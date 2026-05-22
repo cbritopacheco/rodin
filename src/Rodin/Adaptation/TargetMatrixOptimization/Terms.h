@@ -124,48 +124,57 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     return toSpatialMatrix(fe.getBasis(local).getJacobian()(rc));
   }
 
+  // FES-independent: the raw displacement-field coefficients for every local
+  // dof of the polytope, taken straight from the GridFunction data via the
+  // FES's own local->global map. No assumption about dof layout
+  // (node*vdim+component), node ordering, or basis nodality, so this is
+  // correct for P1, P2 (Fekete/Dubiner) and any future element. The geometry
+  // is supplied separately by the polytope transformation, never
+  // reconstructed from "nodal coordinates" (which only exist for a nodal
+  // interpolatory basis).
   template <class GridFunctionType>
-  std::vector<Real> localCoordinateCoefficients(
+  std::vector<Real> localDisplacementCoefficients(
       const GridFunctionType& u,
-      const Geometry::Polytope& cell)
+      const Geometry::Polytope& polytope)
   {
     const auto& fes = u.getFiniteElementSpace();
-    const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-    const size_t vdim = fes.getVectorDimension();
+    const auto& fe = fes.getFiniteElement(
+        polytope.getDimension(), polytope.getIndex());
     const size_t localSize = fe.getCount();
-    requireStrictTMOPCell(cell, vdim, localSize);
-
     std::vector<Real> coeff(localSize, Real(0));
     const auto& data = u.getData();
-    const size_t scalarLocalSize = localSize / vdim;
-    for (size_t node = 0; node < scalarLocalSize; ++node)
-    {
-      const auto& nodeRef = fe.getNode(node * vdim);
-      const Geometry::Point point(cell, nodeRef);
-      const auto& X = point.getPhysicalCoordinates();
-      for (size_t component = 0; component < vdim; ++component)
-      {
-        const size_t local = node * vdim + component;
-        const Index global = fes.getGlobalIndex(
-            {cell.getDimension(), cell.getIndex()},
-            static_cast<Index>(local));
-        coeff[local] = X[component] + data(global);
-      }
-    }
+    for (size_t local = 0; local < localSize; ++local)
+      coeff[local] = data(fes.getGlobalIndex(
+          {polytope.getDimension(), polytope.getIndex()},
+          static_cast<Index>(local)));
     return coeff;
   }
 
+  // grad_ref X_h: the polytope transformation's own reference Jacobian. Basis
+  // agnostic and validated to carry P2 parametric curvature.
+  inline Math::SpatialMatrix<Real> referenceGeometryJacobian(
+      const Geometry::Polytope& polytope,
+      const Math::SpatialPoint& rc)
+  {
+    return toSpatialMatrix(Geometry::Point(polytope, rc).getJacobian());
+  }
+
+  // A = grad_ref x_h = grad_ref X_h + grad_ref u_h, with grad_ref X_h from
+  // the transformation (FES-independent) and grad_ref u_h = sum of the true
+  // displacement dof coefficients times the FES vector-basis Jacobian. No
+  // per-local nodal-coordinate reconstruction, so this is correct at any
+  // order.
   template <class ElementType>
   Math::SpatialMatrix<Real> deformedCoordinateJacobian(
+      const Geometry::Polytope& cell,
       const ElementType& fe,
-      const std::vector<Real>& coefficients,
+      const std::vector<Real>& displacement,
       const Math::SpatialPoint& rc,
       size_t vdim)
   {
-    Math::SpatialMatrix<Real> A(static_cast<std::uint8_t>(vdim),
-              static_cast<std::uint8_t>(vdim));
-    for (size_t local = 0; local < coefficients.size(); ++local)
-      A += coefficients[local] * basisJacobian2D(fe, local, rc);
+    Math::SpatialMatrix<Real> A = referenceGeometryJacobian(cell, rc);
+    for (size_t local = 0; local < displacement.size(); ++local)
+      A += displacement[local] * basisJacobian2D(fe, local, rc);
     return A;
   }
 
@@ -178,103 +187,79 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     const auto& fes = u.getFiniteElementSpace();
     const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
     return deformedCoordinateJacobian(
-        fe, localCoordinateCoefficients(u, cell), rc, fes.getVectorDimension());
+        cell, fe, localDisplacementCoefficients(u, cell), rc,
+        fes.getVectorDimension());
   }
 
+  // The full vdim-vector value of the FES vector basis function for a local
+  // dof. No component-from-layout assumption (vs local%vdim), so this is
+  // correct for any vector element ordering/order.
   template <class ElementType>
-  Real basisComponentValue(
+  Math::SpatialPoint basisVectorValue(
       const ElementType& fe,
       size_t local,
-      const Math::SpatialPoint& rc,
-      size_t component)
+      const Math::SpatialPoint& rc)
   {
-    return fe.getBasis(local)(rc)[static_cast<std::uint8_t>(component)];
+    return fe.getBasis(local)(rc);
   }
 
+  // d/dr of that vector basis function along the (1D) edge reference: column
+  // 0 of its Jacobian.
   template <class ElementType>
-  Real basisComponentDerivative1D(
+  Math::SpatialPoint basisVectorDerivative1D(
       const ElementType& fe,
       size_t local,
-      const Math::SpatialPoint& rc,
-      size_t component)
+      const Math::SpatialPoint& rc)
   {
-    const auto J = fe.getBasis(local).getJacobian()(rc);
-    return J(static_cast<std::uint8_t>(component), 0);
+    const auto J = toSpatialMatrix(fe.getBasis(local).getJacobian()(rc));
+    Math::SpatialPoint d(J.rows());
+    for (std::uint8_t c = 0; c < J.rows(); ++c)
+      d[c] = J(c, 0);
+    return d;
   }
 
-  template <class GridFunctionType>
-  std::vector<Real> localEdgeCoordinateCoefficients(
-      const GridFunctionType& u,
-      const Geometry::Polytope& edge)
-  {
-    const auto& fes = u.getFiniteElementSpace();
-    const auto& fe = fes.getFiniteElement(edge.getDimension(), edge.getIndex());
-    const size_t vdim = fes.getVectorDimension();
-    const size_t localSize = fe.getCount();
-    if (edge.getDimension() != 1
-        || edge.getMesh().getSpaceDimension() != 2
-        || vdim != 2
-        || localSize == 0
-        || localSize % vdim != 0)
-    {
-      throw std::runtime_error(
-          "TMOP::AnalyticLevelSetFitTerm currently supports 2D vector "
-          "finite element spaces on segment interface edges.");
-    }
-
-    std::vector<Real> coeff(localSize, Real(0));
-    const auto& data = u.getData();
-    const size_t scalarLocalSize = localSize / vdim;
-    for (size_t node = 0; node < scalarLocalSize; ++node)
-    {
-      const auto& nodeRef = fe.getNode(node * vdim);
-      const Geometry::Point point(edge, nodeRef);
-      const auto& X = point.getPhysicalCoordinates();
-      for (size_t component = 0; component < vdim; ++component)
-      {
-        const size_t local = node * vdim + component;
-        const Index global = fes.getGlobalIndex(
-            {edge.getDimension(), edge.getIndex()},
-            static_cast<Index>(local));
-        coeff[local] = X[component] + data(global);
-      }
-    }
-    return coeff;
-  }
-
+  // x_h(rc) = X_h(rc) + u_h(rc): geometry from the edge transformation
+  // (FES-independent, carries P2 curvature), displacement from the true dof
+  // coefficients times the FES vector basis. No nodal-coordinate
+  // reconstruction.
   template <class ElementType>
   Math::SpatialPoint deformedEdgePoint(
+      const Geometry::Polytope& edge,
       const ElementType& fe,
-      const std::vector<Real>& coefficients,
+      const std::vector<Real>& displacement,
       const Math::SpatialPoint& rc,
       size_t vdim)
   {
-    Math::SpatialPoint x(static_cast<std::uint8_t>(vdim));
-    x.setZero();
-    for (size_t local = 0; local < coefficients.size(); ++local)
+    Math::SpatialPoint x = Geometry::Point(edge, rc).getPhysicalCoordinates();
+    for (size_t local = 0; local < displacement.size(); ++local)
     {
-      const size_t component = local % vdim;
-      x[static_cast<std::uint8_t>(component)] +=
-        coefficients[local] * basisComponentValue(fe, local, rc, component);
+      const auto phi = basisVectorValue(fe, local, rc);
+      for (size_t c = 0; c < vdim; ++c)
+        x[static_cast<std::uint8_t>(c)] +=
+          displacement[local] * phi[static_cast<std::uint8_t>(c)];
     }
     return x;
   }
 
+  // d x_h / dr = d X_h/dr + d u_h/dr.
   template <class ElementType>
   Math::SpatialPoint deformedEdgeDerivative(
+      const Geometry::Polytope& edge,
       const ElementType& fe,
-      const std::vector<Real>& coefficients,
+      const std::vector<Real>& displacement,
       const Math::SpatialPoint& rc,
       size_t vdim)
   {
+    const auto Jx = referenceGeometryJacobian(edge, rc);
     Math::SpatialPoint dx(static_cast<std::uint8_t>(vdim));
-    dx.setZero();
-    for (size_t local = 0; local < coefficients.size(); ++local)
+    for (size_t c = 0; c < vdim; ++c)
+      dx[static_cast<std::uint8_t>(c)] = Jx(static_cast<std::uint8_t>(c), 0);
+    for (size_t local = 0; local < displacement.size(); ++local)
     {
-      const size_t component = local % vdim;
-      dx[static_cast<std::uint8_t>(component)] +=
-        coefficients[local]
-      * basisComponentDerivative1D(fe, local, rc, component);
+      const auto dphi = basisVectorDerivative1D(fe, local, rc);
+      for (size_t c = 0; c < vdim; ++c)
+        dx[static_cast<std::uint8_t>(c)] +=
+          displacement[local] * dphi[static_cast<std::uint8_t>(c)];
     }
     return dx;
   }
@@ -335,7 +320,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               cell.getDimension(), cell.getIndex());
           requireStrictTMOPCell(cell, fes.getVectorDimension(), fe.getCount());
           m_localCount = fe.getCount();
-          const auto coefficients = localCoordinateCoefficients(m_u.get(), cell);
+          const auto displacement =
+            localDisplacementCoefficients(m_u.get(), cell);
           const auto geometry =
             cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
           const auto& qf =
@@ -349,11 +335,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           {
             const auto& rc = qf.getPoint(q);
             std::vector<Math::SpatialMatrix<Real>> basis(m_localCount);
-            Math::SpatialMatrix<Real> A(d, d);
+            Math::SpatialMatrix<Real> A = referenceGeometryJacobian(cell, rc);
             for (size_t l = 0; l < m_localCount; ++l)
             {
               basis[l] = basisJacobian2D(fe, l, rc);
-              A += coefficients[l] * basis[l];
+              A += displacement[l] * basis[l];
             }
             const Math::SpatialMatrix<Real> W = m_target.evaluate(cell, rc);
             const Real detW = W.determinant();
@@ -459,7 +445,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               cell.getDimension(), cell.getIndex());
           requireStrictTMOPCell(cell, fes.getVectorDimension(), fe.getCount());
           m_localCount = fe.getCount();
-          const auto coefficients = localCoordinateCoefficients(m_u.get(), cell);
+          const auto displacement =
+            localDisplacementCoefficients(m_u.get(), cell);
           const auto geometry =
             cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
           const auto& qf =
@@ -472,13 +459,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           {
             const auto& rc = qf.getPoint(q);
             std::vector<Math::SpatialMatrix<Real>> basis(m_localCount);
-            Math::SpatialMatrix<Real> A(
-                static_cast<std::uint8_t>(fes.getVectorDimension()),
-                static_cast<std::uint8_t>(fes.getVectorDimension()));
+            Math::SpatialMatrix<Real> A = referenceGeometryJacobian(cell, rc);
             for (size_t l = 0; l < m_localCount; ++l)
             {
               basis[l] = basisJacobian2D(fe, l, rc);
-              A += coefficients[l] * basis[l];
+              A += displacement[l] * basis[l];
             }
             const Math::SpatialMatrix<Real> W = m_target.evaluate(cell, rc);
             const Real detW = W.determinant();
@@ -1015,63 +1000,81 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         }
 
       private:
+        // R_l = w * integral_K (u_h . Phi_l) dX, evaluated by quadrature on
+        // the FES vector basis with the physical measure |det grad_ref X_h|.
+        // FES-independent (no P1 vertex layout, no nodal coordinates), so
+        // residual and tangent stay mutually consistent at any order.
         std::vector<Real> computeLocalResidual(
             const Geometry::Polytope& cell,
             size_t sdim) const
         {
-          const size_t localSize = cell.getVertices().size() * sdim;
+          const auto& fes = m_u.get().getFiniteElementSpace();
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          const size_t localSize = fe.getCount();
           std::vector<Real> local(localSize, Real(0));
-
-          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
-          const auto x0 = mesh.getVertexCoordinates(cell.getVertices()(0));
-          const auto x1 = mesh.getVertexCoordinates(cell.getVertices()(1));
-          const auto x2 = mesh.getVertexCoordinates(cell.getVertices()(2));
-          const Real area = triangleArea2D(x0, x1, x2);
-          const auto& data = m_u.get().getData();
-          const Index vertexCount = static_cast<Index>(mesh.getVertexCount());
-
-          for (size_t a = 0; a < 3; ++a)
+          const auto displacement =
+            localDisplacementCoefficients(m_u.get(), cell);
+          const auto geometry = cell.getMesh().getGeometry(
+              cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            for (size_t b = 0; b < 3; ++b)
+            const auto& rc = qf.getPoint(q);
+            const Real wdet = qf.getWeight(q)
+              * std::abs(referenceGeometryJacobian(cell, rc).determinant());
+            std::vector<Math::SpatialPoint> phi(localSize);
+            Math::SpatialPoint uval(static_cast<std::uint8_t>(sdim));
+            for (size_t c = 0; c < sdim; ++c)
+              uval[static_cast<std::uint8_t>(c)] = 0;
+            for (size_t l = 0; l < localSize; ++l)
             {
-              const Real mass = m_weight * area
-                * ((a == b) ? Real(1) / Real(6) : Real(1) / Real(12));
-              const Index vertexB = cell.getVertices()(b);
+              phi[l] = basisVectorValue(fe, l, rc);
               for (size_t c = 0; c < sdim; ++c)
-              {
-                local[a * sdim + c] +=
-                  mass * data(vertexB + static_cast<Index>(c) * vertexCount);
-              }
+                uval[static_cast<std::uint8_t>(c)] +=
+                  displacement[l] * phi[l][static_cast<std::uint8_t>(c)];
+            }
+            for (size_t l = 0; l < localSize; ++l)
+            {
+              Real d = 0;
+              for (size_t c = 0; c < sdim; ++c)
+                d += uval[static_cast<std::uint8_t>(c)]
+                   * phi[l][static_cast<std::uint8_t>(c)];
+              local[l] += m_weight * wdet * d;
             }
           }
-
           return local;
         }
 
         std::reference_wrapper<const GridFunctionType> m_u;
         Real m_weight = 1;
+        size_t m_quadratureOrder = 4;
         const Geometry::Polytope* m_polytope = nullptr;
         std::vector<Real> m_local;
     };
 
+  template <class FES>
   class DeviationTangentIntegrator final
       : public Variational::LocalBilinearFormIntegratorBase<Real>
     {
       public:
         using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
 
-        template <class Solution, class TrialFES, class TestFES>
+        template <class Solution, class TestFES>
         DeviationTangentIntegrator(
-            const Variational::TrialFunction<Solution, TrialFES>& du,
+            const Variational::TrialFunction<Solution, FES>& du,
             const Variational::TestFunction<TestFES>& v,
             Real weight)
           : Parent(du, v),
+            m_fes(&du.getFiniteElementSpace()),
             m_weight(std::max(Real(0), weight))
         {}
 
         DeviationTangentIntegrator(
             const DeviationTangentIntegrator& other)
           : Parent(other),
+            m_fes(other.m_fes),
             m_weight(other.m_weight),
             m_polytope(other.m_polytope),
             m_localSize(other.m_localSize),
@@ -1084,6 +1087,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           return *m_polytope;
         }
 
+        // M_{l,m} = w * integral_K (Phi_l . Phi_m) dX, quadrature on the FES
+        // vector basis with the physical measure. Same basis/quadrature as
+        // the residual, so R = M u holds exactly at any element order.
         DeviationTangentIntegrator& setPolytope(
             const Geometry::Polytope& polytope) override
         {
@@ -1095,32 +1101,34 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               || polytope.getVertices().size() != 3)
             return *this;
 
-          const size_t sdim = 2;
-          m_localSize = polytope.getVertices().size() * sdim;
+          const auto& cell = polytope;
+          const auto& fe = m_fes->getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          const size_t sdim = m_fes->getVectorDimension();
+          m_localSize = fe.getCount();
           m_matrix.assign(m_localSize * m_localSize, Real(0));
 
-          const auto& cell = polytope;
-          const auto& mesh = cell.getMesh();
-          const auto x0 = mesh.getVertexCoordinates(cell.getVertices()(0));
-          const auto x1 = mesh.getVertexCoordinates(cell.getVertices()(1));
-          const auto x2 = mesh.getVertexCoordinates(cell.getVertices()(2));
-          const Real area = triangleArea2D(x0, x1, x2);
-
-          for (size_t trialNode = 0; trialNode < 3; ++trialNode)
+          const auto geometry = cell.getMesh().getGeometry(
+              cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            for (size_t testNode = 0; testNode < 3; ++testNode)
-            {
-              const Real mass = m_weight * area
-                * ((trialNode == testNode)
-                    ? Real(1) / Real(6)
-                    : Real(1) / Real(12));
-              for (size_t c = 0; c < sdim; ++c)
+            const auto& rc = qf.getPoint(q);
+            const Real wdet = qf.getWeight(q)
+              * std::abs(referenceGeometryJacobian(cell, rc).determinant());
+            std::vector<Math::SpatialPoint> phi(m_localSize);
+            for (size_t l = 0; l < m_localSize; ++l)
+              phi[l] = basisVectorValue(fe, l, rc);
+            for (size_t row = 0; row < m_localSize; ++row)
+              for (size_t col = 0; col < m_localSize; ++col)
               {
-                const size_t row = testNode * sdim + c;
-                const size_t col = trialNode * sdim + c;
-                m_matrix[row * m_localSize + col] = mass;
+                Real d = 0;
+                for (size_t c = 0; c < sdim; ++c)
+                  d += phi[row][static_cast<std::uint8_t>(c)]
+                     * phi[col][static_cast<std::uint8_t>(c)];
+                m_matrix[row * m_localSize + col] += m_weight * wdet * d;
               }
-            }
           }
           return *this;
         }
@@ -1143,11 +1151,19 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         }
 
       private:
+        const FES* m_fes = nullptr;
         Real m_weight = 1;
+        size_t m_quadratureOrder = 4;
         const Geometry::Polytope* m_polytope = nullptr;
         size_t m_localSize = 0;
         std::vector<Real> m_matrix;
     };
+
+  template <class Solution, class TrialFES, class TestFES>
+  DeviationTangentIntegrator(
+      const Variational::TrialFunction<Solution, TrialFES>&,
+      const Variational::TestFunction<TestFES>&,
+      Real) -> DeviationTangentIntegrator<TrialFES>;
 
   template <class GridFunctionType>
   class SourceSegmentFitTangentIntegrator final
@@ -1411,8 +1427,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               edge.getDimension(), edge.getIndex());
           const size_t localSize = fe.getCount();
           std::vector<Real> local(localSize, Real(0));
-          const auto coefficients =
-            localEdgeCoordinateCoefficients(m_u.get(), edge);
+          const auto displacement =
+            localDisplacementCoefficients(m_u.get(), edge);
 
           static constexpr std::array<Real, 2> Points = {{
             Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
@@ -1424,9 +1440,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           {
             const Math::SpatialPoint rc{q};
             const auto x =
-              deformedEdgePoint(fe, coefficients, rc, sdim);
+              deformedEdgePoint(edge, fe, displacement, rc, sdim);
             const auto dx =
-              deformedEdgeDerivative(fe, coefficients, rc, sdim);
+              deformedEdgeDerivative(edge, fe, displacement, rc, sdim);
             const Real length = dx.norm();
             if (length <= Real(1e-14))
               continue;
@@ -1435,14 +1451,18 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             const auto grad = m_gradient(x);
             for (size_t localDof = 0; localDof < localSize; ++localDof)
             {
-              const size_t c = localDof % sdim;
-              const Real N =
-                basisComponentValue(fe, localDof, rc, c);
-              const Real dN =
-                basisComponentDerivative1D(fe, localDof, rc, c);
+              const auto phiVec = basisVectorValue(fe, localDof, rc);
+              const auto dphiVec = basisVectorDerivative1D(fe, localDof, rc);
+              Real gradPhi = 0, dirDphi = 0;
+              for (size_t c = 0; c < sdim; ++c)
+              {
+                gradPhi += grad[c] * phiVec[static_cast<std::uint8_t>(c)];
+                dirDphi +=
+                  direction[c] * dphiVec[static_cast<std::uint8_t>(c)];
+              }
               local[localDof] += m_weight * Weight
-                * (length * N * phi * grad[c]
-                 + Real(0.5) * phi * phi * direction[c] * dN);
+                * (length * phi * gradPhi
+                 + Real(0.5) * phi * phi * dirDphi);
             }
           }
 
@@ -1561,8 +1581,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               edge.getDimension(), edge.getIndex());
           const size_t localSize = fe.getCount();
           std::vector<Real> local(localSize * localSize, Real(0));
-          const auto coefficients =
-            localEdgeCoordinateCoefficients(m_u.get(), edge);
+          const auto displacement =
+            localDisplacementCoefficients(m_u.get(), edge);
 
           static constexpr std::array<Real, 2> Points = {{
             Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
@@ -1574,9 +1594,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           {
             const Math::SpatialPoint rc{q};
             const auto x =
-              deformedEdgePoint(fe, coefficients, rc, sdim);
+              deformedEdgePoint(edge, fe, displacement, rc, sdim);
             const auto dx =
-              deformedEdgeDerivative(fe, coefficients, rc, sdim);
+              deformedEdgeDerivative(edge, fe, displacement, rc, sdim);
             const Real length = dx.norm();
             if (length <= Real(1e-14))
               continue;
@@ -1584,24 +1604,37 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             const Real phi = m_value(x);
             const auto grad = m_gradient(x);
 
+            std::vector<Math::SpatialPoint> phiVec(localSize);
+            std::vector<Math::SpatialPoint> dphiVec(localSize);
+            std::vector<Real> dLength(localSize, 0);
+            std::vector<Real> dPhi(localSize, 0);
+            for (size_t i = 0; i < localSize; ++i)
+            {
+              phiVec[i] = basisVectorValue(fe, i, rc);
+              dphiVec[i] = basisVectorDerivative1D(fe, i, rc);
+              for (size_t k = 0; k < sdim; ++k)
+              {
+                dLength[i] +=
+                  direction[k] * dphiVec[i][static_cast<std::uint8_t>(k)];
+                dPhi[i] +=
+                  grad[k] * phiVec[i][static_cast<std::uint8_t>(k)];
+              }
+            }
+
             for (size_t test = 0; test < localSize; ++test)
             {
-              const size_t r = test % sdim;
-              const Real Ni = basisComponentValue(fe, test, rc, r);
-              const Real dNi = basisComponentDerivative1D(fe, test, rc, r);
-              const Real dLengthTest = direction[r] * dNi;
-              const Real dPhiTest = Ni * grad[r];
+              const Real dLengthTest = dLength[test];
+              const Real dPhiTest = dPhi[test];
               for (size_t trial = 0; trial < localSize; ++trial)
               {
-                const size_t c = trial % sdim;
-                const Real Nj = basisComponentValue(fe, trial, rc, c);
-                const Real dNj =
-                  basisComponentDerivative1D(fe, trial, rc, c);
-                const Real dLengthTrial = direction[c] * dNj;
-                const Real dPhiTrial = Nj * grad[c];
+                const Real dLengthTrial = dLength[trial];
+                const Real dPhiTrial = dPhi[trial];
+                Real dphiDot = 0;
+                for (size_t k = 0; k < sdim; ++k)
+                  dphiDot += dphiVec[test][static_cast<std::uint8_t>(k)]
+                           * dphiVec[trial][static_cast<std::uint8_t>(k)];
                 const Real d2Length =
-                  ((r == c ? Real(1) : Real(0)) * dNi * dNj
-                 - dLengthTest * dLengthTrial) / length;
+                  (dphiDot - dLengthTest * dLengthTrial) / length;
 
                 local[test * localSize + trial] += m_weight * Weight
                   * (dLengthTrial * dPhiTest * phi
@@ -1728,7 +1761,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               cell.getDimension(), cell.getIndex());
           requireStrictTMOPCell(
               cell, fes.getVectorDimension(), fe.getCount());
-          const auto coefficients = localCoordinateCoefficients(u, cell);
+          const auto displacement = localDisplacementCoefficients(u, cell);
           const auto& qf = QF::PolytopeQuadratureFormula::get(
               m_quadratureOrder,
               conn.getGeometry(2, cellIndex));
@@ -1737,7 +1770,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             const auto& rc = qf.getPoint(q);
             const Math::SpatialMatrix<Real> A =
               deformedCoordinateJacobian(
-                  fe, coefficients, rc, fes.getVectorDimension());
+                  cell, fe, displacement, rc, fes.getVectorDimension());
             const Math::SpatialMatrix<Real> W = m_target.evaluate(cell, rc);
             const Real detW = W.determinant();
             if (std::abs(detW) <= Real(1e-30))
@@ -1869,14 +1902,13 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       template <class FES, class Data>
       Real energy(const Variational::GridFunction<FES, Data>& u) const
       {
-        const auto& mesh = u.getFiniteElementSpace().getMesh();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
         const size_t sdim = mesh.getSpaceDimension();
         if (sdim != 2)
           return 0;
 
         const auto& conn = mesh.getConnectivity();
-        const auto& data = u.getData();
-        const Index vertexCount = static_cast<Index>(mesh.getVertexCount());
         Real value = 0;
         for (Index cellIndex = 0;
              cellIndex < static_cast<Index>(mesh.getCellCount());
@@ -1885,24 +1917,34 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           if (conn.getGeometry(2, cellIndex)
               != Geometry::Polytope::Type::Triangle)
             continue;
-          const auto& cell = conn.getPolytope(2, cellIndex);
-          const auto x0 = mesh.getVertexCoordinates(cell(0));
-          const auto x1 = mesh.getVertexCoordinates(cell(1));
-          const auto x2 = mesh.getVertexCoordinates(cell(2));
-          const Real area = triangleArea2D(x0, x1, x2);
-          for (size_t a = 0; a < 3; ++a)
+          auto cellIterator = mesh.getPolytope(2, cellIndex);
+          const auto& cell = *cellIterator;
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          const size_t localSize = fe.getCount();
+          const auto displacement = localDisplacementCoefficients(u, cell);
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              4, conn.getGeometry(2, cellIndex));
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            const Index va = cell(a);
-            for (size_t b = 0; b < 3; ++b)
+            const auto& rc = qf.getPoint(q);
+            const Real wdet = qf.getWeight(q)
+              * std::abs(referenceGeometryJacobian(cell, rc).determinant());
+            Math::SpatialPoint uval(static_cast<std::uint8_t>(sdim));
+            for (size_t c = 0; c < sdim; ++c)
+              uval[static_cast<std::uint8_t>(c)] = 0;
+            for (size_t l = 0; l < localSize; ++l)
             {
-              const Index vb = cell(b);
-              const Real mass = area
-                * ((a == b) ? Real(1) / Real(6) : Real(1) / Real(12));
+              const auto phi = basisVectorValue(fe, l, rc);
               for (size_t c = 0; c < sdim; ++c)
-                value += mass
-                  * data(va + static_cast<Index>(c) * vertexCount)
-                  * data(vb + static_cast<Index>(c) * vertexCount);
+                uval[static_cast<std::uint8_t>(c)] +=
+                  displacement[l] * phi[static_cast<std::uint8_t>(c)];
             }
+            Real sq = 0;
+            for (size_t c = 0; c < sdim; ++c)
+              sq += uval[static_cast<std::uint8_t>(c)]
+                  * uval[static_cast<std::uint8_t>(c)];
+            value += wdet * sq;
           }
         }
         return Real(0.5) * m_weight * value;
@@ -2070,6 +2112,23 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         return m_weight;
       }
 
+      /// Normalization constant c_sigma (Knupp-Kolev-Mittal-Tomov 2021): the
+      /// penalty acts with effective weight weight / c_sigma. Set c_sigma to
+      /// the interface measure (total interface length in 2D) so the fit
+      /// weight is portable across mesh resolutions -- the penalty then
+      /// measures the *mean-square* level-set violation along the interface
+      /// rather than its (resolution-dependent) integral. Default 1 (off).
+      AnalyticLevelSetFitTerm& setNormalization(Real cSigma)
+      {
+        m_normalization = (cSigma > Real(0)) ? cSigma : Real(1);
+        return *this;
+      }
+
+      Real getNormalization() const
+      {
+        return m_normalization;
+      }
+
       template <class FES, class Data, class TestFES>
       auto residual(
           const Variational::GridFunction<FES, Data>& u,
@@ -2077,7 +2136,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         return AnalyticLevelSetFitResidualIntegrator<
           Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
-              u, v, m_value, m_gradient, m_interfaceAttribute, m_weight);
+              u, v, m_value, m_gradient, m_interfaceAttribute,
+              m_weight / m_normalization);
       }
 
       template <class FES, class Data, class Solution, class TrialFES, class TestFES>
@@ -2088,7 +2148,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         return AnalyticLevelSetFitTangentIntegrator<
           Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
-              u, du, v, m_value, m_gradient, m_interfaceAttribute, m_weight);
+              u, du, v, m_value, m_gradient, m_interfaceAttribute,
+              m_weight / m_normalization);
       }
 
       template <class FES, class Data>
@@ -2118,14 +2179,14 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const auto& fes = u.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(
               edge.getDimension(), edge.getIndex());
-          const auto coefficients = localEdgeCoordinateCoefficients(u, edge);
+          const auto displacement = localDisplacementCoefficients(u, edge);
           for (Real q : Points)
           {
             const Math::SpatialPoint rc{q};
             const auto x = deformedEdgePoint(
-                fe, coefficients, rc, fes.getVectorDimension());
+                edge, fe, displacement, rc, fes.getVectorDimension());
             const auto dx = deformedEdgeDerivative(
-                fe, coefficients, rc, fes.getVectorDimension());
+                edge, fe, displacement, rc, fes.getVectorDimension());
             const Real length = dx.norm();
             if (length <= Real(0))
               continue;
@@ -2133,7 +2194,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             value += Weight * length * phi * phi;
           }
         }
-        return Real(0.5) * m_weight * value;
+        return Real(0.5) * (m_weight / m_normalization) * value;
       }
 
       template <class Mesh>
@@ -2176,7 +2237,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             value += Weight * length * phi * phi;
           }
         }
-        return Real(0.5) * m_weight * value;
+        return Real(0.5) * (m_weight / m_normalization) * value;
       }
 
     private:
@@ -2193,6 +2254,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       GradientFunction m_gradient;
       Optional<Geometry::Attribute> m_interfaceAttribute;
       Real m_weight = 1;
+      Real m_normalization = 1;
   };
 
   template <class ValueFunction, class GradientFunction>

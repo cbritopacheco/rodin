@@ -7,16 +7,21 @@
 #ifndef RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_METRICS_H
 #define RODIN_ADAPTATION_TARGETMATRIXOPTIMIZATION_METRICS_H
 
+#include <array>
 #include <cmath>
+#include <limits>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Geometry/Point.h"
+#include "Rodin/Geometry/PointCloud.h"
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Math.h"
 #include "Rodin/Types.h"
+#include "Rodin/Variational/H1/H1Element.h"
 
 namespace Rodin::Adaptation::TargetMatrixOptimization
 {
@@ -636,6 +641,206 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   };
 
   /**
+   * @brief Fixed P2 target obtained by projecting interface midside target
+   *        nodes onto an analytic feature.
+   *
+   * This is the curved counterpart to an initial-element target. It does not
+   * modify the mesh geometry. Instead, it captures a desired P2 coordinate map
+   * at construction time: every cell starts from its affine P2 lift, and only
+   * midside nodes on attribute-tagged interface edges are projected by the
+   * caller-supplied manifold projector. The quality term then compares
+   * @f$A(u)@f$ against a target @f$W@f$ that already contains the intended
+   * curvature, so the quality metric no longer asks TMOP to erase the
+   * interface curvature that the fit term is trying to recover.
+   *
+   * Current implementation supports 2D triangular P2 target sampling. Other
+   * cells fall back to ParametricTargetJacobian.
+   */
+  class ProjectedInterfaceTargetJacobian
+  {
+    public:
+      ProjectedInterfaceTargetJacobian() = default;
+
+      template <class Mesh, class Projector>
+      ProjectedInterfaceTargetJacobian(
+          const Mesh& mesh,
+          Geometry::Attribute interfaceAttribute,
+          Projector project)
+        : m_fallback(mesh),
+          m_fe(Geometry::Polytope::Type::Triangle)
+      {
+        const auto& conn = mesh.getConnectivity();
+        m_targets.resize(mesh.getCellCount());
+        for (Index ci = 0; ci < static_cast<Index>(mesh.getCellCount()); ++ci)
+        {
+          if (conn.getGeometry(2, ci) != Geometry::Polytope::Type::Triangle)
+            continue;
+
+          const auto affine = affinePointCloud(mesh, ci);
+          auto desired = affine;
+          for (Index edgeIndex : conn.getIncidence({ 2, 1 }, ci))
+          {
+            const auto attr = mesh.getAttribute(1, edgeIndex);
+            if (!attr || *attr != interfaceAttribute)
+              continue;
+            const auto local =
+              localEdgeVertices(
+                  conn.getPolytope(2, ci),
+                  conn.getPolytope(1, edgeIndex));
+            const size_t node = scalarNodeNear(
+                triangleEdgePoint(local[0], local[1], Real(0.5)));
+            Math::SpatialPoint x{ affine(0, node), affine(1, node) };
+            const auto xp = project(x);
+            desired(0, node) = xp[0];
+            desired(1, node) = xp[1];
+          }
+
+          Real alpha = Real(1);
+          for (int attempt = 0; attempt < 20; ++attempt)
+          {
+            Geometry::PointCloud blended(2, 6);
+            for (size_t j = 0; j < 6; ++j)
+              for (size_t c = 0; c < 2; ++c)
+                blended(c, j) =
+                  affine(c, j) + alpha * (desired(c, j) - affine(c, j));
+            if (isValid(blended))
+            {
+              m_targets[static_cast<size_t>(ci)] = std::move(blended);
+              break;
+            }
+            alpha *= Real(0.5);
+          }
+        }
+      }
+
+      Math::SpatialMatrix<Real> evaluate(
+          const Geometry::Polytope& cell,
+          const Math::SpatialPoint& rc) const
+      {
+        const auto index = static_cast<size_t>(cell.getIndex());
+        if (cell.getGeometry() == Geometry::Polytope::Type::Triangle
+            && index < m_targets.size()
+            && m_targets[index].getCount() > 0)
+        {
+          Geometry::ParametricTransformation<
+            Variational::RealH1Element<2>> trans(
+                m_targets[index], m_fe);
+          Math::SpatialMatrix<Real> W;
+          trans.jacobian(W, rc);
+          if (W.rows() == 2 && W.cols() == 2)
+          {
+            const Real det = W.determinant();
+            if (std::isfinite(det) && det > Real(1e-30))
+              return W;
+          }
+        }
+        return m_fallback.evaluate(cell, rc);
+      }
+
+    private:
+      template <class Mesh>
+      Geometry::PointCloud affinePointCloud(const Mesh& mesh, Index ci) const
+      {
+        const auto& conn = mesh.getConnectivity();
+        const auto& ref =
+          Variational::RealH1Element<2>::getNodes(
+              Geometry::Polytope::Type::Triangle);
+        const auto& cell = conn.getPolytope(2, ci);
+        const auto a = mesh.getVertexCoordinates(cell(0));
+        const auto b = mesh.getVertexCoordinates(cell(1));
+        const auto c = mesh.getVertexCoordinates(cell(2));
+        Geometry::PointCloud pc(2, ref.size());
+        for (size_t j = 0; j < ref.size(); ++j)
+        {
+          const Real r = ref[j][0];
+          const Real s = ref[j][1];
+          pc(0, j) = (Real(1) - r - s) * a[0] + r * b[0] + s * c[0];
+          pc(1, j) = (Real(1) - r - s) * a[1] + r * b[1] + s * c[1];
+        }
+        return pc;
+      }
+
+      template <class CellKey, class EdgeKey>
+      static std::array<std::uint8_t, 2> localEdgeVertices(
+          const CellKey& cell,
+          const EdgeKey& edge)
+      {
+        for (std::uint8_t a = 0; a < 3; ++a)
+          for (std::uint8_t b = a + 1; b < 3; ++b)
+            if ((cell(a) == edge(0) && cell(b) == edge(1))
+                || (cell(a) == edge(1) && cell(b) == edge(0)))
+              return {{ a, b }};
+        return {{ 0, 1 }};
+      }
+
+      static Math::SpatialPoint triangleEdgePoint(
+          std::uint8_t a,
+          std::uint8_t b,
+          Real s)
+      {
+        const auto ca = triangleCorner(a);
+        const auto cb = triangleCorner(b);
+        return Math::SpatialPoint{
+          (Real(1) - s) * ca[0] + s * cb[0],
+          (Real(1) - s) * ca[1] + s * cb[1] };
+      }
+
+      static Math::SpatialPoint triangleCorner(std::uint8_t k)
+      {
+        if (k == 1) return Math::SpatialPoint{ Real(1), Real(0) };
+        if (k == 2) return Math::SpatialPoint{ Real(0), Real(1) };
+        return Math::SpatialPoint{ Real(0), Real(0) };
+      }
+
+      static size_t scalarNodeNear(const Math::SpatialPoint& rc)
+      {
+        const auto& ref =
+          Variational::RealH1Element<2>::getNodes(
+              Geometry::Polytope::Type::Triangle);
+        size_t best = 0;
+        Real bestD = std::numeric_limits<Real>::infinity();
+        for (size_t j = 0; j < ref.size(); ++j)
+        {
+          const Real dr = ref[j][0] - rc[0];
+          const Real ds = ref[j][1] - rc[1];
+          const Real d = dr * dr + ds * ds;
+          if (d < bestD)
+          {
+            bestD = d;
+            best = j;
+          }
+        }
+        return best;
+      }
+
+      bool isValid(const Geometry::PointCloud& pc) const
+      {
+        Geometry::ParametricTransformation<
+          Variational::RealH1Element<2>> trans(pc, m_fe);
+        for (const Math::SpatialPoint& rc : {
+              Math::SpatialPoint{ Real(1) / Real(3), Real(1) / Real(3) },
+              Math::SpatialPoint{ Real(0.5), Real(0.25) },
+              Math::SpatialPoint{ Real(0.25), Real(0.5) },
+              Math::SpatialPoint{ Real(0.25), Real(0.25) }})
+        {
+          Math::SpatialMatrix<Real> J;
+          trans.jacobian(J, rc);
+          if (J.rows() != 2 || J.cols() != 2)
+            return false;
+          const Real det = J.determinant();
+          if (!std::isfinite(det) || !(det > Real(1e-14)))
+            return false;
+        }
+        return true;
+      }
+
+      ParametricTargetJacobian m_fallback;
+      Variational::RealH1Element<2> m_fe{
+        Geometry::Polytope::Type::Triangle };
+      std::vector<Geometry::PointCloud> m_targets;
+  };
+
+  /**
    * @brief Curved-geometry target with a quality-improving bias.
    *
    * Curved elements should not be optimized against a purely affine target at
@@ -897,6 +1102,109 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     private:
       ShapeDistortionMetric m_shape;
       AreaDistortionMetric m_area;
+  };
+
+  /**
+   * 2D size metric (MFEM TMOP metric 77):
+   *   mu(T) = 1/2 (tau - 1/tau)^2,   tau = det(T).
+   *
+   * Scale-AWARE size barrier: zero iff det(T)=1 (element matches the target
+   * size), and mu -> +inf as tau -> 0+, so it forbids size collapse from a
+   * valid configuration. This is the size companion used by the
+   * shape+size metric mu_80 of Knupp-Kolev-Mittal-Tomov (2021); preferred
+   * over (tau-1)^2 because it is symmetric under tau <-> 1/tau and barriers
+   * at collapse.
+   */
+  class SizeMetric77 final : public MetricBase
+  {
+    public:
+      Real value(const Math::SpatialMatrix<Real>& A) const override
+      {
+        if (const Real penalty = invalidPenalty(A); penalty > Real(0))
+          return penalty;
+        const Real tau = A.determinant();
+        const Real d = tau - Real(1) / tau;
+        return Real(0.5) * d * d;
+      }
+
+      Math::SpatialMatrix<Real> gradient(const Math::SpatialMatrix<Real>& T) const
+      {
+        const Real tau = T.determinant();
+        const Real gp = gPrime(tau);
+        return gp * cofactor2D(T);
+      }
+
+      Math::SpatialMatrix<Real> hessianAction(
+          const Math::SpatialMatrix<Real>& T,
+          const Math::SpatialMatrix<Real>& H) const
+      {
+        const Real tau = T.determinant();
+        const Math::SpatialMatrix<Real> C = cofactor2D(T);
+        const Real dtau = matrixInner2D(C, H);    // d(det) in direction H
+        return gPrimePrime(tau) * dtau * C + gPrime(tau) * cofactor2D(H);
+      }
+
+    private:
+      // g(tau) = 1/2 (tau - 1/tau)^2.
+      static Real gPrime(Real tau)
+      {
+        return (tau - Real(1) / tau) * (Real(1) + Real(1) / (tau * tau));
+      }
+      static Real gPrimePrime(Real tau)
+      {
+        const Real inv2 = Real(1) / (tau * tau);
+        return (Real(1) + inv2) * (Real(1) + inv2)
+             + (tau - Real(1) / tau) * (-Real(2) / (tau * tau * tau));
+      }
+  };
+
+  /**
+   * 2D shape+size metric (MFEM TMOP metric 80):
+   *   mu_80 = (1 - gamma) mu_2 + gamma mu_77,   gamma in [0,1].
+   *
+   * mu_2  = ShapeDistortionMetric (scale-invariant shape barrier),
+   * mu_77 = SizeMetric77          (size barrier).
+   *
+   * This is the production metric for moving-interface fitting in
+   * Knupp-Kolev-Mittal-Tomov (2021) (their Taylor-Green / Rayleigh-Taylor
+   * tests use gamma=0.5). Pure-shape metrics are scale-rank-deficient and
+   * leave slivers; the size term restores control over element size.
+   */
+  class ShapeSizeBlendMetric final : public MetricBase
+  {
+    public:
+      explicit ShapeSizeBlendMetric(Real gamma = Real(0.5))
+        : m_gamma(std::max(Real(0), std::min(Real(1), gamma)))
+      {}
+
+      Real getGamma() const { return m_gamma; }
+
+      Real value(const Math::SpatialMatrix<Real>& A) const override
+      {
+        if (const Real penalty = invalidPenalty(A); penalty > Real(0))
+          return penalty;
+        return (Real(1) - m_gamma) * m_shape.value(A)
+             + m_gamma * m_size.value(A);
+      }
+
+      Math::SpatialMatrix<Real> gradient(const Math::SpatialMatrix<Real>& T) const
+      {
+        return (Real(1) - m_gamma) * m_shape.gradient(T)
+             + m_gamma * m_size.gradient(T);
+      }
+
+      Math::SpatialMatrix<Real> hessianAction(
+          const Math::SpatialMatrix<Real>& T,
+          const Math::SpatialMatrix<Real>& H) const
+      {
+        return (Real(1) - m_gamma) * m_shape.hessianAction(T, H)
+             + m_gamma * m_size.hessianAction(T, H);
+      }
+
+    private:
+      Real m_gamma;
+      ShapeDistortionMetric m_shape;  // mu_2
+      SizeMetric77 m_size;            // mu_77
   };
 }
 

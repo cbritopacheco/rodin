@@ -731,7 +731,7 @@ namespace
 int main(int, char**)
 {
   constexpr size_t resolution = 16;
-  constexpr Index steps = 8;
+  constexpr Index steps = 20;
   constexpr Real h = Real(1) / static_cast<Real>(resolution - 1);
 
   LocalMesh background =
@@ -798,11 +798,11 @@ int main(int, char**)
     auto phiGradient =
       [t](const Math::SpatialPoint& x) { return gradPhiAt(x, t); };
 
-    QualityTerm quality(SquaredDistanceMetric{}, target, 0.04);
+    QualityTerm quality(SquaredDistanceMetric{}, target, 1.0);
     quality.setQuadratureOrder(4);
-    DeviationTerm deviation(0.25);
+    DeviationTerm deviation(1.0);
     AnalyticLevelSetFitTerm fit(
-        phiValue, phiGradient, Optional<Attribute>(Interface), 2.0);
+        phiValue, phiGradient, Optional<Attribute>(Interface), 1.0);
     AnalyticLevelSetFitTerm boundaryFit(
         boxBoundaryValue, boxBoundaryGradient,
         Optional<Attribute>(Boundary), 1.0);

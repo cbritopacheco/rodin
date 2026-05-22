@@ -764,7 +764,17 @@ namespace Rodin::Geometry
               && !cellHasRealCrossing(cell, cellEdges)
               && cutMinQuality(cell, cellEdges, signs) < m_minCutQuality)
           {
-            const LevelSetSide dominant = (negative >= positive)
+            // Label the whole kept cell by the side that occupies the larger
+            // AREA of the cell, not by vertex count. For a curved interface a
+            // thin clip can leave 2 vertices on the minority-area side, so
+            // vertex-count dominance mislabels the triangle.
+            const auto negPoly =
+              buildSidePolygon(cell, cellEdges, signs, LevelSetSide::Negative);
+            const auto posPoly =
+              buildSidePolygon(cell, cellEdges, signs, LevelSetSide::Positive);
+            const Real negArea = std::abs(polygonArea2(negPoly));
+            const Real posArea = std::abs(polygonArea2(posPoly));
+            const LevelSetSide dominant = (negArea >= posArea)
               ? LevelSetSide::Negative : LevelSetSide::Positive;
             addTriangle(
               report.originalVertexToOutputVertex[cell(0)],

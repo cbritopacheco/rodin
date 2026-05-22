@@ -32,4 +32,12 @@
 #include "TargetMatrixOptimization/Optimizer.h"
 #include "TargetMatrixOptimization/Problem.h"
 
+// Interface-vertex tangential redistribution (Laplacian-with-projection),
+// applied between the topological stage and the geometric (TMOP) stage.
+#include "TargetMatrixOptimization/InterfaceTangentialRelaxation.h"
+
+// Isoparametric (curved) H1<2> TMOP: shared geometry + Newton solver.
+#include "TargetMatrixOptimization/IsoparametricGeometry.h"
+#include "TargetMatrixOptimization/IsoparametricTMOPSolver.h"
+
 #endif

@@ -106,6 +106,7 @@ namespace Rodin::Tests::Benchmarks
       Real curvedMinQuality = 0;
       Real curvedMinJacobian = 0;
       Index curvedInvalidSamples = 0;
+      Index curvedOverlapSamples = 0;
       bool hasP2Diagnostics = false;
       Real coverage = 0;
       Real signedArea = 0;
@@ -162,6 +163,10 @@ namespace Rodin::Tests::Benchmarks
       Real bestCurvedInvalidSamples = std::numeric_limits<Real>::infinity();
       Real worstCurvedInvalidSamples = 0;
       Real finalCurvedInvalidSamples = 0;
+      Real curvedOverlapSamples = 0;
+      Real bestCurvedOverlapSamples = std::numeric_limits<Real>::infinity();
+      Real worstCurvedOverlapSamples = 0;
+      Real finalCurvedOverlapSamples = 0;
       Real coverage = 0;
       Real signedArea = 0;
       Real finalCoverage = 0;
@@ -239,6 +244,16 @@ namespace Rodin::Tests::Benchmarks
             static_cast<Real>(counters.curvedInvalidSamples));
         finalCurvedInvalidSamples =
           static_cast<Real>(counters.curvedInvalidSamples);
+        curvedOverlapSamples +=
+          static_cast<Real>(counters.curvedOverlapSamples);
+        bestCurvedOverlapSamples = std::min(
+            bestCurvedOverlapSamples,
+            static_cast<Real>(counters.curvedOverlapSamples));
+        worstCurvedOverlapSamples = std::max(
+            worstCurvedOverlapSamples,
+            static_cast<Real>(counters.curvedOverlapSamples));
+        finalCurvedOverlapSamples =
+          static_cast<Real>(counters.curvedOverlapSamples);
         hasP2Diagnostics = hasP2Diagnostics || counters.hasP2Diagnostics;
         coverage += counters.coverage;
         bestCoverage = std::max(bestCoverage, counters.coverage);
@@ -335,6 +350,14 @@ namespace Rodin::Tests::Benchmarks
           benchmark::Counter(std::isfinite(bestCurvedInvalidSamples) ? bestCurvedInvalidSamples : Real(0));
         st.counters["worst_curved_invalid"] =
           benchmark::Counter(worstCurvedInvalidSamples);
+        st.counters["avg_curved_overlap"] =
+          benchmark::Counter(curvedOverlapSamples * inv);
+        st.counters["final_curved_overlap"] =
+          benchmark::Counter(finalCurvedOverlapSamples);
+        st.counters["best_curved_overlap"] =
+          benchmark::Counter(std::isfinite(bestCurvedOverlapSamples) ? bestCurvedOverlapSamples : Real(0));
+        st.counters["worst_curved_overlap"] =
+          benchmark::Counter(worstCurvedOverlapSamples);
         if (hasP2Diagnostics)
         {
           st.counters["avg_p2_fit_rms"] =
@@ -772,7 +795,28 @@ namespace Rodin::Tests::Benchmarks
       Real minQuality = std::numeric_limits<Real>::infinity();
       Real minJacobian = std::numeric_limits<Real>::infinity();
       Index invalidJacobianSamples = 0;
+      Index overlapSamples = 0;  ///< Curved interface samples in non-edge-adjacent neighbours; canary for cell-cell overlap (global-injectivity failure missed by per-cell det/quality).
     };
+
+    inline bool pointInLinearTriangle(
+        const Math::SpatialPoint& p,
+        const Math::SpatialPoint& a,
+        const Math::SpatialPoint& b,
+        const Math::SpatialPoint& c)
+    {
+      const Real d = (b[0] - a[0]) * (c[1] - a[1])
+                   - (b[1] - a[1]) * (c[0] - a[0]);
+      if (std::abs(d) <= Real(1e-30))
+        return false;
+      const Real inv = Real(1) / d;
+      const Real wb = ((c[1] - a[1]) * (p[0] - a[0])
+                    - (c[0] - a[0]) * (p[1] - a[1])) * inv;
+      const Real wc = ((b[0] - a[0]) * (p[1] - a[1])
+                    - (b[1] - a[1]) * (p[0] - a[0])) * inv;
+      const Real wa = Real(1) - wb - wc;
+      const Real eps = Real(1e-9);
+      return wa > eps && wb > eps && wc > eps;
+    }
 
     Math::SpatialPoint triangleReferenceVertex(std::uint8_t local)
     {
@@ -790,27 +834,6 @@ namespace Rodin::Tests::Benchmarks
     {
       return (Real(1) - s) * triangleReferenceVertex(localA)
            + s * triangleReferenceVertex(localB);
-    }
-
-    bool referencePointOnTriangleEdge(
-        const Math::SpatialPoint& rc,
-        std::uint8_t localA,
-        std::uint8_t localB)
-    {
-      const Real eps = Real(1e-12);
-      if ((localA == 0 && localB == 1) || (localA == 1 && localB == 0))
-        return std::abs(rc[1]) <= eps;
-      if ((localA == 1 && localB == 2) || (localA == 2 && localB == 1))
-        return std::abs(rc[0] + rc[1] - Real(1)) <= eps;
-      return std::abs(rc[0]) <= eps;
-    }
-
-    bool referencePointIsTriangleVertex(const Math::SpatialPoint& rc)
-    {
-      const Real eps = Real(1e-12);
-      return (std::abs(rc[0]) <= eps && std::abs(rc[1]) <= eps)
-          || (std::abs(rc[0] - Real(1)) <= eps && std::abs(rc[1]) <= eps)
-          || (std::abs(rc[0]) <= eps && std::abs(rc[1] - Real(1)) <= eps);
     }
 
     Optional<std::array<std::uint8_t, 2>> localEdgeForMeshEdge(
@@ -849,99 +872,6 @@ namespace Rodin::Tests::Benchmarks
           edges.push_back(*edge);
       }
       return edges;
-    }
-
-    void installQuadraticInterfaceGeometry(
-        LocalMesh& mesh,
-        ShapeCase shape,
-        Real t)
-    {
-      if (mesh.getConnectivity().getIncidence(2, 1).size() == 0)
-        return;
-
-      Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
-      Variational::RealH1Element<2> edgeFe(Polytope::Type::Segment);
-      const auto& conn = mesh.getConnectivity();
-      for (Index edgeIndex = 0;
-           edgeIndex < static_cast<Index>(conn.getCount(1));
-           ++edgeIndex)
-      {
-        const auto attr = mesh.getAttribute(1, edgeIndex);
-        const bool isInterface = attr && *attr == Interface;
-
-        const auto& edge = conn.getPolytope(1, edgeIndex);
-        const auto x0 = mesh.getVertexCoordinates(edge(0));
-        const auto x1 = mesh.getVertexCoordinates(edge(1));
-        PointCloud pm(mesh.getSpaceDimension(), edgeFe.getCount());
-        for (size_t local = 0; local < edgeFe.getCount(); ++local)
-        {
-          const Real s = edgeFe.getNode(local)[0];
-          Math::SpatialPoint x = (Real(1) - s) * x0 + s * x1;
-          if (isInterface
-              && s > Real(1e-12)
-              && s < Real(1) - Real(1e-12))
-            x = projectToLevelSet(shape, t, x, 8);
-          for (size_t d = 0; d < static_cast<size_t>(x.size()); ++d)
-            pm(d, local) = x[d];
-        }
-        mesh.setPolytopeTransformation(
-            {1, edgeIndex},
-            new ParametricTransformation<Variational::RealH1Element<2>>(
-                pm, Variational::RealH1Element<2>(edgeFe)));
-      }
-
-      for (Index cellIndex = 0;
-           cellIndex < static_cast<Index>(mesh.getCellCount());
-           ++cellIndex)
-      {
-        if (conn.getGeometry(2, cellIndex) != Polytope::Type::Triangle)
-          continue;
-
-        const auto featureEdges = interfaceLocalEdges(mesh, cellIndex);
-        const auto& cell = conn.getPolytope(2, cellIndex);
-        const auto x0 = mesh.getVertexCoordinates(cell(0));
-        const auto x1 = mesh.getVertexCoordinates(cell(1));
-        const auto x2 = mesh.getVertexCoordinates(cell(2));
-
-        PointCloud pm(mesh.getSpaceDimension(), fe.getCount());
-        for (size_t local = 0; local < fe.getCount(); ++local)
-        {
-          const auto& rc = fe.getNode(local);
-          Math::SpatialPoint x =
-            (Real(1) - rc[0] - rc[1]) * x0 + rc[0] * x1 + rc[1] * x2;
-
-          const bool edgeInterior = !referencePointIsTriangleVertex(rc);
-          bool onInterfaceEdge = false;
-          for (const auto& e : featureEdges)
-            onInterfaceEdge = onInterfaceEdge
-              || referencePointOnTriangleEdge(rc, e[0], e[1]);
-          if (edgeInterior && onInterfaceEdge)
-            x = projectToLevelSet(shape, t, x, 6);
-
-          for (size_t d = 0; d < static_cast<size_t>(x.size()); ++d)
-            pm(d, local) = x[d];
-        }
-
-        auto* trans =
-          new ParametricTransformation<Variational::RealH1Element<2>>(
-              pm, Variational::RealH1Element<2>(fe));
-        bool valid = true;
-        for (const Math::SpatialPoint& rc : {
-              Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)},
-              Math::SpatialPoint{Real(0.5), Real(0.25)},
-              Math::SpatialPoint{Real(0.25), Real(0.5)},
-              Math::SpatialPoint{Real(0.25), Real(0.25)}})
-        {
-          Math::SpatialMatrix<Real> J;
-          trans->jacobian(J, rc);
-          valid = valid && J.rows() == 2 && J.cols() == 2
-            && std::isfinite(J.determinant()) && J.determinant() > Real(1e-14);
-        }
-        if (valid)
-          mesh.setPolytopeTransformation({2, cellIndex}, trans);
-        else
-          delete trans;
-      }
     }
 
     CurvedInterfaceStats curvedInterfaceStats(
@@ -1036,123 +966,60 @@ namespace Rodin::Tests::Benchmarks
         stats.minQuality = 0;
       if (!std::isfinite(stats.minJacobian))
         stats.minJacobian = 0;
+
+      // Cell-cell overlap canary: sample every Interface edge's curved
+      // transformation at 5 interior points and check membership in cells
+      // that share a vertex with the edge but NOT the edge itself. A hit
+      // means the curved interface intrudes into a non-incident neighbour
+      // -- global-injectivity failure missed by per-cell det/quality.
+      const_cast<LocalMesh&>(mesh).getConnectivity().compute(0, 2);
+      const_cast<LocalMesh&>(mesh).getConnectivity().compute(1, 2);
+      static const std::array<Real, 5> sOv = {{
+        Real(0.1), Real(0.25), Real(0.5), Real(0.75), Real(0.9) }};
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        if (!attr || *attr != Interface)
+          continue;
+        const auto& ep = conn.getPolytope(1, e);
+        std::array<Index, 2> edgeAdj{
+          std::numeric_limits<Index>::max(),
+          std::numeric_limits<Index>::max() };
+        {
+          size_t k = 0;
+          for (Index ci : conn.getIncidence({ 1, 2 }, e))
+            if (k < 2) edgeAdj[k++] = ci;
+        }
+        std::vector<Index> nbrs;
+        for (Index vEnd : { ep(0), ep(1) })
+          for (Index ci : conn.getIncidence({ 0, 2 }, vEnd))
+            if (ci != edgeAdj[0] && ci != edgeAdj[1])
+              nbrs.push_back(ci);
+        std::sort(nbrs.begin(), nbrs.end());
+        nbrs.erase(std::unique(nbrs.begin(), nbrs.end()), nbrs.end());
+        if (nbrs.empty())
+          continue;
+        const auto edgeIt = mesh.getPolytope(1, e);
+        for (Real s : sOv)
+        {
+          Math::SpatialPoint sample;
+          edgeIt->getTransformation().transform(
+              sample, Math::SpatialPoint{ s });
+          for (Index ci : nbrs)
+          {
+            const auto& cell = conn.getPolytope(2, ci);
+            const auto Va = mesh.getVertexCoordinates(cell(0));
+            const auto Vb = mesh.getVertexCoordinates(cell(1));
+            const auto Vc = mesh.getVertexCoordinates(cell(2));
+            if (pointInLinearTriangle(sample, Va, Vb, Vc))
+            {
+              ++stats.overlapSamples;
+              break;
+            }
+          }
+        }
+      }
       return stats;
-    }
-
-    template <class FES, class Data>
-    void applyParametricDisplacement(
-        LocalMesh& mesh,
-        const Variational::GridFunction<FES, Data>& u)
-    {
-      const auto& fes = u.getFiniteElementSpace();
-      const auto& data = u.getData();
-      const size_t sdim = mesh.getSpaceDimension();
-      if (sdim != 2 || fes.getVectorDimension() != 2)
-        return;
-
-      const auto& conn = mesh.getConnectivity();
-      std::vector<PointCloud> edgePointClouds(conn.getCount(1));
-      std::vector<PointCloud> cellPointClouds(mesh.getCellCount());
-      std::vector<char> hasCellPointCloud(mesh.getCellCount(), 0);
-      for (Index edgeIndex = 0;
-           edgeIndex < static_cast<Index>(conn.getCount(1));
-           ++edgeIndex)
-      {
-        const auto edgeIterator = mesh.getPolytope(1, edgeIndex);
-        const auto& edge = *edgeIterator;
-        const auto& fe =
-          fes.getFiniteElement(edge.getDimension(), edge.getIndex());
-        const size_t localSize = fe.getCount();
-        PointCloud pm(sdim, localSize / sdim);
-        for (size_t node = 0; node < localSize / sdim; ++node)
-        {
-          const auto& rc = fe.getNode(node * sdim);
-          const Geometry::Point point(edge, rc);
-          auto x = point.getPhysicalCoordinates();
-          for (size_t c = 0; c < sdim; ++c)
-          {
-            const size_t local = node * sdim + c;
-            const Index global = fes.getGlobalIndex(
-                {edge.getDimension(), edge.getIndex()},
-                static_cast<Index>(local));
-            x[c] += data(global);
-          }
-          for (size_t c = 0; c < sdim; ++c)
-            pm(c, node) = x[c];
-        }
-        edgePointClouds[static_cast<size_t>(edgeIndex)] = std::move(pm);
-      }
-
-      for (Index cellIndex = 0;
-           cellIndex < static_cast<Index>(mesh.getCellCount());
-           ++cellIndex)
-      {
-        if (conn.getGeometry(2, cellIndex) != Polytope::Type::Triangle)
-          continue;
-        const auto cellIterator = mesh.getPolytope(2, cellIndex);
-        const auto& cell = *cellIterator;
-        const auto& fe =
-          fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-        const size_t localSize = fe.getCount();
-        PointCloud pm(sdim, localSize / sdim);
-        for (size_t node = 0; node < localSize / sdim; ++node)
-        {
-          const auto& rc = fe.getNode(node * sdim);
-          const Geometry::Point point(cell, rc);
-          auto x = point.getPhysicalCoordinates();
-          for (size_t c = 0; c < sdim; ++c)
-          {
-            const size_t local = node * sdim + c;
-            const Index global = fes.getGlobalIndex(
-                {cell.getDimension(), cell.getIndex()},
-                static_cast<Index>(local));
-            x[c] += data(global);
-          }
-          for (size_t c = 0; c < sdim; ++c)
-            pm(c, node) = x[c];
-        }
-        cellPointClouds[static_cast<size_t>(cellIndex)] = std::move(pm);
-        hasCellPointCloud[static_cast<size_t>(cellIndex)] = 1;
-      }
-
-      for (Index vtx = 0; vtx < static_cast<Index>(mesh.getVertexCount());
-           ++vtx)
-      {
-        auto x = mesh.getVertexCoordinates(vtx);
-        for (size_t c = 0; c < sdim; ++c)
-        {
-          const Index global = fes.getGlobalIndex(
-              {0, vtx}, static_cast<Index>(c));
-          x[c] += data(global);
-        }
-        mesh.setVertexCoordinates(vtx, x);
-      }
-
-      // setVertexCoordinates() flushes all cached/custom transformations.
-      // Reinstall the displaced P2 maps afterwards so the benchmark measures
-      // the actual curved geometry, including edge-midpoint motion.
-      for (Index edgeIndex = 0;
-           edgeIndex < static_cast<Index>(conn.getCount(1));
-           ++edgeIndex)
-      {
-        mesh.setPolytopeTransformation(
-            {1, edgeIndex},
-            new ParametricTransformation<Variational::RealH1Element<2>>(
-                edgePointClouds[static_cast<size_t>(edgeIndex)],
-                Variational::RealH1Element<2>(Polytope::Type::Segment)));
-      }
-      for (Index cellIndex = 0;
-           cellIndex < static_cast<Index>(mesh.getCellCount());
-           ++cellIndex)
-      {
-        if (!hasCellPointCloud[static_cast<size_t>(cellIndex)])
-          continue;
-        mesh.setPolytopeTransformation(
-            {2, cellIndex},
-            new ParametricTransformation<Variational::RealH1Element<2>>(
-                cellPointClouds[static_cast<size_t>(cellIndex)],
-                Variational::RealH1Element<2>(Polytope::Type::Triangle)));
-      }
     }
 
     void annotateBoundary(LocalMesh& mesh)
@@ -1282,6 +1149,41 @@ namespace Rodin::Tests::Benchmarks
       AnalyticLevelSetFitTerm boundaryFit(
           boxBoundaryValue, boxBoundaryGradient, Optional<Attribute>(Boundary), 1.0);
 
+      // Tangential interface constraint: every interface vertex is hard
+      // re-projected onto the analytic phi=0 after each line-search step, so
+      // the corner slides ALONG the level set instead of being held in place
+      // by a soft fit penalty. Matches the policy used by the example.
+      const Index ntv = mesh.getVertexCount();
+      std::vector<char> onInterface(static_cast<size_t>(ntv), 0);
+      {
+        const auto& connI = mesh.getConnectivity();
+        for (Index e = 0; e < static_cast<Index>(connI.getCount(1)); ++e)
+        {
+          const auto attr = mesh.getAttribute(1, e);
+          if (!attr || *attr != Interface)
+            continue;
+          const auto& edge = connI.getPolytope(1, e);
+          onInterface[static_cast<size_t>(edge(0))] = 1;
+          onInterface[static_cast<size_t>(edge(1))] = 1;
+        }
+      }
+      auto enforceInterfaceTangent = [&]()
+      {
+        auto& data = u.getData();
+        for (Index v = 0; v < ntv; ++v)
+        {
+          if (!onInterface[static_cast<size_t>(v)])
+            continue;
+          const auto x0 = mesh.getVertexCoordinates(v);
+          const Math::SpatialPoint xnow{
+            x0[0] + data(v),
+            x0[1] + data(v + ntv) };
+          const auto xproj = projectToLevelSet(shape, t, xnow);
+          data(v) = xproj[0] - x0[0];
+          data(v + ntv) = xproj[1] - x0[1];
+        }
+      };
+
       // Local Armijo/validity line-searched Newton. Unlike NewtonSolver
       // (constant damping only) this backtracks the step until the barrier
       // quality energy is finite and does not increase, so a barrier metric
@@ -1364,6 +1266,7 @@ namespace Rodin::Tests::Benchmarks
           for (int ls = 0; ls < 30; ++ls)
           {
             u.getData() = u0 + alpha * dx;
+            enforceInterfaceTangent();
             start = BenchClock::now();
             const Real e = meritEnergy();
             if (tmopStats)
@@ -1371,11 +1274,23 @@ namespace Rodin::Tests::Benchmarks
             if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
             {
               LocalMesh trialMesh(mesh);
-              applyParametricDisplacement(trialMesh, u);
-              const auto trialStats = curvedInterfaceStats(trialMesh, shape, t);
-              if (trialStats.invalidJacobianSamples == 0
-                  && trialStats.minJacobian > Real(0)
-                  && trialStats.minQuality > Real(0))
+              const Index nvTrial = trialMesh.getVertexCount();
+              for (Index vtx = 0; vtx < nvTrial; ++vtx)
+              {
+                auto x = trialMesh.getVertexCoordinates(vtx);
+                x[0] += u.getData()(vtx);
+                x[1] += u.getData()(vtx + nvTrial);
+                trialMesh.setVertexCoordinates(vtx, x);
+              }
+              trialMesh.getConnectivity().compute(2, 1);
+              trialMesh.getConnectivity().compute(1, 0);
+              const auto trialStats = meshStats(trialMesh);
+              if (trialStats.inverted == 0
+                  && std::isfinite(trialStats.minQuality)
+                  && trialStats.minQuality > Real(0)
+                  && std::isfinite(trialStats.coverage)
+                  && trialStats.coverage > Real(0.8)
+                  && trialStats.coverage < Real(1.2))
               {
                 accepted = true;
                 break;
@@ -1477,12 +1392,6 @@ namespace Rodin::Tests::Benchmarks
         Index maxIterations,
         TMOPSolveStats* tmopStats = nullptr)
     {
-      VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh, 2);
-      GridFunction u(space);
-      u.getData().setZero();
-      TrialFunction du(space);
-      TestFunction v(space);
-
       auto phiValue = [shape, t](const Math::SpatialPoint& x)
       {
         return levelSetValue(shape, x, t);
@@ -1491,135 +1400,68 @@ namespace Rodin::Tests::Benchmarks
       {
         return levelSetGradient(shape, x, t);
       };
-
-      CurvedQualityTargetJacobian target(mesh, 0.75);
-      QualityTerm quality(
-          metric,
-          target,
-          qualityWeight);
-      quality.setQuadratureOrder(4);
-      DeviationTerm deviation(0.25);
-      AnalyticLevelSetFitTerm fit(
-          phiValue, phiGradient, Optional<Attribute>(Interface), 2.0);
-      AnalyticLevelSetFitTerm boundaryFit(
-          boxBoundaryValue, boxBoundaryGradient, Optional<Attribute>(Boundary), 1.0);
-
-      auto makeTangent = [&]()
-      {
-        return quality.tangent(u, du, v) + deviation.tangent(du, v)
-             + fit.tangent(u, du, v) + boundaryFit.tangent(u, du, v);
-      };
-      auto makeResidual = [&]()
-      {
-        return quality.residual(u, v) + deviation.residual(u, v)
-             + fit.residual(u, v) + boundaryFit.residual(u, v);
-      };
-      auto meritEnergy = [&]()
-      {
-        return quality.energy(u)
-          + deviation.energy(u)
-          + fit.energy(u)
-          + boundaryFit.energy(u);
-      };
-
-      bool acceptedAny = false;
       try
       {
-        for (Index it = 0; it < maxIterations; ++it)
+        Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
+        upgradeTransformations(mesh, fe, Interface);  // affine P2 lift
+
+        auto projectToInterface = [shape, t](const Math::SpatialPoint& x)
         {
-          if (tmopStats)
-            tmopStats->iterations++;
-          auto start = BenchClock::now();
-          LinearForm R(v);
-          R = makeResidual();
-          R.assemble();
-          if (tmopStats)
-            tmopStats->assemblySeconds += elapsedSeconds(start);
-          const auto r = R.getVector();
-          if (!r.allFinite())
-          {
-            if (acceptedAny)
-              break;
-            return false;
-          }
-          if (r.norm() <= Real(1e-10))
-            break;
+          return projectToLevelSet(shape, t, x);
+        };
+        ProjectedInterfaceTargetJacobian target(
+            mesh, Interface, projectToInterface);
+        QualityTerm quality(metric, target, qualityWeight);
+        quality.setQuadratureOrder(4);
+        DeviationTerm deviation(Real(0.25));
+        AnalyticLevelSetFitTerm fit(
+            phiValue, phiGradient, Optional<Attribute>(Interface), Real(2));
+        AnalyticLevelSetFitTerm bfit(
+            boxBoundaryValue, boxBoundaryGradient,
+            Optional<Attribute>(Boundary), Real(1));
 
-          start = BenchClock::now();
-          BilinearForm J(du, v);
-          J = makeTangent();
-          J.assemble();
-          if (tmopStats)
-            tmopStats->assemblySeconds += elapsedSeconds(start);
+        VectorH1<2, LocalMesh> space(
+            std::integral_constant<size_t, 2>{}, mesh, 2);
+        GridFunction u(space);
+        u.getData().setZero();
+        TrialFunction du(space);
+        TestFunction  v (space);
 
-          start = BenchClock::now();
-          Eigen::SparseLU<std::decay_t<decltype(J.getOperator())>> lu;
-          lu.compute(J.getOperator());
-          if (lu.info() != Eigen::Success)
-          {
-            if (acceptedAny)
-              break;
-            return false;
-          }
-          const Math::Vector<Real> dx = lu.solve(-r);
-          if (tmopStats)
-            tmopStats->solveSeconds += elapsedSeconds(start);
-          if (lu.info() != Eigen::Success || !dx.allFinite())
-          {
-            if (acceptedAny)
-              break;
-            return false;
-          }
+        auto makeResidual = [&] {
+          return quality.residual(u, v) + deviation.residual(u, v)
+               + fit.residual(u, v)     + bfit.residual(u, v);
+        };
+        auto makeTangent = [&] {
+          return quality.tangent(u, du, v) + deviation.tangent(du, v)
+               + fit.tangent(u, du, v)     + bfit.tangent(u, du, v);
+        };
+        auto energy = [&] {
+          return quality.energy(u) + deviation.energy(u)
+               + fit.energy(u)     + bfit.energy(u);
+        };
 
-          start = BenchClock::now();
-          const Real e0 = meritEnergy();
-          if (tmopStats)
-            tmopStats->meritSeconds += elapsedSeconds(start);
-          const Math::Vector<Real> u0 = u.getData();
-          Real alpha = Real(1);
-          bool accepted = false;
-          for (int ls = 0; ls < 30; ++ls)
-          {
-            u.getData() = u0 + alpha * dx;
-            start = BenchClock::now();
-            const Real e = meritEnergy();
-            if (tmopStats)
-              tmopStats->meritSeconds += elapsedSeconds(start);
-            if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
-            {
-              accepted = true;
-              break;
-            }
-            alpha *= Real(0.5);
-          }
-          if (!accepted)
-          {
-            u.getData() = u0;
-            break;
-          }
-          acceptedAny = true;
-          if (alpha * dx.norm() <= Real(1e-10))
-            break;
-        }
+        IsoparametricTMOPParameters params;
+        params.maxIterations = maxIterations;
+        const auto report = solveIsoparametricTMOP(
+            mesh, fe, u, du, v, makeResidual, makeTangent, energy,
+            Interface, params);
+        if (tmopStats)
+          tmopStats->iterations += report.iterations;
+        syncLinearBackbone(mesh, fe);
+        demoteTransformations(mesh);
+
+        const auto curved = curvedInterfaceStats(mesh, shape, t);
+        return curved.invalidJacobianSamples == 0
+          && curved.minJacobian > Real(0)
+          && std::isfinite(curved.minJacobian)
+          && curved.minQuality > Real(0)
+          && std::isfinite(curved.minQuality)
+          && (report.converged || report.iterations > 0);
       }
       catch (...)
       {
         return false;
       }
-
-      if (!u.getData().allFinite())
-        return false;
-      LocalMesh beforeApply(mesh);
-      applyParametricDisplacement(mesh, u);
-      const auto curved = curvedInterfaceStats(mesh, shape, t);
-      if (curved.invalidJacobianSamples != 0
-          || !(curved.minJacobian > Real(0))
-          || !std::isfinite(curved.minJacobian))
-      {
-        mesh = std::move(beforeApply);
-        return false;
-      }
-      return true;
     }
 
     bool solveCurvedTMOP(
@@ -1705,11 +1547,74 @@ namespace Rodin::Tests::Benchmarks
         return projectToLevelSet(shape, t, x, 2);
       };
 
-      return TriangleMeshOptimizer()
+      auto report = TriangleMeshOptimizer()
         .setParameters(parameters)
         .setFeatureProjection(projectToInterface)
         .setProtectedVertices(std::move(frozen))
         .optimize(mesh);
+
+      // Validity-gated tangent-vertex spreading: one Laplacian-with-
+      // projection pass along the interface chain so clustered interface
+      // corners (the topology that snap=0 + cut can leave behind) are
+      // dispersed BEFORE TMOP runs. Each candidate move is accepted only if
+      // every incident triangle stays orientation-preserving -- this
+      // matches the optimizer's own smoothing-pass policy and prevents the
+      // spreading from flipping any sliver cell. Re-projects each smoothed
+      // vertex onto phi=0 so the analytic fit is preserved exactly.
+      mesh.getConnectivity().compute(0, 2);
+      mesh.getConnectivity().compute(1, 0);
+      const auto& connS = mesh.getConnectivity();
+      std::vector<std::vector<Index>> ifaceNbr(mesh.getVertexCount());
+      for (Index e = 0; e < static_cast<Index>(connS.getCount(1)); ++e)
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        if (!attr || *attr != Interface)
+          continue;
+        const auto& edge = connS.getPolytope(1, e);
+        ifaceNbr[static_cast<size_t>(edge(0))].push_back(edge(1));
+        ifaceNbr[static_cast<size_t>(edge(1))].push_back(edge(0));
+      }
+      constexpr int kSpreadPasses = 3;
+      const Real omega = Real(0.3);
+      for (int p = 0; p < kSpreadPasses; ++p)
+      {
+        for (Index v = 0;
+             v < static_cast<Index>(mesh.getVertexCount()); ++v)
+        {
+          const auto& nbrs = ifaceNbr[static_cast<size_t>(v)];
+          if (nbrs.size() != 2)
+            continue;
+          const auto a = mesh.getVertexCoordinates(nbrs[0]);
+          const auto b = mesh.getVertexCoordinates(nbrs[1]);
+          const Math::SpatialPoint mid{
+            (a[0] + b[0]) * Real(0.5),
+            (a[1] + b[1]) * Real(0.5) };
+          const auto proj = projectToInterface(mid);
+          const auto cur = mesh.getVertexCoordinates(v);
+          const Math::SpatialPoint trial{
+            cur[0] + omega * (proj[0] - cur[0]),
+            cur[1] + omega * (proj[1] - cur[1]) };
+          bool valid = true;
+          for (Index ci : connS.getIncidence({ 0, 2 }, v))
+          {
+            const auto& cell = connS.getPolytope(2, ci);
+            std::array<Math::SpatialPoint, 3> p3;
+            for (size_t k = 0; k < 3; ++k)
+              p3[k] = (cell(k) == v)
+                ? trial
+                : mesh.getVertexCoordinates(cell(k));
+            const Real orient =
+                (p3[1][0] - p3[0][0]) * (p3[2][1] - p3[0][1])
+              - (p3[1][1] - p3[0][1]) * (p3[2][0] - p3[0][0]);
+            if (!(orient > Real(0))) { valid = false; break; }
+          }
+          if (valid)
+            mesh.setVertexCoordinates(v, trial);
+        }
+      }
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+      return report;
     }
 
     TriangleMeshOptimizerReport coarsen(
@@ -1744,6 +1649,7 @@ namespace Rodin::Tests::Benchmarks
       counters.finalMinQuality = stats.minQuality;
       counters.fitRms = fit.first;
       counters.fitMax = fit.second;
+      counters.curvedOverlapSamples = curved.overlapSamples;
       counters.curvedFitRms = curved.fitRms;
       counters.curvedFitMax = curved.fitMax;
       counters.curvedMinQuality = curved.minQuality;
@@ -1999,7 +1905,7 @@ namespace Rodin::Tests::Benchmarks
     {
       auto background = makeBackground(resolution);
       const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
       const Real cutSeconds = elapsedSeconds(cutStart);
       benchmark::DoNotOptimize(cut.mesh.getCellCount());
       counters =
@@ -2020,7 +1926,7 @@ namespace Rodin::Tests::Benchmarks
     {
       auto background = makeBackground(resolution);
       const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
       const Real cutSeconds = elapsedSeconds(cutStart);
       auto optimized = cut.mesh;
       TMOPSolveStats tmopStats;
@@ -2046,7 +1952,7 @@ namespace Rodin::Tests::Benchmarks
     {
       auto background = makeBackground(resolution);
       const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
       const Real cutSeconds = elapsedSeconds(cutStart);
       auto optimized = cut.mesh;
       TMOPSolveStats tmopStats;
@@ -2080,7 +1986,7 @@ namespace Rodin::Tests::Benchmarks
       averages = StageAverages{};
       auto background = makeBackground(resolution);
       const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
       const Real cutSeconds = elapsedSeconds(cutStart);
       auto optimized = cut.mesh;
       bool tmopOk = true;
@@ -2157,7 +2063,7 @@ namespace Rodin::Tests::Benchmarks
     {
       auto background = makeBackground(resolution);
       const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
       const Real cutSeconds = elapsedSeconds(cutStart);
       auto optimized = cut.mesh;
       TMOPSolveStats tmopStats;
@@ -2194,7 +2100,7 @@ namespace Rodin::Tests::Benchmarks
         const Real t = static_cast<Real>(step)
           / static_cast<Real>(std::max<Index>(1, steps - 1));
         const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0.05), Real(0.2));
+        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
         const Real cutSeconds = elapsedSeconds(cutStart);
         auto optimized = cut.mesh;
         const auto optStart = BenchClock::now();
@@ -2238,7 +2144,7 @@ namespace Rodin::Tests::Benchmarks
       averages = StageAverages{};
       auto background = makeBackground(resolution);
       const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0.05), Real(0.2));
+      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
       const Real cutSeconds = elapsedSeconds(cutStart);
       auto optimized = cut.mesh;
 
@@ -2249,7 +2155,6 @@ namespace Rodin::Tests::Benchmarks
       optimized.getConnectivity().compute(2, 1);
       optimized.getConnectivity().compute(1, 0);
       auto curved = optimized;
-      installQuadraticInterfaceGeometry(curved, shape, Real(0.25));
 
       TMOPSolveStats tmopStats;
       const auto tmopStart = BenchClock::now();
@@ -2289,7 +2194,7 @@ namespace Rodin::Tests::Benchmarks
         const Real t = static_cast<Real>(step)
           / static_cast<Real>(std::max<Index>(1, steps - 1));
         const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0.05), Real(0.2));
+        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
         const Real cutSeconds = elapsedSeconds(cutStart);
         auto optimized = cut.mesh;
 
@@ -2300,7 +2205,6 @@ namespace Rodin::Tests::Benchmarks
         optimized.getConnectivity().compute(2, 1);
         optimized.getConnectivity().compute(1, 0);
         auto curved = optimized;
-        installQuadraticInterfaceGeometry(curved, shape, t);
 
         TMOPSolveStats tmopStats;
         const auto tmopStart = BenchClock::now();
@@ -2353,7 +2257,7 @@ namespace Rodin::Tests::Benchmarks
         const Real t = static_cast<Real>(step)
           / static_cast<Real>(std::max<Index>(1, steps - 1));
         const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0.05), Real(0.2));
+        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
         const Real cutSeconds = elapsedSeconds(cutStart);
         auto optimized = cut.mesh;
         const auto optStart = BenchClock::now();
@@ -2407,7 +2311,7 @@ namespace Rodin::Tests::Benchmarks
         const Real t = static_cast<Real>(step)
           / static_cast<Real>(std::max<Index>(1, steps - 1));
         const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0.05), Real(0.2));
+        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
         const Real cutSeconds = elapsedSeconds(cutStart);
         auto optimized = cut.mesh;
         bool tmopOk = true;
@@ -2734,6 +2638,8 @@ namespace Rodin::Tests::Benchmarks
   RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 24)
   RODIN_CURVED_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 10)
   RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 10)
+  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 24)
+  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion, 24)
 
   RODIN_CURVED_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 10, 8)
   RODIN_CURVED_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 16, 8)
@@ -2741,6 +2647,9 @@ namespace Rodin::Tests::Benchmarks
   RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 10, 8)
   RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 16, 8)
   RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 24, 8)
+  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 10, 8)
+  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 24, 8)
+  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion, 24, 8)
 
   RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly, 8)
   RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 8)

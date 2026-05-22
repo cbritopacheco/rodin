@@ -1853,6 +1853,37 @@ namespace Rodin::Tests::Unit
     EXPECT_LT((W - Wnatural).norm(), (Wideal - Wnatural).norm());
   }
 
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ProjectedInterfaceTargetCarriesCurvedMidsideGoal)
+  {
+    auto mesh = makeTriangle({0, 0}, {1, 0}, {0, 0.5});
+    const auto& conn = mesh.getConnectivity();
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto& edge = conn.getPolytope(1, e);
+      if ((edge(0) == 0 && edge(1) == 1)
+          || (edge(0) == 1 && edge(1) == 0))
+        mesh.setAttribute({1, e}, 99);
+    }
+
+    auto project = [](const Math::SpatialPoint& x)
+    {
+      return Math::SpatialPoint{
+        x[0],
+        Real(0.1) * std::sin(Real(3.14159265358979323846) * x[0]) };
+    };
+    ProjectedInterfaceTargetJacobian target(mesh, 99, project);
+    ParametricTargetJacobian affine(mesh);
+
+    auto cellIterator = mesh.getPolytope(2, 0);
+    const auto& cell = *cellIterator;
+    const Math::SpatialPoint rc{Real(1) / Real(3), Real(1) / Real(3)};
+    const auto Wcurved = target.evaluate(cell, rc);
+    const auto Waffine = affine.evaluate(cell, rc);
+
+    EXPECT_GT(Wcurved.determinant(), 0);
+    EXPECT_GT((Wcurved - Waffine).norm(), Real(1e-6));
+  }
+
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeDistortionMetricZeroOnRotationsAndScalings)
   {
     ShapeDistortionMetric metric;
@@ -1983,6 +2014,72 @@ namespace Rodin::Tests::Unit
           EXPECT_NEAR(g(i, j), fd, 1e-5);
         }
 
+      const Math::SpatialMatrix<Real> ha = metric.hessianAction(T, H);
+      const Math::SpatialMatrix<Real> fd =
+        (Real(1) / (Real(2) * eps))
+        * (metric.gradient(T + eps * H) - metric.gradient(T - eps * H));
+      EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 2e-5);
+    }
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, SizeMetric77DerivativesFiniteDifference)
+  {
+    SizeMetric77 metric;
+    std::vector<Math::SpatialMatrix<Real>> cases(4);
+    cases[0] << 1.2, 0.3, 0.1, 0.9;
+    cases[1] << 0.7, -0.2, 0.25, 1.4;
+    cases[2] << 2.0, 0.0, 0.0, 0.5;
+    cases[3] << 1.0, 0.8, -0.3, 1.1;
+    Math::SpatialMatrix<Real> H;
+    H << 0.13, -0.21, 0.07, 0.31;
+
+    const Real eps = 1e-7;
+    for (const auto& T : cases)
+    {
+      const Math::SpatialMatrix<Real> g = metric.gradient(T);
+      for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+          Math::SpatialMatrix<Real> Tp = T, Tm = T;
+          Tp(i, j) += eps;
+          Tm(i, j) -= eps;
+          const Real fd =
+            (metric.value(Tp) - metric.value(Tm)) / (Real(2) * eps);
+          EXPECT_NEAR(g(i, j), fd, 1e-5);
+        }
+      const Math::SpatialMatrix<Real> ha = metric.hessianAction(T, H);
+      const Math::SpatialMatrix<Real> fd =
+        (Real(1) / (Real(2) * eps))
+        * (metric.gradient(T + eps * H) - metric.gradient(T - eps * H));
+      EXPECT_LT((ha - fd).norm() / std::max(Real(1), fd.norm()), 2e-5);
+    }
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ShapeSizeBlendMetric80DerivativesFiniteDifference)
+  {
+    ShapeSizeBlendMetric metric(0.5);
+    std::vector<Math::SpatialMatrix<Real>> cases(4);
+    cases[0] << 1.2, 0.3, 0.1, 0.9;
+    cases[1] << 0.7, -0.2, 0.25, 1.4;
+    cases[2] << 2.0, 0.0, 0.0, 0.5;
+    cases[3] << 1.0, 0.8, -0.3, 1.1;
+    Math::SpatialMatrix<Real> H;
+    H << 0.13, -0.21, 0.07, 0.31;
+
+    const Real eps = 1e-7;
+    for (const auto& T : cases)
+    {
+      const Math::SpatialMatrix<Real> g = metric.gradient(T);
+      for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+        {
+          Math::SpatialMatrix<Real> Tp = T, Tm = T;
+          Tp(i, j) += eps;
+          Tm(i, j) -= eps;
+          const Real fd =
+            (metric.value(Tp) - metric.value(Tm)) / (Real(2) * eps);
+          EXPECT_NEAR(g(i, j), fd, 1e-5);
+        }
       const Math::SpatialMatrix<Real> ha = metric.hessianAction(T, H);
       const Math::SpatialMatrix<Real> fd =
         (Real(1) / (Real(2) * eps))
@@ -2436,5 +2533,263 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(problem.getGeometry().nodes[0].fixed);
     EXPECT_FALSE(problem.getGeometry().nodes[1].fixed);
     EXPECT_FALSE(problem.getGeometry().nodes[2].fixed);
+  }
+
+  // Increment 1 for isoparametric P2 TMOP: prove a curved
+  // ParametricTransformation<RealH1Element<2>> set via
+  // setPolytopeTransformation makes Geometry::Point::getJacobian() carry the
+  // curvature (Jacobian varies across the element). This is the foundational
+  // unknown the whole P2 plan rests on. Conformity is separately guaranteed
+  // by computing edge-node coords from shared edges (affine-mapped reference
+  // nodes), so no Fekete-order bookkeeping is needed.
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, P2ParametricTransformationCarriesCurvature)
+  {
+    auto mesh = makeUnitTriangle();              // V0(0,0) V1(1,0) V2(0,1)
+    RealH1Element<2> fe(Polytope::Type::Triangle);
+    ASSERT_EQ(fe.getCount(), 6u);
+    const auto& ref = RealH1Element<2>::getNodes(Polytope::Type::Triangle);
+    ASSERT_EQ(ref.size(), 6u);
+
+    // On the unit reference triangle the affine geometry IS the ref coords.
+    PointCloud affine(2, 6);
+    PointCloud curved(2, 6);
+    for (size_t j = 0; j < 6; ++j)
+    {
+      affine(0, j) = ref[j][0];
+      affine(1, j) = ref[j][1];
+      curved(0, j) = ref[j][0];
+      curved(1, j) = ref[j][1];
+      // Bump the edge node on V0-V1 (ref.y==0, 0<ref.x<1) off the chord.
+      if (std::abs(ref[j][1]) < 1e-9
+          && ref[j][0] > 1e-9 && ref[j][0] < Real(1) - 1e-9)
+        curved(1, j) += Real(0.2);
+    }
+
+    const Math::SpatialPoint rc1{ Real(0.25), Real(0.25) };
+    const Math::SpatialPoint rc2{ Real(0.50), Real(0.20) };
+
+    mesh.setPolytopeTransformation({ size_t(2), Index(0) },
+        new ParametricTransformation<RealH1Element<2>>(affine, fe));
+    {
+      auto it = mesh.getPolytope(2, 0);
+      const Math::SpatialMatrix<Real> Ja1 = Geometry::Point(*it, rc1).getJacobian();
+      const Math::SpatialMatrix<Real> Ja2 = Geometry::Point(*it, rc2).getJacobian();
+      EXPECT_LT((Ja1 - Ja2).norm(), 1e-10);      // affine => constant Jacobian
+    }
+
+    mesh.setPolytopeTransformation({ size_t(2), Index(0) },
+        new ParametricTransformation<RealH1Element<2>>(curved, fe));
+    {
+      auto it = mesh.getPolytope(2, 0);
+      const Math::SpatialMatrix<Real> Jc1 = Geometry::Point(*it, rc1).getJacobian();
+      const Math::SpatialMatrix<Real> Jc2 = Geometry::Point(*it, rc2).getJacobian();
+      EXPECT_GT((Jc1 - Jc2).norm(), 1e-3);       // curvature is captured
+      EXPECT_GT(Jc1.determinant(), 0.0);         // still a valid map
+    }
+  }
+
+  // Increment 2: the existing TMOP QualityTerm residual/tangent must assemble
+  // and stay finite-difference-consistent on an H1<2> (quadratic) vector
+  // space over a P2 parametric mesh. Proves order-2 TMOP assembly works and
+  // R = dE/du, J = d2E/du2 hold at P2 (the integrators were only ever run at
+  // P1 before). Conformal P2 geometry via affine-mapped reference nodes.
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, P2QualityTermAssemblesAndIsFDConsistent)
+  {
+    auto mesh = makeTwoTriangleSquare();         // 2 tris sharing an edge
+    RealH1Element<2> fe(Polytope::Type::Triangle);
+    const auto& ref = RealH1Element<2>::getNodes(Polytope::Type::Triangle);
+    const auto& conn = mesh.getConnectivity();
+    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
+      const auto& cell = conn.getPolytope(2, c);
+      const auto Va = mesh.getVertexCoordinates(cell(0));
+      const auto Vb = mesh.getVertexCoordinates(cell(1));
+      const auto Vc = mesh.getVertexCoordinates(cell(2));
+      PointCloud pc(2, 6);
+      for (size_t j = 0; j < 6; ++j)
+      {
+        const Real r = ref[j][0], s = ref[j][1];
+        // affine map of the reference node through the cell vertices
+        // (shared edges -> identical points by linearity => conformal).
+        pc(0, j) = (1 - r - s) * Va[0] + r * Vb[0] + s * Vc[0];
+        pc(1, j) = (1 - r - s) * Va[1] + r * Vb[1] + s * Vc[1];
+      }
+      mesh.setPolytopeTransformation({ size_t(2), c },
+          new ParametricTransformation<RealH1Element<2>>(pc, fe));
+    }
+
+    constexpr size_t vdim = 2;
+    H1 space(std::integral_constant<size_t, 2>{}, mesh, vdim);
+    GridFunction displacement(space);
+    fillDisplacement(displacement.getData(), 0.01);
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    QualityTerm quality(
+        SquaredDistanceMetric{}, InitialElementTargetJacobian(mesh), 1.0);
+    DeviationTerm deviation(1.0);
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm residual(v);
+      residual = quality.residual(displacement, v)
+               + deviation.residual(displacement, v);
+      residual.assemble();
+      return residual.getVector();
+    };
+
+    BilinearForm tangent(du, v);
+    tangent = quality.tangent(displacement, du, v)
+            + deviation.tangent(du, v);
+    tangent.assemble();
+
+    const auto residual0 = assembleResidual();
+    auto direction = displacement.getData();
+    fillDirection(direction);
+    const auto original = displacement.getData();
+    const Real eps = 1e-7;
+    displacement.getData() = original + eps * direction;
+    const auto residual1 = assembleResidual();
+    displacement.getData() = original;
+
+    const auto fd = (residual1 - residual0) / eps;
+    const auto jd = tangent.getOperator() * direction;
+    const Real denom = std::max<Real>({ Real(1), fd.norm(), jd.norm() });
+    EXPECT_LT((fd - jd).norm() / denom, 1e-6);
+    EXPECT_GT(residual0.size(), 0);              // P2 space actually built
+  }
+
+  // Increment 3-4 of isoparametric P2 TMOP: an actual nonlinear Newton solve
+  // in an H1<2> vector space over a P2 parametric mesh must reduce the strict
+  // TMOP energy and keep the deformed map valid (det grad x_h > 0 at every
+  // sampled quadrature point). Geometry is a conformal affine-P2
+  // representation (reference nodes affine-mapped through each cell's vertices
+  // => shared edges identical by linearity). One interior vertex is displaced
+  // so the strict energy rises above the topology-fixed P2 baseline; Newton
+  // on the now-FES-independent quality+deviation terms must recover most of
+  // the excess. This is the end-to-end proof that TMOP optimizes in H1<2>,
+  // not merely that residual/tangent are FD-consistent there.
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, P2StrictNewtonReducesEnergyOnParametricMesh)
+  {
+    RealH1Element<2> fe(Polytope::Type::Triangle);
+    const auto& ref = RealH1Element<2>::getNodes(Polytope::Type::Triangle);
+
+    auto makeGrid = []()
+    {
+      auto m = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+      m.getConnectivity().compute(2, 1);
+      m.getConnectivity().compute(1, 0);
+      return m;
+    };
+
+    auto displaceCenter = [](LocalMesh& m)
+    {
+      for (Index v = 0; v < m.getVertexCount(); ++v)
+      {
+        const auto x = m.getVertexCoordinates(v);
+        if (std::abs(x[0] - Real(1)) < 1e-9 && std::abs(x[1] - Real(1)) < 1e-9)
+        {
+          m.setVertexCoordinates(v, { Real(1.42), Real(1.31) });
+          m.getConnectivity().compute(2, 1);
+          m.getConnectivity().compute(1, 0);
+          return;
+        }
+      }
+    };
+
+    auto attachAffineP2 = [&](LocalMesh& m)
+    {
+      const auto& conn = m.getConnectivity();
+      for (Index c = 0; c < static_cast<Index>(m.getCellCount()); ++c)
+      {
+        const auto& cell = conn.getPolytope(2, c);
+        const auto Va = m.getVertexCoordinates(cell(0));
+        const auto Vb = m.getVertexCoordinates(cell(1));
+        const auto Vc = m.getVertexCoordinates(cell(2));
+        PointCloud pc(2, 6);
+        for (size_t j = 0; j < 6; ++j)
+        {
+          const Real r = ref[j][0], s = ref[j][1];
+          pc(0, j) = (1 - r - s) * Va[0] + r * Vb[0] + s * Vc[0];
+          pc(1, j) = (1 - r - s) * Va[1] + r * Vb[1] + s * Vc[1];
+        }
+        m.setPolytopeTransformation({ size_t(2), c },
+            new ParametricTransformation<RealH1Element<2>>(pc, fe));
+      }
+    };
+
+    auto p2StrictEnergy = [](LocalMesh& m)
+    {
+      H1 s(std::integral_constant<size_t, 2>{}, m, 2);
+      GridFunction z(s);
+      z.getData().setZero();
+      QualityTerm q(SquaredDistanceMetric{}, IdentityTargetJacobian{}, 1.0);
+      q.setQuadratureOrder(4);
+      return q.energy(z);
+    };
+
+    auto baseline = makeGrid();
+    attachAffineP2(baseline);
+    const Real baselineEnergy = p2StrictEnergy(baseline);
+
+    auto mesh = makeGrid();
+    displaceCenter(mesh);
+    attachAffineP2(mesh);
+    const Real beforeEnergy = p2StrictEnergy(mesh);
+    ASSERT_GT(beforeEnergy, baselineEnergy * (Real(1) + Real(1e-6)));
+
+    H1 space(std::integral_constant<size_t, 2>{}, mesh, 2);
+    GridFunction displacement(space);
+    displacement.getData().setZero();
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    QualityTerm quality(SquaredDistanceMetric{}, IdentityTargetJacobian{}, 1.0);
+    quality.setQuadratureOrder(4);
+    DeviationTerm deviation(1e-3);
+
+    Variational::Problem problem(du, v);
+    problem =
+        quality.tangent(displacement, du, v)
+      + deviation.tangent(du, v)
+      + quality.residual(displacement, v)
+      + deviation.residual(displacement, v);
+
+    SparseLU linearSolver{problem};
+    NewtonSolver newton(linearSolver);
+    newton
+      .setMaxIterations(40)
+      .setDampingFactor(1.0)
+      .setAbsoluteTolerance(1e-12)
+      .setRelativeTolerance(1e-10)
+      .setStepTolerance(1e-12);
+    newton.solve(displacement);
+    const auto report = newton.getReport();
+
+    const Real afterEnergy = quality.energy(displacement);
+
+    // Validity: min det(grad x_h) over a quadrature stays positive at the
+    // solution (the deformed P2 map is not inverted anywhere sampled).
+    Real minDet = std::numeric_limits<Real>::infinity();
+    const auto& qf =
+      QF::PolytopeQuadratureFormula::get(4, Polytope::Type::Triangle);
+    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
+      auto it = mesh.getPolytope(2, c);
+      for (size_t q = 0; q < qf.getSize(); ++q)
+      {
+        const auto A = deformedCoordinateJacobian(
+            displacement, *it, qf.getPoint(q));
+        minDet = std::min(minDet, A.determinant());
+      }
+    }
+
+    EXPECT_GT(report.initial_residual, 0);
+    EXPECT_LE(report.final_residual, report.initial_residual);
+    EXPECT_GT(minDet, 0);
+    EXPECT_LT(afterEnergy, beforeEnergy);
+    EXPECT_LT(
+        afterEnergy - baselineEnergy,
+        Real(0.5) * (beforeEnergy - baselineEnergy));
   }
 }
