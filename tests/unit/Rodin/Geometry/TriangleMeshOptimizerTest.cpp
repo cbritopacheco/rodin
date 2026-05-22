@@ -72,6 +72,48 @@ namespace Rodin::Tests::Unit
     return { x0, y0, x1, y1 };
   }
 
+  static Index findEdge(const LocalMesh& mesh, Index a, Index b)
+  {
+    const auto& conn = mesh.getConnectivity();
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto& edge = conn.getPolytope(1, e);
+      if ((edge(0) == a && edge(1) == b)
+          || (edge(0) == b && edge(1) == a))
+        return e;
+    }
+    return std::numeric_limits<Index>::max();
+  }
+
+  static LocalMesh shortInteriorFeaturePatch(bool markFeature)
+  {
+    auto mesh = LocalMesh::Builder()
+      .initialize(2)
+      .nodes(6)
+      .vertex({0.0, 0.0})
+      .vertex({1.0, 0.0})
+      .vertex({1.0, 1.0})
+      .vertex({0.0, 1.0})
+      .vertex({0.45, 0.5})
+      .vertex({0.55, 0.5})
+      .polytope(Polytope::Type::Triangle, {0, 1, 4})
+      .polytope(Polytope::Type::Triangle, {1, 5, 4})
+      .polytope(Polytope::Type::Triangle, {1, 2, 5})
+      .polytope(Polytope::Type::Triangle, {2, 3, 5})
+      .polytope(Polytope::Type::Triangle, {3, 4, 5})
+      .polytope(Polytope::Type::Triangle, {3, 0, 4})
+      .finalize();
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    if (markFeature)
+    {
+      const Index edge = findEdge(mesh, 4, 5);
+      EXPECT_NE(edge, std::numeric_limits<Index>::max());
+      mesh.setAttribute({1, edge}, Attribute(99));
+    }
+    return mesh;
+  }
+
   TEST(Rodin_Geometry_TriangleMeshOptimizer, IdentityWithinBounds)
   {
     auto m = grid(5);
@@ -273,6 +315,57 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(r.swaps, 0u);
     EXPECT_NEAR(coverageArea(mesh), beforeCoverage, 1e-14);
+    EXPECT_GT(minSignedArea(mesh), 0.0);
+  }
+
+  TEST(Rodin_Geometry_TriangleMeshOptimizer,
+       FeatureCollapseCollapsesShortAttributedFeatureEdge)
+  {
+    auto mesh = shortInteriorFeaturePatch(true);
+    std::vector<char> protectedVertices(mesh.getVertexCount(), 0);
+    protectedVertices[4] = 1;
+    protectedVertices[5] = 1;
+
+    const auto report = TriangleMeshOptimizer()
+      .setHMin(0)
+      .setHMax(std::numeric_limits<Real>::infinity())
+      .setMinQuality(1e-8)
+      .setMaxIterations(1)
+      .setFeatureProjection(
+          [](const Math::SpatialPoint& p) { return p; })
+      .setFeatureCollapseLength(0.2)
+      .setProtectedVertices(protectedVertices)
+      .optimize(mesh);
+
+    EXPECT_EQ(report.featureCollapses, 1u);
+    EXPECT_EQ(report.collapses, 1u);
+    EXPECT_EQ(mesh.getVertexCount(), 5u);
+    EXPECT_GT(minSignedArea(mesh), 0.0);
+  }
+
+  TEST(Rodin_Geometry_TriangleMeshOptimizer,
+       FeatureCollapseIgnoresUnmarkedProtectedChord)
+  {
+    auto mesh = shortInteriorFeaturePatch(false);
+    const auto vertices = mesh.getVertexCount();
+    std::vector<char> protectedVertices(vertices, 0);
+    protectedVertices[4] = 1;
+    protectedVertices[5] = 1;
+
+    const auto report = TriangleMeshOptimizer()
+      .setHMin(0)
+      .setHMax(std::numeric_limits<Real>::infinity())
+      .setMinQuality(1e-8)
+      .setMaxIterations(1)
+      .setFeatureProjection(
+          [](const Math::SpatialPoint& p) { return p; })
+      .setFeatureCollapseLength(0.2)
+      .setProtectedVertices(protectedVertices)
+      .optimize(mesh);
+
+    EXPECT_EQ(report.featureCollapses, 0u);
+    EXPECT_EQ(report.collapses, 0u);
+    EXPECT_EQ(mesh.getVertexCount(), vertices);
     EXPECT_GT(minSignedArea(mesh), 0.0);
   }
 }

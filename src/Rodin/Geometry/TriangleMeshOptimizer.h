@@ -62,6 +62,7 @@ namespace Rodin::Geometry
     std::size_t iterations = 0;
     std::size_t splits = 0;
     std::size_t collapses = 0;
+    std::size_t featureCollapses = 0;
     std::size_t swaps = 0;
     std::size_t smooths = 0;
     std::size_t featureSmooths = 0;
@@ -79,6 +80,7 @@ namespace Rodin::Geometry
     std::size_t maxIterations = 5;
     std::size_t smoothingPasses = 0;
     std::size_t featureSmoothingPasses = 0;
+    Real featureCollapseLength = 0;
 
     static TriangleMeshOptimizerParameters levelSetCarryForward(Real h)
     {
@@ -90,6 +92,7 @@ namespace Rodin::Geometry
       p.maxIterations = 12;
       p.smoothingPasses = 3;
       p.featureSmoothingPasses = 3;
+      p.featureCollapseLength = Real(0.50) * h;
       return p;
     }
   };
@@ -190,7 +193,9 @@ namespace Rodin::Geometry
       /// midpoint already lies on the feature (projection moves it < 1/4 of
       /// the edge length). Bulletproof: manifold link condition + every
       /// rewritten triangle re-validated with the survivor at its new
-      /// position. 0 (default) disables it.
+      /// position. A candidate must be an attributed 1-D polytope preserved by
+      /// the mesh, not merely a geometric chord between two protected vertices.
+      /// 0 (default) disables it.
       TriangleMeshOptimizer& setFeatureCollapseLength(Real length)
       { m_featureCollapseLength = std::max(Real(0), length); return *this; }
 
@@ -211,19 +216,23 @@ namespace Rodin::Geometry
           .setAreaRelativeTolerance(p.areaRelativeTolerance)
           .setMaxIterations(p.maxIterations)
           .setSmoothingPasses(p.smoothingPasses)
-          .setFeatureSmoothingPasses(p.featureSmoothingPasses);
+          .setFeatureSmoothingPasses(p.featureSmoothingPasses)
+          .setFeatureCollapseLength(p.featureCollapseLength);
       }
 
       /**
        * @brief Protects vertices from topological operators.
        *
-       * No operator touches an edge with a protected endpoint: protected
-       * vertices are never removed, relabeled, split across or swapped through.
+       * Standard split/collapse/swap operators do not touch an edge with a
+       * protected endpoint: protected vertices are never removed, relabeled,
+       * split across or swapped through by those passes.
        * Use this to preserve a fitted level-set interface (or any feature)
        * through coarsening/optimization. Protected vertices remain geometrically
        * fixed unless setFeatureProjection() and setFeatureSmoothingPasses() are
        * enabled, in which case feature smoothing may move them tangentially and
-       * project them back onto the supplied feature.
+       * project them back onto the supplied feature. If setFeatureCollapseLength()
+       * is enabled, a short attributed feature edge may be collapsed into one
+       * projected protected vertex after manifold and quality validation.
        */
       TriangleMeshOptimizer& setProtectedVertices(std::vector<char> mask)
       { m_protected = std::move(mask); return *this; }
@@ -288,6 +297,7 @@ namespace Rodin::Geometry
             (m_featureCollapseLength > Real(0) && m_featureProjection)
               ? featureCollapsePass() : 0;
           report.splits += s; report.collapses += c + fc;
+          report.featureCollapses += fc;
           report.swaps += w; report.smooths += sm;
           report.featureSmooths += fsm;
           if (s == 0 && c == 0 && fc == 0 && w == 0 && sm == 0 && fsm == 0)
@@ -447,6 +457,18 @@ namespace Rodin::Geometry
       struct Proposal { int kind = 0; Index a = 0, b = 0; Real gain = 0;
                         std::vector<Index> cav; };
 
+      bool preservedEdge(Index a, Index b) const
+      {
+        for (const auto& e : m_E)
+        {
+          if (e[0] == e[1])
+            continue;
+          if ((e[0] == a && e[1] == b) || (e[0] == b && e[1] == a))
+            return true;
+        }
+        return false;
+      }
+
       // --- SPLIT ----------------------------------------------------------
 
       std::size_t splitPass() const
@@ -560,6 +582,11 @@ namespace Rodin::Geometry
         {
           const Index rem = p.a, keep = p.b;
           // Re-validate against current state (ring may have changed).
+          const auto it = m_edge.find(ekey(rem, keep));
+          if (it == m_edge.end() || it->second.n != 2)
+            return false;
+          if (!linkCondition(rem, keep, it->second))
+            return false;
           if (!collapseValid(rem, keep)) return false;
           std::vector<std::size_t> ring;
           forVertexTris(rem, [&](std::size_t ti){ ring.push_back(ti); });
@@ -676,10 +703,15 @@ namespace Rodin::Geometry
 
         std::vector<Proposal> prop(m_edges.size());
         std::vector<char> ok(m_edges.size(), 0);
-        for (std::size_t e = 0; e < m_edges.size(); ++e)
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic, 256)
+#endif
+        for (std::ptrdiff_t e = 0;
+             e < static_cast<std::ptrdiff_t>(m_edges.size()); ++e)
         {
-          const auto& r = m_edge.at(m_edges[e]);
+          const auto& r = m_edge.at(m_edges[static_cast<std::size_t>(e)]);
           if (!prot(r.a) || !prot(r.b)) continue;   // BOTH on the feature
+          if (!preservedEdge(r.a, r.b)) continue;    // actual attributed edge
           if (r.n != 2) continue;                   // interior only
           if (bnd[r.a] || bnd[r.b]) continue;       // not domain boundary
           const Real len = (m_X[r.a] - m_X[r.b]).norm();
@@ -699,11 +731,19 @@ namespace Rodin::Geometry
           { for (Index x : m_T[ti]) p.cav.push_back(x); });
           forVertexTris(keep, [&](std::size_t ti)
           { for (Index x : m_T[ti]) p.cav.push_back(x); });
-          prop[e] = p; ok[e] = 1;
+          prop[static_cast<std::size_t>(e)] = p;
+          ok[static_cast<std::size_t>(e)] = 1;
         }
         return commit(prop, ok, [&](const Proposal& p)
         {
           const Index rem = p.a, keep = p.b;
+          const auto it = m_edge.find(ekey(rem, keep));
+          if (it == m_edge.end() || it->second.n != 2)
+            return false;
+          if (!preservedEdge(rem, keep))
+            return false;
+          if (!linkCondition(rem, keep, it->second))
+            return false;
           const Math::SpatialPoint mid =
             Real(0.5) * (m_X[rem] + m_X[keep]);
           const Math::SpatialPoint proj = m_featureProjection(mid);

@@ -524,6 +524,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
     // overlap canary
     mesh.getConnectivity().compute(0, 2);
+    mesh.getConnectivity().compute(1, 2);
     for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
     {
       const auto attr = mesh.getAttribute(1, e);

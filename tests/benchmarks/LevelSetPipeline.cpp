@@ -106,6 +106,7 @@ namespace Rodin::Tests::Benchmarks
       Index pathologicalCuts = 0;
       Index splits = 0;
       Index collapses = 0;
+      Index featureCollapses = 0;
       Index swaps = 0;
       Index smooths = 0;
       Index featureSmooths = 0;
@@ -205,6 +206,7 @@ namespace Rodin::Tests::Benchmarks
       Real tmopIterations = 0;
       Real inverted = 0;
       Real tmopFailures = 0;
+      Real featureCollapses = 0;
       bool hasP2Diagnostics = false;
 
       void add(const StageCounters& counters)
@@ -308,6 +310,7 @@ namespace Rodin::Tests::Benchmarks
         tmopIterations += static_cast<Real>(counters.tmopIterations);
         inverted += static_cast<Real>(counters.inverted);
         tmopFailures += static_cast<Real>(counters.tmopFailures);
+        featureCollapses += static_cast<Real>(counters.featureCollapses);
       }
 
       void publish(benchmark::State& st) const
@@ -484,6 +487,8 @@ namespace Rodin::Tests::Benchmarks
         st.counters["avg_inverted"] = benchmark::Counter(inverted * inv);
         st.counters["avg_tmop_failed"] =
           benchmark::Counter(tmopFailures * inv);
+        st.counters["avg_feature_collapses"] =
+          benchmark::Counter(featureCollapses * inv);
       }
     };
 
@@ -502,6 +507,13 @@ namespace Rodin::Tests::Benchmarks
       Real targetMaxMetric = 0;
       Real targetMinDetT = 0;
       Index targetInvalidSamples = 0;
+      bool hasCurvedMetrics = false;
+      Real curvedFitRms = 0;
+      Real curvedFitMax = 0;
+      Real curvedMinQuality = 0;
+      Real curvedMinJacobian = 0;
+      Index curvedInvalidSamples = 0;
+      Index curvedOverlapSamples = 0;
       Index iterations = 0;
     };
 
@@ -1515,16 +1527,40 @@ namespace Rodin::Tests::Benchmarks
             tmopStats->targetMaxMetric = targetStats.maxMetric;
             tmopStats->targetMinDetT = targetStats.minDetT;
             tmopStats->targetInvalidSamples = targetStats.invalidSamples;
+            const auto curvedStats = curvedInterfaceStats(mesh, shape, t);
+            tmopStats->curvedFitRms = curvedStats.fitRms;
+            tmopStats->curvedFitMax = curvedStats.fitMax;
+            tmopStats->curvedMinQuality = curvedStats.minQuality;
+            tmopStats->curvedMinJacobian = curvedStats.minJacobian;
+            tmopStats->curvedInvalidSamples =
+              curvedStats.invalidJacobianSamples;
+            tmopStats->curvedOverlapSamples = curvedStats.overlapSamples;
+            tmopStats->hasCurvedMetrics = true;
           }
           syncLinearBackbone(mesh, fe);
           demoteTransformations(mesh);
 
-          const auto curved = curvedInterfaceStats(mesh, shape, t);
-          return curved.invalidJacobianSamples == 0
-            && curved.minJacobian > Real(0)
-            && std::isfinite(curved.minJacobian)
-            && curved.minQuality > Real(0)
-            && std::isfinite(curved.minQuality)
+          Index invalid = 0;
+          Real minJac = 0;
+          Real minQ = 0;
+          if (tmopStats && tmopStats->hasCurvedMetrics)
+          {
+            invalid = tmopStats->curvedInvalidSamples;
+            minJac = tmopStats->curvedMinJacobian;
+            minQ = tmopStats->curvedMinQuality;
+          }
+          else
+          {
+            const auto curved = curvedInterfaceStats(mesh, shape, t);
+            invalid = curved.invalidJacobianSamples;
+            minJac = curved.minJacobian;
+            minQ = curved.minQuality;
+          }
+          return invalid == 0
+            && minJac > Real(0)
+            && std::isfinite(minJac)
+            && minQ > Real(0)
+            && std::isfinite(minQ)
             && (report.converged || report.iterations > 0);
         };
 
@@ -1617,7 +1653,10 @@ namespace Rodin::Tests::Benchmarks
     {
       auto parameters = defaultOptimizerParameters(resolution);
       if (stage == StageCase::OptimizeNoFeature)
+      {
         parameters.featureSmoothingPasses = 0;
+        parameters.featureCollapseLength = 0;
+      }
       if (stage == StageCase::OptimizeNoInterior)
         parameters.smoothingPasses = 0;
       return parameters;
@@ -1773,6 +1812,7 @@ namespace Rodin::Tests::Benchmarks
       {
         counters.splits = optReport->splits;
         counters.collapses = optReport->collapses;
+        counters.featureCollapses = optReport->featureCollapses;
         counters.swaps = optReport->swaps;
         counters.smooths = optReport->smooths;
         counters.featureSmooths = optReport->featureSmooths;
@@ -1791,6 +1831,8 @@ namespace Rodin::Tests::Benchmarks
       st.counters["uncut_cells"] = benchmark::Counter(counters.uncutCells);
       st.counters["snapped"] = benchmark::Counter(counters.snappedCrossings);
       st.counters["pathological"] = benchmark::Counter(counters.pathologicalCuts);
+      st.counters["feature_collapses"] =
+        benchmark::Counter(counters.featureCollapses);
       st.counters["qmin_cut"] = benchmark::Counter(counters.cutMinQuality);
       st.counters["qmin_final"] = benchmark::Counter(counters.finalMinQuality);
       st.counters["avg_qmin_final"] =
@@ -1987,6 +2029,16 @@ namespace Rodin::Tests::Benchmarks
         counters.tmopTargetMinDetT = tmopStats->targetMinDetT;
         counters.tmopTargetInvalidSamples = tmopStats->targetInvalidSamples;
         counters.tmopIterations = tmopStats->iterations;
+        if (tmopStats->hasCurvedMetrics)
+        {
+          counters.hasP2Diagnostics = true;
+          counters.curvedFitRms = tmopStats->curvedFitRms;
+          counters.curvedFitMax = tmopStats->curvedFitMax;
+          counters.curvedMinQuality = tmopStats->curvedMinQuality;
+          counters.curvedMinJacobian = tmopStats->curvedMinJacobian;
+          counters.curvedInvalidSamples = tmopStats->curvedInvalidSamples;
+          counters.curvedOverlapSamples = tmopStats->curvedOverlapSamples;
+        }
       }
       publishStageCounters(st, counters);
       return counters;
@@ -2601,6 +2653,7 @@ namespace Rodin::Tests::Benchmarks
           tmopFailures++;
         accumulated.splits += report.splits;
         accumulated.collapses += report.collapses;
+        accumulated.featureCollapses += report.featureCollapses;
         accumulated.swaps += report.swaps;
         accumulated.smooths += report.smooths;
         accumulated.featureSmooths += report.featureSmooths;
@@ -2858,6 +2911,8 @@ namespace Rodin::Tests::Benchmarks
   RODIN_ORBIT_BENCH("SquareFigureEight", SquareFigureEight, "SquaredDistance", SquaredDistance)
   RODIN_ORBIT_BENCH("TriangleFigureEight", TriangleFigureEight, "SquaredDistance", SquaredDistance)
   RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "SquaredDistance", SquaredDistance)
+  RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "AreaDistortion", AreaDistortion)
+  RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize)
   RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance)
   RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion)
   RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize)
