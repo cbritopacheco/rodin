@@ -190,6 +190,31 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         fes.getVectorDimension());
   }
 
+  template <class ElementType>
+  Math::SpatialPoint basisVectorValue(
+      const ElementType& fe,
+      size_t local,
+      const Math::SpatialPoint& rc);
+
+  template <class ElementType>
+  Math::SpatialPoint deformedPoint(
+      const Geometry::Polytope& polytope,
+      const ElementType& fe,
+      const std::vector<Real>& displacement,
+      const Math::SpatialPoint& rc,
+      size_t vdim)
+  {
+    Math::SpatialPoint x = Geometry::Point(polytope, rc).getPhysicalCoordinates();
+    for (size_t local = 0; local < displacement.size(); ++local)
+    {
+      const auto phi = basisVectorValue(fe, local, rc);
+      for (size_t c = 0; c < vdim; ++c)
+        x[static_cast<std::uint8_t>(c)] +=
+          displacement[local] * phi[static_cast<std::uint8_t>(c)];
+    }
+    return x;
+  }
+
   // The full vdim-vector value of the FES vector basis function for a local
   // dof. No component-from-layout assumption (vs local%vdim), so this is
   // correct for any vector element ordering/order.
@@ -1650,6 +1675,535 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
     private:
       Real m_weight = 1;
+  };
+
+  template <class GridFunctionType, class ValueFunction, class GradientFunction>
+  class VolumetricPhaseConsistencyResidualIntegrator final
+      : public Variational::LinearFormIntegratorBase<Real>
+  {
+    public:
+      using Parent = Variational::LinearFormIntegratorBase<Real>;
+
+      template <class TestFES>
+      VolumetricPhaseConsistencyResidualIntegrator(
+          const GridFunctionType& u,
+          const Variational::TestFunction<TestFES>& v,
+          ValueFunction value,
+          GradientFunction gradient,
+          Geometry::Attribute negativeAttribute,
+          Geometry::Attribute positiveAttribute,
+          Real weight,
+          Real epsilon,
+          Real margin,
+          Real normalization,
+          size_t quadratureOrder)
+        : Parent(v),
+          m_u(u),
+          m_value(std::move(value)),
+          m_gradient(std::move(gradient)),
+          m_negativeAttribute(negativeAttribute),
+          m_positiveAttribute(positiveAttribute),
+          m_weight(std::max(Real(0), weight)),
+          m_epsilon(std::max(epsilon, Real(1e-12))),
+          m_margin(margin),
+          m_normalization(std::max(normalization, Real(1e-12))),
+          m_quadratureOrder(quadratureOrder)
+      {}
+
+      VolumetricPhaseConsistencyResidualIntegrator(
+          const VolumetricPhaseConsistencyResidualIntegrator& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_value(other.m_value),
+          m_gradient(other.m_gradient),
+          m_negativeAttribute(other.m_negativeAttribute),
+          m_positiveAttribute(other.m_positiveAttribute),
+          m_weight(other.m_weight),
+          m_epsilon(other.m_epsilon),
+          m_margin(other.m_margin),
+          m_normalization(other.m_normalization),
+          m_quadratureOrder(other.m_quadratureOrder),
+          m_polytope(other.m_polytope),
+          m_localCount(other.m_localCount),
+          m_scale(other.m_scale),
+          m_basisValue(other.m_basisValue),
+          m_gradPhi(other.m_gradPhi)
+      {}
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      VolumetricPhaseConsistencyResidualIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) override
+      {
+        m_polytope = &polytope;
+        const auto& cell = polytope;
+        const auto attr = cell.getMesh().getAttribute(
+            cell.getDimension(), cell.getIndex());
+        const Real phaseSign = getPhaseSign(attr);
+        m_localCount = 0;
+        m_scale.clear();
+        m_basisValue.clear();
+        m_gradPhi.clear();
+        if (phaseSign == Real(0))
+          return *this;
+
+        const auto& fes = m_u.get().getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(
+            cell.getDimension(), cell.getIndex());
+        m_localCount = fe.getCount();
+        const auto displacement = localDisplacementCoefficients(m_u.get(), cell);
+        const auto geometry =
+          cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
+        const size_t nq = qf.getSize();
+        m_scale.assign(nq, 0);
+        m_basisValue.assign(
+            nq, std::vector<Math::SpatialPoint>(m_localCount));
+        m_gradPhi.assign(
+            nq, Math::SpatialPoint(
+                static_cast<std::uint8_t>(fes.getVectorDimension())));
+        for (size_t q = 0; q < nq; ++q)
+        {
+          const auto& rc = qf.getPoint(q);
+          const auto A = deformedCoordinateJacobian(
+              cell, fe, displacement, rc, fes.getVectorDimension());
+          const Real wdet = qf.getWeight(q) * std::abs(A.determinant());
+          const auto x = deformedPoint(
+              cell, fe, displacement, rc, fes.getVectorDimension());
+          const Real z = phaseSign * m_value(x) / m_epsilon;
+          if (z >= m_margin)
+            continue;
+          const Real psiPrime = z - m_margin;
+          m_scale[q] = wdet * psiPrime * phaseSign / m_epsilon;
+          m_gradPhi[q] = m_gradient(x);
+          for (size_t l = 0; l < m_localCount; ++l)
+            m_basisValue[q][l] = basisVectorValue(fe, l, rc);
+        }
+        return *this;
+      }
+
+      Real integrate(size_t local) override
+      {
+        if (local >= m_localCount)
+          return 0;
+        Real value = 0;
+        for (size_t q = 0; q < m_scale.size(); ++q)
+        {
+          if (m_scale[q] == Real(0))
+            continue;
+          value += m_scale[q] * Math::dot(m_gradPhi[q], m_basisValue[q][local]);
+        }
+        return (m_weight / m_normalization) * value;
+      }
+
+      Geometry::Region getRegion() const override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      VolumetricPhaseConsistencyResidualIntegrator* copy() const noexcept override
+      {
+        return new VolumetricPhaseConsistencyResidualIntegrator(*this);
+      }
+
+    private:
+      Real getPhaseSign(const Optional<Geometry::Attribute>& attr) const
+      {
+        if (!attr)
+          return Real(0);
+        if (*attr == m_negativeAttribute)
+          return Real(-1);
+        if (*attr == m_positiveAttribute)
+          return Real(1);
+        return Real(0);
+      }
+
+      std::reference_wrapper<const GridFunctionType> m_u;
+      ValueFunction m_value;
+      GradientFunction m_gradient;
+      Geometry::Attribute m_negativeAttribute;
+      Geometry::Attribute m_positiveAttribute;
+      Real m_weight = 1;
+      Real m_epsilon = 1;
+      Real m_margin = 1;
+      Real m_normalization = 1;
+      size_t m_quadratureOrder = 2;
+      const Geometry::Polytope* m_polytope = nullptr;
+      size_t m_localCount = 0;
+      std::vector<Real> m_scale;
+      std::vector<std::vector<Math::SpatialPoint>> m_basisValue;
+      std::vector<Math::SpatialPoint> m_gradPhi;
+  };
+
+  template <class GridFunctionType, class ValueFunction, class GradientFunction>
+  class VolumetricPhaseConsistencyTangentIntegrator final
+      : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+
+      template <class Solution, class TrialFES, class TestFES>
+      VolumetricPhaseConsistencyTangentIntegrator(
+          const GridFunctionType& u,
+          const Variational::TrialFunction<Solution, TrialFES>& du,
+          const Variational::TestFunction<TestFES>& v,
+          ValueFunction value,
+          GradientFunction gradient,
+          Geometry::Attribute negativeAttribute,
+          Geometry::Attribute positiveAttribute,
+          Real weight,
+          Real epsilon,
+          Real margin,
+          Real normalization,
+          size_t quadratureOrder)
+        : Parent(du, v),
+          m_u(u),
+          m_value(std::move(value)),
+          m_gradient(std::move(gradient)),
+          m_negativeAttribute(negativeAttribute),
+          m_positiveAttribute(positiveAttribute),
+          m_weight(std::max(Real(0), weight)),
+          m_epsilon(std::max(epsilon, Real(1e-12))),
+          m_margin(margin),
+          m_normalization(std::max(normalization, Real(1e-12))),
+          m_quadratureOrder(quadratureOrder)
+      {}
+
+      VolumetricPhaseConsistencyTangentIntegrator(
+          const VolumetricPhaseConsistencyTangentIntegrator& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_value(other.m_value),
+          m_gradient(other.m_gradient),
+          m_negativeAttribute(other.m_negativeAttribute),
+          m_positiveAttribute(other.m_positiveAttribute),
+          m_weight(other.m_weight),
+          m_epsilon(other.m_epsilon),
+          m_margin(other.m_margin),
+          m_normalization(other.m_normalization),
+          m_quadratureOrder(other.m_quadratureOrder),
+          m_polytope(other.m_polytope),
+          m_localCount(other.m_localCount),
+          m_scale(other.m_scale),
+          m_basisValue(other.m_basisValue),
+          m_gradPhi(other.m_gradPhi)
+      {}
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      VolumetricPhaseConsistencyTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) override
+      {
+        m_polytope = &polytope;
+        const auto& cell = polytope;
+        const auto attr = cell.getMesh().getAttribute(
+            cell.getDimension(), cell.getIndex());
+        const Real phaseSign = getPhaseSign(attr);
+        m_localCount = 0;
+        m_scale.clear();
+        m_basisValue.clear();
+        m_gradPhi.clear();
+        if (phaseSign == Real(0))
+          return *this;
+
+        const auto& fes = m_u.get().getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(
+            cell.getDimension(), cell.getIndex());
+        m_localCount = fe.getCount();
+        const auto displacement = localDisplacementCoefficients(m_u.get(), cell);
+        const auto geometry =
+          cell.getMesh().getGeometry(cell.getDimension(), cell.getIndex());
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
+        const size_t nq = qf.getSize();
+        m_scale.assign(nq, 0);
+        m_basisValue.assign(
+            nq, std::vector<Math::SpatialPoint>(m_localCount));
+        m_gradPhi.assign(
+            nq, Math::SpatialPoint(
+                static_cast<std::uint8_t>(fes.getVectorDimension())));
+        for (size_t q = 0; q < nq; ++q)
+        {
+          const auto& rc = qf.getPoint(q);
+          const auto A = deformedCoordinateJacobian(
+              cell, fe, displacement, rc, fes.getVectorDimension());
+          const Real wdet = qf.getWeight(q) * std::abs(A.determinant());
+          const auto x = deformedPoint(
+              cell, fe, displacement, rc, fes.getVectorDimension());
+          const Real z = phaseSign * m_value(x) / m_epsilon;
+          if (z >= m_margin)
+            continue;
+          const Real psiSecond = Real(1);
+          const Real factor = phaseSign / m_epsilon;
+          m_scale[q] = wdet * psiSecond * factor * factor;
+          m_gradPhi[q] = m_gradient(x);
+          for (size_t l = 0; l < m_localCount; ++l)
+            m_basisValue[q][l] = basisVectorValue(fe, l, rc);
+        }
+        return *this;
+      }
+
+      Real integrate(size_t trial, size_t test) override
+      {
+        if (trial >= m_localCount || test >= m_localCount)
+          return 0;
+        Real value = 0;
+        for (size_t q = 0; q < m_scale.size(); ++q)
+        {
+          if (m_scale[q] == Real(0))
+            continue;
+          const Real dTrial =
+            Math::dot(m_gradPhi[q], m_basisValue[q][trial]);
+          const Real dTest =
+            Math::dot(m_gradPhi[q], m_basisValue[q][test]);
+          value += m_scale[q] * dTrial * dTest;
+        }
+        return (m_weight / m_normalization) * value;
+      }
+
+      Geometry::Region getRegion() const override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      VolumetricPhaseConsistencyTangentIntegrator* copy() const noexcept override
+      {
+        return new VolumetricPhaseConsistencyTangentIntegrator(*this);
+      }
+
+    private:
+      Real getPhaseSign(const Optional<Geometry::Attribute>& attr) const
+      {
+        if (!attr)
+          return Real(0);
+        if (*attr == m_negativeAttribute)
+          return Real(-1);
+        if (*attr == m_positiveAttribute)
+          return Real(1);
+        return Real(0);
+      }
+
+      std::reference_wrapper<const GridFunctionType> m_u;
+      ValueFunction m_value;
+      GradientFunction m_gradient;
+      Geometry::Attribute m_negativeAttribute;
+      Geometry::Attribute m_positiveAttribute;
+      Real m_weight = 1;
+      Real m_epsilon = 1;
+      Real m_margin = 1;
+      Real m_normalization = 1;
+      size_t m_quadratureOrder = 2;
+      const Geometry::Polytope* m_polytope = nullptr;
+      size_t m_localCount = 0;
+      std::vector<Real> m_scale;
+      std::vector<std::vector<Math::SpatialPoint>> m_basisValue;
+      std::vector<Math::SpatialPoint> m_gradPhi;
+  };
+
+  template <class ValueFunction, class GradientFunction>
+  class VolumetricPhaseConsistencyTerm
+  {
+    public:
+      VolumetricPhaseConsistencyTerm(
+          ValueFunction value,
+          GradientFunction gradient,
+          Geometry::Attribute negativeAttribute,
+          Geometry::Attribute positiveAttribute,
+          Real weight = 1)
+        : m_value(std::move(value)),
+          m_gradient(std::move(gradient)),
+          m_negativeAttribute(negativeAttribute),
+          m_positiveAttribute(positiveAttribute),
+          m_weight(std::max(Real(0), weight))
+      {}
+
+      VolumetricPhaseConsistencyTerm& setWeight(Real weight)
+      {
+        m_weight = std::max(Real(0), weight);
+        return *this;
+      }
+
+      VolumetricPhaseConsistencyTerm& setEpsilon(Real epsilon)
+      {
+        m_epsilon = std::max(epsilon, Real(1e-12));
+        return *this;
+      }
+
+      VolumetricPhaseConsistencyTerm& setMargin(Real margin)
+      {
+        m_margin = margin;
+        return *this;
+      }
+
+      VolumetricPhaseConsistencyTerm& setNormalization(Real normalization)
+      {
+        m_normalization = normalization > Real(0) ? normalization : Real(1);
+        return *this;
+      }
+
+      VolumetricPhaseConsistencyTerm& setQuadratureOrder(size_t quadratureOrder)
+      {
+        m_quadratureOrder = quadratureOrder;
+        return *this;
+      }
+
+      template <class FES, class Data, class TestFES>
+      auto residual(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return VolumetricPhaseConsistencyResidualIntegrator<
+          Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
+              u, v, m_value, m_gradient,
+              m_negativeAttribute, m_positiveAttribute,
+              m_weight, m_epsilon, m_margin,
+              m_normalization, m_quadratureOrder);
+      }
+
+      template <class FES, class Data, class Solution, class TrialFES, class TestFES>
+      auto tangent(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TrialFunction<Solution, TrialFES>& du,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return VolumetricPhaseConsistencyTangentIntegrator<
+          Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
+              u, du, v, m_value, m_gradient,
+              m_negativeAttribute, m_positiveAttribute,
+              m_weight, m_epsilon, m_margin,
+              m_normalization, m_quadratureOrder);
+      }
+
+      template <class FES, class Data>
+      Real energy(const Variational::GridFunction<FES, Data>& u) const
+      {
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto& conn = mesh.getConnectivity();
+        Real value = 0;
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          const auto attr = mesh.getAttribute(2, cellIndex);
+          const Real phaseSign = getPhaseSign(attr);
+          if (phaseSign == Real(0))
+            continue;
+          const auto cell = mesh.getPolytope(2, cellIndex);
+          const auto& fe = fes.getFiniteElement(
+              cell->getDimension(), cell->getIndex());
+          const auto displacement = localDisplacementCoefficients(u, *cell);
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_quadratureOrder, conn.getGeometry(2, cellIndex));
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            const auto& rc = qf.getPoint(q);
+            const auto A = deformedCoordinateJacobian(
+                *cell, fe, displacement, rc, fes.getVectorDimension());
+            const Real wdet = qf.getWeight(q) * std::abs(A.determinant());
+            const auto x = deformedPoint(
+                *cell, fe, displacement, rc, fes.getVectorDimension());
+            const Real z = phaseSign * m_value(x) / m_epsilon;
+            const Real gap = std::max(Real(0), m_margin - z);
+            value += Real(0.5) * wdet * gap * gap;
+          }
+        }
+        return (m_weight / m_normalization) * value;
+      }
+
+      template <class Mesh>
+      Real energy(const Mesh& mesh) const
+      {
+        const auto& conn = mesh.getConnectivity();
+        Real value = 0;
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          const auto attr = mesh.getAttribute(2, cellIndex);
+          const Real phaseSign = getPhaseSign(attr);
+          if (phaseSign == Real(0))
+            continue;
+          const auto cell = mesh.getPolytope(2, cellIndex);
+          const auto& trans = cell->getTransformation();
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_quadratureOrder, conn.getGeometry(2, cellIndex));
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            Math::SpatialPoint x;
+            trans.transform(x, qf.getPoint(q));
+            Math::SpatialMatrix<Real> J;
+            trans.jacobian(J, qf.getPoint(q));
+            if (J.rows() != 2 || J.cols() != 2)
+              continue;
+            const Real wdet = qf.getWeight(q) * std::abs(J.determinant());
+            const Real z = phaseSign * m_value(x) / m_epsilon;
+            const Real gap = std::max(Real(0), m_margin - z);
+            value += Real(0.5) * wdet * gap * gap;
+          }
+        }
+        return (m_weight / m_normalization) * value;
+      }
+
+      template <class Mesh>
+      Index countWrongSideQuadrature(const Mesh& mesh) const
+      {
+        Index count = 0;
+        const auto& conn = mesh.getConnectivity();
+        for (Index cellIndex = 0;
+             cellIndex < static_cast<Index>(mesh.getCellCount());
+             ++cellIndex)
+        {
+          const auto attr = mesh.getAttribute(2, cellIndex);
+          const Real phaseSign = getPhaseSign(attr);
+          if (phaseSign == Real(0))
+            continue;
+          const auto cell = mesh.getPolytope(2, cellIndex);
+          const auto& trans = cell->getTransformation();
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_quadratureOrder, conn.getGeometry(2, cellIndex));
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            Math::SpatialPoint x;
+            trans.transform(x, qf.getPoint(q));
+            const Real z = phaseSign * m_value(x) / m_epsilon;
+            if (z < Real(0))
+              ++count;
+          }
+        }
+        return count;
+      }
+
+    private:
+      Real getPhaseSign(const Optional<Geometry::Attribute>& attr) const
+      {
+        if (!attr)
+          return Real(0);
+        if (*attr == m_negativeAttribute)
+          return Real(-1);
+        if (*attr == m_positiveAttribute)
+          return Real(1);
+        return Real(0);
+      }
+
+      ValueFunction m_value;
+      GradientFunction m_gradient;
+      Geometry::Attribute m_negativeAttribute;
+      Geometry::Attribute m_positiveAttribute;
+      Real m_weight = 1;
+      Real m_epsilon = 1;
+      Real m_margin = 1;
+      Real m_normalization = 1;
+      size_t m_quadratureOrder = 4;
   };
 
   /**

@@ -8,9 +8,6 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinGeometry_HEADERS
   Mesh.h
   SubMesh.h
-  LevelSetInterfaceGraph.h
-  LevelSetDiscretizerBase.h
-  LevelSetDiscretizerTetrahedra.h
   Polytope.h
   PolytopeQuadrature.h
   Connectivity.h

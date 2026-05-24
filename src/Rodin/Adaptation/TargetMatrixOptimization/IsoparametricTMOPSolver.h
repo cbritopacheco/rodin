@@ -58,6 +58,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     bool converged = false;      ///< Residual fell below the tolerance.
     Real initialResidual = 0;
     Real finalResidual = 0;
+    Real lastAcceptedAlpha = 0;
+    bool acceptedStep = false;
+    Index rejectedSteps = 0;
   };
 
   /// User-tunable Newton parameters.
@@ -162,6 +165,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             && isCurvedMoveValid(mesh, u, fe, params.minDetFloor))
         {
           accepted = true;
+          rep.lastAcceptedAlpha = alpha;
+          rep.acceptedStep = true;
           break;
         }
         alpha *= Real(0.5);
@@ -169,6 +174,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       if (!accepted)
       {
         u.getData() = u0;
+        ++rep.rejectedSteps;
+        rep.acceptedStep = false;
         break;
       }
       ++rep.iterations;

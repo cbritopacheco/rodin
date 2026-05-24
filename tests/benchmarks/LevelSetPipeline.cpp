@@ -87,7 +87,12 @@ namespace Rodin::Tests::Benchmarks
     {
       Index cutCells = 0;
       Index finalCells = 0;
+      Index outerIterations = 0;
       Index interfaceEdges = 0;
+      Index negativeCells = 0;
+      Index positiveCells = 0;
+      Index interfaceMaxDegree = 0;
+      Index branchVertices = 0;
       Index uncutCells = 0;
       Index snappedCrossings = 0;
       Index pathologicalCuts = 0;
@@ -130,6 +135,16 @@ namespace Rodin::Tests::Benchmarks
       Index inverted = 0;
       Index tmopFailures = 0;
       Index reclassifiedCells = 0;
+      Index changedInterfaceEdges = 0;
+      Index wrongSideQuadratureInitial = 0;
+      Index wrongSideQuadratureFinal = 0;
+      Index tmopAccepted = 0;
+      Index tmopRejected = 0;
+      Real phaseEnergyInitial = 0;
+      Real phaseEnergyFinal = 0;
+      Real fitEnergyInitial = 0;
+      Real fitEnergyFinal = 0;
+      Real lineSearchAcceptedAlpha = 0;
     };
 
     struct TopologyReport
@@ -160,7 +175,12 @@ namespace Rodin::Tests::Benchmarks
       Index samples = 0;
       Real cutCells = 0;
       Real finalCells = 0;
+      Real outerIterations = 0;
       Real interfaceEdges = 0;
+      Real negativeCells = 0;
+      Real positiveCells = 0;
+      Real interfaceMaxDegree = 0;
+      Real branchVertices = 0;
       Real uncutCells = 0;
       Real snappedCrossings = 0;
       Real pathologicalCuts = 0;
@@ -230,6 +250,16 @@ namespace Rodin::Tests::Benchmarks
       Real tmopFailures = 0;
       Real featureCollapses = 0;
       Real reclassifiedCells = 0;
+      Real changedInterfaceEdges = 0;
+      Real wrongSideQuadratureInitial = 0;
+      Real wrongSideQuadratureFinal = 0;
+      Real tmopAccepted = 0;
+      Real tmopRejected = 0;
+      Real phaseEnergyInitial = 0;
+      Real phaseEnergyFinal = 0;
+      Real fitEnergyInitial = 0;
+      Real fitEnergyFinal = 0;
+      Real lineSearchAcceptedAlpha = 0;
       bool hasP2Diagnostics = false;
 
       void add(const StageCounters& counters)
@@ -237,7 +267,12 @@ namespace Rodin::Tests::Benchmarks
         ++samples;
         cutCells += static_cast<Real>(counters.cutCells);
         finalCells += static_cast<Real>(counters.finalCells);
+        outerIterations += static_cast<Real>(counters.outerIterations);
         interfaceEdges += static_cast<Real>(counters.interfaceEdges);
+        negativeCells += static_cast<Real>(counters.negativeCells);
+        positiveCells += static_cast<Real>(counters.positiveCells);
+        interfaceMaxDegree += static_cast<Real>(counters.interfaceMaxDegree);
+        branchVertices += static_cast<Real>(counters.branchVertices);
         uncutCells += static_cast<Real>(counters.uncutCells);
         snappedCrossings += static_cast<Real>(counters.snappedCrossings);
         pathologicalCuts += static_cast<Real>(counters.pathologicalCuts);
@@ -343,6 +378,19 @@ namespace Rodin::Tests::Benchmarks
         tmopFailures += static_cast<Real>(counters.tmopFailures);
         featureCollapses += static_cast<Real>(counters.featureCollapses);
         reclassifiedCells += static_cast<Real>(counters.reclassifiedCells);
+        changedInterfaceEdges +=
+          static_cast<Real>(counters.changedInterfaceEdges);
+        wrongSideQuadratureInitial +=
+          static_cast<Real>(counters.wrongSideQuadratureInitial);
+        wrongSideQuadratureFinal +=
+          static_cast<Real>(counters.wrongSideQuadratureFinal);
+        tmopAccepted += static_cast<Real>(counters.tmopAccepted);
+        tmopRejected += static_cast<Real>(counters.tmopRejected);
+        phaseEnergyInitial += counters.phaseEnergyInitial;
+        phaseEnergyFinal += counters.phaseEnergyFinal;
+        fitEnergyInitial += counters.fitEnergyInitial;
+        fitEnergyFinal += counters.fitEnergyFinal;
+        lineSearchAcceptedAlpha += counters.lineSearchAcceptedAlpha;
       }
 
       void publish(benchmark::State& st) const
@@ -353,8 +401,18 @@ namespace Rodin::Tests::Benchmarks
         st.counters["avg_cut_cells"] = benchmark::Counter(cutCells * inv);
         st.counters["avg_final_cells"] =
           benchmark::Counter(finalCells * inv);
+        st.counters["avg_outer_iterations"] =
+          benchmark::Counter(outerIterations * inv);
         st.counters["avg_interface_edges"] =
           benchmark::Counter(interfaceEdges * inv);
+        st.counters["avg_negative_cells"] =
+          benchmark::Counter(negativeCells * inv);
+        st.counters["avg_positive_cells"] =
+          benchmark::Counter(positiveCells * inv);
+        st.counters["avg_interface_max_degree"] =
+          benchmark::Counter(interfaceMaxDegree * inv);
+        st.counters["avg_branch_vertices"] =
+          benchmark::Counter(branchVertices * inv);
         st.counters["avg_uncut_cells"] =
           benchmark::Counter(uncutCells * inv);
         st.counters["avg_snapped"] =
@@ -533,6 +591,26 @@ namespace Rodin::Tests::Benchmarks
           benchmark::Counter(featureCollapses * inv);
         st.counters["avg_reclassified_cells"] =
           benchmark::Counter(reclassifiedCells * inv);
+        st.counters["avg_changed_interface_edges"] =
+          benchmark::Counter(changedInterfaceEdges * inv);
+        st.counters["avg_wrong_side_quadrature_initial"] =
+          benchmark::Counter(wrongSideQuadratureInitial * inv);
+        st.counters["avg_wrong_side_quadrature_final"] =
+          benchmark::Counter(wrongSideQuadratureFinal * inv);
+        st.counters["avg_tmop_accepted"] =
+          benchmark::Counter(tmopAccepted * inv);
+        st.counters["avg_tmop_rejected"] =
+          benchmark::Counter(tmopRejected * inv);
+        st.counters["avg_phase_energy_initial"] =
+          benchmark::Counter(phaseEnergyInitial * inv);
+        st.counters["avg_phase_energy_final"] =
+          benchmark::Counter(phaseEnergyFinal * inv);
+        st.counters["avg_fit_energy_initial"] =
+          benchmark::Counter(fitEnergyInitial * inv);
+        st.counters["avg_fit_energy_final"] =
+          benchmark::Counter(fitEnergyFinal * inv);
+        st.counters["avg_line_search_alpha"] =
+          benchmark::Counter(lineSearchAcceptedAlpha * inv);
       }
     };
 
@@ -559,6 +637,22 @@ namespace Rodin::Tests::Benchmarks
       Index curvedInvalidSamples = 0;
       Index curvedOverlapSamples = 0;
       Index iterations = 0;
+      Index outerIterations = 0;
+      Index negativeCells = 0;
+      Index positiveCells = 0;
+      Index interfaceEdgeCount = 0;
+      Index interfaceMaxDegree = 0;
+      Index branchVertices = 0;
+      Index changedCellAttributes = 0;
+      Index changedInterfaceEdges = 0;
+      Index wrongSideQuadratureInitial = 0;
+      Index wrongSideQuadratureFinal = 0;
+      Real phaseEnergyInitial = 0;
+      Real phaseEnergyFinal = 0;
+      Real fitEnergyInitial = 0;
+      Real fitEnergyFinal = 0;
+      Real lineSearchAcceptedAlpha = 0;
+      bool accepted = false;
     };
 
     Math::SpatialPoint orbitCenter(Real t)
@@ -1165,36 +1259,238 @@ namespace Rodin::Tests::Benchmarks
         LocalMesh::UniformGrid(Polytope::Type::Triangle, {resolution, resolution});
       mesh.scale(Real(1) / static_cast<Real>(resolution - 1));
       mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 2);
       mesh.getConnectivity().compute(1, 0);
       return mesh;
     }
 
-    Index markUncutAnalyticInterfaceEdges(
-        LocalMesh& mesh,
+    std::pair<Real, Real> interfaceFit(
+        const LocalMesh& mesh,
         ShapeCase shape,
-        Real t)
+        Real t);
+
+    std::vector<Optional<Attribute>> captureCellAttributes(const LocalMesh& mesh)
     {
-      mesh.getConnectivity().compute(2, 1);
-      mesh.getConnectivity().compute(1, 0);
-      Index count = 0;
+      std::vector<Optional<Attribute>> attrs(mesh.getCellCount());
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+        attrs[c] = mesh.getAttribute(2, c);
+      return attrs;
+    }
+
+    std::vector<char> captureInterfaceSkeleton(const LocalMesh& mesh)
+    {
+      const auto& conn = mesh.getConnectivity();
+      std::vector<char> interface(conn.getCount(1), 0);
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        interface[e] = attr && *attr == Interface;
+      }
+      return interface;
+    }
+
+    Index countChangedCellAttributes(
+        const std::vector<Optional<Attribute>>& oldAttributes,
+        const std::vector<Optional<Attribute>>& newAttributes)
+    {
+      const size_t count = std::min(oldAttributes.size(), newAttributes.size());
+      Index changed = 0;
+      for (size_t i = 0; i < count; ++i)
+        if (oldAttributes[i] != newAttributes[i])
+          ++changed;
+      return changed;
+    }
+
+    Index compareInterfaceSkeleton(
+        const std::vector<char>& oldSkeleton,
+        const std::vector<char>& newSkeleton)
+    {
+      const size_t count = std::min(oldSkeleton.size(), newSkeleton.size());
+      Index changed = 0;
+      for (size_t i = 0; i < count; ++i)
+        if (oldSkeleton[i] != newSkeleton[i])
+          ++changed;
+      return changed;
+    }
+
+    void clearInterfaceEdges(LocalMesh& mesh)
+    {
       const auto& conn = mesh.getConnectivity();
       for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
       {
         const auto attr = mesh.getAttribute(1, e);
-        if (attr && *attr == Boundary)
+        if (attr && *attr == Interface)
+          mesh.setAttribute({1, e}, Optional<Attribute>{});
+      }
+    }
+
+    struct CellAttributeCounts
+    {
+      Index negative = 0;
+      Index positive = 0;
+    };
+
+    template <class Phi>
+    CellAttributeCounts classifyCellsByPhi(
+        LocalMesh& mesh,
+        Phi&& phi,
+        Attribute negativeAttribute,
+        Attribute positiveAttribute)
+    {
+      CellAttributeCounts counts;
+      const auto& conn = mesh.getConnectivity();
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+      {
+        if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
           continue;
+        const auto cellIt = mesh.getPolytope(2, c);
+        Math::SpatialPoint x;
+        cellIt->getTransformation().transform(
+            x, Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)});
+        const Attribute next =
+          phi(x) <= Real(0) ? negativeAttribute : positiveAttribute;
+        mesh.setAttribute({2, c}, next);
+        if (next == negativeAttribute)
+          ++counts.negative;
+        else if (next == positiveAttribute)
+          ++counts.positive;
+      }
+      return counts;
+    }
+
+    CellAttributeCounts countCellAttributes(
+        const LocalMesh& mesh,
+        Attribute negativeAttribute,
+        Attribute positiveAttribute)
+    {
+      CellAttributeCounts counts;
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+      {
+        const auto attr = mesh.getAttribute(2, c);
+        if (!attr)
+          continue;
+        if (*attr == negativeAttribute)
+          ++counts.negative;
+        else if (*attr == positiveAttribute)
+          ++counts.positive;
+      }
+      return counts;
+    }
+
+    struct InterfaceTopologyStats
+    {
+      Index edgeCount = 0;
+      Index maxDegree = 0;
+      Index branchVertices = 0;
+    };
+
+    InterfaceTopologyStats computeInterfaceTopologyStats(const LocalMesh& mesh)
+    {
+      InterfaceTopologyStats stats;
+      const auto& conn = mesh.getConnectivity();
+      std::vector<Index> degree(mesh.getVertexCount(), 0);
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        if (!attr || *attr != Interface)
+          continue;
+        ++stats.edgeCount;
         const auto& edge = conn.getPolytope(1, e);
-        const Real f0 =
-          levelSetValue(shape, mesh.getVertexCoordinates(edge(0)), t);
-        const Real f1 =
-          levelSetValue(shape, mesh.getVertexCoordinates(edge(1)), t);
-        if (f0 == Real(0) || f1 == Real(0) || f0 * f1 < Real(0))
+        ++degree[edge(0)];
+        ++degree[edge(1)];
+      }
+      for (Index v = 0; v < static_cast<Index>(degree.size()); ++v)
+      {
+        stats.maxDegree = std::max(stats.maxDegree, degree[v]);
+        if (degree[v] > 2)
+          ++stats.branchVertices;
+      }
+      return stats;
+    }
+
+    InterfaceTopologyStats markAttributeJumpInterfaceEdges(
+        LocalMesh& mesh,
+        Attribute negativeAttribute,
+        Attribute positiveAttribute,
+        Attribute interfaceAttribute)
+    {
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(1, 0);
+      const auto& conn = mesh.getConnectivity();
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto neighbors = conn.getIncidence({1, 2}, e);
+        if (neighbors.size() != 2)
+          continue;
+        const auto attr0 = mesh.getAttribute(2, neighbors[0]);
+        const auto attr1 = mesh.getAttribute(2, neighbors[1]);
+        if (!attr0 || !attr1 || *attr0 == *attr1)
+          continue;
+        const bool jump =
+          ((*attr0 == negativeAttribute && *attr1 == positiveAttribute)
+            || (*attr0 == positiveAttribute && *attr1 == negativeAttribute));
+        if (jump)
+          mesh.setAttribute({1, e}, interfaceAttribute);
+      }
+      return computeInterfaceTopologyStats(mesh);
+    }
+
+    Real totalCellMeasure(const LocalMesh& mesh)
+    {
+      const auto& conn = mesh.getConnectivity();
+      Real measure = 0;
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+      {
+        const auto cellIt = mesh.getPolytope(2, c);
+        const auto& trans = cellIt->getTransformation();
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            4, conn.getGeometry(2, c));
+        for (size_t q = 0; q < qf.getSize(); ++q)
         {
-          mesh.setAttribute({1, e}, Interface);
-          ++count;
+          Math::SpatialMatrix<Real> J;
+          trans.jacobian(J, qf.getPoint(q));
+          if (J.rows() == 2 && J.cols() == 2)
+            measure += qf.getWeight(q) * std::abs(J.determinant());
         }
       }
-      return count;
+      return measure;
+    }
+
+    Real totalEdgeMeasure(
+        const LocalMesh& mesh,
+        Optional<Attribute> attribute)
+    {
+      const auto& conn = mesh.getConnectivity();
+      Real measure = 0;
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        if (attribute)
+        {
+          const auto attr = mesh.getAttribute(1, e);
+          if (!attr || *attr != *attribute)
+            continue;
+        }
+        const auto edgeIt = mesh.getPolytope(1, e);
+        const auto& trans = edgeIt->getTransformation();
+        for (Real s : {Real(0.25), Real(0.75)})
+        {
+          Math::SpatialMatrix<Real> J;
+          trans.jacobian(J, Math::SpatialPoint{s});
+          if (J.rows() != 2 || J.cols() != 1)
+            continue;
+          const Real length = std::hypot(J(0, 0), J(1, 0));
+          measure += Real(0.5) * length;
+        }
+      }
+      return measure;
+    }
+
+    Real characteristicCellSize(const LocalMesh& mesh)
+    {
+      const Real area = totalCellMeasure(mesh);
+      const Real cells = static_cast<Real>(std::max<size_t>(1, mesh.getCellCount()));
+      return std::sqrt(area / cells);
     }
 
     TopologyResult makeUncutLevelSetProxy(
@@ -1203,10 +1499,19 @@ namespace Rodin::Tests::Benchmarks
         Real t)
     {
       mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 2);
       mesh.getConnectivity().compute(1, 0);
       annotateBoundary(mesh);
-      const Index interfaceEdges =
-        markUncutAnalyticInterfaceEdges(mesh, shape, t);
+      clearInterfaceEdges(mesh);
+      const auto phiValue = [shape, t](const Math::SpatialPoint& x)
+      {
+        return levelSetValue(shape, x, t);
+      };
+      const auto counts =
+        classifyCellsByPhi(mesh, phiValue, Negative, Positive);
+      const auto interfaceStats =
+        markAttributeJumpInterfaceEdges(mesh, Negative, Positive, Interface);
+      const auto fit = interfaceFit(mesh, shape, t);
 
       TopologyResult result;
       result.mesh = std::move(mesh);
@@ -1215,21 +1520,10 @@ namespace Rodin::Tests::Benchmarks
       result.report.minOutputCellQuality = stats.minQuality;
       result.report.uncutCellCount = result.mesh.getCellCount();
       result.report.referenceStencilOrder = 0;
-      const auto& conn = result.mesh.getConnectivity();
-      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
-      {
-        const auto attr = result.mesh.getAttribute(1, e);
-        if (!attr || *attr != Interface)
-          continue;
-        ++result.report.interfaceEdgeCount;
-        const auto& edge = conn.getPolytope(1, e);
-        for (Index v : {edge(0), edge(1)})
-          result.report.maxInterfaceDeviation =
-            std::max(result.report.maxInterfaceDeviation,
-                std::abs(levelSetValue(
-                    shape, result.mesh.getVertexCoordinates(v), t)));
-      }
-      result.report.macroBoundaryCutCount = interfaceEdges;
+      result.report.interfaceEdgeCount = interfaceStats.edgeCount;
+      result.report.maxInterfaceDeviation = fit.second;
+      result.report.macroBoundaryCutCount = interfaceStats.edgeCount;
+      benchmark::DoNotOptimize(counts.negative + counts.positive);
       return result;
     }
 
@@ -1392,60 +1686,30 @@ namespace Rodin::Tests::Benchmarks
         Real t)
     {
       const auto& conn = mesh.getConnectivity();
-      std::vector<char> onInterface(mesh.getVertexCount(), 0);
+      Real max = 0;
+      Real sq = 0;
+      Index count = 0;
       for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
       {
         const auto attr = mesh.getAttribute(1, e);
         if (!attr || *attr != Interface)
           continue;
-        const auto& edge = conn.getPolytope(1, e);
-        onInterface[edge(0)] = 1;
-        onInterface[edge(1)] = 1;
-      }
-      Real max = 0;
-      Real sq = 0;
-      Index count = 0;
-      for (Index v = 0; v < static_cast<Index>(mesh.getVertexCount()); ++v)
-      {
-        if (!onInterface[v])
-          continue;
-        const Real d = std::abs(
-            levelSetValue(shape, mesh.getVertexCoordinates(v), t));
-        max = std::max(max, d);
-        sq += d * d;
-        count++;
+        const auto edgeIt = mesh.getPolytope(1, e);
+        const auto& trans = edgeIt->getTransformation();
+        for (Real s : {Real(0.25), Real(0.5), Real(0.75)})
+        {
+          Math::SpatialPoint x;
+          trans.transform(x, Math::SpatialPoint{s});
+          const Real d = std::abs(levelSetValue(shape, x, t));
+          max = std::max(max, d);
+          sq += d * d;
+          ++count;
+        }
       }
       return {
         count > 0 ? std::sqrt(sq / static_cast<Real>(count)) : Real(0),
         max
       };
-    }
-
-    Index reclassifyCellsByAnalyticPhi(
-        LocalMesh& mesh,
-        ShapeCase shape,
-        Real t)
-    {
-      Index changed = 0;
-      const auto& conn = mesh.getConnectivity();
-      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-      {
-        if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
-          continue;
-        const auto cellIt = mesh.getPolytope(2, c);
-        Math::SpatialPoint x;
-        cellIt->getTransformation().transform(
-            x, Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)});
-        const Attribute next =
-          levelSetValue(shape, x, t) <= Real(0) ? Negative : Positive;
-        const auto old = mesh.getAttribute(2, c);
-        if (!old || *old != next)
-        {
-          mesh.setAttribute({2, c}, next);
-          ++changed;
-        }
-      }
-      return changed;
     }
 
     template <class Metric>
@@ -1457,7 +1721,8 @@ namespace Rodin::Tests::Benchmarks
         Real qualityWeight,
         Index maxIterations,
         CurvedTargetCase targetCase = CurvedTargetCase::ProjectedInterface,
-        TMOPSolveStats* tmopStats = nullptr)
+        TMOPSolveStats* tmopStats = nullptr,
+        bool relabelByPhi = false)
     {
       auto phiValue = [shape, t](const Math::SpatialPoint& x)
       {
@@ -1470,109 +1735,203 @@ namespace Rodin::Tests::Benchmarks
       try
       {
         Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
-        upgradeTransformations(mesh, fe, Interface);  // affine P2 lift
 
         auto projectToInterface = [shape, t](const Math::SpatialPoint& x)
         {
           return projectToLevelSet(shape, t, x);
         };
-        auto solveWithTarget = [&](const auto& target)
+        auto solveWithTarget = [&](auto&& makeTarget)
         {
-          LocalMesh beforeSolve(mesh);
-          QualityTerm quality(metric, target, qualityWeight);
-          quality.setQuadratureOrder(4);
-          DeviationTerm deviation(Real(0.25));
-          AnalyticLevelSetFitTerm fit(
-              phiValue, phiGradient, Optional<Attribute>(Interface), Real(2));
-          AnalyticLevelSetFitTerm bfit(
-              boxBoundaryValue, boxBoundaryGradient,
-              Optional<Attribute>(Boundary), Real(1));
+          const Index maxOuterIterations = relabelByPhi ? 4 : 1;
+          Index totalChangedCells = 0;
+          Index totalChangedInterfaceEdges = 0;
+          CellAttributeCounts finalCounts =
+            countCellAttributes(mesh, Negative, Positive);
+          InterfaceTopologyStats finalInterfaceStats =
+            computeInterfaceTopologyStats(mesh);
+          Real finalFitEnergy = 0;
+          Real finalPhaseEnergy = 0;
+          Real finalAlpha = 0;
+          bool accepted = false;
 
-          VectorH1<2, LocalMesh> space(
-              std::integral_constant<size_t, 2>{}, mesh, 2);
-          GridFunction u(space);
-          u.getData().setZero();
-          TrialFunction du(space);
-          TestFunction  v (space);
+          for (Index outer = 0; outer < maxOuterIterations; ++outer)
+          {
+            Index changedCellsThisOuter = 0;
+            Index changedInterfaceEdgesThisOuter = 0;
+            if (relabelByPhi)
+            {
+              const auto oldAttributes = captureCellAttributes(mesh);
+              const auto oldSkeleton = captureInterfaceSkeleton(mesh);
+              clearInterfaceEdges(mesh);
+              finalCounts =
+                classifyCellsByPhi(mesh, phiValue, Negative, Positive);
+              finalInterfaceStats =
+                markAttributeJumpInterfaceEdges(
+                    mesh, Negative, Positive, Interface);
+              changedCellsThisOuter = countChangedCellAttributes(
+                  oldAttributes, captureCellAttributes(mesh));
+              changedInterfaceEdgesThisOuter = compareInterfaceSkeleton(
+                  oldSkeleton, captureInterfaceSkeleton(mesh));
+              totalChangedCells += changedCellsThisOuter;
+              totalChangedInterfaceEdges += changedInterfaceEdgesThisOuter;
+            }
+            else
+            {
+              finalCounts = countCellAttributes(mesh, Negative, Positive);
+              finalInterfaceStats = computeInterfaceTopologyStats(mesh);
+            }
 
-          auto makeResidual = [&] {
-            return quality.residual(u, v) + deviation.residual(u, v)
-                 + fit.residual(u, v)     + bfit.residual(u, v);
-          };
-          auto makeTangent = [&] {
-            return quality.tangent(u, du, v) + deviation.tangent(du, v)
-                 + fit.tangent(u, du, v)     + bfit.tangent(u, du, v);
-          };
-          auto energy = [&] {
-            return quality.energy(u) + deviation.energy(u)
-                 + fit.energy(u)     + bfit.energy(u);
-          };
+            upgradeTransformations(mesh, fe, Interface);
+            LocalMesh beforeSolve(mesh);
+            auto target = makeTarget();
+            QualityTerm quality(metric, target, qualityWeight);
+            quality.setQuadratureOrder(4);
+            DeviationTerm deviation(Real(0.25));
+            AnalyticLevelSetFitTerm fit(
+                phiValue, phiGradient, Optional<Attribute>(Interface), Real(2));
+            fit.setNormalization(totalEdgeMeasure(mesh, Optional<Attribute>(Interface)));
+            AnalyticLevelSetFitTerm bfit(
+                boxBoundaryValue, boxBoundaryGradient,
+                Optional<Attribute>(Boundary), Real(1));
+            bfit.setNormalization(totalEdgeMeasure(mesh, Optional<Attribute>(Boundary)));
+            VolumetricPhaseConsistencyTerm phase(
+                phiValue, phiGradient, Negative, Positive,
+                relabelByPhi ? Real(0.5) : Real(0));
+            phase
+              .setQuadratureOrder(4)
+              .setEpsilon(Real(0.5) * characteristicCellSize(mesh))
+              .setMargin(Real(1))
+              .setNormalization(totalCellMeasure(mesh));
 
-          IsoparametricTMOPParameters params;
-          params.maxIterations = maxIterations;
-          const auto report = solveIsoparametricTMOP(
-              mesh, fe, u, du, v, makeResidual, makeTangent, energy,
-              Interface, params);
+            VectorH1<2, LocalMesh> space(
+                std::integral_constant<size_t, 2>{}, mesh, 2);
+            GridFunction u(space);
+            u.getData().setZero();
+            TrialFunction du(space);
+            TestFunction  v (space);
+
+            if (tmopStats && outer == 0)
+            {
+              tmopStats->fitEnergyInitial = fit.energy(mesh);
+              if (relabelByPhi)
+              {
+                tmopStats->phaseEnergyInitial = phase.energy(mesh);
+                tmopStats->wrongSideQuadratureInitial =
+                  phase.countWrongSideQuadrature(mesh);
+              }
+            }
+
+            auto makeResidual = [&] {
+              return quality.residual(u, v) + deviation.residual(u, v)
+                   + fit.residual(u, v)     + bfit.residual(u, v)
+                   + phase.residual(u, v);
+            };
+            auto makeTangent = [&] {
+              return quality.tangent(u, du, v) + deviation.tangent(du, v)
+                   + fit.tangent(u, du, v)     + bfit.tangent(u, du, v)
+                   + phase.tangent(u, du, v);
+            };
+            auto energy = [&] {
+              return quality.energy(u) + deviation.energy(u)
+                   + fit.energy(u)     + bfit.energy(u)
+                   + phase.energy(u);
+            };
+
+            IsoparametricTMOPParameters params;
+            params.maxIterations = maxIterations;
+            const auto report = solveIsoparametricTMOP(
+                mesh, fe, u, du, v, makeResidual, makeTangent, energy,
+                Interface, params);
+            finalAlpha = report.lastAcceptedAlpha;
+            accepted = report.acceptedStep || report.converged || report.iterations > 0;
+
+            const auto targetStats = targetQualityMetrics(mesh, metric, target);
+            const auto curvedStats = curvedInterfaceStats(mesh, shape, t);
+            syncLinearBackbone(mesh, fe);
+            demoteTransformations(mesh);
+            mesh.getConnectivity().compute(2, 1);
+            mesh.getConnectivity().compute(1, 2);
+            mesh.getConnectivity().compute(1, 0);
+
+            finalFitEnergy = fit.energy(mesh);
+            if (relabelByPhi)
+              finalPhaseEnergy = phase.energy(mesh);
+
+            const auto finalStats = meshStats(mesh);
+            const bool valid = curvedStats.invalidJacobianSamples == 0
+              && curvedStats.overlapSamples == 0
+              && curvedStats.minJacobian > Real(0)
+              && std::isfinite(curvedStats.minJacobian)
+              && curvedStats.minQuality > Real(0)
+              && std::isfinite(curvedStats.minQuality)
+              && finalStats.inverted == 0
+              && std::isfinite(finalStats.coverage)
+              && finalStats.coverage > Real(0.8)
+              && finalStats.coverage < Real(1.2)
+              && accepted;
+            if (!valid)
+            {
+              mesh = std::move(beforeSolve);
+              mesh.getConnectivity().compute(2, 1);
+              mesh.getConnectivity().compute(1, 2);
+              mesh.getConnectivity().compute(1, 0);
+              if (tmopStats)
+                tmopStats->hasCurvedMetrics = false;
+              return false;
+            }
+
+            if (tmopStats)
+            {
+              tmopStats->outerIterations = outer + 1;
+              tmopStats->iterations += report.iterations;
+              tmopStats->lineSearchAcceptedAlpha = report.lastAcceptedAlpha;
+              tmopStats->targetMaxMetric = targetStats.maxMetric;
+              tmopStats->targetMinDetT = targetStats.minDetT;
+              tmopStats->targetInvalidSamples = targetStats.invalidSamples;
+              tmopStats->curvedFitRms = curvedStats.fitRms;
+              tmopStats->curvedFitMax = curvedStats.fitMax;
+              tmopStats->curvedMinQuality = curvedStats.minQuality;
+              tmopStats->curvedMinJacobian = curvedStats.minJacobian;
+              tmopStats->curvedInvalidSamples =
+                curvedStats.invalidJacobianSamples;
+              tmopStats->curvedOverlapSamples = curvedStats.overlapSamples;
+              tmopStats->hasCurvedMetrics = true;
+            }
+
+            if (!relabelByPhi)
+              break;
+            if (outer + 1 >= maxOuterIterations)
+              break;
+            if (report.converged
+                && changedCellsThisOuter == 0
+                && changedInterfaceEdgesThisOuter == 0)
+            {
+              break;
+            }
+          }
+
           if (tmopStats)
           {
-            tmopStats->iterations += report.iterations;
-            const auto targetStats =
-              targetQualityMetrics(mesh, metric, target);
-            tmopStats->targetMaxMetric = targetStats.maxMetric;
-            tmopStats->targetMinDetT = targetStats.minDetT;
-            tmopStats->targetInvalidSamples = targetStats.invalidSamples;
-            const auto curvedStats = curvedInterfaceStats(mesh, shape, t);
-            tmopStats->curvedFitRms = curvedStats.fitRms;
-            tmopStats->curvedFitMax = curvedStats.fitMax;
-            tmopStats->curvedMinQuality = curvedStats.minQuality;
-            tmopStats->curvedMinJacobian = curvedStats.minJacobian;
-            tmopStats->curvedInvalidSamples =
-              curvedStats.invalidJacobianSamples;
-            tmopStats->curvedOverlapSamples = curvedStats.overlapSamples;
-            tmopStats->hasCurvedMetrics = true;
-          }
-          syncLinearBackbone(mesh, fe);
-          demoteTransformations(mesh);
-
-          Index invalid = 0;
-          Index overlap = 0;
-          Real minJac = 0;
-          Real minQ = 0;
-          if (tmopStats && tmopStats->hasCurvedMetrics)
-          {
-            invalid = tmopStats->curvedInvalidSamples;
-            overlap = tmopStats->curvedOverlapSamples;
-            minJac = tmopStats->curvedMinJacobian;
-            minQ = tmopStats->curvedMinQuality;
-          }
-          else
-          {
-            const auto curved = curvedInterfaceStats(mesh, shape, t);
-            invalid = curved.invalidJacobianSamples;
-            overlap = curved.overlapSamples;
-            minJac = curved.minJacobian;
-            minQ = curved.minQuality;
-          }
-          const auto finalStats = meshStats(mesh);
-          const bool valid = invalid == 0
-            && overlap == 0
-            && minJac > Real(0)
-            && std::isfinite(minJac)
-            && minQ > Real(0)
-            && std::isfinite(minQ)
-            && finalStats.inverted == 0
-            && std::isfinite(finalStats.coverage)
-            && finalStats.coverage > Real(0.8)
-            && finalStats.coverage < Real(1.2)
-            && (report.converged || report.iterations > 0);
-          if (!valid)
-          {
-            mesh = std::move(beforeSolve);
-            mesh.getConnectivity().compute(2, 1);
-            mesh.getConnectivity().compute(1, 0);
-            if (tmopStats)
-              tmopStats->hasCurvedMetrics = false;
-            return false;
+            tmopStats->negativeCells = finalCounts.negative;
+            tmopStats->positiveCells = finalCounts.positive;
+            tmopStats->interfaceEdgeCount = finalInterfaceStats.edgeCount;
+            tmopStats->interfaceMaxDegree = finalInterfaceStats.maxDegree;
+            tmopStats->branchVertices = finalInterfaceStats.branchVertices;
+            tmopStats->changedCellAttributes = totalChangedCells;
+            tmopStats->changedInterfaceEdges = totalChangedInterfaceEdges;
+            tmopStats->fitEnergyFinal = finalFitEnergy;
+            tmopStats->phaseEnergyFinal = finalPhaseEnergy;
+            tmopStats->lineSearchAcceptedAlpha = finalAlpha;
+            tmopStats->accepted = accepted;
+            if (relabelByPhi)
+              tmopStats->wrongSideQuadratureFinal =
+                VolumetricPhaseConsistencyTerm(
+                    phiValue, phiGradient, Negative, Positive, Real(0.5))
+                  .setQuadratureOrder(4)
+                  .setEpsilon(Real(0.5) * characteristicCellSize(mesh))
+                  .setMargin(Real(1))
+                  .setNormalization(totalCellMeasure(mesh))
+                  .countWrongSideQuadrature(mesh);
           }
           return true;
         };
@@ -1581,27 +1940,42 @@ namespace Rodin::Tests::Benchmarks
         {
           case CurvedTargetCase::ProjectedInterface:
           {
-            ProjectedInterfaceTargetJacobian target(
-                mesh, Interface, projectToInterface);
-            return solveWithTarget(target);
+            return solveWithTarget([&]()
+            {
+              return ProjectedInterfaceTargetJacobian(
+                  mesh, Interface, projectToInterface);
+            });
           }
           case CurvedTargetCase::CurvedQuality005:
-            return solveWithTarget(CurvedQualityTargetJacobian(mesh, Real(0.05)));
+            return solveWithTarget([&]()
+            {
+              return CurvedQualityTargetJacobian(mesh, Real(0.05));
+            });
           case CurvedTargetCase::CurvedQuality010:
-            return solveWithTarget(CurvedQualityTargetJacobian(mesh, Real(0.10)));
+            return solveWithTarget([&]()
+            {
+              return CurvedQualityTargetJacobian(mesh, Real(0.10));
+            });
           case CurvedTargetCase::CurvedQuality020:
-            return solveWithTarget(CurvedQualityTargetJacobian(mesh, Real(0.20)));
+            return solveWithTarget([&]()
+            {
+              return CurvedQualityTargetJacobian(mesh, Real(0.20));
+            });
           case CurvedTargetCase::ProjectedQuality005:
           {
-            ProjectedQualityTargetJacobian target(
-                mesh, Interface, projectToInterface, Real(0.05));
-            return solveWithTarget(target);
+            return solveWithTarget([&]()
+            {
+              return ProjectedQualityTargetJacobian(
+                  mesh, Interface, projectToInterface, Real(0.05));
+            });
           }
           case CurvedTargetCase::ProjectedQuality010:
           {
-            ProjectedQualityTargetJacobian target(
-                mesh, Interface, projectToInterface, Real(0.10));
-            return solveWithTarget(target);
+            return solveWithTarget([&]()
+            {
+              return ProjectedQualityTargetJacobian(
+                  mesh, Interface, projectToInterface, Real(0.10));
+            });
           }
         }
         return false;
@@ -1618,26 +1992,27 @@ namespace Rodin::Tests::Benchmarks
         Real t,
         MetricCase metricCase = MetricCase::ShapeSize,
         CurvedTargetCase targetCase = CurvedTargetCase::ProjectedInterface,
-        TMOPSolveStats* stats = nullptr)
+        TMOPSolveStats* stats = nullptr,
+        bool relabelByPhi = false)
     {
       switch (metricCase)
       {
         case MetricCase::SquaredDistance:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, SquaredDistanceMetric{}, 0.04, 4,
-              targetCase, stats);
+              targetCase, stats, relabelByPhi);
         case MetricCase::AreaDistortion:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, AreaDistortionMetric{}, 0.04, 4,
-              targetCase, stats);
+              targetCase, stats, relabelByPhi);
         case MetricCase::ShapeSize:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, ShapeSizeBlendMetric(Real(0.5)), 0.03, 4,
-              targetCase, stats);
+              targetCase, stats, relabelByPhi);
         case MetricCase::ShapeDistortion:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, ShapeDistortionMetric{}, 0.02, 1,
-              targetCase, stats);
+              targetCase, stats, relabelByPhi);
       }
       return false;
     }
@@ -1648,14 +2023,23 @@ namespace Rodin::Tests::Benchmarks
         ShapeCase shape,
         bool tmopSucceeded,
         Real t,
-        bool hasP2Diagnostics = false)
+        bool hasP2Diagnostics = false,
+        const TMOPSolveStats* tmopStats = nullptr)
     {
       StageCounters counters;
       const auto stats = meshStats(finalMesh);
       const auto fit = interfaceFit(finalMesh, shape, t);
+      const auto interfaceStats = computeInterfaceTopologyStats(finalMesh);
       counters.cutCells = cut.mesh.getCellCount();
       counters.finalCells = finalMesh.getCellCount();
-      counters.interfaceEdges = cut.report.interfaceEdgeCount;
+      counters.outerIterations = tmopStats ? tmopStats->outerIterations : 0;
+      counters.interfaceEdges = interfaceStats.edgeCount;
+      counters.negativeCells = tmopStats ? tmopStats->negativeCells : 0;
+      counters.positiveCells = tmopStats ? tmopStats->positiveCells : 0;
+      counters.interfaceMaxDegree =
+        tmopStats ? tmopStats->interfaceMaxDegree : interfaceStats.maxDegree;
+      counters.branchVertices =
+        tmopStats ? tmopStats->branchVertices : interfaceStats.branchVertices;
       counters.uncutCells = cut.report.uncutCellCount;
       counters.snappedCrossings = cut.report.snappedCrossingCount;
       counters.pathologicalCuts = cut.report.pathologicalCutCount;
@@ -1686,6 +2070,22 @@ namespace Rodin::Tests::Benchmarks
       counters.maxInterfaceDeviation = cut.report.maxInterfaceDeviation;
       counters.inverted = stats.inverted;
       counters.tmopFailures = tmopSucceeded ? 0 : 1;
+      if (tmopStats)
+      {
+        counters.reclassifiedCells = tmopStats->changedCellAttributes;
+        counters.changedInterfaceEdges = tmopStats->changedInterfaceEdges;
+        counters.wrongSideQuadratureInitial =
+          tmopStats->wrongSideQuadratureInitial;
+        counters.wrongSideQuadratureFinal =
+          tmopStats->wrongSideQuadratureFinal;
+        counters.phaseEnergyInitial = tmopStats->phaseEnergyInitial;
+        counters.phaseEnergyFinal = tmopStats->phaseEnergyFinal;
+        counters.fitEnergyInitial = tmopStats->fitEnergyInitial;
+        counters.fitEnergyFinal = tmopStats->fitEnergyFinal;
+        counters.lineSearchAcceptedAlpha = tmopStats->lineSearchAcceptedAlpha;
+        counters.tmopAccepted = tmopStats->accepted ? 1 : 0;
+        counters.tmopRejected = tmopStats->accepted ? 0 : 1;
+      }
 
       return counters;
     }
@@ -1696,7 +2096,17 @@ namespace Rodin::Tests::Benchmarks
     {
       st.counters["cut_cells"] = benchmark::Counter(counters.cutCells);
       st.counters["final_cells"] = benchmark::Counter(counters.finalCells);
+      st.counters["outer_iterations"] =
+        benchmark::Counter(counters.outerIterations);
       st.counters["interface_edges"] = benchmark::Counter(counters.interfaceEdges);
+      st.counters["negative_cells"] =
+        benchmark::Counter(counters.negativeCells);
+      st.counters["positive_cells"] =
+        benchmark::Counter(counters.positiveCells);
+      st.counters["interface_max_degree"] =
+        benchmark::Counter(counters.interfaceMaxDegree);
+      st.counters["branch_vertices"] =
+        benchmark::Counter(counters.branchVertices);
       st.counters["uncut_cells"] = benchmark::Counter(counters.uncutCells);
       st.counters["snapped"] = benchmark::Counter(counters.snappedCrossings);
       st.counters["pathological"] = benchmark::Counter(counters.pathologicalCuts);
@@ -1875,6 +2285,26 @@ namespace Rodin::Tests::Benchmarks
       st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
       st.counters["reclassified_cells"] =
         benchmark::Counter(counters.reclassifiedCells);
+      st.counters["changed_interface_edges"] =
+        benchmark::Counter(counters.changedInterfaceEdges);
+      st.counters["wrong_side_quadrature_initial"] =
+        benchmark::Counter(counters.wrongSideQuadratureInitial);
+      st.counters["wrong_side_quadrature_final"] =
+        benchmark::Counter(counters.wrongSideQuadratureFinal);
+      st.counters["phase_energy_initial"] =
+        benchmark::Counter(counters.phaseEnergyInitial);
+      st.counters["phase_energy_final"] =
+        benchmark::Counter(counters.phaseEnergyFinal);
+      st.counters["fit_energy_initial"] =
+        benchmark::Counter(counters.fitEnergyInitial);
+      st.counters["fit_energy_final"] =
+        benchmark::Counter(counters.fitEnergyFinal);
+      st.counters["line_search_alpha"] =
+        benchmark::Counter(counters.lineSearchAcceptedAlpha);
+      st.counters["tmop_accepted"] =
+        benchmark::Counter(counters.tmopAccepted);
+      st.counters["tmop_rejected"] =
+        benchmark::Counter(counters.tmopRejected);
       st.counters["splits"] = benchmark::Counter(counters.splits);
       st.counters["collapses"] = benchmark::Counter(counters.collapses);
       st.counters["swaps"] = benchmark::Counter(counters.swaps);
@@ -1894,16 +2324,14 @@ namespace Rodin::Tests::Benchmarks
         Real optimizeSeconds = 0,
         Real tmopSeconds = 0,
         const TMOPSolveStats* tmopStats = nullptr,
-        bool hasP2Diagnostics = false,
-        Index reclassifiedCells = 0)
+        bool hasP2Diagnostics = false)
     {
       auto counters = collectStageCounters(
           cut, finalMesh, shape, tmopSucceeded, t,
-          hasP2Diagnostics);
+          hasP2Diagnostics, tmopStats);
       counters.cutSeconds = cutSeconds;
       counters.optimizeSeconds = optimizeSeconds;
       counters.tmopSeconds = tmopSeconds;
-      counters.reclassifiedCells = reclassifiedCells;
       if (tmopStats)
       {
         counters.tmopAssemblySeconds = tmopStats->assemblySeconds;
@@ -1964,21 +2392,20 @@ namespace Rodin::Tests::Benchmarks
           const Real cutSeconds = elapsedSeconds(cutStart);
           auto curved = topology.mesh;
           curved.getConnectivity().compute(2, 1);
+          curved.getConnectivity().compute(1, 2);
           curved.getConnectivity().compute(1, 0);
 
           TMOPSolveStats tmopStats;
           const auto tmopStart = BenchClock::now();
           const bool tmopOk =
-            solveCurvedTMOP(curved, shape, t, metric, target, &tmopStats);
+            solveCurvedTMOP(
+                curved, shape, t, metric, target, &tmopStats, true);
           const Real tmopSeconds = elapsedSeconds(tmopStart);
-          const Index reclassified =
-            reclassifyCellsByAnalyticPhi(curved, shape, t);
           if (!tmopOk)
             tmopFailures++;
 
           counters = setCounters(st, topology, curved, shape, tmopOk, t,
-              cutSeconds, 0, tmopSeconds, &tmopStats, true,
-              reclassified);
+              cutSeconds, 0, tmopSeconds, &tmopStats, true);
           averages.add(counters);
 
           demoteInterface(curved);
@@ -2028,6 +2455,7 @@ namespace Rodin::Tests::Benchmarks
           const Real optimizeSeconds = elapsedSeconds(optStart);
 
           optimized.getConnectivity().compute(2, 1);
+          optimized.getConnectivity().compute(1, 2);
           optimized.getConnectivity().compute(1, 0);
           auto curved = optimized;
 
@@ -2036,14 +2464,11 @@ namespace Rodin::Tests::Benchmarks
           const bool tmopOk =
             solveCurvedTMOP(curved, shape, t, metric, target, &tmopStats);
           const Real tmopSeconds = elapsedSeconds(tmopStart);
-          const Index reclassified =
-            reclassifyCellsByAnalyticPhi(curved, shape, t);
           if (!tmopOk)
             tmopFailures++;
 
           counters = setCounters(st, topology, curved, shape, tmopOk, t,
-              cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats, true,
-              reclassified);
+              cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats, true);
           averages.add(counters);
 
           demoteInterface(curved);
@@ -2068,7 +2493,7 @@ namespace Rodin::Tests::Benchmarks
 
 #define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
   BENCHMARK(BM_LevelSetPipeline_CurvedTargetCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/NoCutP2TMOPRelabel/" SHAPE_LABEL "/ShapeSize/Projected/" #RESOLUTION "x" #STEPS) \
+    ->Name("LevelSetPipeline/NoCutRelabelP2TMOP/" SHAPE_LABEL "/ShapeSize/Projected/" #RESOLUTION "x" #STEPS) \
     ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
       static_cast<int>(MetricCase::ShapeSize), \
       static_cast<int>(CurvedTargetCase::ProjectedInterface)}) \
