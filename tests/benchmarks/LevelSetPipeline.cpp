@@ -1796,7 +1796,7 @@ namespace Rodin::Tests::Benchmarks
             bfit.setNormalization(totalEdgeMeasure(mesh, Optional<Attribute>(Boundary)));
             VolumetricPhaseConsistencyTerm phase(
                 phiValue, phiGradient, Negative, Positive,
-                relabelByPhi ? Real(0.5) : Real(0));
+                relabelByPhi ? Real(0.05) : Real(0));
             phase
               .setQuadratureOrder(4)
               .setEpsilon(Real(0.5) * characteristicCellSize(mesh))
@@ -1843,7 +1843,7 @@ namespace Rodin::Tests::Benchmarks
                 mesh, fe, u, du, v, makeResidual, makeTangent, energy,
                 Interface, params);
             finalAlpha = report.lastAcceptedAlpha;
-            accepted = report.acceptedStep || report.converged || report.iterations > 0;
+            accepted = report.converged || report.iterations > 0;
 
             const auto targetStats = targetQualityMetrics(mesh, metric, target);
             const auto curvedStats = curvedInterfaceStats(mesh, shape, t);
@@ -1856,30 +1856,6 @@ namespace Rodin::Tests::Benchmarks
             finalFitEnergy = fit.energy(mesh);
             if (relabelByPhi)
               finalPhaseEnergy = phase.energy(mesh);
-
-            const auto finalStats = meshStats(mesh);
-            const bool valid = curvedStats.invalidJacobianSamples == 0
-              && curvedStats.overlapSamples == 0
-              && curvedStats.minJacobian > Real(0)
-              && std::isfinite(curvedStats.minJacobian)
-              && curvedStats.minQuality > Real(0)
-              && std::isfinite(curvedStats.minQuality)
-              && finalStats.inverted == 0
-              && std::isfinite(finalStats.coverage)
-              && finalStats.coverage > Real(0.8)
-              && finalStats.coverage < Real(1.2)
-              && accepted;
-            if (!valid)
-            {
-              mesh = std::move(beforeSolve);
-              mesh.getConnectivity().compute(2, 1);
-              mesh.getConnectivity().compute(1, 2);
-              mesh.getConnectivity().compute(1, 0);
-              if (tmopStats)
-                tmopStats->hasCurvedMetrics = false;
-              return false;
-            }
-
             if (tmopStats)
             {
               tmopStats->outerIterations = outer + 1;
@@ -1896,6 +1872,50 @@ namespace Rodin::Tests::Benchmarks
                 curvedStats.invalidJacobianSamples;
               tmopStats->curvedOverlapSamples = curvedStats.overlapSamples;
               tmopStats->hasCurvedMetrics = true;
+            }
+
+            const auto finalStats = meshStats(mesh);
+            const bool valid = curvedStats.invalidJacobianSamples == 0
+              && curvedStats.overlapSamples == 0
+              && curvedStats.minJacobian > Real(0)
+              && std::isfinite(curvedStats.minJacobian)
+              && curvedStats.minQuality > Real(0)
+              && std::isfinite(curvedStats.minQuality)
+              && finalStats.inverted == 0
+              && std::isfinite(finalStats.coverage)
+              && finalStats.coverage > Real(0.8)
+              && finalStats.coverage < Real(1.2)
+              && accepted;
+            if (!valid)
+            {
+              if (tmopStats)
+              {
+                tmopStats->negativeCells = finalCounts.negative;
+                tmopStats->positiveCells = finalCounts.positive;
+                tmopStats->interfaceEdgeCount = finalInterfaceStats.edgeCount;
+                tmopStats->interfaceMaxDegree = finalInterfaceStats.maxDegree;
+                tmopStats->branchVertices = finalInterfaceStats.branchVertices;
+                tmopStats->changedCellAttributes = totalChangedCells;
+                tmopStats->changedInterfaceEdges = totalChangedInterfaceEdges;
+                tmopStats->fitEnergyFinal = finalFitEnergy;
+                tmopStats->phaseEnergyFinal = finalPhaseEnergy;
+                if (relabelByPhi)
+                  tmopStats->wrongSideQuadratureFinal =
+                    VolumetricPhaseConsistencyTerm(
+                        phiValue, phiGradient, Negative, Positive, Real(0.05))
+                      .setQuadratureOrder(4)
+                      .setEpsilon(Real(0.5) * characteristicCellSize(mesh))
+                      .setMargin(Real(1))
+                      .setNormalization(totalCellMeasure(mesh))
+                      .countWrongSideQuadrature(mesh);
+              }
+              mesh = std::move(beforeSolve);
+              mesh.getConnectivity().compute(2, 1);
+              mesh.getConnectivity().compute(1, 2);
+              mesh.getConnectivity().compute(1, 0);
+              if (tmopStats)
+                tmopStats->accepted = false;
+              return false;
             }
 
             if (!relabelByPhi)
