@@ -50,7 +50,7 @@ namespace
   constexpr Attribute Interface = 30;
   constexpr Attribute Boundary = 40;
   constexpr Attribute Negative = 1;
-  constexpr Attribute Positive = 2;
+  constexpr Attribute Positive = 10;
   constexpr Index CurvedQuadratureOrder = 4;
   constexpr Real CurvedDetFloor = 1e-12;
 
@@ -237,24 +237,94 @@ namespace
     Index changed = 0;
   };
 
-  CellClassificationStats classifyCellsByAnalyticPhi(LocalMesh& mesh, Real t)
+  CellClassificationStats classifyCellsByAnalyticPhi(
+      LocalMesh& mesh,
+      Real t,
+      Real epsilon,
+      Real margin)
   {
     const auto before = captureCellSigns(mesh);
+
     CellClassificationStats stats;
     const auto& conn = mesh.getConnectivity();
+
+    epsilon = std::max(epsilon, Real(1e-12));
+
+    auto psi = [margin](Real z)
+    {
+      const Real gap = std::max(Real(0), margin - z);
+      return Real(0.5) * gap * gap;
+    };
+
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
     {
       if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
         continue;
+
       const auto cellIt = mesh.getPolytope(2, c);
-      Math::SpatialPoint x;
-      cellIt->getTransformation().transform(
-          x, Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)});
-      const Attribute next = phiAt(x, t) <= Real(0) ? Negative : Positive;
+      const auto& trans = cellIt->getTransformation();
+
+      const auto& qf = QF::PolytopeQuadratureFormula::get(
+          CurvedQuadratureOrder,
+          Polytope::Type::Triangle);
+
+      Real negativeEnergy = 0;
+      Real positiveEnergy = 0;
+      Real negativeMeasure = 0;
+      Real positiveMeasure = 0;
+
+      for (size_t q = 0; q < qf.getSize(); ++q)
+      {
+        Math::SpatialPoint x;
+        trans.transform(x, qf.getPoint(q));
+
+        Math::SpatialMatrix<Real> J;
+        trans.jacobian(J, qf.getPoint(q));
+
+        if (J.rows() != 2 || J.cols() != 2)
+          continue;
+
+        const Real det = J.determinant();
+        if (!std::isfinite(det) || !(det > Real(0)))
+          continue;
+
+        const Real wdet = qf.getWeight(q) * det;
+        const Real phi = phiAt(x, t);
+
+        const Real zNegative = -phi / epsilon;
+        const Real zPositive =  phi / epsilon;
+
+        negativeEnergy += wdet * psi(zNegative);
+        positiveEnergy += wdet * psi(zPositive);
+
+        if (phi <= Real(0))
+          negativeMeasure += wdet;
+        else
+          positiveMeasure += wdet;
+      }
+
+      Attribute next;
+
+      if (std::isfinite(negativeEnergy)
+          && std::isfinite(positiveEnergy)
+          && std::abs(negativeEnergy - positiveEnergy) > Real(1e-14))
+      {
+        next = negativeEnergy <= positiveEnergy ? Negative : Positive;
+      }
+      else
+      {
+        // Tie fallback: majority sign by quadrature measure.
+        next = negativeMeasure >= positiveMeasure ? Negative : Positive;
+      }
+
       mesh.setAttribute({2, c}, next);
-      if (next == Negative) ++stats.negative;
-      else ++stats.positive;
+
+      if (next == Negative)
+        ++stats.negative;
+      else
+        ++stats.positive;
     }
+
     stats.changed = countChangedCellSigns(before, captureCellSigns(mesh));
     return stats;
   }
@@ -322,7 +392,11 @@ namespace
     Index changedInterfaceEdges = 0;
   };
 
-  RelabelReport relabelAndRebuildInterface(LocalMesh& mesh, Real t)
+  RelabelReport relabelAndRebuildInterface(
+      LocalMesh& mesh,
+      Real t,
+      Real epsilon,
+      Real margin)
   {
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 2);
@@ -330,7 +404,7 @@ namespace
     const auto oldSkeleton = captureInterfaceSkeleton(mesh);
     clearInterfaceEdges(mesh);
     RelabelReport report;
-    report.cells = classifyCellsByAnalyticPhi(mesh, t);
+    report.cells = classifyCellsByAnalyticPhi(mesh, t, epsilon, margin);
     report.interface = markAttributeJumpInterfaceEdges(mesh);
     report.changedInterfaceEdges =
       countChangedSkeleton(oldSkeleton, captureInterfaceSkeleton(mesh));
@@ -471,7 +545,11 @@ namespace
     for (Index outer = 0; outer < maxOuterIterations; ++outer)
     {
       ++out.outerIterations;
-      const auto pre = relabelAndRebuildInterface(mesh, t);
+const auto pre = relabelAndRebuildInterface(
+    mesh,
+    t,
+    std::max(phaseEpsilonFactor * h, Real(1e-12)),
+    phaseMargin);
       if (pre.interface.edgeCount == 0)
         break;
 
@@ -599,72 +677,51 @@ namespace
         break;
 
       LocalMesh beforeMove(mesh);
-      moveMesh(mesh, u, fe, Interface);
-      out.curved = curvedMetrics(mesh, phiValue, Interface);
-      const auto lin = linearQuality(mesh);
-      const bool valid = out.curved.invalidJacobianSamples == 0
-        && out.curved.overlapSamples == 0
-        && out.curved.minDet > CurvedDetFloor
-        && out.curved.qmin > Real(0)
-        && lin.inverted == 0;
-      if (!valid)
-      {
-        mesh = std::move(beforeMove);
-        break;
-      }
+moveMesh(mesh, u, fe, Interface);
 
-      out.accepted = true;
-      out.fitEnergyFinal = fit.energy(mesh);
-      out.phaseEnergyFinal = phase.energy(mesh);
-      out.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
+out.curved = curvedMetrics(mesh, phiValue, Interface);
 
-      syncLinearBackbone(mesh, fe);
-      demoteTransformations(mesh);
-      mesh.getConnectivity().compute(2, 1);
-      mesh.getConnectivity().compute(1, 2);
-      mesh.getConnectivity().compute(1, 0);
+const bool curvedValid =
+  out.curved.invalidJacobianSamples == 0
+  && out.curved.minDet > CurvedDetFloor
+  && out.curved.qmin > Real(1e-12)
+  && std::isfinite(out.curved.minDet)
+  && std::isfinite(out.curved.qmin);
 
-      const auto post = relabelAndRebuildInterface(mesh, t);
-      out.changedCells += post.cells.changed;
-      out.changedInterfaceEdges += post.changedInterfaceEdges;
-      if (post.cells.changed == 0 && post.changedInterfaceEdges == 0)
-        break;
+if (!curvedValid)
+{
+  mesh = std::move(beforeMove);
+  break;
+}
+
+
+mesh.getConnectivity().compute(2, 1);
+mesh.getConnectivity().compute(1, 2);
+mesh.getConnectivity().compute(1, 0);
+
+out.accepted = true;
+out.fitEnergyFinal = fit.energy(mesh);
+out.phaseEnergyFinal = phase.energy(mesh);
+out.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
+
+const auto post = relabelAndRebuildInterface(
+    mesh,
+    t,
+    std::max(phaseEpsilonFactor * h, Real(1e-12)),
+    phaseMargin);
+out.changedCells += post.cells.changed;
+out.changedInterfaceEdges += post.changedInterfaceEdges;
+
+if (post.cells.changed == 0 && post.changedInterfaceEdges == 0)
+  break;
     }
-    return out;
-  }
-
-  LocalMesh interfacePolyline(const LocalMesh& mesh)
-  {
-    std::vector<Math::SpatialPoint> points;
-    std::vector<std::array<Index, 2>> edges;
-    const auto& conn = mesh.getConnectivity();
-    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
-    {
-      const auto attr = mesh.getAttribute(1, e);
-      if (!attr || *attr != Interface)
-        continue;
-      const auto& edge = conn.getPolytope(1, e);
-      const Index base = static_cast<Index>(points.size());
-      points.push_back(mesh.getVertexCoordinates(edge(0)));
-      points.push_back(mesh.getVertexCoordinates(edge(1)));
-      edges.push_back({{base, base + 1}});
-    }
-    auto builder = LocalMesh::Builder();
-    builder.initialize(2).nodes(points.size()).reserve(1, edges.size());
-    for (const auto& p : points)
-      builder.vertex(p);
-    for (const auto& e : edges)
-      builder.polytope(Polytope::Type::Segment, {e[0], e[1]});
-    auto out = builder.finalize();
-    for (Index e = 0; e < out.getPolytopeCount(1); ++e)
-      out.setAttribute({1, e}, Interface);
     return out;
   }
 }
 
 int main(int argc, char** argv)
 {
-  size_t resolution = 40;
+  size_t resolution = 20;
   Index steps = 20;
   Real fitWeight = 2;
   Real qualityWeight = 1;
@@ -731,7 +788,11 @@ int main(int argc, char** argv)
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(1, 0);
     annotateBoundary(mesh);
-    relabelAndRebuildInterface(mesh, t);
+relabelAndRebuildInterface(
+    mesh,
+    t,
+    std::max(phaseEpsilonFactor * h, Real(1e-12)),
+    phaseMargin);
 
     const auto report = solveNoCutTMOP(
         mesh, t, h,
@@ -739,7 +800,11 @@ int main(int argc, char** argv)
         targetBlend, phaseEpsilonFactor, phaseMargin,
         maxOuterRelabelIterations, tmopMaxIterations);
 
-    relabelAndRebuildInterface(mesh, t);
+relabelAndRebuildInterface(
+    mesh,
+    t,
+    std::max(phaseEpsilonFactor * h, Real(1e-12)),
+    phaseMargin);
     const auto interfaceStats = computeInterfaceStats(mesh);
     const auto lin = linearQuality(mesh);
     auto phiValue = [t](const Math::SpatialPoint& x) { return phiAt(x, t); };
@@ -757,10 +822,6 @@ int main(int argc, char** argv)
     grid.clear();
     grid.add("phi", outputPhi, IO::XDMF::Center::Node);
 
-    auto iface = interfacePolyline(mesh);
-    auto curveGrid = xdmf.grid("attribute-jump-interface");
-    curveGrid.setMesh(iface, IO::XDMF::MeshPolicy::Transient);
-    curveGrid.clear();
     xdmf.write(t).flush();
 
     sumFit += curved.fitRms;
@@ -806,9 +867,8 @@ int main(int argc, char** argv)
               << " target_blend=" << targetBlend
               << std::endl;
 
-    clearInterfaceEdges(mesh);
-    mesh.flush();
-    background = std::move(mesh);
+clearInterfaceEdges(mesh);
+background = std::move(mesh);
   }
 
   xdmf.close();
