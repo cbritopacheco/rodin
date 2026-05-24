@@ -9,8 +9,10 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <string>
 #include <vector>
 
 #include <Eigen/SparseLU>
@@ -18,9 +20,8 @@
 #include <Rodin/Adaptation.h>
 #include <Rodin/Assembly/Default.h>
 #include <Rodin/Geometry.h>
-#include <Rodin/Geometry/LevelSetDiscretizerTriangles.h>
-#include <Rodin/Geometry/TriangleMeshOptimizer.h>
 #include <Rodin/IO.h>
+#include <Rodin/MMG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Variational.h>
 
@@ -36,6 +37,11 @@ namespace
   constexpr Attribute Boundary = 40;
   constexpr Attribute Negative = 1;
   constexpr Attribute Positive = 2;
+  constexpr Index CurvedQuadratureOrder = 4;
+  constexpr Index CurvedQualitySamples = 4;
+  constexpr Index CurvedInterfaceSamples = 4;
+  constexpr Index CurvedVisualizationSamples = 4;
+  constexpr Real CurvedDetFloor = 1e-12;
 
   Math::SpatialPoint center(Real t)
   {
@@ -240,7 +246,10 @@ namespace
     return edges;
   }
 
-  void installQuadraticGeometry(LocalMesh& mesh, Real t)
+  void installQuadraticGeometry(
+      LocalMesh& mesh,
+      Real t,
+      Real curvatureClamp = Real(0.35))
   {
     if (mesh.getConnectivity().getIncidence(2, 1).size() == 0)
       return;
@@ -285,7 +294,7 @@ namespace
           / std::max(chord, Real(1e-30));
         minPerp = std::min(minPerp, perp);
       }
-      edgeSafeMag[e] = Real(0.35) * minPerp;
+      edgeSafeMag[e] = curvatureClamp * minPerp;
     }
     auto clampedProject = [&](const Math::SpatialPoint& mid, Real limit)
     {
@@ -379,14 +388,14 @@ namespace
       bool valid = true;
       {
         const auto& qf = QF::PolytopeQuadratureFormula::get(
-            4, Polytope::Type::Triangle);
+            CurvedQuadratureOrder, Polytope::Type::Triangle);
         for (size_t q = 0; q < qf.getSize() && valid; ++q)
         {
           Math::SpatialMatrix<Real> J;
           trans->jacobian(J, qf.getPoint(q));
           valid = J.rows() == 2 && J.cols() == 2
             && std::isfinite(J.determinant())
-            && J.determinant() > Real(1e-12);
+            && J.determinant() > CurvedDetFloor;
         }
       }
       if (valid)
@@ -402,6 +411,8 @@ namespace
     Real fitMax = 0;
     Real minJacobian = std::numeric_limits<Real>::infinity();
     Real minQuality = std::numeric_limits<Real>::infinity();
+    Real sampledSignedArea = 0;
+    Real sampledCoverage = 0;
     Index invalidJacobianSamples = 0;
     Index overlapSamples = 0;  ///< curved interface samples inside a vertex-adjacent (non-edge-adjacent) neighbour cell -> cell-cell overlap canary
   };
@@ -448,7 +459,9 @@ namespace
   CurvedGeometryStats curvedGeometryStats(
       const LocalMesh& mesh,
       Real t,
-      Index samples = 4)
+      Index samples = CurvedQualitySamples,
+      Index quadratureOrder = CurvedQuadratureOrder,
+      Index overlapSamples = CurvedInterfaceSamples)
   {
     CurvedGeometryStats stats;
     Real sq = 0;
@@ -473,7 +486,7 @@ namespace
       };
 
       const auto& qf = QF::PolytopeQuadratureFormula::get(
-          4, Polytope::Type::Triangle);
+          quadratureOrder, Polytope::Type::Triangle);
       for (size_t q = 0; q < qf.getSize(); ++q)
       {
         Math::SpatialMatrix<Real> J;
@@ -493,11 +506,21 @@ namespace
           const auto x00 = map(i, j);
           const auto x10 = map(i + 1, j);
           const auto x01 = map(i, j + 1);
+          const Real a0 = Real(0.5) *
+            ((x10[0] - x00[0]) * (x01[1] - x00[1])
+           - (x10[1] - x00[1]) * (x01[0] - x00[0]));
+          stats.sampledSignedArea += a0;
+          stats.sampledCoverage += std::abs(a0);
           stats.minQuality =
             std::min(stats.minQuality, triangleQuality(x00, x10, x01));
           if (i + j + 1 < samples)
           {
             const auto x11 = map(i + 1, j + 1);
+            const Real a1 = Real(0.5) *
+              ((x11[0] - x10[0]) * (x01[1] - x10[1])
+             - (x11[1] - x10[1]) * (x01[0] - x10[0]));
+            stats.sampledSignedArea += a1;
+            stats.sampledCoverage += std::abs(a1);
             stats.minQuality =
               std::min(stats.minQuality, triangleQuality(x10, x11, x01));
           }
@@ -535,8 +558,7 @@ namespace
     // failure, invisible to per-cell det/quality).
     const_cast<LocalMesh&>(mesh).getConnectivity().compute(0, 2);
     const_cast<LocalMesh&>(mesh).getConnectivity().compute(1, 2);
-    static const std::array<Real, 5> sOv = {{
-      Real(0.1), Real(0.25), Real(0.5), Real(0.75), Real(0.9) }};
+    const Index nOverlap = std::max<Index>(overlapSamples, 1);
     for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
     {
       const auto attr = mesh.getAttribute(1, e);
@@ -558,8 +580,10 @@ namespace
       if (nbrs.empty()) continue;
       const auto edgeIt = mesh.getPolytope(1, e);
       const auto& etrans = edgeIt->getTransformation();
-      for (Real s : sOv)
+      for (Index k = 1; k <= nOverlap; ++k)
       {
+        const Real s =
+          static_cast<Real>(k) / static_cast<Real>(nOverlap + 1);
         Math::SpatialPoint x;
         etrans.transform(x, Math::SpatialPoint{ s });
         for (Index ci : nbrs)
@@ -579,7 +603,7 @@ namespace
 
   LocalMesh curvedInterfacePolyline(
       const LocalMesh& mesh,
-      Index samplesPerEdge = 4)
+      Index samplesPerEdge = CurvedInterfaceSamples)
   {
     std::vector<Math::SpatialPoint> points;
     std::vector<std::array<Index, 2>> segments;
@@ -622,6 +646,41 @@ namespace
     for (Index e = 0; e < out.getPolytopeCount(1); ++e)
       out.setAttribute({1, e}, Interface);
     return out;
+  }
+
+  bool curvedGeometryValid(const CurvedGeometryStats& stats)
+  {
+    return stats.invalidJacobianSamples == 0
+      && stats.overlapSamples == 0
+      && stats.minJacobian > CurvedDetFloor
+      && stats.minQuality > Real(0)
+      && std::isfinite(stats.minJacobian)
+      && std::isfinite(stats.minQuality);
+  }
+
+  bool fastCurvedLocalValidity(const LocalMesh& mesh)
+  {
+    const auto& conn = mesh.getConnectivity();
+    const auto& qf = QF::PolytopeQuadratureFormula::get(
+        CurvedQuadratureOrder, Polytope::Type::Triangle);
+    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
+      if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
+        continue;
+      const auto cellIt = mesh.getPolytope(2, c);
+      const auto& trans = cellIt->getTransformation();
+      for (size_t q = 0; q < qf.getSize(); ++q)
+      {
+        Math::SpatialMatrix<Real> J;
+        trans.jacobian(J, qf.getPoint(q));
+        if (J.rows() != 2 || J.cols() != 2)
+          return false;
+        const Real det = J.determinant();
+        if (!(det > CurvedDetFloor) || !std::isfinite(det))
+          return false;
+      }
+    }
+    return true;
   }
 
   LocalMesh curvedVisualizationMesh(
@@ -720,9 +779,28 @@ namespace
       const GridFunction<FES, Data>& u)
   {
     const auto& fes = u.getFiniteElementSpace();
-    const auto& data = u.getData();
+    const Variational::RealH1Element<2> cellFe(Polytope::Type::Triangle);
+    const Variational::RealH1Element<2> edgeFe(Polytope::Type::Segment);
     const size_t sdim = mesh.getSpaceDimension();
     const auto& conn = mesh.getConnectivity();
+    std::array<size_t, 3> cornerNode{{0, 0, 0}};
+    for (std::uint8_t local = 0; local < 3; ++local)
+    {
+      const auto rv = triangleReferenceVertex(local);
+      Real best = std::numeric_limits<Real>::infinity();
+      for (size_t node = 0; node < cellFe.getCount(); ++node)
+      {
+        const auto& rn = cellFe.getNode(node);
+        const Real d0 = rn[0] - rv[0];
+        const Real d1 = rn[1] - rv[1];
+        const Real dist2 = d0 * d0 + d1 * d1;
+        if (dist2 < best)
+        {
+          best = dist2;
+          cornerNode[local] = node;
+        }
+      }
+    }
     std::vector<PointCloud> edgePointClouds(conn.getCount(1));
     std::vector<PointCloud> cellPointClouds(mesh.getCellCount());
     std::vector<char> hasCellPointCloud(mesh.getCellCount(), 0);
@@ -732,18 +810,18 @@ namespace
       const auto edgeIt = mesh.getPolytope(1, e);
       const auto& edge = *edgeIt;
       const auto& fe = fes.getFiniteElement(edge.getDimension(), edge.getIndex());
-      PointCloud pm(sdim, fe.getCount() / sdim);
-      for (size_t node = 0; node < fe.getCount() / sdim; ++node)
+      const auto displacement = localDisplacementCoefficients(u, edge);
+      PointCloud pm(sdim, edgeFe.getCount());
+      for (size_t node = 0; node < edgeFe.getCount(); ++node)
       {
-        const auto& rc = fe.getNode(node * sdim);
+        const auto& rc = edgeFe.getNode(node);
         const Geometry::Point point(edge, rc);
         auto x = point.getPhysicalCoordinates();
-        for (size_t c = 0; c < sdim; ++c)
+        for (size_t localDof = 0; localDof < displacement.size(); ++localDof)
         {
-          const size_t local = node * sdim + c;
-          x[c] += data(fes.getGlobalIndex(
-              {edge.getDimension(), edge.getIndex()},
-              static_cast<Index>(local)));
+          const auto phi = basisVectorValue(fe, localDof, rc);
+          for (size_t d = 0; d < sdim; ++d)
+            x[d] += displacement[localDof] * phi[static_cast<std::uint8_t>(d)];
         }
         for (size_t c = 0; c < sdim; ++c)
           pm(c, node) = x[c];
@@ -758,18 +836,18 @@ namespace
       const auto cellIt = mesh.getPolytope(2, c);
       const auto& cell = *cellIt;
       const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      PointCloud pm(sdim, fe.getCount() / sdim);
-      for (size_t node = 0; node < fe.getCount() / sdim; ++node)
+      const auto displacement = localDisplacementCoefficients(u, cell);
+      PointCloud pm(sdim, cellFe.getCount());
+      for (size_t node = 0; node < cellFe.getCount(); ++node)
       {
-        const auto& rc = fe.getNode(node * sdim);
+        const auto& rc = cellFe.getNode(node);
         const Geometry::Point point(cell, rc);
         auto x = point.getPhysicalCoordinates();
-        for (size_t d = 0; d < sdim; ++d)
+        for (size_t localDof = 0; localDof < displacement.size(); ++localDof)
         {
-          const size_t local = node * sdim + d;
-          x[d] += data(fes.getGlobalIndex(
-              {cell.getDimension(), cell.getIndex()},
-              static_cast<Index>(local)));
+          const auto phi = basisVectorValue(fe, localDof, rc);
+          for (size_t d = 0; d < sdim; ++d)
+            x[d] += displacement[localDof] * phi[static_cast<std::uint8_t>(d)];
         }
         for (size_t d = 0; d < sdim; ++d)
           pm(d, node) = x[d];
@@ -780,10 +858,26 @@ namespace
 
     for (Index v = 0; v < static_cast<Index>(mesh.getVertexCount()); ++v)
     {
-      auto x = mesh.getVertexCoordinates(v);
-      for (size_t d = 0; d < sdim; ++d)
-        x[d] += data(fes.getGlobalIndex({0, v}, static_cast<Index>(d)));
-      mesh.setVertexCoordinates(v, x);
+      bool found = false;
+      Math::SpatialPoint x(sdim);
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()) && !found; ++c)
+      {
+        if (!hasCellPointCloud[static_cast<size_t>(c)])
+          continue;
+        const auto& cell = conn.getPolytope(2, c);
+        for (std::uint8_t local = 0; local < 3; ++local)
+        {
+          if (cell(local) != v)
+            continue;
+          const size_t node = cornerNode[local];
+          for (size_t d = 0; d < sdim; ++d)
+            x[d] = cellPointClouds[static_cast<size_t>(c)](d, node);
+          found = true;
+          break;
+        }
+      }
+      if (found)
+        mesh.setVertexCoordinates(v, x);
     }
 
     // setVertexCoordinates() flushes cached/custom transformations. Reinstall
@@ -869,13 +963,284 @@ namespace
       qmin = 0;
     return {qmin, inverted};
   }
+
+  bool localVertexMoveValid(
+      const LocalMesh& mesh,
+      Index vertex,
+      const Math::SpatialPoint& candidate,
+      Real minQuality = Real(1e-5))
+  {
+    const auto& conn = mesh.getConnectivity();
+    for (Index ci : conn.getIncidence({ 0, 2 }, vertex))
+    {
+      const auto& cell = conn.getPolytope(2, ci);
+      std::array<Math::SpatialPoint, 3> x{{
+        mesh.getVertexCoordinates(cell(0)),
+        mesh.getVertexCoordinates(cell(1)),
+        mesh.getVertexCoordinates(cell(2)) }};
+      for (size_t k = 0; k < 3; ++k)
+        if (cell(k) == vertex)
+          x[k] = candidate;
+      const Real orient =
+        (x[1][0] - x[0][0]) * (x[2][1] - x[0][1])
+      - (x[1][1] - x[0][1]) * (x[2][0] - x[0][0]);
+      if (!(orient > Real(1e-14)) || !std::isfinite(orient))
+        return false;
+      if (triangleQuality(x[0], x[1], x[2]) < minQuality)
+        return false;
+    }
+    return true;
+  }
+
+  Index snapInterfaceVerticesToAnalytic(
+      LocalMesh& mesh,
+      Real t,
+      Real maxMove)
+  {
+    mesh.getConnectivity().compute(0, 2);
+    mesh.getConnectivity().compute(1, 0);
+    const auto mask = interfaceVertexMask(mesh);
+    Index accepted = 0;
+    for (Index v = 0; v < static_cast<Index>(mesh.getVertexCount()); ++v)
+    {
+      if (v >= static_cast<Index>(mask.size()) || !mask[v])
+        continue;
+      const auto x = mesh.getVertexCoordinates(v);
+      auto p = projectToInterface(x, t);
+      const Real d = (p - x).norm();
+      if (d > maxMove && d > Real(0))
+        p = x + (maxMove / d) * (p - x);
+      bool moved = false;
+      for (int attempt = 0; attempt < 12; ++attempt)
+      {
+        if (localVertexMoveValid(mesh, v, p))
+        {
+          mesh.setVertexCoordinates(v, p);
+          ++accepted;
+          moved = true;
+          break;
+        }
+        p = x + Real(0.5) * (p - x);
+      }
+      (void)moved;
+    }
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    return accepted;
+  }
+
+  Real interfaceMeasure(
+      const LocalMesh& mesh,
+      Attribute attr,
+      Index samples = 2)
+  {
+    Real measure = 0;
+    const auto& conn = mesh.getConnectivity();
+    const Index n = std::max<Index>(samples, 1);
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto edgeAttr = mesh.getAttribute(1, e);
+      if (!edgeAttr || *edgeAttr != attr)
+        continue;
+      const auto edgeIt = mesh.getPolytope(1, e);
+      const auto& trans = edgeIt->getTransformation();
+      for (Index q = 0; q < n; ++q)
+      {
+        const Real s = (static_cast<Real>(q) + Real(0.5))
+          / static_cast<Real>(n);
+        Math::SpatialMatrix<Real> J;
+        trans.jacobian(J, Math::SpatialPoint{s});
+        if (J.cols() != 1)
+          continue;
+        Real len2 = 0;
+        for (Index d = 0; d < static_cast<Index>(J.rows()); ++d)
+          len2 += J(d, 0) * J(d, 0);
+        if (len2 > Real(0) && std::isfinite(len2))
+          measure += std::sqrt(len2) / static_cast<Real>(n);
+      }
+    }
+    return measure;
+  }
+
+  struct InterfaceDegreeStats
+  {
+    Index maxDegree = 0;
+    Index branchVertices = 0;
+  };
+
+  InterfaceDegreeStats interfaceDegreeStats(
+      const LocalMesh& mesh,
+      Attribute attr)
+  {
+    InterfaceDegreeStats stats;
+    std::vector<Index> degree(mesh.getVertexCount(), 0);
+    const auto& conn = mesh.getConnectivity();
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto edgeAttr = mesh.getAttribute(1, e);
+      if (!edgeAttr || *edgeAttr != attr)
+        continue;
+      const auto& edge = conn.getPolytope(1, e);
+      degree[static_cast<size_t>(edge(0))]++;
+      degree[static_cast<size_t>(edge(1))]++;
+    }
+    for (Index d : degree)
+    {
+      stats.maxDegree = std::max(stats.maxDegree, d);
+      if (d > 2)
+        stats.branchVertices++;
+    }
+    return stats;
+  }
+
+  Index markUncutAnalyticInterfaceEdges(LocalMesh& mesh, Real t)
+  {
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    Index count = 0;
+    const auto& conn = mesh.getConnectivity();
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto attr = mesh.getAttribute(1, e);
+      if (attr && *attr == Boundary)
+        continue;
+      const auto& edge = conn.getPolytope(1, e);
+      const Real f0 = phiAt(mesh.getVertexCoordinates(edge(0)), t);
+      const Real f1 = phiAt(mesh.getVertexCoordinates(edge(1)), t);
+      if (f0 == Real(0) || f1 == Real(0) || f0 * f1 < Real(0))
+      {
+        mesh.setAttribute({1, e}, Interface);
+        ++count;
+      }
+    }
+    return count;
+  }
+
+  struct TopologyStageReport
+  {
+    Index cellCount = 0;
+    Index interfaceEdgeCount = 0;
+    Index uncutCellCount = 0;
+    Index referenceStencilOrder = 0;
+    Index macroBoundaryCutCount = 0;
+    Index macroBoundaryCutRejectedByQualityCount = 0;
+    Index sampledStencilFallbackCount = 0;
+    Index noCutQualityFallbackCount = 0;
+    Index graphOnlyFallbackCount = 0;
+    Real minOutputCellQuality = 0;
+    Real maxInterfaceDeviation = 0;
+  };
+
+  struct TopologyStageResult
+  {
+    LocalMesh mesh;
+    TopologyStageReport report;
+    InterfaceDegreeStats interfaceDegree;
+    bool mmgAccepted = true;
+  };
+
+  TopologyStageResult buildTopology(
+      const LocalMesh& background,
+      Real t,
+      Real h,
+      Index stencilOrder)
+  {
+    LocalMesh work(background);
+    work.getConnectivity().compute(2, 1);
+    work.getConnectivity().compute(1, 0);
+
+    annotateBoundary(work);
+    const Index interfaceEdges = markUncutAnalyticInterfaceEdges(work, t);
+    const auto interfaceDegree = interfaceDegreeStats(work, Interface);
+    const auto [qmin, inverted] = meshQuality(work);
+
+    TopologyStageReport report;
+    report.cellCount = work.getCellCount();
+    report.minOutputCellQuality = qmin;
+    report.uncutCellCount = work.getCellCount();
+    report.referenceStencilOrder = 0;
+    report.macroBoundaryCutCount = interfaceEdges;
+    const auto& conn = work.getConnectivity();
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto attr = work.getAttribute(1, e);
+      if (!attr || *attr != Interface)
+        continue;
+      ++report.interfaceEdgeCount;
+      const auto& edge = conn.getPolytope(1, e);
+      for (Index v : {edge(0), edge(1)})
+        report.maxInterfaceDeviation =
+          std::max(report.maxInterfaceDeviation,
+              std::abs(phiAt(work.getVertexCoordinates(v), t)));
+    }
+    (void)h;
+    (void)stencilOrder;
+    (void)inverted;
+    return {
+      std::move(work),
+      std::move(report),
+      interfaceDegree,
+      true
+    };
+  }
+
+  Index reclassifyCellsByAnalyticPhi(LocalMesh& mesh, Real t)
+  {
+    Index changed = 0;
+    const auto& conn = mesh.getConnectivity();
+    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
+      if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
+        continue;
+      const auto cellIt = mesh.getPolytope(2, c);
+      Math::SpatialPoint x;
+      cellIt->getTransformation().transform(
+          x, Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)});
+      const Attribute next = phiAt(x, t) <= Real(0) ? Negative : Positive;
+      const auto old = mesh.getAttribute(2, c);
+      if (!old || *old != next)
+      {
+        mesh.setAttribute({2, c}, next);
+        ++changed;
+      }
+    }
+    return changed;
+  }
 }
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
-  constexpr size_t resolution = 16;
-  constexpr Index steps = 20;
-  constexpr Real h = Real(1) / static_cast<Real>(resolution - 1);
+  size_t resolution = 40;
+  Index steps = 20;
+  Real fitWeight = 2;
+  Real qualityWeight = 1;
+  Real deviationWeight = Real(0.25);
+  Real targetBlend = Real(0.05);
+  Real curvatureClamp = Real(0.35);
+  Index tmopMaxIterations = 8;
+  Index cutStencilOrder = 4;
+  if (argc > 1)
+    resolution = static_cast<size_t>(std::max(3, std::atoi(argv[1])));
+  if (argc > 2)
+    steps = static_cast<Index>(std::max(2, std::atoi(argv[2])));
+  if (argc > 3)
+    fitWeight = std::max(Real(0), static_cast<Real>(std::atof(argv[3])));
+  if (argc > 4)
+    qualityWeight = std::max(Real(0), static_cast<Real>(std::atof(argv[4])));
+  if (argc > 5)
+    deviationWeight = std::max(Real(0), static_cast<Real>(std::atof(argv[5])));
+  if (argc > 6)
+    targetBlend = std::max(Real(0), std::min(Real(1),
+          static_cast<Real>(std::atof(argv[6]))));
+  if (argc > 7)
+    curvatureClamp = std::max(Real(0), static_cast<Real>(std::atof(argv[7])));
+  if (argc > 8)
+    tmopMaxIterations =
+      static_cast<Index>(std::max(1, std::atoi(argv[8])));
+  if (argc > 9)
+    cutStencilOrder =
+      static_cast<Index>(std::max(1, std::atoi(argv[9])));
+  const Real h = Real(1) / static_cast<Real>(resolution - 1);
 
   LocalMesh background =
     LocalMesh::UniformGrid(Polytope::Type::Triangle, { resolution, resolution });
@@ -887,52 +1252,43 @@ int main(int, char**)
   // process, not just the final step.
   Real sumQmin = 0, sumCurvedQmin = 0, sumFit = 0;
   Real sumTargetMaxMu = 0, sumTargetMinDetT = 0;
+  Real sumCurvatureClamp = 0;
+  Real sumCurvedCoverage = 0, sumCurvedSignedArea = 0;
+  Real sumBestP2Fit = 0, sumBestP2Qmin = 0;
+  Real sumCutQmin = 0, sumCutMaxPhi = 0, sumCutCells = 0;
+  Real sumCutMacro = 0, sumCutMacroRejected = 0;
+  Real sumCutSampledFallback = 0, sumCutNoCutFallback = 0;
+  Real sumCutGraphOnlyFallback = 0;
+  Real sumInterfaceBranchVertices = 0, sumInterfaceMaxDegree = 0;
   Index sumInverted = 0, sumTargetInvalid = 0;
-  Index sumOverlap = 0, topologyInsufficient = 0;
-  Index rejectedTMOP = 0, diagSteps = 0;
+  Index sumOverlap = 0, sumBestP2Overlap = 0, topologyInsufficient = 0;
+  Index mmgRejected = 0;
+  Index rejectedTMOP = 0, sumReclassifiedCells = 0, diagSteps = 0;
 
   for (Index step = 0; step < steps; ++step)
   {
     const Real t = static_cast<Real>(step)
       / static_cast<Real>(std::max<Index>(1, steps - 1));
 
-    background.getConnectivity().compute(2, 1);
-    background.getConnectivity().compute(1, 0);
+    // Minimal production loop:
+    //   Rodin level-set cutter -> MMG topology optimizer -> analytic snap
+    //   -> P2 upgrade -> curved target-matrix TMOP -> carry forward.
+    auto topology = buildTopology(background, t, h, cutStencilOrder);
+    LocalMesh optimized = std::move(topology.mesh);
+    const auto cutReport = std::move(topology.report);
+    if (!topology.mmgAccepted)
+      ++mmgRejected;
 
-    P1<Real, LocalMesh> phiSpace(background);
-    GridFunction phi(phiSpace);
-    for (Index i = 0; i < background.getVertexCount(); ++i)
-      phi[i] = phiAt(background.getVertexCoordinates(i), t);
+    // Coarse-topology diagnostic: with this exact topology, how well can a
+    // fully projected P2 interface fit before TMOP? If this stays large, the
+    // limiting factor is the number/placement of feature edges, not the TMOP
+    // solve. The actual run below still uses curvatureClamp for robustness.
+    LocalMesh bestP2Topology(optimized);
+    installQuadraticGeometry(
+        bestP2Topology, t, std::numeric_limits<Real>::infinity());
+    const auto bestP2Stats = curvedGeometryStats(bestP2Topology, t);
 
-    auto cut = LevelSetDiscretizerTriangles(phi)
-      .setSignTolerance(1e-12)
-      .setInterfaceAttribute(Interface)
-      .setNegativeCellAttribute(Negative)
-      .setPositiveCellAttribute(Positive)
-      .setCrossingSnapTolerance(0.05)
-      .setMinCutQuality(0.2)
-      .discretize();
-    annotateBoundary(cut.mesh);
-
-    LocalMesh optimized = cut.mesh;
-    {
-      const auto cutInterfaceMask = interfaceVertexMask(optimized);
-      const auto parameters =
-        TriangleMeshOptimizerParameters::levelSetCarryForward(h);
-      TriangleMeshOptimizer()
-        .setParameters(parameters)
-        .setFeatureProjection([t](const Math::SpatialPoint& x)
-          { return projectToInterface(x, t); })
-        // Collapse interface slivers ALONG phi=0: merge the two endpoints of
-        // a short interface edge into one node kept on the interface. This
-        // removes the cut slivers the fixed-topology TMOP solve cannot fix.
-        .setFeatureCollapseLength(Real(0.5) * h)
-        .setProtectedVertices(cutInterfaceMask)
-        .optimize(optimized);
-    }
-    optimized.getConnectivity().compute(2, 1);
-    optimized.getConnectivity().compute(1, 0);
-    installQuadraticGeometry(optimized, t);
+    installQuadraticGeometry(optimized, t, curvatureClamp);
 
     const auto featureMask = interfaceVertexMask(optimized);
     auto projectToCurrentInterface = [t](const Math::SpatialPoint& x)
@@ -940,7 +1296,7 @@ int main(int, char**)
       return projectToInterface(x, t);
     };
     ProjectedQualityTargetJacobian target(
-        optimized, Interface, projectToCurrentInterface, Real(0.05));
+        optimized, Interface, projectToCurrentInterface, targetBlend);
     ShapeSizeBlendMetric metric(Real(0.5));
 
     VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, optimized, 2);
@@ -954,14 +1310,19 @@ int main(int, char**)
     auto phiGradient =
       [t](const Math::SpatialPoint& x) { return gradPhiAt(x, t); };
 
-    QualityTerm quality(metric, target, 1.0);
-    quality.setQuadratureOrder(4);
-    DeviationTerm deviation(1.0);
+    QualityTerm quality(metric, target, qualityWeight);
+    quality.setQuadratureOrder(CurvedQuadratureOrder);
+    DeviationTerm deviation(deviationWeight);
     AnalyticLevelSetFitTerm fit(
-        phiValue, phiGradient, Optional<Attribute>(Interface), 1.0);
+        phiValue, phiGradient, Optional<Attribute>(Interface), fitWeight);
+    fit.setNormalization(
+        std::max(interfaceMeasure(optimized, Interface), Real(1e-12)));
     AnalyticLevelSetFitTerm boundaryFit(
         boxBoundaryValue, boxBoundaryGradient,
         Optional<Attribute>(Boundary), 1.0);
+    boundaryFit.setNormalization(
+        std::max(interfaceMeasure(optimized, Boundary), Real(1e-12)));
+    const Real fitEnergyInitial = fit.energy(u);
 
     auto makeTangent = [&]()
     {
@@ -991,7 +1352,7 @@ int main(int, char**)
     Index tmopIterations = 0;
     try
     {
-      for (Index it = 0; it < 5; ++it)
+      for (Index it = 0; it < tmopMaxIterations; ++it)
       {
         ++tmopIterations;
         LinearForm R(v);
@@ -1035,12 +1396,8 @@ int main(int, char**)
           if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
           {
             LocalMesh trialMesh(optimized);
-            installQuadraticGeometry(trialMesh, t);
             applyParametricDisplacement(trialMesh, u);
-            const auto trialStats = curvedGeometryStats(trialMesh, t);
-            if (trialStats.invalidJacobianSamples == 0
-                && trialStats.minJacobian > Real(0)
-                && trialStats.minQuality > Real(0))
+            if (fastCurvedLocalValidity(trialMesh))
             {
               acceptedStep = true;
               break;
@@ -1063,10 +1420,13 @@ int main(int, char**)
     {
       solvedTMOP = false;
     }
+    const Real fitEnergyFinal = fit.energy(u);
 
     LocalMesh beforeTMOP(optimized);
     if (solvedTMOP && u.getData().allFinite())
+    {
       applyParametricDisplacement(optimized, u);
+    }
     else
       solvedTMOP = false;
 
@@ -1079,16 +1439,14 @@ int main(int, char**)
       && tmopInverted == 0
       && std::isfinite(tmopQmin)
       && tmopQmin > Real(0)
-      && tmopCurvedStats.invalidJacobianSamples == 0
-      && tmopCurvedStats.minJacobian > Real(0)
-      && std::isfinite(tmopCurvedStats.minJacobian);
+      && curvedGeometryValid(tmopCurvedStats);
     if (!acceptedTMOP)
     {
       optimized = std::move(beforeTMOP);
-      installQuadraticGeometry(optimized, t);
       ++rejectedTMOP;
       tmopCurvedStats = curvedGeometryStats(optimized, t);
     }
+    const Index reclassifiedCells = reclassifyCellsByAnalyticPhi(optimized, t);
     optimized.getConnectivity().compute(2, 1);
     optimized.getConnectivity().compute(1, 0);
 
@@ -1102,12 +1460,12 @@ int main(int, char**)
     grid.clear();
     grid.add("phi", outputPhi, IO::XDMF::Center::Node);
 
-    auto curvedMesh = curvedVisualizationMesh(optimized, 3);
+    auto curvedMesh = curvedVisualizationMesh(optimized, CurvedVisualizationSamples);
     auto curvedGrid = xdmf.grid("curved-p2-sampled");
     curvedGrid.setMesh(curvedMesh, IO::XDMF::MeshPolicy::Transient);
     curvedGrid.clear();
 
-    auto curvedInterface = curvedInterfacePolyline(optimized, 4);
+    auto curvedInterface = curvedInterfacePolyline(optimized);
     auto curveGrid = xdmf.grid("curved-interface");
     curveGrid.setMesh(curvedInterface, IO::XDMF::MeshPolicy::Transient);
     curveGrid.clear();
@@ -1115,7 +1473,9 @@ int main(int, char**)
 
     const auto [qmin, inverted] = meshQuality(optimized);
     const auto curvedStats = curvedGeometryStats(optimized, t);
-    const auto targetStats = targetQualityMetrics(optimized, metric, target);
+    const auto targetStats = targetQualityMetrics(
+        optimized, metric, target, Polytope::Type::Triangle,
+        CurvedQuadratureOrder);
     Real fitErr = 0;
     for (Index i = 0; i < optimized.getVertexCount(); ++i)
       if (i < featureMask.size() && featureMask[i])
@@ -1127,8 +1487,31 @@ int main(int, char**)
     sumFit += curvedStats.fitRms;
     sumTargetMaxMu += targetStats.maxMetric;
     sumTargetMinDetT += targetStats.minDetT;
+    sumCurvatureClamp += curvatureClamp;
+    sumCurvedCoverage += curvedStats.sampledCoverage;
+    sumCurvedSignedArea += curvedStats.sampledSignedArea;
+    sumBestP2Fit += bestP2Stats.fitRms;
+    sumBestP2Qmin += bestP2Stats.minQuality;
+    sumCutQmin += cutReport.minOutputCellQuality;
+    sumCutMaxPhi += cutReport.maxInterfaceDeviation;
+    sumCutCells += static_cast<Real>(cutReport.cellCount);
+    sumCutMacro += static_cast<Real>(cutReport.macroBoundaryCutCount);
+    sumCutMacroRejected += static_cast<Real>(
+        cutReport.macroBoundaryCutRejectedByQualityCount);
+    sumCutSampledFallback += static_cast<Real>(
+        cutReport.sampledStencilFallbackCount);
+    sumCutNoCutFallback += static_cast<Real>(
+        cutReport.noCutQualityFallbackCount);
+    sumCutGraphOnlyFallback += static_cast<Real>(
+        cutReport.graphOnlyFallbackCount);
+    sumInterfaceBranchVertices +=
+      static_cast<Real>(topology.interfaceDegree.branchVertices);
+    sumInterfaceMaxDegree +=
+      static_cast<Real>(topology.interfaceDegree.maxDegree);
     sumTargetInvalid += targetStats.invalidSamples;
     sumOverlap += curvedStats.overlapSamples;
+    sumBestP2Overlap += bestP2Stats.overlapSamples;
+    sumReclassifiedCells += reclassifiedCells;
     // Topology/resolution insufficient: TMOP made no real step (the line
     // search backtracked to ~0) because the start has a cell the fixed
     // topology cannot improve -- either a leftover sliver, or an interface
@@ -1141,21 +1524,55 @@ int main(int, char**)
     std::cout << "step " << step
               << " t=" << t
               << " cells=" << optimized.getCellCount()
+              << " cut_stencil_order=" << cutStencilOrder
+              << " cut_cells=" << cutReport.cellCount
+              << " cut_qmin=" << cutReport.minOutputCellQuality
+              << " cut_phi_max=" << cutReport.maxInterfaceDeviation
+              << " cut_macro=" << cutReport.macroBoundaryCutCount
+              << " cut_macro_rejected="
+              << cutReport.macroBoundaryCutRejectedByQualityCount
+              << " cut_sampled_fallback="
+              << cutReport.sampledStencilFallbackCount
+              << " cut_nocut_fallback="
+              << cutReport.noCutQualityFallbackCount
+              << " cut_graph_only_fallback="
+              << cutReport.graphOnlyFallbackCount
+              << " cut_interface_max_degree="
+              << topology.interfaceDegree.maxDegree
+              << " cut_interface_branch_vertices="
+              << topology.interfaceDegree.branchVertices
+              << " mmg_accepted=" << (topology.mmgAccepted ? 1 : 0)
               << " qmin=" << qmin
               << " curved_qmin=" << curvedStats.minQuality
               << " inverted=" << inverted
               << " fit=" << fitErr
               << " curved_fit_rms=" << curvedStats.fitRms
               << " curved_fit_max=" << curvedStats.fitMax
+              << " best_p2_fit_rms=" << bestP2Stats.fitRms
+              << " best_p2_fit_max=" << bestP2Stats.fitMax
+              << " best_p2_qmin=" << bestP2Stats.minQuality
+              << " best_p2_invalid_jac=" << bestP2Stats.invalidJacobianSamples
+              << " best_p2_overlap=" << bestP2Stats.overlapSamples
               << " curved_min_jac=" << curvedStats.minJacobian
               << " curved_invalid_jac=" << curvedStats.invalidJacobianSamples
               << " curved_overlap=" << curvedStats.overlapSamples
+              << " curved_coverage=" << curvedStats.sampledCoverage
+              << " curved_signed_area=" << curvedStats.sampledSignedArea
+              << " curvature_clamp=" << curvatureClamp
+              << " fit_weight=" << fitWeight
+              << " quality_weight=" << qualityWeight
+              << " deviation_weight=" << deviationWeight
+              << " target_blend=" << targetBlend
+              << " cut_stencil_order=" << cutStencilOrder
               << " tmop_target_max_mu=" << targetStats.maxMetric
               << " tmop_target_min_detT=" << targetStats.minDetT
               << " tmop_target_invalid=" << targetStats.invalidSamples
               << " tmop_iterations=" << tmopIterations
               << " tmop_last_alpha=" << lastAlpha
+              << " analytic_fit_energy_initial=" << fitEnergyInitial
+              << " analytic_fit_energy_final=" << fitEnergyFinal
               << " tmop_accepted=" << (acceptedTMOP ? 1 : 0)
+              << " reclassified_cells=" << reclassifiedCells
               << " topology_insufficient=" << (topoInsufficient ? 1 : 0)
               << std::endl;
 
@@ -1174,6 +1591,30 @@ int main(int, char**)
               << " inverted="
               << static_cast<Real>(sumInverted) / static_cast<Real>(diagSteps)
               << " curved_fit_rms=" << sumFit / static_cast<Real>(diagSteps)
+              << " best_p2_fit_rms="
+              << sumBestP2Fit / static_cast<Real>(diagSteps)
+              << " best_p2_qmin="
+              << sumBestP2Qmin / static_cast<Real>(diagSteps)
+              << " cut_cells="
+              << sumCutCells / static_cast<Real>(diagSteps)
+              << " cut_qmin="
+              << sumCutQmin / static_cast<Real>(diagSteps)
+              << " cut_phi_max="
+              << sumCutMaxPhi / static_cast<Real>(diagSteps)
+              << " cut_macro="
+              << sumCutMacro / static_cast<Real>(diagSteps)
+              << " cut_macro_rejected="
+              << sumCutMacroRejected / static_cast<Real>(diagSteps)
+              << " cut_sampled_fallback="
+              << sumCutSampledFallback / static_cast<Real>(diagSteps)
+              << " cut_nocut_fallback="
+              << sumCutNoCutFallback / static_cast<Real>(diagSteps)
+              << " cut_graph_only_fallback="
+              << sumCutGraphOnlyFallback / static_cast<Real>(diagSteps)
+              << " cut_interface_max_degree="
+              << sumInterfaceMaxDegree / static_cast<Real>(diagSteps)
+              << " cut_interface_branch_vertices="
+              << sumInterfaceBranchVertices / static_cast<Real>(diagSteps)
               << " tmop_target_max_mu="
               << sumTargetMaxMu / static_cast<Real>(diagSteps)
               << " tmop_target_min_detT="
@@ -1182,9 +1623,26 @@ int main(int, char**)
               << static_cast<Real>(sumTargetInvalid) / static_cast<Real>(diagSteps)
               << " curved_overlap="
               << static_cast<Real>(sumOverlap) / static_cast<Real>(diagSteps)
+              << " best_p2_overlap="
+              << static_cast<Real>(sumBestP2Overlap) / static_cast<Real>(diagSteps)
+              << " curved_coverage="
+              << sumCurvedCoverage / static_cast<Real>(diagSteps)
+              << " curved_signed_area="
+              << sumCurvedSignedArea / static_cast<Real>(diagSteps)
+              << " curvature_clamp="
+              << sumCurvatureClamp / static_cast<Real>(diagSteps)
+              << " fit_weight=" << fitWeight
+              << " quality_weight=" << qualityWeight
+              << " deviation_weight=" << deviationWeight
+              << " target_blend=" << targetBlend
+              << " cut_stencil_order=" << cutStencilOrder
+              << " mmg_rejected=" << mmgRejected
               << " rejected_tmop=" << rejectedTMOP
+              << " reclassified_cells="
+              << static_cast<Real>(sumReclassifiedCells) / static_cast<Real>(diagSteps)
               << " topology_insufficient=" << topologyInsufficient
               << "/" << diagSteps
               << std::endl;
+
   return 0;
 }

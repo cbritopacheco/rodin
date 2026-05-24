@@ -11,6 +11,7 @@ add_executable(RodinBenchmarks ${RodinBenchmarks_SRCS})
 target_link_libraries(RodinBenchmarks
   PRIVATE
   Rodin::Adaptation
+  Rodin::MMG
   Rodin::Variational
   Rodin::Solver
   benchmark::benchmark

@@ -40,7 +40,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
    * geometry representation, configures the prototype objective, and advances
    * that detached geometry while keeping topology fixed. It is kept only as a
    * diagnostic bridge while the production path moves to QualityTerm,
-   * DeviationTerm, LevelSetFitTerm, Variational::Problem, and NewtonSolver.
+   * DeviationTerm, AnalyticLevelSetFitTerm, Variational::Problem, and
+   * NewtonSolver.
    *
    * Example:
    * @code

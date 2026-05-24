@@ -687,12 +687,15 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               localEdgeVertices(
                   conn.getPolytope(2, ci),
                   conn.getPolytope(1, edgeIndex));
-            const size_t node = scalarNodeNear(
-                triangleEdgePoint(local[0], local[1], Real(0.5)));
-            Math::SpatialPoint x{ affine(0, node), affine(1, node) };
-            const auto xp = project(x);
-            desired(0, node) = xp[0];
-            desired(1, node) = xp[1];
+            for (Real s : { Real(0), Real(0.5), Real(1) })
+            {
+              const size_t node = scalarNodeNear(
+                  triangleEdgePoint(local[0], local[1], s));
+              Math::SpatialPoint x{ affine(0, node), affine(1, node) };
+              const auto xp = project(x);
+              desired(0, node) = xp[0];
+              desired(1, node) = xp[1];
+            }
           }
 
           Real alpha = Real(1);

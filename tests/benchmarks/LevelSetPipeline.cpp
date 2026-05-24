@@ -18,8 +18,7 @@
 #include <Rodin/Adaptation/TargetMatrixOptimization/IsoparametricGeometry.h>
 #include <Rodin/Assembly/Default.h>
 #include <Rodin/Geometry.h>
-#include <Rodin/Geometry/LevelSetDiscretizerTriangles.h>
-#include <Rodin/Geometry/TriangleMeshOptimizer.h>
+#include <Rodin/MMG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
@@ -66,18 +65,6 @@ namespace Rodin::Tests::Benchmarks
       ShapeDistortion = 3
     };
 
-    enum class StageCase : int
-    {
-      TMOPOnly = 0,
-      OptimizeOnly = 1,
-      TMOPThenOptimize = 2,     // diagnostic: topology changes after TMOP
-      OptimizeThenTMOP = 3,     // production: topology first, TMOP last
-      OptimizeNoFeature = 4,
-      OptimizeNoInterior = 5
-    };
-
-    constexpr StageCase ProductionStageCase = StageCase::OptimizeThenTMOP;
-
     enum class CurvedTargetCase : int
     {
       ProjectedInterface = 0,
@@ -104,6 +91,12 @@ namespace Rodin::Tests::Benchmarks
       Index uncutCells = 0;
       Index snappedCrossings = 0;
       Index pathologicalCuts = 0;
+      Index macroBoundaryCuts = 0;
+      Index macroBoundaryCutRejectedByQuality = 0;
+      Index sampledStencilFallbacks = 0;
+      Index noCutQualityFallbacks = 0;
+      Index graphOnlyFallbacks = 0;
+      Index cutStencilOrder = 1;
       Index splits = 0;
       Index collapses = 0;
       Index featureCollapses = 0;
@@ -136,6 +129,30 @@ namespace Rodin::Tests::Benchmarks
       Index tmopIterations = 0;
       Index inverted = 0;
       Index tmopFailures = 0;
+      Index reclassifiedCells = 0;
+    };
+
+    struct TopologyReport
+    {
+      Index cellCount = 0;
+      Index interfaceEdgeCount = 0;
+      Index uncutCellCount = 0;
+      Index snappedCrossingCount = 0;
+      Index pathologicalCutCount = 0;
+      Index macroBoundaryCutCount = 0;
+      Index macroBoundaryCutRejectedByQualityCount = 0;
+      Index sampledStencilFallbackCount = 0;
+      Index noCutQualityFallbackCount = 0;
+      Index graphOnlyFallbackCount = 0;
+      Index referenceStencilOrder = 0;
+      Real minOutputCellQuality = 0;
+      Real maxInterfaceDeviation = 0;
+    };
+
+    struct TopologyResult
+    {
+      LocalMesh mesh;
+      TopologyReport report;
     };
 
     struct StageAverages
@@ -147,6 +164,11 @@ namespace Rodin::Tests::Benchmarks
       Real uncutCells = 0;
       Real snappedCrossings = 0;
       Real pathologicalCuts = 0;
+      Real macroBoundaryCuts = 0;
+      Real macroBoundaryCutRejectedByQuality = 0;
+      Real sampledStencilFallbacks = 0;
+      Real noCutQualityFallbacks = 0;
+      Real graphOnlyFallbacks = 0;
       Real cutMinQuality = 0;
       Real finalMinQuality = 0;
       Real minFinalQuality = std::numeric_limits<Real>::infinity();
@@ -207,6 +229,7 @@ namespace Rodin::Tests::Benchmarks
       Real inverted = 0;
       Real tmopFailures = 0;
       Real featureCollapses = 0;
+      Real reclassifiedCells = 0;
       bool hasP2Diagnostics = false;
 
       void add(const StageCounters& counters)
@@ -218,6 +241,14 @@ namespace Rodin::Tests::Benchmarks
         uncutCells += static_cast<Real>(counters.uncutCells);
         snappedCrossings += static_cast<Real>(counters.snappedCrossings);
         pathologicalCuts += static_cast<Real>(counters.pathologicalCuts);
+        macroBoundaryCuts += static_cast<Real>(counters.macroBoundaryCuts);
+        macroBoundaryCutRejectedByQuality += static_cast<Real>(
+            counters.macroBoundaryCutRejectedByQuality);
+        sampledStencilFallbacks += static_cast<Real>(
+            counters.sampledStencilFallbacks);
+        noCutQualityFallbacks += static_cast<Real>(
+            counters.noCutQualityFallbacks);
+        graphOnlyFallbacks += static_cast<Real>(counters.graphOnlyFallbacks);
         cutMinQuality += counters.cutMinQuality;
         finalMinQuality += counters.finalMinQuality;
         minFinalQuality =
@@ -311,6 +342,7 @@ namespace Rodin::Tests::Benchmarks
         inverted += static_cast<Real>(counters.inverted);
         tmopFailures += static_cast<Real>(counters.tmopFailures);
         featureCollapses += static_cast<Real>(counters.featureCollapses);
+        reclassifiedCells += static_cast<Real>(counters.reclassifiedCells);
       }
 
       void publish(benchmark::State& st) const
@@ -329,6 +361,16 @@ namespace Rodin::Tests::Benchmarks
           benchmark::Counter(snappedCrossings * inv);
         st.counters["avg_pathological"] =
           benchmark::Counter(pathologicalCuts * inv);
+        st.counters["avg_cut_macro"] =
+          benchmark::Counter(macroBoundaryCuts * inv);
+        st.counters["avg_cut_macro_rejected"] =
+          benchmark::Counter(macroBoundaryCutRejectedByQuality * inv);
+        st.counters["avg_cut_sampled_fallback"] =
+          benchmark::Counter(sampledStencilFallbacks * inv);
+        st.counters["avg_cut_nocut_fallback"] =
+          benchmark::Counter(noCutQualityFallbacks * inv);
+        st.counters["avg_cut_graph_only_fallback"] =
+          benchmark::Counter(graphOnlyFallbacks * inv);
         st.counters["avg_qmin_cut"] =
           benchmark::Counter(cutMinQuality * inv);
         st.counters["avg_qmin_final"] =
@@ -489,6 +531,8 @@ namespace Rodin::Tests::Benchmarks
           benchmark::Counter(tmopFailures * inv);
         st.counters["avg_feature_collapses"] =
           benchmark::Counter(featureCollapses * inv);
+        st.counters["avg_reclassified_cells"] =
+          benchmark::Counter(reclassifiedCells * inv);
       }
     };
 
@@ -1125,31 +1169,221 @@ namespace Rodin::Tests::Benchmarks
       return mesh;
     }
 
-    LevelSetDiscretizerTrianglesResult cutShape(
+    Index markUncutAnalyticInterfaceEdges(
+        LocalMesh& mesh,
+        ShapeCase shape,
+        Real t)
+    {
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+      Index count = 0;
+      const auto& conn = mesh.getConnectivity();
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        if (attr && *attr == Boundary)
+          continue;
+        const auto& edge = conn.getPolytope(1, e);
+        const Real f0 =
+          levelSetValue(shape, mesh.getVertexCoordinates(edge(0)), t);
+        const Real f1 =
+          levelSetValue(shape, mesh.getVertexCoordinates(edge(1)), t);
+        if (f0 == Real(0) || f1 == Real(0) || f0 * f1 < Real(0))
+        {
+          mesh.setAttribute({1, e}, Interface);
+          ++count;
+        }
+      }
+      return count;
+    }
+
+    TopologyResult makeUncutLevelSetProxy(
+        LocalMesh mesh,
+        ShapeCase shape,
+        Real t)
+    {
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+      annotateBoundary(mesh);
+      const Index interfaceEdges =
+        markUncutAnalyticInterfaceEdges(mesh, shape, t);
+
+      TopologyResult result;
+      result.mesh = std::move(mesh);
+      const auto stats = meshStats(result.mesh);
+      result.report.cellCount = result.mesh.getCellCount();
+      result.report.minOutputCellQuality = stats.minQuality;
+      result.report.uncutCellCount = result.mesh.getCellCount();
+      result.report.referenceStencilOrder = 0;
+      const auto& conn = result.mesh.getConnectivity();
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = result.mesh.getAttribute(1, e);
+        if (!attr || *attr != Interface)
+          continue;
+        ++result.report.interfaceEdgeCount;
+        const auto& edge = conn.getPolytope(1, e);
+        for (Index v : {edge(0), edge(1)})
+          result.report.maxInterfaceDeviation =
+            std::max(result.report.maxInterfaceDeviation,
+                std::abs(levelSetValue(
+                    shape, result.mesh.getVertexCoordinates(v), t)));
+      }
+      result.report.macroBoundaryCutCount = interfaceEdges;
+      return result;
+    }
+
+    void resetCellAttributes(LocalMesh& mesh, Attribute attr)
+    {
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+        mesh.setAttribute({ 2, c }, attr);
+    }
+
+    TopologyResult makeExternalCutResult(
+        LocalMesh mesh,
+        ShapeCase shape,
+        Real t)
+    {
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+      annotateBoundary(mesh);
+
+      TopologyResult result;
+      result.mesh = std::move(mesh);
+      const auto stats = meshStats(result.mesh);
+      result.report.cellCount = result.mesh.getCellCount();
+      result.report.minOutputCellQuality = stats.minQuality;
+      result.report.uncutCellCount = result.mesh.getCellCount();
+      result.report.referenceStencilOrder = 0;
+      const auto& conn = result.mesh.getConnectivity();
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = result.mesh.getAttribute(1, e);
+        if (attr && *attr == Interface)
+        {
+          ++result.report.interfaceEdgeCount;
+          const auto& edge = conn.getPolytope(1, e);
+          for (Index v : { edge(0), edge(1) })
+            result.report.maxInterfaceDeviation =
+              std::max(result.report.maxInterfaceDeviation,
+                  std::abs(levelSetValue(
+                      shape, result.mesh.getVertexCoordinates(v), t)));
+        }
+      }
+      return result;
+    }
+
+    bool localVertexMoveValid(
+        const LocalMesh& mesh,
+        Index vertex,
+        const Math::SpatialPoint& candidate,
+        Real minQuality = Real(1e-5))
+    {
+      const auto& conn = mesh.getConnectivity();
+      for (Index ci : conn.getIncidence({ 0, 2 }, vertex))
+      {
+        const auto& cell = conn.getPolytope(2, ci);
+        std::array<Math::SpatialPoint, 3> x{{
+          mesh.getVertexCoordinates(cell(0)),
+          mesh.getVertexCoordinates(cell(1)),
+          mesh.getVertexCoordinates(cell(2)) }};
+        for (size_t k = 0; k < 3; ++k)
+          if (cell(k) == vertex)
+            x[k] = candidate;
+        if (!(signedTriangleArea(x[0], x[1], x[2]) > Real(1e-14)))
+          return false;
+        if (triangleQuality(x[0], x[1], x[2]) < minQuality)
+          return false;
+      }
+      return true;
+    }
+
+    void snapInterfaceVerticesToAnalytic(
+        LocalMesh& mesh,
+        ShapeCase shape,
+        Real t,
+        Real maxMove)
+    {
+      mesh.getConnectivity().compute(0, 2);
+      mesh.getConnectivity().compute(1, 0);
+      std::vector<char> mask(mesh.getVertexCount(), 0);
+      const auto& conn = mesh.getConnectivity();
+      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        if (!attr || *attr != Interface)
+          continue;
+        const auto& edge = conn.getPolytope(1, e);
+        mask[edge(0)] = 1;
+        mask[edge(1)] = 1;
+      }
+      for (Index v = 0; v < static_cast<Index>(mesh.getVertexCount()); ++v)
+      {
+        if (v >= static_cast<Index>(mask.size()) || !mask[v])
+          continue;
+        const auto x = mesh.getVertexCoordinates(v);
+        auto p = projectToLevelSet(shape, t, x);
+        const Real d = (p - x).norm();
+        if (d > maxMove && d > Real(0))
+          p = x + (maxMove / d) * (p - x);
+        if (localVertexMoveValid(mesh, v, p))
+          mesh.setVertexCoordinates(v, p);
+      }
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 0);
+    }
+
+    TopologyResult cutShapeWithMMG(
         LocalMesh& background,
         ShapeCase shape,
         Real t,
-        Real snapTolerance,
-        Real minCutQuality)
+        size_t resolution)
     {
-      background.getConnectivity().compute(2, 1);
-      background.getConnectivity().compute(1, 0);
+      const Real h = Real(1) / static_cast<Real>(resolution - 1);
+      LocalMesh base(background);
+      base.getConnectivity().compute(2, 1);
+      base.getConnectivity().compute(1, 0);
+      resetCellAttributes(base, Negative);
+      annotateBoundary(base);
 
-      P1<Real, LocalMesh> phiSpace(background);
-      GridFunction phi(phiSpace);
-      for (Index v = 0; v < background.getVertexCount(); ++v)
-        phi[v] = levelSetValue(shape, background.getVertexCoordinates(v), t);
+      MMG::Mesh mmgMesh(std::move(base));
+      P1<Real, LocalMesh> phiSpace(mmgMesh);
+      MMG::RealGridFunction phi(phiSpace);
+      for (Index v = 0; v < mmgMesh.getVertexCount(); ++v)
+        phi[v] = levelSetValue(shape, mmgMesh.getVertexCoordinates(v), t);
 
-      auto cut = LevelSetDiscretizerTriangles(phi)
-        .setSignTolerance(1e-12)
-        .setInterfaceAttribute(Interface)
-        .setNegativeCellAttribute(Negative)
-        .setPositiveCellAttribute(Positive)
-        .setCrossingSnapTolerance(snapTolerance)
-        .setMinCutQuality(minCutQuality)
-        .discretize();
-      annotateBoundary(cut.mesh);
-      return cut;
+      MMG::Mesh fitted = MMG::LevelSetDiscretizer()
+        .split(Negative, { Negative, Positive })
+        .setBoundaryReference(Interface)
+        .setHMin(Real(0.35) * h)
+        .setHMax(Real(1.35) * h)
+        .setHausdorff(Real(0.05) * h)
+        .setGradation(Real(1.25))
+        .setAngleDetection(false)
+        .discretize(phi);
+      snapInterfaceVerticesToAnalytic(
+          fitted, shape, t, Real(0.35) * h);
+
+      return makeExternalCutResult(std::move(fitted), shape, t);
+    }
+
+    void optimizeMMGTopology(
+        LocalMesh& mesh,
+        size_t resolution)
+    {
+      const Real h = Real(1) / static_cast<Real>(resolution - 1);
+      MMG::Mesh mmgMesh(std::move(mesh));
+      MMG::Optimizer()
+        .setHMin(Real(0.35) * h)
+        .setHMax(Real(1.35) * h)
+        .setHausdorff(Real(0.05) * h)
+        .setGradation(Real(1.25))
+        .setAngleDetection(false)
+        .optimize(mmgMesh);
+      mmgMesh.getConnectivity().compute(2, 1);
+      mmgMesh.getConnectivity().compute(1, 0);
+      annotateBoundary(mmgMesh);
+      mesh = LocalMesh(std::move(mmgMesh));
     }
 
     std::pair<Real, Real> interfaceFit(
@@ -1187,272 +1421,31 @@ namespace Rodin::Tests::Benchmarks
       };
     }
 
-    template <class Metric>
-    bool solveTMOPWithMetric(
+    Index reclassifyCellsByAnalyticPhi(
         LocalMesh& mesh,
         ShapeCase shape,
-        Real t,
-        Metric metric,
-        Real qualityWeight,
-        Index maxIterations,
-        TMOPSolveStats* tmopStats = nullptr)
+        Real t)
     {
-      P1 space(mesh, mesh.getSpaceDimension());
-      GridFunction u(space);
-      u.getData().setZero();
-      TrialFunction du(space);
-      TestFunction v(space);
-
-      auto phiValue = [shape, t](const Math::SpatialPoint& x)
+      Index changed = 0;
+      const auto& conn = mesh.getConnectivity();
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
       {
-        return levelSetValue(shape, x, t);
-      };
-      auto phiGradient = [shape, t](const Math::SpatialPoint& x)
-      {
-        return levelSetGradient(shape, x, t);
-      };
-
-      QualityTerm quality(
-          metric,
-          IdealElementTargetJacobian(mesh),
-          qualityWeight);
-      DeviationTerm deviation(1.0);
-      AnalyticLevelSetFitTerm fit(
-          phiValue, phiGradient, Optional<Attribute>(Interface), 1.0);
-      AnalyticLevelSetFitTerm boundaryFit(
-          boxBoundaryValue, boxBoundaryGradient, Optional<Attribute>(Boundary), 1.0);
-
-      // Tangential interface constraint: every interface vertex is hard
-      // re-projected onto the analytic phi=0 after each line-search step, so
-      // the corner slides ALONG the level set instead of being held in place
-      // by a soft fit penalty. Matches the policy used by the example.
-      const Index ntv = mesh.getVertexCount();
-      std::vector<char> onInterface(static_cast<size_t>(ntv), 0);
-      {
-        const auto& connI = mesh.getConnectivity();
-        for (Index e = 0; e < static_cast<Index>(connI.getCount(1)); ++e)
+        if (conn.getGeometry(2, c) != Polytope::Type::Triangle)
+          continue;
+        const auto cellIt = mesh.getPolytope(2, c);
+        Math::SpatialPoint x;
+        cellIt->getTransformation().transform(
+            x, Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)});
+        const Attribute next =
+          levelSetValue(shape, x, t) <= Real(0) ? Negative : Positive;
+        const auto old = mesh.getAttribute(2, c);
+        if (!old || *old != next)
         {
-          const auto attr = mesh.getAttribute(1, e);
-          if (!attr || *attr != Interface)
-            continue;
-          const auto& edge = connI.getPolytope(1, e);
-          onInterface[static_cast<size_t>(edge(0))] = 1;
-          onInterface[static_cast<size_t>(edge(1))] = 1;
+          mesh.setAttribute({2, c}, next);
+          ++changed;
         }
       }
-      auto enforceInterfaceTangent = [&]()
-      {
-        auto& data = u.getData();
-        for (Index v = 0; v < ntv; ++v)
-        {
-          if (!onInterface[static_cast<size_t>(v)])
-            continue;
-          const auto x0 = mesh.getVertexCoordinates(v);
-          const Math::SpatialPoint xnow{
-            x0[0] + data(v),
-            x0[1] + data(v + ntv) };
-          const auto xproj = projectToLevelSet(shape, t, xnow);
-          data(v) = xproj[0] - x0[0];
-          data(v + ntv) = xproj[1] - x0[1];
-        }
-      };
-
-      // Local Armijo/validity line-searched Newton. Unlike NewtonSolver
-      // (constant damping only) this backtracks the step until the barrier
-      // quality energy is finite and does not increase, so a barrier metric
-      // (ShapeDistortion) cannot cross det<=0 and is actually usable.
-      auto makeTangent = [&]()
-      {
-        return quality.tangent(u, du, v) + deviation.tangent(du, v)
-             + fit.tangent(u, du, v) + boundaryFit.tangent(u, du, v);
-      };
-      auto makeResidual = [&]()
-      {
-        return quality.residual(u, v) + deviation.residual(u, v)
-             + fit.residual(u, v) + boundaryFit.residual(u, v);
-      };
-      auto meritEnergy = [&]()
-      {
-        return quality.energy(u)
-          + deviation.energy(u)
-          + fit.energy(u)
-          + boundaryFit.energy(u);
-      };
-
-      bool acceptedAny = false;
-      try
-      {
-        for (Index it = 0; it < maxIterations; ++it)
-        {
-          if (tmopStats)
-            tmopStats->iterations++;
-          auto start = BenchClock::now();
-          LinearForm R(v);
-          R = makeResidual();
-          R.assemble();
-          if (tmopStats)
-            tmopStats->assemblySeconds += elapsedSeconds(start);
-          const auto r = R.getVector();
-          if (!r.allFinite())
-          {
-            if (acceptedAny)
-              break;
-            return false;
-          }
-          if (r.norm() <= Real(1e-10))
-            break;
-
-          start = BenchClock::now();
-          BilinearForm J(du, v);
-          J = makeTangent();
-          J.assemble();
-          if (tmopStats)
-            tmopStats->assemblySeconds += elapsedSeconds(start);
-
-          start = BenchClock::now();
-          Eigen::SparseLU<std::decay_t<decltype(J.getOperator())>> lu;
-          lu.compute(J.getOperator());
-          if (lu.info() != Eigen::Success)
-          {
-            if (acceptedAny)
-              break;
-            return false;
-          }
-          const Math::Vector<Real> rhs = -r;          // Newton: J dx = -R
-          const Math::Vector<Real> dx = lu.solve(rhs);
-          if (tmopStats)
-            tmopStats->solveSeconds += elapsedSeconds(start);
-          if (lu.info() != Eigen::Success || !dx.allFinite())
-          {
-            if (acceptedAny)
-              break;
-            return false;
-          }
-
-          start = BenchClock::now();
-          const Real e0 = meritEnergy();
-          if (tmopStats)
-            tmopStats->meritSeconds += elapsedSeconds(start);
-          const Math::Vector<Real> u0 = u.getData();
-          Real alpha = Real(1);
-          bool accepted = false;
-          for (int ls = 0; ls < 30; ++ls)
-          {
-            u.getData() = u0 + alpha * dx;
-            enforceInterfaceTangent();
-            start = BenchClock::now();
-            const Real e = meritEnergy();
-            if (tmopStats)
-              tmopStats->meritSeconds += elapsedSeconds(start);
-            if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12)))
-            {
-              LocalMesh trialMesh(mesh);
-              const Index nvTrial = trialMesh.getVertexCount();
-              for (Index vtx = 0; vtx < nvTrial; ++vtx)
-              {
-                auto x = trialMesh.getVertexCoordinates(vtx);
-                x[0] += u.getData()(vtx);
-                x[1] += u.getData()(vtx + nvTrial);
-                trialMesh.setVertexCoordinates(vtx, x);
-              }
-              trialMesh.getConnectivity().compute(2, 1);
-              trialMesh.getConnectivity().compute(1, 0);
-              const auto trialStats = meshStats(trialMesh);
-              if (trialStats.inverted == 0
-                  && std::isfinite(trialStats.minQuality)
-                  && trialStats.minQuality > Real(0)
-                  && std::isfinite(trialStats.coverage)
-                  && trialStats.coverage > Real(0.8)
-                  && trialStats.coverage < Real(1.2))
-              {
-                accepted = true;
-                break;
-              }
-            }
-            alpha *= Real(0.5);
-          }
-          if (!accepted)
-          {
-            u.getData() = u0;                          // keep best so far
-            break;
-          }
-          acceptedAny = true;
-          if (alpha * dx.norm() <= Real(1e-10))
-            break;
-        }
-      }
-      catch (...)
-      {
-        return false;
-      }
-
-      const auto& data = u.getData();
-      for (Eigen::Index i = 0; i < data.size(); ++i)
-      {
-        if (!std::isfinite(data(i)))
-          return false;
-      }
-
-      const Index nv = mesh.getVertexCount();
-      std::vector<Math::SpatialPoint> originalVertices;
-      originalVertices.reserve(static_cast<size_t>(nv));
-      for (Index vtx = 0; vtx < nv; ++vtx)
-        originalVertices.push_back(mesh.getVertexCoordinates(vtx));
-
-      for (Index vtx = 0; vtx < nv; ++vtx)
-      {
-        auto x = mesh.getVertexCoordinates(vtx);
-        x[0] += data(vtx);
-        x[1] += data(vtx + nv);
-        mesh.setVertexCoordinates(vtx, x);
-      }
-      mesh.getConnectivity().compute(2, 1);
-      mesh.getConnectivity().compute(1, 0);
-
-      const auto stats = meshStats(mesh);
-      const bool valid =
-        stats.inverted == 0
-        && std::isfinite(stats.coverage)
-        && std::isfinite(stats.signedArea)
-        && stats.coverage > Real(0.8)
-        && stats.coverage < Real(1.2);
-      if (!valid)
-      {
-        for (Index vtx = 0; vtx < nv; ++vtx)
-          mesh.setVertexCoordinates(vtx, originalVertices[vtx]);
-        mesh.getConnectivity().compute(2, 1);
-        mesh.getConnectivity().compute(1, 0);
-        return false;
-      }
-      return true;
-    }
-
-    bool solveTMOP(
-        LocalMesh& mesh,
-        ShapeCase shape,
-        Real t,
-        MetricCase metricCase = MetricCase::SquaredDistance,
-        TMOPSolveStats* stats = nullptr)
-    {
-      switch (metricCase)
-      {
-        case MetricCase::SquaredDistance:
-          return solveTMOPWithMetric(
-              mesh, shape, t, SquaredDistanceMetric{}, 0.05, 5, stats);
-        case MetricCase::AreaDistortion:
-          return solveTMOPWithMetric(
-              mesh, shape, t, AreaDistortionMetric{}, 0.05, 5, stats);
-        case MetricCase::ShapeSize:
-          return solveTMOPWithMetric(
-              mesh, shape, t, ShapeSizeMetric{}, 0.03, 5, stats);
-        case MetricCase::ShapeDistortion:
-          // The pure shape barrier has a scale nullspace and still lacks
-          // line-searched step rejection in NewtonSolver; keep it in the
-          // benchmark matrix, but with a conservative one-step diagnostic.
-          return solveTMOPWithMetric(
-              mesh, shape, t, ShapeDistortionMetric{}, 0.02, 1, stats);
-      }
-      return false;
+      return changed;
     }
 
     template <class Metric>
@@ -1485,6 +1478,7 @@ namespace Rodin::Tests::Benchmarks
         };
         auto solveWithTarget = [&](const auto& target)
         {
+          LocalMesh beforeSolve(mesh);
           QualityTerm quality(metric, target, qualityWeight);
           quality.setQuadratureOrder(4);
           DeviationTerm deviation(Real(0.25));
@@ -1541,11 +1535,13 @@ namespace Rodin::Tests::Benchmarks
           demoteTransformations(mesh);
 
           Index invalid = 0;
+          Index overlap = 0;
           Real minJac = 0;
           Real minQ = 0;
           if (tmopStats && tmopStats->hasCurvedMetrics)
           {
             invalid = tmopStats->curvedInvalidSamples;
+            overlap = tmopStats->curvedOverlapSamples;
             minJac = tmopStats->curvedMinJacobian;
             minQ = tmopStats->curvedMinQuality;
           }
@@ -1553,15 +1549,32 @@ namespace Rodin::Tests::Benchmarks
           {
             const auto curved = curvedInterfaceStats(mesh, shape, t);
             invalid = curved.invalidJacobianSamples;
+            overlap = curved.overlapSamples;
             minJac = curved.minJacobian;
             minQ = curved.minQuality;
           }
-          return invalid == 0
+          const auto finalStats = meshStats(mesh);
+          const bool valid = invalid == 0
+            && overlap == 0
             && minJac > Real(0)
             && std::isfinite(minJac)
             && minQ > Real(0)
             && std::isfinite(minQ)
+            && finalStats.inverted == 0
+            && std::isfinite(finalStats.coverage)
+            && finalStats.coverage > Real(0.8)
+            && finalStats.coverage < Real(1.2)
             && (report.converged || report.iterations > 0);
+          if (!valid)
+          {
+            mesh = std::move(beforeSolve);
+            mesh.getConnectivity().compute(2, 1);
+            mesh.getConnectivity().compute(1, 0);
+            if (tmopStats)
+              tmopStats->hasCurvedMetrics = false;
+            return false;
+          }
+          return true;
         };
 
         switch (targetCase)
@@ -1629,151 +1642,9 @@ namespace Rodin::Tests::Benchmarks
       return false;
     }
 
-    bool solveSquaredTMOP(
-        LocalMesh& mesh,
-        ShapeCase shape,
-        Real t,
-        Real qualityWeight,
-        TMOPSolveStats* stats = nullptr)
-    {
-      return solveTMOPWithMetric(
-          mesh, shape, t, SquaredDistanceMetric{}, qualityWeight, 5, stats);
-    }
-
-    TriangleMeshOptimizerParameters defaultOptimizerParameters(
-        size_t resolution)
-    {
-      const Real h = Real(1) / static_cast<Real>(resolution - 1);
-      return TriangleMeshOptimizerParameters::levelSetCarryForward(h);
-    }
-
-    TriangleMeshOptimizerParameters optimizerParametersForStage(
-        size_t resolution,
-        StageCase stage)
-    {
-      auto parameters = defaultOptimizerParameters(resolution);
-      if (stage == StageCase::OptimizeNoFeature)
-      {
-        parameters.featureSmoothingPasses = 0;
-        parameters.featureCollapseLength = 0;
-      }
-      if (stage == StageCase::OptimizeNoInterior)
-        parameters.smoothingPasses = 0;
-      return parameters;
-    }
-
-    TriangleMeshOptimizerReport coarsen(
-        LocalMesh& mesh,
-        size_t resolution,
-        ShapeCase shape,
-        Real t,
-        const TriangleMeshOptimizerParameters& parameters)
-    {
-      std::vector<char> frozen(mesh.getVertexCount(), 0);
-      const auto& conn = mesh.getConnectivity();
-      for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
-      {
-        const auto attr = mesh.getAttribute(1, e);
-        if (!attr || *attr != Interface)
-          continue;
-        const auto& edge = conn.getPolytope(1, e);
-        frozen[edge(0)] = 1;
-        frozen[edge(1)] = 1;
-      }
-
-      // Snap a candidate point back onto phi=0 via two Newton steps on the
-      // analytic level set: x <- x - phi(x) grad(x) / |grad|^2. Keeps the
-      // fit exact while interface vertices are tangentially smoothed.
-      auto projectToInterface =
-        [shape, t](const Math::SpatialPoint& x) -> Math::SpatialPoint
-      {
-        return projectToLevelSet(shape, t, x, 2);
-      };
-
-      auto report = TriangleMeshOptimizer()
-        .setParameters(parameters)
-        .setFeatureProjection(projectToInterface)
-        .setProtectedVertices(std::move(frozen))
-        .optimize(mesh);
-
-      // Validity-gated tangent-vertex spreading: one Laplacian-with-
-      // projection pass along the interface chain so clustered interface
-      // corners (the topology that snap=0 + cut can leave behind) are
-      // dispersed BEFORE TMOP runs. Each candidate move is accepted only if
-      // every incident triangle stays orientation-preserving -- this
-      // matches the optimizer's own smoothing-pass policy and prevents the
-      // spreading from flipping any sliver cell. Re-projects each smoothed
-      // vertex onto phi=0 so the analytic fit is preserved exactly.
-      mesh.getConnectivity().compute(0, 2);
-      mesh.getConnectivity().compute(1, 0);
-      const auto& connS = mesh.getConnectivity();
-      std::vector<std::vector<Index>> ifaceNbr(mesh.getVertexCount());
-      for (Index e = 0; e < static_cast<Index>(connS.getCount(1)); ++e)
-      {
-        const auto attr = mesh.getAttribute(1, e);
-        if (!attr || *attr != Interface)
-          continue;
-        const auto& edge = connS.getPolytope(1, e);
-        ifaceNbr[static_cast<size_t>(edge(0))].push_back(edge(1));
-        ifaceNbr[static_cast<size_t>(edge(1))].push_back(edge(0));
-      }
-      constexpr int kSpreadPasses = 3;
-      const Real omega = Real(0.3);
-      for (int p = 0; p < kSpreadPasses; ++p)
-      {
-        for (Index v = 0;
-             v < static_cast<Index>(mesh.getVertexCount()); ++v)
-        {
-          const auto& nbrs = ifaceNbr[static_cast<size_t>(v)];
-          if (nbrs.size() != 2)
-            continue;
-          const auto a = mesh.getVertexCoordinates(nbrs[0]);
-          const auto b = mesh.getVertexCoordinates(nbrs[1]);
-          const Math::SpatialPoint mid{
-            (a[0] + b[0]) * Real(0.5),
-            (a[1] + b[1]) * Real(0.5) };
-          const auto proj = projectToInterface(mid);
-          const auto cur = mesh.getVertexCoordinates(v);
-          const Math::SpatialPoint trial{
-            cur[0] + omega * (proj[0] - cur[0]),
-            cur[1] + omega * (proj[1] - cur[1]) };
-          bool valid = true;
-          for (Index ci : connS.getIncidence({ 0, 2 }, v))
-          {
-            const auto& cell = connS.getPolytope(2, ci);
-            std::array<Math::SpatialPoint, 3> p3;
-            for (size_t k = 0; k < 3; ++k)
-              p3[k] = (cell(k) == v)
-                ? trial
-                : mesh.getVertexCoordinates(cell(k));
-            const Real orient =
-                (p3[1][0] - p3[0][0]) * (p3[2][1] - p3[0][1])
-              - (p3[1][1] - p3[0][1]) * (p3[2][0] - p3[0][0]);
-            if (!(orient > Real(0))) { valid = false; break; }
-          }
-          if (valid)
-            mesh.setVertexCoordinates(v, trial);
-        }
-      }
-      mesh.getConnectivity().compute(2, 1);
-      mesh.getConnectivity().compute(1, 0);
-      return report;
-    }
-
-    TriangleMeshOptimizerReport coarsen(
-        LocalMesh& mesh,
-        size_t resolution,
-        ShapeCase shape,
-        Real t)
-    {
-      return coarsen(mesh, resolution, shape, t,
-          defaultOptimizerParameters(resolution));
-    }
-
     StageCounters collectStageCounters(
-        const LevelSetDiscretizerTrianglesResult& cut,
+        const TopologyResult& cut,
         const LocalMesh& finalMesh,
-        const TriangleMeshOptimizerReport* optReport,
         ShapeCase shape,
         bool tmopSucceeded,
         Real t,
@@ -1784,10 +1655,17 @@ namespace Rodin::Tests::Benchmarks
       const auto fit = interfaceFit(finalMesh, shape, t);
       counters.cutCells = cut.mesh.getCellCount();
       counters.finalCells = finalMesh.getCellCount();
-      counters.interfaceEdges = cut.report.interfaceEdgeProvenance.size();
+      counters.interfaceEdges = cut.report.interfaceEdgeCount;
       counters.uncutCells = cut.report.uncutCellCount;
       counters.snappedCrossings = cut.report.snappedCrossingCount;
       counters.pathologicalCuts = cut.report.pathologicalCutCount;
+      counters.macroBoundaryCuts = cut.report.macroBoundaryCutCount;
+      counters.macroBoundaryCutRejectedByQuality =
+        cut.report.macroBoundaryCutRejectedByQualityCount;
+      counters.sampledStencilFallbacks = cut.report.sampledStencilFallbackCount;
+      counters.noCutQualityFallbacks = cut.report.noCutQualityFallbackCount;
+      counters.graphOnlyFallbacks = cut.report.graphOnlyFallbackCount;
+      counters.cutStencilOrder = cut.report.referenceStencilOrder;
       counters.cutMinQuality = cut.report.minOutputCellQuality;
       counters.finalMinQuality = stats.minQuality;
       counters.fitRms = fit.first;
@@ -1808,15 +1686,6 @@ namespace Rodin::Tests::Benchmarks
       counters.maxInterfaceDeviation = cut.report.maxInterfaceDeviation;
       counters.inverted = stats.inverted;
       counters.tmopFailures = tmopSucceeded ? 0 : 1;
-      if (optReport)
-      {
-        counters.splits = optReport->splits;
-        counters.collapses = optReport->collapses;
-        counters.featureCollapses = optReport->featureCollapses;
-        counters.swaps = optReport->swaps;
-        counters.smooths = optReport->smooths;
-        counters.featureSmooths = optReport->featureSmooths;
-      }
 
       return counters;
     }
@@ -1831,6 +1700,18 @@ namespace Rodin::Tests::Benchmarks
       st.counters["uncut_cells"] = benchmark::Counter(counters.uncutCells);
       st.counters["snapped"] = benchmark::Counter(counters.snappedCrossings);
       st.counters["pathological"] = benchmark::Counter(counters.pathologicalCuts);
+      st.counters["cut_stencil_order"] =
+        benchmark::Counter(counters.cutStencilOrder);
+      st.counters["cut_macro"] =
+        benchmark::Counter(counters.macroBoundaryCuts);
+      st.counters["cut_macro_rejected"] =
+        benchmark::Counter(counters.macroBoundaryCutRejectedByQuality);
+      st.counters["cut_sampled_fallback"] =
+        benchmark::Counter(counters.sampledStencilFallbacks);
+      st.counters["cut_nocut_fallback"] =
+        benchmark::Counter(counters.noCutQualityFallbacks);
+      st.counters["cut_graph_only_fallback"] =
+        benchmark::Counter(counters.graphOnlyFallbacks);
       st.counters["feature_collapses"] =
         benchmark::Counter(counters.featureCollapses);
       st.counters["qmin_cut"] = benchmark::Counter(counters.cutMinQuality);
@@ -1992,6 +1873,8 @@ namespace Rodin::Tests::Benchmarks
         benchmark::Counter(counters.tmopIterations);
       st.counters["inverted"] = benchmark::Counter(counters.inverted);
       st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
+      st.counters["reclassified_cells"] =
+        benchmark::Counter(counters.reclassifiedCells);
       st.counters["splits"] = benchmark::Counter(counters.splits);
       st.counters["collapses"] = benchmark::Counter(counters.collapses);
       st.counters["swaps"] = benchmark::Counter(counters.swaps);
@@ -2002,9 +1885,8 @@ namespace Rodin::Tests::Benchmarks
 
     StageCounters setCounters(
         benchmark::State& st,
-        const LevelSetDiscretizerTrianglesResult& cut,
+        const TopologyResult& cut,
         const LocalMesh& finalMesh,
-        const TriangleMeshOptimizerReport* optReport,
         ShapeCase shape,
         bool tmopSucceeded,
         Real t,
@@ -2012,14 +1894,16 @@ namespace Rodin::Tests::Benchmarks
         Real optimizeSeconds = 0,
         Real tmopSeconds = 0,
         const TMOPSolveStats* tmopStats = nullptr,
-        bool hasP2Diagnostics = false)
+        bool hasP2Diagnostics = false,
+        Index reclassifiedCells = 0)
     {
       auto counters = collectStageCounters(
-          cut, finalMesh, optReport, shape, tmopSucceeded, t,
+          cut, finalMesh, shape, tmopSucceeded, t,
           hasP2Diagnostics);
       counters.cutSeconds = cutSeconds;
       counters.optimizeSeconds = optimizeSeconds;
       counters.tmopSeconds = tmopSeconds;
+      counters.reclassifiedCells = reclassifiedCells;
       if (tmopStats)
       {
         counters.tmopAssemblySeconds = tmopStats->assemblySeconds;
@@ -2054,1033 +1938,168 @@ namespace Rodin::Tests::Benchmarks
           mesh.setAttribute({1, e}, Attribute(0));
       }
     }
-  }
 
-  static void BM_LevelSetPipeline_CutExact(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    StageCounters counters;
-    for (auto _ : st)
+    static void BM_LevelSetPipeline_CurvedTargetCarryForwardOrbit(
+        benchmark::State& st)
     {
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      benchmark::DoNotOptimize(cut.mesh.getCellCount());
-      counters =
-        setCounters(st, cut, cut.mesh, nullptr, shape, true, Real(0.25),
-            cutSeconds);
-    }
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.SetItemsProcessed(st.iterations() * counters.cutCells);
-  }
-
-  static void BM_LevelSetPipeline_CutQualityAware(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    StageCounters counters;
-    for (auto _ : st)
-    {
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      benchmark::DoNotOptimize(cut.mesh.getCellCount());
-      counters =
-        setCounters(st, cut, cut.mesh, nullptr, shape, true, Real(0.25),
-            cutSeconds);
-    }
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.SetItemsProcessed(st.iterations() * counters.cutCells);
-  }
-
-  static void BM_LevelSetPipeline_TMOPMetricFreshCut(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    const auto metric = static_cast<MetricCase>(st.range(2));
-    StageCounters counters;
-    for (auto _ : st)
-    {
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      auto optimized = cut.mesh;
-      TMOPSolveStats tmopStats;
-      const auto tmopStart = BenchClock::now();
-      const bool tmopOk =
-        solveTMOP(optimized, shape, Real(0.25), metric, &tmopStats);
-      const Real tmopSeconds = elapsedSeconds(tmopStart);
-      benchmark::DoNotOptimize(optimized.getCellCount());
-      counters =
-        setCounters(st, cut, optimized, nullptr, shape, tmopOk, Real(0.25),
-            cutSeconds, 0, tmopSeconds, &tmopStats);
-    }
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.SetItemsProcessed(st.iterations() * counters.cutCells);
-  }
-
-  static void BM_LevelSetPipeline_CoarsenAfterTMOP(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    StageCounters counters;
-    for (auto _ : st)
-    {
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      auto optimized = cut.mesh;
-      TMOPSolveStats tmopStats;
-      const auto tmopStart = BenchClock::now();
-      const bool tmopOk =
-        solveTMOP(optimized, shape, Real(0.25),
-            MetricCase::SquaredDistance, &tmopStats);
-      const Real tmopSeconds = elapsedSeconds(tmopStart);
-      const auto optStart = BenchClock::now();
-      const auto report = coarsen(optimized, resolution, shape, Real(0.25));
-      const Real optimizeSeconds = elapsedSeconds(optStart);
-      benchmark::DoNotOptimize(optimized.getCellCount());
-      counters =
-        setCounters(st, cut, optimized, &report, shape, tmopOk, Real(0.25),
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats);
-    }
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_StageFreshCut(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    const auto metric = static_cast<MetricCase>(st.range(2));
-    const auto stage = static_cast<StageCase>(st.range(3));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      auto optimized = cut.mesh;
-      bool tmopOk = true;
-      TriangleMeshOptimizerReport report;
-      TMOPSolveStats tmopStats;
-      Real optimizeSeconds = 0;
-      Real tmopSeconds = 0;
-      const auto config = optimizerParametersForStage(resolution, stage);
-      switch (stage)
+      const auto resolution = static_cast<size_t>(st.range(0));
+      const auto steps = static_cast<Index>(st.range(1));
+      const auto shape = static_cast<ShapeCase>(st.range(2));
+      const auto metric = static_cast<MetricCase>(st.range(3));
+      const auto target = static_cast<CurvedTargetCase>(st.range(4));
+      StageCounters counters;
+      StageAverages averages;
+      for (auto _ : st)
       {
-        case StageCase::TMOPOnly:
+        averages = StageAverages{};
+        auto background = makeBackground(resolution);
+        Index tmopFailures = 0;
+        for (Index step = 0; step < steps; ++step)
         {
-          const auto start = BenchClock::now();
-          tmopOk = solveTMOP(
-              optimized, shape, Real(0.25), metric, &tmopStats);
-          tmopSeconds += elapsedSeconds(start);
-          break;
+          const Real t = static_cast<Real>(step)
+            / static_cast<Real>(std::max<Index>(1, steps - 1));
+          const auto cutStart = BenchClock::now();
+          auto topology =
+            makeUncutLevelSetProxy(LocalMesh(background), shape, t);
+          const Real cutSeconds = elapsedSeconds(cutStart);
+          auto curved = topology.mesh;
+          curved.getConnectivity().compute(2, 1);
+          curved.getConnectivity().compute(1, 0);
+
+          TMOPSolveStats tmopStats;
+          const auto tmopStart = BenchClock::now();
+          const bool tmopOk =
+            solveCurvedTMOP(curved, shape, t, metric, target, &tmopStats);
+          const Real tmopSeconds = elapsedSeconds(tmopStart);
+          const Index reclassified =
+            reclassifyCellsByAnalyticPhi(curved, shape, t);
+          if (!tmopOk)
+            tmopFailures++;
+
+          counters = setCounters(st, topology, curved, shape, tmopOk, t,
+              cutSeconds, 0, tmopSeconds, &tmopStats, true,
+              reclassified);
+          averages.add(counters);
+
+          demoteInterface(curved);
+          curved.flush();
+          background = std::move(curved);
         }
-        case StageCase::OptimizeOnly:
+        counters.tmopFailures = tmopFailures;
+        benchmark::DoNotOptimize(background.getCellCount());
+      }
+      averages.publish(st);
+      st.counters["resolution"] = benchmark::Counter(resolution);
+      st.counters["orbit_steps"] = benchmark::Counter(steps);
+      st.counters["curved_geometry"] = benchmark::Counter(1);
+      st.counters["curved_target_case"] =
+        benchmark::Counter(static_cast<int>(target));
+      st.counters["production_order"] = benchmark::Counter(1);
+      st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
+      st.SetItemsProcessed(st.iterations() * counters.finalCells);
+    }
+
+    static void BM_LevelSetPipeline_CurvedMMGCarryForwardOrbit(
+        benchmark::State& st)
+    {
+      const auto resolution = static_cast<size_t>(st.range(0));
+      const auto steps = static_cast<Index>(st.range(1));
+      const auto shape = static_cast<ShapeCase>(st.range(2));
+      const auto metric = static_cast<MetricCase>(st.range(3));
+      const auto target = static_cast<CurvedTargetCase>(st.range(4));
+      StageCounters counters;
+      StageAverages averages;
+      for (auto _ : st)
+      {
+        averages = StageAverages{};
+        auto background = makeBackground(resolution);
+        Index tmopFailures = 0;
+        for (Index step = 0; step < steps; ++step)
         {
-          const auto start = BenchClock::now();
-          report = coarsen(optimized, resolution, shape, Real(0.25), config);
-          optimizeSeconds += elapsedSeconds(start);
-          break;
+          const Real t = static_cast<Real>(step)
+            / static_cast<Real>(std::max<Index>(1, steps - 1));
+          const auto cutStart = BenchClock::now();
+          auto topology = cutShapeWithMMG(background, shape, t, resolution);
+          const Real cutSeconds = elapsedSeconds(cutStart);
+          auto optimized = topology.mesh;
+
+          const auto optStart = BenchClock::now();
+          optimizeMMGTopology(optimized, resolution);
+          const Real optimizeSeconds = elapsedSeconds(optStart);
+
+          optimized.getConnectivity().compute(2, 1);
+          optimized.getConnectivity().compute(1, 0);
+          auto curved = optimized;
+
+          TMOPSolveStats tmopStats;
+          const auto tmopStart = BenchClock::now();
+          const bool tmopOk =
+            solveCurvedTMOP(curved, shape, t, metric, target, &tmopStats);
+          const Real tmopSeconds = elapsedSeconds(tmopStart);
+          const Index reclassified =
+            reclassifyCellsByAnalyticPhi(curved, shape, t);
+          if (!tmopOk)
+            tmopFailures++;
+
+          counters = setCounters(st, topology, curved, shape, tmopOk, t,
+              cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats, true,
+              reclassified);
+          averages.add(counters);
+
+          demoteInterface(curved);
+          curved.flush();
+          background = std::move(curved);
         }
-        case StageCase::TMOPThenOptimize:
-        case StageCase::OptimizeNoFeature:
-        case StageCase::OptimizeNoInterior:
-        {
-          auto start = BenchClock::now();
-          tmopOk = solveTMOP(
-              optimized, shape, Real(0.25), metric, &tmopStats);
-          tmopSeconds += elapsedSeconds(start);
-          start = BenchClock::now();
-          report = coarsen(optimized, resolution, shape, Real(0.25), config);
-          optimizeSeconds += elapsedSeconds(start);
-          break;
-        }
-        case StageCase::OptimizeThenTMOP:
-        {
-          auto start = BenchClock::now();
-          report = coarsen(optimized, resolution, shape, Real(0.25), config);
-          optimizeSeconds += elapsedSeconds(start);
-          start = BenchClock::now();
-          tmopOk = solveTMOP(
-              optimized, shape, Real(0.25), metric, &tmopStats);
-          tmopSeconds += elapsedSeconds(start);
-          break;
-        }
+        counters.tmopFailures = tmopFailures;
+        benchmark::DoNotOptimize(background.getCellCount());
       }
-      benchmark::DoNotOptimize(optimized.getCellCount());
-      counters =
-        setCounters(st, cut, optimized, &report, shape, tmopOk, Real(0.25),
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats);
-      averages.add(counters);
+      averages.publish(st);
+      st.counters["resolution"] = benchmark::Counter(resolution);
+      st.counters["orbit_steps"] = benchmark::Counter(steps);
+      st.counters["curved_geometry"] = benchmark::Counter(1);
+      st.counters["mmg_topology"] = benchmark::Counter(1);
+      st.counters["curved_target_case"] =
+        benchmark::Counter(static_cast<int>(target));
+      st.counters["production_order"] = benchmark::Counter(1);
+      st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
+      st.SetItemsProcessed(st.iterations() * counters.finalCells);
     }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["stage_case"] = benchmark::Counter(static_cast<int>(stage));
-    st.counters["production_order"] =
-      benchmark::Counter(stage == ProductionStageCase ? 1 : 0);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
   }
 
-  static void BM_LevelSetPipeline_TMOPSquaredWeightFreshCut(
-      benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    const Real qualityWeight =
-      static_cast<Real>(st.range(2)) / static_cast<Real>(1000);
-    StageCounters counters;
-    for (auto _ : st)
-    {
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      auto optimized = cut.mesh;
-      TMOPSolveStats tmopStats;
-      const auto tmopStart = BenchClock::now();
-      const bool tmopOk =
-        solveSquaredTMOP(
-            optimized, shape, Real(0.25), qualityWeight, &tmopStats);
-      const Real tmopSeconds = elapsedSeconds(tmopStart);
-      benchmark::DoNotOptimize(optimized.getCellCount());
-      counters =
-        setCounters(st, cut, optimized, nullptr, shape, tmopOk, Real(0.25),
-            cutSeconds, 0, tmopSeconds, &tmopStats);
-    }
-    st.counters["quality_weight"] = benchmark::Counter(qualityWeight);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.SetItemsProcessed(st.iterations() * counters.cutCells);
-  }
-
-  static void BM_LevelSetPipeline_CarryForwardOrbit(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto steps = static_cast<Index>(st.range(1));
-    const auto shape = static_cast<ShapeCase>(st.range(2));
-    const auto metric = static_cast<MetricCase>(st.range(3));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      Index tmopFailures = 0;
-      for (Index step = 0; step < steps; ++step)
-      {
-        const Real t = static_cast<Real>(step)
-          / static_cast<Real>(std::max<Index>(1, steps - 1));
-        const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
-        const Real cutSeconds = elapsedSeconds(cutStart);
-        auto optimized = cut.mesh;
-        const auto optStart = BenchClock::now();
-        const auto report = coarsen(optimized, resolution, shape, t);
-        const Real optimizeSeconds = elapsedSeconds(optStart);
-        TMOPSolveStats tmopStats;
-        const auto tmopStart = BenchClock::now();
-        const bool tmopOk =
-          solveTMOP(optimized, shape, t, metric, &tmopStats);
-        const Real tmopSeconds = elapsedSeconds(tmopStart);
-        if (!tmopOk)
-          tmopFailures++;
-        optimized.getConnectivity().compute(2, 1);
-        optimized.getConnectivity().compute(1, 0);
-        counters = setCounters(st, cut, optimized, &report, shape, tmopOk, t,
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats);
-        averages.add(counters);
-        demoteInterface(optimized);
-        background = std::move(optimized);
-      }
-      counters.tmopFailures = tmopFailures;
-      benchmark::DoNotOptimize(background.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["orbit_steps"] = benchmark::Counter(steps);
-    st.counters["production_order"] = benchmark::Counter(1);
-    st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_CurvedFreshCut(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    const auto metric = static_cast<MetricCase>(st.range(2));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      auto optimized = cut.mesh;
-
-      const auto optStart = BenchClock::now();
-      const auto report = coarsen(optimized, resolution, shape, Real(0.25));
-      const Real optimizeSeconds = elapsedSeconds(optStart);
-
-      optimized.getConnectivity().compute(2, 1);
-      optimized.getConnectivity().compute(1, 0);
-      auto curved = optimized;
-
-      TMOPSolveStats tmopStats;
-      const auto tmopStart = BenchClock::now();
-      const bool tmopOk =
-        solveCurvedTMOP(curved, shape, Real(0.25), metric,
-            CurvedTargetCase::ProjectedInterface, &tmopStats);
-      const Real tmopSeconds = elapsedSeconds(tmopStart);
-
-      counters = setCounters(st, cut, curved, &report, shape, tmopOk,
-          Real(0.25), cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats,
-          true);
-      averages.add(counters);
-      benchmark::DoNotOptimize(curved.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["curved_geometry"] = benchmark::Counter(1);
-    st.counters["production_order"] = benchmark::Counter(1);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_CurvedCarryForwardOrbit(
-      benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto steps = static_cast<Index>(st.range(1));
-    const auto shape = static_cast<ShapeCase>(st.range(2));
-    const auto metric = static_cast<MetricCase>(st.range(3));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      Index tmopFailures = 0;
-      for (Index step = 0; step < steps; ++step)
-      {
-        const Real t = static_cast<Real>(step)
-          / static_cast<Real>(std::max<Index>(1, steps - 1));
-        const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
-        const Real cutSeconds = elapsedSeconds(cutStart);
-        auto optimized = cut.mesh;
-
-        const auto optStart = BenchClock::now();
-        const auto report = coarsen(optimized, resolution, shape, t);
-        const Real optimizeSeconds = elapsedSeconds(optStart);
-
-        optimized.getConnectivity().compute(2, 1);
-        optimized.getConnectivity().compute(1, 0);
-        auto curved = optimized;
-
-        TMOPSolveStats tmopStats;
-        const auto tmopStart = BenchClock::now();
-        const bool tmopOk =
-          solveCurvedTMOP(curved, shape, t, metric,
-              CurvedTargetCase::ProjectedInterface, &tmopStats);
-        const Real tmopSeconds = elapsedSeconds(tmopStart);
-        if (!tmopOk)
-          tmopFailures++;
-
-        counters = setCounters(st, cut, curved, &report, shape, tmopOk, t,
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats, true);
-        averages.add(counters);
-
-        // Carry the endpoint motion produced by the curved TMOP solve into
-        // the next linear cut. The cutter is still P1/topological, so clear
-        // the P2 transformations after preserving the updated vertices.
-        demoteInterface(curved);
-        curved.flush();
-        background = std::move(curved);
-      }
-      counters.tmopFailures = tmopFailures;
-      benchmark::DoNotOptimize(background.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["orbit_steps"] = benchmark::Counter(steps);
-    st.counters["curved_geometry"] = benchmark::Counter(1);
-    st.counters["production_order"] = benchmark::Counter(1);
-    st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_CurvedTargetFreshCut(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto shape = static_cast<ShapeCase>(st.range(1));
-    const auto metric = static_cast<MetricCase>(st.range(2));
-    const auto target = static_cast<CurvedTargetCase>(st.range(3));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      const auto cutStart = BenchClock::now();
-      auto cut = cutShape(background, shape, Real(0.25), Real(0), Real(0.2));
-      const Real cutSeconds = elapsedSeconds(cutStart);
-      auto optimized = cut.mesh;
-
-      const auto optStart = BenchClock::now();
-      const auto report = coarsen(optimized, resolution, shape, Real(0.25));
-      const Real optimizeSeconds = elapsedSeconds(optStart);
-
-      optimized.getConnectivity().compute(2, 1);
-      optimized.getConnectivity().compute(1, 0);
-      auto curved = optimized;
-
-      TMOPSolveStats tmopStats;
-      const auto tmopStart = BenchClock::now();
-      const bool tmopOk =
-        solveCurvedTMOP(curved, shape, Real(0.25), metric, target, &tmopStats);
-      const Real tmopSeconds = elapsedSeconds(tmopStart);
-
-      counters = setCounters(st, cut, curved, &report, shape, tmopOk,
-          Real(0.25), cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats,
-          true);
-      averages.add(counters);
-      benchmark::DoNotOptimize(curved.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["curved_geometry"] = benchmark::Counter(1);
-    st.counters["curved_target_case"] =
-      benchmark::Counter(static_cast<int>(target));
-    st.counters["production_order"] = benchmark::Counter(1);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_CurvedTargetCarryForwardOrbit(
-      benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto steps = static_cast<Index>(st.range(1));
-    const auto shape = static_cast<ShapeCase>(st.range(2));
-    const auto metric = static_cast<MetricCase>(st.range(3));
-    const auto target = static_cast<CurvedTargetCase>(st.range(4));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      Index tmopFailures = 0;
-      for (Index step = 0; step < steps; ++step)
-      {
-        const Real t = static_cast<Real>(step)
-          / static_cast<Real>(std::max<Index>(1, steps - 1));
-        const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
-        const Real cutSeconds = elapsedSeconds(cutStart);
-        auto optimized = cut.mesh;
-
-        const auto optStart = BenchClock::now();
-        const auto report = coarsen(optimized, resolution, shape, t);
-        const Real optimizeSeconds = elapsedSeconds(optStart);
-
-        optimized.getConnectivity().compute(2, 1);
-        optimized.getConnectivity().compute(1, 0);
-        auto curved = optimized;
-
-        TMOPSolveStats tmopStats;
-        const auto tmopStart = BenchClock::now();
-        const bool tmopOk =
-          solveCurvedTMOP(curved, shape, t, metric, target, &tmopStats);
-        const Real tmopSeconds = elapsedSeconds(tmopStart);
-        if (!tmopOk)
-          tmopFailures++;
-
-        counters = setCounters(st, cut, curved, &report, shape, tmopOk, t,
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats, true);
-        averages.add(counters);
-
-        demoteInterface(curved);
-        curved.flush();
-        background = std::move(curved);
-      }
-      counters.tmopFailures = tmopFailures;
-      benchmark::DoNotOptimize(background.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["orbit_steps"] = benchmark::Counter(steps);
-    st.counters["curved_geometry"] = benchmark::Counter(1);
-    st.counters["curved_target_case"] =
-      benchmark::Counter(static_cast<int>(target));
-    st.counters["production_order"] = benchmark::Counter(1);
-    st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_CarryForwardSquaredWeight(
-      benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto steps = static_cast<Index>(st.range(1));
-    const auto shape = static_cast<ShapeCase>(st.range(2));
-    const Real qualityWeight =
-      static_cast<Real>(st.range(3)) / static_cast<Real>(1000);
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      Index tmopFailures = 0;
-      for (Index step = 0; step < steps; ++step)
-      {
-        const Real t = static_cast<Real>(step)
-          / static_cast<Real>(std::max<Index>(1, steps - 1));
-        const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
-        const Real cutSeconds = elapsedSeconds(cutStart);
-        auto optimized = cut.mesh;
-        const auto optStart = BenchClock::now();
-        const auto report = coarsen(optimized, resolution, shape, t);
-        const Real optimizeSeconds = elapsedSeconds(optStart);
-        TMOPSolveStats tmopStats;
-        const auto tmopStart = BenchClock::now();
-        const bool tmopOk =
-          solveSquaredTMOP(
-              optimized, shape, t, qualityWeight, &tmopStats);
-        const Real tmopSeconds = elapsedSeconds(tmopStart);
-        if (!tmopOk)
-          tmopFailures++;
-        optimized.getConnectivity().compute(2, 1);
-        optimized.getConnectivity().compute(1, 0);
-        counters = setCounters(st, cut, optimized, &report, shape, tmopOk, t,
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats);
-        averages.add(counters);
-        demoteInterface(optimized);
-        background = std::move(optimized);
-      }
-      counters.tmopFailures = tmopFailures;
-      benchmark::DoNotOptimize(background.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["orbit_steps"] = benchmark::Counter(steps);
-    st.counters["quality_weight"] = benchmark::Counter(qualityWeight);
-    st.counters["production_order"] = benchmark::Counter(1);
-    st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-  static void BM_LevelSetPipeline_CarryForwardStage(benchmark::State& st)
-  {
-    const auto resolution = static_cast<size_t>(st.range(0));
-    const auto steps = static_cast<Index>(st.range(1));
-    const auto shape = static_cast<ShapeCase>(st.range(2));
-    const auto metric = static_cast<MetricCase>(st.range(3));
-    const auto stage = static_cast<StageCase>(st.range(4));
-    StageCounters counters;
-    StageAverages averages;
-    for (auto _ : st)
-    {
-      averages = StageAverages{};
-      auto background = makeBackground(resolution);
-      Index tmopFailures = 0;
-      TriangleMeshOptimizerReport accumulated;
-      for (Index step = 0; step < steps; ++step)
-      {
-        const Real t = static_cast<Real>(step)
-          / static_cast<Real>(std::max<Index>(1, steps - 1));
-        const auto cutStart = BenchClock::now();
-        auto cut = cutShape(background, shape, t, Real(0), Real(0.2));
-        const Real cutSeconds = elapsedSeconds(cutStart);
-        auto optimized = cut.mesh;
-        bool tmopOk = true;
-        TriangleMeshOptimizerReport report;
-        TMOPSolveStats tmopStats;
-        Real optimizeSeconds = 0;
-        Real tmopSeconds = 0;
-        const auto config = optimizerParametersForStage(resolution, stage);
-        switch (stage)
-        {
-          case StageCase::TMOPOnly:
-          {
-            const auto start = BenchClock::now();
-            tmopOk = solveTMOP(optimized, shape, t, metric, &tmopStats);
-            tmopSeconds += elapsedSeconds(start);
-            break;
-          }
-          case StageCase::OptimizeOnly:
-          {
-            const auto start = BenchClock::now();
-            report = coarsen(optimized, resolution, shape, t, config);
-            optimizeSeconds += elapsedSeconds(start);
-            break;
-          }
-          case StageCase::TMOPThenOptimize:
-          case StageCase::OptimizeNoFeature:
-          case StageCase::OptimizeNoInterior:
-          {
-            auto start = BenchClock::now();
-            tmopOk = solveTMOP(optimized, shape, t, metric, &tmopStats);
-            tmopSeconds += elapsedSeconds(start);
-            start = BenchClock::now();
-            report = coarsen(optimized, resolution, shape, t, config);
-            optimizeSeconds += elapsedSeconds(start);
-            break;
-          }
-          case StageCase::OptimizeThenTMOP:
-          {
-            auto start = BenchClock::now();
-            report = coarsen(optimized, resolution, shape, t, config);
-            optimizeSeconds += elapsedSeconds(start);
-            start = BenchClock::now();
-            tmopOk = solveTMOP(optimized, shape, t, metric, &tmopStats);
-            tmopSeconds += elapsedSeconds(start);
-            break;
-          }
-        }
-        if (!tmopOk)
-          tmopFailures++;
-        accumulated.splits += report.splits;
-        accumulated.collapses += report.collapses;
-        accumulated.featureCollapses += report.featureCollapses;
-        accumulated.swaps += report.swaps;
-        accumulated.smooths += report.smooths;
-        accumulated.featureSmooths += report.featureSmooths;
-        optimized.getConnectivity().compute(2, 1);
-        optimized.getConnectivity().compute(1, 0);
-        counters = setCounters(st, cut, optimized, &accumulated, shape, tmopOk, t,
-            cutSeconds, optimizeSeconds, tmopSeconds, &tmopStats);
-        auto stepCounters =
-          collectStageCounters(cut, optimized, &report, shape, tmopOk, t);
-        stepCounters.cutSeconds = cutSeconds;
-        stepCounters.optimizeSeconds = optimizeSeconds;
-        stepCounters.tmopSeconds = tmopSeconds;
-        stepCounters.tmopAssemblySeconds = tmopStats.assemblySeconds;
-        stepCounters.tmopSolveSeconds = tmopStats.solveSeconds;
-        stepCounters.tmopMeritSeconds = tmopStats.meritSeconds;
-        stepCounters.tmopIterations = tmopStats.iterations;
-        averages.add(stepCounters);
-        demoteInterface(optimized);
-        background = std::move(optimized);
-      }
-      counters.tmopFailures = tmopFailures;
-      benchmark::DoNotOptimize(background.getCellCount());
-    }
-    averages.publish(st);
-    st.counters["resolution"] = benchmark::Counter(resolution);
-    st.counters["orbit_steps"] = benchmark::Counter(steps);
-    st.counters["stage_case"] = benchmark::Counter(static_cast<int>(stage));
-    st.counters["production_order"] =
-      benchmark::Counter(stage == ProductionStageCase ? 1 : 0);
-    st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
-    st.SetItemsProcessed(st.iterations() * counters.finalCells);
-  }
-
-#define RODIN_CUT_EXACT_BENCH(SHAPE_LABEL, SHAPE_ENUM) \
-  BENCHMARK(BM_LevelSetPipeline_CutExact) \
-    ->Name("LevelSetPipeline/CutExact/" SHAPE_LABEL "/24") \
-    ->Args({24, static_cast<int>(ShapeCase::SHAPE_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_CUT_QUALITY_BENCH(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION) \
-  BENCHMARK(BM_LevelSetPipeline_CutQualityAware) \
-    ->Name("LevelSetPipeline/CutQualityAware/" SHAPE_LABEL "/" #RESOLUTION) \
-    ->Args({RESOLUTION, static_cast<int>(ShapeCase::SHAPE_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_TMOP_METRIC_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM) \
-  BENCHMARK(BM_LevelSetPipeline_TMOPMetricFreshCut) \
-    ->Name("LevelSetPipeline/TMOPFresh/" SHAPE_LABEL "/" METRIC_LABEL "/24") \
-    ->Args({24, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_COARSEN_BENCH(SHAPE_LABEL, SHAPE_ENUM) \
-  BENCHMARK(BM_LevelSetPipeline_CoarsenAfterTMOP) \
-    ->Name("LevelSetPipeline/CoarsenAfterTMOP/" SHAPE_LABEL "/24") \
-    ->Args({24, static_cast<int>(ShapeCase::SHAPE_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM) \
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit) \
-    ->Name("LevelSetPipeline/CarryForward/" SHAPE_LABEL "/" METRIC_LABEL "/24x8") \
-    ->Args({24, 8, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_RESOLUTION_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, RESOLUTION, STEPS) \
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit) \
-    ->Name("LevelSetPipeline/Resolution/" SHAPE_LABEL "/" METRIC_LABEL "/" #RESOLUTION "x" #STEPS) \
-    ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_CURVED_FRESH_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, RESOLUTION) \
-  BENCHMARK(BM_LevelSetPipeline_CurvedFreshCut) \
-    ->Name("LevelSetPipeline/CurvedFresh/" SHAPE_LABEL "/" METRIC_LABEL "/" #RESOLUTION) \
-    ->Args({RESOLUTION, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_CURVED_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, RESOLUTION, STEPS) \
-  BENCHMARK(BM_LevelSetPipeline_CurvedCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/CurvedCarryForward/" SHAPE_LABEL "/" METRIC_LABEL "/" #RESOLUTION "x" #STEPS) \
-    ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_CURVED_TARGET_FRESH_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, TARGET_LABEL, TARGET_ENUM, RESOLUTION) \
-  BENCHMARK(BM_LevelSetPipeline_CurvedTargetFreshCut) \
-    ->Name("LevelSetPipeline/CurvedTargetFresh/" SHAPE_LABEL "/" METRIC_LABEL "/" TARGET_LABEL "/" #RESOLUTION) \
-    ->Args({RESOLUTION, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM), \
-      static_cast<int>(CurvedTargetCase::TARGET_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-#define RODIN_CURVED_TARGET_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, TARGET_LABEL, TARGET_ENUM, RESOLUTION, STEPS) \
+#define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
   BENCHMARK(BM_LevelSetPipeline_CurvedTargetCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/CurvedTargetCarryForward/" SHAPE_LABEL "/" METRIC_LABEL "/" TARGET_LABEL "/" #RESOLUTION "x" #STEPS) \
+    ->Name("LevelSetPipeline/NoCutP2TMOPRelabel/" SHAPE_LABEL "/ShapeSize/Projected/" #RESOLUTION "x" #STEPS) \
     ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM), \
-      static_cast<int>(CurvedTargetCase::TARGET_ENUM)}) \
+      static_cast<int>(MetricCase::ShapeSize), \
+      static_cast<int>(CurvedTargetCase::ProjectedInterface)}) \
     ->Unit(benchmark::kMillisecond);
 
-#define RODIN_WEIGHT_FRESH_BENCH(SHAPE_LABEL, SHAPE_ENUM, WEIGHT_MILLI) \
-  BENCHMARK(BM_LevelSetPipeline_TMOPSquaredWeightFreshCut) \
-    ->Name("LevelSetPipeline/TMOPWeightFresh/" SHAPE_LABEL "/SquaredDistance/w" #WEIGHT_MILLI "/24") \
-    ->Args({24, static_cast<int>(ShapeCase::SHAPE_ENUM), WEIGHT_MILLI}) \
+#define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
+  BENCHMARK(BM_LevelSetPipeline_CurvedMMGCarryForwardOrbit) \
+    ->Name("LevelSetPipeline/MMGCutP2TMOPRelabel/" SHAPE_LABEL "/ShapeSize/Projected/" #RESOLUTION "x" #STEPS) \
+    ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
+      static_cast<int>(MetricCase::ShapeSize), \
+      static_cast<int>(CurvedTargetCase::ProjectedInterface)}) \
     ->Unit(benchmark::kMillisecond);
 
-#define RODIN_WEIGHT_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, WEIGHT_MILLI) \
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardSquaredWeight) \
-    ->Name("LevelSetPipeline/CarryForwardWeight/" SHAPE_LABEL "/SquaredDistance/w" #WEIGHT_MILLI "/24x8") \
-    ->Args({24, 8, static_cast<int>(ShapeCase::SHAPE_ENUM), WEIGHT_MILLI}) \
-    ->Unit(benchmark::kMillisecond);
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 5, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 10, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 16, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 24, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 5, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 10, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 16, 8)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 24, 8)
 
-#define RODIN_STAGE_FRESH_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, STAGE_LABEL, STAGE_ENUM) \
-  BENCHMARK(BM_LevelSetPipeline_StageFreshCut) \
-    ->Name("LevelSetPipeline/StageFresh/" SHAPE_LABEL "/" METRIC_LABEL "/" STAGE_LABEL "/24") \
-    ->Args({24, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM), \
-      static_cast<int>(StageCase::STAGE_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 5, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 10, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 16, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 24, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 5, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 10, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 16, 8)
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 24, 8)
 
-#define RODIN_STAGE_ORBIT_BENCH(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, STAGE_LABEL, STAGE_ENUM, STEPS) \
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardStage) \
-    ->Name("LevelSetPipeline/CarryForwardStage/" SHAPE_LABEL "/" METRIC_LABEL "/" STAGE_LABEL "/24x" #STEPS) \
-    ->Args({24, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::METRIC_ENUM), \
-      static_cast<int>(StageCase::STAGE_ENUM)}) \
-    ->Unit(benchmark::kMillisecond);
-
-  RODIN_CUT_EXACT_BENCH("Circle", CircleOrbit)
-  RODIN_CUT_EXACT_BENCH("Square", SquareOrbit)
-  RODIN_CUT_EXACT_BENCH("Triangle", TriangleOrbit)
-  RODIN_CUT_EXACT_BENCH("CircleEnterLeave", CircleEnterLeave)
-  RODIN_CUT_EXACT_BENCH("CircleFigureEight", CircleFigureEight)
-  RODIN_CUT_EXACT_BENCH("SquareFigureEight", SquareFigureEight)
-  RODIN_CUT_EXACT_BENCH("TriangleFigureEight", TriangleFigureEight)
-  RODIN_CUT_EXACT_BENCH("WavyCircle", WavyCircleOrbit)
-  RODIN_CUT_EXACT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight)
-  RODIN_CUT_EXACT_BENCH("WavyCircleEnterLeave", WavyCircleEnterLeave)
-
-  RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 24)
-  RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 48)
-  RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 10)
-  RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 12)
-  RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 16)
-  RODIN_CUT_QUALITY_BENCH("Circle", CircleOrbit, 32)
-  RODIN_CUT_QUALITY_BENCH("Square", SquareOrbit, 24)
-  RODIN_CUT_QUALITY_BENCH("Triangle", TriangleOrbit, 24)
-  RODIN_CUT_QUALITY_BENCH("CircleEnterLeave", CircleEnterLeave, 24)
-  RODIN_CUT_QUALITY_BENCH("CircleFigureEight", CircleFigureEight, 24)
-  RODIN_CUT_QUALITY_BENCH("SquareFigureEight", SquareFigureEight, 24)
-  RODIN_CUT_QUALITY_BENCH("TriangleFigureEight", TriangleFigureEight, 24)
-  RODIN_CUT_QUALITY_BENCH("WavyCircle", WavyCircleOrbit, 24)
-  RODIN_CUT_QUALITY_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, 24)
-  RODIN_CUT_QUALITY_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, 10)
-  RODIN_CUT_QUALITY_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, 12)
-  RODIN_CUT_QUALITY_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, 16)
-  RODIN_CUT_QUALITY_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, 32)
-  RODIN_CUT_QUALITY_BENCH("WavyCircleEnterLeave", WavyCircleEnterLeave, 24)
-
-  RODIN_TMOP_METRIC_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("Circle", CircleOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_TMOP_METRIC_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize)
-  RODIN_TMOP_METRIC_BENCH("Circle", CircleOrbit, "ShapeDistortion", ShapeDistortion)
-  RODIN_TMOP_METRIC_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("Square", SquareOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_TMOP_METRIC_BENCH("Square", SquareOrbit, "ShapeSize", ShapeSize)
-  RODIN_TMOP_METRIC_BENCH("Square", SquareOrbit, "ShapeDistortion", ShapeDistortion)
-  RODIN_TMOP_METRIC_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("Triangle", TriangleOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_TMOP_METRIC_BENCH("Triangle", TriangleOrbit, "ShapeSize", ShapeSize)
-  RODIN_TMOP_METRIC_BENCH("Triangle", TriangleOrbit, "ShapeDistortion", ShapeDistortion)
-  RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "AreaDistortion", AreaDistortion)
-  RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "ShapeSize", ShapeSize)
-  RODIN_TMOP_METRIC_BENCH("CircleEnterLeave", CircleEnterLeave, "ShapeDistortion", ShapeDistortion)
-  RODIN_TMOP_METRIC_BENCH("CircleFigureEight", CircleFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("SquareFigureEight", SquareFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("TriangleFigureEight", TriangleFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("WavyCircle", WavyCircleOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("WavyCircle", WavyCircleOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_TMOP_METRIC_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize)
-  RODIN_TMOP_METRIC_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_TMOP_METRIC_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion)
-  RODIN_TMOP_METRIC_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize)
-
-  RODIN_WEIGHT_FRESH_BENCH("Circle", CircleOrbit, 50)
-  RODIN_WEIGHT_FRESH_BENCH("Circle", CircleOrbit, 100)
-  RODIN_WEIGHT_FRESH_BENCH("Circle", CircleOrbit, 200)
-  RODIN_WEIGHT_FRESH_BENCH("Circle", CircleOrbit, 500)
-
-  RODIN_COARSEN_BENCH("Circle", CircleOrbit)
-  RODIN_COARSEN_BENCH("Square", SquareOrbit)
-  RODIN_COARSEN_BENCH("Triangle", TriangleOrbit)
-  RODIN_COARSEN_BENCH("CircleEnterLeave", CircleEnterLeave)
-  RODIN_COARSEN_BENCH("CircleFigureEight", CircleFigureEight)
-  RODIN_COARSEN_BENCH("SquareFigureEight", SquareFigureEight)
-  RODIN_COARSEN_BENCH("TriangleFigureEight", TriangleFigureEight)
-  RODIN_COARSEN_BENCH("WavyCircle", WavyCircleOrbit)
-  RODIN_COARSEN_BENCH("WavyCircleFigureEight", WavyCircleFigureEight)
-
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeNoFeature", OptimizeNoFeature)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeNoInterior", OptimizeNoInterior)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
-  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeNoFeature", OptimizeNoFeature)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeNoInterior", OptimizeNoInterior)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion, "TMOPThenOptimize", TMOPThenOptimize)
-  RODIN_STAGE_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "TMOPThenOptimize", TMOPThenOptimize)
-
-  RODIN_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance)
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Circle/SquaredDistance/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::CircleOrbit),
-      static_cast<int>(MetricCase::SquaredDistance)})
-    ->Unit(benchmark::kMillisecond);
-  RODIN_ORBIT_BENCH("Circle", CircleOrbit, "AreaDistortion", AreaDistortion)
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Circle/AreaDistortion/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::CircleOrbit),
-      static_cast<int>(MetricCase::AreaDistortion)})
-    ->Unit(benchmark::kMillisecond);
-  RODIN_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize)
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Circle/ShapeSize/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::CircleOrbit),
-      static_cast<int>(MetricCase::ShapeSize)})
-    ->Unit(benchmark::kMillisecond);
-  RODIN_ORBIT_BENCH("Circle", CircleOrbit, "ShapeDistortion", ShapeDistortion)
-  RODIN_ORBIT_BENCH("Square", SquareOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("Square", SquareOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_ORBIT_BENCH("Square", SquareOrbit, "ShapeSize", ShapeSize)
-  RODIN_ORBIT_BENCH("Triangle", TriangleOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("Triangle", TriangleOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_ORBIT_BENCH("Triangle", TriangleOrbit, "ShapeSize", ShapeSize)
-  RODIN_ORBIT_BENCH("CircleEnterLeave", CircleEnterLeave, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("CircleFigureEight", CircleFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("SquareFigureEight", SquareFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("TriangleFigureEight", TriangleFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "AreaDistortion", AreaDistortion)
-  RODIN_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize)
-  RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance)
-  RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion)
-  RODIN_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize)
-  RODIN_ORBIT_BENCH("WavyCircleEnterLeave", WavyCircleEnterLeave, "SquaredDistance", SquaredDistance)
-
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 10, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 12, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 16, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 24, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 32, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 10, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 12, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 16, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 24, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 32, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 10, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 12, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 16, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 24, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 32, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 10, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 12, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 16, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 24, 8)
-  RODIN_RESOLUTION_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 32, 8)
-
-  RODIN_CURVED_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 10)
-  RODIN_CURVED_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 16)
-  RODIN_CURVED_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 24)
-  RODIN_CURVED_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, 24)
-  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 10)
-  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 16)
-  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 24)
-  RODIN_CURVED_FRESH_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, 10)
-  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 10)
-  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 24)
-  RODIN_CURVED_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion, 24)
-
-  RODIN_CURVED_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 10, 8)
-  RODIN_CURVED_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 16, 8)
-  RODIN_CURVED_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, 24, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, 24, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 10, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 16, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, 24, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 10, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, 24, 8)
-  RODIN_CURVED_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "AreaDistortion", AreaDistortion, 24, 8)
-
-  RODIN_CURVED_TARGET_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Projected", ProjectedInterface, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Curved005", CurvedQuality005, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Curved010", CurvedQuality010, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Curved020", CurvedQuality020, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality005", ProjectedQuality005, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality010", ProjectedQuality010, 24)
-
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Projected", ProjectedInterface, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Curved005", CurvedQuality005, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Curved010", CurvedQuality010, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Curved020", CurvedQuality020, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality005", ProjectedQuality005, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality010", ProjectedQuality010, 24)
-
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Projected", ProjectedInterface, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Curved005", CurvedQuality005, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Curved010", CurvedQuality010, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Curved020", CurvedQuality020, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "ProjectedQuality005", ProjectedQuality005, 24)
-  RODIN_CURVED_TARGET_FRESH_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "ProjectedQuality010", ProjectedQuality010, 24)
-
-  RODIN_CURVED_TARGET_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Projected", ProjectedInterface, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Curved005", CurvedQuality005, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Curved010", CurvedQuality010, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "Curved020", CurvedQuality020, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality005", ProjectedQuality005, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("Circle", CircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality010", ProjectedQuality010, 24, 8)
-
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Projected", ProjectedInterface, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Curved005", CurvedQuality005, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Curved010", CurvedQuality010, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "Curved020", CurvedQuality020, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality005", ProjectedQuality005, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircle", WavyCircleOrbit, "ShapeSize", ShapeSize, "ProjectedQuality010", ProjectedQuality010, 24, 8)
-
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Projected", ProjectedInterface, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Curved005", CurvedQuality005, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Curved010", CurvedQuality010, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "Curved020", CurvedQuality020, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "ProjectedQuality005", ProjectedQuality005, 24, 8)
-  RODIN_CURVED_TARGET_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "ShapeSize", ShapeSize, "ProjectedQuality010", ProjectedQuality010, 24, 8)
-
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly, 8)
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 8)
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 8)
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP, 8)
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 20)
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 20)
-  RODIN_STAGE_ORBIT_BENCH("Circle", CircleOrbit, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP, 20)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPOnly", TMOPOnly, 8)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 8)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 8)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP, 8)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeOnly", OptimizeOnly, 20)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "TMOPThenOptimize", TMOPThenOptimize, 20)
-  RODIN_STAGE_ORBIT_BENCH("WavyCircleFigureEight", WavyCircleFigureEight, "SquaredDistance", SquaredDistance, "OptimizeThenTMOP", OptimizeThenTMOP, 20)
-
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Square/SquaredDistance/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::SquareOrbit),
-      static_cast<int>(MetricCase::SquaredDistance)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Square/AreaDistortion/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::SquareOrbit),
-      static_cast<int>(MetricCase::AreaDistortion)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Square/ShapeSize/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::SquareOrbit),
-      static_cast<int>(MetricCase::ShapeSize)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Triangle/SquaredDistance/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::TriangleOrbit),
-      static_cast<int>(MetricCase::SquaredDistance)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Triangle/AreaDistortion/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::TriangleOrbit),
-      static_cast<int>(MetricCase::AreaDistortion)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/Triangle/ShapeSize/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::TriangleOrbit),
-      static_cast<int>(MetricCase::ShapeSize)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/WavyCircleFigureEight/SquaredDistance/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::WavyCircleFigureEight),
-      static_cast<int>(MetricCase::SquaredDistance)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/WavyCircleFigureEight/AreaDistortion/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::WavyCircleFigureEight),
-      static_cast<int>(MetricCase::AreaDistortion)})
-    ->Unit(benchmark::kMillisecond);
-  BENCHMARK(BM_LevelSetPipeline_CarryForwardOrbit)
-    ->Name("LevelSetPipeline/CarryForward/WavyCircleFigureEight/ShapeSize/24x20")
-    ->Args({24, 20, static_cast<int>(ShapeCase::WavyCircleFigureEight),
-      static_cast<int>(MetricCase::ShapeSize)})
-    ->Unit(benchmark::kMillisecond);
-
-  RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 50)
-  RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 100)
-  RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 200)
-  RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 500)
-  RODIN_WEIGHT_ORBIT_BENCH("Circle", CircleOrbit, 1000)
-
-#undef RODIN_CUT_EXACT_BENCH
-#undef RODIN_CUT_QUALITY_BENCH
-#undef RODIN_TMOP_METRIC_BENCH
-#undef RODIN_COARSEN_BENCH
-#undef RODIN_ORBIT_BENCH
-#undef RODIN_RESOLUTION_ORBIT_BENCH
-#undef RODIN_CURVED_FRESH_BENCH
-#undef RODIN_CURVED_ORBIT_BENCH
-#undef RODIN_WEIGHT_FRESH_BENCH
-#undef RODIN_WEIGHT_ORBIT_BENCH
-#undef RODIN_STAGE_FRESH_BENCH
-#undef RODIN_STAGE_ORBIT_BENCH
+#undef RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT
+#undef RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT
 }
