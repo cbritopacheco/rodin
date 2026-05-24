@@ -545,11 +545,11 @@ namespace
     for (Index outer = 0; outer < maxOuterIterations; ++outer)
     {
       ++out.outerIterations;
-const auto pre = relabelAndRebuildInterface(
-    mesh,
-    t,
-    std::max(phaseEpsilonFactor * h, Real(1e-12)),
-    phaseMargin);
+      const auto pre = relabelAndRebuildInterface(
+          mesh,
+          t,
+          std::max(phaseEpsilonFactor * h, Real(1e-12)),
+          phaseMargin);
       if (pre.interface.edgeCount == 0)
         break;
 
@@ -677,43 +677,41 @@ const auto pre = relabelAndRebuildInterface(
         break;
 
       LocalMesh beforeMove(mesh);
-moveMesh(mesh, u, fe, Interface);
+      moveMesh(mesh, u, fe, Interface);
 
-out.curved = curvedMetrics(mesh, phiValue, Interface);
+      out.curved = curvedMetrics(mesh, phiValue, Interface);
+      const bool curvedValid =
+        out.curved.invalidJacobianSamples == 0
+        && out.curved.minDet > CurvedDetFloor
+        && out.curved.qmin > Real(1e-12)
+        && std::isfinite(out.curved.minDet)
+        && std::isfinite(out.curved.qmin);
 
-const bool curvedValid =
-  out.curved.invalidJacobianSamples == 0
-  && out.curved.minDet > CurvedDetFloor
-  && out.curved.qmin > Real(1e-12)
-  && std::isfinite(out.curved.minDet)
-  && std::isfinite(out.curved.qmin);
+      if (!curvedValid)
+      {
+        mesh = std::move(beforeMove);
+        break;
+      }
 
-if (!curvedValid)
-{
-  mesh = std::move(beforeMove);
-  break;
-}
+      mesh.getConnectivity().compute(2, 1);
+      mesh.getConnectivity().compute(1, 2);
+      mesh.getConnectivity().compute(1, 0);
 
+      out.accepted = true;
+      out.fitEnergyFinal = fit.energy(mesh);
+      out.phaseEnergyFinal = phase.energy(mesh);
+      out.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
 
-mesh.getConnectivity().compute(2, 1);
-mesh.getConnectivity().compute(1, 2);
-mesh.getConnectivity().compute(1, 0);
+      const auto post = relabelAndRebuildInterface(
+          mesh,
+          t,
+          std::max(phaseEpsilonFactor * h, Real(1e-12)),
+          phaseMargin);
+      out.changedCells += post.cells.changed;
+      out.changedInterfaceEdges += post.changedInterfaceEdges;
 
-out.accepted = true;
-out.fitEnergyFinal = fit.energy(mesh);
-out.phaseEnergyFinal = phase.energy(mesh);
-out.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
-
-const auto post = relabelAndRebuildInterface(
-    mesh,
-    t,
-    std::max(phaseEpsilonFactor * h, Real(1e-12)),
-    phaseMargin);
-out.changedCells += post.cells.changed;
-out.changedInterfaceEdges += post.changedInterfaceEdges;
-
-if (post.cells.changed == 0 && post.changedInterfaceEdges == 0)
-  break;
+      if (post.cells.changed == 0 && post.changedInterfaceEdges == 0)
+        break;
     }
     return out;
   }
@@ -788,11 +786,11 @@ int main(int argc, char** argv)
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(1, 0);
     annotateBoundary(mesh);
-relabelAndRebuildInterface(
-    mesh,
-    t,
-    std::max(phaseEpsilonFactor * h, Real(1e-12)),
-    phaseMargin);
+    relabelAndRebuildInterface(
+        mesh,
+        t,
+        std::max(phaseEpsilonFactor * h, Real(1e-12)),
+        phaseMargin);
 
     const auto report = solveNoCutTMOP(
         mesh, t, h,
@@ -800,11 +798,11 @@ relabelAndRebuildInterface(
         targetBlend, phaseEpsilonFactor, phaseMargin,
         maxOuterRelabelIterations, tmopMaxIterations);
 
-relabelAndRebuildInterface(
-    mesh,
-    t,
-    std::max(phaseEpsilonFactor * h, Real(1e-12)),
-    phaseMargin);
+    relabelAndRebuildInterface(
+        mesh,
+        t,
+        std::max(phaseEpsilonFactor * h, Real(1e-12)),
+        phaseMargin);
     const auto interfaceStats = computeInterfaceStats(mesh);
     const auto lin = linearQuality(mesh);
     auto phiValue = [t](const Math::SpatialPoint& x) { return phiAt(x, t); };

@@ -75,6 +75,15 @@ namespace Rodin::Tests::Benchmarks
       ProjectedQuality010 = 5
     };
 
+    enum class ObjectiveCase : int
+    {
+      AllTerms = 0,
+      NoQuality = 1,
+      NoInterfaceFit = 2,
+      NoPhase = 3,
+      QualityInterfacePhase = 4
+    };
+
     struct MeshStats
     {
       Real minQuality = 0;
@@ -1721,6 +1730,7 @@ namespace Rodin::Tests::Benchmarks
         Real qualityWeight,
         Index maxIterations,
         CurvedTargetCase targetCase = CurvedTargetCase::ProjectedInterface,
+        ObjectiveCase objectiveCase = ObjectiveCase::AllTerms,
         TMOPSolveStats* tmopStats = nullptr,
         bool relabelByPhi = false)
     {
@@ -1784,19 +1794,41 @@ namespace Rodin::Tests::Benchmarks
             upgradeTransformations(mesh, fe, Interface);
             LocalMesh beforeSolve(mesh);
             auto target = makeTarget();
-            QualityTerm quality(metric, target, qualityWeight);
+            const bool useQuality =
+              objectiveCase != ObjectiveCase::NoQuality;
+            const bool useInterfaceFit =
+              objectiveCase != ObjectiveCase::NoInterfaceFit;
+            const bool usePhase =
+              objectiveCase != ObjectiveCase::NoPhase;
+            const bool useDeviation =
+              objectiveCase != ObjectiveCase::QualityInterfacePhase;
+            const bool useBoundary =
+              objectiveCase != ObjectiveCase::QualityInterfacePhase;
+            const Real activeQualityWeight =
+              useQuality ? qualityWeight : Real(0);
+            const Real activeFitWeight =
+              useInterfaceFit ? Real(2) : Real(0);
+            const Real activeDeviationWeight =
+              useDeviation ? Real(0.25) : Real(0);
+            const Real activeBoundaryWeight =
+              useBoundary ? Real(1) : Real(0);
+            const Real activePhaseWeight =
+              (relabelByPhi && usePhase) ? Real(0.05) : Real(0);
+
+            QualityTerm quality(metric, target, activeQualityWeight);
             quality.setQuadratureOrder(4);
-            DeviationTerm deviation(Real(0.25));
+            DeviationTerm deviation(activeDeviationWeight);
             AnalyticLevelSetFitTerm fit(
-                phiValue, phiGradient, Optional<Attribute>(Interface), Real(2));
+                phiValue, phiGradient,
+                Optional<Attribute>(Interface), activeFitWeight);
             fit.setNormalization(totalEdgeMeasure(mesh, Optional<Attribute>(Interface)));
             AnalyticLevelSetFitTerm bfit(
                 boxBoundaryValue, boxBoundaryGradient,
-                Optional<Attribute>(Boundary), Real(1));
+                Optional<Attribute>(Boundary), activeBoundaryWeight);
             bfit.setNormalization(totalEdgeMeasure(mesh, Optional<Attribute>(Boundary)));
             VolumetricPhaseConsistencyTerm phase(
                 phiValue, phiGradient, Negative, Positive,
-                relabelByPhi ? Real(0.05) : Real(0));
+                activePhaseWeight);
             phase
               .setQuadratureOrder(4)
               .setEpsilon(Real(0.5) * characteristicCellSize(mesh))
@@ -2012,6 +2044,7 @@ namespace Rodin::Tests::Benchmarks
         Real t,
         MetricCase metricCase = MetricCase::ShapeSize,
         CurvedTargetCase targetCase = CurvedTargetCase::ProjectedInterface,
+        ObjectiveCase objectiveCase = ObjectiveCase::AllTerms,
         TMOPSolveStats* stats = nullptr,
         bool relabelByPhi = false)
     {
@@ -2020,19 +2053,19 @@ namespace Rodin::Tests::Benchmarks
         case MetricCase::SquaredDistance:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, SquaredDistanceMetric{}, 0.04, 4,
-              targetCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi);
         case MetricCase::AreaDistortion:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, AreaDistortionMetric{}, 0.04, 4,
-              targetCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi);
         case MetricCase::ShapeSize:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, ShapeSizeBlendMetric(Real(0.5)), 0.03, 4,
-              targetCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi);
         case MetricCase::ShapeDistortion:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, ShapeDistortionMetric{}, 0.02, 1,
-              targetCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi);
       }
       return false;
     }
@@ -2395,6 +2428,7 @@ namespace Rodin::Tests::Benchmarks
       const auto shape = static_cast<ShapeCase>(st.range(2));
       const auto metric = static_cast<MetricCase>(st.range(3));
       const auto target = static_cast<CurvedTargetCase>(st.range(4));
+      const auto objective = static_cast<ObjectiveCase>(st.range(5));
       StageCounters counters;
       StageAverages averages;
       for (auto _ : st)
@@ -2419,7 +2453,8 @@ namespace Rodin::Tests::Benchmarks
           const auto tmopStart = BenchClock::now();
           const bool tmopOk =
             solveCurvedTMOP(
-                curved, shape, t, metric, target, &tmopStats, true);
+                curved, shape, t, metric, target,
+                objective, &tmopStats, true);
           const Real tmopSeconds = elapsedSeconds(tmopStart);
           if (!tmopOk)
             tmopFailures++;
@@ -2441,6 +2476,8 @@ namespace Rodin::Tests::Benchmarks
       st.counters["curved_geometry"] = benchmark::Counter(1);
       st.counters["curved_target_case"] =
         benchmark::Counter(static_cast<int>(target));
+      st.counters["objective_case"] =
+        benchmark::Counter(static_cast<int>(objective));
       st.counters["production_order"] = benchmark::Counter(1);
       st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
       st.SetItemsProcessed(st.iterations() * counters.finalCells);
@@ -2454,6 +2491,7 @@ namespace Rodin::Tests::Benchmarks
       const auto shape = static_cast<ShapeCase>(st.range(2));
       const auto metric = static_cast<MetricCase>(st.range(3));
       const auto target = static_cast<CurvedTargetCase>(st.range(4));
+      const auto objective = static_cast<ObjectiveCase>(st.range(5));
       StageCounters counters;
       StageAverages averages;
       for (auto _ : st)
@@ -2482,7 +2520,9 @@ namespace Rodin::Tests::Benchmarks
           TMOPSolveStats tmopStats;
           const auto tmopStart = BenchClock::now();
           const bool tmopOk =
-            solveCurvedTMOP(curved, shape, t, metric, target, &tmopStats);
+            solveCurvedTMOP(
+                curved, shape, t, metric, target,
+                objective, &tmopStats);
           const Real tmopSeconds = elapsedSeconds(tmopStart);
           if (!tmopOk)
             tmopFailures++;
@@ -2505,27 +2545,53 @@ namespace Rodin::Tests::Benchmarks
       st.counters["mmg_topology"] = benchmark::Counter(1);
       st.counters["curved_target_case"] =
         benchmark::Counter(static_cast<int>(target));
+      st.counters["objective_case"] =
+        benchmark::Counter(static_cast<int>(objective));
       st.counters["production_order"] = benchmark::Counter(1);
       st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
       st.SetItemsProcessed(st.iterations() * counters.finalCells);
     }
   }
 
-#define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
+#define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, OBJECTIVE_LABEL, OBJECTIVE_ENUM, RESOLUTION, STEPS) \
   BENCHMARK(BM_LevelSetPipeline_CurvedTargetCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/NoCutRelabelP2TMOP/" SHAPE_LABEL "/ShapeSize/Projected/" #RESOLUTION "x" #STEPS) \
+    ->Name("LevelSetPipeline/NoCutRelabelP2TMOP/" SHAPE_LABEL "/" METRIC_LABEL "/Projected/" OBJECTIVE_LABEL "/" #RESOLUTION "x" #STEPS) \
     ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::ShapeSize), \
-      static_cast<int>(CurvedTargetCase::ProjectedInterface)}) \
+      static_cast<int>(MetricCase::METRIC_ENUM), \
+      static_cast<int>(CurvedTargetCase::ProjectedInterface), \
+      static_cast<int>(ObjectiveCase::OBJECTIVE_ENUM)}) \
     ->Unit(benchmark::kMillisecond);
 
-#define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
+#define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, OBJECTIVE_LABEL, OBJECTIVE_ENUM, RESOLUTION, STEPS) \
   BENCHMARK(BM_LevelSetPipeline_CurvedMMGCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/MMGCutP2TMOPRelabel/" SHAPE_LABEL "/ShapeSize/Projected/" #RESOLUTION "x" #STEPS) \
+    ->Name("LevelSetPipeline/MMGCutP2TMOPRelabel/" SHAPE_LABEL "/" METRIC_LABEL "/Projected/" OBJECTIVE_LABEL "/" #RESOLUTION "x" #STEPS) \
     ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
-      static_cast<int>(MetricCase::ShapeSize), \
-      static_cast<int>(CurvedTargetCase::ProjectedInterface)}) \
+      static_cast<int>(MetricCase::METRIC_ENUM), \
+      static_cast<int>(CurvedTargetCase::ProjectedInterface), \
+      static_cast<int>(ObjectiveCase::OBJECTIVE_ENUM)}) \
     ->Unit(benchmark::kMillisecond);
+
+#define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE( \
+      SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "AllTerms", AllTerms, RESOLUTION, STEPS)
+
+#define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE( \
+      SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "AllTerms", AllTerms, RESOLUTION, STEPS)
+
+#define RODIN_OBJECTIVE_MATRIX(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "SquaredDistance", SquaredDistance, "AllTerms", AllTerms, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "AreaDistortion", AreaDistortion, "AllTerms", AllTerms, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoQuality", NoQuality, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoInterfaceFit", NoInterfaceFit, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoPhase", NoPhase, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "SquaredDistance", SquaredDistance, "AllTerms", AllTerms, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "AreaDistortion", AreaDistortion, "AllTerms", AllTerms, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoQuality", NoQuality, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoInterfaceFit", NoInterfaceFit, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoPhase", NoPhase, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, RESOLUTION, STEPS)
 
   RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 5, 8)
   RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 10, 8)
@@ -2545,6 +2611,12 @@ namespace Rodin::Tests::Benchmarks
   RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 16, 8)
   RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT("WavyCircleFigureEight", WavyCircleFigureEight, 24, 8)
 
+  RODIN_OBJECTIVE_MATRIX("Circle", CircleOrbit, 10, 8)
+  RODIN_OBJECTIVE_MATRIX("WavyCircleFigureEight", WavyCircleFigureEight, 10, 8)
+
 #undef RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT
 #undef RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT
+#undef RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE
+#undef RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE
+#undef RODIN_OBJECTIVE_MATRIX
 }

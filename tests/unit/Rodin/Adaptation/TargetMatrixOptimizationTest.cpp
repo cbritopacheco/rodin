@@ -32,6 +32,11 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  static constexpr Attribute TestNegative = 1;
+  static constexpr Attribute TestPositive = 2;
+  static constexpr Attribute TestBoundary = 40;
+  static constexpr Attribute TestInterface = 99;
+
   // These test-only helpers keep Eigen-style 2x2 literals working with
   // SpatialMatrix while preserving the suite's existing row-major semantics.
   inline Math::SpatialMatrix<Real> mat2(Real a, Real b, Real c, Real d)
@@ -124,6 +129,11 @@ namespace Rodin::Tests::Unit
       .finalize();
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
+    mesh.getConnectivity().compute(1, 2);
+    mesh.setAttribute({2, 0}, TestNegative);
+    mesh.setAttribute({2, 1}, TestNegative);
+    mesh.setAttribute({2, 2}, TestPositive);
+    mesh.setAttribute({2, 3}, TestPositive);
     const auto& conn = mesh.getConnectivity();
     for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
     {
@@ -132,7 +142,21 @@ namespace Rodin::Tests::Unit
       const auto b = mesh.getVertexCoordinates(edge(1));
       if (std::abs(a[0] - Real(0.5)) <= Real(1e-12)
        && std::abs(b[0] - Real(0.5)) <= Real(1e-12))
-        mesh.setAttribute({1, e}, 99);
+      {
+        mesh.setAttribute({1, e}, TestInterface);
+      }
+      else
+      {
+        const bool boundary =
+          (std::abs(a[0]) <= Real(1e-12) && std::abs(b[0]) <= Real(1e-12))
+       || (std::abs(a[0] - Real(1)) <= Real(1e-12)
+        && std::abs(b[0] - Real(1)) <= Real(1e-12))
+       || (std::abs(a[1]) <= Real(1e-12) && std::abs(b[1]) <= Real(1e-12))
+       || (std::abs(a[1] - Real(1)) <= Real(1e-12)
+        && std::abs(b[1] - Real(1)) <= Real(1e-12));
+        if (boundary)
+          mesh.setAttribute({1, e}, TestBoundary);
+      }
     }
     return mesh;
   }
@@ -396,31 +420,189 @@ namespace Rodin::Tests::Unit
     return (fd - jd).norm() / denom;
   }
 
-  static HighOrderTriangleGeometry upgradeUnitTriangle()
+  enum ObjectiveTermMask : int
   {
-    auto mesh = makeUnitTriangle();
-    return HighOrderGeometryUpgrade().upgrade(mesh, 2);
+    ObjectiveQuality  = 1 << 0,
+    ObjectiveGamma    = 1 << 1,
+    ObjectivePhase    = 1 << 2,
+    ObjectiveDeviation = 1 << 3,
+    ObjectiveBoundary = 1 << 4,
+    ObjectiveAll =
+        ObjectiveQuality
+      | ObjectiveGamma
+      | ObjectivePhase
+      | ObjectiveDeviation
+      | ObjectiveBoundary
+  };
+
+  static const char* objectiveMaskName(int mask)
+  {
+    switch (mask)
+    {
+      case ObjectiveQuality: return "quality";
+      case ObjectiveGamma: return "gamma";
+      case ObjectivePhase: return "phase";
+      case ObjectiveDeviation: return "deviation";
+      case ObjectiveBoundary: return "boundary";
+      case ObjectiveQuality | ObjectiveGamma | ObjectivePhase:
+        return "quality+gamma+phase";
+      case ObjectiveGamma | ObjectivePhase | ObjectiveBoundary:
+        return "gamma+phase+boundary";
+      case ObjectiveAll: return "all";
+      default: return "custom";
+    }
   }
 
-  static HighOrderTriangleGeometry makeInvertedGeometry()
+  template <class Metric, class SpaceFactory>
+  static Real finiteDifferenceObjectiveError(
+      Metric metric,
+      SpaceFactory makeSpace,
+      int mask,
+      Real finiteDifferenceStep)
   {
-    HighOrderTriangleGeometry geometry;
-    geometry.order = 2;
-    geometry.nodes = {
-      { Math::SpatialPoint({0, 0}), Math::SpatialPoint({0, 0}), true },
-      { Math::SpatialPoint({0, 1}), Math::SpatialPoint({0, 1}), true },
-      { Math::SpatialPoint({1, 0}), Math::SpatialPoint({1, 0}), true },
-      { Math::SpatialPoint({0, 0.5}), Math::SpatialPoint({0, 0.5}), false },
-      { Math::SpatialPoint({0.5, 0.5}), Math::SpatialPoint({0.5, 0.5}), false },
-      { Math::SpatialPoint({0.5, 0}), Math::SpatialPoint({0.5, 0}), false } };
-    geometry.cells.push_back({{0, 1, 2, 3, 4, 5}});
-    return geometry;
-  }
+    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
+    auto space = makeSpace(mesh);
+    GridFunction displacement(space);
+    fillDisplacement(displacement.getData(), Real(0.002));
 
-  static void distortMidpoint(HighOrderTriangleGeometry& geometry)
-  {
-    const Index midpoint = geometry.cells.front()[3];
-    geometry.nodes[midpoint].x[1] += 0.25;
+    TrialFunction du(space);
+    TestFunction v(space);
+
+    auto phi = [](const Math::SpatialPoint& x)
+    {
+      return x[0] - Real(0.5);
+    };
+    auto gradPhi = [](const Math::SpatialPoint&)
+    {
+      return Math::SpatialPoint{1, 0};
+    };
+    auto boundaryValue = [](const Math::SpatialPoint& x)
+    {
+      return x[1];
+    };
+    auto boundaryGradient = [](const Math::SpatialPoint&)
+    {
+      return Math::SpatialPoint{0, 1};
+    };
+
+    QualityTerm quality(metric, IdentityTargetJacobian{}, Real(0.8));
+    quality.setQuadratureOrder(4);
+
+    AnalyticLevelSetFitTerm gamma(
+        phi, gradPhi, Optional<Attribute>(TestInterface), Real(1.1));
+    gamma.setNormalization(Real(1));
+
+    VolumetricPhaseConsistencyTerm phase(
+        phi, gradPhi, TestNegative, TestPositive, Real(0.9));
+    phase
+      .setQuadratureOrder(4)
+      .setEpsilon(Real(1))
+      .setMargin(Real(1))
+      .setNormalization(Real(1));
+
+    DeviationTerm deviation(Real(0.7));
+
+    AnalyticLevelSetFitTerm boundary(
+        boundaryValue, boundaryGradient,
+        Optional<Attribute>(TestBoundary), Real(0.6));
+    boundary.setNormalization(Real(1));
+
+    auto assembleResidual = [&]()
+    {
+      Math::Vector<Real> r =
+        Math::Vector<Real>::Zero(displacement.getData().size());
+      if (mask & ObjectiveQuality)
+      {
+        LinearForm form(v);
+        form = quality.residual(displacement, v);
+        form.assemble();
+        r += form.getVector();
+      }
+      if (mask & ObjectiveGamma)
+      {
+        LinearForm form(v);
+        form = gamma.residual(displacement, v);
+        form.assemble();
+        r += form.getVector();
+      }
+      if (mask & ObjectivePhase)
+      {
+        LinearForm form(v);
+        form = phase.residual(displacement, v);
+        form.assemble();
+        r += form.getVector();
+      }
+      if (mask & ObjectiveDeviation)
+      {
+        LinearForm form(v);
+        form = deviation.residual(displacement, v);
+        form.assemble();
+        r += form.getVector();
+      }
+      if (mask & ObjectiveBoundary)
+      {
+        LinearForm form(v);
+        form = boundary.residual(displacement, v);
+        form.assemble();
+        r += form.getVector();
+      }
+      return r;
+    };
+
+    auto tangentAction = [&](const Math::Vector<Real>& direction)
+    {
+      Math::Vector<Real> jd =
+        Math::Vector<Real>::Zero(displacement.getData().size());
+      if (mask & ObjectiveQuality)
+      {
+        BilinearForm form(du, v);
+        form = quality.tangent(displacement, du, v);
+        form.assemble();
+        jd += form.getOperator() * direction;
+      }
+      if (mask & ObjectiveGamma)
+      {
+        BilinearForm form(du, v);
+        form = gamma.tangent(displacement, du, v);
+        form.assemble();
+        jd += form.getOperator() * direction;
+      }
+      if (mask & ObjectivePhase)
+      {
+        BilinearForm form(du, v);
+        form = phase.tangent(displacement, du, v);
+        form.assemble();
+        jd += form.getOperator() * direction;
+      }
+      if (mask & ObjectiveDeviation)
+      {
+        BilinearForm form(du, v);
+        form = deviation.tangent(du, v);
+        form.assemble();
+        jd += form.getOperator() * direction;
+      }
+      if (mask & ObjectiveBoundary)
+      {
+        BilinearForm form(du, v);
+        form = boundary.tangent(displacement, du, v);
+        form.assemble();
+        jd += form.getOperator() * direction;
+      }
+      return jd;
+    };
+
+    const auto r0 = assembleResidual();
+    auto direction = displacement.getData();
+    fillDirection(direction);
+    const auto u0 = displacement.getData();
+    displacement.getData() = u0 + finiteDifferenceStep * direction;
+    const auto r1 = assembleResidual();
+    displacement.getData() = u0;
+
+    const auto fd = (r1 - r0) / finiteDifferenceStep;
+    const auto jd = tangentAction(direction);
+    const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+    return (fd - jd).norm() / denom;
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, SquaredDistanceMetricIsZeroAtIdentity)
@@ -477,141 +659,6 @@ namespace Rodin::Tests::Unit
 
     IdentityTargetJacobian target;
     EXPECT_NEAR((target.evaluate(cell, rc) - Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-14);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, P2UpgradeCreatesExpectedNodes)
-  {
-    auto geometry = upgradeUnitTriangle();
-
-    ASSERT_EQ(geometry.nodes.size(), 6);
-    ASSERT_EQ(geometry.cells.size(), 1);
-    EXPECT_TRUE(geometry.nodes[0].fixed);
-    EXPECT_TRUE(geometry.nodes[1].fixed);
-    EXPECT_TRUE(geometry.nodes[2].fixed);
-
-    const Index midpoint = geometry.cells.front()[3];
-    EXPECT_FALSE(geometry.nodes[midpoint].fixed);
-    EXPECT_NEAR(geometry.nodes[midpoint].x[0], 0.5, 1e-14);
-    EXPECT_NEAR(geometry.nodes[midpoint].x[1], 0.0, 1e-14);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, LinearlyInitializedP2HasLinearJacobian)
-  {
-    const auto geometry = upgradeUnitTriangle();
-    CurvedTriangleJacobianEvaluator evaluator;
-
-    for (const auto& point : std::vector<ReferencePoint>{
-           { Real(1) / Real(3), Real(1) / Real(3) },
-           { Real(0.2), Real(0.2) },
-           { Real(0.6), Real(0.2) },
-           { Real(0.2), Real(0.6) } })
-    {
-      const auto J = evaluator.jacobian(geometry, 0, point);
-      EXPECT_NEAR((J - Math::SpatialMatrix<Real>::Identity(2, 2)).norm(), 0, 1e-13);
-      EXPECT_NEAR(J.determinant(), 1, 1e-13);
-    }
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, MovingHighOrderNodeChangesJacobian)
-  {
-    auto geometry = upgradeUnitTriangle();
-    CurvedTriangleJacobianEvaluator evaluator;
-    const auto before = evaluator.jacobian(geometry, 0);
-
-    distortMidpoint(geometry);
-    const auto after = evaluator.jacobian(geometry, 0);
-
-    EXPECT_GT((after - before).norm(), 1e-8);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, InvalidCurvedGeometryIsDetected)
-  {
-    const auto geometry = makeInvertedGeometry();
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-
-    EXPECT_LT(objective.minJacobian(geometry), 0);
-    EXPECT_EQ(objective.invalidElementCount(geometry), 1);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveIsFiniteAndIncreasesForDistortion)
-  {
-    auto geometry = upgradeUnitTriangle();
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-
-    const Real clean = objective.value(geometry);
-    distortMidpoint(geometry);
-    const Real distorted = objective.value(geometry);
-
-    EXPECT_TRUE(std::isfinite(clean));
-    EXPECT_TRUE(std::isfinite(distorted));
-    EXPECT_GT(distorted, clean);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, DeviationPenaltyTracksNodeDisplacement)
-  {
-    auto geometry = upgradeUnitTriangle();
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-    objective.setDeviationWeight(2.0);
-
-    EXPECT_NEAR(objective.deviationValue(geometry), 0, 1e-14);
-    distortMidpoint(geometry);
-    EXPECT_GT(objective.deviationValue(geometry), 0);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, OptimizerReducesObjective)
-  {
-    auto geometry = upgradeUnitTriangle();
-    distortMidpoint(geometry);
-
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-    objective.setDeviationWeight(0.1);
-    const Real before = objective.value(geometry);
-
-    OptimizerOptions options;
-    options.maxIterations = 20;
-    options.initialStepSize = 0.05;
-    const auto report = Optimizer(geometry, objective)
-      .setOptions(options)
-      .optimize();
-
-    EXPECT_LT(report.finalObjective, before);
-    EXPECT_EQ(report.invalidElements, 0);
-    EXPECT_GT(report.iterations, 0);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, OptimizerDoesNotMoveFixedVertices)
-  {
-    auto geometry = upgradeUnitTriangle();
-    const auto v0 = geometry.nodes[0].x;
-    const auto v1 = geometry.nodes[1].x;
-    const auto v2 = geometry.nodes[2].x;
-    distortMidpoint(geometry);
-
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-    Optimizer(geometry, objective).optimize();
-
-    EXPECT_NEAR((geometry.nodes[0].x - v0).norm(), 0, 1e-14);
-    EXPECT_NEAR((geometry.nodes[1].x - v1).norm(), 0, 1e-14);
-    EXPECT_NEAR((geometry.nodes[2].x - v2).norm(), 0, 1e-14);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, OptimizerRejectsInvalidInitialGeometry)
-  {
-    auto geometry = makeInvertedGeometry();
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-
-    const auto report = Optimizer(geometry, objective).optimize();
-
-    EXPECT_EQ(report.iterations, 0);
-    EXPECT_EQ(report.invalidElements, 1);
-    EXPECT_FALSE(report.converged);
-    EXPECT_EQ(report.reason, "invalid initial geometry");
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, DeviationTermAssemblesResidualAndTangent)
@@ -750,7 +797,7 @@ namespace Rodin::Tests::Unit
     };
 
     AnalyticLevelSetFitTerm fit(
-        value, gradient, Optional<Attribute>(99), 1.0);
+        value, gradient, Optional<Attribute>(TestInterface), 1.0);
 
     EXPECT_NEAR(fit.energy(cut), 0, 1e-28);
   }
@@ -767,13 +814,14 @@ namespace Rodin::Tests::Unit
       return Math::SpatialPoint{1, 0};
     };
     AnalyticLevelSetFitTerm fit(
-        value, gradient, Optional<Attribute>(99), 1.0);
+        value, gradient, Optional<Attribute>(TestInterface), 1.0);
 
     ASSERT_GT(Index(1), 0);
     Index outputEdge = 0;
     const auto& conn = cut.getConnectivity();
     for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
-      if (const auto attr = cut.getAttribute(1, e); attr && *attr == 99)
+      if (const auto attr = cut.getAttribute(1, e);
+          attr && *attr == TestInterface)
       {
         outputEdge = e;
         break;
@@ -808,7 +856,7 @@ namespace Rodin::Tests::Unit
       return Math::SpatialPoint{1, 0};
     };
     AnalyticLevelSetFitTerm fit(
-        value, gradient, Optional<Attribute>(99), 2.25);
+        value, gradient, Optional<Attribute>(TestInterface), 2.25);
 
     auto assembleResidual = [&]()
     {
@@ -839,6 +887,85 @@ namespace Rodin::Tests::Unit
     const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
 
     EXPECT_NEAR((fd - jd).norm() / denom, 0, 1e-7);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP1)
+  {
+    const std::array<int, 8> masks = {{
+      ObjectiveQuality,
+      ObjectiveGamma,
+      ObjectivePhase,
+      ObjectiveDeviation,
+      ObjectiveBoundary,
+      ObjectiveQuality | ObjectiveGamma | ObjectivePhase,
+      ObjectiveGamma | ObjectivePhase | ObjectiveBoundary,
+      ObjectiveAll
+    }};
+    const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
+    auto makeP1 = [](LocalMesh& mesh)
+    {
+      return P1(mesh, 2);
+    };
+
+    auto checkMetric = [&](const char* metricName, auto metric)
+    {
+      for (const int mask : masks)
+      {
+        Real best = std::numeric_limits<Real>::infinity();
+        for (const Real eps : steps)
+        {
+          const Real error =
+            finiteDifferenceObjectiveError(metric, makeP1, mask, eps);
+          best = std::min(best, error);
+        }
+        SCOPED_TRACE(metricName);
+        SCOPED_TRACE(objectiveMaskName(mask));
+        EXPECT_LT(best, Real(5e-6));
+      }
+    };
+
+    checkMetric("squared-distance", SquaredDistanceMetric{});
+    checkMetric("area-distortion", AreaDistortionMetric{});
+    checkMetric("shape-size-blend", ShapeSizeBlendMetric(Real(0.5)));
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP2)
+  {
+    const std::array<int, 6> masks = {{
+      ObjectiveQuality,
+      ObjectiveGamma,
+      ObjectivePhase,
+      ObjectiveDeviation,
+      ObjectiveBoundary,
+      ObjectiveAll
+    }};
+    const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
+    auto makeP2 = [](LocalMesh& mesh)
+    {
+      return VectorH1<2, LocalMesh>(
+          std::integral_constant<size_t, 2>{}, mesh, 2);
+    };
+
+    auto checkMetric = [&](const char* metricName, auto metric)
+    {
+      for (const int mask : masks)
+      {
+        Real best = std::numeric_limits<Real>::infinity();
+        for (const Real eps : steps)
+        {
+          const Real error =
+            finiteDifferenceObjectiveError(metric, makeP2, mask, eps);
+          best = std::min(best, error);
+        }
+        SCOPED_TRACE(metricName);
+        SCOPED_TRACE(objectiveMaskName(mask));
+        EXPECT_LT(best, Real(2e-5));
+      }
+    };
+
+    checkMetric("squared-distance", SquaredDistanceMetric{});
+    checkMetric("area-distortion", AreaDistortionMetric{});
+    checkMetric("shape-size-blend", ShapeSizeBlendMetric(Real(0.5)));
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, NativeTermsFiniteDifferenceOnAffineMeshes)
@@ -1367,7 +1494,7 @@ namespace Rodin::Tests::Unit
       const auto& edge = conn.getPolytope(1, e);
       if ((edge(0) == 0 && edge(1) == 1)
           || (edge(0) == 1 && edge(1) == 0))
-        mesh.setAttribute({1, e}, 99);
+        mesh.setAttribute({1, e}, TestInterface);
     }
 
     auto project = [](const Math::SpatialPoint& x)
@@ -1376,7 +1503,7 @@ namespace Rodin::Tests::Unit
         x[0],
         Real(0.1) * std::sin(Real(3.14159265358979323846) * x[0]) };
     };
-    ProjectedInterfaceTargetJacobian target(mesh, 99, project);
+    ProjectedInterfaceTargetJacobian target(mesh, TestInterface, project);
     ParametricTargetJacobian affine(mesh);
 
     auto cellIterator = mesh.getPolytope(2, 0);
@@ -1398,7 +1525,7 @@ namespace Rodin::Tests::Unit
       const auto& edge = conn.getPolytope(1, e);
       if ((edge(0) == 0 && edge(1) == 1)
           || (edge(0) == 1 && edge(1) == 0))
-        mesh.setAttribute({1, e}, 99);
+        mesh.setAttribute({1, e}, TestInterface);
     }
 
     auto project = [](const Math::SpatialPoint& x)
@@ -1407,9 +1534,10 @@ namespace Rodin::Tests::Unit
         x[0],
         Real(0.1) * std::sin(Real(3.14159265358979323846) * x[0]) };
     };
-    ProjectedInterfaceTargetJacobian projected(mesh, 99, project);
+    ProjectedInterfaceTargetJacobian projected(mesh, TestInterface, project);
     IdealElementTargetJacobian ideal(mesh);
-    ProjectedQualityTargetJacobian target(mesh, 99, project, Real(0.10));
+    ProjectedQualityTargetJacobian target(
+        mesh, TestInterface, project, Real(0.10));
 
     auto cellIterator = mesh.getPolytope(2, 0);
     const auto& cell = *cellIterator;
@@ -1789,22 +1917,6 @@ namespace Rodin::Tests::Unit
     : public testing::TestWithParam<AffineTriangleCase>
   {};
 
-  TEST_P(Rodin_Adaptation_TargetMatrixOptimization_AffineTriangles, P2UpgradePreservesAffineJacobian)
-  {
-    const auto c = GetParam();
-    auto mesh = makeTriangle(c.a, c.b, c.c);
-    const auto geometry = HighOrderGeometryUpgrade().upgrade(mesh, 2);
-    CurvedTriangleJacobianEvaluator evaluator;
-
-    for (const auto& point : std::vector<ReferencePoint>{
-           {0.2, 0.2}, {0.6, 0.2}, {0.2, 0.6}, {Real(1) / Real(3), Real(1) / Real(3)}})
-    {
-      const auto J = evaluator.jacobian(geometry, 0, point);
-      EXPECT_NEAR((J - c.J).norm(), 0, 1e-13);
-      EXPECT_GT(J.determinant(), 0);
-    }
-  }
-
   TEST_P(Rodin_Adaptation_TargetMatrixOptimization_AffineTriangles, StrictQualityEnergyMatchesIdentityTargetFormula)
   {
     const auto c = GetParam();
@@ -1862,191 +1974,6 @@ namespace Rodin::Tests::Unit
         AffineTriangleCase{{0.2, 0.1}, {1.2, 0.3}, {0.4, 1.4}, mat2(1, 0.2, 0.2, 1.3)},
         AffineTriangleCase{{2, -1}, {2.5, -0.5}, {1.5, 1}, mat2(0.5, -0.5, 0.5, 2)},
         AffineTriangleCase{{-2, -1}, {-0.5, -1}, {-1.5, 0.25}, mat2(1.5, 0.5, 0, 1.25)}));
-
-  class Rodin_Adaptation_TargetMatrixOptimization_MidpointPerturbations
-    : public testing::TestWithParam<std::pair<Index, Math::SpatialPoint>>
-  {};
-
-  TEST_P(Rodin_Adaptation_TargetMatrixOptimization_MidpointPerturbations, PerturbingFreeNodeChangesObjective)
-  {
-    auto geometry = upgradeUnitTriangle();
-    const auto c = GetParam();
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-    const Real before = objective.value(geometry);
-
-    const Index node = geometry.cells.front()[c.first];
-    geometry.nodes[node].x[0] += c.second[0];
-    geometry.nodes[node].x[1] += c.second[1];
-
-    EXPECT_GT(objective.value(geometry), before);
-    EXPECT_EQ(objective.invalidElementCount(geometry), 0);
-  }
-
-  INSTANTIATE_TEST_SUITE_P(
-      FreeNodeMoves,
-      Rodin_Adaptation_TargetMatrixOptimization_MidpointPerturbations,
-      testing::Values(
-        std::pair<Index, Math::SpatialPoint>{3, Math::SpatialPoint({0.00, 0.10})},
-        std::pair<Index, Math::SpatialPoint>{3, Math::SpatialPoint({0.10, 0.00})},
-        std::pair<Index, Math::SpatialPoint>{4, Math::SpatialPoint({0.00, 0.10})},
-        std::pair<Index, Math::SpatialPoint>{4, Math::SpatialPoint({-0.10, 0.00})},
-        std::pair<Index, Math::SpatialPoint>{5, Math::SpatialPoint({0.08, 0.00})},
-        std::pair<Index, Math::SpatialPoint>{5, Math::SpatialPoint({0.00, -0.08})}));
-
-  class Rodin_Adaptation_TargetMatrixOptimization_DeviationWeights
-    : public testing::TestWithParam<Real>
-  {};
-
-  TEST_P(Rodin_Adaptation_TargetMatrixOptimization_DeviationWeights, DeviationScalesWithWeight)
-  {
-    auto geometry = upgradeUnitTriangle();
-    distortMidpoint(geometry);
-
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-    objective.setDeviationWeight(GetParam());
-
-    EXPECT_NEAR(objective.deviationValue(geometry), GetParam() * 0.25 * 0.25, 1e-14);
-  }
-
-  INSTANTIATE_TEST_SUITE_P(
-      Weights,
-      Rodin_Adaptation_TargetMatrixOptimization_DeviationWeights,
-      testing::Values(0.0, 0.1, 1.0, 10.0, 100.0));
-
-  class Rodin_Adaptation_TargetMatrixOptimization_OptimizerPerturbations
-    : public testing::TestWithParam<std::pair<Index, Math::SpatialPoint>>
-  {};
-
-  TEST_P(Rodin_Adaptation_TargetMatrixOptimization_OptimizerPerturbations, OptimizerReducesDifferentPerturbations)
-  {
-    auto geometry = upgradeUnitTriangle();
-    const auto c = GetParam();
-    const Index node = geometry.cells.front()[c.first];
-    geometry.nodes[node].x[0] += c.second[0];
-    geometry.nodes[node].x[1] += c.second[1];
-
-    SquaredDistanceMetric metric;
-    Objective objective(metric);
-    objective.setDeviationWeight(0.1);
-    const Real before = objective.value(geometry);
-
-    OptimizerOptions options;
-    options.maxIterations = 15;
-    options.initialStepSize = 0.03;
-    const auto report = Optimizer(geometry, objective)
-      .setOptions(options)
-      .optimize();
-
-    EXPECT_LT(report.finalObjective, before);
-    EXPECT_EQ(report.invalidElements, 0);
-  }
-
-  INSTANTIATE_TEST_SUITE_P(
-      Moves,
-      Rodin_Adaptation_TargetMatrixOptimization_OptimizerPerturbations,
-      testing::Values(
-        std::pair<Index, Math::SpatialPoint>{3, Math::SpatialPoint({0.00, 0.20})},
-        std::pair<Index, Math::SpatialPoint>{3, Math::SpatialPoint({0.15, 0.00})},
-        std::pair<Index, Math::SpatialPoint>{4, Math::SpatialPoint({-0.15, 0.00})},
-        std::pair<Index, Math::SpatialPoint>{4, Math::SpatialPoint({0.00, -0.12})},
-        std::pair<Index, Math::SpatialPoint>{5, Math::SpatialPoint({0.12, 0.12})}));
-
-  class Rodin_Adaptation_TargetMatrixOptimization_LinearMeshObjective
-    : public testing::TestWithParam<AffineTriangleCase>
-  {};
-
-  TEST_P(Rodin_Adaptation_TargetMatrixOptimization_LinearMeshObjective, FunctionBaseMetricMatchesManualQuadrature)
-  {
-    const auto c = GetParam();
-    auto mesh = makeTriangle(c.a, c.b, c.c);
-    SquaredDistanceMetric metric;
-
-    const Real objective = LinearMeshMetricObjective(metric).compute(mesh);
-    const Real area = std::abs(c.J.determinant()) / Real(2);
-    const Real expected = area * metric.value(c.J);
-
-    EXPECT_NEAR(objective, expected, 1e-13);
-  }
-
-  INSTANTIATE_TEST_SUITE_P(
-      FunctionBaseBridge,
-      Rodin_Adaptation_TargetMatrixOptimization_LinearMeshObjective,
-      testing::Values(
-        AffineTriangleCase{{0, 0}, {1, 0}, {0, 1}, mat2(1, 0, 0, 1)},
-        AffineTriangleCase{{0, 0}, {2, 0}, {0, 1}, mat2(2, 0, 0, 1)},
-        AffineTriangleCase{{0, 0}, {1, 0.2}, {0.1, 1.1}, mat2(1, 0.1, 0.2, 1.1)},
-        AffineTriangleCase{{1, 1}, {1.5, 1}, {1, 1.5}, mat2(0.5, 0, 0, 0.5)}));
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, ProblemRequiresInitialization)
-  {
-    auto mesh = makeUnitTriangle();
-    Rodin::Adaptation::TargetMatrixOptimization::Problem problem(mesh);
-
-    try
-    {
-      (void) problem.value();
-      FAIL() << "Expected uninitialized TMOP problem to throw.";
-    }
-    catch (const Alert::Exception& e)
-    {
-      EXPECT_NE(
-        std::string(e.what()).find("has not been initialized"),
-        std::string::npos);
-    }
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, ProblemInitializesAndEvaluates)
-  {
-    auto mesh = makeUnitTriangle();
-    SquaredDistanceMetric metric;
-    Rodin::Adaptation::TargetMatrixOptimization::Problem problem(mesh);
-    problem
-      .setMetric(metric)
-      .setDeviationWeight(0.1)
-      .initialize();
-
-    EXPECT_TRUE(problem.isInitialized());
-    EXPECT_EQ(problem.invalidElementCount(), 0);
-    EXPECT_TRUE(std::isfinite(problem.value()));
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, ProblemOptimizerUpdatesGeometry)
-  {
-    auto mesh = makeUnitTriangle();
-    SquaredDistanceMetric metric;
-    Rodin::Adaptation::TargetMatrixOptimization::Problem problem(mesh);
-    problem
-      .setMetric(metric)
-      .setDeviationWeight(0.1)
-      .initialize();
-    distortMidpoint(problem.getGeometry());
-
-    const Real before = problem.value();
-    OptimizerOptions options;
-    options.maxIterations = 10;
-    options.initialStepSize = 0.03;
-    const auto report = problem
-      .setOptimizerOptions(options)
-      .optimize();
-
-    EXPECT_LT(report.finalObjective, before);
-    EXPECT_EQ(report.finalInvalidElements, 0);
-  }
-
-  TEST(Rodin_Adaptation_TargetMatrixOptimization, ProblemCanLeaveOriginalVerticesFree)
-  {
-    auto mesh = makeUnitTriangle();
-    Rodin::Adaptation::TargetMatrixOptimization::Problem problem(mesh);
-    problem
-      .setFixOriginalVertices(false)
-      .initialize();
-
-    EXPECT_FALSE(problem.getGeometry().nodes[0].fixed);
-    EXPECT_FALSE(problem.getGeometry().nodes[1].fixed);
-    EXPECT_FALSE(problem.getGeometry().nodes[2].fixed);
-  }
 
   // Increment 1 for isoparametric P2 TMOP: prove a curved
   // ParametricTransformation<RealH1Element<2>> set via

@@ -8,12 +8,9 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinAdaptation_HEADERS
   TargetMatrixOptimization.h
   TargetMatrixOptimization/Metrics.h
-  TargetMatrixOptimization/Functions.h
   TargetMatrixOptimization/Terms.h
-  TargetMatrixOptimization/Geometry.h
-  TargetMatrixOptimization/Objective.h
-  TargetMatrixOptimization/Optimizer.h
-  TargetMatrixOptimization/Problem.h
+  TargetMatrixOptimization/IsoparametricGeometry.h
+  TargetMatrixOptimization/IsoparametricTMOPSolver.h
 )
 
 add_library(RodinAdaptation INTERFACE)

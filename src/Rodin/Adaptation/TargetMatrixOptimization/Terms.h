@@ -540,287 +540,6 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     };
 
   template <class GridFunctionType>
-  class EdgeSpringQualityResidualIntegrator final
-      : public Variational::LinearFormIntegratorBase<Real>
-    {
-      public:
-        using Parent = Variational::LinearFormIntegratorBase<Real>;
-
-        template <class TestFES>
-        EdgeSpringQualityResidualIntegrator(
-            const GridFunctionType& u,
-            const Variational::TestFunction<TestFES>& v,
-            Real weight)
-          : Parent(v),
-            m_u(u),
-            m_weight(std::max(Real(0), weight))
-        {}
-
-        EdgeSpringQualityResidualIntegrator(
-            const EdgeSpringQualityResidualIntegrator& other)
-          : Parent(other),
-            m_u(other.m_u),
-            m_weight(other.m_weight),
-            m_polytope(other.m_polytope),
-            m_local(other.m_local)
-        {}
-
-        const Geometry::Polytope& getPolytope() const override
-        {
-          assert(m_polytope);
-          return *m_polytope;
-        }
-
-        EdgeSpringQualityResidualIntegrator& setPolytope(
-            const Geometry::Polytope& polytope) override
-        {
-          m_polytope = &polytope;
-          m_local.clear();
-
-          if (polytope.getDimension() != 2
-              || polytope.getVertices().size() != 3)
-            return *this;
-
-          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
-          const size_t sdim = mesh.getSpaceDimension();
-          if (sdim != 2)
-            return *this;
-
-          m_local = computeLocalResidual(polytope, sdim);
-          return *this;
-        }
-
-        Real integrate(size_t local) override
-        {
-          if (local >= m_local.size())
-            return 0;
-          return m_local[local];
-        }
-
-        Geometry::Region getRegion() const override
-        {
-          return Geometry::Region::Cells;
-        }
-
-        EdgeSpringQualityResidualIntegrator* copy() const noexcept override
-        {
-          return new EdgeSpringQualityResidualIntegrator(*this);
-        }
-
-      private:
-        std::vector<Real> computeLocalResidual(
-            const Geometry::Polytope& cell,
-            size_t sdim) const
-        {
-          std::vector<Real> local(cell.getVertices().size() * sdim, Real(0));
-
-          std::array<Math::SpatialPoint, 3> X;
-          std::array<Math::SpatialPoint, 3> x;
-          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
-          for (size_t i = 0; i < 3; ++i)
-          {
-            X[i] = mesh.getVertexCoordinates(cell.getVertices()(i));
-            x[i] = deformedVertex(m_u.get(), cell, i, sdim);
-          }
-
-          const Real area = triangleArea2D(X[0], X[1], X[2]);
-          Real target = equilateralEdgeLengthFromArea(area);
-          if (target <= Real(0))
-          {
-            target =
-              (edgeLength(X[0], X[1])
-             + edgeLength(X[1], X[2])
-             + edgeLength(X[2], X[0])) / Real(3);
-          }
-
-          static constexpr std::array<std::array<size_t, 2>, 3> Edges = {{
-            {{0, 1}}, {{1, 2}}, {{2, 0}}
-          }};
-
-          for (const auto& edge : Edges)
-          {
-            const size_t a = edge[0];
-            const size_t b = edge[1];
-            const auto e = x[b] - x[a];
-            const Real length = e.norm();
-            if (length <= Real(1e-14))
-              continue;
-            const auto direction = (Real(1) / length) * e;
-            const Real scale = m_weight * (length - target);
-            for (size_t c = 0; c < sdim; ++c)
-            {
-              local[a * sdim + c] -= scale * direction[c];
-              local[b * sdim + c] += scale * direction[c];
-            }
-          }
-
-          return local;
-        }
-
-        std::reference_wrapper<const GridFunctionType> m_u;
-        Real m_weight = 1;
-        const Geometry::Polytope* m_polytope = nullptr;
-        std::vector<Real> m_local;
-    };
-
-  template <class GridFunctionType>
-  class EdgeSpringQualityTangentIntegrator final
-      : public Variational::LocalBilinearFormIntegratorBase<Real>
-    {
-      public:
-        using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
-
-        template <class Solution, class TrialFES, class TestFES>
-        EdgeSpringQualityTangentIntegrator(
-            const GridFunctionType& u,
-            const Variational::TrialFunction<Solution, TrialFES>& du,
-            const Variational::TestFunction<TestFES>& v,
-            Real weight)
-          : Parent(du, v),
-            m_u(u),
-            m_weight(std::max(Real(0), weight))
-        {}
-
-        EdgeSpringQualityTangentIntegrator(
-            const EdgeSpringQualityTangentIntegrator& other)
-          : Parent(other),
-            m_u(other.m_u),
-            m_weight(other.m_weight),
-            m_polytope(other.m_polytope),
-            m_localSize(other.m_localSize),
-            m_matrix(other.m_matrix)
-        {}
-
-        const Geometry::Polytope& getPolytope() const override
-        {
-          assert(m_polytope);
-          return *m_polytope;
-        }
-
-        EdgeSpringQualityTangentIntegrator& setPolytope(
-            const Geometry::Polytope& polytope) override
-        {
-          m_polytope = &polytope;
-          m_localSize = 0;
-          m_matrix.clear();
-
-          if (polytope.getDimension() != 2
-              || polytope.getVertices().size() != 3)
-            return *this;
-
-          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
-          const size_t sdim = mesh.getSpaceDimension();
-          if (sdim != 2)
-            return *this;
-
-          m_localSize = polytope.getVertices().size() * sdim;
-          m_matrix = computeLocalTangent(polytope, sdim);
-          return *this;
-        }
-
-        Real integrate(size_t trial, size_t test) override
-        {
-          if (trial >= m_localSize || test >= m_localSize)
-            return 0;
-          return m_matrix[test * m_localSize + trial];
-        }
-
-        Geometry::Region getRegion() const override
-        {
-          return Geometry::Region::Cells;
-        }
-
-        EdgeSpringQualityTangentIntegrator* copy() const noexcept override
-        {
-          return new EdgeSpringQualityTangentIntegrator(*this);
-        }
-
-      private:
-        std::vector<Real> computeLocalTangent(
-            const Geometry::Polytope& cell,
-            size_t sdim) const
-        {
-          const size_t localSize = cell.getVertices().size() * sdim;
-          std::vector<Real> local(localSize * localSize, Real(0));
-
-          const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
-          std::array<Math::SpatialPoint, 3> X;
-          std::array<Math::SpatialPoint, 3> x;
-          for (size_t i = 0; i < 3; ++i)
-          {
-            X[i] = mesh.getVertexCoordinates(cell.getVertices()(i));
-            x[i] = deformedVertex(m_u.get(), cell, i, sdim);
-          }
-
-          // Same rest length as the residual (equilateral length from the
-          // undeformed area, with a fallback), so the tangent below is the
-          // exact Jacobian of the residual edge force.
-          const Real area = triangleArea2D(X[0], X[1], X[2]);
-          Real target = equilateralEdgeLengthFromArea(area);
-          if (target <= Real(0))
-          {
-            target =
-              (edgeLength(X[0], X[1])
-             + edgeLength(X[1], X[2])
-             + edgeLength(X[2], X[0])) / Real(3);
-          }
-
-          static constexpr std::array<std::array<size_t, 2>, 3> Edges = {{
-            {{0, 1}}, {{1, 2}}, {{2, 0}}
-          }};
-
-          auto add = [&](size_t rowVertex, size_t rowComp,
-                         size_t colVertex, size_t colComp,
-                         Real value)
-          {
-            const size_t row = rowVertex * sdim + rowComp;
-            const size_t col = colVertex * sdim + colComp;
-            local[row * localSize + col] += value;
-          };
-
-          for (const auto& edge : Edges)
-          {
-            const size_t a = edge[0];
-            const size_t b = edge[1];
-            const auto e = x[b] - x[a];
-            const Real length = e.norm();
-            if (length <= Real(1e-14))
-              continue;
-            const auto direction = (Real(1) / length) * e;
-            // d/dx of f = w (|e| - L0) e/|e| :
-            //   K = w [ ee^T/|e|^2  +  (|e|-L0)/|e| (I - ee^T/|e|^2) ].
-            // The first term is the axial stiffness; the second is the
-            // geometric stiffness that the previous tangent omitted, which
-            // is what broke residual/Jacobian consistency away from
-            // equilibrium and forced tiny damping.
-            const Real geom = (length - target) / length;
-            for (size_t r = 0; r < sdim; ++r)
-            {
-              for (size_t cc = 0; cc < sdim; ++cc)
-              {
-                const Real dd = direction[r] * direction[cc];
-                const Real identity = (r == cc) ? Real(1) : Real(0);
-                const Real value =
-                  m_weight * (dd + geom * (identity - dd));
-                add(a, r, a, cc,  value);
-                add(a, r, b, cc, -value);
-                add(b, r, a, cc, -value);
-                add(b, r, b, cc,  value);
-              }
-            }
-          }
-
-          return local;
-        }
-
-        std::reference_wrapper<const GridFunctionType> m_u;
-        Real m_weight = 1;
-        const Geometry::Polytope* m_polytope = nullptr;
-        size_t m_localSize = 0;
-        std::vector<Real> m_matrix;
-    };
-
-  template <class GridFunctionType>
   class DeviationResidualIntegrator final
       : public Variational::LinearFormIntegratorBase<Real>
     {
@@ -1521,55 +1240,6 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   QualityTerm(Metric, TargetJacobian) -> QualityTerm<Metric, TargetJacobian>;
 
   /**
-   * @brief Legacy edge-spring smoother, not a TMOP quality metric.
-   *
-   * This term penalizes deviations of deformed cell edge lengths from an
-   * equilateral rest length. It can remain useful as a diagnostic smoother, but
-   * it is intentionally not exposed as TMOP::QualityTerm and must not be
-   * reported as TMOP energy.
-   */
-  class EdgeSpringSmoothingTerm
-  {
-    public:
-      explicit EdgeSpringSmoothingTerm(Real weight = 1)
-        : m_weight(std::max(Real(0), weight))
-      {}
-
-      EdgeSpringSmoothingTerm& setWeight(Real weight)
-      {
-        m_weight = std::max(Real(0), weight);
-        return *this;
-      }
-
-      Real getWeight() const
-      {
-        return m_weight;
-      }
-
-      template <class FES, class Data, class TestFES>
-      auto residual(
-          const Variational::GridFunction<FES, Data>& u,
-          const Variational::TestFunction<TestFES>& v) const
-      {
-        return EdgeSpringQualityResidualIntegrator<
-          Variational::GridFunction<FES, Data>>(u, v, m_weight);
-      }
-
-      template <class FES, class Data, class Solution, class TrialFES, class TestFES>
-      auto tangent(
-          const Variational::GridFunction<FES, Data>& u,
-          const Variational::TrialFunction<Solution, TrialFES>& du,
-          const Variational::TestFunction<TestFES>& v) const
-      {
-        return EdgeSpringQualityTangentIntegrator<
-          Variational::GridFunction<FES, Data>>(u, du, v, m_weight);
-      }
-
-    private:
-      Real m_weight = 1;
-  };
-
-  /**
    * @brief Quadratic displacement-deviation term.
    *
    * Energy:
@@ -1770,9 +1440,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         for (size_t q = 0; q < nq; ++q)
         {
           const auto& rc = qf.getPoint(q);
-          const auto A = deformedCoordinateJacobian(
-              cell, fe, displacement, rc, fes.getVectorDimension());
-          const Real wdet = qf.getWeight(q) * std::abs(A.determinant());
+          Math::SpatialMatrix<Real> J0;
+          cell.getTransformation().jacobian(J0, rc);
+          const Real wdet = qf.getWeight(q) * std::abs(J0.determinant());
           const auto x = deformedPoint(
               cell, fe, displacement, rc, fes.getVectorDimension());
           const Real z = phaseSign * m_value(x) / m_epsilon;
@@ -1934,9 +1604,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         for (size_t q = 0; q < nq; ++q)
         {
           const auto& rc = qf.getPoint(q);
-          const auto A = deformedCoordinateJacobian(
-              cell, fe, displacement, rc, fes.getVectorDimension());
-          const Real wdet = qf.getWeight(q) * std::abs(A.determinant());
+          Math::SpatialMatrix<Real> J0;
+          cell.getTransformation().jacobian(J0, rc);
+          const Real wdet = qf.getWeight(q) * std::abs(J0.determinant());
           const auto x = deformedPoint(
               cell, fe, displacement, rc, fes.getVectorDimension());
           const Real z = phaseSign * m_value(x) / m_epsilon;
@@ -2107,9 +1777,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           for (size_t q = 0; q < qf.getSize(); ++q)
           {
             const auto& rc = qf.getPoint(q);
-            const auto A = deformedCoordinateJacobian(
-                *cell, fe, displacement, rc, fes.getVectorDimension());
-            const Real wdet = qf.getWeight(q) * std::abs(A.determinant());
+            Math::SpatialMatrix<Real> J0;
+            cell->getTransformation().jacobian(J0, rc);
+            const Real wdet = qf.getWeight(q) * std::abs(J0.determinant());
             const auto x = deformedPoint(
                 *cell, fe, displacement, rc, fes.getVectorDimension());
             const Real z = phaseSign * m_value(x) / m_epsilon;
