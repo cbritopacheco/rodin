@@ -403,6 +403,9 @@ namespace Rodin::Examples::Heart
         LVModel lv;
         /// @brief Default RCR parameters copied to every outlet at startup.
         RCR defaultRCR{5.0e8, 5.0e-10, 1.0e9, 500.0, 10000.0, 11000.0};
+
+        Real inletTangentialDamping = 1e3;
+        Real inletVelocityDamping = 0.0;
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);

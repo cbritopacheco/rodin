@@ -861,6 +861,18 @@ namespace Rodin::Examples::Heart
     const auto symLag =
       0.5 * (gradLag + Transpose(gradLag));
 
+    const auto duNormal =
+      Dot(m_u, normal) * normal;
+
+    const auto duTangential =
+      m_u - duNormal;
+
+    const auto uStateNormal =
+      Dot(uState, normal) * normal;
+
+    const auto uStateTangential =
+      uState - uStateNormal;
+
     const auto& cy = m_cfg.viscosity;
     const Real gammaReg = cy.gammaRegularization;
     const Real mu0      = cy.mu0;
@@ -902,24 +914,80 @@ namespace Rodin::Examples::Heart
     if (m_cfg.flowMode == FlowMode::Newton)
     {
       m_flow =
-          /* Jacobian */
+          /*
+           * =========================
+           * Newton Jacobian / tangent
+           * =========================
+           *
+           * Unknowns here are Newton corrections:
+           *   m_u : velocity correction
+           *   m_p : pressure correction
+           */
+
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
 
+        /*
+         * Newton linearization of convection:
+         *   rho ((du · grad) uState + (uState · grad) du, v)
+         *
+         * In your notation this is encoded by newtonConvection.
+         */
         + m_cfg.rho * Integral(Dot(newtonConvection, m_v))
 
+        /*
+         * Temam/skew-symmetric convection correction tangent.
+         */
         + 0.5 * m_cfg.rho * Integral(temamJacobian1)
         + 0.5 * m_cfg.rho * Integral(temamJacobian2)
 
+        /*
+         * Nonlinear viscous tangent:
+         *   2 mu D(du) : D(v)
+         * + 2 dmu[du] D(uState) : D(v)
+         */
         + 2.0 * Integral(mu * symDU, symV)
         + 2.0 * Integral(dmu * symU, symV)
 
+        /*
+         * Stokes pressure/divergence block.
+         */
         - Integral(m_p, Div(m_v))
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
+        /*
+         * Inlet normal impedance tangent.
+         *
+         * Boundary pressure law:
+         *   p_inlet_boundary = pin + Z (u · n)
+         *
+         * Tangent:
+         *   Z (du · n) (v · n)
+         */
         + m_cfg.inletImpedance
           * BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
+
+        /*
+         * Inlet tangential damping tangent.
+         *
+         * Controls u_tau without directly prescribing normal inflow.
+         */
+        + m_cfg.inletTangentialDamping
+          * BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+
+        /*
+         * Backflow stabilization tangent.
+         *
+         * inletBeta activates when inlet behaves as an outlet:
+         *   uOld · n > 0
+         *
+         * outletBeta activates when outlet behaves as an inlet:
+         *   uOld · n < 0
+         *
+         * Since beta is lagged with m_uOld, the tangent is simply beta * du.
+         */
         + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2)
@@ -927,24 +995,69 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
 
-          /* Residual */
+
+          /*
+           * =========================
+           * Newton residual
+           * =========================
+           *
+           * Everything below must use the current nonlinear state:
+           *   uState, pState
+           *
+           * Do not use m_u here, except inside DirichletBC correction terms.
+           */
+
         + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v)
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
 
+        /*
+         * Convective residual:
+         *   rho ((uState · grad) uState, v)
+         */
         + m_cfg.rho * Integral(Dot(stateConvection, m_v))
 
+        /*
+         * Temam/skew residual.
+         */
         + 0.5 * m_cfg.rho * Integral(temamResidual)
 
+        /*
+         * Viscous residual:
+         *   2 mu(uState) D(uState) : D(v)
+         */
         + 2.0 * Integral(mu * symU, symV)
 
+        /*
+         * Pressure/divergence residual.
+         */
         - Integral(pState, Div(m_v))
         + Integral(Div(uState), m_q)
         + m_cfg.eps * Integral(pState, m_q)
 
+        /*
+         * Inlet pressure source.
+         */
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
+        /*
+         * Inlet normal impedance residual.
+         *
+         * Must use uState, not m_u.
+         */
         + m_cfg.inletImpedance
           * BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v)).over(m_cfg.inlet)
+
+        /*
+         * Inlet tangential damping residual.
+         *
+         * Must use uStateTangential, not duTangential.
+         */
+        + m_cfg.inletTangentialDamping
+          * BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
+
+        /*
+         * Outlet pressure Neumann residuals.
+         */
         + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
         + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
         + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
@@ -952,7 +1065,13 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
         + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
+        /*
+         * Backflow stabilization residual.
+         *
+         * Must use uState.
+         */
         + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v)).over(m_cfg.inlet)
+
         + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet0)
         + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet1)
         + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet2)
@@ -960,27 +1079,73 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet4)
         + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet5)
 
+        /*
+         * Variational elimination of wall Dirichlet condition.
+         *
+         * Since unknown is Newton correction, impose:
+         *   du = -uState
+         * on the wall.
+         */
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
     }
     else
     {
       m_flow =
-          /* Jacobian */
+          /*
+           * =========================
+           * Oseen linear operator
+           * =========================
+           *
+           * Unknowns are directly:
+           *   m_u : new velocity
+           *   m_p : new pressure
+           *
+           * There is no separate nonlinear residual/tangent split here.
+           */
+
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
 
+        /*
+         * Oseen convection with lagged convecting velocity uLag = m_uOld.
+         */
         + m_cfg.rho * Integral(Dot(oseenConvectionJacobian, m_v))
 
+        /*
+         * Lagged Temam correction.
+         */
         + 0.5 * m_cfg.rho * Integral(oseenTemamJacobian)
 
+        /*
+         * Lagged viscosity.
+         */
         + 2.0 * Integral(muLag * symDU, symV)
 
+        /*
+         * Stokes pressure/divergence block.
+         */
         - Integral(m_p, Div(m_v))
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
+        /*
+         * Inlet normal impedance.
+         */
         + m_cfg.inletImpedance
           * BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
+
+        /*
+         * Inlet tangential damping.
+         */
+        + m_cfg.inletTangentialDamping
+          * BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+
+        /*
+         * Backflow stabilization.
+         *
+         * Keep only one inlet term.
+         */
         + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2)
@@ -988,11 +1153,28 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
 
-          /* Right-hand side terms */
+
+          /*
+           * =========================
+           * Oseen right-hand side
+           * =========================
+           *
+           * The old velocity term appears with a minus sign because the problem is
+           * assembled in residual form:
+           *
+           *   A u^{n+1} - rho/dt u^n + boundary loads = 0
+           */
+
         - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
 
+        /*
+         * Inlet pressure source.
+         */
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
+        /*
+         * Explicit outlet pressures.
+         */
         + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
         + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
         + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
@@ -1000,6 +1182,12 @@ namespace Rodin::Examples::Heart
         + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
         + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
+        /*
+         * Wall no-slip condition.
+         *
+         * Since Oseen unknown is the new velocity itself, impose:
+         *   u = 0.
+         */
         + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
     }
 
@@ -1494,6 +1682,7 @@ namespace Rodin::Examples::Heart
         printStepTiming(acceptedStep + 1);
 
         accepted = true;
+        ++acceptedStep;
         nextDt = std::min(baseDt, solverDt / factor);
       }
     }
