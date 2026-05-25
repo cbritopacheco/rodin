@@ -1548,7 +1548,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           Real epsilon,
           Real margin,
           Real normalization,
-          size_t quadratureOrder)
+          size_t quadratureOrder,
+          std::function<Math::SpatialMatrix<Real>(const Math::SpatialPoint&)> hessian = {})
         : Parent(du, v),
           m_u(u),
           m_value(std::move(value)),
@@ -1559,7 +1560,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           m_epsilon(std::max(epsilon, Real(1e-12))),
           m_margin(margin),
           m_normalization(std::max(normalization, Real(1e-12))),
-          m_quadratureOrder(quadratureOrder)
+          m_quadratureOrder(quadratureOrder),
+          m_hessian(std::move(hessian))
       {}
 
       VolumetricPhaseConsistencyTangentIntegrator(
@@ -1575,11 +1577,14 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           m_margin(other.m_margin),
           m_normalization(other.m_normalization),
           m_quadratureOrder(other.m_quadratureOrder),
+          m_hessian(other.m_hessian),
           m_polytope(other.m_polytope),
           m_localCount(other.m_localCount),
           m_scale(other.m_scale),
+          m_curvatureScale(other.m_curvatureScale),
           m_basisValue(other.m_basisValue),
-          m_gradPhi(other.m_gradPhi)
+          m_gradPhi(other.m_gradPhi),
+          m_hessianValue(other.m_hessianValue)
       {}
 
       const Geometry::Polytope& getPolytope() const override
@@ -1598,8 +1603,10 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         const Real phaseSign = getPhaseSign(attr);
         m_localCount = 0;
         m_scale.clear();
+        m_curvatureScale.clear();
         m_basisValue.clear();
         m_gradPhi.clear();
+        m_hessianValue.clear();
         if (phaseSign == Real(0))
           return *this;
 
@@ -1614,11 +1621,13 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           QF::PolytopeQuadratureFormula::get(m_quadratureOrder, geometry);
         const size_t nq = qf.getSize();
         m_scale.assign(nq, 0);
+        m_curvatureScale.assign(nq, 0);
         m_basisValue.assign(
             nq, std::vector<Math::SpatialPoint>(m_localCount));
         m_gradPhi.assign(
             nq, Math::SpatialPoint(
                 static_cast<std::uint8_t>(fes.getVectorDimension())));
+        m_hessianValue.assign(nq, Math::SpatialMatrix<Real>());
         for (size_t q = 0; q < nq; ++q)
         {
           const auto& rc = qf.getPoint(q);
@@ -1630,10 +1639,16 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const Real z = phaseSign * m_value(x) / m_epsilon;
           if (z >= m_margin)
             continue;
+          const Real psiPrime = z - m_margin;
           const Real psiSecond = Real(1);
           const Real factor = phaseSign / m_epsilon;
           m_scale[q] = wdet * psiSecond * factor * factor;
           m_gradPhi[q] = m_gradient(x);
+          if (m_hessian)
+          {
+            m_curvatureScale[q] = wdet * psiPrime * factor;
+            m_hessianValue[q] = m_hessian(x);
+          }
           for (size_t l = 0; l < m_localCount; ++l)
             m_basisValue[q][l] = basisVectorValue(fe, l, rc);
         }
@@ -1654,6 +1669,17 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const Real dTest =
             Math::dot(m_gradPhi[q], m_basisValue[q][test]);
           value += m_scale[q] * dTrial * dTest;
+          if (m_curvatureScale[q] != Real(0))
+          {
+            Real curvature = 0;
+            const auto& h = m_hessianValue[q];
+            for (std::uint8_t a = 0; a < h.rows(); ++a)
+              for (std::uint8_t b = 0; b < h.cols(); ++b)
+                curvature += m_basisValue[q][test][a]
+                           * h(a, b)
+                           * m_basisValue[q][trial][b];
+            value += m_curvatureScale[q] * curvature;
+          }
         }
         return (m_weight / m_normalization) * value;
       }
@@ -1690,17 +1716,22 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       Real m_margin = 1;
       Real m_normalization = 1;
       size_t m_quadratureOrder = 2;
+      std::function<Math::SpatialMatrix<Real>(const Math::SpatialPoint&)> m_hessian;
       const Geometry::Polytope* m_polytope = nullptr;
       size_t m_localCount = 0;
       std::vector<Real> m_scale;
+      std::vector<Real> m_curvatureScale;
       std::vector<std::vector<Math::SpatialPoint>> m_basisValue;
       std::vector<Math::SpatialPoint> m_gradPhi;
+      std::vector<Math::SpatialMatrix<Real>> m_hessianValue;
   };
 
   template <class ValueFunction, class GradientFunction>
   class VolumetricPhaseConsistencyTerm
   {
     public:
+      using HessianFunction = std::function<Math::SpatialMatrix<Real>(const Math::SpatialPoint&)>;
+
       VolumetricPhaseConsistencyTerm(
           ValueFunction value,
           GradientFunction gradient,
@@ -1709,6 +1740,22 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           Real weight = 1)
         : m_value(std::move(value)),
           m_gradient(std::move(gradient)),
+          m_negativeAttribute(negativeAttribute),
+          m_positiveAttribute(positiveAttribute),
+          m_weight(std::max(Real(0), weight))
+      {}
+
+      template <class HessianLike>
+      VolumetricPhaseConsistencyTerm(
+          ValueFunction value,
+          GradientFunction gradient,
+          HessianLike hessian,
+          Geometry::Attribute negativeAttribute,
+          Geometry::Attribute positiveAttribute,
+          Real weight = 1)
+        : m_value(std::move(value)),
+          m_gradient(std::move(gradient)),
+          m_hessian(HessianFunction(std::move(hessian))),
           m_negativeAttribute(negativeAttribute),
           m_positiveAttribute(positiveAttribute),
           m_weight(std::max(Real(0), weight))
@@ -1768,7 +1815,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
               u, du, v, m_value, m_gradient,
               m_negativeAttribute, m_positiveAttribute,
               m_weight, m_epsilon, m_margin,
-              m_normalization, m_quadratureOrder);
+              m_normalization, m_quadratureOrder, m_hessian);
       }
 
       template <class FES, class Data>
@@ -1885,6 +1932,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
       ValueFunction m_value;
       GradientFunction m_gradient;
+      HessianFunction m_hessian;
       Geometry::Attribute m_negativeAttribute;
       Geometry::Attribute m_positiveAttribute;
       Real m_weight = 1;
@@ -1893,6 +1941,15 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       Real m_normalization = 1;
       size_t m_quadratureOrder = 4;
   };
+
+  template <class ValueFunction, class GradientFunction, class HessianFunction>
+  VolumetricPhaseConsistencyTerm(
+      ValueFunction,
+      GradientFunction,
+      HessianFunction,
+      Geometry::Attribute,
+      Geometry::Attribute,
+      Real) -> VolumetricPhaseConsistencyTerm<ValueFunction, GradientFunction>;
 
   /**
    * @brief Analytic level-set interface-fit penalty.

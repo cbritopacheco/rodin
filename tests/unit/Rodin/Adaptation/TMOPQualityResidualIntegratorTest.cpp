@@ -10,7 +10,7 @@
 
 TEST(Rodin_Adaptation_TargetMatrixOptimization_PerClass, TMOPQualityResidualIntegratorFiniteDifferenceConsistencyP1)
 {
-  const auto result = Rodin::Tests::Unit::TMOPFD::tmopQualityFdSweep(false);
+  const auto result = Rodin::Tests::Unit::TMOPFD::tmopQualityEnergyFdSweep(false);
   Rodin::Tests::Unit::TMOPFD::printFDSweep("TMOPQualityResidualIntegrator", "P1", result);
   EXPECT_LT(result.bestError(), Rodin::Real(2e-5));
   EXPECT_TRUE(Rodin::Tests::Unit::TMOPFD::hasEpsilonScalingTrend(result));
@@ -18,7 +18,7 @@ TEST(Rodin_Adaptation_TargetMatrixOptimization_PerClass, TMOPQualityResidualInte
 
 TEST(Rodin_Adaptation_TargetMatrixOptimization_PerClass, TMOPQualityResidualIntegratorFiniteDifferenceConsistencyP2)
 {
-  const auto result = Rodin::Tests::Unit::TMOPFD::tmopQualityFdSweep(true);
+  const auto result = Rodin::Tests::Unit::TMOPFD::tmopQualityEnergyFdSweep(true);
   Rodin::Tests::Unit::TMOPFD::printFDSweep("TMOPQualityResidualIntegrator", "P2", result);
   EXPECT_LT(result.bestError(), Rodin::Real(3e-5));
   EXPECT_TRUE(Rodin::Tests::Unit::TMOPFD::hasEpsilonScalingTrend(result));

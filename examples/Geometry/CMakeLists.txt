@@ -79,5 +79,5 @@ target_link_libraries(LevelSetMovingCurvedCircle
   Rodin::Adaptation
   Rodin::Geometry
   Rodin::IO
-  Rodin::MMG
+  Rodin::Solver
   Rodin::Variational)

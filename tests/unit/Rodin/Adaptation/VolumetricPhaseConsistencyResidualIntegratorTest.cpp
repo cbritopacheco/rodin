@@ -10,7 +10,7 @@
 
 TEST(Rodin_Adaptation_TargetMatrixOptimization_PerClass, VolumetricPhaseConsistencyResidualIntegratorFiniteDifferenceConsistencyP1)
 {
-  const auto result = Rodin::Tests::Unit::TMOPFD::phaseFdSweep(false);
+  const auto result = Rodin::Tests::Unit::TMOPFD::phaseEnergyFdSweep(false);
   Rodin::Tests::Unit::TMOPFD::printFDSweep("VolumetricPhaseConsistencyResidualIntegrator", "P1", result);
   EXPECT_LT(result.bestError(), Rodin::Real(3e-5));
   EXPECT_TRUE(Rodin::Tests::Unit::TMOPFD::hasEpsilonScalingTrend(result));
@@ -18,7 +18,7 @@ TEST(Rodin_Adaptation_TargetMatrixOptimization_PerClass, VolumetricPhaseConsiste
 
 TEST(Rodin_Adaptation_TargetMatrixOptimization_PerClass, VolumetricPhaseConsistencyResidualIntegratorFiniteDifferenceConsistencyP2)
 {
-  const auto result = Rodin::Tests::Unit::TMOPFD::phaseFdSweep(true);
+  const auto result = Rodin::Tests::Unit::TMOPFD::phaseEnergyFdSweep(true);
   Rodin::Tests::Unit::TMOPFD::printFDSweep("VolumetricPhaseConsistencyResidualIntegrator", "P2", result);
   EXPECT_LT(result.bestError(), Rodin::Real(5e-5));
   EXPECT_TRUE(Rodin::Tests::Unit::TMOPFD::hasEpsilonScalingTrend(result));

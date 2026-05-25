@@ -32,7 +32,7 @@ namespace Rodin::Tests::Unit::TMOPFD
 
   struct FDSweepResult
   {
-    std::array<Real, 4> steps{{1e-5, 1e-6, 1e-7, 1e-8}};
+    std::array<Real, 4> steps{{1e-4, 1e-5, 1e-6, 1e-7}};
     std::array<Real, 4> errors{{
       std::numeric_limits<Real>::infinity(),
       std::numeric_limits<Real>::infinity(),
@@ -54,14 +54,10 @@ namespace Rodin::Tests::Unit::TMOPFD
     const Real e2 = result.errors[2];
     if (!std::isfinite(e0) || !std::isfinite(e1) || !std::isfinite(e2))
       return false;
-
-    // Machine-floor regime: derivative consistency is already at numerical noise level.
     if (best <= Real(1e-10))
       return true;
-
     if (e0 <= Real(0) || e1 <= Real(0) || e2 <= Real(0))
       return false;
-
     const Real p01 = std::log(e0 / e1) / std::log(Real(10));
     const Real p12 = std::log(e1 / e2) / std::log(Real(10));
     return p01 >= Real(0.25) || p12 >= Real(0.25);
@@ -74,7 +70,8 @@ namespace Rodin::Tests::Unit::TMOPFD
   {
     std::cout << "FD_TABLE " << name << " " << order << "\n";
     for (size_t i = 0; i < result.steps.size(); ++i)
-      std::cout << "eps=" << result.steps[i] << " error=" << result.errors[i] << "\n";
+      std::cout << "eps=" << result.steps[i]
+                << " error=" << result.errors[i] << "\n";
   }
 
   inline LocalMesh makeTwoTriangleSquareWithVerticalInterface()
@@ -100,6 +97,7 @@ namespace Rodin::Tests::Unit::TMOPFD
     mesh.setAttribute({2, 1}, Negative);
     mesh.setAttribute({2, 2}, Positive);
     mesh.setAttribute({2, 3}, Positive);
+
     const auto& conn = mesh.getConnectivity();
     for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
     {
@@ -127,13 +125,42 @@ namespace Rodin::Tests::Unit::TMOPFD
     return mesh;
   }
 
+  struct QuadraticPhi
+  {
+    Real operator()(const Math::SpatialPoint& x) const
+    {
+      return x[0] * x[0] + Real(0.5) * x[1] * x[1] - Real(0.4);
+    }
+  };
+
+  struct QuadraticPhiGradient
+  {
+    Math::SpatialPoint operator()(const Math::SpatialPoint& x) const
+    {
+      return Math::SpatialPoint{Real(2) * x[0], x[1]};
+    }
+  };
+
+  struct QuadraticPhiHessian
+  {
+    Math::SpatialMatrix<Real> operator()(const Math::SpatialPoint&) const
+    {
+      Math::SpatialMatrix<Real> h(2, 2);
+      h(0, 0) = Real(2);
+      h(0, 1) = Real(0);
+      h(1, 0) = Real(0);
+      h(1, 1) = Real(1);
+      return h;
+    }
+  };
+
   inline void fillDisplacement(Eigen::VectorXd& data, Real amplitude)
   {
     for (Eigen::Index i = 0; i < data.size(); ++i)
     {
       const Real k = static_cast<Real>(i + 1);
       data(i) = amplitude * (std::sin(Real(0.37) * k)
-               + Real(0.5) * std::cos(Real(0.19) * k));
+              + Real(0.5) * std::cos(Real(0.19) * k));
     }
   }
 
@@ -149,7 +176,7 @@ namespace Rodin::Tests::Unit::TMOPFD
   }
 
   template <class AssembleResidual, class AssembleTangentAction>
-  inline FDSweepResult finiteDifferenceConsistencySweep(
+  inline FDSweepResult finiteDifferenceTangentSweep(
       Eigen::VectorXd& u,
       AssembleResidual assembleResidual,
       AssembleTangentAction assembleTangentAction)
@@ -161,11 +188,12 @@ namespace Rodin::Tests::Unit::TMOPFD
     for (size_t i = 0; i < result.steps.size(); ++i)
     {
       const Real eps = result.steps[i];
-      const auto r0 = assembleResidual();
       u = u0 + eps * direction;
-      const auto r1 = assembleResidual();
+      const auto rPlus = assembleResidual();
+      u = u0 - eps * direction;
+      const auto rMinus = assembleResidual();
       u = u0;
-      const auto fd = (r1 - r0) / eps;
+      const auto fd = (rPlus - rMinus) / (Real(2) * eps);
       const auto jd = assembleTangentAction(direction);
       const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
       result.errors[i] = (fd - jd).norm() / denom;
@@ -173,289 +201,200 @@ namespace Rodin::Tests::Unit::TMOPFD
     return result;
   }
 
+  template <class AssembleResidual, class Energy>
+  inline FDSweepResult finiteDifferenceEnergyGradientSweep(
+      Eigen::VectorXd& u,
+      AssembleResidual assembleResidual,
+      Energy energy)
+  {
+    FDSweepResult result;
+    const auto u0 = u;
+    auto direction = u;
+    fillDirection(direction);
+    u = u0;
+    const auto residual = assembleResidual();
+    const Real directionalResidual = residual.dot(direction);
+    for (size_t i = 0; i < result.steps.size(); ++i)
+    {
+      const Real eps = result.steps[i];
+      u = u0 + eps * direction;
+      const Real ePlus = energy();
+      u = u0 - eps * direction;
+      const Real eMinus = energy();
+      u = u0;
+      const Real fd = (ePlus - eMinus) / (Real(2) * eps);
+      const Real denom =
+        std::max<Real>({Real(1), std::abs(fd), std::abs(directionalResidual)});
+      result.errors[i] = std::abs(fd - directionalResidual) / denom;
+    }
+    return result;
+  }
+
+  template <class Space, class MakeTerm>
+  inline FDSweepResult tangentSweepOnSpace(Space& space, MakeTerm makeTerm)
+  {
+    GridFunction u(space);
+    fillDisplacement(u.getData(), Real(0.002));
+    TrialFunction du(space);
+    TestFunction v(space);
+    auto term = makeTerm();
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm r(v);
+      r = term.residual(u, v);
+      r.assemble();
+      return r.getVector();
+    };
+    auto assembleTangentAction = [&](const Math::Vector<Real>& d)
+    {
+      BilinearForm j(du, v);
+      if constexpr (requires { term.tangent(u, du, v); })
+        j = term.tangent(u, du, v);
+      else
+        j = term.tangent(du, v);
+      j.assemble();
+      return (j.getOperator() * d).eval();
+    };
+    return finiteDifferenceTangentSweep(
+        u.getData(), assembleResidual, assembleTangentAction);
+  }
+
+  template <class Space, class MakeTerm>
+  inline FDSweepResult energySweepOnSpace(Space& space, MakeTerm makeTerm)
+  {
+    GridFunction u(space);
+    fillDisplacement(u.getData(), Real(0.002));
+    TestFunction v(space);
+    auto term = makeTerm();
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm r(v);
+      r = term.residual(u, v);
+      r.assemble();
+      return r.getVector();
+    };
+    auto energy = [&]()
+    {
+      return term.energy(u);
+    };
+    return finiteDifferenceEnergyGradientSweep(
+        u.getData(), assembleResidual, energy);
+  }
+
+  template <class Sweep>
+  inline FDSweepResult withDisplacementSpace(bool useP2, Sweep sweep)
+  {
+    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
+    if (useP2)
+    {
+      VectorH1<2, LocalMesh> space(
+          std::integral_constant<size_t, 2>{}, mesh, 2);
+      return sweep(space);
+    }
+    P1 space(mesh, 2);
+    return sweep(space);
+  }
+
+  inline auto makeQualityTerm()
+  {
+    QualityTerm quality(
+        ShapeSizeBlendMetric(Real(0.5)), IdentityTargetJacobian{}, Real(0.7));
+    quality.setQuadratureOrder(4);
+    return quality;
+  }
+
+  inline auto makeDeviationTerm()
+  {
+    return DeviationTerm(Real(0.25));
+  }
+
+  inline auto makeAnalyticFitTerm()
+  {
+    AnalyticLevelSetFitTerm fit(
+        QuadraticPhi{}, QuadraticPhiGradient{}, QuadraticPhiHessian{},
+        Optional<Attribute>(Interface), Real(1.1));
+    fit.setQuadratureOrder(4);
+    fit.setNormalization(Real(1));
+    return fit;
+  }
+
+  inline auto makePhaseTerm()
+  {
+    VolumetricPhaseConsistencyTerm phase(
+        QuadraticPhi{}, QuadraticPhiGradient{}, QuadraticPhiHessian{},
+        Negative, Positive, Real(0.9));
+    phase
+      .setQuadratureOrder(4)
+      .setEpsilon(Real(0.5))
+      .setMargin(Real(1))
+      .setNormalization(Real(1));
+    return phase;
+  }
+
   inline FDSweepResult tmopQualityFdSweep(bool useP2)
   {
-    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
-    if (useP2)
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      VectorH1<2, LocalMesh> space(
-          std::integral_constant<size_t, 2>{}, mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
-      QualityTerm quality(
-          ShapeSizeBlendMetric(Real(0.5)), IdentityTargetJacobian{}, Real(0.7));
-      quality.setQuadratureOrder(4);
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = quality.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = quality.tangent(u, du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
-    else
-    {
-      P1 space(mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
-      QualityTerm quality(
-          ShapeSizeBlendMetric(Real(0.5)), IdentityTargetJacobian{}, Real(0.7));
-      quality.setQuadratureOrder(4);
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = quality.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = quality.tangent(u, du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
+      return tangentSweepOnSpace(space, []() { return makeQualityTerm(); });
+    });
   }
 
-      inline FDSweepResult deviationFdSweep(bool useP2)
+  inline FDSweepResult deviationFdSweep(bool useP2)
   {
-    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
-    if (useP2)
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      VectorH1<2, LocalMesh> space(
-          std::integral_constant<size_t, 2>{}, mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
-      DeviationTerm deviation(Real(0.25));
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = deviation.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = deviation.tangent(du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
-    else
-    {
-      P1 space(mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
-      DeviationTerm deviation(Real(0.25));
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = deviation.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = deviation.tangent(du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
+      return tangentSweepOnSpace(space, []() { return makeDeviationTerm(); });
+    });
   }
 
-      inline FDSweepResult analyticFitFdSweep(bool useP2)
+  inline FDSweepResult analyticFitFdSweep(bool useP2)
   {
-    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
-    auto phi = [](const Math::SpatialPoint& x)
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      return x[0] * x[0] + Real(0.5) * x[1] * x[1] - Real(0.4);
-    };
-    auto gradPhi = [](const Math::SpatialPoint& x)
-    {
-      return Math::SpatialPoint{Real(2) * x[0], x[1]};
-    };
-    auto hessPhi = [](const Math::SpatialPoint&)
-    {
-      Math::SpatialMatrix<Real> h(2, 2);
-      h(0, 0) = Real(2);
-      h(0, 1) = Real(0);
-      h(1, 0) = Real(0);
-      h(1, 1) = Real(1);
-      return h;
-    };
-
-    if (useP2)
-    {
-      VectorH1<2, LocalMesh> space(
-          std::integral_constant<size_t, 2>{}, mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
-
-      AnalyticLevelSetFitTerm fit(
-        phi, gradPhi, hessPhi, Optional<Attribute>(Interface), Real(1.1));
-      fit.setQuadratureOrder(4);
-      fit.setNormalization(Real(1));
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = fit.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = fit.tangent(u, du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
-    else
-    {
-      P1 space(mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
-
-      AnalyticLevelSetFitTerm fit(
-        phi, gradPhi, hessPhi, Optional<Attribute>(Interface), Real(1.1));
-      fit.setQuadratureOrder(4);
-      fit.setNormalization(Real(1));
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = fit.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = fit.tangent(u, du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
+      return tangentSweepOnSpace(space, []() { return makeAnalyticFitTerm(); });
+    });
   }
 
-      inline FDSweepResult phaseFdSweep(bool useP2)
+  inline FDSweepResult phaseFdSweep(bool useP2)
   {
-    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
-    auto phi = [](const Math::SpatialPoint& x)
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      return x[0] - Real(0.5);
-    };
-    auto gradPhi = [](const Math::SpatialPoint&)
+      return tangentSweepOnSpace(space, []() { return makePhaseTerm(); });
+    });
+  }
+
+  inline FDSweepResult tmopQualityEnergyFdSweep(bool useP2)
+  {
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      return Math::SpatialPoint{1, 0};
-    };
+      return energySweepOnSpace(space, []() { return makeQualityTerm(); });
+    });
+  }
 
-    if (useP2)
+  inline FDSweepResult deviationEnergyFdSweep(bool useP2)
+  {
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      VectorH1<2, LocalMesh> space(
-          std::integral_constant<size_t, 2>{}, mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
+      return energySweepOnSpace(space, []() { return makeDeviationTerm(); });
+    });
+  }
 
-      VolumetricPhaseConsistencyTerm phase(
-        phi, gradPhi, Negative, Positive, Real(0.9));
-      phase
-        .setQuadratureOrder(4)
-        .setEpsilon(Real(0.5))
-        .setMargin(Real(1))
-        .setNormalization(Real(1));
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = phase.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = phase.tangent(u, du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-        return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
-    else
+  inline FDSweepResult analyticFitEnergyFdSweep(bool useP2)
+  {
+    return withDisplacementSpace(useP2, [](auto& space)
     {
-      P1 space(mesh, 2);
-      GridFunction u(space);
-      fillDisplacement(u.getData(), Real(0.002));
-      TrialFunction du(space);
-      TestFunction v(space);
+      return energySweepOnSpace(space, []() { return makeAnalyticFitTerm(); });
+    });
+  }
 
-      VolumetricPhaseConsistencyTerm phase(
-        phi, gradPhi, Negative, Positive, Real(0.9));
-      phase
-        .setQuadratureOrder(4)
-        .setEpsilon(Real(0.5))
-        .setMargin(Real(1))
-        .setNormalization(Real(1));
-
-      auto assembleResidual = [&]()
-      {
-        LinearForm r(v);
-        r = phase.residual(u, v);
-        r.assemble();
-        return r.getVector();
-      };
-      auto assembleTangentAction = [&](const Math::Vector<Real>& d)
-      {
-        BilinearForm j(du, v);
-        j = phase.tangent(u, du, v);
-        j.assemble();
-        return (j.getOperator() * d).eval();
-      };
-      return finiteDifferenceConsistencySweep(
-          u.getData(), assembleResidual, assembleTangentAction);
-    }
+  inline FDSweepResult phaseEnergyFdSweep(bool useP2)
+  {
+    return withDisplacementSpace(useP2, [](auto& space)
+    {
+      return energySweepOnSpace(space, []() { return makePhaseTerm(); });
+    });
   }
 
   inline Real tmopQualityFdError(bool useP2)
