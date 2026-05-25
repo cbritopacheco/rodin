@@ -9,6 +9,18 @@ set(RodinAdaptation_HEADERS
   TargetMatrixOptimization.h
   TargetMatrixOptimization/Metrics.h
   TargetMatrixOptimization/Terms.h
+  TargetMatrixOptimization/TMOPQualityResidualIntegrator.h
+  TargetMatrixOptimization/TMOPQualityTangentIntegrator.h
+  TargetMatrixOptimization/DeviationResidualIntegrator.h
+  TargetMatrixOptimization/DeviationTangentIntegrator.h
+  TargetMatrixOptimization/AnalyticLevelSetFitResidualIntegrator.h
+  TargetMatrixOptimization/AnalyticLevelSetFitTangentIntegrator.h
+  TargetMatrixOptimization/QualityTerm.h
+  TargetMatrixOptimization/DeviationTerm.h
+  TargetMatrixOptimization/VolumetricPhaseConsistencyResidualIntegrator.h
+  TargetMatrixOptimization/VolumetricPhaseConsistencyTangentIntegrator.h
+  TargetMatrixOptimization/VolumetricPhaseConsistencyTerm.h
+  TargetMatrixOptimization/AnalyticLevelSetFitTerm.h
   TargetMatrixOptimization/IsoparametricGeometry.h
   TargetMatrixOptimization/IsoparametricTMOPSolver.h
 )

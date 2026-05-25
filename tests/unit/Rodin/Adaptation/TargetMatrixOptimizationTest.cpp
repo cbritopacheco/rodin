@@ -8,6 +8,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <iomanip>
 #include <initializer_list>
 #include <limits>
 #include <string>
@@ -966,6 +967,261 @@ namespace Rodin::Tests::Unit
     const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
 
     EXPECT_NEAR((fd - jd).norm() / denom, 0, 1e-7);
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, DISABLED_MovingCurvedCircleObjectiveResidualTangentConsistency)
+  {
+    auto mesh = makeTwoTriangleSquareWithVerticalInterface();
+    VectorH1<2, LocalMesh> space(
+        std::integral_constant<size_t, 2>{}, mesh, 2);
+
+    GridFunction displacement(space);
+    fillDisplacement(displacement.getData(), Real(0.002));
+
+    TrialFunction du(space);
+    TestFunction v(space);
+
+    auto center = [](Real t)
+    {
+      return Math::SpatialPoint{
+        Real(0.5) + Real(0.18) * std::sin(Real(2) * Real(M_PI) * t),
+        Real(0.5) + Real(0.13) * std::sin(Real(4) * Real(M_PI) * t + Real(0.35))
+      };
+    };
+    auto phi = [center](const Math::SpatialPoint& x)
+    {
+      constexpr Real t = Real(0.5);
+      constexpr Real r = Real(0.17);
+      const auto c = center(t);
+      const Real dx = x[0] - c[0];
+      const Real dy = x[1] - c[1];
+      return std::hypot(dx, dy) - r;
+    };
+    auto gradPhi = [center](const Math::SpatialPoint& x)
+    {
+      constexpr Real t = Real(0.5);
+      const auto c = center(t);
+      const Real dx = x[0] - c[0];
+      const Real dy = x[1] - c[1];
+      const Real rho2 = dx * dx + dy * dy;
+      const Real rho = std::sqrt(rho2);
+      if (rho <= Real(1e-14))
+        return Math::SpatialPoint{1, 0};
+      return Math::SpatialPoint{dx / rho, dy / rho};
+    };
+    auto hessPhi = [center](const Math::SpatialPoint& x)
+    {
+      constexpr Real t = Real(0.5);
+      Math::SpatialMatrix<Real> h(2, 2);
+      const auto c = center(t);
+      const Real dx = x[0] - c[0];
+      const Real dy = x[1] - c[1];
+      const Real rho2 = dx * dx + dy * dy;
+      const Real rho = std::sqrt(rho2);
+      if (rho <= Real(1e-14))
+      {
+        h.setZero();
+        return h;
+      }
+      const Real rho3 = rho2 * rho;
+      h(0, 0) = dy * dy / rho3;
+      h(0, 1) = -dx * dy / rho3;
+      h(1, 0) = h(0, 1);
+      h(1, 1) = dx * dx / rho3;
+      return h;
+    };
+    auto boundaryValue = [](const Math::SpatialPoint& x)
+    {
+      return x[0] * (Real(1) - x[0]) * x[1] * (Real(1) - x[1]);
+    };
+    auto boundaryGradient = [](const Math::SpatialPoint& x)
+    {
+      return Math::SpatialPoint{
+        (Real(1) - Real(2) * x[0]) * x[1] * (Real(1) - x[1]),
+        (Real(1) - Real(2) * x[1]) * x[0] * (Real(1) - x[0])
+      };
+    };
+    auto boundaryHessian = [](const Math::SpatialPoint& x)
+    {
+      Math::SpatialMatrix<Real> h(2, 2);
+      h(0, 0) = -Real(2) * x[1] * (Real(1) - x[1]);
+      h(1, 1) = -Real(2) * x[0] * (Real(1) - x[0]);
+      h(0, 1) = (Real(1) - Real(2) * x[0]) * (Real(1) - Real(2) * x[1]);
+      h(1, 0) = h(0, 1);
+      return h;
+    };
+
+    ShapeSizeBlendMetric metric(Real(0.5));
+    QualityTerm quality(metric, IdentityTargetJacobian{}, Real(0.03));
+    quality.setQuadratureOrder(4);
+
+    DeviationTerm deviation(Real(0.25));
+
+    AnalyticLevelSetFitTerm fit(
+        phi, gradPhi, hessPhi, Optional<Attribute>(TestInterface), Real(30));
+    fit.setNormalization(Real(1));
+    fit.setQuadratureOrder(4);
+
+    AnalyticLevelSetFitTerm bfit(
+        boundaryValue,
+        boundaryGradient,
+        boundaryHessian,
+        Optional<Attribute>(TestBoundary),
+        Real(1));
+    bfit.setNormalization(Real(1));
+    bfit.setQuadratureOrder(4);
+
+    VolumetricPhaseConsistencyTerm phase(
+        phi, gradPhi, TestNegative, TestPositive, Real(0));
+    phase
+      .setQuadratureOrder(4)
+      .setEpsilon(Real(0.5))
+      .setMargin(Real(1))
+      .setNormalization(Real(1));
+
+    constexpr int MaskQuality = 1 << 0;
+    constexpr int MaskDeviation = 1 << 1;
+    constexpr int MaskFit = 1 << 2;
+    constexpr int MaskBoundaryFit = 1 << 3;
+    constexpr int MaskPhase = 1 << 4;
+
+    auto assembleResidual = [&](int mask)
+    {
+      Math::Vector<Real> r =
+        Math::Vector<Real>::Zero(displacement.getData().size());
+      if (mask & MaskQuality)
+      {
+        LinearForm residual(v);
+        residual = quality.residual(displacement, v);
+        residual.assemble();
+        r += residual.getVector();
+      }
+      if (mask & MaskDeviation)
+      {
+        LinearForm residual(v);
+        residual = deviation.residual(displacement, v);
+        residual.assemble();
+        r += residual.getVector();
+      }
+      if (mask & MaskFit)
+      {
+        LinearForm residual(v);
+        residual = fit.residual(displacement, v);
+        residual.assemble();
+        r += residual.getVector();
+      }
+      if (mask & MaskBoundaryFit)
+      {
+        LinearForm residual(v);
+        residual = bfit.residual(displacement, v);
+        residual.assemble();
+        r += residual.getVector();
+      }
+      if (mask & MaskPhase)
+      {
+        LinearForm residual(v);
+        residual = phase.residual(displacement, v);
+        residual.assemble();
+        r += residual.getVector();
+      }
+      return r;
+    };
+
+    auto tangentAction = [&](int mask, const Math::Vector<Real>& direction)
+    {
+      Math::Vector<Real> jd =
+        Math::Vector<Real>::Zero(displacement.getData().size());
+      if (mask & MaskQuality)
+      {
+        BilinearForm tangent(du, v);
+        tangent = quality.tangent(displacement, du, v);
+        tangent.assemble();
+        jd += tangent.getOperator() * direction;
+      }
+      if (mask & MaskDeviation)
+      {
+        BilinearForm tangent(du, v);
+        tangent = deviation.tangent(du, v);
+        tangent.assemble();
+        jd += tangent.getOperator() * direction;
+      }
+      if (mask & MaskFit)
+      {
+        BilinearForm tangent(du, v);
+        tangent = fit.tangent(displacement, du, v);
+        tangent.assemble();
+        jd += tangent.getOperator() * direction;
+      }
+      if (mask & MaskBoundaryFit)
+      {
+        BilinearForm tangent(du, v);
+        tangent = bfit.tangent(displacement, du, v);
+        tangent.assemble();
+        jd += tangent.getOperator() * direction;
+      }
+      if (mask & MaskPhase)
+      {
+        BilinearForm tangent(du, v);
+        tangent = phase.tangent(displacement, du, v);
+        tangent.assemble();
+        jd += tangent.getOperator() * direction;
+      }
+      return jd;
+    };
+
+    auto direction = displacement.getData();
+    fillDirection(direction);
+
+    const auto u0 = displacement.getData();
+    const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
+
+    struct MaskCase
+    {
+      const char* name;
+      int mask;
+    };
+    const std::array<MaskCase, 7> cases{{
+      {"quality", MaskQuality},
+      {"deviation", MaskDeviation},
+      {"fit", MaskFit},
+      {"boundary-fit", MaskBoundaryFit},
+      {"quality+fit", MaskQuality | MaskFit},
+      {"quality+deviation+fit+boundary-fit",
+        MaskQuality | MaskDeviation | MaskFit | MaskBoundaryFit},
+      {"all",
+        MaskQuality | MaskDeviation | MaskFit | MaskBoundaryFit | MaskPhase}
+    }};
+
+    Real bestAll = std::numeric_limits<Real>::infinity();
+    std::cout << std::setprecision(12);
+    for (const auto& c : cases)
+    {
+      std::array<Real, 4> errors{};
+      Real best = std::numeric_limits<Real>::infinity();
+      for (size_t i = 0; i < steps.size(); ++i)
+      {
+        const Real eps = steps[i];
+        const auto r0 = assembleResidual(c.mask);
+        displacement.getData() = u0 + eps * direction;
+        const auto r1 = assembleResidual(c.mask);
+        displacement.getData() = u0;
+
+        const auto fd = (r1 - r0) / eps;
+        const auto jd = tangentAction(c.mask, direction);
+        const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+        errors[i] = (fd - jd).norm() / denom;
+        best = std::min(best, errors[i]);
+      }
+
+      if (std::string(c.name) == "all")
+        bestAll = best;
+
+      std::cout << "FD_TABLE " << c.name << "\n";
+      for (size_t i = 0; i < steps.size(); ++i)
+        std::cout << "eps=" << steps[i] << " error=" << errors[i] << "\n";
+    }
+
+    EXPECT_LT(bestAll, Real(3e-5));
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP1)

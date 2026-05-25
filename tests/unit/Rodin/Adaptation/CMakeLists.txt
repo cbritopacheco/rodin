@@ -1,4 +1,18 @@
-add_executable(RodinAdaptationTargetMatrixOptimizationTest TargetMatrixOptimizationTest.cpp)
+add_executable(RodinAdaptationTargetMatrixOptimizationTest
+  TargetMatrixOptimizationTest.cpp
+  TMOPQualityResidualIntegratorTest.cpp
+  TMOPQualityTangentIntegratorTest.cpp
+  DeviationResidualIntegratorTest.cpp
+  DeviationTangentIntegratorTest.cpp
+  AnalyticLevelSetFitResidualIntegratorTest.cpp
+  AnalyticLevelSetFitTangentIntegratorTest.cpp
+  VolumetricPhaseConsistencyResidualIntegratorTest.cpp
+  VolumetricPhaseConsistencyTangentIntegratorTest.cpp
+  QualityTermTest.cpp
+  DeviationTermTest.cpp
+  AnalyticLevelSetFitTermTest.cpp
+  VolumetricPhaseConsistencyTermTest.cpp
+)
 target_link_libraries(RodinAdaptationTargetMatrixOptimizationTest
   PUBLIC
   GTest::gtest
