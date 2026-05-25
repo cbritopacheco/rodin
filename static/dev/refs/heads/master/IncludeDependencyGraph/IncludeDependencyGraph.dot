@@ -345,7 +345,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=26,
+		weight=25,
 		width=2];
 	"Rodin/Geometry.h" -> "Rodin/Geometry/PolytopeTransformation.h";
 	"Rodin/Geometry/IdentityTransformation.h"	[colorscheme=spectral9,
@@ -355,7 +355,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=27,
+		weight=26,
 		width=2];
 	"Rodin/Geometry.h" -> "Rodin/Geometry/IdentityTransformation.h";
 	"Rodin/Geometry/PolytopeIterator.h"	[colorscheme=spectral9,
@@ -375,7 +375,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=28,
+		weight=27,
 		width=2];
 	"Rodin/Geometry.h" -> "Rodin/Geometry/IsoparametricTransformation.h";
 	"Rodin/Geometry/Region.h"	[colorscheme=spectral9,
@@ -1622,7 +1622,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=27,
+		weight=26,
 		width=2];
 	"Rodin/IO/HDF5.h" -> "Rodin/Geometry/PolytopeTransformationIndex.h";
 	"Rodin/IO/MeshLoader.h"	[colorscheme=spectral9,
@@ -1766,7 +1766,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=26,
+		weight=23,
 		width=2];
 	"Rodin/Geometry/Mesh.h" -> "Rodin/Geometry/PolytopeQuadrature.h";
 	"Rodin/Geometry/Mesh.h" -> "Rodin/Geometry/PolytopeTransformationIndex.h";
@@ -1827,7 +1827,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=14,
+		weight=13,
 		width=2];
 	"Rodin/Geometry/Connectivity.h" -> "Rodin/Geometry/GeometryIndexed.h";
 	"Rodin/Serialization/UnorderedMap.h"	[colorscheme=spectral9,
@@ -1910,21 +1910,21 @@ strict digraph "" {
 	"Rodin/Solid/Local/ConstitutivePoint.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=8,
+		fontsize=7,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=16,
+		weight=15,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Local/ConstitutivePoint.h";
 	"Rodin/Solid/Local/Input.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=8,
+		fontsize=7,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=16,
+		weight=14,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Local/Input.h";
 	"Rodin/Solid/Kinematics/KinematicState.h"	[colorscheme=spectral9,
@@ -1960,41 +1960,41 @@ strict digraph "" {
 	"Rodin/Solid/Constitutive/HyperElasticLaw.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
+		fontsize=7,
+		height=2,
+		shape=circle,
+		style=filled,
+		weight=15,
+		width=2];
+	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/HyperElasticLaw.h";
+	"Rodin/Solid/Constitutive/NeoHookean.h"	[colorscheme=spectral9,
+		fillcolor=8,
+		fixedsize=true,
 		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
 		weight=16,
 		width=2];
-	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/HyperElasticLaw.h";
-	"Rodin/Solid/Constitutive/NeoHookean.h"	[colorscheme=spectral9,
-		fillcolor=8,
-		fixedsize=true,
-		fontsize=7,
-		height=2,
-		shape=circle,
-		style=filled,
-		weight=15,
-		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/NeoHookean.h";
 	"Rodin/Solid/Constitutive/SaintVenantKirchhoff.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=16,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/SaintVenantKirchhoff.h";
 	"Rodin/Solid/Constitutive/MooneyRivlin.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=16,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Constitutive/MooneyRivlin.h";
 	"Rodin/Solid/Integrators/InternalForce.h"	[colorscheme=spectral9,
@@ -2054,7 +2054,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=16,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Fields/FirstPiolaKirchhoffStress.h";
 	"Rodin/Solid/Fields/CauchyStress.h"	[colorscheme=spectral9,
@@ -2064,7 +2064,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=16,
 		width=2];
 	"Rodin/Solid.h" -> "Rodin/Solid/Fields/CauchyStress.h";
 	"Rodin/Solid/Linear/LinearElasticityIntegral.h"	[colorscheme=spectral9,
@@ -2284,7 +2284,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=9,
+		weight=14,
 		width=2];
 	"Rodin/PETSc.h" -> "Rodin/PETSc/Math.h";
 	"Rodin/PETSc/Solver.h"	[colorscheme=spectral9,
@@ -3085,7 +3085,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=15,
+		weight=14,
 		width=2];
 	"Rodin/Variational/P0g.h" -> "Rodin/Variational/P0g/P0gElement.h";
 	"Rodin/Variational/P0g/ShapeFunction.h"	[colorscheme=spectral9,
@@ -3177,7 +3177,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=17,
+		weight=16,
 		width=2];
 	"Rodin/Variational/P1.h" -> "Rodin/Variational/P1/P1Element.h";
 	"Rodin/Variational/P1/Derivative.h"	[colorscheme=spectral9,
@@ -3962,7 +3962,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=12,
+		weight=10,
 		width=2];
 	"Rodin/Variational/H1/H1.h" -> "Rodin/Variational/H1/Fekete.h";
 	"Rodin/Variational/H1/GLL.h"	[colorscheme=spectral9,
@@ -4044,7 +4044,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=14,
+		weight=13,
 		width=2];
 	"Rodin/Variational/P0g/P0gElement.h" -> "Rodin/Variational/FiniteElement.h";
 	"Rodin/Variational/P0g/ShapeFunction.h" -> "Rodin/Math/Traits.h";
@@ -4121,11 +4121,11 @@ strict digraph "" {
 	"Rodin/Variational/P1/P1Element.hpp"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=14,
+		weight=16,
 		width=2];
 	"Rodin/Variational/P1/P1Element.h" -> "Rodin/Variational/P1/P1Element.hpp";
 	"Rodin/Variational/P1/Derivative.h" -> "Rodin/Math/Vector.h";
@@ -4306,7 +4306,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=11,
+		weight=10,
 		width=2];
 	"Rodin/Variational/H1/Fekete.h" -> "Rodin/Variational/H1/WarpBlend.h";
 	"Rodin/Variational/H1/GLL.h" -> "Rodin/Math/Common.h";
@@ -4330,21 +4330,21 @@ strict digraph "" {
 	"Rodin/Variational/H1/LagrangeBasis.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=6,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=8,
+		weight=7,
 		width=2];
 	"Rodin/Variational/H1/H1Element.hpp" -> "Rodin/Variational/H1/LagrangeBasis.h";
 	"Rodin/Variational/H1/Dubiner.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=8,
+		fontsize=7,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=16,
+		weight=14,
 		width=2];
 	"Rodin/Variational/H1/H1Element.hpp" -> "Rodin/Variational/H1/Dubiner.h";
 	"Rodin/Variational/H1/H1Element.hpp" -> "Rodin/Variational/H1/LegendrePolynomial.h";
@@ -4577,7 +4577,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=32,
+		weight=31,
 		width=2];
 	"Rodin/Serialization/Export.h" -> "Rodin/Geometry/IsoparametricTransformation.h";
 	"Rodin/Serialization/Export.h" -> "Rodin/Variational/P1/P1Element.h";
@@ -4642,7 +4642,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=14,
+		weight=13,
 		width=2];
 	"Rodin/Serialization/PolytopeType.h" -> "Rodin/Geometry/Polytope.h";
 	"Rodin/Serialization/PolytopeType.h" -> "Rodin/Array.h";
