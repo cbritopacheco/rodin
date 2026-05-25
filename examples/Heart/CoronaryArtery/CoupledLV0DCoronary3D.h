@@ -337,16 +337,13 @@ namespace Rodin::Examples::Heart
         std::array<Attribute, 6> outlets{{4, 5, 6, 7, 8, 9}};
 
         /// @brief Mesh coordinate scale applied after partitioning.
-        Real meshScale = 1.0e-2;
+        Real meshScale = 1.0e-3;
         /// @brief Pressure stabilization parameter.
         Real eps = 1.0e-12;
         /// @brief 3D blood density.
         Real rho = 1060.0;
         /// @brief Inlet reversed-flow damping multiplier. Set to 0 to disable.
         Real inletBackflowStabilization = 1.0;
-        /// @brief Inlet normal impedance coefficient in Pa s / m. Set to 0 to disable.
-        /// @details Defaults to defaultRCR.Rp times the scaled inlet area.
-        Real inletImpedance = 1.45675e4;
         /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
         Real outletBackflowStabilization = 1.0;
 

@@ -44,7 +44,7 @@
  *
  * The simulation defaults inherited from `CoupledLV0DCoronary3D::Config`
  * include `dt = 1e-3 s`, `nsteps = 2550`, `rho = 1060 kg/m^3`,
- * `eps = 1e-12`, `meshScale = 1e-2`, inlet/outlet backflow stabilization `1`,
+ * `eps = 1e-12`, `meshScale = 1e-3`, inlet/outlet backflow stabilization `1`,
  * wall attribute `2`, inlet attribute `3`, outlet attributes `4..9`, and
  * default RCR parameters
  * `(Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000)`.
