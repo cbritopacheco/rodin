@@ -849,7 +849,6 @@ namespace Rodin::Examples::Heart
       0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
     const auto inletBackflowDamping =
       0.5 * m_cfg.inletBackflowStabilization * m_cfg.rho * inletBeta;
-
     const auto symDU =
       0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
@@ -918,6 +917,8 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
+        + m_cfg.inletImpedance
+          * BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
         + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
@@ -942,6 +943,8 @@ namespace Rodin::Examples::Heart
 
         + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
+        + m_cfg.inletImpedance
+          * BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v)).over(m_cfg.inlet)
         + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
         + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
         + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
@@ -975,6 +978,8 @@ namespace Rodin::Examples::Heart
         + Integral(Div(m_u), m_q)
         + m_cfg.eps * Integral(m_p, m_q)
 
+        + m_cfg.inletImpedance
+          * BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
         + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
         + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
