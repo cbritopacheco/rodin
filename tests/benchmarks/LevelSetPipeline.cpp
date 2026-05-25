@@ -77,12 +77,34 @@ namespace Rodin::Tests::Benchmarks
 
     enum class ObjectiveCase : int
     {
-      AllTerms = 0,
-      NoQuality = 1,
-      NoInterfaceFit = 2,
-      NoPhase = 3,
-      QualityInterfacePhase = 4
+      QualityOnly = 1 << 0,
+      InterfaceFitOnly = 1 << 1,
+      PhaseOnly = 1 << 2,
+      DeviationOnly = 1 << 3,
+      BoundaryOnly = 1 << 4,
+      QualityInterface = (1 << 0) | (1 << 1),
+      QualityPhase = (1 << 0) | (1 << 2),
+      InterfacePhase = (1 << 1) | (1 << 2),
+      QualityInterfacePhase = (1 << 0) | (1 << 1) | (1 << 2),
+      AllTerms = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4),
+      NoQuality = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4)),
+      NoInterfaceFit = ((1 << 0) | (1 << 2) | (1 << 3) | (1 << 4)),
+      NoPhase = ((1 << 0) | (1 << 1) | (1 << 3) | (1 << 4))
     };
+
+    enum ObjectiveTermMask : int
+    {
+      ObjectiveQuality = 1 << 0,
+      ObjectiveInterfaceFit = 1 << 1,
+      ObjectivePhase = 1 << 2,
+      ObjectiveDeviation = 1 << 3,
+      ObjectiveBoundary = 1 << 4
+    };
+
+    inline bool hasObjectiveTerm(ObjectiveCase objectiveCase, ObjectiveTermMask term)
+    {
+      return (static_cast<int>(objectiveCase) & static_cast<int>(term)) != 0;
+    }
 
     struct MeshStats
     {
@@ -153,7 +175,7 @@ namespace Rodin::Tests::Benchmarks
       Real phaseEnergyFinal = 0;
       Real fitEnergyInitial = 0;
       Real fitEnergyFinal = 0;
-      Real lineSearchAcceptedAlpha = 0;
+      Real fullStepAcceptedAlpha = 0;
     };
 
     struct TopologyReport
@@ -268,7 +290,7 @@ namespace Rodin::Tests::Benchmarks
       Real phaseEnergyFinal = 0;
       Real fitEnergyInitial = 0;
       Real fitEnergyFinal = 0;
-      Real lineSearchAcceptedAlpha = 0;
+      Real fullStepAcceptedAlpha = 0;
       bool hasP2Diagnostics = false;
 
       void add(const StageCounters& counters)
@@ -399,7 +421,7 @@ namespace Rodin::Tests::Benchmarks
         phaseEnergyFinal += counters.phaseEnergyFinal;
         fitEnergyInitial += counters.fitEnergyInitial;
         fitEnergyFinal += counters.fitEnergyFinal;
-        lineSearchAcceptedAlpha += counters.lineSearchAcceptedAlpha;
+        fullStepAcceptedAlpha += counters.fullStepAcceptedAlpha;
       }
 
       void publish(benchmark::State& st) const
@@ -619,7 +641,7 @@ namespace Rodin::Tests::Benchmarks
         st.counters["avg_fit_energy_final"] =
           benchmark::Counter(fitEnergyFinal * inv);
         st.counters["avg_line_search_alpha"] =
-          benchmark::Counter(lineSearchAcceptedAlpha * inv);
+          benchmark::Counter(fullStepAcceptedAlpha * inv);
       }
     };
 
@@ -660,7 +682,7 @@ namespace Rodin::Tests::Benchmarks
       Real phaseEnergyFinal = 0;
       Real fitEnergyInitial = 0;
       Real fitEnergyFinal = 0;
-      Real lineSearchAcceptedAlpha = 0;
+      Real fullStepAcceptedAlpha = 0;
       bool accepted = false;
     };
 
@@ -1732,7 +1754,8 @@ namespace Rodin::Tests::Benchmarks
         CurvedTargetCase targetCase = CurvedTargetCase::ProjectedInterface,
         ObjectiveCase objectiveCase = ObjectiveCase::AllTerms,
         TMOPSolveStats* tmopStats = nullptr,
-        bool relabelByPhi = false)
+      bool relabelByPhi = false,
+      Real phaseEpsilonScale = Real(0.5))
     {
       auto phiValue = [shape, t](const Math::SpatialPoint& x)
       {
@@ -1794,16 +1817,16 @@ namespace Rodin::Tests::Benchmarks
             upgradeTransformations(mesh, fe, Interface);
             LocalMesh beforeSolve(mesh);
             auto target = makeTarget();
-            const bool useQuality =
-              objectiveCase != ObjectiveCase::NoQuality;
-            const bool useInterfaceFit =
-              objectiveCase != ObjectiveCase::NoInterfaceFit;
-            const bool usePhase =
-              objectiveCase != ObjectiveCase::NoPhase;
-            const bool useDeviation =
-              objectiveCase != ObjectiveCase::QualityInterfacePhase;
-            const bool useBoundary =
-              objectiveCase != ObjectiveCase::QualityInterfacePhase;
+            const bool useQuality = hasObjectiveTerm(
+                objectiveCase, ObjectiveTermMask::ObjectiveQuality);
+            const bool useInterfaceFit = hasObjectiveTerm(
+                objectiveCase, ObjectiveTermMask::ObjectiveInterfaceFit);
+            const bool usePhase = hasObjectiveTerm(
+                objectiveCase, ObjectiveTermMask::ObjectivePhase);
+            const bool useDeviation = hasObjectiveTerm(
+                objectiveCase, ObjectiveTermMask::ObjectiveDeviation);
+            const bool useBoundary = hasObjectiveTerm(
+                objectiveCase, ObjectiveTermMask::ObjectiveBoundary);
             const Real activeQualityWeight =
               useQuality ? qualityWeight : Real(0);
             const Real activeFitWeight =
@@ -1831,7 +1854,7 @@ namespace Rodin::Tests::Benchmarks
                 activePhaseWeight);
             phase
               .setQuadratureOrder(4)
-              .setEpsilon(Real(0.5) * characteristicCellSize(mesh))
+              .setEpsilon(phaseEpsilonScale * characteristicCellSize(mesh))
               .setMargin(Real(1))
               .setNormalization(totalCellMeasure(mesh));
 
@@ -1892,7 +1915,7 @@ namespace Rodin::Tests::Benchmarks
             {
               tmopStats->outerIterations = outer + 1;
               tmopStats->iterations += report.iterations;
-              tmopStats->lineSearchAcceptedAlpha = report.lastAcceptedAlpha;
+              tmopStats->fullStepAcceptedAlpha = report.lastAcceptedAlpha;
               tmopStats->targetMaxMetric = targetStats.maxMetric;
               tmopStats->targetMinDetT = targetStats.minDetT;
               tmopStats->targetInvalidSamples = targetStats.invalidSamples;
@@ -1973,7 +1996,7 @@ namespace Rodin::Tests::Benchmarks
             tmopStats->changedInterfaceEdges = totalChangedInterfaceEdges;
             tmopStats->fitEnergyFinal = finalFitEnergy;
             tmopStats->phaseEnergyFinal = finalPhaseEnergy;
-            tmopStats->lineSearchAcceptedAlpha = finalAlpha;
+            tmopStats->fullStepAcceptedAlpha = finalAlpha;
             tmopStats->accepted = accepted;
             if (relabelByPhi)
               tmopStats->wrongSideQuadratureFinal =
@@ -2046,26 +2069,31 @@ namespace Rodin::Tests::Benchmarks
         CurvedTargetCase targetCase = CurvedTargetCase::ProjectedInterface,
         ObjectiveCase objectiveCase = ObjectiveCase::AllTerms,
         TMOPSolveStats* stats = nullptr,
-        bool relabelByPhi = false)
+        bool relabelByPhi = false,
+        Real phaseEpsilonScale = Real(0.5))
     {
       switch (metricCase)
       {
         case MetricCase::SquaredDistance:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, SquaredDistanceMetric{}, 0.04, 4,
-              targetCase, objectiveCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi,
+              phaseEpsilonScale);
         case MetricCase::AreaDistortion:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, AreaDistortionMetric{}, 0.04, 4,
-              targetCase, objectiveCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi,
+              phaseEpsilonScale);
         case MetricCase::ShapeSize:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, ShapeSizeBlendMetric(Real(0.5)), 0.03, 4,
-              targetCase, objectiveCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi,
+              phaseEpsilonScale);
         case MetricCase::ShapeDistortion:
           return solveCurvedTMOPWithMetric(
               mesh, shape, t, ShapeDistortionMetric{}, 0.02, 1,
-              targetCase, objectiveCase, stats, relabelByPhi);
+              targetCase, objectiveCase, stats, relabelByPhi,
+              phaseEpsilonScale);
       }
       return false;
     }
@@ -2135,7 +2163,7 @@ namespace Rodin::Tests::Benchmarks
         counters.phaseEnergyFinal = tmopStats->phaseEnergyFinal;
         counters.fitEnergyInitial = tmopStats->fitEnergyInitial;
         counters.fitEnergyFinal = tmopStats->fitEnergyFinal;
-        counters.lineSearchAcceptedAlpha = tmopStats->lineSearchAcceptedAlpha;
+        counters.fullStepAcceptedAlpha = tmopStats->fullStepAcceptedAlpha;
         counters.tmopAccepted = tmopStats->accepted ? 1 : 0;
         counters.tmopRejected = tmopStats->accepted ? 0 : 1;
       }
@@ -2353,7 +2381,7 @@ namespace Rodin::Tests::Benchmarks
       st.counters["fit_energy_final"] =
         benchmark::Counter(counters.fitEnergyFinal);
       st.counters["line_search_alpha"] =
-        benchmark::Counter(counters.lineSearchAcceptedAlpha);
+        benchmark::Counter(counters.fullStepAcceptedAlpha);
       st.counters["tmop_accepted"] =
         benchmark::Counter(counters.tmopAccepted);
       st.counters["tmop_rejected"] =
@@ -2429,6 +2457,8 @@ namespace Rodin::Tests::Benchmarks
       const auto metric = static_cast<MetricCase>(st.range(3));
       const auto target = static_cast<CurvedTargetCase>(st.range(4));
       const auto objective = static_cast<ObjectiveCase>(st.range(5));
+      const Real phaseEpsilonScale =
+        static_cast<Real>(st.range(6)) / Real(100);
       StageCounters counters;
       StageAverages averages;
       for (auto _ : st)
@@ -2454,7 +2484,7 @@ namespace Rodin::Tests::Benchmarks
           const bool tmopOk =
             solveCurvedTMOP(
                 curved, shape, t, metric, target,
-                objective, &tmopStats, true);
+                objective, &tmopStats, true, phaseEpsilonScale);
           const Real tmopSeconds = elapsedSeconds(tmopStart);
           if (!tmopOk)
             tmopFailures++;
@@ -2478,6 +2508,8 @@ namespace Rodin::Tests::Benchmarks
         benchmark::Counter(static_cast<int>(target));
       st.counters["objective_case"] =
         benchmark::Counter(static_cast<int>(objective));
+      st.counters["phase_epsilon_scale"] =
+        benchmark::Counter(phaseEpsilonScale);
       st.counters["production_order"] = benchmark::Counter(1);
       st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
       st.SetItemsProcessed(st.iterations() * counters.finalCells);
@@ -2492,6 +2524,8 @@ namespace Rodin::Tests::Benchmarks
       const auto metric = static_cast<MetricCase>(st.range(3));
       const auto target = static_cast<CurvedTargetCase>(st.range(4));
       const auto objective = static_cast<ObjectiveCase>(st.range(5));
+      const Real phaseEpsilonScale =
+        static_cast<Real>(st.range(6)) / Real(100);
       StageCounters counters;
       StageAverages averages;
       for (auto _ : st)
@@ -2522,7 +2556,7 @@ namespace Rodin::Tests::Benchmarks
           const bool tmopOk =
             solveCurvedTMOP(
                 curved, shape, t, metric, target,
-                objective, &tmopStats);
+                objective, &tmopStats, false, phaseEpsilonScale);
           const Real tmopSeconds = elapsedSeconds(tmopStart);
           if (!tmopOk)
             tmopFailures++;
@@ -2547,51 +2581,81 @@ namespace Rodin::Tests::Benchmarks
         benchmark::Counter(static_cast<int>(target));
       st.counters["objective_case"] =
         benchmark::Counter(static_cast<int>(objective));
+      st.counters["phase_epsilon_scale"] =
+        benchmark::Counter(phaseEpsilonScale);
       st.counters["production_order"] = benchmark::Counter(1);
       st.counters["tmop_failed"] = benchmark::Counter(counters.tmopFailures);
       st.SetItemsProcessed(st.iterations() * counters.finalCells);
     }
   }
 
-#define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, OBJECTIVE_LABEL, OBJECTIVE_ENUM, RESOLUTION, STEPS) \
+#define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, OBJECTIVE_LABEL, OBJECTIVE_ENUM, EPS_SCALE, RESOLUTION, STEPS) \
   BENCHMARK(BM_LevelSetPipeline_CurvedTargetCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/NoCutRelabelP2TMOP/" SHAPE_LABEL "/" METRIC_LABEL "/Projected/" OBJECTIVE_LABEL "/" #RESOLUTION "x" #STEPS) \
+    ->Name("LevelSetPipeline/NoCutRelabelP2TMOP/" SHAPE_LABEL "/" METRIC_LABEL "/Projected/" OBJECTIVE_LABEL "/eps" #EPS_SCALE "/" #RESOLUTION "x" #STEPS) \
     ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
       static_cast<int>(MetricCase::METRIC_ENUM), \
       static_cast<int>(CurvedTargetCase::ProjectedInterface), \
-      static_cast<int>(ObjectiveCase::OBJECTIVE_ENUM)}) \
+      static_cast<int>(ObjectiveCase::OBJECTIVE_ENUM), \
+      EPS_SCALE}) \
     ->Unit(benchmark::kMillisecond);
 
-#define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, OBJECTIVE_LABEL, OBJECTIVE_ENUM, RESOLUTION, STEPS) \
+#define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, METRIC_LABEL, METRIC_ENUM, OBJECTIVE_LABEL, OBJECTIVE_ENUM, EPS_SCALE, RESOLUTION, STEPS) \
   BENCHMARK(BM_LevelSetPipeline_CurvedMMGCarryForwardOrbit) \
-    ->Name("LevelSetPipeline/MMGCutP2TMOPRelabel/" SHAPE_LABEL "/" METRIC_LABEL "/Projected/" OBJECTIVE_LABEL "/" #RESOLUTION "x" #STEPS) \
+    ->Name("LevelSetPipeline/MMGCutP2TMOPRelabel/" SHAPE_LABEL "/" METRIC_LABEL "/Projected/" OBJECTIVE_LABEL "/eps" #EPS_SCALE "/" #RESOLUTION "x" #STEPS) \
     ->Args({RESOLUTION, STEPS, static_cast<int>(ShapeCase::SHAPE_ENUM), \
       static_cast<int>(MetricCase::METRIC_ENUM), \
       static_cast<int>(CurvedTargetCase::ProjectedInterface), \
-      static_cast<int>(ObjectiveCase::OBJECTIVE_ENUM)}) \
+      static_cast<int>(ObjectiveCase::OBJECTIVE_ENUM), \
+      EPS_SCALE}) \
     ->Unit(benchmark::kMillisecond);
 
 #define RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
   RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE( \
-      SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "AllTerms", AllTerms, RESOLUTION, STEPS)
+  SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "AllTerms", AllTerms, 50, RESOLUTION, STEPS)
 
 #define RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
   RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE( \
-      SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "AllTerms", AllTerms, RESOLUTION, STEPS)
+      SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "AllTerms", AllTerms, 50, RESOLUTION, STEPS)
 
 #define RODIN_OBJECTIVE_MATRIX(SHAPE_LABEL, SHAPE_ENUM, RESOLUTION, STEPS) \
-  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "SquaredDistance", SquaredDistance, "AllTerms", AllTerms, RESOLUTION, STEPS) \
-  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "AreaDistortion", AreaDistortion, "AllTerms", AllTerms, RESOLUTION, STEPS) \
-  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoQuality", NoQuality, RESOLUTION, STEPS) \
-  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoInterfaceFit", NoInterfaceFit, RESOLUTION, STEPS) \
-  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoPhase", NoPhase, RESOLUTION, STEPS) \
-  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, RESOLUTION, STEPS) \
-  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "SquaredDistance", SquaredDistance, "AllTerms", AllTerms, RESOLUTION, STEPS) \
-  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "AreaDistortion", AreaDistortion, "AllTerms", AllTerms, RESOLUTION, STEPS) \
-  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoQuality", NoQuality, RESOLUTION, STEPS) \
-  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoInterfaceFit", NoInterfaceFit, RESOLUTION, STEPS) \
-  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoPhase", NoPhase, RESOLUTION, STEPS) \
-  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, RESOLUTION, STEPS)
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "SquaredDistance", SquaredDistance, "AllTerms", AllTerms, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "AreaDistortion", AreaDistortion, "AllTerms", AllTerms, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityOnly", QualityOnly, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfaceFitOnly", InterfaceFitOnly, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "PhaseOnly", PhaseOnly, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "DeviationOnly", DeviationOnly, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "BoundaryOnly", BoundaryOnly, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterface", QualityInterface, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityPhase", QualityPhase, 25, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityPhase", QualityPhase, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityPhase", QualityPhase, 100, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfacePhase", InterfacePhase, 25, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfacePhase", InterfacePhase, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfacePhase", InterfacePhase, 100, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, 25, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, 100, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoQuality", NoQuality, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoInterfaceFit", NoInterfaceFit, 50, RESOLUTION, STEPS) \
+  RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoPhase", NoPhase, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "SquaredDistance", SquaredDistance, "AllTerms", AllTerms, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "AreaDistortion", AreaDistortion, "AllTerms", AllTerms, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityOnly", QualityOnly, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfaceFitOnly", InterfaceFitOnly, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "PhaseOnly", PhaseOnly, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterface", QualityInterface, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityPhase", QualityPhase, 25, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityPhase", QualityPhase, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityPhase", QualityPhase, 100, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfacePhase", InterfacePhase, 25, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfacePhase", InterfacePhase, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "InterfacePhase", InterfacePhase, 100, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, 25, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "QualityInterfacePhase", QualityInterfacePhase, 100, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoQuality", NoQuality, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoInterfaceFit", NoInterfaceFit, 50, RESOLUTION, STEPS) \
+  RODIN_MMG_CUT_P2_TMOP_RELABEL_ORBIT_CASE(SHAPE_LABEL, SHAPE_ENUM, "ShapeSize", ShapeSize, "NoPhase", NoPhase, 50, RESOLUTION, STEPS)
 
   RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 5, 8)
   RODIN_NO_CUT_P2_TMOP_RELABEL_ORBIT("Circle", CircleOrbit, 10, 8)

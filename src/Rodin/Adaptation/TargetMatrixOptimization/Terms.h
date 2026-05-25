@@ -787,13 +787,15 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             ValueFunction value,
             GradientFunction gradient,
             Optional<Geometry::Attribute> interfaceAttribute,
-            Real weight)
+            Real weight,
+            size_t quadratureOrder)
           : Parent(v),
             m_u(u),
             m_value(std::move(value)),
             m_gradient(std::move(gradient)),
             m_interfaceAttribute(interfaceAttribute),
-            m_weight(std::max(Real(0), weight))
+            m_weight(std::max(Real(0), weight)),
+            m_quadratureOrder(quadratureOrder)
         {}
 
         AnalyticLevelSetFitResidualIntegrator(
@@ -804,6 +806,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             m_gradient(other.m_gradient),
             m_interfaceAttribute(other.m_interfaceAttribute),
             m_weight(other.m_weight),
+            m_quadratureOrder(other.m_quadratureOrder),
             m_polytope(other.m_polytope),
             m_local(other.m_local)
         {}
@@ -872,15 +875,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const auto displacement =
             localDisplacementCoefficients(m_u.get(), edge);
 
-          static constexpr std::array<Real, 2> Points = {{
-            Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
-            Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
-          }};
-          static constexpr Real Weight = Real(0.5);
-
-          for (Real q : Points)
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_quadratureOrder, Geometry::Polytope::Type::Segment);
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            const Math::SpatialPoint rc{q};
+            const auto& rc = qf.getPoint(q);
             const auto x =
               deformedEdgePoint(edge, fe, displacement, rc, sdim);
             const auto dx =
@@ -902,7 +901,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
                 dirDphi +=
                   direction[c] * dphiVec[static_cast<std::uint8_t>(c)];
               }
-              local[localDof] += m_weight * Weight
+              local[localDof] += m_weight * qf.getWeight(q)
                 * (length * phi * gradPhi
                  + Real(0.5) * phi * phi * dirDphi);
             }
@@ -916,6 +915,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         GradientFunction m_gradient;
         Optional<Geometry::Attribute> m_interfaceAttribute;
         Real m_weight = 1;
+        size_t m_quadratureOrder = 4;
         const Geometry::Polytope* m_polytope = nullptr;
         std::vector<Real> m_local;
     };
@@ -935,13 +935,17 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             ValueFunction value,
             GradientFunction gradient,
             Optional<Geometry::Attribute> interfaceAttribute,
-            Real weight)
+            Real weight,
+            size_t quadratureOrder,
+          std::function<Math::SpatialMatrix<Real>(const Math::SpatialPoint&)> hessian = {})
           : Parent(du, v),
             m_u(u),
             m_value(std::move(value)),
             m_gradient(std::move(gradient)),
             m_interfaceAttribute(interfaceAttribute),
-            m_weight(std::max(Real(0), weight))
+            m_weight(std::max(Real(0), weight)),
+            m_quadratureOrder(quadratureOrder),
+            m_hessian(std::move(hessian))
         {}
 
         AnalyticLevelSetFitTangentIntegrator(
@@ -952,6 +956,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             m_gradient(other.m_gradient),
             m_interfaceAttribute(other.m_interfaceAttribute),
             m_weight(other.m_weight),
+            m_quadratureOrder(other.m_quadratureOrder),
+            m_hessian(other.m_hessian),
             m_polytope(other.m_polytope),
             m_localSize(other.m_localSize),
             m_matrix(other.m_matrix)
@@ -1026,15 +1032,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const auto displacement =
             localDisplacementCoefficients(m_u.get(), edge);
 
-          static constexpr std::array<Real, 2> Points = {{
-            Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
-            Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
-          }};
-          static constexpr Real Weight = Real(0.5);
-
-          for (Real q : Points)
+          const auto& qf = QF::PolytopeQuadratureFormula::get(
+              m_quadratureOrder, Geometry::Polytope::Type::Segment);
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            const Math::SpatialPoint rc{q};
+            const auto& rc = qf.getPoint(q);
             const auto x =
               deformedEdgePoint(edge, fe, displacement, rc, sdim);
             const auto dx =
@@ -1045,6 +1047,10 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             const auto direction = (Real(1) / length) * dx;
             const Real phi = m_value(x);
             const auto grad = m_gradient(x);
+            const bool hasHessian = static_cast<bool>(m_hessian);
+            const Math::SpatialMatrix<Real> hess = hasHessian
+              ? m_hessian(x)
+              : Math::SpatialMatrix<Real>();
 
             std::vector<Math::SpatialPoint> phiVec(localSize);
             std::vector<Math::SpatialPoint> dphiVec(localSize);
@@ -1077,10 +1083,20 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
                            * dphiVec[trial][static_cast<std::uint8_t>(k)];
                 const Real d2Length =
                   (dphiDot - dLengthTest * dLengthTrial) / length;
+                Real d2Phi = 0;
+                if (hasHessian)
+                {
+                  for (size_t a = 0; a < sdim; ++a)
+                    for (size_t b = 0; b < sdim; ++b)
+                      d2Phi += phiVec[test][static_cast<std::uint8_t>(a)]
+                            * hess(a, b)
+                            * phiVec[trial][static_cast<std::uint8_t>(b)];
+                }
 
-                local[test * localSize + trial] += m_weight * Weight
+                local[test * localSize + trial] += m_weight * qf.getWeight(q)
                   * (dLengthTrial * dPhiTest * phi
                    + length * dPhiTest * dPhiTrial
+                   + length * phi * d2Phi
                    + phi * dPhiTrial * dLengthTest
                    + Real(0.5) * phi * phi * d2Length);
               }
@@ -1095,6 +1111,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         GradientFunction m_gradient;
         Optional<Geometry::Attribute> m_interfaceAttribute;
         Real m_weight = 1;
+        size_t m_quadratureOrder = 4;
+        std::function<Math::SpatialMatrix<Real>(const Math::SpatialPoint&)> m_hessian;
         const Geometry::Polytope* m_polytope = nullptr;
         size_t m_localSize = 0;
         std::vector<Real> m_matrix;
@@ -1885,16 +1903,18 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
    *   J_\phi(u) = \frac12 \int_\Gamma \phi(X + u)^2\,dS.
    * @f]
    *
-   * The residual uses @f$\phi\nabla\phi@f$ on interface edges. The tangent is a
-   * Gauss-Newton linearization with the interface edge-length variation
-   * included, but without the analytic Hessian of @f$\phi@f$. This makes it
-   * exact for affine level sets and a robust first production fit term for
-   * smooth nonlinear level sets such as moving circles.
+  * The residual uses @f$\phi\nabla\phi@f$ on interface edges. The tangent is
+  * exact when an analytic Hessian is supplied, and otherwise falls back to a
+  * Gauss-Newton linearization without the level-set Hessian. This keeps the
+  * term usable for smooth nonlinear level sets while still supporting exact
+  * Newton behavior for problems such as the moving-circle example.
    */
   template <class ValueFunction, class GradientFunction>
   class AnalyticLevelSetFitTerm
   {
     public:
+      using HessianFunction = std::function<Math::SpatialMatrix<Real>(const Math::SpatialPoint&)>;
+
       AnalyticLevelSetFitTerm(
           ValueFunction value,
           GradientFunction gradient,
@@ -1902,6 +1922,19 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           Real weight = 1)
         : m_value(std::move(value)),
           m_gradient(std::move(gradient)),
+          m_interfaceAttribute(interfaceAttribute),
+          m_weight(std::max(Real(0), weight))
+      {}
+
+      AnalyticLevelSetFitTerm(
+          ValueFunction value,
+          GradientFunction gradient,
+          HessianFunction hessian,
+          Optional<Geometry::Attribute> interfaceAttribute,
+          Real weight = 1)
+        : m_value(std::move(value)),
+          m_gradient(std::move(gradient)),
+          m_hessian(std::move(hessian)),
           m_interfaceAttribute(interfaceAttribute),
           m_weight(std::max(Real(0), weight))
       {}
@@ -1934,15 +1967,26 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         return m_normalization;
       }
 
+      AnalyticLevelSetFitTerm& setQuadratureOrder(size_t quadratureOrder)
+      {
+        m_quadratureOrder = quadratureOrder;
+        return *this;
+      }
+
+      size_t getQuadratureOrder() const
+      {
+        return m_quadratureOrder;
+      }
+
       template <class FES, class Data, class TestFES>
       auto residual(
           const Variational::GridFunction<FES, Data>& u,
           const Variational::TestFunction<TestFES>& v) const
       {
         return AnalyticLevelSetFitResidualIntegrator<
-          Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
+              Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
               u, v, m_value, m_gradient, m_interfaceAttribute,
-              m_weight / m_normalization);
+              m_weight / m_normalization, m_quadratureOrder);
       }
 
       template <class FES, class Data, class Solution, class TrialFES, class TestFES>
@@ -1952,9 +1996,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const Variational::TestFunction<TestFES>& v) const
       {
         return AnalyticLevelSetFitTangentIntegrator<
-          Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
+              Variational::GridFunction<FES, Data>, ValueFunction, GradientFunction>(
               u, du, v, m_value, m_gradient, m_interfaceAttribute,
-              m_weight / m_normalization);
+              m_weight / m_normalization, m_quadratureOrder, m_hessian);
       }
 
       template <class FES, class Data>
@@ -1968,11 +2012,8 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         if (sdim != 2)
           return 0;
 
-        static constexpr std::array<Real, 2> Points = {{
-          Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
-          Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
-        }};
-        static constexpr Real Weight = Real(0.5);
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            m_quadratureOrder, Geometry::Polytope::Type::Segment);
 
         Real value = 0;
         for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
@@ -1985,9 +2026,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const auto& fe = fes.getFiniteElement(
               edge.getDimension(), edge.getIndex());
           const auto displacement = localDisplacementCoefficients(u, edge);
-          for (Real q : Points)
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            const Math::SpatialPoint rc{q};
+            const auto& rc = qf.getPoint(q);
             const auto x = deformedEdgePoint(
                 edge, fe, displacement, rc, fes.getVectorDimension());
             const auto dx = deformedEdgeDerivative(
@@ -1996,7 +2037,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             if (length <= Real(0))
               continue;
             const Real phi = m_value(x);
-            value += Weight * length * phi * phi;
+            value += qf.getWeight(q) * length * phi * phi;
           }
         }
         return Real(0.5) * (m_weight / m_normalization) * value;
@@ -2007,13 +2048,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       {
         RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
 
-        static constexpr std::array<Real, 2> Points = {{
-          Real(0.5) - Real(0.5) / Real(1.7320508075688772935274463415059),
-          Real(0.5) + Real(0.5) / Real(1.7320508075688772935274463415059)
-        }};
-        static constexpr Real Weight = Real(0.5);
-
         const auto& conn = mesh.getConnectivity();
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            m_quadratureOrder, Geometry::Polytope::Type::Segment);
         Real value = 0;
         for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
         {
@@ -2022,9 +2059,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
           const auto edgeIterator = mesh.getPolytope(1, e);
           const auto& edge = *edgeIterator;
           const auto& trans = edge.getTransformation();
-          for (Real q : Points)
+          for (size_t q = 0; q < qf.getSize(); ++q)
           {
-            const Math::SpatialPoint rc{q};
+            const auto& rc = qf.getPoint(q);
             Math::SpatialPoint x;
             trans.transform(x, rc);
             Math::SpatialMatrix<Real> J;
@@ -2039,7 +2076,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
             if (length <= Real(0))
               continue;
             const Real phi = m_value(x);
-            value += Weight * length * phi * phi;
+            value += qf.getWeight(q) * length * phi * phi;
           }
         }
         return Real(0.5) * (m_weight / m_normalization) * value;
@@ -2057,9 +2094,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
 
       ValueFunction m_value;
       GradientFunction m_gradient;
+        HessianFunction m_hessian;
       Optional<Geometry::Attribute> m_interfaceAttribute;
       Real m_weight = 1;
       Real m_normalization = 1;
+      size_t m_quadratureOrder = 4;
   };
 
   template <class ValueFunction, class GradientFunction>

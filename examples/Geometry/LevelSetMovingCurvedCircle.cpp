@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <type_traits>
 #include <vector>
 
 #include <Eigen/SparseLU>
@@ -64,15 +65,23 @@ namespace
 
   Real wavyRadius(Real theta, Real t)
   {
-    return Real(0.17)
-      + Real(0.035) * std::sin(
-          Real(5) * theta + Real(0.65) * std::sin(Real(2) * Pi * t));
+    (void) theta;
+    (void) t;
+    return Real(0.17);
   }
 
   Real wavyRadiusDerivative(Real theta, Real t)
   {
-    return Real(0.175) * std::cos(
-        Real(5) * theta + Real(0.65) * std::sin(Real(2) * Pi * t));
+    (void) theta;
+    (void) t;
+    return Real(0);
+  }
+
+  Real wavyRadiusSecondDerivative(Real theta, Real t)
+  {
+    (void) theta;
+    (void) t;
+    return Real(0);
   }
 
   Real phiAt(const Math::SpatialPoint& x, Real t)
@@ -101,6 +110,51 @@ namespace
     };
   }
 
+  Math::SpatialMatrix<Real> hessianPhiAt(const Math::SpatialPoint& x, Real t)
+  {
+    Math::SpatialMatrix<Real> h(2, 2);
+    const auto c = center(t);
+    const Real dx = x[0] - c[0];
+    const Real dy = x[1] - c[1];
+    const Real rho2 = dx * dx + dy * dy;
+    const Real rho = std::sqrt(rho2);
+    if (rho <= Real(1e-14))
+    {
+      h(0, 0) = h(0, 1) = h(1, 0) = h(1, 1) = Real(0);
+      return h;
+    }
+
+    const Real theta = std::atan2(dy, dx);
+    const Real dr = wavyRadiusDerivative(theta, t);
+    const Real ddr = wavyRadiusSecondDerivative(theta, t);
+
+    const Real rho3 = rho2 * rho;
+    const Real rho4 = rho2 * rho2;
+
+    const Real hRho00 = dy * dy / rho3;
+    const Real hRho01 = -dx * dy / rho3;
+    const Real hRho11 = dx * dx / rho3;
+
+    const Real hTheta00 = Real(2) * dx * dy / rho4;
+    const Real hTheta01 = (dy * dy - dx * dx) / rho4;
+    const Real hTheta11 = -Real(2) * dx * dy / rho4;
+
+    const Real dThetaDx = -dy / rho2;
+    const Real dThetaDy = dx / rho2;
+    const Real gradTheta0 = dThetaDx;
+    const Real gradTheta1 = dThetaDy;
+
+    const Real hR00 = ddr * gradTheta0 * gradTheta0 + dr * hTheta00;
+    const Real hR01 = ddr * gradTheta0 * gradTheta1 + dr * hTheta01;
+    const Real hR11 = ddr * gradTheta1 * gradTheta1 + dr * hTheta11;
+
+    h(0, 0) = hRho00 - hR00;
+    h(0, 1) = hRho01 - hR01;
+    h(1, 0) = h(0, 1);
+    h(1, 1) = hRho11 - hR11;
+    return h;
+  }
+
   Math::SpatialPoint projectToInterface(const Math::SpatialPoint& x, Real t)
   {
     Math::SpatialPoint p = x;
@@ -119,27 +173,25 @@ namespace
 
   Real boxBoundaryValue(const Math::SpatialPoint& x)
   {
-    const std::array<Real, 4> d = {{
-      std::abs(x[0]), std::abs(x[0] - Real(1)),
-      std::abs(x[1]), std::abs(x[1] - Real(1)) }};
-    const auto side =
-      static_cast<size_t>(std::min_element(d.begin(), d.end()) - d.begin());
-    if (side == 0) return x[0];
-    if (side == 1) return x[0] - Real(1);
-    if (side == 2) return x[1];
-    return x[1] - Real(1);
+    return x[0] * (Real(1) - x[0]) * x[1] * (Real(1) - x[1]);
+  }
+
+  Math::SpatialMatrix<Real> boxBoundaryHessian(const Math::SpatialPoint& x)
+  {
+    Math::SpatialMatrix<Real> h(2, 2);
+    h(0, 0) = -Real(2) * x[1] * (Real(1) - x[1]);
+    h(1, 1) = -Real(2) * x[0] * (Real(1) - x[0]);
+    h(0, 1) = (Real(1) - Real(2) * x[0]) * (Real(1) - Real(2) * x[1]);
+    h(1, 0) = h(0, 1);
+    return h;
   }
 
   Math::SpatialPoint boxBoundaryGradient(const Math::SpatialPoint& x)
   {
-    const std::array<Real, 4> d = {{
-      std::abs(x[0]), std::abs(x[0] - Real(1)),
-      std::abs(x[1]), std::abs(x[1] - Real(1)) }};
-    const auto side =
-      static_cast<size_t>(std::min_element(d.begin(), d.end()) - d.begin());
-    if (side < 2)
-      return Math::SpatialPoint{1, 0};
-    return Math::SpatialPoint{0, 1};
+    return Math::SpatialPoint{
+      (Real(1) - Real(2) * x[0]) * x[1] * (Real(1) - x[1]),
+      (Real(1) - Real(2) * x[1]) * x[0] * (Real(1) - x[0])
+    };
   }
 
   void annotateBoundary(LocalMesh& mesh)
@@ -159,6 +211,187 @@ namespace
      || std::abs(x1[1]) <= eps || std::abs(x1[1] - Real(1)) <= eps;
       if (on0 && on1)
         mesh.setAttribute({1, e}, Boundary);
+    }
+  }
+
+  Math::SpatialPoint triangleCorner(std::uint8_t k)
+  {
+    if (k == 1) return Math::SpatialPoint{Real(1), Real(0)};
+    if (k == 2) return Math::SpatialPoint{Real(0), Real(1)};
+    return Math::SpatialPoint{Real(0), Real(0)};
+  }
+
+    template <class Cell, class Edge>
+    std::array<std::uint8_t, 2> localEdgeVertices(
+      const Cell& cell,
+      const Edge& edge)
+  {
+    for (std::uint8_t a = 0; a < 3; ++a)
+      for (std::uint8_t b = a + 1; b < 3; ++b)
+        if ((cell(a) == edge(0) && cell(b) == edge(1))
+            || (cell(a) == edge(1) && cell(b) == edge(0)))
+          return {{a, b}};
+    return {{0, 1}};
+  }
+
+  Math::SpatialPoint triangleEdgeMidpoint(
+      std::uint8_t a,
+      std::uint8_t b)
+  {
+    const auto ca = triangleCorner(a);
+    const auto cb = triangleCorner(b);
+    return Math::SpatialPoint{
+      Real(0.5) * (ca[0] + cb[0]),
+      Real(0.5) * (ca[1] + cb[1])};
+  }
+
+  template <class Element>
+  size_t scalarNodeNear(
+      Geometry::Polytope::Type geometry,
+      const Math::SpatialPoint& rc)
+  {
+    const auto& ref = Element::getNodes(geometry);
+    size_t best = 0;
+    Real bestD = std::numeric_limits<Real>::infinity();
+    for (size_t j = 0; j < ref.size(); ++j)
+    {
+      Real d = 0;
+      for (std::uint8_t k = 0; k < rc.size(); ++k)
+      {
+        const Real diff = ref[j][k] - rc[k];
+        d += diff * diff;
+      }
+      if (d < bestD)
+      {
+        bestD = d;
+        best = j;
+      }
+    }
+    return best;
+  }
+
+  template <class Element>
+  bool validP2CellPointCloud(
+      const Geometry::PointCloud& pc,
+      const Element& fe)
+  {
+    Geometry::ParametricTransformation<Element> trans(pc, fe);
+    const auto& qf = QF::PolytopeQuadratureFormula::get(
+        CurvedQuadratureOrder, Polytope::Type::Triangle);
+    for (size_t q = 0; q < qf.getSize(); ++q)
+    {
+      Math::SpatialMatrix<Real> J;
+      trans.jacobian(J, qf.getPoint(q));
+      if (J.rows() != 2 || J.cols() != 2)
+        return false;
+      const Real det = J.determinant();
+      if (!std::isfinite(det) || !(det > CurvedDetFloor))
+        return false;
+    }
+    return true;
+  }
+
+  template <class Element>
+  Geometry::PointCloud currentCellPointCloud(
+      const LocalMesh& mesh,
+      Index ci)
+  {
+    auto cellIt = mesh.getPolytope(2, ci);
+    const auto& ref = Element::getNodes(Polytope::Type::Triangle);
+    Geometry::PointCloud pc(2, ref.size());
+    for (size_t j = 0; j < ref.size(); ++j)
+    {
+      const auto x = Geometry::Point(*cellIt, ref[j]).getPhysicalCoordinates();
+      pc(0, j) = x[0];
+      pc(1, j) = x[1];
+    }
+    return pc;
+  }
+
+  template <class Element>
+  Geometry::PointCloud currentEdgePointCloud(
+      const LocalMesh& mesh,
+      Index e)
+  {
+    auto edgeIt = mesh.getPolytope(1, e);
+    const auto& ref = Element::getNodes(Polytope::Type::Segment);
+    Geometry::PointCloud pc(2, ref.size());
+    for (size_t j = 0; j < ref.size(); ++j)
+    {
+      const auto x = Geometry::Point(*edgeIt, ref[j]).getPhysicalCoordinates();
+      pc(0, j) = x[0];
+      pc(1, j) = x[1];
+    }
+    return pc;
+  }
+
+  template <class Element>
+  void initializeProjectedInterfaceTransformations(
+      LocalMesh& mesh,
+      const Element& fe,
+      Real t)
+  {
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    const auto& conn = mesh.getConnectivity();
+    const Index nc = static_cast<Index>(mesh.getCellCount());
+    for (Index ci = 0; ci < nc; ++ci)
+    {
+      if (conn.getGeometry(2, ci) != Polytope::Type::Triangle)
+        continue;
+      auto affine = currentCellPointCloud<Element>(mesh, ci);
+      auto desired = affine;
+      const auto& cell = conn.getPolytope(2, ci);
+      for (Index e : conn.getIncidence({2, 1}, ci))
+      {
+        const auto attr = mesh.getAttribute(1, e);
+        if (!attr || *attr != Interface)
+          continue;
+        const auto local =
+          localEdgeVertices(cell, conn.getPolytope(1, e));
+        const size_t node = scalarNodeNear<Element>(
+            Polytope::Type::Triangle,
+            triangleEdgeMidpoint(local[0], local[1]));
+        const Math::SpatialPoint x{affine(0, node), affine(1, node)};
+        const auto xp = projectToInterface(x, t);
+        desired(0, node) = xp[0];
+        desired(1, node) = xp[1];
+      }
+
+      Real alpha = 1;
+      Geometry::PointCloud blended = affine;
+      for (int attempt = 0; attempt < 20; ++attempt)
+      {
+        for (size_t j = 0; j < desired.getCount(); ++j)
+        {
+          blended(0, j) = affine(0, j) + alpha * (desired(0, j) - affine(0, j));
+          blended(1, j) = affine(1, j) + alpha * (desired(1, j) - affine(1, j));
+        }
+        if (validP2CellPointCloud(blended, fe))
+          break;
+        alpha *= Real(0.5);
+      }
+      mesh.setPolytopeTransformation(
+          {size_t(2), ci},
+          new ParametricTransformation<Element>(blended, fe));
+    }
+
+    Element feSeg(Polytope::Type::Segment);
+    for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+    {
+      const auto attr = mesh.getAttribute(1, e);
+      if (!attr || *attr != Interface)
+        continue;
+      auto pc = currentEdgePointCloud<Element>(mesh, e);
+      const size_t node = scalarNodeNear<Element>(
+          Polytope::Type::Segment, Math::SpatialPoint{Real(0.5)});
+      const Math::SpatialPoint x{pc(0, node), pc(1, node)};
+      const auto xp = projectToInterface(x, t);
+      pc(0, node) = xp[0];
+      pc(1, node) = xp[1];
+      mesh.setPolytopeTransformation(
+          {size_t(1), e},
+          new ParametricTransformation<Element>(pc, feSeg));
     }
   }
 
@@ -516,6 +749,10 @@ namespace
     Real fitEnergyFinal = 0;
     Real phaseEnergyInitial = 0;
     Real phaseEnergyFinal = 0;
+    Real initialResidual = 0;
+    Real finalResidual = 0;
+    Real lastQuadraticRate = -1;
+    Index regularizationIncrements = 0;
     CurvedMetrics curved;
   };
 
@@ -530,189 +767,257 @@ namespace
       Real targetBlend,
       Real phaseEpsilonFactor,
       Real phaseMargin,
-      Index maxOuterIterations,
       Index maxNewtonIterations)
   {
     SolveReport out;
     auto phiValue = [t](const Math::SpatialPoint& x) { return phiAt(x, t); };
     auto phiGradient = [t](const Math::SpatialPoint& x) { return gradPhiAt(x, t); };
+    auto phiHessian = [t](const Math::SpatialPoint& x) { return hessianPhiAt(x, t); };
     auto projector = [t](const Math::SpatialPoint& x)
     {
       return projectToInterface(x, t);
     };
 
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
-    for (Index outer = 0; outer < maxOuterIterations; ++outer)
+    ++out.outerIterations;
+    const auto pre = relabelAndRebuildInterface(
+        mesh,
+        t,
+        std::max(phaseEpsilonFactor * h, Real(1e-12)),
+        phaseMargin);
+    if (pre.interface.edgeCount == 0)
+      return out;
+
+    upgradeTransformations(mesh, fe, Interface);
+    initializeProjectedInterfaceTransformations(mesh, fe, t);
+    ProjectedInterfaceTargetJacobian target(mesh, Interface, projector);
+    ShapeSizeBlendMetric metric(targetBlend);
+
+    VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh, 2);
+    GridFunction u(space);
+    u.getData().setZero();
+    TrialFunction du(space);
+    TestFunction v(space);
+
+    QualityTerm quality(metric, target, qualityWeight);
+    quality.setQuadratureOrder(CurvedQuadratureOrder);
+    DeviationTerm deviation(deviationWeight);
+    AnalyticLevelSetFitTerm fit(
+      phiValue, phiGradient, phiHessian, Optional<Attribute>(Interface), fitWeight);
+    fit.setQuadratureOrder(CurvedQuadratureOrder);
+    fit.setNormalization(std::max(edgeMeasure(mesh, Interface), Real(1e-12)));
+    AnalyticLevelSetFitTerm bfit(
+      boxBoundaryValue, boxBoundaryGradient, boxBoundaryHessian,
+      Optional<Attribute>(Boundary), Real(1));
+    bfit.setQuadratureOrder(CurvedQuadratureOrder);
+    bfit.setNormalization(std::max(edgeMeasure(mesh, Boundary), Real(1e-12)));
+    VolumetricPhaseConsistencyTerm phase(
+        phiValue, phiGradient, Negative, Positive, phaseWeight);
+    phase
+      .setQuadratureOrder(CurvedQuadratureOrder)
+      .setEpsilon(std::max(phaseEpsilonFactor * h, Real(1e-12)))
+      .setMargin(phaseMargin)
+      .setNormalization(std::max(totalCellMeasure(mesh), Real(1e-12)));
+
+    out.fitEnergyInitial = fit.energy(mesh);
+    out.phaseEnergyInitial = phase.energy(mesh);
+    out.wrongSideInitial = phase.countWrongSideQuadrature(mesh);
+
+    auto makeResidual = [&]()
     {
-      ++out.outerIterations;
-      const auto pre = relabelAndRebuildInterface(
-          mesh,
-          t,
-          std::max(phaseEpsilonFactor * h, Real(1e-12)),
-          phaseMargin);
-      if (pre.interface.edgeCount == 0)
-        break;
+      return quality.residual(u, v)
+           + deviation.residual(u, v)
+         + fit.residual(u, v)
+         + bfit.residual(u, v)
+         + phase.residual(u, v);
+    };
+    auto makeTangent = [&]()
+    {
+      return quality.tangent(u, du, v)
+           + deviation.tangent(du, v)
+         + fit.tangent(u, du, v)
+         + bfit.tangent(u, du, v)
+         + phase.tangent(u, du, v);
+    };
+    auto energy = [&]()
+    {
+      return quality.energy(u)
+           + deviation.energy(u)
+         + fit.energy(u)
+         + bfit.energy(u)
+         + phase.energy(u);
+    };
 
-      upgradeTransformations(mesh, fe, Interface);
-      auto target = ProjectedQualityTargetJacobian(
-          mesh, Interface, projector, targetBlend);
-      ShapeSizeBlendMetric metric(Real(0.5));
+    IsoparametricTMOPParameters params;
+    params.maxIterations = maxNewtonIterations;
+    params.residualTolerance = Real(1e-10);
+    params.stepTolerance = Real(1e-10);
+    params.minDetFloor = Real(0);
+    params.printIterations = false;
+    const auto tmop = solveIsoparametricTMOP(
+      mesh,
+      fe,
+      u,
+      du,
+      v,
+      makeResidual,
+      makeTangent,
+      energy,
+      Interface,
+      params);
 
-      VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh, 2);
-      GridFunction u(space);
-      u.getData().setZero();
-      TrialFunction du(space);
-      TestFunction v(space);
+    out.newtonIterations = tmop.iterations;
+    out.initialResidual = tmop.initialResidual;
+    out.finalResidual = tmop.finalResidual;
+    out.lastQuadraticRate = tmop.lastQuadraticRate;
+    out.lastAlpha = tmop.lastAcceptedAlpha;
+    const bool residualImproved =
+      std::isfinite(tmop.initialResidual)
+      && std::isfinite(tmop.finalResidual)
+      && (tmop.finalResidual <= tmop.initialResidual);
+    out.accepted = tmop.converged || (tmop.acceptedStep && residualImproved);
 
-      QualityTerm quality(metric, target, qualityWeight);
-      quality.setQuadratureOrder(CurvedQuadratureOrder);
-      DeviationTerm deviation(deviationWeight);
-      AnalyticLevelSetFitTerm fit(
-          phiValue, phiGradient, Optional<Attribute>(Interface), fitWeight);
-      fit.setNormalization(std::max(edgeMeasure(mesh, Interface), Real(1e-12)));
-      AnalyticLevelSetFitTerm boundaryFit(
-          boxBoundaryValue, boxBoundaryGradient,
-          Optional<Attribute>(Boundary), Real(1));
-      boundaryFit.setNormalization(std::max(edgeMeasure(mesh, Boundary), Real(1e-12)));
-      VolumetricPhaseConsistencyTerm phase(
-          phiValue, phiGradient, Negative, Positive, phaseWeight);
-      phase
-        .setQuadratureOrder(CurvedQuadratureOrder)
-        .setEpsilon(std::max(phaseEpsilonFactor * h, Real(1e-12)))
-        .setMargin(phaseMargin)
-        .setNormalization(std::max(totalCellMeasure(mesh), Real(1e-12)));
-
-      if (outer == 0)
-      {
-        out.fitEnergyInitial = fit.energy(mesh);
-        out.phaseEnergyInitial = phase.energy(mesh);
-        out.wrongSideInitial = phase.countWrongSideQuadrature(mesh);
-      }
-
-      auto makeResidual = [&]()
-      {
-        return quality.residual(u, v)
-             + deviation.residual(u, v)
-             + fit.residual(u, v)
-             + boundaryFit.residual(u, v)
-             + phase.residual(u, v);
-      };
-      auto makeTangent = [&]()
-      {
-        return quality.tangent(u, du, v)
-             + deviation.tangent(du, v)
-             + fit.tangent(u, du, v)
-             + boundaryFit.tangent(u, du, v)
-             + phase.tangent(u, du, v);
-      };
-      auto energy = [&]()
-      {
-        return quality.energy(u)
-             + deviation.energy(u)
-             + fit.energy(u)
-             + boundaryFit.energy(u)
-             + phase.energy(u);
-      };
-
+    if (!out.accepted)
+    {
+      Real previousResidual = -1;
       bool hadAcceptedStep = false;
-      try
+      for (Index it = 0; it < maxNewtonIterations; ++it)
       {
-        for (Index it = 0; it < maxNewtonIterations; ++it)
+        ++out.newtonIterations;
+        LinearForm R(v);
+        R = makeResidual();
+        R.assemble();
+        const auto r = R.getVector();
+        if (!r.allFinite())
+          break;
+        const Real rNorm = r.norm();
+        if (it == 0)
+          out.initialResidual = rNorm;
+        out.finalResidual = rNorm;
+        if (previousResidual > Real(0) && std::isfinite(previousResidual))
+          out.lastQuadraticRate = rNorm / (previousResidual * previousResidual);
+        if (rNorm <= Real(1e-10))
+          break;
+
+        BilinearForm J(du, v);
+        J = makeTangent();
+        J.assemble();
+
+        const auto A = J.getOperator();
+        const auto rhs = -r;
+        const Math::Vector<Real> u0 = u.getData();
+        const Real e0 = energy();
+        Eigen::SparseLU<std::decay_t<decltype(A)>> lu;
+        lu.compute(A);
+        if (lu.info() != Eigen::Success)
+          break;
+
+        const auto dx = lu.solve(rhs);
+        if (lu.info() != Eigen::Success || !dx.allFinite())
+          break;
+
+        bool acceptedStep = false;
+        Real alphaNewton = 1;
+        Real stepNorm = 0;
+        for (int attempt = 0; attempt < 20; ++attempt)
         {
-          ++out.newtonIterations;
-          LinearForm R(v);
-          R = makeResidual();
-          R.assemble();
-          const auto r = R.getVector();
-          if (!r.allFinite())
-            break;
-          if (r.norm() <= Real(1e-10))
-            break;
-
-          BilinearForm J(du, v);
-          J = makeTangent();
-          J.assemble();
-
-          Eigen::SparseLU<std::decay_t<decltype(J.getOperator())>> lu;
-          lu.compute(J.getOperator());
-          if (lu.info() != Eigen::Success)
-            break;
-          const Math::Vector<Real> dx = lu.solve(-r);
-          if (lu.info() != Eigen::Success || !dx.allFinite())
-            break;
-
-          const Math::Vector<Real> u0 = u.getData();
-          const Real e0 = energy();
-          Real alpha = 1;
-          bool acceptedStep = false;
-          for (int ls = 0; ls < 30; ++ls)
+          u.getData() = u0 + alphaNewton * dx;
+          if (!u.getData().allFinite())
           {
-            u.getData() = u0 + alpha * dx;
-            const Real e = energy();
-            if (std::isfinite(e) && e <= e0 * (Real(1) + Real(1e-12))
-                && isCurvedMoveValid(mesh, u, fe, CurvedDetFloor))
-            {
-              acceptedStep = true;
-              break;
-            }
-            alpha *= Real(0.5);
+            alphaNewton *= Real(0.5);
+            continue;
           }
-          out.lastAlpha = alpha;
-          if (!acceptedStep)
+          const Real eTrial = energy();
+          LinearForm RTrial(v);
+          RTrial = makeResidual();
+          RTrial.assemble();
+          const auto rTrial = RTrial.getVector();
+          if (!rTrial.allFinite())
           {
-            u.getData() = u0;
+            alphaNewton *= Real(0.5);
+            continue;
+          }
+          const Real rTrialNorm = rTrial.norm();
+          const bool residualDecrease =
+            rTrialNorm <= (Real(1) - Real(1e-4) * alphaNewton) * rNorm;
+          if (std::isfinite(eTrial) && eTrial <= e0 && residualDecrease)
+          {
+            stepNorm = (alphaNewton * dx).norm();
+            out.finalResidual = rTrialNorm;
+            acceptedStep = true;
             break;
           }
-          hadAcceptedStep = true;
-          if (alpha * dx.norm() <= Real(1e-10))
-            break;
+          alphaNewton *= Real(0.5);
         }
-      }
-      catch (...)
-      {
-        hadAcceptedStep = false;
+
+        if (!acceptedStep)
+        {
+          u.getData() = u0;
+          break;
+        }
+
+        hadAcceptedStep = true;
+        out.lastAlpha = alphaNewton;
+        previousResidual = rNorm;
+        if (stepNorm <= Real(1e-10))
+          break;
       }
 
       if (!hadAcceptedStep || !u.getData().allFinite())
-        break;
+        return out;
 
       LocalMesh beforeMove(mesh);
-      moveMesh(mesh, u, fe, Interface);
+      Real alpha = 1;
+      bool acceptedMove = false;
+      for (int attempt = 0; attempt < 20; ++attempt)
+      {
+        LocalMesh candidate(beforeMove);
+        VectorH1<2, LocalMesh> candidateSpace(std::integral_constant<size_t, 2>{}, candidate, 2);
+        GridFunction scaledU(candidateSpace);
+        scaledU.getData() = u.getData();
+        scaledU.getData() *= alpha;
+        moveMesh(candidate, scaledU, fe, Interface);
 
-      out.curved = curvedMetrics(mesh, phiValue, Interface);
-      const bool curvedValid =
-        out.curved.invalidJacobianSamples == 0
-        && out.curved.minDet > CurvedDetFloor
-        && out.curved.qmin > Real(1e-12)
-        && std::isfinite(out.curved.minDet)
-        && std::isfinite(out.curved.qmin);
+        out.curved = curvedMetrics(candidate, phiValue, Interface);
+        const bool curvedValid =
+          out.curved.invalidJacobianSamples == 0
+          && out.curved.overlapSamples == 0
+          && std::isfinite(out.curved.minDet)
+          && std::isfinite(out.curved.qmin);
+        if (curvedValid)
+        {
+          mesh = std::move(candidate);
+          acceptedMove = true;
+          break;
+        }
+        alpha *= Real(0.5);
+      }
 
-      if (!curvedValid)
+      if (!acceptedMove)
       {
         mesh = std::move(beforeMove);
-        break;
+        return out;
       }
+
+      out.accepted = true;
+      out.lastAlpha = alpha;
+    }
 
       mesh.getConnectivity().compute(2, 1);
       mesh.getConnectivity().compute(1, 2);
       mesh.getConnectivity().compute(1, 0);
-
-      out.accepted = true;
-      out.fitEnergyFinal = fit.energy(mesh);
-      out.phaseEnergyFinal = phase.energy(mesh);
-      out.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
 
       const auto post = relabelAndRebuildInterface(
           mesh,
           t,
           std::max(phaseEpsilonFactor * h, Real(1e-12)),
           phaseMargin);
+        initializeProjectedInterfaceTransformations(mesh, fe, t);
+        out.fitEnergyFinal = fit.energy(mesh);
+        out.phaseEnergyFinal = phase.energy(mesh);
+        out.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
       out.changedCells += post.cells.changed;
       out.changedInterfaceEdges += post.changedInterfaceEdges;
-
-      if (post.cells.changed == 0 && post.changedInterfaceEdges == 0)
-        break;
-    }
     return out;
   }
 }
@@ -721,15 +1026,14 @@ int main(int argc, char** argv)
 {
   size_t resolution = 20;
   Index steps = 20;
-  Real fitWeight = 2;
-  Real qualityWeight = 1;
+  Real fitWeight = Real(30);
+  Real qualityWeight = Real(0.03);
   Real deviationWeight = Real(0.25);
-  Real targetBlend = Real(0.05);
-  Real phaseWeight = Real(0.05);
+  Real targetBlend = Real(0.5);
+  Real phaseWeight = Real(0);
   Real phaseEpsilonFactor = Real(0.5);
   Real phaseMargin = Real(1);
-  Index tmopMaxIterations = 8;
-  Index maxOuterRelabelIterations = 4;
+  Index tmopMaxIterations = 20;
 
   if (argc > 1)
     resolution = static_cast<size_t>(std::max(3, std::atoi(argv[1])));
@@ -752,8 +1056,6 @@ int main(int argc, char** argv)
     phaseMargin = static_cast<Real>(std::atof(argv[9]));
   if (argc > 10)
     tmopMaxIterations = static_cast<Index>(std::max(1, std::atoi(argv[10])));
-  if (argc > 11)
-    maxOuterRelabelIterations = static_cast<Index>(std::max(1, std::atoi(argv[11])));
 
   const Real h = Real(1) / static_cast<Real>(resolution - 1);
 
@@ -795,8 +1097,8 @@ int main(int argc, char** argv)
     const auto report = solveNoCutTMOP(
         mesh, t, h,
         qualityWeight, fitWeight, phaseWeight, deviationWeight,
-        targetBlend, phaseEpsilonFactor, phaseMargin,
-        maxOuterRelabelIterations, tmopMaxIterations);
+      targetBlend, phaseEpsilonFactor, phaseMargin,
+      tmopMaxIterations);
 
     relabelAndRebuildInterface(
         mesh,
@@ -858,11 +1160,9 @@ int main(int argc, char** argv)
               << " fit_energy_final=" << report.fitEnergyFinal
               << " phase_energy_initial=" << report.phaseEnergyInitial
               << " phase_energy_final=" << report.phaseEnergyFinal
-              << " fit_weight=" << fitWeight
-              << " phase_weight=" << phaseWeight
-              << " quality_weight=" << qualityWeight
-              << " deviation_weight=" << deviationWeight
-              << " target_blend=" << targetBlend
+              << " residual_initial=" << report.initialResidual
+              << " residual_final=" << report.finalResidual
+              << " qrate_last=" << report.lastQuadraticRate
               << std::endl;
 
 clearInterfaceEdges(mesh);

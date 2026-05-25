@@ -22,15 +22,15 @@
  *       makeResidual, makeTangent, energy,
  *       interfaceAttribute);
  *
- * The driver does Newton + Armijo line search + curved-validity gate; it
+ * The driver does full Newton steps plus a curved-validity gate; it
  * does NOT enforce a hard interface manifold constraint. The interface
  * fit term in the residual is responsible for pulling interface vertices
- * onto phi=0 *smoothly* -- Newton stays smooth, the line search has no
- * alpha-invariant jump on interface dofs, and convergence is well-behaved.
+ * onto phi=0 *smoothly* -- Newton stays smooth, and there is no line
+ * search branch with alpha-dependent interface updates.
  *
  * If you need exact-on-manifold interface vertices, add a smooth penalty
  * term to the composition (e.g. a vertex-based phi^2 weight), do NOT
- * overwrite u inside the line search.
+ * overwrite u inside a step-rejection branch.
  *
  * On success the driver commits the displacement to the mesh via
  * moveMesh(mesh, u). No state, no class.
@@ -39,6 +39,7 @@
 #include <Eigen/SparseLU>
 
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <utility>
 
@@ -58,6 +59,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     bool converged = false;      ///< Residual fell below the tolerance.
     Real initialResidual = 0;
     Real finalResidual = 0;
+    Real lastQuadraticRate = -1;
     Real lastAcceptedAlpha = 0;
     bool acceptedStep = false;
     Index rejectedSteps = 0;
@@ -67,19 +69,16 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   struct IsoparametricTMOPParameters
   {
     Index maxIterations = 8;
-    Index lineSearchBudget = 30;
     Real residualTolerance = Real(1e-10);
     /// Step-norm cutoff to declare convergence.
     Real stepTolerance = Real(1e-10);
     /// Strict curved-det floor (absolute).
     Real minDetFloor = Real(0);
-    /// Relative slack on the merit non-increase line-search gate. With the
-    /// smooth (projection-free) method a near-monotone tolerance is enough.
-    Real meritRelativeTolerance = Real(1e-12);
+    /// Print per-iteration Newton diagnostics.
+    bool printIterations = false;
   };
 
-  /// Newton + Armijo line search + interface tangential constraint +
-  /// curved-validity gate, for the isoparametric TMOP problem.
+  /// Full Newton plus curved-validity gate, for the isoparametric TMOP problem.
   ///
   /// The user composes the residual / tangent / energy with Rodin's existing
   /// form language INSIDE the callables `makeResidual` / `makeTangent` /
@@ -107,9 +106,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
   /// Smooth method: the interface fit is the level-set penalty term that
   /// the caller put in `makeResidual` / `makeTangent` (Knupp, Kolev, Mittal,
   /// Tomov 2021). No geometric surface projection, no hard manifold
-  /// constraint -- the line search is a plain Armijo backtracking with a
-  /// curved-validity gate, so Newton stays smooth. Tangential relaxation is
-  /// provided automatically by the quality metric.
+  /// constraint, and no step damping: a rejected full step is reported as a
+  /// failed Newton step immediately.
+  /// Tangential relaxation is provided automatically by the quality metric.
   template <class Element,
             class FES, class Data,
             class TrialF, class TestF,
@@ -130,6 +129,7 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
     using GeoData = Data;
 
     IsoparametricTMOPSolverReport rep;
+    Real previousResidual = -1;
     for (Index it = 0; it < params.maxIterations; ++it)
     {
       Variational::LinearForm R(v);
@@ -138,6 +138,11 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       const auto r = R.getVector();
       if (!r.allFinite()) break;
       const Real rNorm = r.norm();
+      const Real quadraticRate =
+        (previousResidual > Real(0) && std::isfinite(previousResidual))
+        ? (rNorm / (previousResidual * previousResidual))
+        : Real(-1);
+      rep.lastQuadraticRate = quadraticRate;
       if (it == 0) rep.initialResidual = rNorm;
       rep.finalResidual = rNorm;
       if (rNorm <= params.residualTolerance)
@@ -152,24 +157,27 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       const GeoData dx = lu.solve(-r);
       if (lu.info() != Eigen::Success || !dx.allFinite()) break;
 
-      const Real e0 = energy();
       const GeoData u0 = u.getData();
-      Real alpha = Real(1);
-      bool accepted = false;
-      for (Index ls = 0; ls < params.lineSearchBudget; ++ls)
+      const Real eBefore = energy();
+      u.getData() = u0 + dx;
+      const Real e = energy();
+      const bool accepted =
+        std::isfinite(e)
+        && isCurvedMoveValid(mesh, u, fe, params.minDetFloor);
+      rep.lastAcceptedAlpha = Real(1);
+      rep.acceptedStep = accepted;
+      if (params.printIterations)
       {
-        u.getData() = u0 + alpha * dx;
-        const Real e = energy();
-        if (std::isfinite(e)
-            && e <= e0 * (Real(1) + params.meritRelativeTolerance)
-            && isCurvedMoveValid(mesh, u, fe, params.minDetFloor))
-        {
-          accepted = true;
-          rep.lastAcceptedAlpha = alpha;
-          rep.acceptedStep = true;
-          break;
-        }
-        alpha *= Real(0.5);
+        std::cout
+          << "tmop_newton it=" << it
+          << " residual=" << rNorm
+          << " qrate=" << quadraticRate
+          << " step_norm=" << dx.norm()
+          << " alpha=1"
+          << " energy_before=" << eBefore
+          << " energy_after=" << e
+          << " full_step_valid=" << (accepted ? 1 : 0)
+          << "\n";
       }
       if (!accepted)
       {
@@ -178,8 +186,9 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
         rep.acceptedStep = false;
         break;
       }
+      previousResidual = rNorm;
       ++rep.iterations;
-      if (alpha * dx.norm() <= params.stepTolerance) break;
+      if (dx.norm() <= params.stepTolerance) break;
     }
 
     // Commit: move the parametric mesh by the solved displacement.

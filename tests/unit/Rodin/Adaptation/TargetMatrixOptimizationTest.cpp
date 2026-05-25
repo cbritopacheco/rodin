@@ -458,7 +458,8 @@ namespace Rodin::Tests::Unit
       Metric metric,
       SpaceFactory makeSpace,
       int mask,
-      Real finiteDifferenceStep)
+      Real finiteDifferenceStep,
+      Real phaseEpsilon = Real(1))
   {
     auto mesh = makeTwoTriangleSquareWithVerticalInterface();
     auto space = makeSpace(mesh);
@@ -496,7 +497,7 @@ namespace Rodin::Tests::Unit
         phi, gradPhi, TestNegative, TestPositive, Real(0.9));
     phase
       .setQuadratureOrder(4)
-      .setEpsilon(Real(1))
+      .setEpsilon(phaseEpsilon)
       .setMargin(Real(1))
       .setNormalization(Real(1));
 
@@ -603,6 +604,24 @@ namespace Rodin::Tests::Unit
     const auto jd = tangentAction(direction);
     const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
     return (fd - jd).norm() / denom;
+  }
+
+  static std::vector<int> allNonEmptyObjectiveMasks()
+  {
+    std::vector<int> masks;
+    masks.reserve(static_cast<size_t>(ObjectiveAll));
+    for (int mask = 1; mask <= ObjectiveAll; ++mask)
+      masks.push_back(mask);
+    return masks;
+  }
+
+  static std::vector<int> allPhaseObjectiveMasks()
+  {
+    std::vector<int> masks;
+    for (int mask = 1; mask <= ObjectiveAll; ++mask)
+      if (mask & ObjectivePhase)
+        masks.push_back(mask);
+    return masks;
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, SquaredDistanceMetricIsZeroAtIdentity)
@@ -889,18 +908,69 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((fd - jd).norm() / denom, 0, 1e-7);
   }
 
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, AnalyticLevelSetFitTermCurvedHessianIsConsistent)
+  {
+    auto cut = makeTwoTriangleSquareWithVerticalInterface();
+    constexpr size_t vdim = 2;
+    P1 space(cut, vdim);
+
+    GridFunction displacement(space);
+    auto& data = displacement.getData();
+    for (Eigen::Index i = 0; i < data.size(); ++i)
+      data(i) = 0.01 * std::cos(static_cast<Real>(i + 1));
+
+    TrialFunction du(space);
+    TestFunction v(space);
+    auto value = [](const Math::SpatialPoint& x)
+    {
+      return x[0] * x[0] + Real(0.5) * x[1] * x[1] - Real(0.4);
+    };
+    auto gradient = [](const Math::SpatialPoint& x)
+    {
+      return Math::SpatialPoint{Real(2) * x[0], x[1]};
+    };
+    auto hessian = [](const Math::SpatialPoint&)
+    {
+      return mat2(Real(2), Real(0), Real(0), Real(1));
+    };
+
+    AnalyticLevelSetFitTerm fit(
+        value, gradient, hessian, Optional<Attribute>(TestInterface), 2.25);
+
+    auto assembleResidual = [&]()
+    {
+      LinearForm residual(v);
+      residual = fit.residual(displacement, v);
+      residual.assemble();
+      return residual.getVector();
+    };
+
+    BilinearForm tangent(du, v);
+    tangent = fit.tangent(displacement, du, v);
+    tangent.assemble();
+
+    const auto residual0 = assembleResidual();
+    auto direction = data;
+    for (Eigen::Index i = 0; i < direction.size(); ++i)
+      direction(i) = std::sin(Real(0.61) * static_cast<Real>(i + 1));
+    direction /= direction.norm();
+
+    const auto original = data;
+    const Real eps = 1e-7;
+    data = original + eps * direction;
+    const auto residual1 = assembleResidual();
+    data = original;
+
+    const auto fd = (residual1 - residual0) / eps;
+    const auto jd = tangent.getOperator() * direction;
+    const Real denom = std::max<Real>({Real(1), fd.norm(), jd.norm()});
+
+    EXPECT_NEAR((fd - jd).norm() / denom, 0, 1e-7);
+  }
+
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP1)
   {
-    const std::array<int, 8> masks = {{
-      ObjectiveQuality,
-      ObjectiveGamma,
-      ObjectivePhase,
-      ObjectiveDeviation,
-      ObjectiveBoundary,
-      ObjectiveQuality | ObjectiveGamma | ObjectivePhase,
-      ObjectiveGamma | ObjectivePhase | ObjectiveBoundary,
-      ObjectiveAll
-    }};
+    const auto masks = allNonEmptyObjectiveMasks();
     const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
     auto makeP1 = [](LocalMesh& mesh)
     {
@@ -931,14 +1001,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP2)
   {
-    const std::array<int, 6> masks = {{
-      ObjectiveQuality,
-      ObjectiveGamma,
-      ObjectivePhase,
-      ObjectiveDeviation,
-      ObjectiveBoundary,
-      ObjectiveAll
-    }};
+    const auto masks = allNonEmptyObjectiveMasks();
     const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
     auto makeP2 = [](LocalMesh& mesh)
     {
@@ -966,6 +1029,67 @@ namespace Rodin::Tests::Unit
     checkMetric("squared-distance", SquaredDistanceMetric{});
     checkMetric("area-distortion", AreaDistortionMetric{});
     checkMetric("shape-size-blend", ShapeSizeBlendMetric(Real(0.5)));
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP1PhaseEpsilonScaling)
+  {
+    const auto masks = allPhaseObjectiveMasks();
+    const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
+    const std::array<Real, 4> epsilons = {{0.25, 0.5, 1.0, 2.0}};
+    auto makeP1 = [](LocalMesh& mesh)
+    {
+      return P1(mesh, 2);
+    };
+
+    for (const Real phaseEpsilon : epsilons)
+    {
+      for (const int mask : masks)
+      {
+        Real best = std::numeric_limits<Real>::infinity();
+        for (const Real eps : steps)
+        {
+          const Real error = finiteDifferenceObjectiveError(
+              ShapeSizeBlendMetric(Real(0.5)), makeP1, mask, eps,
+              phaseEpsilon);
+          best = std::min(best, error);
+        }
+        SCOPED_TRACE("shape-size-blend");
+        SCOPED_TRACE(objectiveMaskName(mask));
+        SCOPED_TRACE(phaseEpsilon);
+        EXPECT_LT(best, Real(5e-6));
+      }
+    }
+  }
+
+  TEST(Rodin_Adaptation_TargetMatrixOptimization, ObjectiveTermMatrixFiniteDifferenceP2PhaseEpsilonScaling)
+  {
+    const auto masks = allPhaseObjectiveMasks();
+    const std::array<Real, 4> steps = {{1e-5, 1e-6, 1e-7, 1e-8}};
+    const std::array<Real, 4> epsilons = {{0.25, 0.5, 1.0, 2.0}};
+    auto makeP2 = [](LocalMesh& mesh)
+    {
+      return VectorH1<2, LocalMesh>(
+          std::integral_constant<size_t, 2>{}, mesh, 2);
+    };
+
+    for (const Real phaseEpsilon : epsilons)
+    {
+      for (const int mask : masks)
+      {
+        Real best = std::numeric_limits<Real>::infinity();
+        for (const Real eps : steps)
+        {
+          const Real error = finiteDifferenceObjectiveError(
+              ShapeSizeBlendMetric(Real(0.5)), makeP2, mask, eps,
+              phaseEpsilon);
+          best = std::min(best, error);
+        }
+        SCOPED_TRACE("shape-size-blend");
+        SCOPED_TRACE(objectiveMaskName(mask));
+        SCOPED_TRACE(phaseEpsilon);
+        EXPECT_LT(best, Real(2e-5));
+      }
+    }
   }
 
   TEST(Rodin_Adaptation_TargetMatrixOptimization, NativeTermsFiniteDifferenceOnAffineMeshes)
