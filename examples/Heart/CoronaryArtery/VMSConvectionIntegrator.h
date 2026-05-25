@@ -67,14 +67,25 @@
  *
  * This implementation is intentionally specialized:
  *
- * - 3D cells only,
- * - vector-valued quadratic H1 velocity fields,
- * - diagonal component-wise vector assembly,
+ * - cell integrals in the mesh spatial dimension,
+ * - vector-valued velocity fields whose basis functions provide Jacobians,
  * - explicit frozen convective velocity @f$u_h^n@f$,
  * - projected stabilization parameter @f$\tau_K@f$,
- * - local stabilization length @f$h_K = |K|^{1/3}@f$.
+ * - local stabilization length @f$h_K = |K|^{1/d}@f$ for cell dimension
+ *   @f$d@f$, computed outside this header as part of @f$\tau_K@f$.
+ *
+ * The integrators below do not implement a full residual-based VMS
+ * Navier--Stokes method. They implement only the convective, projected,
+ * term-by-term stabilization used by the coronary example experiments. The
+ * advection velocity, projected convective acceleration, projected tau, and
+ * dynamic subscale are treated as already known fields. Consequently this
+ * contribution is suitable as a lagged Oseen/Picard stabilization term. If it
+ * is used inside a Newton solve, it should be understood as a frozen
+ * stabilization contribution unless the caller also differentiates these
+ * external projected fields.
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <memory>
@@ -94,6 +105,24 @@ namespace Rodin::Examples::Heart
   /**
    * @brief Cell integrator for the bilinear projected-VMS convective term.
    *
+   * This class adds streamline-oriented dissipation in the direction of the
+   * frozen velocity @f$u_h^n@f$. For @f$\tau_K \ge 0@f$, the square case
+   * satisfies:
+   *
+   * @f[
+   *   A_K(w_h,w_h)
+   *   =
+   *   \int_K
+   *     \tau_K \rho^2
+   *     \left|(\nabla w_h)u_h^n\right|^2
+   *   \, dx
+   *   \ge 0 .
+   * @f]
+   *
+   * Thus the term damps unresolved convective derivatives without adding
+   * isotropic viscosity. It is not a pressure, divergence, or viscous residual
+   * stabilization.
+   *
    * This assembles:
    *
    * @f[
@@ -107,23 +136,23 @@ namespace Rodin::Examples::Heart
    *   \, dx .
    * @f]
    *
-   * For scalar basis functions @f$\phi_a@f$ and @f$\psi_b@f$, the local
-   * scalar block is:
+   * For vector basis functions @f$\Phi_a@f$ and @f$\Psi_b@f$, the local entry is:
    *
    * @f[
    *   A_{ba}
    *   =
    *   \int_K
    *     \tau_K \rho^2
-   *     \left(\nabla \phi_a \cdot u_h^n\right)
-   *     \left(\nabla \psi_b \cdot u_h^n\right)
+   *     \left((\nabla \Phi_a)u_h^n\right)
+   *     \cdot
+   *     \left((\nabla \Psi_b)u_h^n\right)
    *   \, dx .
    * @f]
    *
-   * This scalar block is copied onto each diagonal velocity component block.
-   * Cross-component coupling is not assembled here because
-   * @f$((\nabla u_h)u_h^n)_c@f$ depends only on the @f$c@f$-th velocity
-   * component basis functions.
+   * The implementation is finite-element-order independent for vector finite
+   * elements whose basis functions expose a Jacobian. Local entries are formed
+   * directly from @f$(\nabla \Phi_a)u_h^n@f$ rather than by assuming a scalar
+   * P2 block structure.
    *
    * @tparam TrialFunction Trial velocity field type.
    * @tparam TestFunction Test velocity field type.
@@ -187,9 +216,6 @@ namespace Rodin::Examples::Heart
         const auto geometry = polytope.getGeometry();
         const auto idx = polytope.getIndex();
 
-        if (d != 3)
-          throw std::runtime_error("VMSConvectionBilinearIntegrator expects 3D cells.");
-
         const auto& trialFES = m_u.getFiniteElementSpace();
         const auto& testFES  = m_v.getFiniteElementSpace();
 
@@ -198,39 +224,38 @@ namespace Rodin::Examples::Heart
 
         const size_t ntr = m_u.getDOFs(polytope);
         const size_t nte = m_v.getDOFs(polytope);
+        const size_t vdim = trialFES.getVectorDimension();
 
-        constexpr size_t KTrial = 2;
-        constexpr size_t KTest  = 2;
+        if (vdim == 0 || vdim != testFES.getVectorDimension())
+          throw std::runtime_error("VMSConvectionBilinearIntegrator expects matching vector-valued spaces.");
 
-        const Variational::H1Element<KTrial, ScalarType> trialScalarFE(geometry);
-        const Variational::H1Element<KTest,  ScalarType> testScalarFE(geometry);
-
-        const size_t ntrS = trialScalarFE.getCount();
-        const size_t nteS = testScalarFE.getCount();
-
-        assert(ntrS > 0 && nteS > 0);
-        assert(ntr % ntrS == 0);
-        assert(nte % nteS == 0);
-
-        const size_t vdim = ntr / ntrS;
-        assert(vdim == nte / nteS);
+        if (ntr != trialFE.getCount() || nte != testFE.getCount())
+          throw std::runtime_error("VMSConvectionBilinearIntegrator expects element-local DOFs to match finite-element basis count.");
 
         /*
-         * Conservative quadrature choice.
+         * Conservative quadrature choice for
          *
-         * The integrand contains products of directional derivatives and
-         * non-polynomial coefficients through tau_K if mu/uOld vary in space.
-         * This order is intentionally not minimal.
+         *   tau (grad Phi uOld) . (grad Psi uOld).
+         *
+         * The tau field is often projected from a non-polynomial expression,
+         * so exactness is not guaranteed. This still integrates the polynomial
+         * part of the lagged convective stabilization without the old P2
+         * underintegration.
          */
-        const size_t qOrder = trialFE.getOrder() + testFE.getOrder();
+        const size_t uOldOrder =
+          getFunctionOrder(m_uOld, polytope, trialFE.getOrder());
+        const size_t tauOrder =
+          getFunctionOrder(m_tau, polytope, size_t(0));
+        const size_t qOrder =
+          tauOrder
+          + derivativeOrder(trialFE.getOrder())
+          + derivativeOrder(testFE.getOrder())
+          + 2 * uOldOrder;
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
-
-        const auto& trTab = trialScalarFE.getTabulation(qf);
-        const auto& teTab = testScalarFE .getTabulation(qf);
 
         m_mat.resize(
           static_cast<Eigen::Index>(nte),
@@ -240,17 +265,14 @@ namespace Rodin::Examples::Heart
 
         ScalarType* A = m_mat.data();
 
-        std::vector<Math::SpatialVector<ScalarType>> Gtr(ntrS);
-        std::vector<Math::SpatialVector<ScalarType>> Gte(nteS);
+        std::vector<Math::SpatialVector<ScalarType>> trDir(ntr);
+        std::vector<Math::SpatialVector<ScalarType>> teDir(nte);
 
-        Math::SpatialVector<ScalarType> trDir(ntrS);
-        Math::SpatialVector<ScalarType> teDir(nteS);
+        for (auto& t : trDir)
+          t.resize(static_cast<std::uint8_t>(vdim));
 
-        for (auto& g : Gtr)
-          g.resize(static_cast<std::uint8_t>(d));
-
-        for (auto& g : Gte)
-          g.resize(static_cast<std::uint8_t>(d));
+        for (auto& t : teDir)
+          t.resize(static_cast<std::uint8_t>(vdim));
 
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
@@ -261,49 +283,42 @@ namespace Rodin::Examples::Heart
             static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
 
           const auto Jinv = p.getJacobianInverse();
-
-          fillPhysicalGradients3D(qp, Jinv, trTab, Gtr);
-          fillPhysicalGradients3D(qp, Jinv, teTab, Gte);
+          const auto& rc = p.getReferenceCoordinates();
 
           const auto uOld = m_uOld.getValue(ip);
           const auto tau = m_tau.getValue(ip);
 
+          if (uOld.size() != d)
+            throw std::runtime_error("VMSConvectionBilinearIntegrator expects the frozen velocity dimension to match the cell dimension.");
+
           /*
            * Directional derivatives along frozen velocity:
            *
-           *   trDir[a] = grad phi_a · uOld,
-           *   teDir[b] = grad psi_b · uOld.
+           *   trDir[a] = (grad Phi_a) uOld,
+           *   teDir[b] = (grad Psi_b) uOld.
            */
-          for (size_t a = 0; a < ntrS; ++a)
-            trDir[a] = Math::dot(Gtr[a], uOld);
+          for (size_t a = 0; a < ntr; ++a)
+            fillDirectionalDerivative(trDir[a], trialFE.getBasis(a), rc, Jinv, uOld);
 
-          for (size_t b = 0; b < nteS; ++b)
-            teDir[b] = Math::dot(Gte[b], uOld);
+          for (size_t b = 0; b < nte; ++b)
+            fillDirectionalDerivative(teDir[b], testFE.getBasis(b), rc, Jinv, uOld);
 
-          for (size_t b = 0; b < nteS; ++b)
+          for (size_t b = 0; b < nte; ++b)
           {
-            for (size_t a = 0; a < ntrS; ++a)
+            for (size_t a = 0; a < ntr; ++a)
             {
               /*
-               * Local scalar entry:
+               * Local vector-basis entry:
                *
                *   int_K tau rho^2
-               *     (grad phi_a · uOld)
-               *     (grad psi_b · uOld).
+               *     ((grad Phi_a) uOld)
+               *     ·
+               *     ((grad Psi_b) uOld).
                */
               const ScalarType kij =
-                wdet * tau * m_rho * trDir[a] * m_rho * teDir[b];
+                wdet * tau * m_rho * m_rho * Math::dot(trDir[a], teDir[b]);
 
-              /*
-               * Copy the scalar entry on each velocity diagonal block.
-               */
-              for (size_t c = 0; c < vdim; ++c)
-              {
-                const size_t row = b * vdim + c;
-                const size_t col = a * vdim + c;
-
-                A[row * ntr + col] += kij;
-              }
+              A[b * ntr + a] += kij;
             }
           }
         }
@@ -330,38 +345,60 @@ namespace Rodin::Examples::Heart
 
     private:
       /**
-       * @brief Maps reference gradients to physical gradients in 3D.
+       * @brief Computes @f$(\nabla \Phi)uOld@f$ for one vector basis.
        *
-       * If @f$\hat \nabla \phi@f$ is the reference gradient and @f$J@f$ is
-       * the geometric Jacobian, then:
-       *
-       * @f[
-       *   \nabla_x \phi = J^{-T} \hat \nabla \phi .
-       * @f]
+       * The vector finite-element basis supplies the reference Jacobian
+       * @f$\hat\nabla\Phi@f$. Physical derivatives are obtained by
+       * @f$\nabla_x\Phi = \hat\nabla\Phi J^{-1}@f$.
        */
-      template <class Tabulation, class JInv>
-      static void fillPhysicalGradients3D(
-          size_t qp,
+      template <class Basis, class JInv, class Vector>
+      static void fillDirectionalDerivative(
+          Math::SpatialVector<ScalarType>& out,
+          const Basis& basis,
+          const Math::SpatialVector<Real>& rc,
           const JInv& Jinv,
-          const Tabulation& tab,
-          std::vector<Math::SpatialVector<ScalarType>>& G)
+          const Vector& uOld)
       {
-        const ScalarType j00 = Jinv(0,0), j10 = Jinv(1,0), j20 = Jinv(2,0);
-        const ScalarType j01 = Jinv(0,1), j11 = Jinv(1,1), j21 = Jinv(2,1);
-        const ScalarType j02 = Jinv(0,2), j12 = Jinv(1,2), j22 = Jinv(2,2);
+        const auto Jref = basis.getJacobian()(rc);
+        const size_t vdim = out.size();
+        const size_t d = uOld.size();
 
-        for (size_t a = 0; a < G.size(); ++a)
+        out.setZero();
+        for (size_t c = 0; c < vdim; ++c)
         {
-          const auto g = tab.getGradient(qp, a);
-
-          const ScalarType gx = g[0];
-          const ScalarType gy = g[1];
-          const ScalarType gz = g[2];
-
-          G[a][0] = j00 * gx + j10 * gy + j20 * gz;
-          G[a][1] = j01 * gx + j11 * gy + j21 * gz;
-          G[a][2] = j02 * gx + j12 * gy + j22 * gz;
+          for (size_t j = 0; j < d; ++j)
+          {
+            ScalarType gradPhys = 0;
+            for (size_t r = 0; r < d; ++r)
+            {
+              gradPhys +=
+                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
+                * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
+            }
+            out(static_cast<std::uint8_t>(c)) +=
+              gradPhys * uOld(static_cast<std::uint8_t>(j));
+          }
         }
+      }
+
+      static size_t derivativeOrder(size_t order) noexcept
+      {
+        return order == 0 ? 0 : order - 1;
+      }
+
+      template <class Function>
+      static size_t getFunctionOrder(
+          const Function& f,
+          const Geometry::Polytope& polytope,
+          size_t fallback)
+      {
+        if constexpr (requires { f.getOrder(polytope); })
+        {
+          const auto order = f.getOrder(polytope);
+          if (order.has_value())
+            return *order;
+        }
+        return fallback;
       }
 
       const TrialFunction& m_u;
@@ -381,6 +418,11 @@ namespace Rodin::Examples::Heart
 
   /**
    * @brief Cell integrator for the linear projected-VMS convective term.
+   *
+   * This class provides the explicit/source part paired with
+   * VMSConvectionBilinearIntegrator. It represents the finite-element
+   * projection and dynamic subscale correction that is subtracted from the
+   * bilinear convective stabilization in the global residual.
    *
    * This assembles the right-hand-side-like term:
    *
@@ -411,6 +453,12 @@ namespace Rodin::Examples::Heart
    * @f[
    *   A_K(u_h,v_h) - L_K(v_h).
    * @f]
+   *
+   * With the documented subscale update, this makes the stabilization act on
+   * the projected fine-scale part of the convective acceleration. If
+   * @f$u_h = u_h^n@f$ and the dynamic history is zero, the projected component
+   * cancels the matching part of the bilinear term, leaving only the
+   * orthogonal convective correction.
    *
    * @tparam TestFunction Test velocity field type.
    * @tparam OldSubScale Dynamic subscale field type.
@@ -479,45 +527,52 @@ namespace Rodin::Examples::Heart
         const auto geometry = polytope.getGeometry();
         const auto idx = polytope.getIndex();
 
-        if (d != 3)
-          throw std::runtime_error("VMSConvectionLinearIntegrator expects 3D cells.");
-
         const auto& fes = m_v.getFiniteElementSpace();
         const auto& fe = fes.getFiniteElement(d, idx);
 
         const size_t nte = m_v.getDOFs(polytope);
+        const size_t vdim = fes.getVectorDimension();
 
-        constexpr size_t KTest = 2;
+        if (vdim == 0)
+          throw std::runtime_error("VMSConvectionLinearIntegrator expects a vector-valued test space.");
 
-        const Variational::H1Element<KTest, ScalarType> scalarFE(geometry);
-
-        const size_t nteS = scalarFE.getCount();
-
-        assert(nteS > 0);
-        assert(nte % nteS == 0);
-
-        const size_t vdim = nte / nteS;
+        if (nte != fe.getCount())
+          throw std::runtime_error("VMSConvectionLinearIntegrator expects element-local DOFs to match finite-element basis count.");
 
         /*
-         * Conservative quadrature choice. The coefficients are not generally
-         * polynomial because tau_K depends on uOld and mu.
+         * Conservative quadrature choice for
+         *
+         *   rho (tau rho uProj + subScale) . ((grad Psi) uOld).
+         *
+         * The projected fields can be polynomial, while tau is usually a
+         * projected representation of a non-polynomial expression.
          */
-        const size_t qOrder = fe.getOrder();
+        const size_t uOldOrder =
+          getFunctionOrder(m_uOld, polytope, fe.getOrder());
+        const size_t tauOrder =
+          getFunctionOrder(m_tau, polytope, size_t(0));
+        const size_t projOrder =
+          getFunctionOrder(m_uProj, polytope, uOldOrder);
+        const size_t subOrder =
+          getFunctionOrder(m_sub, polytope, projOrder);
+        const size_t coefficientOrder =
+          std::max(tauOrder + projOrder, subOrder);
+        const size_t qOrder =
+          coefficientOrder + derivativeOrder(fe.getOrder()) + uOldOrder;
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qOrder, geometry);
 
         const auto& q = polytope.getQuadrature(qf);
-        const auto& tab = scalarFE.getTabulation(qf);
 
         m_vec.resize(static_cast<Eigen::Index>(nte));
         m_vec.setZero();
 
-        std::vector<Math::SpatialVector<ScalarType>> Gte(nteS);
-        Math::SpatialVector<ScalarType> teDir(nteS);
+        std::vector<Math::SpatialVector<ScalarType>> teDir(nte);
+        Math::SpatialVector<ScalarType> coefficient(static_cast<std::uint8_t>(vdim));
 
-        for (auto& g : Gte)
-          g.resize(static_cast<std::uint8_t>(d));
+        for (auto& t : teDir)
+          t.resize(static_cast<std::uint8_t>(vdim));
 
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
@@ -528,43 +583,45 @@ namespace Rodin::Examples::Heart
             static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
 
           const auto Jinv = p.getJacobianInverse();
-
-          fillPhysicalGradients3D(qp, Jinv, tab, Gte);
+          const auto& rc = p.getReferenceCoordinates();
 
           const auto uOld  = m_uOld.getValue(ip);
           const auto uProj = m_uProj.getValue(ip);
           const auto subScale = m_sub.getValue(ip);
           const auto tau = m_tau.getValue(ip);
 
+          if (uOld.size() != d)
+            throw std::runtime_error("VMSConvectionLinearIntegrator expects the frozen velocity dimension to match the cell dimension.");
+
           /*
            * Directional derivative of test basis along frozen velocity:
            *
-           *   teDir[b] = grad psi_b · uOld.
+           *   teDir[b] = (grad Psi_b) uOld.
            */
-          for (size_t b = 0; b < nteS; ++b)
-            teDir[b] = Math::dot(Gte[b], uOld);
+          for (size_t b = 0; b < nte; ++b)
+            fillDirectionalDerivative(teDir[b], fe.getBasis(b), rc, Jinv, uOld);
 
-          for (size_t b = 0; b < nteS; ++b)
+          for (size_t c = 0; c < vdim; ++c)
           {
-            for (size_t c = 0; c < vdim; ++c)
-            {
-              const size_t row = b * vdim + c;
+            coefficient(static_cast<std::uint8_t>(c)) =
+              tau * m_rho * uProj(static_cast<std::uint8_t>(c))
+              + subScale(static_cast<std::uint8_t>(c));
+          }
 
-              /*
-               * Local vector entry:
-               *
-               *   int_K rho
-               *     (tau rho uProj_c + sub_c)
-               *     (grad psi_b · uOld).
-               *
-               * The global expression should subtract this integrator.
-               */
-              m_vec(static_cast<Eigen::Index>(row)) +=
-                wdet
-                * m_rho
-                * (tau * m_rho * uProj[c] + subScale[c])
-                * teDir[b];
-            }
+          for (size_t b = 0; b < nte; ++b)
+          {
+            /*
+             * Local vector-basis entry:
+             *
+             *   int_K rho
+             *     (tau rho uProj + sub)
+             *     ·
+             *     ((grad Psi_b) uOld).
+             *
+             * The global expression should subtract this integrator.
+             */
+            m_vec(static_cast<Eigen::Index>(b)) +=
+              wdet * m_rho * Math::dot(coefficient, teDir[b]);
           }
         }
 
@@ -588,38 +645,60 @@ namespace Rodin::Examples::Heart
 
     private:
       /**
-       * @brief Maps reference gradients to physical gradients in 3D.
+       * @brief Computes @f$(\nabla \Psi)uOld@f$ for one vector basis.
        *
-       * If @f$\hat \nabla \psi@f$ is the reference gradient and @f$J@f$ is
-       * the geometric Jacobian, then:
-       *
-       * @f[
-       *   \nabla_x \psi = J^{-T} \hat \nabla \psi .
-       * @f]
+       * The vector finite-element basis supplies the reference Jacobian
+       * @f$\hat\nabla\Psi@f$. Physical derivatives are obtained by
+       * @f$\nabla_x\Psi = \hat\nabla\Psi J^{-1}@f$.
        */
-      template <class Tabulation, class JInv>
-      static void fillPhysicalGradients3D(
-          size_t qp,
+      template <class Basis, class JInv, class Vector>
+      static void fillDirectionalDerivative(
+          Math::SpatialVector<ScalarType>& out,
+          const Basis& basis,
+          const Math::SpatialVector<Real>& rc,
           const JInv& Jinv,
-          const Tabulation& tab,
-          std::vector<Math::SpatialVector<ScalarType>>& G)
+          const Vector& uOld)
       {
-        const ScalarType j00 = Jinv(0,0), j10 = Jinv(1,0), j20 = Jinv(2,0);
-        const ScalarType j01 = Jinv(0,1), j11 = Jinv(1,1), j21 = Jinv(2,1);
-        const ScalarType j02 = Jinv(0,2), j12 = Jinv(1,2), j22 = Jinv(2,2);
+        const auto Jref = basis.getJacobian()(rc);
+        const size_t vdim = out.size();
+        const size_t d = uOld.size();
 
-        for (size_t b = 0; b < G.size(); ++b)
+        out.setZero();
+        for (size_t c = 0; c < vdim; ++c)
         {
-          const auto g = tab.getGradient(qp, b);
-
-          const ScalarType gx = g[0];
-          const ScalarType gy = g[1];
-          const ScalarType gz = g[2];
-
-          G[b][0] = j00 * gx + j10 * gy + j20 * gz;
-          G[b][1] = j01 * gx + j11 * gy + j21 * gz;
-          G[b][2] = j02 * gx + j12 * gy + j22 * gz;
+          for (size_t j = 0; j < d; ++j)
+          {
+            ScalarType gradPhys = 0;
+            for (size_t r = 0; r < d; ++r)
+            {
+              gradPhys +=
+                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
+                * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
+            }
+            out(static_cast<std::uint8_t>(c)) +=
+              gradPhys * uOld(static_cast<std::uint8_t>(j));
+          }
         }
+      }
+
+      static size_t derivativeOrder(size_t order) noexcept
+      {
+        return order == 0 ? 0 : order - 1;
+      }
+
+      template <class Function>
+      static size_t getFunctionOrder(
+          const Function& f,
+          const Geometry::Polytope& polytope,
+          size_t fallback)
+      {
+        if constexpr (requires { f.getOrder(polytope); })
+        {
+          const auto order = f.getOrder(polytope);
+          if (order.has_value())
+            return *order;
+        }
+        return fallback;
       }
 
       const TestFunction& m_v;
