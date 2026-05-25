@@ -12,6 +12,7 @@ add_executable(RodinAdaptationTargetMatrixOptimizationTest
   DeviationTermTest.cpp
   AnalyticLevelSetFitTermTest.cpp
   VolumetricPhaseConsistencyTermTest.cpp
+  TMOPMinimizerTest.cpp
 )
 target_link_libraries(RodinAdaptationTargetMatrixOptimizationTest
   PUBLIC

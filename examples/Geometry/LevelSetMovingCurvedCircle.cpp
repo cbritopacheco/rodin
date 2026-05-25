@@ -32,7 +32,6 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/IO.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
-#include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
@@ -466,11 +465,17 @@ namespace
   struct SolveReport
   {
     bool moved = false;
-    bool newtonConverged = false;
-    size_t newtonIterations = 0;
-    Real initialResidual = 0;
-    Real finalResidual = 0;
+    bool minimizerConverged = false;
+    size_t minimizerIterations = 0;
+    Index acceptedSteps = 0;
+    Index rejectedSteps = 0;
+    Real initialEnergy = 0;
+    Real finalEnergy = 0;
+    Real initialGradientNorm = 0;
+    Real finalGradientNorm = 0;
     Real finalStepNorm = 0;
+    Real finalAlpha = 0;
+    Real finalDirectionalDerivative = 0;
     Real fitEnergyInitial = 0;
     Real fitEnergyFinal = 0;
     Real phaseEnergyInitial = 0;
@@ -490,7 +495,7 @@ namespace
       Real deviationWeight,
       Real targetBlend,
       Real phaseEpsilonFactor,
-      Index maxNewtonIterations,
+      Index maxIterations,
       const P2Element& fe)
   {
     SolveReport report;
@@ -505,7 +510,7 @@ namespace
     VectorH1<2, LocalMesh> space(std::integral_constant<size_t, 2>{}, mesh, 2);
     GridFunction u(space);
     u.getData().setZero();
-    TrialFunction du(space);
+    TrialFunction p(space);
     TestFunction v(space);
 
     QualityTerm quality(metric, target, qualityWeight);
@@ -539,43 +544,58 @@ namespace
     report.phaseEnergyInitial = phase.energy(u);
     report.wrongSideInitial = phase.countWrongSideQuadrature(mesh);
 
-    Problem problem(du, v);
-    problem = quality.tangent(u, du, v)
-            + deviation.tangent(du, v)
-            + fit.tangent(u, du, v)
-            + phase.tangent(u, du, v)
-            + quality.residual(u, v)
-            + deviation.residual(u, v)
-            + fit.residual(u, v)
-            + phase.residual(u, v);
+    auto makeResidual = [&]()
+    {
+      return quality.residual(u, v)
+           + deviation.residual(u, v)
+           + fit.residual(u, v)
+           + phase.residual(u, v);
+    };
+    auto energy = [&]()
+    {
+      return quality.energy(u)
+           + deviation.energy(u)
+           + fit.energy(u)
+           + phase.energy(u);
+    };
 
-    Solver::SparseLU linearSolver(problem);
-    Solver::NewtonSolver newton(linearSolver);
-    newton
-      .setMaxIterations(static_cast<size_t>(std::max<Index>(1, maxNewtonIterations)))
-      .setDampingFactor(Real(1))
-      .setAbsoluteTolerance(Real(1e-10))
-      .setRelativeTolerance(Real(1e-8))
-      .setStepTolerance(Real(1e-10));
+    IsoparametricTMOPMinimizerParameters params;
+    params.maxIterations = std::max<Index>(1, maxIterations);
+    params.gradientTolerance = Real(1e-10);
+    params.stepTolerance = Real(1e-10);
+    params.energyTolerance = Real(1e-14);
+    params.preconditionerLength = std::max(Real(0.5) * h, Real(1e-8));
+    params.minDetFloor = Real(0);
+    auto admissible = [&]()
+    {
+      return isTargetAdmissible(
+          mesh,
+          u,
+          fe,
+          target,
+          params.minDetFloor,
+          Polytope::Type::Triangle,
+          static_cast<Index>(CurvedQuadratureOrder));
+    };
 
-    newton.solve(u);
+    const auto min = minimizeIsoparametricTMOP(
+        mesh, fe, u, p, v, makeResidual, energy, admissible, Interface, params);
 
-    const auto& nr = newton.getReport();
-    report.newtonConverged = nr.converged;
-    report.newtonIterations = nr.iterations;
-    report.initialResidual = nr.initial_residual;
-    report.finalResidual = nr.final_residual;
-    report.finalStepNorm = nr.final_step_norm;
+    report.moved = min.acceptedAnyStep;
+    report.minimizerConverged = min.converged;
+    report.minimizerIterations = min.iterations;
+    report.acceptedSteps = min.acceptedSteps;
+    report.rejectedSteps = min.rejectedSteps;
+    report.initialEnergy = min.initialEnergy;
+    report.finalEnergy = min.finalEnergy;
+    report.initialGradientNorm = min.initialGradientNorm;
+    report.finalGradientNorm = min.finalGradientNorm;
+    report.finalStepNorm = min.finalStepNorm;
+    report.finalAlpha = min.finalAlpha;
+    report.finalDirectionalDerivative = min.finalDirectionalDerivative;
     report.fitEnergyFinal = fit.energy(u);
     report.phaseEnergyFinal = phase.energy(u);
     report.displacement = u.getData();
-
-    if (nr.converged && u.getData().allFinite())
-    {
-      moveMesh(mesh, u, fe, Interface);
-      report.moved = true;
-    }
-
     report.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
     return report;
   }
@@ -591,7 +611,7 @@ int main(int argc, char** argv)
   Real deviationWeight = Real(1);
   Real targetBlend = Real(0.1);
   Real phaseEpsilonFactor = Real(0.5);
-  Index maxNewtonIterations = 20;
+  Index maxMinimizerIterations = 50;
 
   if (argc > 1)
     resolution = static_cast<size_t>(std::max(3, std::atoi(argv[1])));
@@ -611,7 +631,7 @@ int main(int argc, char** argv)
   if (argc > 8)
     phaseEpsilonFactor = std::max(Real(1e-8), static_cast<Real>(std::atof(argv[8])));
   if (argc > 9)
-    maxNewtonIterations = static_cast<Index>(std::max(1, std::atoi(argv[9])));
+    maxMinimizerIterations = static_cast<Index>(std::max(1, std::atoi(argv[9])));
 
   const Real h = Real(1) / static_cast<Real>(resolution - 1);
 
@@ -649,7 +669,7 @@ int main(int argc, char** argv)
         deviationWeight,
         targetBlend,
         phaseEpsilonFactor,
-        maxNewtonIterations,
+        maxMinimizerIterations,
         fe);
 
     const auto post = labelAndBuildInterface(mesh, fe, t, classification);
@@ -698,11 +718,17 @@ int main(int argc, char** argv)
       << " changed_interface_edges=" << post.changedInterfaceEdges
       << " interface_max_degree=" << post.interface.maxDegree
       << " interface_branch_vertices=" << post.interface.branchVertices
-      << " newton_converged=" << (report.newtonConverged ? 1 : 0)
-      << " newton_iterations=" << report.newtonIterations
-      << " residual_initial=" << report.initialResidual
-      << " residual_final=" << report.finalResidual
+      << " minimizer_converged=" << (report.minimizerConverged ? 1 : 0)
+      << " minimizer_iterations=" << report.minimizerIterations
+      << " accepted_steps=" << report.acceptedSteps
+      << " rejected_steps=" << report.rejectedSteps
+      << " energy_initial=" << report.initialEnergy
+      << " energy_final=" << report.finalEnergy
+      << " gradient_initial=" << report.initialGradientNorm
+      << " gradient_final=" << report.finalGradientNorm
       << " step_norm_final=" << report.finalStepNorm
+      << " alpha_final=" << report.finalAlpha
+      << " directional_derivative_final=" << report.finalDirectionalDerivative
       << " moved=" << (report.moved ? 1 : 0)
       << " wrong_side_initial=" << report.wrongSideInitial
       << " wrong_side_final=" << report.wrongSideFinal

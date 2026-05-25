@@ -12,8 +12,9 @@
  * @brief Rodin-native TMOP mesh adaptation components.
  *
  * The production direction is fixed-topology TMOP assembled as ordinary Rodin
- * residual and tangent terms into LinearProblem objects, then solved by
- * NewtonSolver and the existing local/PETSc/MPI/OpenMP backends.
+ * residual terms and minimized with determinant-safe line search plus a fixed
+ * elliptic preconditioner. Tangent terms remain available for testing and
+ * Newton experiments.
  *
  * TMOP exposes metrics, target Jacobians, deformation helpers, and Rodin-native
  * residual/tangent terms. The residual/tangent terms are the production path:
@@ -24,6 +25,7 @@
 #include "TargetMatrixOptimization/Metrics.h"
 #include "TargetMatrixOptimization/Terms.h"
 #include "TargetMatrixOptimization/IsoparametricGeometry.h"
+#include "TargetMatrixOptimization/IsoparametricTMOPMinimizer.h"
 #include "TargetMatrixOptimization/IsoparametricTMOPSolver.h"
 
 #endif

@@ -19,7 +19,6 @@
 #include <Rodin/Assembly/Default.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
-#include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
@@ -503,9 +502,14 @@ namespace Rodin::Tests::Benchmarks
       bool converged = false;
       bool moved = false;
       size_t iterations = 0;
-      Real initialResidual = 0;
-      Real finalResidual = 0;
+      Index acceptedSteps = 0;
+      Index rejectedSteps = 0;
+      Real initialEnergy = 0;
+      Real finalEnergy = 0;
+      Real initialGradientNorm = 0;
+      Real finalGradientNorm = 0;
       Real finalStepNorm = 0;
+      Real finalAlpha = 0;
       Real fitEnergyInitial = 0;
       Real fitEnergyFinal = 0;
       Real phaseEnergyInitial = 0;
@@ -534,7 +538,7 @@ namespace Rodin::Tests::Benchmarks
           std::integral_constant<size_t, Order>{}, mesh, 2);
       GridFunction u(space);
       u.getData().setZero();
-      TrialFunction du(space);
+      TrialFunction p(space);
       TestFunction v(space);
 
       QualityTerm quality(metric, target, weights.quality);
@@ -573,77 +577,89 @@ namespace Rodin::Tests::Benchmarks
         stats.wrongSideInitial = phase.countWrongSideQuadrature(mesh);
       }
 
-      Problem problem(du, v);
-      if constexpr (Term == static_cast<int>(TermCase::QualityDeviation))
+      auto makeResidual = [&]()
       {
-        problem = quality.tangent(u, du, v)
-                + deviation.tangent(du, v)
-                + quality.residual(u, v)
-                + deviation.residual(u, v);
-      }
-      else if constexpr (Term == static_cast<int>(TermCase::FitDeviation))
+        if constexpr (Term == static_cast<int>(TermCase::QualityDeviation))
+        {
+          return quality.residual(u, v)
+               + deviation.residual(u, v);
+        }
+        else if constexpr (Term == static_cast<int>(TermCase::FitDeviation))
+        {
+          return fit.residual(u, v)
+               + deviation.residual(u, v);
+        }
+        else if constexpr (Term == static_cast<int>(TermCase::PhaseDeviation))
+        {
+          return phase.residual(u, v)
+               + deviation.residual(u, v);
+        }
+        else if constexpr (Term == static_cast<int>(TermCase::FitPhaseDeviation))
+        {
+          return fit.residual(u, v)
+               + phase.residual(u, v)
+               + deviation.residual(u, v);
+        }
+        else
+        {
+          return quality.residual(u, v)
+               + fit.residual(u, v)
+               + phase.residual(u, v)
+               + deviation.residual(u, v);
+        }
+      };
+      auto energy = [&]()
       {
-        problem = fit.tangent(u, du, v)
-                + deviation.tangent(du, v)
-                + fit.residual(u, v)
-                + deviation.residual(u, v);
-      }
-      else if constexpr (Term == static_cast<int>(TermCase::PhaseDeviation))
-      {
-        problem = phase.tangent(u, du, v)
-                + deviation.tangent(du, v)
-                + phase.residual(u, v)
-                + deviation.residual(u, v);
-      }
-      else if constexpr (Term == static_cast<int>(TermCase::FitPhaseDeviation))
-      {
-        problem = fit.tangent(u, du, v)
-                + phase.tangent(u, du, v)
-                + deviation.tangent(du, v)
-                + fit.residual(u, v)
-                + phase.residual(u, v)
-                + deviation.residual(u, v);
-      }
-      else
-      {
-        problem = quality.tangent(u, du, v)
-                + fit.tangent(u, du, v)
-                + phase.tangent(u, du, v)
-                + deviation.tangent(du, v)
-                + quality.residual(u, v)
-                + fit.residual(u, v)
-                + phase.residual(u, v)
-                + deviation.residual(u, v);
-      }
+        Real e = deviation.energy(u);
+        if constexpr (usesQuality<Term>())
+          e += quality.energy(u);
+        if constexpr (usesFit<Term>())
+          e += fit.energy(u);
+        if constexpr (usesPhase<Term>())
+          e += phase.energy(u);
+        return e;
+      };
 
-      Solver::SparseLU linearSolver(problem);
-      Solver::NewtonSolver newton(linearSolver);
-      newton
-        .setMaxIterations(20)
-        .setDampingFactor(Real(1))
-        .setAbsoluteTolerance(Real(1e-10))
-        .setRelativeTolerance(Real(1e-8))
-        .setStepTolerance(Real(1e-10));
-      newton.solve(u);
+      IsoparametricTMOPMinimizerParameters params;
+      params.maxIterations = 50;
+      params.gradientTolerance = Real(1e-10);
+      params.stepTolerance = Real(1e-10);
+      params.energyTolerance = Real(1e-14);
+      params.preconditionerLength = std::max(Real(0.5) * h, Real(1e-8));
+      params.minDetFloor = Real(0);
+      auto admissible = [&]()
+      {
+        RealH1Element<Order> fe(Polytope::Type::Triangle);
+        return isTargetAdmissible(
+            mesh,
+            u,
+            fe,
+            target,
+            params.minDetFloor,
+            Polytope::Type::Triangle,
+            static_cast<Index>(CurvedQuadratureOrder));
+      };
 
-      const auto& nr = newton.getReport();
-      stats.converged = nr.converged;
-      stats.iterations = nr.iterations;
-      stats.initialResidual = nr.initial_residual;
-      stats.finalResidual = nr.final_residual;
-      stats.finalStepNorm = nr.final_step_norm;
+      RealH1Element<Order> fe(Polytope::Type::Triangle);
+      const auto min = minimizeIsoparametricTMOP(
+          mesh, fe, u, p, v, makeResidual, energy, admissible, Interface, params);
+
+      stats.converged = min.converged;
+      stats.moved = min.acceptedAnyStep;
+      stats.iterations = min.iterations;
+      stats.acceptedSteps = min.acceptedSteps;
+      stats.rejectedSteps = min.rejectedSteps;
+      stats.initialEnergy = min.initialEnergy;
+      stats.finalEnergy = min.finalEnergy;
+      stats.initialGradientNorm = min.initialGradientNorm;
+      stats.finalGradientNorm = min.finalGradientNorm;
+      stats.finalStepNorm = min.finalStepNorm;
+      stats.finalAlpha = min.finalAlpha;
 
       if constexpr (usesFit<Term>())
         stats.fitEnergyFinal = fit.energy(u);
       if constexpr (usesPhase<Term>())
         stats.phaseEnergyFinal = phase.energy(u);
-
-      if (nr.converged && u.getData().allFinite())
-      {
-        RealH1Element<Order> fe(Polytope::Type::Triangle);
-        moveMesh(mesh, u, fe, Interface);
-        stats.moved = true;
-      }
 
       if constexpr (usesPhase<Term>())
         stats.wrongSideFinal = phase.countWrongSideQuadrature(mesh);
@@ -662,9 +678,15 @@ namespace Rodin::Tests::Benchmarks
       Index branchVertices = 0;
       Index convergedSteps = 0;
       Index movedSteps = 0;
-      Index newtonIterations = 0;
-      Real finalResidual = 0;
+      Index minimizerIterations = 0;
+      Index acceptedSteps = 0;
+      Index rejectedSteps = 0;
+      Real initialEnergy = 0;
+      Real finalEnergy = 0;
+      Real initialGradientNorm = 0;
+      Real finalGradientNorm = 0;
       Real finalStepNorm = 0;
+      Real finalAlpha = 0;
       Real fitEnergyInitial = 0;
       Real fitEnergyFinal = 0;
       Real phaseEnergyInitial = 0;
@@ -725,9 +747,15 @@ namespace Rodin::Tests::Benchmarks
         totals.branchVertices += label.interface.branchVertices;
         totals.convergedSteps += solve.converged ? 1 : 0;
         totals.movedSteps += solve.moved ? 1 : 0;
-        totals.newtonIterations += static_cast<Index>(solve.iterations);
-        totals.finalResidual += solve.finalResidual;
+        totals.minimizerIterations += static_cast<Index>(solve.iterations);
+        totals.acceptedSteps += solve.acceptedSteps;
+        totals.rejectedSteps += solve.rejectedSteps;
+        totals.initialEnergy += solve.initialEnergy;
+        totals.finalEnergy += solve.finalEnergy;
+        totals.initialGradientNorm += solve.initialGradientNorm;
+        totals.finalGradientNorm += solve.finalGradientNorm;
         totals.finalStepNorm += solve.finalStepNorm;
+        totals.finalAlpha += solve.finalAlpha;
         totals.fitEnergyInitial += solve.fitEnergyInitial;
         totals.fitEnergyFinal += solve.fitEnergyFinal;
         totals.phaseEnergyInitial += solve.phaseEnergyInitial;
@@ -781,12 +809,24 @@ namespace Rodin::Tests::Benchmarks
         benchmark::Counter(stats.convergedSteps);
       st.counters["moved_steps"] =
         benchmark::Counter(stats.movedSteps);
-      st.counters["avg_newton_iterations"] =
-        benchmark::Counter(static_cast<Real>(stats.newtonIterations) * inv);
-      st.counters["avg_final_residual"] =
-        benchmark::Counter(stats.finalResidual * inv);
+      st.counters["avg_minimizer_iterations"] =
+        benchmark::Counter(static_cast<Real>(stats.minimizerIterations) * inv);
+      st.counters["avg_accepted_steps"] =
+        benchmark::Counter(static_cast<Real>(stats.acceptedSteps) * inv);
+      st.counters["avg_rejected_steps"] =
+        benchmark::Counter(static_cast<Real>(stats.rejectedSteps) * inv);
+      st.counters["avg_initial_energy"] =
+        benchmark::Counter(stats.initialEnergy * inv);
+      st.counters["avg_final_energy"] =
+        benchmark::Counter(stats.finalEnergy * inv);
+      st.counters["avg_initial_gradient_norm"] =
+        benchmark::Counter(stats.initialGradientNorm * inv);
+      st.counters["avg_final_gradient_norm"] =
+        benchmark::Counter(stats.finalGradientNorm * inv);
       st.counters["avg_final_step_norm"] =
         benchmark::Counter(stats.finalStepNorm * inv);
+      st.counters["avg_final_alpha"] =
+        benchmark::Counter(stats.finalAlpha * inv);
       st.counters["avg_fit_energy_initial"] =
         benchmark::Counter(stats.fitEnergyInitial * inv);
       st.counters["avg_fit_energy_final"] =

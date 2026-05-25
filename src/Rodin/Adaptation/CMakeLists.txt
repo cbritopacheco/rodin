@@ -22,6 +22,7 @@ set(RodinAdaptation_HEADERS
   TargetMatrixOptimization/VolumetricPhaseConsistencyTerm.h
   TargetMatrixOptimization/AnalyticLevelSetFitTerm.h
   TargetMatrixOptimization/IsoparametricGeometry.h
+  TargetMatrixOptimization/IsoparametricTMOPMinimizer.h
   TargetMatrixOptimization/IsoparametricTMOPSolver.h
 )
 
