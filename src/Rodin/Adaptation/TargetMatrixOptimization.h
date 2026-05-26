@@ -27,5 +27,6 @@
 #include "TargetMatrixOptimization/IsoparametricGeometry.h"
 #include "TargetMatrixOptimization/IsoparametricTMOPMinimizer.h"
 #include "TargetMatrixOptimization/IsoparametricTMOPSolver.h"
+#include "TargetMatrixOptimization/LevelSetGraphCutClassifier.h"
 
 #endif

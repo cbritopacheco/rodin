@@ -2177,6 +2177,458 @@ namespace Rodin::Adaptation::TargetMatrixOptimization
       ValueFunction,
       GradientFunction) ->
         AnalyticLevelSetFitTerm<ValueFunction, GradientFunction>;
+
+  // ── InterfaceNormalAdvectionFitTerm ──────────────────────────────────────
+  //
+  // Penalty: rho/2 * integral_{Gamma_h} (u·n − target(x))^2 ds
+  //
+  // n = 90° CCW rotation of the undeformed edge tangent.
+  // target(x) = Δt * V_n(x) where V_n is the signed normal velocity.
+  // The term is quadratic in u; geometry is evaluated at the undeformed
+  // configuration so the tangent matrix is symmetric and constant per step.
+
+  template <class GridFunctionType, class TargetFunction>
+  class InterfaceNormalAdvectionFitResidualIntegrator final
+      : public Variational::LinearFormIntegratorBase<Real>
+  {
+    public:
+      using Parent = Variational::LinearFormIntegratorBase<Real>;
+
+      template <class TestFES>
+      InterfaceNormalAdvectionFitResidualIntegrator(
+          const GridFunctionType& u,
+          const Variational::TestFunction<TestFES>& v,
+          TargetFunction target,
+          Optional<Geometry::Attribute> interfaceAttribute,
+          Real weight,
+          size_t quadratureOrder)
+        : Parent(v),
+          m_u(u),
+          m_target(std::move(target)),
+          m_interfaceAttribute(interfaceAttribute),
+          m_weight(std::max(Real(0), weight)),
+          m_quadratureOrder(quadratureOrder)
+      {}
+
+      InterfaceNormalAdvectionFitResidualIntegrator(
+          const InterfaceNormalAdvectionFitResidualIntegrator& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_target(other.m_target),
+          m_interfaceAttribute(other.m_interfaceAttribute),
+          m_weight(other.m_weight),
+          m_quadratureOrder(other.m_quadratureOrder),
+          m_polytope(other.m_polytope),
+          m_local(other.m_local)
+      {}
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      InterfaceNormalAdvectionFitResidualIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) override
+      {
+        m_polytope = &polytope;
+        m_local.clear();
+        if (!isActiveInterfaceEdge(polytope))
+          return *this;
+        const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+        const size_t sdim = mesh.getSpaceDimension();
+        if (sdim != 2)
+          return *this;
+        m_local = computeLocalResidual(polytope, sdim);
+        return *this;
+      }
+
+      Real integrate(size_t local) override
+      {
+        if (local >= m_local.size())
+          return 0;
+        return m_local[local];
+      }
+
+      Geometry::Region getRegion() const override
+      {
+        return Geometry::Region::Faces;
+      }
+
+      InterfaceNormalAdvectionFitResidualIntegrator* copy() const noexcept override
+      {
+        return new InterfaceNormalAdvectionFitResidualIntegrator(*this);
+      }
+
+    private:
+      bool isActiveInterfaceEdge(const Geometry::Polytope& edge) const
+      {
+        if (edge.getDimension() != 1 || edge.getVertices().size() != 2)
+          return false;
+        if (!m_interfaceAttribute)
+          return true;
+        const auto attr = edge.getMesh().getAttribute(1, edge.getIndex());
+        return attr && *attr == *m_interfaceAttribute;
+      }
+
+      std::vector<Real> computeLocalResidual(
+          const Geometry::Polytope& edge,
+          size_t sdim) const
+      {
+        const auto& fes = m_u.get().getFiniteElementSpace();
+        const auto& fe  = fes.getFiniteElement(edge.getDimension(), edge.getIndex());
+        const size_t localSize = fe.getCount();
+        std::vector<Real> local(localSize, Real(0));
+        const auto displacement = localDisplacementCoefficients(m_u.get(), edge);
+
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            m_quadratureOrder, Geometry::Polytope::Type::Segment);
+
+        for (size_t q = 0; q < qf.getSize(); ++q)
+        {
+          const auto& rc    = qf.getPoint(q);
+          const auto   J    = referenceGeometryJacobian(edge, rc);
+          const Real arcLen = std::hypot(J(0, 0), J(1, 0));
+          if (arcLen <= Real(1e-14))
+            continue;
+
+          // Outward normal: 90° CCW rotation of tangent (t -> n = (-ty, tx)).
+          // Sign convention: orientation-consistent with the edge parametrization.
+          const Math::SpatialPoint n{ -J(1, 0) / arcLen, J(0, 0) / arcLen };
+
+          Math::SpatialPoint x;
+          edge.getTransformation().transform(x, rc);
+          const Real tgt = m_target(x);
+
+          // u_h · n at this QP
+          Real uDotN = Real(0);
+          for (size_t i = 0; i < localSize; ++i)
+          {
+            const auto phiI = basisVectorValue(fe, i, rc);
+            Real p = Real(0);
+            for (size_t c = 0; c < sdim; ++c)
+              p += phiI[static_cast<std::uint8_t>(c)] * n[c];
+            uDotN += displacement[i] * p;
+          }
+
+          for (size_t j = 0; j < localSize; ++j)
+          {
+            const auto phiJ = basisVectorValue(fe, j, rc);
+            Real p = Real(0);
+            for (size_t c = 0; c < sdim; ++c)
+              p += phiJ[static_cast<std::uint8_t>(c)] * n[c];
+            local[j] += m_weight * qf.getWeight(q) * arcLen * (uDotN - tgt) * p;
+          }
+        }
+        return local;
+      }
+
+      std::reference_wrapper<const GridFunctionType> m_u;
+      TargetFunction m_target;
+      Optional<Geometry::Attribute> m_interfaceAttribute;
+      Real   m_weight         = 1;
+      size_t m_quadratureOrder = 4;
+      const Geometry::Polytope* m_polytope = nullptr;
+      std::vector<Real> m_local;
+  };
+
+  template <class GridFunctionType, class TargetFunction>
+  class InterfaceNormalAdvectionFitTangentIntegrator final
+      : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using Parent = Variational::LocalBilinearFormIntegratorBase<Real>;
+
+      template <class Solution, class TrialFES, class TestFES>
+      InterfaceNormalAdvectionFitTangentIntegrator(
+          const GridFunctionType& u,
+          const Variational::TrialFunction<Solution, TrialFES>& du,
+          const Variational::TestFunction<TestFES>& v,
+          Optional<Geometry::Attribute> interfaceAttribute,
+          Real weight,
+          size_t quadratureOrder)
+        : Parent(du, v),
+          m_u(u),
+          m_interfaceAttribute(interfaceAttribute),
+          m_weight(std::max(Real(0), weight)),
+          m_quadratureOrder(quadratureOrder)
+      {}
+
+      InterfaceNormalAdvectionFitTangentIntegrator(
+          const InterfaceNormalAdvectionFitTangentIntegrator& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_interfaceAttribute(other.m_interfaceAttribute),
+          m_weight(other.m_weight),
+          m_quadratureOrder(other.m_quadratureOrder),
+          m_polytope(other.m_polytope),
+          m_localSize(other.m_localSize),
+          m_matrix(other.m_matrix)
+      {}
+
+      const Geometry::Polytope& getPolytope() const override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      InterfaceNormalAdvectionFitTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) override
+      {
+        m_polytope  = &polytope;
+        m_localSize = 0;
+        m_matrix.clear();
+        if (!isActiveInterfaceEdge(polytope))
+          return *this;
+        const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+        const size_t sdim = mesh.getSpaceDimension();
+        if (sdim != 2)
+          return *this;
+        const auto& fes = m_u.get().getFiniteElementSpace();
+        const auto& fe  = fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        m_localSize = fe.getCount();
+        m_matrix    = computeLocalTangent(polytope, sdim);
+        return *this;
+      }
+
+      Real integrate(size_t trial, size_t test) override
+      {
+        if (trial >= m_localSize || test >= m_localSize)
+          return 0;
+        return m_matrix[test * m_localSize + trial];
+      }
+
+      Geometry::Region getRegion() const override
+      {
+        return Geometry::Region::Faces;
+      }
+
+      InterfaceNormalAdvectionFitTangentIntegrator* copy() const noexcept override
+      {
+        return new InterfaceNormalAdvectionFitTangentIntegrator(*this);
+      }
+
+    private:
+      bool isActiveInterfaceEdge(const Geometry::Polytope& edge) const
+      {
+        if (edge.getDimension() != 1 || edge.getVertices().size() != 2)
+          return false;
+        if (!m_interfaceAttribute)
+          return true;
+        const auto attr = edge.getMesh().getAttribute(1, edge.getIndex());
+        return attr && *attr == *m_interfaceAttribute;
+      }
+
+      std::vector<Real> computeLocalTangent(
+          const Geometry::Polytope& edge,
+          size_t sdim) const
+      {
+        const auto& fes = m_u.get().getFiniteElementSpace();
+        const auto& fe  = fes.getFiniteElement(edge.getDimension(), edge.getIndex());
+        const size_t localSize = fe.getCount();
+        std::vector<Real> local(localSize * localSize, Real(0));
+
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            m_quadratureOrder, Geometry::Polytope::Type::Segment);
+
+        for (size_t q = 0; q < qf.getSize(); ++q)
+        {
+          const auto& rc    = qf.getPoint(q);
+          const auto   J    = referenceGeometryJacobian(edge, rc);
+          const Real arcLen = std::hypot(J(0, 0), J(1, 0));
+          if (arcLen <= Real(1e-14))
+            continue;
+          const Math::SpatialPoint n{ -J(1, 0) / arcLen, J(0, 0) / arcLen };
+
+          // phi_i · n for all local DOFs
+          std::vector<Real> phiDotN(localSize, Real(0));
+          for (size_t i = 0; i < localSize; ++i)
+          {
+            const auto phi = basisVectorValue(fe, i, rc);
+            for (size_t c = 0; c < sdim; ++c)
+              phiDotN[i] += phi[static_cast<std::uint8_t>(c)] * n[c];
+          }
+
+          for (size_t test = 0; test < localSize; ++test)
+            for (size_t trial = 0; trial < localSize; ++trial)
+              local[test * localSize + trial] +=
+                m_weight * qf.getWeight(q) * arcLen * phiDotN[test] * phiDotN[trial];
+        }
+        return local;
+      }
+
+      std::reference_wrapper<const GridFunctionType> m_u;
+      Optional<Geometry::Attribute> m_interfaceAttribute;
+      Real   m_weight          = 1;
+      size_t m_quadratureOrder = 4;
+      const Geometry::Polytope* m_polytope = nullptr;
+      size_t m_localSize = 0;
+      std::vector<Real> m_matrix;
+  };
+
+  /**
+   * @brief Advection-driven interface fit term.
+   *
+   * Assembles the quadratic penalty:
+   * @f[
+   *   \frac{\rho}{2} \int_{\Gamma_h}
+   *     \bigl(u \cdot n - \Delta t\,V_n(x)\bigr)^2 \,\mathrm{d}s
+   * @f]
+   * where @f$n@f$ is the 90° CCW rotation of the undeformed edge tangent and
+   * @f$V_n(x) = V(x)\cdot n(x)@f$ is the signed normal velocity supplied
+   * by the caller via @p target(x) = Δt * V_n(x).
+   *
+   * Since @f$n@f$ is evaluated at the current (undeformed) geometry, the term
+   * is linear in @f$u@f$ (residual) and has a symmetric positive semi-definite
+   * tangent that is constant per time step — cheaper to assemble than the
+   * nonlinear @f$\phi(x+u)@f$ term.
+   */
+  template <class TargetFunction>
+  class InterfaceNormalAdvectionFitTerm
+  {
+    public:
+      InterfaceNormalAdvectionFitTerm(
+          TargetFunction target,
+          Optional<Geometry::Attribute> interfaceAttribute = {},
+          Real weight = 1)
+        : m_target(std::move(target)),
+          m_interfaceAttribute(interfaceAttribute),
+          m_weight(std::max(Real(0), weight))
+      {}
+
+      InterfaceNormalAdvectionFitTerm& setWeight(Real weight)
+      {
+        m_weight = std::max(Real(0), weight);
+        return *this;
+      }
+
+      Real getWeight() const { return m_weight; }
+
+      InterfaceNormalAdvectionFitTerm& setNormalization(Real cSigma)
+      {
+        m_normalization = (cSigma > Real(0)) ? cSigma : Real(1);
+        return *this;
+      }
+
+      Real getNormalization() const { return m_normalization; }
+
+      InterfaceNormalAdvectionFitTerm& setQuadratureOrder(size_t order)
+      {
+        m_quadratureOrder = order;
+        return *this;
+      }
+
+      size_t getQuadratureOrder() const { return m_quadratureOrder; }
+
+      template <class FES, class Data, class TestFES>
+      auto residual(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return InterfaceNormalAdvectionFitResidualIntegrator<
+            Variational::GridFunction<FES, Data>, TargetFunction>(
+            u, v, m_target, m_interfaceAttribute,
+            m_weight / m_normalization, m_quadratureOrder);
+      }
+
+      template <class FES, class Data, class Solution, class TrialFES, class TestFES>
+      auto tangent(
+          const Variational::GridFunction<FES, Data>& u,
+          const Variational::TrialFunction<Solution, TrialFES>& du,
+          const Variational::TestFunction<TestFES>& v) const
+      {
+        return InterfaceNormalAdvectionFitTangentIntegrator<
+            Variational::GridFunction<FES, Data>, TargetFunction>(
+            u, du, v, m_interfaceAttribute,
+            m_weight / m_normalization, m_quadratureOrder);
+      }
+
+      template <class FES, class Data>
+      Real energy(const Variational::GridFunction<FES, Data>& u) const
+      {
+        const auto& mesh = u.getFiniteElementSpace().getMesh();
+        RODIN_GEOMETRY_REQUIRE_INCIDENCE(mesh, 1, 0);
+        const auto& conn = mesh.getConnectivity();
+        const size_t sdim = mesh.getSpaceDimension();
+        if (sdim != 2)
+          return 0;
+
+        const auto& qf = QF::PolytopeQuadratureFormula::get(
+            m_quadratureOrder, Geometry::Polytope::Type::Segment);
+
+        Real value = 0;
+        for (Index e = 0; e < static_cast<Index>(conn.getCount(1)); ++e)
+        {
+          if (!isActiveInterfaceEdge(mesh, e))
+            continue;
+          const auto edgeIterator = mesh.getPolytope(1, e);
+          const auto& edge = *edgeIterator;
+          const auto& fes  = u.getFiniteElementSpace();
+          const auto& fe   = fes.getFiniteElement(edge.getDimension(), edge.getIndex());
+          const size_t localSize = fe.getCount();
+          const auto displacement = localDisplacementCoefficients(u, edge);
+
+          for (size_t q = 0; q < qf.getSize(); ++q)
+          {
+            const auto& rc    = qf.getPoint(q);
+            const auto   J    = referenceGeometryJacobian(edge, rc);
+            const Real arcLen = std::hypot(J(0, 0), J(1, 0));
+            if (arcLen <= Real(1e-14))
+              continue;
+            const Math::SpatialPoint n{ -J(1, 0) / arcLen, J(0, 0) / arcLen };
+
+            Math::SpatialPoint x;
+            edge.getTransformation().transform(x, rc);
+            const Real tgt = m_target(x);
+
+            Real uDotN = Real(0);
+            for (size_t i = 0; i < localSize; ++i)
+            {
+              const auto phi = basisVectorValue(fe, i, rc);
+              Real p = Real(0);
+              for (size_t c = 0; c < sdim; ++c)
+                p += phi[static_cast<std::uint8_t>(c)] * n[c];
+              uDotN += displacement[i] * p;
+            }
+            const Real r = uDotN - tgt;
+            value += qf.getWeight(q) * arcLen * r * r;
+          }
+        }
+        return Real(0.5) * (m_weight / m_normalization) * value;
+      }
+
+    private:
+      template <class Mesh>
+      bool isActiveInterfaceEdge(const Mesh& mesh, Index edge) const
+      {
+        if (!m_interfaceAttribute)
+          return true;
+        const auto attr = mesh.getAttribute(1, edge);
+        return attr && *attr == *m_interfaceAttribute;
+      }
+
+      TargetFunction m_target;
+      Optional<Geometry::Attribute> m_interfaceAttribute;
+      Real   m_weight          = 1;
+      Real   m_normalization   = 1;
+      size_t m_quadratureOrder = 4;
+  };
+
+  template <class TargetFunction>
+  InterfaceNormalAdvectionFitTerm(
+      TargetFunction,
+      Optional<Geometry::Attribute>,
+      Real) -> InterfaceNormalAdvectionFitTerm<TargetFunction>;
+
+  template <class TargetFunction>
+  InterfaceNormalAdvectionFitTerm(
+      TargetFunction,
+      Optional<Geometry::Attribute>) -> InterfaceNormalAdvectionFitTerm<TargetFunction>;
+
+  template <class TargetFunction>
+  InterfaceNormalAdvectionFitTerm(
+      TargetFunction) -> InterfaceNormalAdvectionFitTerm<TargetFunction>;
+
 }
 
 #endif
