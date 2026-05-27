@@ -21,12 +21,12 @@
  *  - transient XDMF output for visualization.
  *
  * At each optimization iteration the program:
- *  1. optionally conditions the initial mesh with MMG,
+ *  1. optimizes the current mesh with MMG,
  *  2. trims the exterior subdomain,
  *  3. solves the elasticity state equation,
  *  4. computes a regularized shape gradient,
  *  5. advects the level set function,
- *  6. reconstructs the domain using a direct tetrahedral level-set split,
+ *  6. reconstructs the domain using MMG,
  *  7. evaluates the objective,
  *  8. writes XDMF snapshots for visualization.
  *
@@ -74,7 +74,7 @@
  * During the optimization the following files are produced:
  *
  * - @c Omega0.mesh            : initial mesh
- * - @c Optimized.mesh         : current mesh before trimming
+ * - @c Optimized.mesh         : mesh after MMG optimization
  * - @c Trimmed.mesh           : mesh restricted to the current domain
  * - @c State.mesh             : mesh used for the elasticity solve
  * - @c State.gf               : displacement field
@@ -99,7 +99,9 @@
  * @section notes Notes
  *
  * - PETSc provides the linear algebra backend.
- * - MMG is used for level-set discretization and mesh optimization.
+ * - MMG is used for mesh optimization and level-set discretization.
+ * - If remeshing fails at some iteration, the algorithm reduces @c hmax
+ *   and retries with a finer mesh.
  * - The XDMF output is intended for temporal visualization of the optimization.
  */
 
@@ -134,18 +136,17 @@ static constexpr Real lambda = 0.5769;
 // Optimization parameters
 static constexpr size_t maxIt = 300;
 static constexpr Real eps = 1e-12;
+static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax0 = 0.9;
+static Real hmax0 = 0.5;
 static Real hmax = hmax0;
-static Real hminFactor = 0.1;
-static Real hmin = hminFactor * hmax;
-static Real hgrad = 1.6;
+static Real hmin = 0.01 * hmax;
 static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Real k = 0.2;
-const Real dt = k * (hmax - hmin) / hgrad;
-static Real alpha = 8 * hmax * hmax;
+const Real k = 0.5;
+const Real dt = k * (hmax - hmin) / 2;
+static Real alpha = dt;
 
 using FES = VectorP1<Mesh<Context::Local>>;
 
@@ -193,34 +194,28 @@ int main(int argc, char** argv)
   while (i < maxIt)
   {
     Alert::Info() << "----- Iteration: " << i << Alert::Raise;
-    if (i == 0)
+    Alert::Info() << "   | Optimizing the domain..." << Alert::Raise;
+
+    try
     {
-      Alert::Info() << "   | Conditioning the initial mesh..." << Alert::Raise;
+      MMG::Optimizer().setHMax(hmax)
+                      .setHMin(hmin)
+                      // .setGradation(1.1)
+                      // .setHausdorff(hausd)
+                      .setAngleDetection(false)
+                      .optimize(th);
 
-      try
-      {
-        MMG::Optimizer().setHMax(hmax)
-                        .setHMin(hmin)
-                        .setGradation(hgrad)
-                        .setHausdorff(hausd)
-                        .setAngleDetection(false)
-                        .optimize(th);
-
-        hmax = hmax0;
-        hmin = hminFactor * hmax;
-      }
-      catch (const Alert::Exception& e)
-      {
-        hmax /= 2;
-        hmin = hminFactor * hmax;
-        Alert::Warning() << "Initial mesh conditioning failed. Reducing hmax to "
-                         << hmax << " and retrying." << Alert::Raise;
-        continue;
-      }
+      hmax = hmax0;
+      hmin = 0.1 * hmax;
     }
-    else
+    catch (const Alert::Exception& e)
     {
-      Alert::Info() << "   | Using the current tetrahedral mesh without MMG optimization." << Alert::Raise;
+      hmax /= 2;
+      hmin = 0.01 * hmax;
+      Alert::Warning() << "Mesh optimization failed at iteration " << i
+                       << ". Reducing hmax to " << hmax
+                       << " and retrying." << Alert::Raise;
+      continue;
     }
 
     th.save("Optimized.mesh", IO::FileFormat::MEDIT);
@@ -231,7 +226,6 @@ int main(int argc, char** argv)
     conn.discover(3, 1);
     conn.restrict(1, 0);
     conn.restrict(2, 0);
-    conn.restrict(2, 1);
     conn.restrict(2, 3);
     conn.discover(0, 0);
 
@@ -340,35 +334,22 @@ int main(int argc, char** argv)
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     try
     {
-      th = MMG::LevelSetDiscretizer()
-        .split(Interior, {Interior, Exterior})
-        .split(Exterior, {Interior, Exterior})
-        .setRMC(1e-6)
-        .setHMax(hmax)
-        .setHMin(hmin)
-        .setHausdorff(hausd)
-        .setAngleDetection(false)
-        .setBoundaryReference(Gamma)
-        .setBaseReferences(GammaD)
-        .discretize(advect.getSolution());
-
-      th.getConnectivity().compute(2, 3);
-      for (auto it = th.getBoundary(); it; ++it)
-      {
-        const auto attr = it->getAttribute();
-        if (!attr)
-        {
-          th.setAttribute(it.key(), Gamma0);
-        }
-      }
+      th = MMG::LevelSetDiscretizer().setHMax(hmax)
+                                     .setHMin(hmin)
+                                     // .setHausdorff(hausd)
+                                     .setAngleDetection(false)
+                                     .setRMC(1e-5)
+                                     .setBaseReferences(GammaD)
+                                     .setBoundaryReference(Gamma)
+                                     .discretize(advect.getSolution());
 
       hmax = hmax0;
-      hmin = hminFactor * hmax;
+      hmin = 0.01 * hmax;
     }
     catch (const Alert::Exception& e)
     {
       hmax /= 2;
-      hmin = hminFactor * hmax;
+      hmin = 0.01 * hmax;
       Alert::Warning() << "Meshing failed at iteration " << i
                        << ". Reducing hmax to " << hmax
                        << " and retrying." << Alert::Raise;

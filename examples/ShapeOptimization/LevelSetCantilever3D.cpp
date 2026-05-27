@@ -130,14 +130,14 @@ static constexpr Real eps = 1e-12;
 static constexpr Real hgrad = 1.6;
 static constexpr Real ell = 0.1;
 static Real elementStep = 0.5;
-static Real hmax0 = 0.5;
+static Real hmax0 = 0.1;
 static Real hmax = hmax0;
 static Real hmin = 0.1 * hmax;
 static Real hausd = 0.1 * hmin;
 static size_t hmaxIt = maxIt / 2;
-const Real k = 0.2;
+const Real k = 0.5;
 const Real dt = k * (hmax - hmin) / 2;
-static Real alpha = 8 * hmax * hmax;
+static Real alpha = dt;
 
 using FES = VectorP1<Mesh<Context::Local>>;
 
@@ -190,7 +190,7 @@ int main(int, char**)
       MMG::Optimizer().setHMax(hmax)
                       .setHMin(hmin)
                       // .setGradation(1.1)
-                      .setHausdorff(hausd)
+                      // .setHausdorff(hausd)
                       .setAngleDetection(false)
                       .optimize(th);
 
@@ -217,7 +217,6 @@ int main(int, char**)
 
     conn.restrict(1, 0);
     conn.restrict(2, 0);
-    conn.restrict(2, 1);
 
     conn.restrict(2, 3);
 
@@ -256,7 +255,7 @@ int main(int, char**)
     elasticity = LinearElasticityIntegral(u, v)(lambda, mu)
                - BoundaryIntegral(f, v).over(GammaN)
                + DirichletBC(u, VectorFunction{0, 0, 0}).on(GammaD);
-    auto cg = Solver::SparseLU(elasticity);
+    auto cg = Solver::CG(elasticity);
     cg.solve();
 
     u.getSolution().save("State.gf", IO::FileFormat::MFEM);
@@ -278,7 +277,7 @@ int main(int, char**)
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(n, w)).over(Gamma)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
-    Solver::SparseLU(hilbert).solve();
+    Solver::CG(hilbert).solve();
 
     auto& dJ = g.getSolution();
 
@@ -327,27 +326,14 @@ int main(int, char**)
     Alert::Info() << "   | Meshing the domain." << Alert::Raise;
     try
     {
-      th = MMG::LevelSetDiscretizer()
-        .split(Interior, {Interior, Exterior})
-        .split(Exterior, {Interior, Exterior})
-        .setRMC(1e-6)
-        .setHMax(hmax)
-        .setHMin(hmin)
-        .setHausdorff(hausd)
-        .setAngleDetection(false)
-        .setBoundaryReference(Gamma)
-        .setBaseReferences(GammaD)
-        .discretize(advect.getSolution());
-
-      th.getConnectivity().compute(2, 3);
-      for (auto it = th.getBoundary(); it; ++it)
-      {
-        const auto attr = it->getAttribute();
-        if (!attr)
-        {
-          th.setAttribute(it.key(), Gamma0);
-        }
-      }
+      th = MMG::LevelSetDiscretizer().setHMax(hmax)
+                                     .setHMin(hmin)
+                                     // .setHausdorff(hausd)
+                                     .setAngleDetection(false)
+                                     .setRMC(1e-5)
+                                     .setBaseReferences(GammaD)
+                                     .setBoundaryReference(Gamma)
+                                     .discretize(advect.getSolution());
 
       hmax = hmax0;
       hmin = 0.1 * hmax;
@@ -356,7 +342,7 @@ int main(int, char**)
     {
       hmax /= 2;
       hmin = 0.1 * hmax;
-      Alert::Warning() << "Level-set discretization failed at iteration " << i
+      Alert::Warning() << "Meshing failed at iteration " << i
                        << ". Reducing hmax to " << hmax
                        << " and retrying." << Alert::Raise;
       continue;

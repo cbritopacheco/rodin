@@ -72,12 +72,3 @@ target_link_libraries(AnnulusClosing PUBLIC Rodin::Geometry)
 
 add_executable(AttributeDetection AttributeDetection.cpp)
 target_link_libraries(AttributeDetection PUBLIC Rodin::Geometry)
-
-add_executable(LevelSetMovingCurvedCircle LevelSetMovingCurvedCircle.cpp)
-target_link_libraries(LevelSetMovingCurvedCircle
-  PUBLIC
-  Rodin::Adaptation
-  Rodin::Geometry
-  Rodin::IO
-  Rodin::Solver
-  Rodin::Variational)
