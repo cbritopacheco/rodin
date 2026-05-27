@@ -492,7 +492,8 @@ namespace Rodin::Examples::Heart
           const OldVelocity& uOld,
           const ProjectedVelocity& uProj,
           const ProjectedTau& tau,
-          ScalarType rho)
+          ScalarType rho,
+          ScalarType dt)
         : Parent(v.getLeaf()),
           m_v(v),
           m_sub(subOld),
@@ -500,7 +501,8 @@ namespace Rodin::Examples::Heart
           m_uProj(uProj),
           m_tau(tau),
           m_polytope(nullptr),
-          m_rho(rho)
+          m_rho(rho),
+          m_dt(dt)
       {}
 
       VMSConvectionLinearIntegrator(
@@ -604,8 +606,8 @@ namespace Rodin::Examples::Heart
           for (size_t c = 0; c < vdim; ++c)
           {
             coefficient(static_cast<std::uint8_t>(c)) =
-              tau * m_rho * uProj(static_cast<std::uint8_t>(c))
-              + subScale(static_cast<std::uint8_t>(c));
+              tau * (m_rho * uProj(static_cast<std::uint8_t>(c))
+              + 1. / m_dt * subScale(static_cast<std::uint8_t>(c)));
           }
 
           for (size_t b = 0; b < nte; ++b)
@@ -709,6 +711,7 @@ namespace Rodin::Examples::Heart
 
       const Geometry::Polytope* m_polytope;
       ScalarType m_rho;
+      ScalarType m_dt;
 
       Math::Vector<ScalarType> m_vec;
 
