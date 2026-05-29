@@ -271,8 +271,8 @@ namespace Rodin::Examples::Heart
           /*
            * Directional derivatives along frozen velocity:
            *
-           *   trDir[a] = grad phi_a · uOld,
-           *   teDir[b] = grad psi_b · uOld.
+           *   trDir[a] = grad phi_a \cdot uOld,
+           *   teDir[b] = grad psi_b \cdot uOld.
            */
           for (size_t a = 0; a < ntrS; ++a)
             trDir[a] = Math::dot(Gtr[a], uOld);
@@ -288,8 +288,8 @@ namespace Rodin::Examples::Heart
                * Local scalar entry:
                *
                *   int_K tau rho^2
-               *     (grad phi_a · uOld)
-               *     (grad psi_b · uOld).
+               *     (grad phi_a \cdot uOld)
+               *     (grad psi_b \cdot uOld).
                */
               const ScalarType kij =
                 wdet * tau * m_rho * trDir[a] * m_rho * teDir[b];
@@ -539,7 +539,7 @@ namespace Rodin::Examples::Heart
           /*
            * Directional derivative of test basis along frozen velocity:
            *
-           *   teDir[b] = grad psi_b · uOld.
+           *   teDir[b] = grad psi_b \cdot uOld.
            */
           for (size_t b = 0; b < nteS; ++b)
             teDir[b] = Math::dot(Gte[b], uOld);
@@ -555,7 +555,7 @@ namespace Rodin::Examples::Heart
                *
                *   int_K rho
                *     (tau rho uProj_c + sub_c)
-               *     (grad psi_b · uOld).
+               *     (grad psi_b \cdot uOld).
                *
                * The global expression should subtract this integrator.
                */

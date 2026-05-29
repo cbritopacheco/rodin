@@ -21,11 +21,11 @@ using namespace Rodin::Solver;
  * 3D manufactured tests for the reaction–diffusion equation:
  *
  * Strong form:
- *   -Δu + α u = f   in Ω
- *             u = g   on ∂Ω
+ *   -Δu + \alpha u = f   in \Omega
+ *             u = g   on \partial\Omega
  *
  * Weak form:
- *   ∫Ω ∇u·∇v dx + α ∫Ω u v dx = ∫Ω f v dx
+ *   \int\Omega \nablau\cdot\nablav dx + \alpha \int\Omega u v dx = \int\Omega f v dx
  *
  * Geometry note:
  *   UniformGrid({M,M,M}) creates coordinates {0,…,M−1}.
@@ -100,7 +100,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // ---------------------------------------------------------------------------
   // u = sin(pi x) sin(pi y) sin(pi z)
   // Δu = -3 pi^2 u
-  // f = -Δu + α u = (3 pi^2 + α) u
+  // f = -Δu + \alpha u = (3 pi^2 + \alpha) u
   // ---------------------------------------------------------------------------
   TEST_P(ReactionDiffusion3DTest16, SimpleSine)
   {
@@ -133,7 +133,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // Polynomial:
   // u = x(1-x)y(1-y)z(1-z)
   // Δu = 2y(1-y)z(1-z) + 2x(1-x)z(1-z) + 2x(1-x)y(1-y)
-  // f = -Δu + α u
+  // f = -Δu + \alpha u
   // ---------------------------------------------------------------------------
   TEST_P(ReactionDiffusion3DTest16, Polynomial)
   {

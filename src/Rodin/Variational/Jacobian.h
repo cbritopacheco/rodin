@@ -36,7 +36,7 @@
  * // Displacement gradient for elasticity
  * P1 Vh(mesh, mesh.getSpaceDimension());
  * GridFunction<P1> u(Vh);
- * auto F = Jacobian(u);  // Deformation gradient F = ∇u
+ * auto F = Jacobian(u);  // Deformation gradient F = \nablau
  * ```
  */
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H

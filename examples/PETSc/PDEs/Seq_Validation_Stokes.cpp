@@ -2,9 +2,9 @@
  * Stokes P2–P1 convergence validation with mesh refinement.
  *
  * Problem:
- *   -Δu + ∇p = f   in Ω = (0,1)^3
- *        div u = 0 in Ω
- *             u = u_exact on ∂Ω
+ *   -Δu + \nablap = f   in \Omega = (0,1)^3
+ *        div u = 0 in \Omega
+ *             u = u_exact on \partial\Omega
  *
  * This script:
  *   1) solves the problem on a sequence of refined tetrahedral meshes,
@@ -392,7 +392,7 @@ int main(int argc, char** argv)
     // Non-P1 pressure so that pressure convergence is nontrivial.
     auto p_exact = x * x + y * y + z * z;
 
-    // f = -Δu + ∇p
+    // f = -Δu + \nablap
     VectorFunction f{
       -(d2ax * day + ax * d3ay) + 2.0 * x,
        (d3ax * ay + dax * d2ay) + 2.0 * y,
@@ -454,8 +454,8 @@ int main(int argc, char** argv)
 
     /*
      * Pressure gauge correction:
-     *   c_h = mean(p_h - p_exact) over Ω.
-     * Since Ω = (0,1)^3, |Ω| = 1, so mean = integral.
+     *   c_h = mean(p_h - p_exact) over \Omega.
+     * Since \Omega = (0,1)^3, |\Omega| = 1, so mean = integral.
      */
     const double p_mean_shift = IntegrateScalarGridFunction(diag, ph_sol - p_exact);
 

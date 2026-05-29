@@ -195,15 +195,15 @@ namespace Rodin::Variational
         const auto& rc = p.getReferenceCoordinates();
 
         // Build the reference jacobian accumulator:
-        // G = Σ_v u(v) ⊗ ∇_hat φ_v   (vdim x d)
+        // G = Σ_v u(v) ⊗ \nabla_hat φ_v   (vdim x d)
         SpatialMatrixType G(vdim, d);
         G.setZero();
 
         // For each vertex basis (scalar), accumulate:
-        // for each component c: G(c, :) += u_c(v) * ∇_hat φ_v^T
+        // for each component c: G(c, :) += u_c(v) * \nabla_hat φ_v^T
         for (size_t v = 0; v < nv; ++v)
         {
-          // ∇_hat φ_v (size d)
+          // \nabla_hat φ_v (size d)
           // Avoid GradientFunction() to prevent extra vector construction.
           Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)

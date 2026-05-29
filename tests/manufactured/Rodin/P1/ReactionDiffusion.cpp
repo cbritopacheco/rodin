@@ -174,7 +174,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       TestFunction  v(vh);
 
       // Assemble the variational problem:
-      // Find u such that ∫ (∇u·∇v + u*v) dx = ∫ f*v dx, with u=0 on ∂Ω.
+      // Find u such that \int (\nablau\cdot\nablav + u*v) dx = \int f*v dx, with u=0 on \partial\Omega.
       Problem rd(u, v);
       rd = Integral(Grad(u), Grad(v))
          + Integral(u, v)

@@ -35,7 +35,7 @@ namespace Rodin::Tests::Unit
     Point p(polytope, rc);
 
     Real value = dot_product.getValue(p);
-    // (3,4) · (2,1) = 3*2 + 4*1 = 6 + 4 = 10
+    // (3,4) \cdot (2,1) = 3*2 + 4*1 = 6 + 4 = 10
     EXPECT_NEAR(value, 10.0, 1e-10);
   }
 
@@ -109,7 +109,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Vector mass matrix: ∫ u · v dx
+    // Vector mass matrix: \int u \cdot v dx
     bf = Integral(Dot(u, v));
     bf.assemble();
 
@@ -169,7 +169,7 @@ namespace Rodin::Tests::Unit
     Point p(polytope, rc);
 
     Real value = dot_product.getValue(p);
-    // (2,3) · (4,6) = 2*4 + 3*6 = 8 + 18 = 26
+    // (2,3) \cdot (4,6) = 2*4 + 3*6 = 8 + 18 = 26
     EXPECT_NEAR(value, 26.0, 1e-10);
   }
 
@@ -188,7 +188,7 @@ namespace Rodin::Tests::Unit
     Point p(polytope, rc);
 
     Real value = dot_product.getValue(p);
-    // (1,2,3) · (4,5,6) = 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
+    // (1,2,3) \cdot (4,5,6) = 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
     EXPECT_NEAR(value, 32.0, 1e-10);
   }
 

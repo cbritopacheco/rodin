@@ -9,22 +9,22 @@
  *
  * These tests distribute a mesh across MPI ranks and exercise:
  *   - GridFunction projection onto distributed P0 and P0g.
- *   - Linear form assembly (∫ f·v dΩ) with distributed P0 and P0g.
- *   - Bilinear form assembly (∫ u·v dΩ) with distributed P0 and P0g.
+ *   - Linear form assembly (\int f\cdotv d\Omega) with distributed P0 and P0g.
+ *   - Bilinear form assembly (\int u\cdotv d\Omega) with distributed P0 and P0g.
  *   - Solving the L2 projection problem with distributed P0 via PETSc GMRES.
  *   - Solving the L2 projection problem with distributed P0g via PETSc GMRES.
  *
  * ### P0 tests
  *
  * For the P0 space (piecewise constant), the natural PDE is the L2 projection:
- * find u_h ∈ P0 such that ∫ u_h v dΩ = ∫ f v dΩ for all v ∈ P0.
+ * find u_h ∈ P0 such that \int u_h v d\Omega = \int f v d\Omega for all v ∈ P0.
  * The resulting system is diagonal with M_ii = |K_i| (cell area/volume),
  * so u_h = f_K (average of f over each cell K).
  *
  * ### P0g tests
  *
  * For the P0g space (global constant), the L2 projection gives:
- * |Ω| · c = ∫ f dΩ, so c = (1/|Ω|) ∫ f dΩ.
+ * |\Omega| \cdot c = \int f d\Omega, so c = (1/|\Omega|) \int f d\Omega.
  * For a constant f this reduces to c = f.
  */
 
@@ -154,7 +154,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
    * @brief The global integral of the projected constant function equals
    *        the constant times the domain area.
    *
-   * ∫ u_h dΩ = c · |Ω|.
+   * \int u_h d\Omega = c \cdot |\Omega|.
    */
   TEST(PETSc_MPI_P0, Integral_ProjectedConstant_EqualsArea_Triangle)
   {
@@ -176,7 +176,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     // Integral of the grid function over the domain
     const Real total = Integral(u).compute();
 
-    // Expected: c * |Ω| = c * 1 = c
+    // Expected: c * |\Omega| = c * 1 = c
     EXPECT_NEAR(total, c, 1e-9);
   }
 
@@ -185,7 +185,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble ∫ 1·v dΩ on distributed P0 and verify the global
+   * @brief Assemble \int 1\cdotv d\Omega on distributed P0 and verify the global
    *        vector size equals the number of cells.
    *
    * For P0 each entry corresponds to one cell, so the vector size must equal
@@ -217,10 +217,10 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief Sum of ∫ 1·v dΩ over all P0 test functions equals domain area.
+   * @brief Sum of \int 1\cdotv d\Omega over all P0 test functions equals domain area.
    *
    * For f = 1 and P0, each entry b_K = |K| (cell measure).
-   * ∑_K b_K = |Ω|.
+   * ∑_K b_K = |\Omega|.
    */
   TEST(PETSc_MPI_P0, LinearForm_SumEqualsDomainArea_Triangle)
   {
@@ -252,7 +252,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble the P0 mass matrix ∫ u·v dΩ and check global dimensions.
+   * @brief Assemble the P0 mass matrix \int u\cdotv d\Omega and check global dimensions.
    *
    * For P0 the global matrix size is (N_cells × N_cells).
    */
@@ -291,7 +291,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   /**
    * @brief Solve the L2 projection of a constant onto P0 via PETSc GMRES.
    *
-   * Problem: find u_h ∈ P0 s.t. ∫ u_h v dΩ = ∫ c v dΩ for all v ∈ P0.
+   * Problem: find u_h ∈ P0 s.t. \int u_h v d\Omega = \int c v d\Omega for all v ∈ P0.
    * Solution: u_h = c on every cell.  L2 error = 0.
    */
   TEST(PETSc_MPI_P0, SolveL2Projection_Constant_Triangle)
@@ -319,7 +319,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     PETSc::Solver::GMRES solver(projection);
     solver.solve();
 
-    // Compute ∫ (u_h - c)^2 dΩ
+    // Compute \int (u_h - c)^2 d\Omega
     FES sh(mesh);
     GridFunction<FES, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - RealFunction(c), 2);
@@ -405,9 +405,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
   /**
    * @brief Project a constant onto distributed P0g and verify the projection
-   *        by checking ∫ u_h dΩ = c · |Ω|.
+   *        by checking \int u_h d\Omega = c \cdot |\Omega|.
    *
-   * The test uses a [0,1]×[0,1] mesh (area = 1), so ∫ u_h dΩ = c.
+   * The test uses a [0,1]×[0,1] mesh (area = 1), so \int u_h d\Omega = c.
    */
   TEST(PETSc_MPI_P0g, GridFunctionProjection_ConstantFunction_Triangle)
   {
@@ -426,7 +426,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     GridFunction<decltype(fes), ::Vec> u(fes);
     u = RealFunction(c);
 
-    // Verify projection via collective integral: ∫ u_h dΩ = c * 1 = c
+    // Verify projection via collective integral: \int u_h d\Omega = c * 1 = c
     const Real total = Integral(u).compute();
     EXPECT_NEAR(total, c, 1e-10);
   }
@@ -436,7 +436,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief ∫ 1·v dΩ with P0g has global size 1.
+   * @brief \int 1\cdotv d\Omega with P0g has global size 1.
    */
   TEST(PETSc_MPI_P0g, LinearForm_GlobalVectorSizeIsOne_Triangle)
   {
@@ -462,10 +462,10 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief ∫ 1·v dΩ with P0g: the single entry equals |Ω|.
+   * @brief \int 1\cdotv d\Omega with P0g: the single entry equals |\Omega|.
    *
    * For f = 1 the single P0g DOF entry accumulates contributions from all
-   * cells: ∑_K |K| = |Ω|.
+   * cells: ∑_K |K| = |\Omega|.
    */
   TEST(PETSc_MPI_P0g, LinearForm_SingleEntry_EqualsDomainArea_Triangle)
   {
@@ -497,9 +497,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble ∫ u·v dΩ with P0g: global matrix is 1×1.
+   * @brief Assemble \int u\cdotv d\Omega with P0g: global matrix is 1×1.
    *
-   * For scalar P0g the system is 1×1 with the single entry equal to |Ω|.
+   * For scalar P0g the system is 1×1 with the single entry equal to |\Omega|.
    */
   TEST(PETSc_MPI_P0g, BilinearForm_MassMatrix_1x1_Triangle)
   {
@@ -570,7 +570,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   /**
    * @brief Solve the L2 projection of a constant onto P0g via PETSc GMRES.
    *
-   * Problem: find c ∈ P0g s.t. ∫ c v dΩ = ∫ const v dΩ for all v ∈ P0g.
+   * Problem: find c ∈ P0g s.t. \int c v d\Omega = \int const v d\Omega for all v ∈ P0g.
    * Solution: c = const.  L2 error = 0.
    */
   TEST(PETSc_MPI_P0g, SolveL2Projection_Constant_Triangle)
@@ -602,7 +602,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     GridFunction<FES, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - RealFunction(c), 2);
 
-    // Integral(diff) = ∫ (c_h - c)^2 dΩ.  For a constant rhs this must be 0.
+    // Integral(diff) = \int (c_h - c)^2 d\Omega.  For a constant rhs this must be 0.
     const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0.0, 1e-10);
   }
@@ -646,7 +646,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
    * @brief P0g L2 projection of f(x,y) = x + y on [0,1]x[0,1].
    *
    * The global average of f(x,y) = x + y over [0,1]^2 is 1/2 + 1/2 = 1.
-   * The L2 error ∫ (c_h - f)^2 dΩ = ∫ (1 - x - y)^2 dΩ = 1/6.
+   * The L2 error \int (c_h - f)^2 d\Omega = \int (1 - x - y)^2 d\Omega = 1/6.
    */
   TEST(PETSc_MPI_P0g, SolveL2Projection_LinearF_GlobalAverageIsOne_Triangle)
   {
@@ -679,7 +679,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
     GridFunction<FES, ::Vec> diff(sh);
     diff = Pow(u.getSolution() - RealFunction(1.0), 2);
 
-    // ∫ (c_h - 1)^2 dΩ should be 0 (c_h = 1 = average of f over [0,1]^2)
+    // \int (c_h - 1)^2 d\Omega should be 0 (c_h = 1 = average of f over [0,1]^2)
     const Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0.0, 1e-6);
   }

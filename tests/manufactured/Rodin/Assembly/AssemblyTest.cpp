@@ -62,7 +62,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -----------------------------------------------------------------------
   // Test 1: Poisson with P1-exact affine manufactured solution.
   //
-  // -Δu = 0,  u = x + 2y + 1  on ∂Ω.
+  // -Δu = 0,  u = x + 2y + 1  on \partial\Omega.
   //
   // With f = 0 and an affine Dirichlet BC the discrete solution equals the
   // manufactured solution to machine precision, regardless of mesh size or
@@ -112,7 +112,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -----------------------------------------------------------------------
   // Test 2: Reaction-diffusion with quadratic manufactured solution.
   //
-  // -Δu + u = f,  u = x*(1-x)*y*(1-y)  on ∂Ω (= 0).
+  // -Δu + u = f,  u = x*(1-x)*y*(1-y)  on \partial\Omega (= 0).
   // f = 2*y*(1-y) + 2*x*(1-x) + x*(1-x)*y*(1-y).
   // -----------------------------------------------------------------------
   TEST_P(Assembly_2D_Test_8x8, ReactionDiffusion_QuadraticSolution_LowError)
@@ -354,7 +354,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   using Assembly_P0_2D_Test_8x8 = Assembly_P0_2D_Test<8>;
 
   /**
-   * @brief P0 mass matrix row sums equal element areas (∫_K 1 dK = |K|).
+   * @brief P0 mass matrix row sums equal element areas (\int_K 1 dK = |K|).
    */
   TEST_P(Assembly_P0_2D_Test_8x8, P0MassMatrix_RowSumsEqualAreas)
   {
@@ -378,7 +378,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   }
 
   /**
-   * @brief P0 load vector sums to domain area (∫_Ω 1 dΩ = 1).
+   * @brief P0 load vector sums to domain area (\int_\Omega 1 d\Omega = 1).
    */
   TEST_P(Assembly_P0_2D_Test_8x8, P0LoadVector_SumEqualsArea)
   {
@@ -479,8 +479,8 @@ namespace Rodin::Tests::Manufactured::Assembly
    * @brief 1-D P1 mass matrix: (M * ones).sum() equals the domain length.
    *
    * By partition of unity, ∑_i φ_i(x) = 1 for all x, so
-   * (M * ones)_i = ∑_j M_ij = ∫_Ω φ_i dΩ, and summing over i gives
-   * ∑_i ∫_Ω φ_i dΩ = ∫_Ω 1 dΩ = |Ω| = 1 (after scaling to [0,1]).
+   * (M * ones)_i = ∑_j M_ij = \int_\Omega φ_i d\Omega, and summing over i gives
+   * ∑_i \int_\Omega φ_i d\Omega = \int_\Omega 1 d\Omega = |\Omega| = 1 (after scaling to [0,1]).
    */
   TEST_F(Assembly_Segment_Test, P1MassMatrix_SumEqualsLength)
   {

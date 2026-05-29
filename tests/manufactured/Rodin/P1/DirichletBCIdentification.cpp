@@ -24,14 +24,14 @@ using namespace Rodin::Solver;
  * The tests in this file verify the *algebraic* identification by exploiting
  * specific reductions:
  *
- *  - `DirichletBC(u, -u).on(Γ)` reduces to `u = 0 on Γ`, since the constraint
+ *  - `DirichletBC(u, -u).on(\Gamma)` reduces to `u = 0 on \Gamma`, since the constraint
  *    @f$ u_s = -u_s @f$ implies @f$ 2 u_s = 0 @f$, hence @f$ u_s = 0 @f$.
  *
- *  - `DirichletBC(u, c·u).on(Γ)` with @f$ c \neq 1 @f$ also reduces to
- *    @f$ u = 0 @f$ on @f$ Γ @f$, since
+ *  - `DirichletBC(u, c\cdotu).on(\Gamma)` with @f$ c \neq 1 @f$ also reduces to
+ *    @f$ u = 0 @f$ on @f$ \Gamma @f$, since
  *    @f$ u_s = c\,u_s \;\Leftrightarrow\; (1-c)\,u_s = 0 @f$.
  *
- *  - `DirichletBC(u, f·v).on(Γ)` with `v` itself constrained to a known
+ *  - `DirichletBC(u, f\cdotv).on(\Gamma)` with `v` itself constrained to a known
  *    function `g_v` via a value-prescribing BC produces an effective
  *    Dirichlet of value @f$ f(x_s) g_v(x_s) @f$ on each slave node @f$ x_s @f$
  *    (Lagrange same-FES). Comparing solutions confirms the constraint
@@ -67,8 +67,8 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     Manufactured_DirichletBCIdentification_Test<32>;
 
   /**
-   * @brief `DirichletBC(u, -u).on(Γ)` is algebraically equivalent to
-   *        `DirichletBC(u, 0).on(Γ)` for the Poisson problem.
+   * @brief `DirichletBC(u, -u).on(\Gamma)` is algebraically equivalent to
+   *        `DirichletBC(u, 0).on(\Gamma)` for the Poisson problem.
    *
    * Solves
    * @f[
@@ -117,8 +117,8 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
   }
 
   /**
-   * @brief `DirichletBC(u, c·u).on(Γ)` with @f$ c \neq 1 @f$ and @f$ c \neq 0 @f$
-   *        reduces to @f$ u=0 @f$ on @f$ Γ @f$ for the Poisson problem.
+   * @brief `DirichletBC(u, c\cdotu).on(\Gamma)` with @f$ c \neq 1 @f$ and @f$ c \neq 0 @f$
+   *        reduces to @f$ u=0 @f$ on @f$ \Gamma @f$ for the Poisson problem.
    *
    * For each @f$ c \in \{ -1, -2, 0.5, 3 \} @f$ the identification
    * solution must coincide with the homogeneous-Dirichlet solution.
@@ -127,7 +127,7 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
    *       (singular row). `c = 0` is excluded because the assembler's
    *       strict-zero pruning drops the empty constraint row entirely;
    *       to pin DOFs to zero use `DirichletBC(u, Zero())`, not
-   *       `DirichletBC(u, 0·v)`.
+   *       `DirichletBC(u, 0\cdotv)`.
    */
   TEST_P(Test_32x32, ScalarSelfIdentificationEquivalentToZero)
   {

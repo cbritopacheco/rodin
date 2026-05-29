@@ -33,7 +33,7 @@
  * ```cpp
  * // Normal derivative on boundary
  * auto n = BoundaryNormal();
- * auto normal_deriv = Derivative(u, n);  // ∂u/∂n = ∇u·n
+ * auto normal_deriv = Derivative(u, n);  // \partialu/\partialn = \nablau\cdotn
  * ```
  */
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H

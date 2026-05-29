@@ -215,7 +215,7 @@ namespace Rodin::Tests::Unit
 
   TEST(LegendrePolynomial, Orthogonality_P0_P1)
   {
-    // ∫_{-1}^{1} P_0(x) P_1(x) dx = 0
+    // \int_{-1}^{1} P_0(x) P_1(x) dx = 0
     // Numerical integration via Gauss-Legendre quadrature
     const int N = 20;
     Real sum = 0.0;
@@ -232,7 +232,7 @@ namespace Rodin::Tests::Unit
 
   TEST(LegendrePolynomial, Orthogonality_P1_P2)
   {
-    // ∫_{-1}^{1} P_1(x) P_2(x) dx = 0
+    // \int_{-1}^{1} P_1(x) P_2(x) dx = 0
     const int N = 20;
     Real sum = 0.0;
     for (int i = 0; i < N; ++i)
@@ -363,7 +363,7 @@ namespace Rodin::Tests::Unit
 
   TEST(LegendrePolynomial, Orthogonality_P2_P5)
   {
-    // ∫_{-1}^{1} P_2(x) P_5(x) dx = 0
+    // \int_{-1}^{1} P_2(x) P_5(x) dx = 0
     const int N = 30;
     Real sum = 0.0;
     for (int i = 0; i < N; ++i)
@@ -450,7 +450,7 @@ namespace Rodin::Tests::Unit
 
   TEST(LegendrePolynomial, Orthogonality_P5_P15)
   {
-    // ∫_{-1}^{1} P_5(x) P_15(x) dx = 0
+    // \int_{-1}^{1} P_5(x) P_15(x) dx = 0
     // Use Gauss-Legendre quadrature with 11 points (exact for deg <= 21)
     // Nodes and weights for 11-point Gauss-Legendre quadrature on [-1, 1]
     const std::array<Real, 11> nodes = {

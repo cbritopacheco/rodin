@@ -3373,7 +3373,7 @@ namespace Rodin::Variational
           // Evaluate coefficient at this quadrature point
           const auto fval = coeff.getValue(ip);
 
-          // Assemble: K(b*vdim+c, a*vdim+c) += wdet * (∇φ_a · f) * ψ_b
+          // Assemble: K(b*vdim+c, a*vdim+c) += wdet * (\nablaφ_a \cdot f) * ψ_b
           for (size_t ib = 0; ib < testScalarCount; ++ib)
           {
             const ScalarType phi_te = teTab.getBasis(qp, ib);

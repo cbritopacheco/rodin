@@ -2895,7 +2895,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup QuadratureRuleSpecializations
-   * @brief Specialization for ∫ (∇u · f)·v in the case of P1 shape functions
+   * @brief Specialization for \int (\nablau \cdot f)\cdotv in the case of P1 shape functions
    *
    * This class represents the CTAD for the expression:
    * @f[

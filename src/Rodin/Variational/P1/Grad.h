@@ -262,7 +262,7 @@ namespace Rodin::Variational
           }
         };
 
-        // Cached physical gradients ∇_x φ_a (one per scalar basis function)
+        // Cached physical gradients \nabla_x φ_a (one per scalar basis function)
         std::vector<SpatialVectorType> grad;
 
         CellKey cellKey;
@@ -393,7 +393,7 @@ namespace Rodin::Variational
           // J^{-T} at this integration point (constant for affine maps)
           const auto JinvT = pt.getJacobianInverse().transpose();
 
-          // Compute physical gradients: ∇_x φ_a = J^{-T} ∇_hat φ_a
+          // Compute physical gradients: \nabla_x φ_a = J^{-T} \nabla_hat φ_a
           for (size_t a = 0; a < nv; ++a)
           {
             // Reference gradient (size d). Build without using GradientFunction()

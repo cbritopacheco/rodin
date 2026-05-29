@@ -21,8 +21,8 @@
  *
  * The fluid ALE displacement d_f is computed by harmonic extension:
  *
- *   -Δ d_f = 0       in Ω_f
- *      d_f = d_s     on Γ_FSI
+ *   -Δ d_f = 0       in \Omega_f
+ *      d_f = d_s     on \Gamma_FSI
  *      d_f = 0       on inlet, outlet, and wall
  *
  * Then the fluid mesh is moved by:
