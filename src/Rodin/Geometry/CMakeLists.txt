@@ -12,7 +12,6 @@ set(RodinGeometry_HEADERS
   PolytopeQuadrature.h
   Connectivity.h
   MinSTCut.h
-  ClassifiedSignedDistance.h
   PolytopeIterator.h
   PolytopeTransformation.h
 )
@@ -27,7 +26,6 @@ set(RodinGeometry_SRCS
   PolytopeTransformation.cpp
   Connectivity.cpp
   MinSTCut.cpp
-  ClassifiedSignedDistance.cpp
   SubMesh.cpp
   MeshBuilder.cpp
   SubMeshBuilder.cpp

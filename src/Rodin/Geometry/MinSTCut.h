@@ -46,6 +46,41 @@ namespace Rodin::Geometry
         Real energy = 0;
       };
 
+      /**
+       * @brief Optional classification policies layered on top of the bare
+       * Potts graph cut.
+       *
+       * These options let callers control checkerboard suppression,
+       * narrow-band restriction, and zero-level-aware facet weighting
+       * without changing the underlying max-flow engine.
+       */
+      struct Options
+      {
+        /// Multiplicative scale applied to every pairwise capacity
+        /// (Potts smoothing strength lambda).
+        Real lambdaScale = 1;
+
+        /// Multiplicative scale applied to every unary cost.
+        Real unaryScale = 1;
+
+        /// If `|moment[i]| >= farFieldThreshold` the cell `i` is pinned
+        /// to `sign(-moment[i])` by injecting a large unary on the
+        /// opposite terminal. Disabled when negative.
+        Real farFieldThreshold = -1;
+
+        /// Per-edge multiplier replacing `lambdaScale` on the i-th edge.
+        /// Use for zero-level-aware facet weighting (e.g. down-weight
+        /// pairwise term where |phi| is small so the cut prefers to
+        /// align with the actual interface).
+        /// Size must be `edges.size()` or `0` (disabled).
+        std::vector<Real> perEdgeLambda;
+
+        /// Per-cell free/fixed mask. `cellInBand[i] == false` pins cell
+        /// `i` to `sign(-moment[i])` via a large unary. Size must be
+        /// `volumes.size()` or `0` (disabled, all cells free).
+        std::vector<Boolean> cellInBand;
+      };
+
       static Real getInsideCost(Real volume, Real moment) noexcept;
 
       static Real getOutsideCost(Real volume, Real moment) noexcept;
@@ -54,6 +89,12 @@ namespace Rodin::Geometry
           const std::vector<Real>& volumes,
           const std::vector<Real>& moments,
           const std::vector<Edge>& edges) const;
+
+      Result classify(
+          const std::vector<Real>& volumes,
+          const std::vector<Real>& moments,
+          const std::vector<Edge>& edges,
+          const Options& options) const;
 
       Result solve(
           const std::vector<Real>& insideCosts,

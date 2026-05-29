@@ -28,7 +28,6 @@
 #include "Geometry/AttributeIndex.h"
 #include "Geometry/IndexGenerator.h"
 #include "Geometry/MinSTCut.h"
-#include "Geometry/ClassifiedSignedDistance.h"
 #include "Geometry/MeshPartitioner.h"
 #include "Geometry/BalancedCompactPartitioner.h"
 #include "Geometry/GreedyPartitioner.h"

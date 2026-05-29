@@ -148,19 +148,87 @@ namespace Rodin::Geometry
       const std::vector<Real>& moments,
       const std::vector<Edge>& edges) const
   {
+    return classify(volumes, moments, edges, Options{});
+  }
+
+  MinSTCut::Result MinSTCut::classify(
+      const std::vector<Real>& volumes,
+      const std::vector<Real>& moments,
+      const std::vector<Edge>& edges,
+      const Options& options) const
+  {
     if (volumes.size() != moments.size())
       throw std::invalid_argument("MinSTCut volumes and moments have different sizes.");
+    if (!options.perEdgeLambda.empty()
+        && options.perEdgeLambda.size() != edges.size())
+      throw std::invalid_argument(
+          "MinSTCut perEdgeLambda size does not match the number of edges.");
+    if (!options.cellInBand.empty()
+        && options.cellInBand.size() != volumes.size())
+      throw std::invalid_argument(
+          "MinSTCut cellInBand size does not match the number of cells.");
+
+    // Pin-cost: should dominate any conceivable unary on the same cell.
+    // We compute it from the sum of unscaled unaries plus the sum of all
+    // pairwise capacities so a pinned cell can never be flipped by the cut.
+    Real totalUnary = 0;
+    for (Index i = 0; i < volumes.size(); ++i)
+    {
+      if (volumes[i] < 0)
+        throw std::invalid_argument("MinSTCut received a negative cell volume.");
+      totalUnary += getInsideCost(volumes[i], moments[i])
+                  + getOutsideCost(volumes[i], moments[i]);
+    }
+    Real totalPairwise = 0;
+    for (const Edge& e : edges)
+    {
+      if (e.capacity < 0)
+        throw std::invalid_argument("MinSTCut received a negative pairwise capacity.");
+      totalPairwise += e.capacity;
+    }
+    const Real pinCost =
+      Real(1e3) * (options.unaryScale * totalUnary
+                   + std::max(options.lambdaScale, Real(1)) * totalPairwise
+                   + Real(1));
 
     std::vector<Real> insideCosts(volumes.size());
     std::vector<Real> outsideCosts(volumes.size());
     for (Index i = 0; i < volumes.size(); ++i)
     {
-      if (volumes[i] < 0)
-        throw std::invalid_argument("MinSTCut received a negative cell volume.");
-      insideCosts[i] = getInsideCost(volumes[i], moments[i]);
-      outsideCosts[i] = getOutsideCost(volumes[i], moments[i]);
+      insideCosts[i] = options.unaryScale * getInsideCost(volumes[i], moments[i]);
+      outsideCosts[i] = options.unaryScale * getOutsideCost(volumes[i], moments[i]);
+
+      const Boolean inBand =
+        options.cellInBand.empty() ? true : options.cellInBand[i];
+      const Boolean farField =
+        options.farFieldThreshold >= 0
+        && std::abs(moments[i]) >= options.farFieldThreshold;
+
+      if (!inBand || farField)
+      {
+        // Pin to sign(-moment): negative moment -> Inside, positive -> Outside.
+        // To pin Inside, make the cost of the Outside label dominant, and
+        // vice-versa.
+        if (moments[i] < 0)
+          outsideCosts[i] += pinCost;
+        else
+          insideCosts[i] += pinCost;
+      }
     }
-    return solve(insideCosts, outsideCosts, edges);
+
+    std::vector<Edge> scaledEdges = edges;
+    for (Index e = 0; e < scaledEdges.size(); ++e)
+    {
+      const Real lambda =
+        options.perEdgeLambda.empty()
+        ? options.lambdaScale
+        : options.perEdgeLambda[e];
+      if (lambda < 0)
+        throw std::invalid_argument("MinSTCut perEdgeLambda contains a negative value.");
+      scaledEdges[e].capacity *= lambda;
+    }
+
+    return solve(insideCosts, outsideCosts, scaledEdges);
   }
 
   MinSTCut::Result MinSTCut::solve(
