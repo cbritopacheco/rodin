@@ -14,6 +14,13 @@ target_link_libraries(Displace
   Rodin::Geometry
   Rodin::Variational)
 
+add_executable(LevelSetSDRReconstruction LevelSetSDRReconstruction.cpp)
+target_link_libraries(LevelSetSDRReconstruction
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(Skin Skin.cpp)
 target_link_libraries(Skin
   PUBLIC
