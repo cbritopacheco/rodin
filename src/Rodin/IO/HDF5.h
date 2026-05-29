@@ -1691,9 +1691,20 @@ namespace Rodin::IO
      * @brief Writes a grid function as cell-centered data to an HDF5 file
      *        for XDMF visualization.
      *
-     * Evaluates the grid function at the vertices of each cell and averages
-     * the values to produce a single value per cell. The result is stored in
-     * the `/GridFunction/Values/Data` dataset.
+     * Evaluates the grid function at the cell CENTROID — a single
+     * `Geometry::Point` per cell with that cell's polytope and the
+     * polytope's reference centroid — and stores the result in the
+     * `/GridFunction/Values/Data` dataset.
+     *
+     * This is correct for true cell-centered FE spaces (e.g. P0, where
+     * the centroid evaluation returns the cell's single DOF value) as
+     * well as for nodal FE spaces sampled at the centroid (e.g. P1,
+     * where it returns the interpolated value at the geometric centre
+     * of the cell). The previous implementation averaged values at the
+     * cell's vertices, which is meaningless for P0 (vertex evaluation
+     * of a cell-centered field is not well defined) and yielded
+     * silently incorrect XDMF output for any cell-centered scalar /
+     * vector field.
      *
      * @tparam GridFunctionType  Concrete grid function type.
      * @param[in] gf        Grid function to export.
@@ -1713,7 +1724,6 @@ namespace Rodin::IO
       const size_t nc = mesh.getCellCount();
       const size_t vdim = gf.getDimension();
       const size_t D = mesh.getDimension();
-      const auto& c2v = mesh.getConnectivity().getIncidence(D, 0);
 
       const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
@@ -1754,32 +1764,17 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
-      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
-
       if constexpr (std::is_same_v<RangeType, ScalarType>)
       {
         std::vector<HDF5::F64> values(nc, 0.0);
 
         for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
         {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          ScalarType accum = ScalarType(0);
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = mesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            accum += gf(p);
-          }
-
+          const auto polytope = mesh.getPolytope(D, cell);
+          const Geometry::Polytope::Traits ts(polytope->getGeometry());
+          const Geometry::Point centroid(*polytope, ts.getCentroid());
           values[static_cast<size_t>(cell)] =
-            static_cast<HDF5::F64>(accum / static_cast<Real>(vertices.size()));
+            static_cast<HDF5::F64>(gf(centroid));
         }
 
         HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
@@ -1790,29 +1785,14 @@ namespace Rodin::IO
 
         for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
         {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          std::vector<ScalarType> accum(vdim, ScalarType(0));
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = mesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            const auto value = gf(p);
-
-            for (size_t c = 0; c < vdim; ++c)
-              accum[c] += value[c];
-          }
-
+          const auto polytope = mesh.getPolytope(D, cell);
+          const Geometry::Polytope::Traits ts(polytope->getGeometry());
+          const Geometry::Point centroid(*polytope, ts.getCentroid());
+          const auto value = gf(centroid);
           for (size_t c = 0; c < vdim; ++c)
           {
             values[static_cast<size_t>(cell) * vdim + c] =
-              static_cast<HDF5::F64>(accum[c] / static_cast<Real>(vertices.size()));
+              static_cast<HDF5::F64>(value[c]);
           }
         }
 
