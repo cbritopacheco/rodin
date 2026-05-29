@@ -77,6 +77,105 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.insideCells.size(), 0u);
   }
 
+  TEST(Rodin_Geometry_MinSTCut, NegativeMomentIsInside)
+  {
+    // Single isolated cell with a negative moment is labelled Inside.
+    const std::vector<Real> volumes{ 1.0 };
+    const std::vector<Real> moments{ -0.7 };
+    const auto result =
+      MinSTCut().classify(volumes, moments, {});
+    ASSERT_EQ(result.labels.size(), 1u);
+    EXPECT_EQ(result.labels[0], MinSTCut::Inside);
+  }
+
+  TEST(Rodin_Geometry_MinSTCut, PositiveMomentIsOutside)
+  {
+    // Single isolated cell with a positive moment is labelled Outside.
+    const std::vector<Real> volumes{ 1.0 };
+    const std::vector<Real> moments{ +0.7 };
+    const auto result =
+      MinSTCut().classify(volumes, moments, {});
+    ASSERT_EQ(result.labels.size(), 1u);
+    EXPECT_EQ(result.labels[0], MinSTCut::Outside);
+  }
+
+  TEST(Rodin_Geometry_MinSTCut, TwoCellStrongEdgeForcesCommonLabel)
+  {
+    // Two cells with conflicting moments (one negative, one positive)
+    // connected by an edge whose capacity dominates the unary terms.
+    // The optimal cut keeps both on the same side of the source/sink
+    // partition, i.e. they share a label and no cut edge appears.
+    const std::vector<Real> volumes{ 1.0, 1.0 };
+    const std::vector<Real> moments{ -0.4, +0.4 };
+    const std::vector<MinSTCut::Edge> edges{ { 0, 1, 1e3 } };
+    const auto result =
+      MinSTCut().classify(volumes, moments, edges);
+    ASSERT_EQ(result.labels.size(), 2u);
+    EXPECT_EQ(result.labels[0], result.labels[1]);
+    EXPECT_TRUE(result.cutEdges.empty());
+  }
+
+  TEST(Rodin_Geometry_MinSTCut, TwoCellWeakEdgeFollowsData)
+  {
+    // Same conflicting-moment setup as above but with a weak smoothing
+    // edge: the data term wins and the labels split along the moment
+    // sign, producing one cut edge.
+    const std::vector<Real> volumes{ 1.0, 1.0 };
+    const std::vector<Real> moments{ -0.4, +0.4 };
+    const std::vector<MinSTCut::Edge> edges{ { 0, 1, 1e-3 } };
+    const auto result =
+      MinSTCut().classify(volumes, moments, edges);
+    ASSERT_EQ(result.labels.size(), 2u);
+    EXPECT_EQ(result.labels[0], MinSTCut::Inside);
+    EXPECT_EQ(result.labels[1], MinSTCut::Outside);
+    ASSERT_EQ(result.cutEdges.size(), 1u);
+  }
+
+  TEST(Rodin_Geometry_MinSTCut, Checkerboard2x2SmoothsForLargeLambda)
+  {
+    // 2x2 grid with checkerboard sign pattern:
+    //
+    //   (0,0) = -  (0,1) = +
+    //   (1,0) = +  (1,1) = -
+    //
+    // With weak smoothing the cut produces a checkerboard label
+    // pattern; with strong smoothing the optimal labelling is uniform
+    // (all Inside or all Outside, here Inside because the negative
+    // unary costs slightly dominate the matched positives in our toy
+    // capacities).
+    constexpr std::size_t rows = 2;
+    constexpr std::size_t cols = 2;
+    const std::vector<Real> volumes(rows * cols, 1.0);
+    const std::vector<Real> moments{
+      -1.0,  +1.0,
+      +1.0,  -1.0
+    };
+    const auto edges = gridEdges(rows, cols, 1.0);
+
+    {
+      MinSTCut::Options weak;
+      weak.lambdaScale = 1e-6;
+      const auto result =
+        MinSTCut().classify(volumes, moments, edges, weak);
+      // Checkerboard preserved (each cell matches its own sign).
+      EXPECT_EQ(result.labels[0], MinSTCut::Inside);
+      EXPECT_EQ(result.labels[1], MinSTCut::Outside);
+      EXPECT_EQ(result.labels[2], MinSTCut::Outside);
+      EXPECT_EQ(result.labels[3], MinSTCut::Inside);
+    }
+    {
+      MinSTCut::Options strong;
+      strong.lambdaScale = 1e6;
+      const auto result =
+        MinSTCut().classify(volumes, moments, edges, strong);
+      // Strong smoothing collapses the 2x2 to a single label.
+      EXPECT_EQ(result.labels[0], result.labels[1]);
+      EXPECT_EQ(result.labels[1], result.labels[2]);
+      EXPECT_EQ(result.labels[2], result.labels[3]);
+      EXPECT_TRUE(result.cutEdges.empty());
+    }
+  }
+
   TEST(Rodin_Geometry_MinSTCut, UnaryCostMatchesAdvertisedConvention)
   {
     // Inside cost charges only positive moments, outside only negative.

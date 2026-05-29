@@ -5,8 +5,22 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// Static SDR (Surface-aware Distance-Reconstruction) displacement on a P1
-// vector finite-element space, expressed through Rodin::Variational::Problem.
+// 2D triangular static prototype of SDR (Surface-aware Distance
+// Reconstruction) displacement, on a P1 vector finite-element space,
+// expressed through Rodin::Variational::Problem.
+//
+// Scope. This is intentionally limited to:
+//   - planar 2D meshes;
+//   - linear (affine) triangles;
+//   - a single static SDR solve;
+//   - an analytic level set with closed-form phi, grad phi, hess phi.
+//
+// Curved / high-order reconstruction, true polytope-map quality on
+// non-affine elements, and time-dependent / coupled flows are explicitly
+// out of scope here. The phase moments, A_K branch, A_K^u, J_K_scale,
+// and output indexing all go through PolytopeTransformation and the FES
+// machinery, so extending the prototype to curved elements is a
+// localized change to the cell-quality + sampling code paths only.
 //
 // Pipeline:
 //   1. Compute per-cell phase moments by integrating tanh(phi/eps).
@@ -17,17 +31,39 @@
 //      (Fast Marching Method) seeded on the cut skeleton, signed on the
 //      interior region.
 //   5. Solve a static displacement problem on a P1 vector FES so that
-//      phi(X + u) approximates s_h^LF on the band {|s_h^LF| <= delta}.
+//      phi(X + u) approximates s_h^LF in a Gaussian-weighted band around
+//      the cut skeleton.
 //
-// The SDR residual and tangent are expressed as Rodin form-language
-// integrators (Variational::LinearFormIntegratorBase /
-// LocalBilinearFormIntegratorBase). The Newton step is run through
-// Rodin::Variational::Problem + Rodin::Solver::NewtonSolver. No
-// hand-written dense residual/Jacobian loop is used as the main solve.
+// Energy and well-posedness, in words.
+//   - The SDR data term controls (in the sense of dominating the
+//     Hessian) the component of u along grad_y phi at every quadrature
+//     point with non-negligible weight. It does NOT control motion
+//     tangent to the level set, and it does NOT control mesh motion in
+//     the far field. The Gaussian smoothing widens the support of the
+//     SDR Hessian (so far-field rows are not exactly zero) but it does
+//     not make the SDR functional coercive on its own.
+//   - The intrinsic shape quality energy (Q_shape - 1 weighted by cell
+//     area) supplies tangential control and far-field regularization.
+//   - The Jacobian admissibility / nondegeneracy / singularity barrier
+//     keeps j_K^u(xhat) = sigma_K det(A_K^u) / J_K_scale strictly
+//     positive, which is what makes Q_shape well-defined on the same
+//     branch.
+//   - Zero Dirichlet on the mesh boundary pins the perimeter dofs and
+//     kills rigid-body modes.
+// All four ingredients together make the discrete Newton system
+// positive-definite; none of them alone does so.
 //
-// This iteration intentionally implements only the SDR penalty +
-// Tikhonov regularization. The Jacobian admissibility + shape barrier
-// (with sigma_K branch and j_K^u) will land in a follow-up turn.
+// Implementation notes.
+//   - Residuals and tangents for SDR are FES-generic Rodin form-language
+//     integrators (LinearFormIntegratorBase / LocalBilinearFormIntegratorBase).
+//   - The Jacobian admissibility barrier + intrinsic shape quality
+//     residual and tangent are derived analytically and assume the 2D
+//     triangular affine prototype above (constant grad_X u_h per cell).
+//   - The Newton step uses the Gauss-Newton form of the SDR tangent
+//     (the rank-1 grad_y phi outer product, dropping the indefinite
+//     (phi - s) * hess(phi) term). This is the standard treatment for
+//     nonlinear least-squares functionals; the dropped term vanishes at
+//     a stationary point, so the minimum is unchanged.
 //
 #include <Rodin/Assembly.h>
 #include <Rodin/Distance/Eikonal.h>
@@ -202,11 +238,13 @@ namespace
   //
   //   where W(s) = exp(-s^2 / (2 * deltaW^2)) is a global Gaussian and
   //   M_w = int_Omega W(s_h^LF) dX is the weighted band measure.
-  //   Dropping the hard gate is what eliminates the rank-1 ill-conditioning
-  //   in the far field that previously required Tikhonov regularization or
-  //   a SubMesh restriction: every cell now contributes a non-zero (but
-  //   decreasing-with-distance) SDR Hessian, so the full-mesh linear
-  //   system is coercive and Newton can converge quadratically.
+  //   Dropping the hard gate gives every cell a non-zero (but rapidly
+  //   decreasing-with-distance) SDR contribution, which widens the
+  //   support of the rank-1 grad_y phi outer-product Hessian. This is
+  //   NOT by itself a coercivity argument: the SDR term still controls
+  //   mostly the normal direction, and tangential / far-field
+  //   regularization is provided by the shape + admissibility energies
+  //   (see the main()-level comment near the Problem assembly).
   //
   //   Residual:
   //
@@ -521,45 +559,53 @@ namespace
     -> SDRTangentIntegrator<L, S, DU, V, U>;
 
   // -------------------------------------------------------------------------
-  //   Per-cell affine geometry cache for the Jacobian admissibility barrier
+  //   Per-cell geometry cache for the Jacobian admissibility barrier
+  //   (nondegeneracy / singularity barrier; never an "orientation" barrier).
   // -------------------------------------------------------------------------
   //
-  //   For each triangle cell K we precompute the affine map A_K = D F_K,
-  //   the sigma_K branch sign of det(A_K), and the inverse-transpose used
-  //   to evaluate the spatial gradient of the P1 displacement field on K:
+  // For each triangle cell K we obtain A_K(xhat_q) = D F_K(xhat_q) at every
+  // quadrature point xhat_q from the actual Rodin PolytopeTransformation,
+  // verify the branch sign
   //
-  //       grad_X u_h = A_K^{-T} * grad_xhat U
+  //     sigma_Kq = sign(det A_K(xhat_q))
   //
-  //   where the reference-gradient matrix grad_xhat U is built from the
-  //   vertex displacement coefficients. The PR review explicitly requires
-  //   that the actual polytope orientation (sigma_K) is respected and
-  //   that vertex order is NOT swapped for positive determinant.
+  // is consistent across quadrature points (we treat one branch per
+  // cell — this is the affine 2D prototype), and integrate
   //
-  //   For affine triangles, A_K is constant on K, |K_hat| = 1/2, and
-  //   |det A_K| = 2|K|, so the requested integral form
+  //     J_K_scale = (1 / |Khat|) * int_Khat |det A_K(xhat)| dxhat
   //
-  //       j_K_scale = (1/|K_hat|) int_{K_hat} |det A_K(x_hat)| dx_hat
+  // via the cell's reference quadrature. The cached J_K_scale enters the
+  // intrinsic admissibility quantity
   //
-  //   reduces to |det A_K|.
+  //     j_K^u(xhat) = sigma_K * det(A_K^u(xhat)) / J_K_scale
+  //
+  // and the admissibility condition is `j_K^u > j_min` (not det > 0).
+  //
+  // For an affine triangle A_K is constant in xhat, |Khat| = 1/2, and
+  // J_K_scale reduces to |det A_K|. We exploit that constancy when
+  // evaluating the per-cell analytical barrier residual + Hessian below,
+  // but the value of A_K used in the algebra is the one returned by the
+  // PolytopeTransformation — not a hand-built [X1 - X0, X2 - X0] matrix.
   //
   struct CellGeomCache
   {
     Index index = 0;
     Real area = 0;                          // |K|
-    Real detAK = 0;                         // signed det(A_K)
-    Real absDetAK = 0;                      // |det(A_K)| = j_K_scale
-    int sigmaK = 1;                         // sign(det A_K)
-    Math::SpatialMatrix<Real> A;            // A_K (2x2)
-    Math::SpatialMatrix<Real> Ainv;         // A_K^{-1} (2x2)
+    Real detAK = 0;                         // signed det(A_K) (constant for affine)
+    Real Jscale = 0;                        // (1/|Khat|) integral |det A_K(xhat)| dxhat
+    int sigmaK = 1;                         // verified-consistent sign(det A_K(xhat_q))
+    Math::SpatialMatrix<Real> A;            // A_K = D F_K (2x2; from PolytopeTransformation)
+    Math::SpatialMatrix<Real> Ainv;         // A_K^{-1}
     Math::SpatialMatrix<Real> AinvT;        // A_K^{-T}
-    Math::SpatialMatrix<Real> C;            // A_K A_K^T  (used by analytic shape barrier)
-    Math::Matrix<Real> gradN;               // 3x2: rows = spatial grads of basis fns
+    Math::SpatialMatrix<Real> C;            // A_K A_K^T  (analytical shape Hessian)
+    Math::Matrix<Real> gradN;               // 3x2: spatial gradients of P1 nodal basis
     std::array<Index, 3> vertices = {{ 0, 0, 0 }};
   };
 
   std::vector<CellGeomCache> precomputeCellGeometry(const Mesh<Context::Local>& mesh)
   {
     std::vector<CellGeomCache> cache(mesh.getCellCount());
+
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
@@ -569,29 +615,65 @@ namespace
       for (size_t i = 0; i < 3; ++i)
         c.vertices[i] = vertices[i];
 
-      const Vec2 X0 = mesh.getVertexCoordinates(vertices[0]);
-      const Vec2 X1 = mesh.getVertexCoordinates(vertices[1]);
-      const Vec2 X2 = mesh.getVertexCoordinates(vertices[2]);
+      // Use the polytope's own quadrature to (i) probe A_K at every qp
+      // for the sigma_K consistency check and (ii) integrate J_K_scale.
+      const auto& qf =
+        QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(qf);
+      const size_t nqp = quadrature.getSize();
+      if (nqp == 0)
+        throw std::runtime_error(
+            "precomputeCellGeometry: cell quadrature is empty.");
 
-      Math::SpatialMatrix<Real> A(2, 2);
-      A(0, 0) = X1(0) - X0(0); A(0, 1) = X2(0) - X0(0);
-      A(1, 0) = X1(1) - X0(1); A(1, 1) = X2(1) - X0(1);
+      // |Khat| for the reference triangle = 1/2; for the segment = 1; etc.
+      // Compute |Khat| via the same quadrature so we stay polytope-agnostic
+      // at this level of the code: sum_q wq = |Khat|.
+      Real khatMeasure = 0;
+      Real integralAbsDetA = 0;
+      Math::SpatialMatrix<Real> Aq;
+      int sigmaFirst = 0;
+      for (size_t q = 0; q < nqp; ++q)
+      {
+        const auto& pt = quadrature.getPoint(q);
+        const auto& rc = pt.getReferenceCoordinates();
+        const Real wq = qf.getWeight(q);
+        khatMeasure += wq;
+        cell.getTransformation().jacobian(Aq, rc);
+        const Real detAq = Aq.determinant();
+        if (detAq == Real(0))
+          throw std::runtime_error(
+              "precomputeCellGeometry: degenerate A_K(xhat_q) at cell "
+              + std::to_string(c.index));
+        const int sigmaq = detAq > 0 ? 1 : -1;
+        if (q == 0)
+          sigmaFirst = sigmaq;
+        else if (sigmaq != sigmaFirst)
+          throw std::runtime_error(
+              "precomputeCellGeometry: sigma_Kq is not consistent across "
+              "quadrature points at cell " + std::to_string(c.index)
+              + " (curved/inverted element rejected by the affine prototype).");
+        integralAbsDetA += wq * std::abs(detAq);
+      }
+      c.sigmaK = sigmaFirst;
+      c.Jscale = integralAbsDetA / khatMeasure;
 
-      const Real det = A.determinant();
-      c.A = A;
-      c.detAK = det;
-      c.absDetAK = std::abs(det);
-      c.sigmaK = det >= 0 ? 1 : -1;
-      c.area = Real(0.5) * c.absDetAK;
-      c.Ainv = A.inverse();
+      // For the 2D triangular affine prototype: A_K is constant; sample it
+      // once from PolytopeTransformation at the cell's reference centroid.
+      Math::SpatialPoint rcCentroid(2);
+      rcCentroid(0) = Real(1) / Real(3);
+      rcCentroid(1) = Real(1) / Real(3);
+      cell.getTransformation().jacobian(c.A, rcCentroid);
+      c.detAK = c.A.determinant();
+      c.area = Real(0.5) * std::abs(c.detAK);
+      c.Ainv = c.A.inverse();
       c.AinvT = c.Ainv.transpose();
-      c.C = A * A.transpose();
+      c.C = c.A * c.A.transpose();
 
-      // Reference gradients of the P1 basis on a triangle:
+      // Reference gradients of the P1 basis on the triangle:
       //   N_0 = 1 - rx - ry, grad_ref = (-1, -1)
       //   N_1 = rx,          grad_ref = (+1,  0)
       //   N_2 = ry,          grad_ref = ( 0, +1)
-      // Spatial gradient: grad_X N_k = A^{-T} * grad_ref N_k.
+      // Spatial gradient: grad_X N_k = A_K^{-T} * grad_ref N_k.
       c.gradN.resize(3, 2);
       const auto col0 = c.AinvT.col(0);
       const auto col1 = c.AinvT.col(1);
@@ -654,20 +736,22 @@ namespace
     return gradHat;
   }
 
-  // Vector P1 global dof layout is COMPONENT-MAJOR:
-  //   global dof for (vertex v, component c) = v + c * vertexCount.
-  // See Rodin::Variational::P1<SpatialVector<Real>, Mesh>::P1(mesh, vdim).
+  // Pull the per-vertex displacement values out of the vector P1
+  // GridFunction through the FES dof-mapping API. The (vertex, component)
+  // -> global dof map is determined by Rodin and may change layout; we
+  // never index the raw data buffer directly.
   template <class StateType>
   std::array<Vec2, 3> extractCellU(
       const CellGeomCache& cell, const StateType& u)
   {
+    const auto& fes = u.getFiniteElementSpace();
     const auto& uData = u.getData();
-    const Index vn = u.getFiniteElementSpace().getMesh().getVertexCount();
     std::array<Vec2, 3> uv;
     for (size_t i = 0; i < 3; ++i)
     {
       const Index v = cell.vertices[i];
-      uv[i] = vec2(uData(v), uData(v + vn));
+      const auto& dofs = fes.getDOFs(0, v);   // vertex dof set (length vdim)
+      uv[i] = vec2(uData(dofs[0]), uData(dofs[1]));
     }
     return uv;
   }
@@ -684,32 +768,53 @@ namespace
     Math::Matrix<Real> hess;       // 6x6
   };
 
-  // Fully analytical residual and tangent of the shape + admissibility
-  // barrier on an affine triangle, with the sigma_K branch.
+  // Fully analytical residual and tangent of
+  //   - the intrinsic shape quality energy, and
+  //   - the Jacobian admissibility / nondegeneracy / singularity
+  //     barrier (NOT an "orientation" barrier),
+  // on an affine triangle, with the sigma_K branch baked in.
   //
-  // Notation in this routine (all 2x2 unless noted):
-  //   F    = I + grad_X u_h           on the cell (constant for affine map)
-  //   M    = F A_K                    (cell-deformed Jacobian)
-  //   D    = sigma_K det(M) = |det A_K| * det F
-  //   n    = ||M||_F^2 = tr(M^T M)
-  //   FC   = F * C, with C = A_K A_K^T
+  // The barrier is the integral form
+  //
+  //   E_jac(u) = - average_K  integral_Khat log(j_K^u(xhat) - j_min) dxhat
+  //
+  // (per the spec: minus log of the strictly positive admissibility
+  // quantity, averaged over xhat and cell-area-weighted at assembly time).
+  //
+  // Intrinsic shape quality on the same branch (general dimension):
+  //
+  //   Q_shape(A_K^u) = (1/d) ||A_K^u||_F^2 / (sigma_K det(A_K^u))^(2/d)
+  //
+  // valid only when sigma_K det(A_K^u) > 0; this is enforced by the
+  // admissibility barrier above.
+  //
+  // For the 2D triangular affine prototype this routine specializes to
+  // d = 2, where (sigma_K det)^(2/d) = sigma_K det. We still write the
+  // power explicitly so it is clear what the general-dimensional formula
+  // is.
+  //
+  // Notation in the algebra below (all 2x2 unless noted):
+  //   F     = I + grad_X u_h    on the cell (constant for affine map)
+  //   M     = F A_K             cell-deformed Jacobian, sigma_K det M > 0
+  //   D     = (sigma_K det M)^(2/d) -> sigma_K det M in 2D = Jscale * det F
+  //   n     = ||M||_F^2
+  //   FC    = F * C, with C = A_K A_K^T
   //   FinvT = F^{-T}
-  //   j     = det F                   (= j_K^u for affine triangles)
-  //   h     = j / (j - jMin)          (log-barrier multiplier)
-  //   K_d   = jMin * j / (j - jMin)^2 (det-Hessian scalar)
+  //   j     = sigma_K det(A_K^u) / Jscale       (admissibility quantity)
+  //   h     = j / (j - jMin)
+  //   K_d   = jMin * j / (j - jMin)^2
   //   w_s   = gamma * |K|/|Omega|
   //   w_d   = beta  * |K|/|Omega|
   //
-  // Energy:
-  //   E_cell = w_s * (n / (2 D) - 1) - w_d * log(j - jMin)
+  // Per-cell energy:
+  //   E_cell = w_s * (n / (d D) - 1) - w_d * log(j - jMin)
   //
-  // First derivative w.r.t. F (closed form):
-  //   S = w_s/D * (F C - (n/2) F^{-T}) - w_d * h * F^{-T}
+  // First derivative dE/dF (closed form, 2D specialization):
+  //   S = w_s/D * (F C - (n/2) F^{-T}) - w_d * h / Jscale * (Jscale F^{-T})
+  // which simplifies to the form below.
   //
-  // Mapping S -> per-dof residual via grad_X N_k (constant on the cell):
-  //   R[k*2 + l] = (S * grad N_k)_l       where grad N_k is a 2-vector
-  //
-  // Tangent contraction is derived in the comment above the loop.
+  // Per-dof residual via grad_X N_k (constant on the cell):
+  //   R[k*2 + l] = (S * grad_X N_k)_l
   BarrierLocal evaluateBarrierLocal(
       const CellGeomCache& cell,
       const std::array<Vec2, 3>& uv,
@@ -730,7 +835,16 @@ namespace
     Math::SpatialMatrix<Real> F =
       Math::SpatialMatrix<Real>::Identity(2, 2) + U * cell.gradN;
 
-    const Real j = F.determinant();
+    // Intrinsic admissibility quantity (PR-review formula):
+    //   j_K^u = sigma_K * det(A_K^u) / J_K_scale
+    //         = sigma_K * det(F * A_K) / J_K_scale
+    //         = (sigma_K * det A_K * det F) / J_K_scale.
+    // For affine cells sigma_K det A_K = |det A_K| = Jscale, so this
+    // simplifies to det(F); we still write the general form so the
+    // sigma_K branch is visible.
+    const Real detF = F.determinant();
+    const Real sigDetA = static_cast<Real>(cell.sigmaK) * cell.detAK;
+    const Real j = sigDetA * detF / cell.Jscale;
     out.j = j;
     if (j <= params.jMin)
     {
@@ -738,10 +852,15 @@ namespace
       return out;
     }
 
+    // M = F A_K, n = ||M||_F^2, sigma_K det M > 0 by admissibility.
     const Math::SpatialMatrix<Real> M = F * cell.A;
     const Real n2 = M.squaredNorm();
-    const Real D = cell.absDetAK * j;
-    const Real qShape = Real(0.5) * n2 / D;
+    const Real sigDetM = static_cast<Real>(cell.sigmaK) * M.determinant();
+    // 2D specialization: (sigma_K det M)^(2/d) = sigma_K det M when d=2.
+    // Written generically here so the formula stays honest.
+    constexpr Real d = 2;
+    const Real D = std::pow(sigDetM, Real(2) / d);
+    const Real qShape = n2 / (d * D);
 
     const Real areaWeight = cell.area / params.domainMeasure;
     const Real w_s = params.gamma * areaWeight;
@@ -1155,13 +1274,21 @@ int main(int, char**)
   //   Step 6: Problem assembly and Newton solve
   // -------------------------------------------------------------------------
   // Full nonlinear residual: R(v;u) = R_SDR + R_barrier.
-  // Tangent: K(du,v;u) = K_SDR + K_barrier (full Hessian, no FD wrapper).
-  // With the smooth band weight, every cell contributes a nonzero SDR
-  // Hessian and the full-mesh system is coercive — no Tikhonov needed.
+  // Tangent: K(du,v;u) = K_SDR + K_barrier (analytic; Gauss-Newton on the
+  // SDR side, full Hessian on the barrier side).
+  //
+  // The SDR data term alone is not coercive: at every quadrature point
+  // its Hessian is the rank-1 outer product grad_y phi grad_y phi^T,
+  // which controls displacement along grad_y phi only. Motion tangent
+  // to the level set, and any far-field mesh motion, must be supplied
+  // by the intrinsic shape quality energy and the Jacobian admissibility
+  // barrier. The Gaussian band weight gives the SDR Hessian a non-zero
+  // (but rank-1 and small) contribution everywhere; it widens the
+  // support of the SDR coupling but does not coerce the full problem.
   // DirichletBC on the grid boundary pins the perimeter dofs to zero,
-  // which both eliminates rigid-body modes and reflects the fact that
-  // the mesh boundary is the analyst-imposed domain edge (the SDR fit
-  // happens in the interior).
+  // killing rigid-body modes and reflecting the fact that the mesh
+  // boundary is the analyst-imposed domain edge (the SDR fit happens
+  // in the interior).
   auto zero = VectorFunction{ Zero(), Zero() };
 
   Problem newton(du, v);
@@ -1198,15 +1325,18 @@ int main(int, char**)
   //   Step 7: diagnostics + XDMF output
   // -------------------------------------------------------------------------
   LocalMesh moved(mesh);
-  const auto& uData = u.getData();
-  const Index vn = mesh.getVertexCount();
-  for (Index vertex = 0; vertex < vn; ++vertex)
   {
-    const Vec2 x = mesh.getVertexCoordinates(vertex);
-    // Vector P1 dof layout is component-major: dof = vertex + comp * vn.
-    const Real ux = uData(vertex);
-    const Real uy = uData(vertex + vn);
-    moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
+    const auto& uFes = u.getFiniteElementSpace();
+    const auto& uData = u.getData();
+    const Index vn = mesh.getVertexCount();
+    for (Index vertex = 0; vertex < vn; ++vertex)
+    {
+      const Vec2 x = mesh.getVertexCoordinates(vertex);
+      const auto& dofs = uFes.getDOFs(0, vertex);   // [dof_x, dof_y]
+      const Real ux = uData(dofs[0]);
+      const Real uy = uData(dofs[1]);
+      moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
+    }
   }
   moved.save("LevelSetSDRReconstruction_HF.mesh", IO::FileFormat::MFEM);
 
@@ -1240,15 +1370,20 @@ int main(int, char**)
   GridFunction cellLabel(p0Fes);
   GridFunction phaseMoment(p0Fes);
   GridFunction sigmaKgf(p0Fes);
-  for (const auto& info : cellMoments)
   {
-    const Index dof =
-      p0Fes.getGlobalIndex({mesh.getDimension(), info.index}, 0);
-    cellLabel.getData()(dof) =
-      static_cast<Real>(classified.labels[info.index]);
-    phaseMoment.getData()(dof) = info.moment;
-    sigmaKgf.getData()(dof) =
-      static_cast<Real>(cellCache[info.index].sigmaK);
+    // Cell-iterator-driven assignment: every P0 write goes through the
+    // FES global-index lookup. This is robust against any future P0
+    // renumbering — the code never assumes "dof index == cell index".
+    const size_t d = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const Index idx = cellIt->getIndex();
+      const Index dof = p0Fes.getGlobalIndex({d, idx}, 0);
+      cellLabel.getData()(dof)   = static_cast<Real>(classified.labels[idx]);
+      phaseMoment.getData()(dof) = cellMoments[idx].moment;
+      sigmaKgf.getData()(dof)    =
+        static_cast<Real>(cellCache[idx].sigmaK);
+    }
   }
   cellLabel.setName("cell_label");
   phaseMoment.setName("phase_moment");
@@ -1269,27 +1404,30 @@ int main(int, char**)
   GridFunction jK(p0FesMoved);
   GridFunction qShape(p0FesMoved);
   GridFunction cellLabelHF(p0FesMoved);
-  // Recompute the moved-mesh cell geometry to get det F and Q_shape from
-  // the actual updated vertex positions (rather than re-deriving from u).
+  // Recompute the moved-mesh cell geometry to get A_K^u from the actual
+  // updated vertex positions (rather than re-deriving F from u).
   const auto movedCache = precomputeCellGeometry(moved);
-  for (const auto& info : cellMoments)
   {
-    const Index dof =
-      p0FesMoved.getGlobalIndex({moved.getDimension(), info.index}, 0);
-    const auto& src = cellCache[info.index];
-    const auto& dst = movedCache[info.index];
-    // F = A_K^u A_K^{-1}, det F = det(A_K^u) / det(A_K).
-    // With the sigma_K branch:
-    //   j_K^u = sigma_K det(A_K^u) / |det A_K|
-    //         = sigma_K det F * sigma_K = det F.
-    jK.getData()(dof) = dst.detAK / src.detAK;
-    // Q_shape = 0.5 * ||A_K^u||_F^2 / (sigma_K det A_K^u)
-    //         = 0.5 * ||dst.A||_F^2 / (sigma_K * dst.detAK)
-    qShape.getData()(dof) =
-      Real(0.5) * dst.A.squaredNorm()
-        / (static_cast<Real>(src.sigmaK) * dst.detAK);
-    cellLabelHF.getData()(dof) =
-      static_cast<Real>(classified.labels[info.index]);
+    const size_t d = moved.getDimension();
+    for (auto cellIt = moved.getCell(); cellIt; ++cellIt)
+    {
+      const Index idx = cellIt->getIndex();
+      const Index dof = p0FesMoved.getGlobalIndex({d, idx}, 0);
+      const auto& src = cellCache[idx];
+      const auto& dst = movedCache[idx];
+      // j_K^u = sigma_K det(A_K^u) / J_K_scale.
+      const Real sigDetAu =
+        static_cast<Real>(src.sigmaK) * dst.detAK;
+      jK.getData()(dof) = sigDetAu / src.Jscale;
+      // Q_shape = (1/d) ||A_K^u||_F^2 / (sigma_K det A_K^u)^(2/d).
+      // For d=2 the exponent collapses to 1; written generically.
+      const Real dExp = Real(2) / Real(d);
+      qShape.getData()(dof) =
+        dst.A.squaredNorm()
+          / (static_cast<Real>(d) * std::pow(sigDetAu, dExp));
+      cellLabelHF.getData()(dof) =
+        static_cast<Real>(classified.labels[idx]);
+    }
   }
   jK.setName("j");
   qShape.setName("q_shape");
@@ -1352,7 +1490,7 @@ int main(int, char**)
             << classified.insideCells.size() << " / "
             << classified.outsideCells.size() << '\n';
   std::cout << "  interface facets: " << interfaceFacets.size() << '\n';
-  std::cout << "  vector dofs: " << uData.size() << '\n';
+  std::cout << "  vector dofs: " << u.getData().size() << '\n';
   std::cout << "  h: " << h << ", delta: " << delta << '\n';
   std::cout << "  |Omega_h|: " << domainMeasure
             << ", M_w (smooth band): " << weightedBandMeasure << '\n';
