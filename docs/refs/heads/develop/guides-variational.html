@@ -734,10 +734,10 @@ $ \mathbf{u} $
 <g id='eq37-page1'>
 <use x='0' y='0' xlink:href='#eq37-g0-117'/>
 </g>
-</svg>)</td><td><code>Component(u, i)</code> or <code>u.x()</code></td></tr></tbody></table><pre class="m-code"><span class="c1">// Laplacian-like term: ∫ ∇u · ∇v dx</span>
+</svg>)</td><td><code>Component(u, i)</code> or <code>u.x()</code></td></tr></tbody></table><pre class="m-code"><span class="c1">// Laplacian-like term: \int \nablau \cdot \nablav dx</span>
 <span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
-<span class="c1">// Divergence term (for vector fields): ∫ (∇·u)(∇·v) dx</span>
+<span class="c1">// Divergence term (for vector fields): \int (\nabla\cdotu)(\nabla\cdotv) dx</span>
 <span class="n">Integral</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Div</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
 <span class="c1">// Elasticity: symmetric gradient ε(u) : ε(v)</span>

@@ -80,13 +80,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md358">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md359">Features</a></li>
-            <li><a href="#autotoc_md360">Degree of Freedom (DOF) Formulas</a></li>
-            <li><a href="#autotoc_md361">Usage Example</a></li>
+            <li><a href="#autotoc_md365">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md366">Features</a></li>
+            <li><a href="#autotoc_md367">Degree of Freedom (DOF) Formulas</a></li>
+            <li><a href="#autotoc_md368">Usage Example</a></li>
           </ul>
         </nav>
-<p>This header provides access to the H1-conforming Lagrange finite element family. These are high-order-stable elements with continuous (H¹) basis functions across element boundaries.</p><section id="autotoc_md358"><h3><a href="#autotoc_md358">Mathematical Foundation</a></h3><p>The H1-conforming Lagrange space of degree k is defined as:</p><div class="m-math"><svg style="width: 22.649em; height: 1.402em;" viewBox="85.557851 -13.45978 217.427342 13.45978">
+<p>This header provides access to the H1-conforming Lagrange finite element family. These are high-order-stable elements with continuous (H¹) basis functions across element boundaries.</p><section id="autotoc_md365"><h3><a href="#autotoc_md365">Mathematical Foundation</a></h3><p>The H1-conforming Lagrange space of degree k is defined as:</p><div class="m-math"><svg style="width: 22.649em; height: 1.402em;" viewBox="85.557851 -13.45978 217.427342 13.45978">
 <title>
 \[
   V_h^k = \{u \in H^1(\Omega) : u|_K \in \mathbb{P}_k(K) \, \forall K \in \mathcal{T}_h\}
@@ -172,7 +172,7 @@ $ K $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg>.</p></section><section id="autotoc_md359"><h3><a href="#autotoc_md359">Features</a></h3><ul><li>Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)</li><li>H¹-conforming (continuous across element boundaries)</li><li>Lagrange nodal basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
+</svg>.</p></section><section id="autotoc_md366"><h3><a href="#autotoc_md366">Features</a></h3><ul><li>Supports arbitrary polynomial degree k (K=0, 1, 2, 3, 4, 5, 6, ...)</li><li>H¹-conforming (continuous across element boundaries)</li><li>Lagrange nodal basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
 </title>
@@ -262,7 +262,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq8-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq8-g1-49'/>
 </g>
-</svg> norm</li><li>Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge</li><li>High-order-stable implementation</li></ul></section><section id="autotoc_md360"><h3><a href="#autotoc_md360">Degree of Freedom (DOF) Formulas</a></h3><ul><li>Segment: <svg class="m-math" style="width: 2.788em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 26.760473 9.215393">
+</svg> norm</li><li>Supports all standard geometries: Segment, Triangle, Quadrilateral, Tetrahedron, Wedge</li><li>High-order-stable implementation</li></ul></section><section id="autotoc_md367"><h3><a href="#autotoc_md367">Degree of Freedom (DOF) Formulas</a></h3><ul><li>Segment: <svg class="m-math" style="width: 2.788em; height: 0.960em; vertical-align: -0.095em;" viewBox="0 -8.302191 26.760473 9.215393">
 <title>
 $ k+1 $
 </title>
@@ -393,7 +393,7 @@ $ (k+1) \cdot \frac{(k+1)(k+2)}{2} $
 <rect x='45.694855' y='-3.227886' height='.478187' width='44.057623'/>
 <use x='65.606575' y='4.122632' xlink:href='#eq13-g3-50'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md361"><h3><a href="#autotoc_md361">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 2 (quadratic)</span>
+</svg></li></ul></section><section id="autotoc_md368"><h3><a href="#autotoc_md368">Usage Example</a></h3><pre class="m-code"><span class="c1">// H1 element of degree 2 (quadratic)</span>
 <span class="n">RealH1Element</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;DOFs: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">h1_2</span><span class="p">.</span><span class="n">getCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span><span class="w">  </span><span class="c1">// 6</span>
 

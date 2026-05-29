@@ -80,12 +80,12 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md534">Kinematics</a></li>
-            <li><a href="#autotoc_md535">Constitutive Point and Input Injection</a></li>
-            <li><a href="#autotoc_md536">Constitutive Laws</a></li>
-            <li><a href="#autotoc_md537">Integrators</a></li>
-            <li><a href="#autotoc_md538">Derived Fields</a></li>
-            <li><a href="#autotoc_md539">Typical Usage</a></li>
+            <li><a href="#autotoc_md541">Kinematics</a></li>
+            <li><a href="#autotoc_md542">Constitutive Point and Input Injection</a></li>
+            <li><a href="#autotoc_md543">Constitutive Laws</a></li>
+            <li><a href="#autotoc_md544">Integrators</a></li>
+            <li><a href="#autotoc_md545">Derived Fields</a></li>
+            <li><a href="#autotoc_md546">Typical Usage</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a> module provides a layered framework for finite-strain hyperelasticity. It is organized into four sub-layers:</p><section id="autotoc_md534"><h3><a href="#autotoc_md534">Kinematics</a></h3><p><code><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a></code> encapsulates all finite-strain kinematic quantities at a quadrature point. Set the displacement gradient with <code>setDisplacementGradient(H)</code> and query derived tensors:</p><table class="m-table"><thead><tr><th>Getter</th><th>Returns</th><th>Definition</th></tr></thead><tbody><tr><td><code>getDisplacementGradient()</code></td><td><svg class="m-math" style="width: 1.816em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 17.434651 8.169354">
+<p>The <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid</a> module provides a layered framework for finite-strain hyperelasticity. It is organized into four sub-layers:</p><section id="autotoc_md541"><h3><a href="#autotoc_md541">Kinematics</a></h3><p><code><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a></code> encapsulates all finite-strain kinematic quantities at a quadrature point. Set the displacement gradient with <code>setDisplacementGradient(H)</code> and query derived tensors:</p><table class="m-table"><thead><tr><th>Getter</th><th>Returns</th><th>Definition</th></tr></thead><tbody><tr><td><code>getDisplacementGradient()</code></td><td><svg class="m-math" style="width: 1.816em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 17.434651 8.169354">
 <title>
 $ \nabla\mathbf{u} $
 </title>
@@ -387,9 +387,9 @@ $ I_5 = \mathbf{a}_0 \cdot \mathbf{C}^2\mathbf{a}_0 $
 <use x='59.99193' y='0' xlink:href='#eq17-g0-97'/>
 <use x='66.529913' y='1.793263' xlink:href='#eq17-g3-48'/>
 </g>
-</svg> (for anisotropic materials; constructed with a fiber direction vector)</li></ul></section><section id="autotoc_md535"><h3><a href="#autotoc_md535">Constitutive Point and Input Injection</a></h3><p><code><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a></code> bundles a <code><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a></code> with an optional <code><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a></code> (for spatial location) and a tag-based auxiliary data store. Auxiliary data (fiber directions, activation values, etc.) is injected via typed tags:</p><pre class="m-code"><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiberVec</span><span class="p">);</span>
+</svg> (for anisotropic materials; constructed with a fiber direction vector)</li></ul></section><section id="autotoc_md542"><h3><a href="#autotoc_md542">Constitutive Point and Input Injection</a></h3><p><code><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a></code> bundles a <code><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a></code> with an optional <code><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a></code> (for spatial location) and a tag-based auxiliary data store. Auxiliary data (fiber directions, activation values, etc.) is injected via typed tags:</p><pre class="m-code"><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fiberVec</span><span class="p">);</span>
 <span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">FiberDirection</span><span class="o">&gt;</span><span class="p">();</span>
-<span class="kt">bool</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">has</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">();</span></pre><p>The <code><a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&lt;Derived&gt;</code> CRTP base and <code>InputFunction</code> callable allow the user to inject auxiliary data at each quadrature point during assembly. Integrators accept input via <code>setInput()</code>.</p></section><section id="autotoc_md536"><h3><a href="#autotoc_md536">Constitutive Laws</a></h3><p>Each law derives from <code><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&lt;Derived&gt;</code> (CRTP base) and provides:</p><ul><li>A <code>Cache</code> struct for precomputed invariant data</li><li><code>setCache(cache, cp)</code> — populate the cache from a <code><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a></code></li><li><code>getFirstPiolaKirchhoffStress(P, cache, cp)</code> — <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
+<span class="kt">bool</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cp</span><span class="p">.</span><span class="n">has</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">();</span></pre><p>The <code><a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a>&lt;Derived&gt;</code> CRTP base and <code>InputFunction</code> callable allow the user to inject auxiliary data at each quadrature point during assembly. Integrators accept input via <code>setInput()</code>.</p></section><section id="autotoc_md543"><h3><a href="#autotoc_md543">Constitutive Laws</a></h3><p>Each law derives from <code><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&lt;Derived&gt;</code> (CRTP base) and provides:</p><ul><li>A <code>Cache</code> struct for precomputed invariant data</li><li><code>setCache(cache, cp)</code> — populate the cache from a <code><a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a></code></li><li><code>getFirstPiolaKirchhoffStress(P, cache, cp)</code> — <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
 <title>
 $ \mathbf{P} = \partial W / \partial \mathbf{F} $
 </title>
@@ -773,7 +773,7 @@ $ \nu $
 <use x='275.478674' y='-2.988792' xlink:href='#eq33-g1-23'/>
 <use x='282.016607' y='-2.988792' xlink:href='#eq33-g2-41'/>
 </g>
-</svg></div></section><section id="autotoc_md537"><h3><a href="#autotoc_md537">Integrators</a></h3><p>Both integrators use <code>setDisplacement()</code> to set the linearization point and <code>setInput()</code> for auxiliary data injection. Quadrature order is auto-selected (2× FE order) unless overridden with <code>setQuadratureOrder()</code>.</p><table class="m-table"><thead><tr><th>Integrator</th><th>Form type</th><th>Assembles</th><th>Mathematical expression</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>&lt;Law, FES&gt;</code></td><td>Linear (residual)</td><td>Internal force vector</td><td><svg class="m-math" style="width: 10.456em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 100.373295 13.781784">
+</svg></div></section><section id="autotoc_md544"><h3><a href="#autotoc_md544">Integrators</a></h3><p>Both integrators use <code>setDisplacement()</code> to set the linearization point and <code>setInput()</code> for auxiliary data injection. Quadrature order is auto-selected (2× FE order) unless overridden with <code>setQuadratureOrder()</code>.</p><table class="m-table"><thead><tr><th>Integrator</th><th>Form type</th><th>Assembles</th><th>Mathematical expression</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>&lt;Law, FES&gt;</code></td><td>Linear (residual)</td><td>Internal force vector</td><td><svg class="m-math" style="width: 10.456em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 100.373295 13.781784">
 <title>
 $ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX $
 </title>
@@ -850,7 +850,7 @@ $ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX $
 <span class="n">residual</span><span class="p">.</span><span class="n">setDisplacement</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">                  </span><span class="c1">// set linearization point</span>
 
 <span class="n">Solid</span><span class="o">::</span><span class="n">MaterialTangent</span><span class="w"> </span><span class="nf">tangent</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">du</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span><span class="w">  </span><span class="c1">// (law, TrialFunction, TestFunction)</span>
-<span class="n">tangent</span><span class="p">.</span><span class="n">setDisplacement</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">                   </span><span class="c1">// set linearization point</span></pre></section><section id="autotoc_md538"><h3><a href="#autotoc_md538">Derived Fields</a></h3><ul><li><code><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress</a>&lt;Law&gt;</code> — Post-process <svg class="m-math" style="width: 0.957em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 9.187779 8.202578">
+<span class="n">tangent</span><span class="p">.</span><span class="n">setDisplacement</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">                   </span><span class="c1">// set linearization point</span></pre></section><section id="autotoc_md545"><h3><a href="#autotoc_md545">Derived Fields</a></h3><ul><li><code><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress</a>&lt;Law&gt;</code> — Post-process <svg class="m-math" style="width: 0.957em; height: 0.854em; vertical-align: -0.000em;" viewBox="0 -8.202578 9.187779 8.202578">
 <title>
 $ \mathbf{P} $
 </title>
@@ -911,7 +911,7 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
 <use x='60.077254' y='0' xlink:href='#eq38-g0-73'/>
 <use x='65.08626' y='0' xlink:href='#eq38-g3-41'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md539"><h3><a href="#autotoc_md539">Typical Usage</a></h3><p>A quasi-static hyperelastic block under gravity using <code><a href="class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a></code> (from <code>examples/Solid/BlockGravity.cpp</code>):</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solid.h&gt;</span>
+</svg></li></ul></section><section id="autotoc_md546"><h3><a href="#autotoc_md546">Typical Usage</a></h3><p>A quasi-static hyperelastic block under gravity using <code><a href="class_rodin_1_1_solid_1_1_neo_hookean.html" class="m-doc">NeoHookean</a></code> (from <code>examples/Solid/BlockGravity.cpp</code>):</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solid.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver/NewtonSolver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver/SparseLU.h&gt;</span>
 
@@ -1015,7 +1015,7 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
             </dt>
             <dd>CRTP base class for inputs.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class FES&gt;</div>
+              <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>
             </dt>
             <dd>Linear form integrator for the internal force vector in hyperelastic problems.</dd>
@@ -1028,7 +1028,7 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
             </dt>
             <dd>Kinematic state for finite-strain continuum mechanics.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class Solution, class FES&gt;</div>
+              <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>
             </dt>
             <dd>Local bilinear form integrator for the material tangent stiffness in hyperelastic problems.</dd>
@@ -1063,16 +1063,18 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class TestFES&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a4256327d56c43a82788510b60bcba910" class="m-doc">InternalForce</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;TestFES&gt;&amp;) -&gt; InternalForce&lt; LawDerived, TestFES &gt;</span>
+              <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#aebc6a3814be2364a980341bf57aac308" class="m-doc">InternalForce</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              const TestFunctionType&amp;,
+              const DisplacementType&amp;) -&gt; InternalForce&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
             <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class S, class TrialFES, class TestFES&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a4b4360d1e0d35ed2a04cacafc33cf85a" class="m-doc">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;S, TrialFES&gt;&amp;,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;TestFES&gt;&amp;) -&gt; MaterialTangent&lt; LawDerived, S, TrialFES &gt;</span>
+              <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a20595a29ddc3e001e30e4d25d90c49d3" class="m-doc">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              const TrialFunctionType&amp;,
+              const TestFunctionType&amp;,
+              const DisplacementType&amp;) -&gt; MaterialTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
             <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>.</dd>
           </dl>
@@ -1089,26 +1091,28 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a4256327d56c43a82788510b60bcba910"><div>
+          <section class="m-doc-details" id="aebc6a3814be2364a980341bf57aac308"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_force_8h.html">&lt;Rodin/Solid/Integrators/InternalForce.h&gt;</a></div>
               <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFES&gt;
+                template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4256327d56c43a82788510b60bcba910" class="m-doc-self">InternalForce</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;TestFES&gt;&amp;) -&gt; InternalForce&lt; LawDerived, TestFES &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebc6a3814be2364a980341bf57aac308" class="m-doc-self">InternalForce</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              const TestFunctionType&amp;,
+              const DisplacementType&amp;) -&gt; InternalForce&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
             <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>.</p>
           </div></section>
-          <section class="m-doc-details" id="a4b4360d1e0d35ed2a04cacafc33cf85a"><div>
+          <section class="m-doc-details" id="a20595a29ddc3e001e30e4d25d90c49d3"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_material_tangent_8h.html">&lt;Rodin/Solid/Integrators/MaterialTangent.h&gt;</a></div>
               <div class="m-doc-template">
-                template&lt;class LawDerived, class S, class TrialFES, class TestFES&gt;
+                template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4b4360d1e0d35ed2a04cacafc33cf85a" class="m-doc-self">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;S, TrialFES&gt;&amp;,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;TestFES&gt;&amp;) -&gt; MaterialTangent&lt; LawDerived, S, TrialFES &gt;</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20595a29ddc3e001e30e4d25d90c49d3" class="m-doc-self">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              const TrialFunctionType&amp;,
+              const TestFunctionType&amp;,
+              const DisplacementType&amp;) -&gt; MaterialTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
             <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>.</p>
           </div></section>

@@ -80,9 +80,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md528">Algorithm</a></li>
-            <li><a href="#autotoc_md529">Time Stepping and Boundary Policies</a></li>
-            <li><a href="#autotoc_md530">Typical Usage</a></li>
+            <li><a href="#autotoc_md535">Algorithm</a></li>
+            <li><a href="#autotoc_md536">Time Stepping and Boundary Policies</a></li>
+            <li><a href="#autotoc_md537">Typical Usage</a></li>
             <li>
               Reference
               <ul>
@@ -123,7 +123,7 @@
 <use x='218.481229' y='-8.200662' xlink:href='#eq1-g3-61'/>
 <use x='230.90671' y='-8.200662' xlink:href='#eq1-g3-48'/>
 </g>
-</svg></div><section id="autotoc_md528"><h3><a href="#autotoc_md528">Algorithm</a></h3><p>At each time step, the <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> method:</p><ol><li><strong>Traces characteristics</strong> backward from each mesh vertex along the velocity field <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
+</svg></div><section id="autotoc_md535"><h3><a href="#autotoc_md535">Algorithm</a></h3><p>At each time step, the <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> method:</p><ol><li><strong>Traces characteristics</strong> backward from each mesh vertex along the velocity field <svg class="m-math" style="width: 0.759em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.285181 5.313399">
 <title>
 $ \mathbf{v} $
 </title>
@@ -220,7 +220,7 @@ $ \mathbf{v} $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-118'/>
 </g>
-</svg>.</p></section><section id="autotoc_md529"><h3><a href="#autotoc_md529">Time Stepping and Boundary Policies</a></h3><p>The characteristic tracing uses configurable time-stepping schemes. The default is Runge-Kutta 4 (<code><a href="struct_rodin_1_1_math_1_1_runge_kutta_1_1_r_k4.html" class="m-doc">Math::<wbr />RungeKutta::<wbr />RK4</a></code>); custom steppers can be passed as the fifth constructor argument.</p><p>Two boundary policies handle characteristics that hit the domain boundary:</p><table class="m-table"><thead><tr><th>Policy</th><th>Behavior</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_advection_1_1_stop_inside_boundary_policy.html" class="m-doc">StopInsideBoundaryPolicy</a></code></td><td>Clamps the departure point to an interior point with a small inward offset (<code>eps_in_phys</code>, default <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
+</svg>.</p></section><section id="autotoc_md536"><h3><a href="#autotoc_md536">Time Stepping and Boundary Policies</a></h3><p>The characteristic tracing uses configurable time-stepping schemes. The default is Runge-Kutta 4 (<code><a href="struct_rodin_1_1_math_1_1_runge_kutta_1_1_r_k4.html" class="m-doc">Math::<wbr />RungeKutta::<wbr />RK4</a></code>); custom steppers can be passed as the fifth constructor argument.</p><p>Two boundary policies handle characteristics that hit the domain boundary:</p><table class="m-table"><thead><tr><th>Policy</th><th>Behavior</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_advection_1_1_stop_inside_boundary_policy.html" class="m-doc">StopInsideBoundaryPolicy</a></code></td><td>Clamps the departure point to an interior point with a small inward offset (<code>eps_in_phys</code>, default <svg class="m-math" style="width: 2.788em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 26.760853 9.474739">
 <title>
 $ 10^{-12} $
 </title>
@@ -256,7 +256,7 @@ $ \nabla\phi \cdot \delta\mathbf{x} $
 <use x='25.52499' y='0' xlink:href='#eq9-g2-14'/>
 <use x='31.157946' y='0' xlink:href='#eq9-g0-120'/>
 </g>
-</svg>. Used automatically for <strong>subsequent steps</strong> (from the current solution).</td></tr></tbody></table><p>The <code><a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a></code> class tracks time internally (<code>m_t</code>) and switches between the initial condition (first step) and the current solution (later steps).</p></section><section id="autotoc_md530"><h3><a href="#autotoc_md530">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>. Used automatically for <strong>subsequent steps</strong> (from the current solution).</td></tr></tbody></table><p>The <code><a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a></code> class tracks time internally (<code>m_t</code>) and switches between the initial condition (first step) and the current solution (later steps).</p></section><section id="autotoc_md537"><h3><a href="#autotoc_md537">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 

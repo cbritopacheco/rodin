@@ -248,7 +248,7 @@ $ \frac{\partial u}{\partial n} = \nabla u \cdot \mathbf{n} $
 </g>
 </svg></li><li>Material derivatives in fluid dynamics</li><li>Characteristic methods for PDEs</li><li>Shape sensitivity analysis</li></ul></section><section id="autotoc_md306"><h3><a href="#autotoc_md306">Usage Example</a></h3><pre class="m-code"><span class="c1">// Normal derivative on boundary</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BoundaryNormal</span><span class="p">();</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">normal_deriv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Derivative</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w">  </span><span class="c1">// ∂u/∂n = ∇u·n</span></pre></section>
+<span class="k">auto</span><span class="w"> </span><span class="n">normal_deriv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Derivative</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">);</span><span class="w">  </span><span class="c1">// \partialu/\partialn = \nablau\cdotn</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

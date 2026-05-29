@@ -282,7 +282,7 @@ $ \partial u / \partial n = 0 $
 <use x='219.024271' y='-8.200662' xlink:href='#eq8-g5-0'/>
 <use x='226.338445' y='-6.407399' xlink:href='#eq8-g0-78'/>
 </g>
-</svg></div><p>These arise naturally from integration by parts in the weak formulation and appear as <strong>boundary integrals</strong>:</p><pre class="m-code"><span class="c1">// ∫_ΓN g v ds</span>
+</svg></div><p>These arise naturally from integration by parts in the weak formulation and appear as <strong>boundary integrals</strong>:</p><pre class="m-code"><span class="c1">// \int_\GammaN g v ds</span>
 <span class="n">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre><section id="guides-bc-neumann-example"><h3><a href="#guides-bc-neumann-example">Example: Neumann on One Side</a></h3><pre class="m-code"><span class="kt">int</span><span class="w"> </span><span class="n">GammaD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Dirichlet boundary</span>
 <span class="kt">int</span><span class="w"> </span><span class="n">GammaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">  </span><span class="c1">// Neumann boundary</span>
 

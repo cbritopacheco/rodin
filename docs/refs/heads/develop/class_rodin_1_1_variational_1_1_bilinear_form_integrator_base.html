@@ -298,9 +298,9 @@ $ \int_K c \, u \cdot v \, dx $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#ab4af0a0138e99a2cc711484129247521" class="m-doc">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, TrialFES&gt;&amp; u,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v)</span>
+              <div class="m-doc-template">template&lt;class TrialFunctionType, class TestFunctionType, std::enable_if_t&lt;<a href="struct_rodin_1_1_variational_1_1_is_trial_function.html" class="m-doc">IsTrialFunction</a>&lt;std::decay_t&lt;TrialFunctionType&gt;&gt;::Value &amp;&amp; <a href="struct_rodin_1_1_variational_1_1_is_test_function.html" class="m-doc">IsTestFunction</a>&lt;std::decay_t&lt;TestFunctionType&gt;&gt;::Value, int&gt; = 0&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a602663b97bf5ce06664aca0287c0c2f5" class="m-doc">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v)</span>
             </dt>
             <dd>Constructs a bilinear form integrator.</dd>
             <dt>
@@ -350,14 +350,14 @@ $ \int_K c \, u \cdot v \, dx $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab4af0a0138e99a2cc711484129247521"><div>
+          <section class="m-doc-details" id="a602663b97bf5ce06664aca0287c0c2f5"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Number, class Derived&gt;
-                template&lt;class Solution, class TrialFES, class TestFES&gt;
+                template&lt;class TrialFunctionType, class TestFunctionType, std::enable_if_t&lt;<a href="struct_rodin_1_1_variational_1_1_is_trial_function.html" class="m-doc">IsTrialFunction</a>&lt;std::decay_t&lt;TrialFunctionType&gt;&gt;::Value &amp;&amp; <a href="struct_rodin_1_1_variational_1_1_is_test_function.html" class="m-doc">IsTestFunction</a>&lt;std::decay_t&lt;TestFunctionType&gt;&gt;::Value, int&gt; = 0&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase&lt;Number, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab4af0a0138e99a2cc711484129247521" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, TrialFES&gt;&amp; u,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;TestFES&gt;&amp; v)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />BilinearFormIntegratorBase&lt;Number, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a602663b97bf5ce06664aca0287c0c2f5" class="m-doc-self">BilinearFormIntegratorBase</a>(</span><span class="m-doc-wrap">const TrialFunctionType&amp; u,
+              const TestFunctionType&amp; v)</span></span>
             </h3>
             <p>Constructs a bilinear form integrator.</p>
             <table class="m-table m-fullwidth m-flat">
