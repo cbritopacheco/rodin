@@ -769,7 +769,7 @@ namespace Rodin::Variational
 
         case Geometry::Polytope::Type::Segment:
         {
-          // ∂φ_i / ∂x on [0,1] with GLL01 nodes
+          // \partialφ_i / \partialx on [0,1] with GLL01 nodes
           assert(m_i == 0);
           return LagrangeBasisSegment<K>::getDerivative(
               m_local, r.value());
@@ -819,9 +819,9 @@ namespace Rodin::Variational
                         dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
                       }
 
-                      if (m_i == 0)      // ∂/∂x
+                      if (m_i == 0)      // \partial/\partialx
                         result += Vinv(mode_idx, m_local) * dpsi_dx;
-                      else if (m_i == 1) // ∂/∂y
+                      else if (m_i == 1) // \partial/\partialy
                         result += Vinv(mode_idx, m_local) * dpsi_dy;
 
                       ++mode_idx;
@@ -837,12 +837,12 @@ namespace Rodin::Variational
           const size_t j_idx = m_local / (K + 1);
           const size_t i_idx = m_local % (K + 1);
 
-          if (m_i == 0) // ∂/∂x
+          if (m_i == 0) // \partial/\partialx
           {
             return LagrangeBasisQuadrilateral<K>::getDerivative(
                        i_idx, j_idx, 0, r.x(), r.y());
           }
-          else if (m_i == 1) // ∂/∂y
+          else if (m_i == 1) // \partial/\partialy
           {
             return LagrangeBasisQuadrilateral<K>::getDerivative(
                        i_idx, j_idx, 1, r.x(), r.y());
@@ -926,11 +926,11 @@ namespace Rodin::Variational
                                       + dpsi_dc * dc_dz;
                             }
 
-                            if (m_i == 0)      // ∂/∂x
+                            if (m_i == 0)      // \partial/\partialx
                               result += Vinv(mode_idx, m_local) * dpsi_dx;
-                            else if (m_i == 1) // ∂/∂y
+                            else if (m_i == 1) // \partial/\partialy
                               result += Vinv(mode_idx, m_local) * dpsi_dy;
-                            else if (m_i == 2) // ∂/∂z
+                            else if (m_i == 2) // \partial/\partialz
                               result += Vinv(mode_idx, m_local) * dpsi_dz;
 
                             ++mode_idx;
@@ -964,7 +964,7 @@ namespace Rodin::Variational
 
           const Real z = r(2);
 
-          if (m_i < 2) // ∂/∂x or ∂/∂y
+          if (m_i < 2) // \partial/\partialx or \partial/\partialy
           {
             // --- triangle gradient (same as Triangle case, but index = alpha) ---
             const auto& Vinv = VandermondeTriangle<K>::getInverse();
@@ -1008,9 +1008,9 @@ namespace Rodin::Variational
                           dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
                         }
 
-                        if (m_i == 0)      // ∂/∂x
+                        if (m_i == 0)      // \partial/\partialx
                           tri_deriv += Vinv(mode_idx, alpha) * dpsi_dx;
-                        else if (m_i == 1) // ∂/∂y
+                        else if (m_i == 1) // \partial/\partialy
                           tri_deriv += Vinv(mode_idx, alpha) * dpsi_dy;
 
                         ++mode_idx;
@@ -1021,7 +1021,7 @@ namespace Rodin::Variational
             const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
             return tri_deriv * seg_val;
           }
-          else // m_i == 2 → ∂/∂z
+          else // m_i == 2 → \partial/\partialz
           {
             // --- triangle value (same as in BasisFunction wedge case) ---
             const auto& Vinv = VandermondeTriangle<K>::getInverse();
@@ -1075,11 +1075,11 @@ namespace Rodin::Variational
           const Real dlz = LagrangeBasisSegment<K>::getDerivative(k, z);
 
           Real val = 0;
-          if (m_i == 0)      // ∂/∂x
+          if (m_i == 0)      // \partial/\partialx
             val = dlx * ly * lz;
-          else if (m_i == 1) // ∂/∂y
+          else if (m_i == 1) // \partial/\partialy
             val = lx * dly * lz;
-          else if (m_i == 2) // ∂/∂z
+          else if (m_i == 2) // \partial/\partialz
             val = lx * ly * dlz;
 
           return static_cast<Scalar>(val);

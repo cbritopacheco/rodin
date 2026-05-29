@@ -358,7 +358,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Strain energy form: ∫ J(u) : J(v) dx
+    // Strain energy form: \int J(u) : J(v) dx
     bf = Integral(Jacobian(u), Jacobian(v));
 
     EXPECT_FALSE(bf.getLocalIntegrators().empty());

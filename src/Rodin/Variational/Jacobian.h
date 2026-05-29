@@ -36,7 +36,7 @@
  * // Displacement gradient for elasticity
  * P1 Vh(mesh, mesh.getSpaceDimension());
  * GridFunction<P1> u(Vh);
- * auto F = Jacobian(u);  // Deformation gradient F = ∇u
+ * auto F = Jacobian(u);  // Deformation gradient F = \nablau
  * ```
  */
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
@@ -243,7 +243,7 @@ namespace Rodin::Variational
           key.geom = polytope.getGeometry();
           key.dim  = polytope.getDimension();
           key.cell = polytope.getIndex();
-          key.qf   = &ip.getQuadratureFormula();
+          key.qf   = ip.getQuadratureFormula();
           key.qp   = ip.getIndex();
           key.valid = true;
 

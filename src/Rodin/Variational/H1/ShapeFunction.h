@@ -105,7 +105,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto* qf = ip.getQuadratureFormulaPtr();
+        const auto* qf = ip.getQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         typename Cache::Key key;
@@ -125,6 +125,7 @@ namespace Rodin::Variational
 
           if (qf)
           {
+            // Fast path: use element tabulation inside quadrature loops.
             const auto& tab = fe.getTabulation(*qf);
             for (size_t a = 0; a < ndof; ++a)
               m_cache.basis[a] = tab.getBasis(qp, a);
@@ -271,7 +272,7 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto* qf = ip.getQuadratureFormulaPtr();
+        const auto* qf = ip.getQuadratureFormula();
         const size_t qp = qf ? ip.getIndex() : 0;
 
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();

@@ -2425,7 +2425,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<5>(Polytope::Type::Pyramid).getCount(), 91);
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Pyramid).getCount(), 140);
 
-    // Wedge: (K+1)·(K+1)(K+2)/2
+    // Wedge: (K+1)\cdot(K+1)(K+2)/2
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Wedge).getCount(), 6);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Wedge).getCount(), 18);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Wedge).getCount(), 40);

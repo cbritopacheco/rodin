@@ -112,7 +112,7 @@ namespace Rodin::Tests::Unit
 
     LinearForm lf(v_scalar);
 
-    // ∫ div(u) * v dx - this is a mixed formulation
+    // \int div(u) * v dx - this is a mixed formulation
     lf = Integral(Div(u_vector), v_scalar);
 
     // This should be constructible
@@ -129,7 +129,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // ∫ div(u) * div(v) dx - part of mixed elasticity formulations
+    // \int div(u) * div(v) dx - part of mixed elasticity formulations
     bf = Integral(Div(u), Div(v));
     bf.assemble();
 

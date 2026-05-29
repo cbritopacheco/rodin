@@ -97,7 +97,7 @@ namespace Rodin::Variational
    *   - Triangle: (K+1)(K+2)/2
    *   - Quadrilateral: (K+1)²
    *   - Tetrahedron: (K+1)(K+2)(K+3)/6
-   *   - Wedge: (K+1)·(K+1)(K+2)/2
+   *   - Wedge: (K+1)\cdot(K+1)(K+2)/2
    * - **Basis functions**: Lagrange polynomials of degree K satisfying the Lagrange property:
    *   @f$ \phi_i(x_j) = \delta_{ij} @f$ where @f$ x_j @f$ are the Lagrange nodes
    * - **Gradient**: Polynomial of degree K-1
@@ -684,7 +684,7 @@ namespace Rodin::Variational
        * - Triangle: (K+1)(K+2)/2
        * - Quadrilateral: (K+1)²
        * - Tetrahedron: (K+1)(K+2)(K+3)/6
-       * - Wedge: (K+1)·(K+1)(K+2)/2
+       * - Wedge: (K+1)\cdot(K+1)(K+2)/2
        *
        * @return Number of degrees of freedom
        */

@@ -16,6 +16,8 @@
 #ifndef RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 #define RODIN_VARIATIONAL_LINEARFORMINTEGRATOR_H
 
+#include <type_traits>
+
 #include "Rodin/Geometry/Region.h"
 
 #include "ForwardDecls.h"
@@ -77,8 +79,11 @@ namespace Rodin::Variational
        * Creates an integrator that will compute contributions involving
        * the test function @f$ v @f$.
        */
-      template <class FES>
-      LinearFormIntegratorBase(const TestFunction<FES>& v)
+      template <class TestFunctionType,
+                std::enable_if_t<
+                  IsTestFunction<std::decay_t<TestFunctionType>>::Value,
+                  int> = 0>
+      LinearFormIntegratorBase(const TestFunctionType& v)
         : m_v(v.copy())
       {}
 

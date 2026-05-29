@@ -128,7 +128,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Laplacian operator: ∫ ∇u · ∇v dx
+    // Laplacian operator: \int \nablau \cdot \nablav dx
     bf = Integral(Grad(u), Grad(v));
 
     EXPECT_FALSE(bf.getLocalIntegrators().empty());
@@ -477,7 +477,7 @@ namespace Rodin::Tests::Unit
 
       const auto& X = p.getPhysicalCoordinates();
 
-      // ∇f = [2x + 2y, 2x + 2y, 6z]
+      // \nablaf = [2x + 2y, 2x + 2y, 6z]
       const Real ex = 2.0 * X(0) + 2.0 * X(1);
       const Real ey = 2.0 * X(0) + 2.0 * X(1);
       const Real ez = 6.0 * X(2);
@@ -498,7 +498,7 @@ namespace Rodin::Tests::Unit
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
 
-    // f(x,y,z) = x + 2y + 3z  -> ∇f = [1,2,3]
+    // f(x,y,z) = x + 2y + 3z  -> \nablaf = [1,2,3]
     RealFunction linear_func([](const Geometry::Point& p)
     {
       return p.x() + 2.0 * p.y() + 3.0 * p.z();

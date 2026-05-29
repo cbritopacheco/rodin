@@ -130,7 +130,7 @@ namespace Rodin::Tests::Manufactured::PreassembledMixed
   // Mixed system:
   //   (u, v) – (p, v) + (p, q) – [L_p0](q) + BC(u = exact)
   //
-  // where [L_p0] is the load vector ∫ f·q supplied as a preassembled
+  // where [L_p0] is the load vector \int f\cdotq supplied as a preassembled
   // LinearForm instead of Integral(f, q).
   // -----------------------------------------------------------------------
   TEST_P(PreassembledMixed_10x10,

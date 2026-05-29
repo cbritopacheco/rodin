@@ -107,7 +107,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Laplacian operator: ∫ ∇u · ∇v dx
+    // Laplacian operator: \int \nablau \cdot \nablav dx
     bf = Integral(Grad(u), Grad(v));
 
     EXPECT_FALSE(bf.getLocalIntegrators().empty());

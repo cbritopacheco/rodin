@@ -104,7 +104,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     // Compute lambda_exact via assembled operator:
     // re0_p = pressure-block residual with lambda=0
     // g     = A_pλ column (pressure rows)
-    // lambda* = -(g·re0_p)/(g·g)
+    // lambda* = -(g\cdotre0_p)/(g\cdotg)
     x_exact[lambdaIndex] = 0.0;
 
     auto re0   = (A * x_exact - b).eval();

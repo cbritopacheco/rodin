@@ -621,7 +621,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
-          // Faces oriented to match ∂[0,1,2,3] = [1,2,3] - [0,2,3] + [0,1,3] - [0,1,2]
+          // Faces oriented to match \partial[0,1,2,3] = [1,2,3] - [0,2,3] + [0,1,3] - [0,1,2]
           out.resize(4);
           out[0] = { Polytope::Type::Triangle, Polytope::Key({ p(1), p(2), p(3) }) }; // +[1,2,3]
           out[1] = { Polytope::Type::Triangle, Polytope::Key({ p(0), p(3), p(2) }) }; // -[0,2,3]

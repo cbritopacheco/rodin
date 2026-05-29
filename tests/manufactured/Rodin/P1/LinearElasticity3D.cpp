@@ -28,7 +28,7 @@ using namespace Rodin::Solver;
  * eps(u) = 0.5 (grad u + grad u^T)
  *
  * Weak form:
- *   ∫ [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = ∫ f·v dx
+ *   \int [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = \int f\cdotv dx
  *
  * NOTE on geometry: Rodin's UniformGrid({M,M,M}) produces coordinates {0,...,M-1}.
  * We scale by 1/(M-1) so the domain is [0,1]^3.

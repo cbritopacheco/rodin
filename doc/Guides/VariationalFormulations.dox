@@ -144,10 +144,10 @@
   | Component | @f$ u_i @f$ | Scalar (from vector @f$ \mathbf{u} @f$) | `Component(u, i)` or `u.x()` |
 
   @code{.cpp}
-  // Laplacian-like term: ∫ ∇u · ∇v dx
+  // Laplacian-like term: \int \nablau \cdot \nablav dx
   Integral(Grad(u), Grad(v))
 
-  // Divergence term (for vector fields): ∫ (∇·u)(∇·v) dx
+  // Divergence term (for vector fields): \int (\nabla\cdotu)(\nabla\cdotv) dx
   Integral(Div(u), Div(v))
 
   // Elasticity: symmetric gradient ε(u) : ε(v)

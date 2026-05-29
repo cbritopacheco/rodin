@@ -13,6 +13,8 @@
  */
 #include <gtest/gtest.h>
 
+#include <boost/bimap.hpp>
+
 #include "Rodin/Variational.h"
 #include "Rodin/Assembly/Sequential.h"
 #include "Rodin/Assembly/Default.h"
@@ -60,7 +62,7 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief All entries of ∫ 1·v dΩ are positive for a positive basis.
+   * @brief All entries of \int 1\cdotv d\Omega are positive for a positive basis.
    */
   TEST(Assembly_Sequential_LinearForm, ConstantRHS_EntriesPositive_P1)
   {
@@ -78,7 +80,7 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief ∫ 1·v dΩ with P0 sums to area (each element has exactly one DOF
+   * @brief \int 1\cdotv d\Omega with P0 sums to area (each element has exactly one DOF
    * and the mass is |K|).
    */
   TEST(Assembly_Sequential_LinearForm, ConstantRHS_SumEqualsArea_P0)
@@ -99,7 +101,7 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Scaling: ∫ 2·v dΩ = 2 · ∫ 1·v dΩ.
+   * @brief Scaling: \int 2\cdotv d\Omega = 2 \cdot \int 1\cdotv d\Omega.
    */
   TEST(Assembly_Sequential_LinearForm, LinearScaling_P1)
   {
@@ -212,7 +214,7 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief P1 mass matrix row-sum equals domain area (∑_j M_ij summed over all
-   * i,j equals ∫_Ω 1 dΩ = area(Ω)).  For UniformGrid({4,4}) the domain is
+   * i,j equals \int_\Omega 1 d\Omega = area(\Omega)).  For UniformGrid({4,4}) the domain is
    * [0,3]x[0,3] so area = 9.
    */
   TEST(Assembly_Sequential_BilinearForm_Sparse, P1MassMatrix_SumEqualsArea)
@@ -226,7 +228,7 @@ namespace Rodin::Tests::Unit
     bf = Integral(u, v);
     bf.assemble();
 
-    // sum of all entries of M equals ∫_Ω (∑_i φ_i)(∑_j φ_j) dΩ = ∫_Ω 1 dΩ = area(Ω).
+    // sum of all entries of M equals \int_\Omega (∑_i φ_i)(∑_j φ_j) d\Omega = \int_\Omega 1 d\Omega = area(\Omega).
     // UniformGrid({4,4}) spans [0,3]x[0,3], so area = 9.
     const auto& A = bf.getOperator();
     Math::Vector<Real> ones(A.cols());
@@ -522,6 +524,334 @@ namespace Rodin::Tests::Unit
 
     ASSERT_EQ(b1.size(), b2.size());
     EXPECT_NEAR((b1 - b2).norm(), 0.0, 1e-12);
+  }
+
+  TEST(Assembly_Problem_Identification, PreassembledFormsProjectRowsColumnsAndVector)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+    TrialFunction eta(fes);
+    TestFunction  zeta(fes);
+
+    constexpr Real gamma = 2.0;
+    const Index n = static_cast<Index>(fes.getSize());
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(n, n);
+    std::vector<Eigen::Triplet<Real>> triplets{
+      Eigen::Triplet<Real>(0, 0, 2.0),
+      Eigen::Triplet<Real>(0, 1, 3.0),
+      Eigen::Triplet<Real>(1, 0, 5.0)
+    };
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    LinearForm loadU(v);
+    loadU.getVector().resize(n);
+    loadU.getVector().setZero();
+    loadU.getVector().coeffRef(0) = 7.0;
+    loadU.getVector().coeffRef(1) = 11.0;
+
+    Problem problem(u, v, eta, zeta);
+    problem = uu + DirichletBC(u, RealFunction(gamma) * eta) - loadU;
+    problem.assemble();
+
+    const auto& A = problem.getLinearSystem().getOperator();
+    const auto& b = problem.getLinearSystem().getVector();
+    ASSERT_EQ(A.rows(), static_cast<Eigen::Index>(2 * n));
+    ASSERT_EQ(A.cols(), static_cast<Eigen::Index>(2 * n));
+
+    EXPECT_NEAR(A.coeff(n + 0, n + 0), gamma * 2.0 * gamma, 1e-14);
+    EXPECT_NEAR(A.coeff(n + 0, n + 1), gamma * 3.0 * gamma, 1e-14);
+    EXPECT_NEAR(A.coeff(n + 1, n + 0), gamma * 5.0 * gamma, 1e-14);
+
+    EXPECT_NEAR(A.coeff(0, 0), 1.0, 1e-14);
+    EXPECT_NEAR(A.coeff(0, n + 0), -gamma, 1e-14);
+    EXPECT_NEAR(b.coeff(0), 0.0, 1e-14);
+    EXPECT_NEAR(b.coeff(n + 0), gamma * 7.0, 1e-14);
+    EXPECT_NEAR(b.coeff(n + 1), gamma * 11.0, 1e-14);
+  }
+
+  TEST(Assembly_Problem_Identification, AffineIdentificationWritesDefectRows)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+    TrialFunction eta(fes);
+    TestFunction  zeta(fes);
+
+    constexpr Real gamma = 2.0;
+    constexpr Real defect = 3.0;
+    const Index n = static_cast<Index>(fes.getSize());
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(n, n);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    for (Index i = 0; i < n; i++)
+      triplets.emplace_back(i, i, 1.0);
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    LinearForm zero(v);
+    zero.getVector().resize(n);
+    zero.getVector().setZero();
+
+    Problem problem(u, v, eta, zeta);
+    problem = uu
+            + DirichletBC(
+                u,
+                RealFunction(gamma) * eta,
+                RealFunction(defect))
+            - zero;
+    problem.assemble();
+
+    const auto& A = problem.getLinearSystem().getOperator();
+    const auto& b = problem.getLinearSystem().getVector();
+    ASSERT_EQ(A.rows(), static_cast<Eigen::Index>(2 * n));
+    ASSERT_EQ(A.cols(), static_cast<Eigen::Index>(2 * n));
+    ASSERT_EQ(b.size(), static_cast<Eigen::Index>(2 * n));
+
+    for (Index i = 0; i < n; i++)
+    {
+      EXPECT_NEAR(b.coeff(i), defect, 1e-14) << "row " << i;
+      EXPECT_NEAR(A.coeff(i, i), 1.0, 1e-14)
+        << "entry (" << i << ", " << i << ")";
+      EXPECT_NEAR(A.coeff(i, n + i), -gamma, 1e-14)
+        << "entry (" << i << ", " << (n + i) << ")";
+      EXPECT_NEAR(b.coeff(n + i), -gamma * defect, 1e-14)
+        << "projected row " << (n + i);
+      EXPECT_NEAR(A.coeff(n + i, n + i), gamma * gamma, 1e-14)
+        << "projected entry (" << (n + i) << ", " << (n + i) << ")";
+    }
+  }
+
+  TEST(Assembly_Problem_Identification, SequentialVectorMasterProjectsMultipleFiniteSpaces)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 slaveFES(mesh);
+    P1 masterFES(mesh, mesh.getSpaceDimension());
+
+    TrialFunction u(slaveFES);
+    TestFunction  v(slaveFES);
+    TrialFunction eta(masterFES);
+    TestFunction  zeta(masterFES);
+
+    auto bc =
+      DirichletBC(
+          u,
+          RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
+    bc.assemble();
+
+    using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
+    ASSERT_TRUE(std::holds_alternative<IdentifiedDOFs>(bc.getDOFs()));
+    const auto& ident = std::get<IdentifiedDOFs>(bc.getDOFs());
+    ASSERT_FALSE(ident.empty());
+
+    bool sawMultiMaster = false;
+    for (const auto& [slave, row] : ident)
+    {
+      (void) slave;
+      if (row.first.size() >= 2)
+        sawMultiMaster = true;
+    }
+    ASSERT_TRUE(sawMultiMaster);
+
+    const Index nSlave  = static_cast<Index>(slaveFES.getSize());
+    const Index nMaster = static_cast<Index>(masterFES.getSize());
+    const Index nTotal  = nSlave + nMaster;
+
+    struct MatrixEntry
+    {
+      Index row;
+      Index col;
+      Real value;
+    };
+    const std::vector<MatrixEntry> matrixEntries{
+      { 0, 0, 2.0 },
+      { 0, 1, 3.0 },
+      { 1, 0, 5.0 },
+      { 1, 1, 7.0 }
+    };
+    const std::vector<std::pair<Index, Real>> vectorEntries{
+      { 0, 11.0 },
+      { 1, -13.0 }
+    };
+
+    BilinearForm uu(u, v);
+    uu.getOperator().resize(nSlave, nSlave);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    for (const auto& e : matrixEntries)
+      triplets.emplace_back(e.row, e.col, e.value);
+    uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
+
+    LinearForm loadU(v);
+    loadU.getVector().resize(nSlave);
+    loadU.getVector().setZero();
+    for (const auto& [row, value] : vectorEntries)
+      loadU.getVector().coeffRef(row) = value;
+
+    auto body = uu + bc - loadU;
+
+    using LinearSystemType =
+      Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
+    using ProblemType =
+      Problem<LinearSystemType,
+              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+
+    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
+    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+
+    std::array<size_t, 2> trialOffsets{
+      0, static_cast<size_t>(nSlave)
+    };
+    std::array<size_t, 2> testOffsets{
+      0, static_cast<size_t>(nSlave)
+    };
+
+    boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
+    boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
+    trialUUIDMap.right.insert({ 0, u.getUUID() });
+    trialUUIDMap.right.insert({ 1, eta.getUUID() });
+    testUUIDMap.right.insert({ 0, v.getUUID() });
+    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(body)>,
+      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
+          body,
+          trialFunctions,
+          testFunctions,
+          trialOffsets,
+          testOffsets,
+          trialUUIDMap,
+          testUUIDMap,
+          static_cast<size_t>(nTotal),
+          static_cast<size_t>(nTotal));
+
+    LinearSystemType ls;
+    Assembly::Sequential<LinearSystemType, ProblemType> assembler;
+    assembler.execute(ls, input);
+
+    Eigen::MatrixXd expectedA =
+      Eigen::MatrixXd::Zero(
+          static_cast<Eigen::Index>(nTotal),
+          static_cast<Eigen::Index>(nTotal));
+    Eigen::VectorXd expectedB =
+      Eigen::VectorXd::Zero(static_cast<Eigen::Index>(nTotal));
+
+    auto expand = [&](Index local)
+    {
+      std::vector<std::pair<Index, Real>> res;
+      const auto it = ident.find(local);
+      if (it == ident.end())
+      {
+        res.emplace_back(local, 1.0);
+        return res;
+      }
+      const auto& masters = it->second.first;
+      const auto& coeffs  = it->second.second;
+      for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+        res.emplace_back(nSlave + masters[k], coeffs[k]);
+      return res;
+    };
+
+    for (const auto& e : matrixEntries)
+      for (const auto& r : expand(e.row))
+        for (const auto& c : expand(e.col))
+          expectedA(r.first, c.first) += r.second * e.value * c.second;
+
+    for (const auto& [row, value] : vectorEntries)
+      for (const auto& r : expand(row))
+        expectedB(r.first) += r.second * value;
+
+    for (const auto& [slave, row] : ident)
+    {
+      expectedA.row(static_cast<Eigen::Index>(slave)).setZero();
+      expectedA(slave, slave) = 1.0;
+      const auto& masters = row.first;
+      const auto& coeffs  = row.second;
+      for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+        expectedA(slave, nSlave + masters[k]) -= coeffs[k];
+      expectedB(slave) = 0.0;
+    }
+
+    const auto& A = ls.getOperator();
+    const auto& b = ls.getVector();
+    ASSERT_EQ(A.rows(), static_cast<Eigen::Index>(nTotal));
+    ASSERT_EQ(A.cols(), static_cast<Eigen::Index>(nTotal));
+    ASSERT_EQ(b.size(), static_cast<Eigen::Index>(nTotal));
+
+    for (Index i = 0; i < nTotal; i++)
+    {
+      EXPECT_NEAR(b.coeff(i), expectedB(i), 1e-14) << "row " << i;
+      for (Index j = 0; j < nTotal; j++)
+      {
+        EXPECT_NEAR(A.coeff(i, j), expectedA(i, j), 1e-14)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
+  TEST(Assembly_Problem_Identification, SelfIdentificationMatchesZeroValueConstraint)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 refFES(mesh);
+    TrialFunction uRef(refFES);
+    TestFunction  vRef(refFES);
+
+    Problem refProblem(uRef, vRef);
+    refProblem = Integral(Grad(uRef), Grad(vRef))
+               - Integral(RealFunction(1.0), vRef)
+               + DirichletBC(uRef, Zero());
+    refProblem.assemble();
+
+    P1 idFES(mesh);
+    TrialFunction uId(idFES);
+    TestFunction  vId(idFES);
+
+    Problem idProblem(uId, vId);
+    idProblem = Integral(Grad(uId), Grad(vId))
+              - Integral(RealFunction(1.0), vId)
+              + DirichletBC(uId, -uId);
+    idProblem.assemble();
+
+    const auto& ARef = refProblem.getLinearSystem().getOperator();
+    const auto& bRef = refProblem.getLinearSystem().getVector();
+    const auto& AId  = idProblem.getLinearSystem().getOperator();
+    const auto& bId  = idProblem.getLinearSystem().getVector();
+
+    ASSERT_EQ(ARef.rows(), AId.rows());
+    ASSERT_EQ(ARef.cols(), AId.cols());
+    ASSERT_EQ(bRef.size(), bId.size());
+
+    EXPECT_NEAR((ARef - AId).norm(), 0.0, 1e-12);
+    EXPECT_NEAR((bRef - bId).norm(), 0.0, 1e-12);
+  }
+
+  TEST(Assembly_Problem_Identification, OverlappingValueAndIdentificationThrows)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    TrialFunction u(fes);
+    TestFunction  v(fes);
+
+    Problem problem(u, v);
+    problem = Integral(u, v)
+            + DirichletBC(u, RealFunction(0.0))
+            + DirichletBC(u, RealFunction(2.0) * u);
+
+    EXPECT_THROW(problem.assemble(), Alert::Exception);
   }
 
   // =========================================================================
