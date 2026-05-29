@@ -606,7 +606,7 @@ namespace Rodin::Examples::Heart
           for (size_t c = 0; c < vdim; ++c)
           {
             coefficient(static_cast<std::uint8_t>(c)) =
-              tau * (m_rho * uProj(static_cast<std::uint8_t>(c))
+              tau * m_rho * (uProj(static_cast<std::uint8_t>(c))
               + 1. / m_dt * subScale(static_cast<std::uint8_t>(c)));
           }
 

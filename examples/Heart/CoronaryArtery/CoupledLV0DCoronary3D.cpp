@@ -91,19 +91,18 @@ CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI &context,
       m_uh(std::integral_constant<size_t, 2>{}, m_mesh,
            m_mesh.getSpaceDimension()),
       m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
-      m_uph(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
-      m_tauh(m_mesh),
-      m_u(m_uh), m_p(m_ph),
-      m_mu(m_ph), m_v(m_uh), m_q(m_ph), m_r(m_ph), m_uOld(m_uh), m_pOld(m_ph),
-      m_one(m_ph), m_qFlux(m_ph), m_sub(m_uph), m_subOld(m_uph), m_up(m_uph), m_vp(m_uph),
-      m_tau(m_tauh), m_t(m_tauh), m_tauOld(m_tauh),
-      m_flux(m_qFlux), m_flow(m_u, m_p, m_v, m_q),
-      m_flowKSP(m_flow), m_flowSolver(m_flowKSP),
+      m_uph(std::integral_constant<size_t, 2>{}, m_mesh,
+            m_mesh.getSpaceDimension()),
+      m_tauh(m_mesh), m_u(m_uh), m_p(m_ph), m_mu(m_ph), m_v(m_uh), m_q(m_ph),
+      m_r(m_ph), m_uOld(m_uh), m_pOld(m_ph), m_one(m_ph), m_qFlux(m_ph),
+      m_sub(m_uph), m_subOld(m_uph), m_up(m_uph), m_vp(m_uph), m_tau(m_tauh),
+      m_t(m_tauh), m_tauOld(m_tauh), m_flux(m_qFlux),
+      m_flow(m_u, m_p, m_v, m_q), m_flowKSP(m_flow), m_flowSolver(m_flowKSP),
       m_viscosityProjection(m_mu, m_r),
       m_viscosityProjectionKSP(m_viscosityProjection), m_l2ConvU(m_up, m_vp),
       m_l2ConvUSolver(m_l2ConvU), m_subProjection(m_sub, m_vp),
-      m_subProjectionSolver(m_subProjection),
-      m_tauProjection(m_tau, m_t), m_tauProjectionSolver(m_tauProjection) {
+      m_subProjectionSolver(m_subProjection), m_tauProjection(m_tau, m_t),
+      m_tauProjectionSolver(m_tauProjection) {
   auto cellCount = m_mesh.getCellCount();
   auto vertexCount = m_mesh.getVertexCount();
   auto spaceDim = m_mesh.getSpaceDimension();
@@ -466,14 +465,14 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
     return sgn * (*root);
   };
 
-  const Real dPim = (s.pv - h.nm1.pv) / dt;
-  const Real Qim = bc.C * dPim;
+  //const Real dPim = (s.pv - h.nm1.pv) / dt;
+ // const Real Qim = bc.C * dPim;
 
   auto distalResidual = [&](Real pc) -> std::pair<Real, Real> {
-    const Real x = pc;
+    const Real x = pc - 0.5 * s.pv;
     const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
 
-    const Real f = cap * (pc - pcOld) + qd - Qim - Q;
+    const Real f = cap * (pc - pcOld) + qd - Q;
     const Real df = cap + dqd;
 
     return {f, df};
@@ -513,7 +512,7 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
     }
   }
 
-  const auto [qd, dqd] = flowLaw(bc.pc, lengthD, radiusD);
+  const auto [qd, dqd] = flowLaw(bc.pc - 0.5 * s.pv, lengthD, radiusD);
   (void)dqd;
   bc.qd = qd;
 
@@ -704,6 +703,105 @@ bool CoupledLV0DCoronary3D::advance0D() {
   return rep.converged;
 }
 
+void CoupledLV0DCoronary3D::solveStatic() {
+  if (isRoot())
+    ThreeDInfo() << "Solving static initialization ..." << Alert::Raise;
+
+  const auto normal = BoundaryNormal(m_mesh);
+  const Attribute outlet0 = m_cfg.outlets[0];
+  const Attribute outlet1 = m_cfg.outlets[1];
+  const Attribute outlet2 = m_cfg.outlets[2];
+  const Attribute outlet3 = m_cfg.outlets[3];
+  const Attribute outlet4 = m_cfg.outlets[4];
+  const Attribute outlet5 = m_cfg.outlets[5];
+
+  const auto &s = m_model.getState();
+  const Real pin = s.par;
+
+  // ----------------------------------------------------------------
+  // Viscosity: use muInf (high-shear limit), representative of bulk
+  // coronary flow.
+  // ----------------------------------------------------------------
+  const Real mu = m_cfg.viscosity.muInf;
+
+  // ----------------------------------------------------------------
+  // Symmetric gradient of trial/test functions — must be recomputed
+  // locally
+  // ----------------------------------------------------------------
+  const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+
+  const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+
+  // ----------------------------------------------------------------
+  // Oseen convection: linearized around m_uOld.
+  // If m_uOld == 0 on the first call this reduces to Stokes,
+  // so there is no cost to including it — but if you call
+  // solveStatic() after an initial Stokes pass it immediately
+  // picks up convective effects and gives a much better IC.
+  // ----------------------------------------------------------------
+  const auto &uLag = m_uOld;
+  const auto oseenConvection = Mult(Jacobian(m_u), uLag); // (uLag·∇)du
+  const auto divLag = Div(uLag);
+  const auto oseenTemam = divLag * Dot(m_u, m_v); // Temam stabilization
+
+  // Backflow damping (keeps BCs stable even in steady solve)
+  const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
+  const auto outletBackflowDamping =
+      0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
+
+  m_flow =
+      // --- Viscous term (Stokes core) ---
+      2.0 * Integral(mu * symDU, symV)
+
+      // --- Pressure-velocity coupling ---
+      - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) +
+      m_cfg.eps * Integral(m_p, m_q)
+
+      // --- Boundary conditions ---
+      + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
+
+      +
+      BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
+      BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1) +
+      BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2) +
+      BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3) +
+      BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4) +
+      BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
+
+      + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
+      BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
+      BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
+      BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
+      BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4) +
+      BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
+
+      + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
+
+  m_flow.assemble();
+
+  if (!m_flowFieldSplitsSet) {
+    m_flow.setFieldSplits();
+    m_flowFieldSplitsSet = true;
+  }
+
+  m_flow.solve(m_flowKSP);
+
+  ::KSPConvergedReason reason;
+  PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+  assert(ierr == PETSC_SUCCESS);
+
+  PetscInt iterations = 0;
+  ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
+  assert(ierr == PETSC_SUCCESS);
+  (void)ierr;
+
+  if (isRoot()) {
+    KSPInfo() << "Static solve: "
+              << (reason > 0 ? "Converged" : "Did NOT converge")
+              << "  iterations = " << iterations << Alert::Raise;
+  }
+}
+
 bool CoupledLV0DCoronary3D::solve3D() {
   const auto setup3DStart = CoronaryClock::now();
 
@@ -819,8 +917,8 @@ bool CoupledLV0DCoronary3D::solve3D() {
     const Real speed = std::sqrt(dot(uOld, uOld));
 
     const Real Tau =
-        1. / (2.0 * std::pow(order, 4.) * mu / (m_cfg.rho * std::pow(hK, 2.0)) +
-              4.0 * order * speed / hK);
+        1. / (4.0 * std::pow(order, 4.) * mu / (m_cfg.rho * std::pow(hK, 2.0)) +
+              2.0 * order * speed / hK);
 
     return 1. / (m_cfg.rho / m_cfg.dt + m_cfg.rho / Tau);
   };
@@ -840,7 +938,7 @@ bool CoupledLV0DCoronary3D::solve3D() {
         Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
 
         for (size_t c = 0; c < out.size(); ++c) {
-          out[c] = tau * (1. / m_cfg.dt * old[c] - m_cfg.rho * (conv[c] - proj[c]));
+          out[c] = tau * m_cfg.rho * (1./m_cfg.dt * old[c] - (conv[c] - proj[c]));
         }
 
         return out;
@@ -897,7 +995,6 @@ bool CoupledLV0DCoronary3D::solve3D() {
          */
         - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) +
         m_cfg.eps * Integral(m_p, m_q)
-
 
         /*
          * Inlet normal impedance tangent.
@@ -989,17 +1086,17 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *
          * Must use uState, not m_u.
          */
-        + m_cfg.inletImpedance *
-              BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
-                  .over(m_cfg.inlet)
+        //+ m_cfg.inletImpedance *
+          //    BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
+            //      .over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping residual.
          *
          * Must use uStateTangential, not duTangential.
          */
-        + m_cfg.inletTangentialDamping *
-              BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
+       // + m_cfg.inletTangentialDamping *
+         //     BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Outlet pressure Neumann residuals.
@@ -1090,7 +1187,8 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *     ((grad v) u^n).
          */
 
-        + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(), m_cfg.rho)
+        + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
+                                          m_cfg.rho)
 
         /*
          * VMS linear contribution subtracted from the residual:
@@ -1100,21 +1198,23 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *       ·
          *       ((grad v) u^n).
          */
+
         - VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
-                                        m_up.getSolution(), m_tau.getSolution(), m_cfg.rho, m_cfg.dt)
+                                        m_up.getSolution(), m_tau.getSolution(),
+                                        m_cfg.rho, m_cfg.dt)
 
         /*
          * Inlet normal impedance.
          */
-        + m_cfg.inletImpedance *
-              BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
-                  .over(m_cfg.inlet)
+        //+ m_cfg.inletImpedance *
+          //  BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
+            //  .over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping.
          */
-        + m_cfg.inletTangentialDamping *
-              BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+        //+ m_cfg.inletTangentialDamping *
+          //  BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Backflow stabilization.
@@ -1480,6 +1580,17 @@ int CoupledLV0DCoronary3D::run() {
 
   Real nextDt = baseDt;
   int acceptedStep = 0;
+
+  {
+    //solveStatic();
+
+    //computeFluxes();
+    //for (const Attribute tag : m_cfg.outlets)
+      //updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
+        //              m_cfg.dt);
+
+   // updateHistory();
+   }
 
   while (m_model.getState().t <
          finalTime - 0.5 * std::numeric_limits<Real>::epsilon()) {

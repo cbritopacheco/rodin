@@ -139,11 +139,11 @@ public:
     /// @brief Proximal surrogate vessel radius.
     Real proximalRadius = 6.0e-4;
     /// @brief Proximal surrogate vessel length.
-    Real proximalLength = 0.0005;
+    Real proximalLength = 0.00025;
     /// @brief Distal surrogate vessel radius.
     Real distalRadius = 1.0e-4;
     /// @brief Distal surrogate vessel length.
-    Real distalLength = 0.005;
+    Real distalLength = 0.002;
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
     Real pressureDropTolerance = 1.0e-12;
     /// @brief Minimum shear-rate bracket.
@@ -183,15 +183,15 @@ public:
     /// @brief Period of the prescribed cardiac cycle.
     Real period = 0.85;
     /// @brief Activation ramp start.
-    Real tRampStart = 0.15;
+    Real tRampStart = 0.15 - 0.1;
     /// @brief Activation ramp end.
-    Real tRampEnd = 0.21;
+    Real tRampEnd = 0.21 - 0.1;
     /// @brief Activation plateau end.
-    Real tPlateauEnd = 0.36;
+    Real tPlateauEnd = 0.36 - 0.1;
     /// @brief Relaxation ramp end.
-    Real tRelaxEnd = 0.45;
+    Real tRelaxEnd = 0.45 - 0.1;
     /// @brief Negative activation plateau end.
-    Real tNegativeEnd = 0.6;
+    Real tNegativeEnd = 0.6 - 0.1;
     /// @brief Positive activation plateau value.
     Real positiveValue = 35.0;
     /// @brief Negative activation plateau value.
@@ -252,13 +252,13 @@ public:
     /// @brief Proximal arterial resistance.
     Real Rp = 5e7;
     /// @brief Proximal arterial compliance.
-    Real Cp = 1e-8;
+    Real Cp = 5e-9;
     /// @brief Distal arterial resistance.
     Real Rd = 1.0e8;
     /// @brief Distal arterial compliance.
-    Real Cd = 1.0e-9;
+    Real Cd = 5.0e-10;
     /// @brief Atrial valve coefficient.
-    Real Kat = 8.0e-7;
+    Real Kat = 4.0e-6;
     /// @brief Peripheral valve coefficient.
     Real Kp = 5.0e-10;
     /// @brief Arterial valve coefficient.
@@ -332,11 +332,11 @@ public:
     /// @brief Yasuda transition exponent.
     Real yasuda = 0.8625;
     /// @brief Proximal surrogate vessel radius.
-    Real proximalRadius = 0.00125;
+    Real proximalRadius = 0.0125;
     /// @brief Proximal surrogate vessel length.
-    Real proximalLength = 0.05;
+    Real proximalLength = 0.4;
     /// @brief Distal surrogate vessel radius.
-    Real distalRadius = 0.0007;
+    Real distalRadius = 0.005;
     /// @brief Distal surrogate vessel length.
     Real distalLength = 0.2;
   };
@@ -377,12 +377,12 @@ public:
     /// @brief No-slip wall boundary attribute.
     Attribute wall = 2;
     /// @brief Inlet boundary attribute.
-    Attribute inlet = 3;
+    Attribute inlet = 4;
     /// @brief Outlet boundary attributes, in the same order used by RCR data.
-    std::array<Attribute, 6> outlets{{4, 5, 6, 7, 8, 9}};
+    std::array<Attribute, 6> outlets{{7, 8, 9, 10, 14,15}};
 
     /// @brief Mesh coordinate scale applied after partitioning.
-    Real meshScale = 1.0e-2;
+    Real meshScale = 1.0e-3;
     /// @brief Pressure stabilization parameter.
     Real eps = 1.0e-12;
     /// @brief 3D blood density.
@@ -392,7 +392,7 @@ public:
     /// @brief Inlet normal impedance coefficient in Pa s / m. Set to 0 to
     /// disable.
     /// @details Defaults to defaultRCR.Rp times the scaled inlet area.
-    Real inletImpedance = 1.45675e4;
+    Real inletImpedance = 5.e1;
     /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
     Real outletBackflowStabilization = 1.0;
 
@@ -418,7 +418,7 @@ public:
     /// @brief 0D LV model parameters and initial conditions.
     LVModel lv;
     /// @brief Default RCR parameters copied to every outlet at startup.
-    RCR defaultRCR{5.0e8, 1.0e-11, 1.0e9, 500.0, 10000.0, 11000.0};
+    RCR defaultRCR{5.0e8, 5.0e-11, 1.0e9, 500.0, 10300.0, 10800.0};
 
     Real inletTangentialDamping = 1e3;
     Real inletVelocityDamping = 0.0;
@@ -491,6 +491,7 @@ private:
   bool isRoot() const;
 
   bool advance0D();
+  void solveStatic();
   bool solve3D();
   void computeFluxes();
   void updateHistory();
