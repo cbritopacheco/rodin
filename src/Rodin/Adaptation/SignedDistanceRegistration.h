@@ -93,6 +93,35 @@ namespace Rodin::Adaptation
               params);
       }
 
+      /**
+       * @brief PSD-projected full-Newton tangent.
+       *
+       * Same call signature as `Tangent(phi, grad, hess, sLF, params)`
+       * (CTAD on the level-set Hessian), but the per-qpt second-order
+       * correction `r * hess(phi)` is clamped to its PSD part before
+       * being added to the local block. The global tangent stays SPD
+       * even when `r` changes sign across the band, so Newton contracts
+       * past the GN noise floor without the indefiniteness that
+       * destabilises raw full-Newton on this objective.
+       */
+      template <class PhiDerived, class GradDerived, class HessDerived,
+                class SLF>
+      auto TangentPSDProjected(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+          const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
+          const SLF& sLF,
+          SDRParameters params = {}) const
+      {
+        return SDRTangentIntegrator<
+                  SDRTangentMode::PSDProjectedNewton,
+                  PhiDerived, GradDerived, HessDerived,
+                  SLF, Trial, Test, State>(
+              phi, grad, hess, sLF,
+              m_du.get(), m_v.get(), m_u.get(),
+              params);
+      }
+
       // ---- Decomposed: Residual ---------------------------------------------
       template <class PhiDerived, class GradDerived, class SLF>
       auto Residual(

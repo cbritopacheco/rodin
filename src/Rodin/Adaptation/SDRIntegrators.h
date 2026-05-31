@@ -63,17 +63,78 @@ namespace Rodin::Adaptation
   enum class SDRTangentMode
   {
     GaussNewton,
-    Newton
+    Newton,
+    PSDProjectedNewton  ///< Full Newton with the per-quadrature-point
+                        ///< correction `r * hess(phi)` clamped to its
+                        ///< positive-semidefinite part (eigenvalue >= 0).
+                        ///< The global tangent stays PSD, so Newton
+                        ///< contracts super-linearly past the GN noise
+                        ///< floor without the tangential indefiniteness
+                        ///< that destabilises raw full-Newton wherever
+                        ///< the SDR residual r changes sign.
   };
 
   inline const char* sdrTangentModeName(SDRTangentMode m)
   {
     switch (m)
     {
-      case SDRTangentMode::GaussNewton: return "GaussNewton";
-      case SDRTangentMode::Newton:      return "Newton";
+      case SDRTangentMode::GaussNewton:        return "GaussNewton";
+      case SDRTangentMode::Newton:             return "Newton";
+      case SDRTangentMode::PSDProjectedNewton: return "PSDProjectedNewton";
     }
     return "?";
+  }
+
+  namespace detail
+  {
+    /**
+     * @brief Project a symmetric 2x2 matrix onto its positive-semidefinite
+     *        part by eigenvalue clamping.
+     *
+     * Given M with spectral decomposition M = lp P+ + lm P-, returns
+     * `(M)+ = max(0, lp) P+ + max(0, lm) P-`. Using the spectral identity
+     * `lp P+ = (lp / (lp - lm)) (M - lm I)` (and the symmetric variant for
+     * lm < 0 < lp), the projection is computed without an explicit
+     * eigendecomposition.
+     */
+    inline Math::SpatialMatrix<Real> psdProject2x2(
+        const Math::SpatialMatrix<Real>& M)
+    {
+      const Real a = M(0, 0);
+      const Real c = M(1, 1);
+      const Real b = Real(0.5) * (M(0, 1) + M(1, 0));   ///< symmetric part
+      const Real tr = a + c;
+      const Real disc = (a - c) * (a - c) * Real(0.25) + b * b;
+      const Real s = std::sqrt(std::max(disc, Real(0)));
+      const Real lp = Real(0.5) * tr + s;               ///< larger eigenvalue
+      const Real lm = Real(0.5) * tr - s;               ///< smaller eigenvalue
+
+      Math::SpatialMatrix<Real> out(2, 2);
+      if (lp <= Real(0))
+      {
+        out.setZero();
+        return out;
+      }
+      if (lm >= Real(0))
+      {
+        out = M;
+        // Re-symmetrise to scrub off any numerical asymmetry from caller.
+        const Real off = Real(0.5) * (out(0, 1) + out(1, 0));
+        out(0, 1) = off;
+        out(1, 0) = off;
+        return out;
+      }
+      // Mixed signs: lm < 0 < lp. Keep only the lp eigenspace.
+      // M+ = (lp / (lp - lm)) * (M - lm I).
+      const Real scale = lp / (lp - lm);
+      out = scale * M;
+      out(0, 0) -= scale * lm;
+      out(1, 1) -= scale * lm;
+      const Real off = Real(0.5) * (out(0, 1) + out(1, 0));
+      out(0, 1) = off;
+      out(1, 0) = off;
+      return out;
+    }
   }
 
   struct SDRParameters
@@ -507,6 +568,187 @@ namespace Rodin::Adaptation
               for (std::size_t c = 0; c < vdim; ++c)
                 vTHu += testValues[te](c) * HU[tr](c);
               m_matrix(te, tr) += measure * coef * r * vTHu;
+            }
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t tr, std::size_t te) final override
+      { return m_matrix(te, tr); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Cells; }
+
+      SDRTangentIntegrator* copy() const noexcept final override
+      { return new SDRTangentIntegrator(*this); }
+
+    private:
+      std::unique_ptr<PhiType>  m_phi;
+      std::unique_ptr<GradType> m_grad;
+      std::unique_ptr<HessType> m_hess;
+      std::reference_wrapper<const SLFType>  m_sLF;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType>  m_test;
+      std::reference_wrapper<const StateType> m_state;
+      SDRParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Matrix<ScalarType> m_matrix;
+  };
+
+  // ---- PSDProjectedNewton specialisation -----------------------------------
+  //
+  // Identical to the full-Newton specialisation up to the per-quadrature-point
+  // assembly of the second-order correction `r * hess(phi)`. Here that 2x2
+  // matrix is projected to its PSD part (`(M)+`) BEFORE being contracted with
+  // the test/trial basis. The result: the global tangent stays SPD, so Newton
+  // contracts even when r changes sign across the band — which is exactly the
+  // regime where raw full-Newton breaks (the tangential eigenvalue r/||p-c||
+  // becomes negative and the indefinite step flips cells through the singular
+  // floor).
+  //
+  // Where r * hess(phi) is already PSD this mode is identical to full Newton
+  // and recovers quadratic convergence. Where it is mixed-sign, this mode
+  // keeps only the PSD-contributing eigenspace and degenerates gracefully
+  // toward GN on the indefinite directions — but does NOT cycle around the
+  // GN minimum, because the PSD piece is supplied at every iteration and
+  // contracts the dropped-term spectral radius.
+  //
+  template <class PhiDerived, class GradDerived, class HessDerived,
+            class SLFType, class TrialType, class TestType, class StateType>
+  class SDRTangentIntegrator<
+            SDRTangentMode::PSDProjectedNewton,
+            PhiDerived, GradDerived, HessDerived,
+            SLFType, TrialType, TestType, StateType>
+    final : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType = Real;
+      using PhiType  = Variational::RealFunctionBase<PhiDerived>;
+      using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
+      using HessType = Variational::MatrixFunctionBase<Real, HessDerived>;
+      static constexpr SDRTangentMode Mode = SDRTangentMode::PSDProjectedNewton;
+
+      SDRTangentIntegrator(
+          const PhiType& phi, const GradType& grad, const HessType& hess,
+          const SLFType& sLF,
+          const TrialType& du,
+          const TestType& v,
+          const StateType& u,
+          SDRParameters params)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
+          m_phi(phi.copy()), m_grad(grad.copy()), m_hess(hess.copy()),
+          m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
+          m_params(params)
+      {}
+
+      SDRTangentIntegrator(const SDRTangentIntegrator& other)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+          m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
+          m_hess(other.m_hess ? other.m_hess->copy() : nullptr),
+          m_sLF(other.m_sLF), m_trial(other.m_trial),
+          m_test(other.m_test), m_state(other.m_state),
+          m_params(other.m_params), m_polytope(other.m_polytope),
+          m_matrix()
+      {}
+
+      SDRTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const std::size_t d = polytope.getDimension();
+        const Index cellIdx = polytope.getIndex();
+        const auto& trialFES = m_trial.get().getFiniteElementSpace();
+        const auto& testFES  = m_test.get().getFiniteElementSpace();
+        const auto& trialFE  = trialFES.getFiniteElement(d, cellIdx);
+        const auto& testFE   = testFES.getFiniteElement(d, cellIdx);
+        const std::size_t trialDofs = trialFE.getCount();
+        const std::size_t testDofs  = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_matrix.resize(testDofs, trialDofs);
+        m_matrix.setZero();
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              sdrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+        const std::size_t nqp = quadrature.getSize();
+
+        for (std::size_t q = 0; q < nqp; ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Real wq = qf.getWeight(q);
+          const Real distortion = pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          const Real s = m_sLF.get().getValue(ip);
+          const auto uqRange = m_state.get().getValue(ip);
+          Math::SpatialVector<Real> y(d);
+          for (std::size_t c = 0; c < vdim; ++c)
+            y(c) = pt.getCoordinates()(c) + uqRange(c);
+
+          const Geometry::Point movedPoint = detail::makeMovedPoint(pt, y);
+
+          const Real r = m_phi->getValue(movedPoint) - s;
+          const auto gradPhi = m_grad->getValue(movedPoint);
+          const auto hessPhi = m_hess->getValue(movedPoint);
+
+          const Real weight =
+            std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real coef = m_params.rhoS * weight * m_params.normalizer;
+          const Real measure = wq * distortion;
+
+          std::vector<Math::SpatialVector<Real>> testValues(testDofs);
+          std::vector<Math::SpatialVector<Real>> trialValues(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+            testValues[te] = testFE.getBasis(te)(rc);
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            trialValues[tr] = trialFE.getBasis(tr)(rc);
+
+          std::vector<Real> gpDotV(testDofs);
+          std::vector<Real> gpDotU(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPhi(c) * testValues[te](c);
+            gpDotV[te] = acc;
+          }
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+          {
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPhi(c) * trialValues[tr](c);
+            gpDotU[tr] = acc;
+          }
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+              m_matrix(te, tr) +=
+                measure * coef * gpDotU[tr] * gpDotV[te];
+
+          // The second-order correction is `r * hess(phi)`. Project to PSD
+          // before contracting with the basis — this is the entire point of
+          // this specialisation, see the class docstring.
+          const Math::SpatialMatrix<Real> rH = r * hessPhi;
+          const Math::SpatialMatrix<Real> rHplus = detail::psdProject2x2(rH);
+
+          std::vector<Math::SpatialVector<Real>> HU(trialDofs);
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            HU[tr] = rHplus * trialValues[tr];
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            {
+              Real vTHu = 0;
+              for (std::size_t c = 0; c < vdim; ++c)
+                vTHu += testValues[te](c) * HU[tr](c);
+              m_matrix(te, tr) += measure * coef * vTHu;
             }
         }
         return *this;

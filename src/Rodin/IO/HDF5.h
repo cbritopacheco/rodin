@@ -106,6 +106,7 @@
 #include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Geometry/PolytopeTransformationIndex.h"
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Shard.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/IO/MeshLoader.h"
 #include "Rodin/IO/MeshPrinter.h"
@@ -890,15 +891,79 @@ namespace Rodin::IO
       return false;
     }
 
+    /**
+     * @brief Returns a non-null `Shard*` iff `mesh` is a partition shard.
+     *
+     * The per-rank XDMF writers must filter out non-owned cells so that
+     * stitched visualization in ParaView does not show the same cell
+     * twice (once from the owning rank, once from each rank carrying it
+     * as a ghost). For a plain `Mesh<Context::Local>` this returns
+     * nullptr and the writers iterate every cell.
+     */
+    inline
+    const Geometry::Shard* asShard(const Geometry::MeshBase& mesh)
+    {
+      return dynamic_cast<const Geometry::Shard*>(&mesh);
+    }
+
+    /**
+     * @brief True iff cell `i` should appear in the per-rank XDMF stream.
+     *
+     * On a `Shard` this means `isOwned(D, i)`. On a non-shard local mesh
+     * the predicate is identically true.
+     */
+    inline
+    bool isXDMFOwnedCell(
+        const Geometry::Shard* shard, std::size_t D, Index i)
+    {
+      return !shard || shard->isOwned(D, i);
+    }
+
+    /**
+     * @brief Number of cells the per-rank XDMF stream renders.
+     *
+     * Equals the shard's owned-cell count when `mesh` is a `Shard`,
+     * otherwise `mesh.getCellCount()`.
+     */
+    inline
+    std::size_t getXDMFRenderedCellCount(const Geometry::MeshBase& mesh)
+    {
+      const auto* shard = asShard(mesh);
+      if (!shard)
+        return mesh.getCellCount();
+      const std::size_t D = mesh.getDimension();
+      const std::size_t n = mesh.getCellCount();
+      std::size_t count = 0;
+      for (Index i = 0; i < static_cast<Index>(n); ++i)
+        if (shard->isOwned(D, i))
+          ++count;
+      return count;
+    }
+
     inline
     size_t getXDMFVisualizationVertexCount(const Geometry::MeshBase& mesh)
     {
+      // Linear meshes share vertices across cells; vertex emission is
+      // by vertex index, not per-cell. We deliberately do NOT filter the
+      // shard's vertex count here, because cell topology written by
+      // writeXDMFTopology still references those shared vertex indices
+      // even from owned cells. Some vertices may be redundantly emitted
+      // on multiple ranks, but they will carry identical coordinates so
+      // ParaView superposes them harmlessly.
       if (!hasCurvedXDMFGeometry(mesh))
         return mesh.getVertexCount();
 
+      // Curved meshes pack per-cell reference-node coordinates in
+      // cell-iteration order; the curved topology indexes them as
+      // `nextNode++`. The cell stream is filtered to OWNED cells, so the
+      // vertex stream must be too, or the indices will desynchronise.
+      const auto* shard = asShard(mesh);
+      const std::size_t D = mesh.getDimension();
       size_t count = 0;
       for (auto it = mesh.getCell(); !it.end(); ++it)
       {
+        if (!isXDMFOwnedCell(shard, D, it->getIndex()))
+          continue;
         const size_t order = it->getTransformation().getOrder();
         count += getXDMFReferenceNodes(it->getGeometry(), order).size();
       }
@@ -916,11 +981,15 @@ namespace Rodin::IO
     inline
     size_t getXDMFMixedTopologySize(const Geometry::MeshBase& mesh)
     {
+      const auto* shard = asShard(mesh);
+      const std::size_t D = mesh.getDimension();
       if (hasCurvedXDMFGeometry(mesh))
       {
         size_t size = 0;
         for (auto it = mesh.getCell(); !it.end(); ++it)
         {
+          if (!isXDMFOwnedCell(shard, D, it->getIndex()))
+            continue;
           const size_t order = it->getTransformation().getOrder();
           const auto nodes = getXDMFReferenceNodes(it->getGeometry(), order);
           size += 1 + nodes.size();
@@ -933,6 +1002,8 @@ namespace Rodin::IO
       size_t size = 0;
       for (auto it = mesh.getCell(); !it.end(); ++it)
       {
+        if (!isXDMFOwnedCell(shard, D, it->getIndex()))
+          continue;
         const auto geometry = it->getGeometry();
         const size_t nv = it->getVertices().size();
         size += 1 + nv;
@@ -957,13 +1028,19 @@ namespace Rodin::IO
           static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
       const auto& connectivity = localMesh.getConnectivity();
       const size_t D = connectivity.getDimension();
+      const auto* shard = asShard(mesh);
 
       bool first = true;
       Geometry::Polytope::Type firstGeometry = Geometry::Polytope::Type::Point;
       size_t nodesPerCell = 0;
+      size_t ownedCount = 0;
 
       for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
       {
+        if (!isXDMFOwnedCell(shard, D, i))
+          continue;
+        ++ownedCount;
+
         const auto geometry = connectivity.getGeometry(D, i);
         const auto& trans = localMesh.getPolytopeTransformation(D, i);
         const size_t order = trans.getOrder();
@@ -992,7 +1069,7 @@ namespace Rodin::IO
 
       layout.isUniform = true;
       layout.topologyType = getXDMFQuadraticTopologyName(firstGeometry);
-      layout.rowCount = static_cast<size_t>(connectivity.getCount(D));
+      layout.rowCount = ownedCount;
       layout.columnCount = nodesPerCell;
       layout.entryCount = layout.rowCount * layout.columnCount;
       return layout;
@@ -1322,6 +1399,7 @@ namespace Rodin::IO
       const size_t D = connectivity.getDimension();
       const auto layout =
         getXDMFTopologyLayout(mesh, allowUniformCurvedTopology);
+      const auto* shard = asShard(mesh);
 
       if (layout.isUniform)
       {
@@ -1352,6 +1430,9 @@ namespace Rodin::IO
         U64 nextNode = 0;
         for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
         {
+          if (!isXDMFOwnedCell(shard, D, i))
+            continue;
+
           const auto geometry = connectivity.getGeometry(D, i);
           const auto& trans = mesh.getPolytopeTransformation(D, i);
           const size_t order = trans.getOrder();
@@ -1375,6 +1456,9 @@ namespace Rodin::IO
 
       for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
       {
+        if (!isXDMFOwnedCell(shard, D, i))
+          continue;
+
         const auto geometry = connectivity.getGeometry(D, i);
         const auto& key = connectivity.getPolytope(D, i);
 
@@ -1455,8 +1539,12 @@ namespace Rodin::IO
 
         const auto& connectivity = localMesh.getConnectivity();
         const size_t D = connectivity.getDimension();
+        const auto* shard = asShard(mesh);
         for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
         {
+          if (!isXDMFOwnedCell(shard, D, i))
+            continue;
+
           const auto geometry = connectivity.getGeometry(D, i);
           const auto& trans = localMesh.getPolytopeTransformation(D, i);
           const auto nodes = getXDMFReferenceNodes(geometry, trans.getOrder());
@@ -1525,8 +1613,30 @@ namespace Rodin::IO
       const auto& connectivity = localMesh.getConnectivity();
       const size_t D = connectivity.getDimension();
 
+      // Per-rank XDMF only attaches the dim=D region attribute to the
+      // cell topology (ParaView reads it as the cell-attribute "region").
+      // Lower-dimensional region arrays are written for Rodin's own
+      // bookkeeping and are unchanged. The dim=D array MUST match the
+      // filtered cell topology written by writeXDMFTopology, otherwise
+      // ParaView would associate region values with the wrong cells.
+      const auto* shard = asShard(mesh);
       for (size_t d = 0; d <= D; ++d)
       {
+        if (shard && d == D)
+        {
+          std::vector<U64> attrs;
+          attrs.reserve(getXDMFRenderedCellCount(mesh));
+          for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+          {
+            if (!shard->isOwned(D, i))
+              continue;
+            const auto a = localMesh.getAttribute(D, i);
+            attrs.push_back(a ? static_cast<U64>(*a) : NullAttributeMarker);
+          }
+          writeVectorDataset(file, attributePath(d), attrs);
+          continue;
+        }
+
         std::vector<U64> attrs(connectivity.getCount(d), NullAttributeMarker);
         for (Index i = 0; i < static_cast<Index>(connectivity.getCount(d)); ++i)
         {
@@ -1586,14 +1696,42 @@ namespace Rodin::IO
       writeXDMFRegionAttribute(file.get(), mesh);
     }
 
+    // Forward declaration of the explicit-mesh overload, defined below.
+    template <class GridFunctionType>
+    void writeXDMFNodeAttribute(
+        const GridFunctionType& gf,
+        const Geometry::MeshBase& visMesh,
+        const boost::filesystem::path& filename);
+
     /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
      *        HDF5 file for XDMF visualization.
      *
-     * Evaluates the grid function at each vertex of the mesh and stores
-     * the result in the `/GridFunction/Values/Data` dataset. For scalar
-     * functions, a flat `[nv]` vector is written; for vector functions, a
-     * `[nv × vdim]` matrix is written.
+     * Convenience overload that uses the grid function's own FES mesh as
+     * the visualization mesh. It delegates to the explicit-mesh overload,
+     * which carries the curved-vs-linear branch logic that aligns the
+     * emitted geometry / topology cardinality with the data cardinality.
+     *
+     * Writing a node attribute on a curved mesh through a hand-rolled
+     * vertex iteration would silently produce `mesh.getVertexCount()`
+     * values while `writeXDMFVertices` / `writeXDMFTopology` emit
+     * `Σ_K |refNodes(K)|` per-cell visualization nodes — a cardinality
+     * mismatch that ParaView either rejects or, worse, plots silently
+     * misaligned. Routing through the explicit-mesh overload eliminates
+     * that pitfall.
+     *
+     * @note The visualization mesh MUST be a `Mesh<Context::Local>` (the
+     *       mesh-level XDMF writers cast unconditionally to it). In MPI
+     *       mode, `MeshBase::getCellCount()` / `getVertexCount()` on the
+     *       parent `MPIMesh` return the GLOBAL allreduce'd counts while
+     *       its iterators range only over shard-local indices — so
+     *       sizing a values buffer by the global count and writing only
+     *       the shard prefix silently corrupts the HDF5 dataset. We
+     *       therefore guard the one-arg path with a `dynamic_cast` and
+     *       fail loudly if the GF's FES is built on a non-local mesh;
+     *       in that case the caller must either use `IO::XDMF` with
+     *       `setMesh(mpiMesh)` (which forwards the shard automatically)
+     *       or call the explicit-mesh overload with `mpiMesh.getShard()`.
      *
      * @tparam GridFunctionType  Concrete grid function type.
      * @param[in] gf        Grid function to export.
@@ -1602,89 +1740,20 @@ namespace Rodin::IO
     template <class GridFunctionType>
     void writeXDMFNodeAttribute(const GridFunctionType& gf, const boost::filesystem::path& filename)
     {
-      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      const auto& fes = gf.getFiniteElementSpace();
-      const auto& mesh = fes.getMesh();
-
-      const size_t nv = mesh.getVertexCount();
-      const size_t vdim = gf.getDimension();
-
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
-      if (!file)
+      const auto& fesMesh = gf.getFiniteElementSpace().getMesh();
+      const auto* localMesh =
+          dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
+      if (!localMesh)
       {
         Alert::Exception()
-          << "Failed to create HDF5 XDMF node attribute file: " << filename
+          << "writeXDMFNodeAttribute(gf, path): the grid function's FES "
+             "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
+             "shard explicitly via writeXDMFNodeAttribute(gf, "
+             "mpiMesh.getShard(), path), or use IO::XDMF with "
+             "setMesh(mpiMesh) which forwards the shard automatically."
           << Alert::Raise;
       }
-
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Meta group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Values group."
-            << Alert::Raise;
-        }
-      }
-
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
-
-      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
-
-      if constexpr (std::is_same_v<RangeType, ScalarType>)
-      {
-        std::vector<HDF5::F64> values(nv);
-        for (auto it = mesh.getVertex(); !it.end(); ++it)
-        {
-          const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
-          values[static_cast<size_t>(i)] = static_cast<HDF5::F64>(gf(p));
-        }
-
-        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
-      }
-      else
-      {
-        std::vector<HDF5::F64> values(nv * vdim);
-        for (auto it = mesh.getVertex(); !it.end(); ++it)
-        {
-          const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
-          const auto value = gf(p);
-
-          for (size_t c = 0; c < vdim; ++c)
-            values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>(value[c]);
-        }
-
-        HDF5::writeMatrixDataset(
-            file.get(),
-            Path::GridFunctionValuesData,
-            values,
-            static_cast<hsize_t>(nv),
-            static_cast<hsize_t>(vdim));
-      }
+      writeXDMFNodeAttribute(gf, *localMesh, filename);
     }
 
     /**
@@ -1710,99 +1779,41 @@ namespace Rodin::IO
      * @param[in] gf        Grid function to export.
      * @param[in] filename  Output HDF5 file path.
      */
+    // Forward declaration of the explicit-mesh overload, defined below.
+    template <class GridFunctionType>
+    void writeXDMFCellAttribute(
+        const GridFunctionType& gf,
+        const Geometry::MeshBase& visMesh,
+        const boost::filesystem::path& filename);
+
     template <class GridFunctionType>
     void writeXDMFCellAttribute(
         const GridFunctionType& gf, const boost::filesystem::path& filename)
     {
-      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
-      const auto& fes = gf.getFiniteElementSpace();
-      const auto& mesh = fes.getMesh();
-
-      const size_t nc = mesh.getCellCount();
-      const size_t vdim = gf.getDimension();
-      const size_t D = mesh.getDimension();
-
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
-      if (!file)
+      // Convenience overload: delegate to the explicit-mesh variant with
+      // visMesh == gfMesh so that both code paths share a single
+      // implementation. Keeps the per-cell centroid evaluation logic in
+      // exactly one place.
+      //
+      // Same MPI guard as writeXDMFNodeAttribute (see that overload for
+      // the detailed rationale): MeshBase::getCellCount() on an MPIMesh
+      // returns the global allreduce'd count while iteration is
+      // shard-local, so a one-arg call with an MPI-backed GF would
+      // silently emit a malformed dataset. Fail loudly instead.
+      const auto& fesMesh = gf.getFiniteElementSpace().getMesh();
+      const auto* localMesh =
+          dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
+      if (!localMesh)
       {
         Alert::Exception()
-          << "Failed to create HDF5 XDMF cell attribute file: " << filename
+          << "writeXDMFCellAttribute(gf, path): the grid function's FES "
+             "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
+             "shard explicitly via writeXDMFCellAttribute(gf, "
+             "mpiMesh.getShard(), path), or use IO::XDMF with "
+             "setMesh(mpiMesh) which forwards the shard automatically."
           << Alert::Raise;
       }
-
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Meta group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Values group."
-            << Alert::Raise;
-        }
-      }
-
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
-
-      if constexpr (std::is_same_v<RangeType, ScalarType>)
-      {
-        std::vector<HDF5::F64> values(nc, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
-        {
-          const auto polytope = mesh.getPolytope(D, cell);
-          const Geometry::Polytope::Traits ts(polytope->getGeometry());
-          const Geometry::Point centroid(*polytope, ts.getCentroid());
-          values[static_cast<size_t>(cell)] =
-            static_cast<HDF5::F64>(gf(centroid));
-        }
-
-        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
-      }
-      else
-      {
-        std::vector<HDF5::F64> values(nc * vdim, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
-        {
-          const auto polytope = mesh.getPolytope(D, cell);
-          const Geometry::Polytope::Traits ts(polytope->getGeometry());
-          const Geometry::Point centroid(*polytope, ts.getCentroid());
-          const auto value = gf(centroid);
-          for (size_t c = 0; c < vdim; ++c)
-          {
-            values[static_cast<size_t>(cell) * vdim + c] =
-              static_cast<HDF5::F64>(value[c]);
-          }
-        }
-
-        HDF5::writeMatrixDataset(
-            file.get(),
-            Path::GridFunctionValuesData,
-            values,
-            static_cast<hsize_t>(nc),
-            static_cast<hsize_t>(vdim));
-      }
+      writeXDMFCellAttribute(gf, *localMesh, filename);
     }
     /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
@@ -1880,12 +1891,20 @@ namespace Rodin::IO
       if (hasCurvedXDMFGeometry(visMesh))
       {
         const size_t D = visMesh.getDimension();
+        const auto* shard = asShard(visMesh);
+        // Curved-mesh node values are packed per-cell ref-node, in the
+        // same cell-iteration order as writeXDMFVertices and
+        // writeXDMFTopology — which both filter ghost cells. The
+        // attribute stream must filter identically or indices will
+        // desync between geometry / topology / attribute datasets.
         if constexpr (std::is_same_v<RangeType, ScalarType>)
         {
           std::vector<HDF5::F64> values(nv);
           size_t out = 0;
           for (Index i = 0; i < static_cast<Index>(visMesh.getCellCount()); ++i)
           {
+            if (!isXDMFOwnedCell(shard, D, i))
+              continue;
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
             const auto nodes = getXDMFReferenceNodes(
@@ -1899,6 +1918,14 @@ namespace Rodin::IO
               values[out++] = static_cast<HDF5::F64>(gf(p));
             }
           }
+          if (out != nv)
+          {
+            Alert::Exception()
+              << "writeXDMFNodeAttribute (curved): emitted " << out
+              << " values but expected " << nv
+              << " — visMesh and gfMesh cardinalities disagree."
+              << Alert::Raise;
+          }
           HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
         }
         else
@@ -1907,6 +1934,8 @@ namespace Rodin::IO
           size_t out = 0;
           for (Index i = 0; i < static_cast<Index>(visMesh.getCellCount()); ++i)
           {
+            if (!isXDMFOwnedCell(shard, D, i))
+              continue;
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
             const auto nodes = getXDMFReferenceNodes(
@@ -1922,6 +1951,14 @@ namespace Rodin::IO
                 values[out * vdim + c] = static_cast<HDF5::F64>(value[c]);
               ++out;
             }
+          }
+          if (out != nv)
+          {
+            Alert::Exception()
+              << "writeXDMFNodeAttribute (curved): emitted " << out
+              << " values but expected " << nv
+              << " — visMesh and gfMesh cardinalities disagree."
+              << Alert::Raise;
           }
           HDF5::writeMatrixDataset(
               file.get(),
@@ -1993,10 +2030,17 @@ namespace Rodin::IO
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      const size_t nc = visMesh.getCellCount();
+      // In distributed mode `visMesh` is the per-rank shard; emit only
+      // OWNED cells so that neighbouring ranks do not redraw the same
+      // cell. The ordering must agree with writeXDMFTopology (also
+      // shard-aware) so that XDMF associates each value with the right
+      // cell.
+      const auto* shard = asShard(visMesh);
+      const size_t nc = shard
+        ? getXDMFRenderedCellCount(visMesh)
+        : visMesh.getCellCount();
       const size_t vdim = gf.getDimension();
       const size_t D = visMesh.getDimension();
-      const auto& c2v = visMesh.getConnectivity().getIncidence(D, 0);
 
       const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
@@ -2037,71 +2081,60 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
-      // Same rationale as writeXDMFNodeAttribute: use the GF's mesh for
-      // polytope lookup so polytopeMesh == fesMesh holds in getValue().
+      // Evaluate at the cell centroid (NOT averaged at vertices), so the
+      // result is exact for P0 (the cell DOF) and consistent for higher-
+      // order nodal spaces. The grid function's FES mesh is used for the
+      // polytope lookup so that polytopeMesh == fesMesh in getValue().
       const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
-      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+      const std::size_t totalCells = visMesh.getCellCount();
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
       {
-        std::vector<HDF5::F64> values(nc, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        std::vector<HDF5::F64> values;
+        values.reserve(nc);
+        for (Index cell = 0; cell < static_cast<Index>(totalCells); ++cell)
         {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          ScalarType accum = ScalarType(0);
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = gfMesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            accum += gf(p);
-          }
-
-          values[static_cast<size_t>(cell)] =
-            static_cast<HDF5::F64>(accum / static_cast<Real>(vertices.size()));
+          if (!isXDMFOwnedCell(shard, D, cell))
+            continue;
+          const auto polytope = gfMesh.getPolytope(D, cell);
+          const Geometry::Polytope::Traits ts(polytope->getGeometry());
+          const Geometry::Point centroid(*polytope, ts.getCentroid());
+          values.push_back(static_cast<HDF5::F64>(gf(centroid)));
         }
-
+        // Defensive: invariant on (visMesh, gfMesh) cardinality (T2).
+        if (values.size() != nc)
+        {
+          Alert::Exception()
+            << "writeXDMFCellAttribute: emitted " << values.size()
+            << " values but expected " << nc
+            << " — visMesh and gfMesh cell cardinalities disagree."
+            << Alert::Raise;
+        }
         HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
       }
       else
       {
-        std::vector<HDF5::F64> values(nc * vdim, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        std::vector<HDF5::F64> values;
+        values.reserve(nc * vdim);
+        for (Index cell = 0; cell < static_cast<Index>(totalCells); ++cell)
         {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          std::vector<ScalarType> accum(vdim, ScalarType(0));
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = gfMesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            const auto value = gf(p);
-
-            for (size_t c = 0; c < vdim; ++c)
-              accum[c] += value[c];
-          }
-
+          if (!isXDMFOwnedCell(shard, D, cell))
+            continue;
+          const auto polytope = gfMesh.getPolytope(D, cell);
+          const Geometry::Polytope::Traits ts(polytope->getGeometry());
+          const Geometry::Point centroid(*polytope, ts.getCentroid());
+          const auto value = gf(centroid);
           for (size_t c = 0; c < vdim; ++c)
-          {
-            values[static_cast<size_t>(cell) * vdim + c] =
-              static_cast<HDF5::F64>(accum[c] / static_cast<Real>(vertices.size()));
-          }
+            values.push_back(static_cast<HDF5::F64>(value[c]));
         }
-
+        if (values.size() != nc * vdim)
+        {
+          Alert::Exception()
+            << "writeXDMFCellAttribute: emitted " << values.size()
+            << " values but expected " << (nc * vdim)
+            << " — visMesh and gfMesh cell cardinalities disagree."
+            << Alert::Raise;
+        }
         HDF5::writeMatrixDataset(
             file.get(),
             Path::GridFunctionValuesData,

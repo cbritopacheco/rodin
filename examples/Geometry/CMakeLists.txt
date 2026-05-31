@@ -21,6 +21,13 @@ target_link_libraries(LevelSetSDRReconstruction
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetSDRWavyCircleSweep LevelSetSDRWavyCircleSweep.cpp)
+target_link_libraries(LevelSetSDRWavyCircleSweep
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(Skin Skin.cpp)
 target_link_libraries(Skin
   PUBLIC

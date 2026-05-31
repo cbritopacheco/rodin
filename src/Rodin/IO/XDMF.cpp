@@ -300,7 +300,11 @@ namespace Rodin::IO
       SnapshotRecord snapshot;
       snapshot.time = time;
       snapshot.vertexCount = HDF5::getXDMFVisualizationVertexCount(*gr.mesh);
-      snapshot.cellCount = gr.mesh->getCellCount();
+      // In distributed (per-rank) mode, the rank's mesh is its shard.
+      // The XDMF cell stream emits only OWNED cells (ghosts belong to
+      // some other rank), so the cell count exposed in the XML must
+      // match.
+      snapshot.cellCount = HDF5::getXDMFRenderedCellCount(*gr.mesh);
       snapshot.meshDimension = gr.mesh->getDimension();
       snapshot.spaceDimension = gr.mesh->getSpaceDimension();
       const auto topologyLayout =

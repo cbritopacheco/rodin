@@ -68,10 +68,17 @@ namespace
   constexpr Real kGamma = 1e-1;
   constexpr Real kBeta  = 1e-2;
 
+  // For the FD test we INTENTIONALLY pick jSafe large enough that the
+  // floor barrier is active at the test displacement (j ~ 1 < jSafe).
+  // This exercises the active-branch closed-form Hessian; the inactive
+  // branch is trivial (identically zero B-contribution, so only the
+  // shape block is exercised — that block is unchanged from the previous
+  // implementation).
   BarrierParameters defaultParams(Real domainMeasure)
   {
     BarrierParameters p;
-    p.jMin = 1e-3;
+    p.jMin = Real(0.1);
+    p.jSafe = Real(1.5);
     p.domainMeasure = domainMeasure;
     return p;
   }

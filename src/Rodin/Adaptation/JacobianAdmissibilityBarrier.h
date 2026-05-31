@@ -9,49 +9,64 @@
 
 /**
  * @file
- * @brief Intrinsic shape quality energy + Jacobian admissibility /
- *        nondegeneracy / singularity barrier — fully analytical residual
- *        and tangent for the 2D triangular affine prototype.
+ * @brief Intrinsic shape quality energy + singularity floor barrier
+ *        ("nondegeneracy floor", a.k.a. `E_floor`) — fully analytical
+ *        residual and tangent for the 2D triangular affine prototype.
  *
  * Scope.
  *   PROTOTYPE-SPECIALISED: 2D, planar mesh, affine triangle cells,
- *   P1 vector dofs (three vertices, two components each — six local dofs
- *   per cell). NOT FES-independent.
+ *   P1 vector dofs (three vertices, two components each — six local
+ *   dofs per cell). NOT FES-independent.
  *
  * Mathematics.
- *   Intrinsic admissibility:
+ *   Branch-aware admissibility scalar:
  *     j_K^u(xhat) = sigma_K * det(A_K^u(xhat)) / J_K_scale,
- *     admissibility condition: j_K^u > j_min.
+ *     j_K^u > j_min  (only condition; sigma_K carries the initial
+ *                     orientation, j_K^u = 1 has no special meaning).
  *
- *   Intrinsic shape quality:
+ *   Intrinsic shape quality (independent of orientation):
  *     Q_shape(A_K^u) = (1/d) ||A_K^u||_F^2 / (sigma_K det(A_K^u))^(2/d),
- *     valid only when sigma_K det(A_K^u) > 0.
+ *     well-defined whenever sigma_K det(A_K^u) > 0.
+ *
+ *   Singularity floor (active ONLY near the singular set j -> j_min+):
+ *     For j_min < j_safe set s := j_safe - j_min, and
+ *       B(j) =  0,                                              j >= j_safe,
+ *       B(j) = -log((j - j_min) / s) + (j - j_safe) / s,        j <  j_safe.
+ *     Properties: B(j_safe) = 0, B'(j_safe) = 0, B(j) -> +oo as
+ *     j -> j_min+.  B is monotonically decreasing on (j_min, j_safe]
+ *     and identically zero above j_safe, so it does NOT bias the
+ *     element toward any particular volume — only protects against
+ *     singularity.
  *
  *   Per-cell energy (area-weighted at assembly):
- *     E_cell = w_s * (Q_shape - 1) - w_d * log(j_K^u - j_min)
- *   with w_s = gamma * |K|/|Omega|, w_d = beta * |K|/|Omega|.
+ *     E_cell = w_s * (Q_shape - 1) + w_d * B(j_K^u),
+ *   with w_s = gamma * |K|/|Omega|, w_d = beta * |K|/|Omega|. The
+ *   global energy is `E_shape(u) + E_floor(u)`, where `E_floor` is
+ *   the sum of the B-contributions.
+ *
+ *   This is NOT an orientation barrier; it is NOT a volume regulariser;
+ *   it does NOT prefer j=1. It is a one-sided lower-floor barrier.
  *
  * Form-language API.
- *   gamma and beta — the shape and admissibility energy weights — are
- *   passed as `Variational::RealFunctionBase<...>` objects, mirroring
- *   the (lambda, mu) Lamé parameters in
+ *   gamma (shape weight) and beta (floor weight) are passed as
+ *   `Variational::RealFunctionBase<...>` objects, mirroring the
+ *   (lambda, mu) Lamé parameters in
  *   `Rodin::Variational::LinearElasticityIntegral`. The integrator
  *   evaluates them at the cell centroid (in physical coordinates),
  *   pulling out the per-cell scalar values before calling the
  *   closed-form `evaluateBarrierLocal`.
  *
- *   `jMin` and `domainMeasure` are algorithmic / mesh-global scalars
- *   that don't naturally vary in space and stay as `Real` fields on
- *   `BarrierParameters`.
+ *   `jMin` (singular floor), `jSafe` (activation threshold) and
+ *   `domainMeasure` are algorithmic / mesh-global scalars and stay as
+ *   `Real` fields on `BarrierParameters`. Recommended defaults:
+ *     jMin  ~ 1e-8 .. 1e-6,  jSafe ~ 1e-3 .. 1e-2.
  *
  *   The user-facing helper `JacobianAdmissibilityBarrier` mirrors
  *   `SignedDistanceRegistration`: variational skeleton + cell cache
  *   captured at construction; gamma, beta and params supplied at
- *   `operator()` / `Tangent` / `Residual`.
- *
- * Naming.
- *   The log(j_K^u - j_min) term is the "Jacobian admissibility /
- *   nondegeneracy / singularity barrier". Never an "orientation barrier".
+ *   `operator()` / `Tangent` / `Residual`. The class name is retained
+ *   for backward compatibility; conceptually the energy it produces is
+ *   `E_shape + E_floor`.
  */
 
 #include <array>
@@ -81,17 +96,21 @@
 namespace Rodin::Adaptation
 {
   /**
-   * @brief Scalar parameters for the shape + admissibility energy.
+   * @brief Scalar parameters for the shape + singularity-floor energy.
    *
-   *   jMin          = admissibility floor (strictly positive)
+   *   jMin          = singularity floor (strictly positive, e.g. 1e-8)
+   *   jSafe         = activation threshold of the floor barrier,
+   *                   jMin < jSafe (e.g. 1e-3). B(j) = 0 for j >= jSafe.
    *   domainMeasure = |Omega| (mesh-global normalisation)
    *
-   * The spatial weights gamma and beta are NOT carried here — they are
-   * `Variational::RealFunctionBase` objects passed alongside.
+   * The spatial weights gamma (shape) and beta (floor) are NOT carried
+   * here — they are `Variational::RealFunctionBase` objects passed
+   * alongside.
    */
   struct BarrierParameters
   {
-    Real jMin = 1e-3;
+    Real jMin = 1e-8;
+    Real jSafe = 1e-3;
     Real domainMeasure = 0;
   };
 
@@ -99,19 +118,85 @@ namespace Rodin::Adaptation
   {
     Real energy = 0;
     Real j = 0;
-    bool valid = true;
+    bool valid = true;          ///< j > jMin (cell is on its initial branch)
+    bool floorActive = false;   ///< j < jSafe (B-contribution is nonzero)
     Math::Vector<Real> grad;
     Math::Matrix<Real> hess;
   };
 
   /**
-   * @brief Process-wide counter for cells that hit j_K^u <= j_min during
-   *        assembly. The Newton driver reads it after each iteration.
+   * @brief Process-wide counter for cells that hit j_K^u <= jMin during
+   *        assembly (singularity hit). The Newton driver reads it after
+   *        each iteration.
    */
   inline std::atomic<unsigned long>& barrierInadmissibleCount()
   {
     static std::atomic<unsigned long> count{0};
     return count;
+  }
+
+  /**
+   * @brief Diagonal magnitude used for the local block when a cell hits
+   *        j_K^u <= jMin during assembly.
+   *
+   * The fallback freezes the cell's six DOFs for this Newton step by
+   * contributing a large multiple of the identity to the local Hessian
+   * (and zero to the residual). The penalty must dominate any other
+   * contribution to that cell — most notably the SDR rank-one block,
+   * which scales like `rho_s * params.normalizer * area` and can easily
+   * reach `O(10)` per cell on realistic mesh / SDR weights.
+   *
+   * `1e10` is large enough that the resulting Newton update in the
+   * frozen DOFs is below floating-point noise:
+   *     du ~ R / 1e10 ~ 1e-10 * R,
+   * which is at most `1e-8` for any realistic `R`. The remainder of the
+   * mesh continues to take its proper Newton step. The cell is allowed
+   * back into the iteration as soon as its `j_K^u` re-enters the
+   * admissible region, which happens automatically because the Newton
+   * step at neighbouring cells continues unobstructed.
+   *
+   * The previous fallback used a unit diagonal (`1`), which is the same
+   * magnitude as the SDR contribution on typical meshes and therefore
+   * failed to freeze the cell — producing massive Newton updates in the
+   * singular DOFs (we observed `step ~ 14` on a unit-square mesh in the
+   * wavy-circle sweep) that immediately drove tens of neighbouring
+   * cells through the singular floor and triggered a cascade.
+   */
+  inline constexpr Real kBarrierSingularPenalty = Real(1e10);
+
+  /**
+   * @brief Process-wide counter for cells where the floor barrier was
+   *        active (j < jSafe) during the last assembly. Diagnostic only.
+   */
+  inline std::atomic<unsigned long>& barrierFloorActiveCount()
+  {
+    static std::atomic<unsigned long> count{0};
+    return count;
+  }
+
+  /**
+   * @brief Process-wide minimum of j_K^u over all assembled cells
+   *        (running min across threads; reset externally if needed).
+   *        Stored as the bit-cast of a `double` in an atomic, updated
+   *        via compare-exchange.
+   */
+  inline std::atomic<Real>& barrierMinJ()
+  {
+    static std::atomic<Real> value{std::numeric_limits<Real>::infinity()};
+    return value;
+  }
+
+  inline void barrierUpdateMinJ(Real candidate)
+  {
+    Real cur = barrierMinJ().load(std::memory_order_relaxed);
+    while (candidate < cur
+        && !barrierMinJ().compare_exchange_weak(
+              cur, candidate,
+              std::memory_order_relaxed,
+              std::memory_order_relaxed))
+    {
+      // cur updated by compare_exchange_weak; loop.
+    }
   }
 
   /**
@@ -159,19 +244,48 @@ namespace Rodin::Adaptation
     const Real w_s = gamma * areaWeight;
     const Real w_d = beta  * areaWeight;
 
-    out.energy =
-        w_s * (qShape - Real(1))
-      - w_d * std::log(j - params.jMin);
+    // Singularity floor barrier B(j); identically zero (and so are its
+    // derivatives) when j >= jSafe — no volume bias above the activation
+    // threshold. Below jSafe it diverges as j -> jMin+.
+    //
+    // Reuse the OLD log-barrier code path with effective coefficients
+    // h_eff and Kd_eff (zero in the inactive branch). For j < jSafe:
+    //     s        := jSafe - jMin           (> 0)
+    //     h        := j / (j - jMin)         (the OLD log-barrier h)
+    //     Kd       := jMin*j / (j - jMin)^2  (the OLD log-barrier Kd)
+    //     h_eff    := h  - j/s
+    //     Kd_eff   := Kd + j/s
+    //     E_floor  := w_d * (-log((j-jMin)/s) + (j - jSafe)/s)
+    // Identity check: in the active branch the residual
+    //     +w_d * B'(j) * j * FinvT
+    // equals  -w_d * h_eff * FinvT, which has the exact same form as the
+    // old `-w_d h FinvT` block; analogously for the Hessian (Kd, h) ->
+    // (Kd_eff, h_eff). Cf. the file-level docstring for the derivation.
+    Real h_eff   = 0;
+    Real Kd_eff  = 0;
+    Real eFloor  = 0;
+    const bool floorActive = (j < params.jSafe);
+    out.floorActive = floorActive;
+    if (floorActive)
+    {
+      const Real s    = params.jSafe - params.jMin;
+      const Real djm  = j - params.jMin;
+      const Real h    = j / djm;
+      const Real Kd   = params.jMin * j / (djm * djm);
+      const Real jOs  = j / s;
+      h_eff   = h - jOs;
+      Kd_eff  = Kd + jOs;
+      eFloor  = -std::log(djm / s) + (j - params.jSafe) / s;
+    }
+
+    out.energy = w_s * (qShape - Real(1)) + w_d * eFloor;
 
     const Math::SpatialMatrix<Real> FinvT = F.inverse().transpose();
     const Math::SpatialMatrix<Real> FC = F * cell.C;
-    const Real h = j / (j - params.jMin);
-    const Real Kd = params.jMin * j
-                  / ((j - params.jMin) * (j - params.jMin));
     const Real wsOverD = w_s / D;
     Math::SpatialMatrix<Real> S =
         wsOverD * (FC - Real(0.5) * n2 * FinvT)
-      - w_d * h * FinvT;
+      - w_d * h_eff * FinvT;
 
     for (std::size_t k = 0; k < 3; ++k)
       for (std::size_t l = 0; l < 2; ++l)
@@ -211,8 +325,8 @@ namespace Rodin::Adaptation
                        + FinvTgk[k](p) * FinvTgk[m](l));
 
             const Real det =
-                Kd * FinvTgk[k](l) * FinvTgk[m](p)
-              + h  * FinvTgk[k](p) * FinvTgk[m](l);
+                Kd_eff * FinvTgk[k](l) * FinvTgk[m](p)
+              + h_eff  * FinvTgk[k](p) * FinvTgk[m](l);
 
             out.hess(k * 2 + l, m * 2 + p) =
                 wsOverD * shape + w_d * det;
@@ -324,6 +438,9 @@ namespace Rodin::Adaptation
           barrierInadmissibleCount().fetch_add(1, std::memory_order_relaxed);
           return *this;
         }
+        barrierUpdateMinJ(local.j);
+        if (local.floorActive)
+          barrierFloorActiveCount().fetch_add(1, std::memory_order_relaxed);
         m_elemVec = local.grad;
         return *this;
       }
@@ -416,10 +533,16 @@ namespace Rodin::Adaptation
         if (!local.valid)
         {
           barrierInadmissibleCount().fetch_add(1, std::memory_order_relaxed);
+          // Freeze this cell's six DOFs for one Newton step by a large
+          // identity penalty. See `kBarrierSingularPenalty` for the
+          // rationale and the value chosen.
           for (std::size_t i = 0; i < 6; ++i)
-            m_matrix(i, i) = Real(1);
+            m_matrix(i, i) = kBarrierSingularPenalty;
           return *this;
         }
+        barrierUpdateMinJ(local.j);
+        if (local.floorActive)
+          barrierFloorActiveCount().fetch_add(1, std::memory_order_relaxed);
         m_matrix = local.hess;
         return *this;
       }

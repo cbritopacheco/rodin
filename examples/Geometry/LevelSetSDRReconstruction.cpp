@@ -20,7 +20,7 @@
 //     vector-valued basis evaluation; they are FES-generic within the
 //     planar 2D vector setting and have not been exercised on higher-order
 //     or non-affine elements.
-//   - The shape + Jacobian admissibility barrier integrators
+//   - The shape + singularity-floor (E_floor) integrators
 //     (Rodin::Adaptation::Barrier{Residual,Tangent}Integrator) are NOT
 //     FES-independent: they are specialised to affine P1 triangles in 2D
 //     (six local dofs, constant grad_X u_h per cell). Extending them
@@ -44,10 +44,15 @@
 //     functional coercive on its own.
 //   - The intrinsic shape quality energy (Q_shape - 1, cell-area-weighted)
 //     supplies tangential control and far-field regularisation.
-//   - The Jacobian admissibility barrier keeps
+//   - The singularity floor E_floor is the only piece protecting
 //       j_K^u(xhat) = sigma_K det(A_K^u) / J_K_scale
-//     strictly positive, which is what makes Q_shape well-defined on the
-//     same sigma_K branch.
+//     from collapsing through the cell's initial sigma_K branch
+//     (j_K^u -> j_min). It is identically zero (and so are its
+//     derivatives) whenever j_K^u >= j_safe, so it does NOT bias the
+//     element toward any particular volume; it is NOT an orientation
+//     barrier; it does NOT prefer j_K^u = 1. It is only a one-sided
+//     safeguard against the singular set, sufficient to keep
+//     Q_shape well-defined on the same sigma_K branch.
 //   - Zero Dirichlet on the mesh boundary pins the perimeter dofs and
 //     kills rigid-body modes.
 // All four ingredients together make the discrete Newton system
@@ -112,8 +117,9 @@
 //       phi or s_h^LF is irregular.
 //     - On this prototype Newton matches GaussNewton for the first ~5
 //       iterations, then the indefinite Newton step drives a handful
-//       of cells past j_K^u = j_min. Those cells are flagged via
-//       `barrierInadmissibleCount()` and contribute a small identity
+//       of cells past j_K^u = j_min (the singular floor). Those cells
+//       are flagged via `barrierInadmissibleCount()` and contribute a
+//       small identity
 //       block (instead of throwing, which under OpenMP assembly is
 //       std::terminate); Newton continues but no longer converges.
 //
@@ -314,7 +320,7 @@ namespace
 
 int main(int, char**)
 {
-  constexpr std::size_t n = 17;
+  constexpr std::size_t n = 40;
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;
@@ -487,10 +493,14 @@ int main(int, char**)
   // weights are wrapped in `RealFunction<Real>(value)` exactly like
   // any other scalar constant in Rodin form language; spatially
   // varying weights can be any `Variational::RealFunctionBase<...>`.
+  // gamma weighs the shape term E_shape; beta weighs the singularity
+  // floor term E_floor. The floor barrier is active ONLY when
+  // j_K^u < jSafe, so beta has no effect away from the singular set.
   RealFunction<Real> barrierGamma(Real(1e-1));
   RealFunction<Real> barrierBeta(Real(1e-2));
   BarrierParameters barrierParams;
-  barrierParams.jMin = 1e-3;
+  barrierParams.jMin  = 1e-8;
+  barrierParams.jSafe = 1e-3;
   barrierParams.domainMeasure = domainMeasure;
 
   // Per-cell geometry cache, indexed by local iteration order.
@@ -596,13 +606,21 @@ int main(int, char**)
     .setMonitor([&](const auto& report)
     {
       const auto bad = barrierInadmissibleCount().exchange(0);
+      const auto floorN = barrierFloorActiveCount().exchange(0);
+      const Real minJ = barrierMinJ().exchange(
+          std::numeric_limits<Real>::infinity(),
+          std::memory_order_relaxed);
       std::cout << "Newton " << std::setw(2) << report.iterations
                 << ": ||R||=" << std::scientific << std::setprecision(6)
                 << report.final_residual
                 << "  step=" << report.final_step_norm
                 << "  damping=" << report.damping_factor;
+      if (std::isfinite(minJ))
+        std::cout << "  min_j=" << std::setprecision(3) << minJ;
+      if (floorN > 0)
+        std::cout << "  active_floor_cells=" << floorN;
       if (bad > 0)
-        std::cout << "  [inadmissible cells=" << bad << "]";
+        std::cout << "  [singular cells=" << bad << "]";
       std::cout << '\n';
       residualHistory.push_back(report.final_residual);
     });
