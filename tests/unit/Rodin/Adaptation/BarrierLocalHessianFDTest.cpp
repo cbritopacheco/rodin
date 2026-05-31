@@ -35,6 +35,7 @@
 
 #include <array>
 #include <cmath>
+#include <iostream>
 #include <vector>
 
 #include <Rodin/Adaptation.h>
@@ -58,6 +59,13 @@ namespace
     mesh.getConnectivity().compute(1, 2);
     mesh.getConnectivity().compute(2, 2);
     mesh.getConnectivity().compute(0, 0);
+    return mesh;
+  }
+
+  Mesh<Context::Local> makeUnitSquareTriangleMesh(std::size_t n)
+  {
+    auto mesh = makeSmallTriangleMesh(n);
+    mesh.scale(Real(1) / static_cast<Real>(n - 1));
     return mesh;
   }
 
@@ -153,6 +161,55 @@ namespace Rodin::Tests::Unit
     const auto local = evaluateBarrierLocal(cell, uv, kGamma, kBeta, defaultParams(1));
     EXPECT_TRUE(local.valid);
     EXPECT_GT(local.j, Real(0));
+  }
+
+  TEST(Rodin_Adaptation_Barrier, IdentityJacobianRatioIsMeshIndependent)
+  {
+    const std::array<std::size_t, 4> ns{ 20, 30, 40, 60 };
+    const Real jMinRatio = Real(1e-8);
+    const Real jSafeRatio = Real(1e-3);
+    const Real lineSearchSafetyMargin = Real(10);
+    const Real jLineSearchRatio =
+      std::max(jMinRatio, lineSearchSafetyMargin * jSafeRatio);
+
+    std::cout << "\nJacobian-ratio refinement check\n";
+    for (const std::size_t n : ns)
+    {
+      auto mesh = makeUnitSquareTriangleMesh(n);
+      auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
+      ASSERT_FALSE(cellCache.empty());
+
+      Real minJIdentity = std::numeric_limits<Real>::infinity();
+      Real maxIdentityError = 0;
+      for (const auto& cell : cellCache)
+      {
+        std::array<Math::SpatialVector<Real>, 3> uv;
+        for (auto& x : uv)
+        {
+          x = Math::SpatialVector<Real>(2);
+          x(0) = 0;
+          x(1) = 0;
+        }
+
+        BarrierParameters params;
+        params.jMin = jMinRatio;
+        params.jSafe = jSafeRatio;
+        params.domainMeasure = Real(1);
+        const auto local =
+          evaluateBarrierLocal(cell, uv, kGamma, kBeta, params);
+        ASSERT_TRUE(local.valid);
+        minJIdentity = std::min(minJIdentity, local.j);
+        maxIdentityError =
+          std::max(maxIdentityError, std::abs(local.j - Real(1)));
+      }
+
+      std::cout << "  n=" << n
+                << "  min_j_identity=" << minJIdentity
+                << "  jLineSearch=" << jLineSearchRatio
+                << '\n';
+      EXPECT_LT(maxIdentityError, Real(1e-12)) << "n=" << n;
+      EXPECT_EQ(jLineSearchRatio, Real(1e-2));
+    }
   }
 
   // The minimum FD error across a logarithmic eps sweep must reach the

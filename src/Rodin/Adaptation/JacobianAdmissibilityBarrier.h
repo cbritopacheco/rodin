@@ -56,9 +56,11 @@
  *   pulling out the per-cell scalar values before calling the
  *   closed-form `evaluateBarrierLocal`.
  *
- *   `jMin` (singular floor), `jSafe` (activation threshold) and
- *   `domainMeasure` are algorithmic / mesh-global scalars and stay as
- *   `Real` fields on `BarrierParameters`. Recommended defaults:
+ *   `jMin` (singular floor ratio), `jSafe` (activation threshold ratio)
+ *   and `domainMeasure` are algorithmic / mesh-global scalars and stay
+ *   as `Real` fields on `BarrierParameters`. They are dimensionless
+ *   thresholds for j_K^u = sigma_K det(A_K^u) / J_K_scale, never raw
+ *   determinant thresholds. Recommended defaults:
  *     jMin  ~ 1e-8 .. 1e-6,  jSafe ~ 1e-3 .. 1e-2.
  *
  *   The user-facing helper `JacobianAdmissibilityBarrier` mirrors
@@ -98,9 +100,11 @@ namespace Rodin::Adaptation
   /**
    * @brief Scalar parameters for the shape + singularity-floor energy.
    *
-   *   jMin          = singularity floor (strictly positive, e.g. 1e-8)
-   *   jSafe         = activation threshold of the floor barrier,
-   *                   jMin < jSafe (e.g. 1e-3). B(j) = 0 for j >= jSafe.
+   *   jMin          = dimensionless singularity floor ratio
+   *                   (strictly positive, e.g. 1e-8)
+   *   jSafe         = dimensionless activation threshold ratio of the
+   *                   floor barrier, jMin < jSafe (e.g. 1e-3).
+   *                   B(j) = 0 for j >= jSafe.
    *   domainMeasure = |Omega| (mesh-global normalisation)
    *
    * The spatial weights gamma (shape) and beta (floor) are NOT carried
@@ -109,8 +113,8 @@ namespace Rodin::Adaptation
    */
   struct BarrierParameters
   {
-    Real jMin = 1e-8;
-    Real jSafe = 1e-3;
+    Real jMin = 1e-8;  ///< dimensionless ratio, not raw det(A_K^u)
+    Real jSafe = 1e-3; ///< dimensionless ratio, not raw det(A_K^u)
     Real domainMeasure = 0;
   };
 

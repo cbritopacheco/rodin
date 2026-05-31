@@ -27,9 +27,9 @@
 //
 // FES-independence and Newton-tangent choices follow the same honest
 // caveats as the parent example: the barrier + shape closed-form
-// algebra is specialised to affine P1 triangles in 2D; SDR is the
-// Gauss--Newton flavour (CTAD-selected by passing phi/grad/sLF/params,
-// without hess). The example is therefore a 2D triangular prototype.
+// algebra is specialised to affine P1 triangles in 2D; SDR uses the
+// PSD-projected full-Newton tangent. The example is therefore a 2D
+// triangular prototype.
 //
 #include <Rodin/Adaptation.h>
 #include <Rodin/Assembly.h>
@@ -269,17 +269,55 @@ namespace
       mesh.setAttribute({D - 1, it->getIndex()}, Attribute{0});
   }
 
+  std::size_t parseSizeTOption(
+      int argc, char** argv, const std::string& name, std::size_t fallback)
+  {
+    const std::string prefix = "--" + name + "=";
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string arg(argv[i]);
+      if (arg.rfind(prefix, 0) == 0)
+        return static_cast<std::size_t>(std::stoul(arg.substr(prefix.size())));
+    }
+    return fallback;
+  }
+
+  Real parseRealOption(
+      int argc, char** argv, const std::string& name, Real fallback)
+  {
+    const std::string prefix = "--" + name + "=";
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string arg(argv[i]);
+      if (arg.rfind(prefix, 0) == 0)
+        return static_cast<Real>(std::stod(arg.substr(prefix.size())));
+    }
+    return fallback;
+  }
+
+  bool hasFlag(int argc, char** argv, const std::string& name)
+  {
+    const std::string flag = "--" + name;
+    for (int i = 1; i < argc; ++i)
+      if (std::string(argv[i]) == flag)
+        return true;
+    return false;
+  }
+
 }
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
   // -------------------------------------------------------------------------
   // Step 0: frame schedule, mesh, and constants.
   // -------------------------------------------------------------------------
-  constexpr std::size_t n = 20;        ///< 1D mesh resolution (n x n nodes).
-  constexpr std::size_t nFrames = 20;  ///< Number of orbit snapshots.
+  const std::size_t n =
+    parseSizeTOption(argc, argv, "n", 50);          ///< n x n nodes.
+  const std::size_t nFrames =
+    parseSizeTOption(argc, argv, "frames", 200);    ///< orbit snapshots.
   constexpr Real        orbitR = 0.10; ///< Radius of the centre's orbit.
-  constexpr Real        amp    = 0.025;///< Wavy-circle radial amplitude.
+  const Real            amp =
+    parseRealOption(argc, argv, "amp", Real(0.05)); ///< radial amplitude.
   constexpr Real        R0     = 0.20; ///< Wavy-circle nominal radius.
   constexpr Real        kLobes = 6;    ///< Number of azimuthal lobes.
 
@@ -322,8 +360,10 @@ int main(int, char**)
   //
   // Both knobs are opt-in. Set to 0 to recover the un-regularised
   // PSD-projected Newton iteration that was already used at n=60.
-  const Real kHarmonicEps = Real(0);      ///< harmonic / Dirichlet energy weight
-  const Real kTikhonovEps = Real(0);      ///< L² Tikhonov weight
+  const Real kHarmonicEps =
+    parseRealOption(argc, argv, "harmonic-eps", Real(0));
+  const Real kTikhonovEps =
+    parseRealOption(argc, argv, "tikhonov-eps", Real(0));
 
   // -------------------------------------------------------------------------
   // Admissibility-first backtracking line search.
@@ -331,7 +371,8 @@ int main(int, char**)
   //   while (alpha >= alphaMin)
   //     uTrial = u + alpha * p
   //     adm    = evaluateAdmissibility(uTrial)
-  //     if (adm.minJ > jMin && adm.inadmissibleCount == 0): accept
+  //     if (adm.minJRatio > jLineSearchRatio
+  //         && adm.inadmissibleCount == 0): accept
   //     else: alpha *= reduction
   //
   // When disabled, the iteration falls back to the static `kDamping`
@@ -340,11 +381,14 @@ int main(int, char**)
   const Real   kLineSearchAlphaInit = Real(1);
   const Real   kLineSearchReduction = Real(0.5);
   const Real   kLineSearchAlphaMin  = Real(1e-6);
-  // Safety margin above j_safe used as the line-search admissibility
-  // floor: accept only steps with min_K j_K^u > kLineSearchSafetyMargin
-  // × j_safe. The previous default (j_min = 10⁻⁸) only protected against
-  // catastrophic flips, allowing iterates to enter the FLOOR-BARRIER
-  // active region (j ∈ (j_min, j_safe)) where the barrier Hessian is
+  // Safety margin above jSafeRatio used as the line-search admissibility
+  // floor. The threshold is dimensionless because it is applied to
+  // j_K^u = sigma_K det(A_K^u) / J_K_scale, never to raw det(A_K^u).
+  // Accept only steps with
+  //   min_K j_K^u > max(jMinRatio, margin * jSafeRatio).
+  // The previous default (j_min = 10^-8) only protected against
+  // catastrophic flips, allowing iterates to enter the floor-barrier
+  // active region (j in (j_min, j_safe)) where the barrier Hessian is
   // very stiff and subsequent Newton directions become explosively
   // compressive. Keeping the iterate safely above j_safe avoids this.
   const Real   kLineSearchSafetyMargin = Real(10);
@@ -652,7 +696,7 @@ int main(int, char**)
     // hand side is the SDR variational derivative AT u = 0:
     //
     //     ⟨δE_SDR(0), v⟩
-    //       = ρ_s · normalizer · ∫_Ω w_δ(s_h^LF) · (φ - s_h^LF) · ∇φ · v dx.
+    //       = ρ_s · ∫_Ω w_δ(s_h^LF) · (φ - s_h^LF) · ∇φ · v dx.
     //
     // By Lax–Milgram on (V₀, a), this defines u_H uniquely; it is the
     // gradient of E_SDR at u = 0 in the H¹₀ topology (i.e. a Sobolev
@@ -746,7 +790,7 @@ int main(int, char**)
     //
     // Per-iteration diagnostics: dumped when kVerbose, kept quiet
     // otherwise so the summary stays readable.
-    constexpr bool kVerbose = false;
+    const bool kVerbose = hasFlag(argc, argv, "verbose");
     barrierMinJ().store(std::numeric_limits<Real>::infinity(),
                         std::memory_order_relaxed);
     barrierFloorActiveCount().exchange(0);
@@ -872,10 +916,10 @@ int main(int, char**)
       const auto step = newtonSolver.getReport();
       const Real R = step.final_residual;
 
-      if (R < residualBest)
+      const bool residualImproved = (R < residualBest);
+      if (residualImproved)
       {
         residualBest = R;
-        uBest = uOld;
         stallCount = 0;
       }
       else
@@ -885,8 +929,16 @@ int main(int, char**)
       }
 
       if (it == 0) r0 = R;
-      if (R <= kAbsTol) break;
-      if (r0 > 0 && R <= kRelTol * r0) break;
+      if (R <= kAbsTol)
+      {
+        if (residualImproved) uBest = u.getData();
+        break;
+      }
+      if (r0 > 0 && R <= kRelTol * r0)
+      {
+        if (residualImproved) uBest = u.getData();
+        break;
+      }
 
       // Reconstruct the un-damped Newton direction and back-substitute
       // through the admissibility line search.
@@ -900,12 +952,12 @@ int main(int, char**)
         // Tighten the line-search floor from j_min (catastrophic flip
         // protection only) to a safety multiple of j_safe (avoid the
         // floor barrier's active region). See `kLineSearchSafetyMargin`.
-        const Real lsFloor =
+        const Real jLineSearchRatio =
           std::max(barrierParams.jMin,
                    kLineSearchSafetyMargin * barrierParams.jSafe);
         lsRes = Diag::admissibilityLineSearch(
             u.getData(), p, evaluator,
-            lsFloor,
+            jLineSearchRatio,
             kLineSearchAlphaInit, kLineSearchReduction, kLineSearchAlphaMin);
         alphaUsed = lsRes.alphaAccepted;
       }
@@ -914,17 +966,19 @@ int main(int, char**)
         // Baseline static damping; admissibility checked for diagnostics
         // only (never used to reject).
         const auto adm1 = evaluator(u.getData() + Real(1) * p);
-        lsRes.minJAtAlpha1              = adm1.minJ;
+        lsRes.minJRatioAtAlpha1         = adm1.minJRatio;
         lsRes.inadmissibleCountAtAlpha1 = adm1.inadmissibleCount;
         u.getData() += kDamping * p;
         const auto admUsed = evaluator(u.getData());
         lsRes.alphaAccepted             = kDamping;
-        lsRes.minJAccepted              = admUsed.minJ;
+        lsRes.minJRatioAccepted         = admUsed.minJRatio;
         lsRes.inadmissibleCountAccepted = admUsed.inadmissibleCount;
         lsRes.succeeded                 = true;
         alphaUsed = kDamping;
       }
       const Real stepNorm = alphaUsed * p.norm();
+      if (residualImproved && lsRes.succeeded)
+        uBest = u.getData();
 
       // Observation-only diagnostics.
       const Diag::AdmissibilityDiagnostics admDiag =
@@ -940,8 +994,8 @@ int main(int, char**)
         std::cout << "      it=" << std::setw(2) << it
                   << "  ||R||="  << std::scientific << std::setprecision(3) << R
                   << "  step="   << stepNorm << '\n';
-        std::cout << "           min_j_before="    << std::setprecision(3) << admDiag.minJBefore
-                  << "  min_j_after_full=" << admDiag.minJAfterFull
+        std::cout << "           min_j_before="    << std::setprecision(3) << admDiag.minJRatioBefore
+                  << "  min_j_after_full=" << admDiag.minJRatioAfterFull
                   << "  inadm_after="      << admDiag.inadmAfter
                   << "  min_pred_margin="  << admDiag.minPredMargin
                   << "  pred_inadm="       << admDiag.predInadm;
@@ -952,9 +1006,9 @@ int main(int, char**)
         std::cout << "           line_search:"
                   << " alpha="                  << lsRes.alphaAccepted
                   << "  backtracks="            << lsRes.backtracks
-                  << "  min_j@alpha=1="         << lsRes.minJAtAlpha1
+                  << "  min_j@alpha=1="         << lsRes.minJRatioAtAlpha1
                   << "  inadm@alpha=1="         << lsRes.inadmissibleCountAtAlpha1
-                  << "  min_j_accepted="        << lsRes.minJAccepted
+                  << "  min_j_accepted="        << lsRes.minJRatioAccepted
                   << "  inadm_accepted="        << lsRes.inadmissibleCountAccepted
                   << (lsRes.succeeded ? "" : "  [FAILED]")
                   << '\n';

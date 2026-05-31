@@ -320,7 +320,7 @@ namespace
 
 int main(int, char**)
 {
-  constexpr std::size_t n = 40;
+  constexpr std::size_t n = 50;
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;

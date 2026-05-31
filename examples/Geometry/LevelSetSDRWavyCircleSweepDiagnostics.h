@@ -10,16 +10,16 @@
 // Kept in a separate header to keep the example itself focused on the
 // per-frame orchestration. The contents here are:
 //
-//   1. `AdmissibilityReport` — black-box (minJ, inadmissibleCount)
-//       summary at the cell scale.
+//   1. `AdmissibilityReport` — black-box (minJRatio,
+//       inadmissibleCount) summary at the cell scale.
 //   2. `evaluateAdmissibilityP1` — P1-vector admissibility check
 //       computed in closed form from the existing cell-geometry cache.
 //   3. `admissibilityLineSearch` — FES-INDEPENDENT backtracking line
 //       search; only sees dof-vectors and an `Evaluator` callable.
 //   4. `AdmissibilityDiagnostics` — X1-style per-iteration inspection
-//       (min_j_before, min_j_after_full, inadm_after, min_pred_margin,
-//       pred_inadm). Useful for understanding WHY a step had to
-//       backtrack but never used to decide whether to accept.
+//       (min_j_ratio_before, min_j_ratio_after_full, inadm_after,
+//       min_pred_margin, pred_inadm). Useful for understanding WHY a
+//       step had to backtrack but never used to decide whether to accept.
 //
 #ifndef LEVELSETSDRWAVYCIRCLESWEEP_DIAGNOSTICS_H
 #define LEVELSETSDRWAVYCIRCLESWEEP_DIAGNOSTICS_H
@@ -43,7 +43,9 @@ namespace LevelSetSDRWavyCircleSweepSupport
   // ---------- Black-box admissibility report --------------------------------
   struct AdmissibilityReport
   {
-    Real        minJ              = std::numeric_limits<Real>::infinity();
+    // Dimensionless branch-normalized Jacobian ratio:
+    //   j_K^u = sigma_K det(A_K^u) / J_K_scale.
+    Real        minJRatio         = std::numeric_limits<Real>::infinity();
     std::size_t inadmissibleCount = 0;
   };
 
@@ -64,7 +66,7 @@ namespace LevelSetSDRWavyCircleSweepSupport
       const Math::Vector<Real>& uData,
       const std::vector<Adapta::CellGeomCache>& cellCache,
       const FES& fes,
-      Real jMin)
+      Real jMinRatio)
   {
     AdmissibilityReport rep;
     for (const auto& cellG : cellCache)
@@ -82,8 +84,8 @@ namespace LevelSetSDRWavyCircleSweepSupport
       const Real sigDetA =
         static_cast<Real>(cellG.sigmaK) * cellG.detAK;
       const Real j = sigDetA * F.determinant() / cellG.Jscale;
-      if (j < rep.minJ)         rep.minJ              = j;
-      if (j <= jMin)            ++rep.inadmissibleCount;
+      if (j < rep.minJRatio)    rep.minJRatio         = j;
+      if (j <= jMinRatio)       ++rep.inadmissibleCount;
     }
     return rep;
   }
@@ -93,9 +95,9 @@ namespace LevelSetSDRWavyCircleSweepSupport
   {
     Real        alphaAccepted             = Real(0);
     std::size_t backtracks                = 0;
-    Real        minJAtAlpha1              = std::numeric_limits<Real>::quiet_NaN();
+    Real        minJRatioAtAlpha1         = std::numeric_limits<Real>::quiet_NaN();
     std::size_t inadmissibleCountAtAlpha1 = 0;
-    Real        minJAccepted              = std::numeric_limits<Real>::quiet_NaN();
+    Real        minJRatioAccepted         = std::numeric_limits<Real>::quiet_NaN();
     std::size_t inadmissibleCountAccepted = 0;
     bool        succeeded                 = false;
   };
@@ -110,7 +112,7 @@ namespace LevelSetSDRWavyCircleSweepSupport
       Math::Vector<Real>& u,
       const Math::Vector<Real>& p,
       Evaluator&& evaluator,
-      Real jMin,
+      Real jLineSearchRatio,
       Real alphaInit = Real(1),
       Real reduction = Real(0.5),
       Real alphaMin  = Real(1e-6))
@@ -129,17 +131,18 @@ namespace LevelSetSDRWavyCircleSweepSupport
 
       if (firstIter)
       {
-        result.minJAtAlpha1              = adm.minJ;
+        result.minJRatioAtAlpha1         = adm.minJRatio;
         result.inadmissibleCountAtAlpha1 = adm.inadmissibleCount;
         firstIter = false;
       }
       lastAdm = adm;
 
-      if (adm.minJ > jMin && adm.inadmissibleCount == 0)
+      if (adm.minJRatio > jLineSearchRatio
+          && adm.inadmissibleCount == 0)
       {
         u = uTrial;
         result.alphaAccepted             = alpha;
-        result.minJAccepted              = adm.minJ;
+        result.minJRatioAccepted         = adm.minJRatio;
         result.inadmissibleCountAccepted = adm.inadmissibleCount;
         result.succeeded                 = true;
         return result;
@@ -150,7 +153,7 @@ namespace LevelSetSDRWavyCircleSweepSupport
 
     // Failed: leave u unchanged.
     u = uOld;
-    result.minJAccepted              = lastAdm.minJ;
+    result.minJRatioAccepted         = lastAdm.minJRatio;
     result.inadmissibleCountAccepted = lastAdm.inadmissibleCount;
     return result;
   }
@@ -162,8 +165,8 @@ namespace LevelSetSDRWavyCircleSweepSupport
   // direction. Useful to expose WHY a step had to backtrack.
   struct AdmissibilityDiagnostics
   {
-    Real        minJBefore     = std::numeric_limits<Real>::infinity();
-    Real        minJAfterFull  = std::numeric_limits<Real>::infinity();
+    Real        minJRatioBefore     = std::numeric_limits<Real>::infinity();
+    Real        minJRatioAfterFull  = std::numeric_limits<Real>::infinity();
     std::size_t inadmAfter     = 0;
     Real        minPredMargin  = std::numeric_limits<Real>::infinity();
     std::size_t predInadm      = 0;
@@ -175,7 +178,7 @@ namespace LevelSetSDRWavyCircleSweepSupport
       const Math::Vector<Real>& p,
       const std::vector<Adapta::CellGeomCache>& cellCache,
       const FES& fes,
-      Real jMin,
+      Real jMinRatio,
       Real tau)
   {
     AdmissibilityDiagnostics d;
@@ -202,13 +205,13 @@ namespace LevelSetSDRWavyCircleSweepSupport
       const Math::SpatialMatrix<Real> Finv = F.inverse();
       const Real trTerm  = (Finv * gradP).trace();
       const Real Dj      = jU * trTerm;
-      const Real margin  = jU + Dj - jMin;
+      const Real margin  = jU + Dj - jMinRatio;
 
-      if (jU      < d.minJBefore)    d.minJBefore    = jU;
-      if (jAfter  < d.minJAfterFull) d.minJAfterFull = jAfter;
-      if (jAfter <= jMin)            ++d.inadmAfter;
+      if (jU      < d.minJRatioBefore)    d.minJRatioBefore    = jU;
+      if (jAfter  < d.minJRatioAfterFull) d.minJRatioAfterFull = jAfter;
+      if (jAfter <= jMinRatio)            ++d.inadmAfter;
       if (margin  < d.minPredMargin) d.minPredMargin = margin;
-      if (Dj < -tau * (jU - jMin))   ++d.predInadm;
+      if (Dj < -tau * (jU - jMinRatio))   ++d.predInadm;
     }
     return d;
   }
