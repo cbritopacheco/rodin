@@ -64,7 +64,7 @@
  *     jMin  ~ 1e-8 .. 1e-6,  jSafe ~ 1e-3 .. 1e-2.
  *
  *   The user-facing helper `JacobianAdmissibilityBarrier` mirrors
- *   `SignedDistanceRegistration`: variational skeleton + cell cache
+ *   `SDFRRegistration`: variational skeleton + cell cache
  *   captured at construction; gamma, beta and params supplied at
  *   `operator()` / `Tangent` / `Residual`. The class name is retained
  *   for backward compatibility; conceptually the energy it produces is
@@ -146,9 +146,9 @@ namespace Rodin::Adaptation
    * The fallback freezes the cell's six DOFs for this Newton step by
    * contributing a large multiple of the identity to the local Hessian
    * (and zero to the residual). The penalty must dominate any other
-   * contribution to that cell — most notably the SDR rank-one block,
+   * contribution to that cell — most notably the SDFR rank-one block,
    * which scales like `rho_s * params.normalizer * area` and can easily
-   * reach `O(10)` per cell on realistic mesh / SDR weights.
+   * reach `O(10)` per cell on realistic mesh / SDFR weights.
    *
    * `1e10` is large enough that the resulting Newton update in the
    * frozen DOFs is below floating-point noise:
@@ -160,7 +160,7 @@ namespace Rodin::Adaptation
    * step at neighbouring cells continues unobstructed.
    *
    * The previous fallback used a unit diagonal (`1`), which is the same
-   * magnitude as the SDR contribution on typical meshes and therefore
+   * magnitude as the SDFR contribution on typical meshes and therefore
    * failed to freeze the cell — producing massive Newton updates in the
    * singular DOFs (we observed `step ~ 14` on a unit-square mesh in the
    * wavy-circle sweep) that immediately drove tens of neighbouring
@@ -579,7 +579,7 @@ namespace Rodin::Adaptation
 
   /**
    * @brief High-level helper for the shape + Jacobian admissibility
-   *        barrier, modelled on `SignedDistanceRegistration` and
+   *        barrier, modelled on `SDFRRegistration` and
    *        `LinearElasticityIntegral`.
    *
    * Holds the variational skeleton `(du, v, u)` together with the

@@ -5,17 +5,17 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// 2D triangular static prototype of SDR (Surface-aware Distance
-// Reconstruction) displacement, on a P1 vector finite-element space,
+// 2D triangular static prototype of SDFR (signed distance function
+// registration) displacement, on a P1 vector finite-element space,
 // expressed through Rodin::Variational::Problem.
 //
 // Scope.
 //   - Planar 2D meshes; affine triangle cells.
-//   - A single static SDR solve.
+//   - A single static SDFR solve.
 //   - An analytic level set with closed-form phi, grad phi, hess phi.
 //
 // FES-independence — honest version.
-//   - The SDR integrators (Rodin::Adaptation::SDR{Residual,Tangent}Integrator)
+//   - The SDFR integrators (Rodin::Adaptation::SDFR{Residual,Tangent}Integrator)
 //     use Rodin's FES interface for per-cell finite-element lookup and
 //     vector-valued basis evaluation; they are FES-generic within the
 //     planar 2D vector setting and have not been exercised on higher-order
@@ -36,11 +36,11 @@
 //     assumption).
 //
 // Energy and well-posedness, in words.
-//   - The SDR data term controls (in the sense of dominating the Hessian)
+//   - The SDFR data term controls (in the sense of dominating the Hessian)
 //     the component of u along grad_y phi at every quadrature point with
 //     non-negligible weight. It does NOT control motion tangent to the
 //     level set, nor mesh motion in the far field. The Gaussian smoothing
-//     widens the support of the SDR Hessian but does not make the SDR
+//     widens the support of the SDFR Hessian but does not make the SDFR
 //     functional coercive on its own.
 //   - The intrinsic shape quality energy (Q_shape - 1, cell-area-weighted)
 //     supplies tangential control and far-field regularisation.
@@ -61,16 +61,16 @@
 // FullNewton vs GaussNewton — what we actually observe here.
 //
 //   Mode selection follows the Rodin::Variational::LinearElasticityIntegral
-//   pattern. The SignedDistanceRegistration helper captures the
+//   pattern. The SDFRRegistration helper captures the
 //   VARIATIONAL SKELETON (trial du, test v, state u) at construction,
 //   and the DATA (level set, optional Hessian callable, signed-distance
 //   field, parameters) is passed at `operator()` / `Tangent` /
 //   `Residual` time. Overload resolution on the call signature picks
-//   the right SDRTangentIntegrator specialisation:
+//   the right SDFRTangentIntegrator specialisation:
 //
-//     SignedDistanceRegistration sdr(du, v, u);
-//     newton = sdr(phi, grad,        sLF, params);   // -> GaussNewton
-//     newton = sdr(phi, grad, hess,  sLF, params);   // -> Newton
+//     SDFRRegistration sdfrTerm(du, v, u);
+//     newton = sdfrTerm(phi, grad,        sLF, params);   // -> GaussNewton
+//     newton = sdfrTerm(phi, grad, hess,  sLF, params);   // -> Newton
 //
 //   The three derivatives of the level set (phi, grad, hess) are
 //   first-class equal arguments at the call site, exactly like
@@ -83,7 +83,7 @@
 //   by the unit tests in
 //   tests/unit/Rodin/Adaptation/BarrierLocalHessianFDTest.cpp;
 //   relative error ~1e-10 at the optimum eps with V-shape signature).
-//   Only the SDR tangent flavour changes between modes.
+//   Only the SDFR tangent flavour changes between modes.
 //
 //   GaussNewton (default).
 //     - K_GN = (grad phi)(grad phi)^T per quadrature point.
@@ -94,7 +94,7 @@
 //
 //           r * hess(phi)
 //
-//       does not vanish at the GN minimum because the SDR L2 fit is
+//       does not vanish at the GN minimum because the SDFR L2 fit is
 //       approximate (r* != 0). The linear contraction floor is set by
 //       the spectral radius of the GN-vs-Newton tangent mismatch on
 //       that nonzero residual.
@@ -316,17 +316,26 @@ namespace
     }
   }
 
+  bool hasFlag(int argc, char** argv, const std::string& name)
+  {
+    const std::string flag = "--" + name;
+    for (int i = 1; i < argc; ++i)
+      if (argv[i] == flag)
+        return true;
+    return false;
+  }
+
 }
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
   constexpr std::size_t n = 50;
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;
 
-  // Pick the SDR tangent flavour for this run. Flip to
-  // SDRTangentMode::Newton to audit the full-Newton tangent.
+  // Pick the SDFR tangent flavour for this run. Flip to
+  // SDFRIntegratorTangentMode::Newton to audit the full-Newton tangent.
   //
   // For this prototype, empirically:
   //   - GaussNewton converges monotonically with factor ~3 per iter early
@@ -334,10 +343,10 @@ int main(int, char**)
   //   - Newton matches GaussNewton for the first few iterations, then the
   //     indefinite r * hess(phi) term takes over and produces residual
   //     spikes. On this circle level set inside the sphere phi has a
-  //     non-PSD Hessian, so the SDR full Newton tangent is genuinely
+  //     non-PSD Hessian, so the SDFR full Newton tangent is genuinely
   //     indefinite away from the solution.
-  // The SDR tangent mode is selected by the constructor call site of
-  // `SignedDistanceRegistration` below, not by a runtime flag. Flip
+  // The SDFR tangent mode is selected by the constructor call site of
+  // `SDFRRegistration` below, not by a runtime flag. Flip
   // `kUseFullNewton` to instantiate the Newton specialisation (which
   // also requires passing the level-set Hessian as a callable).
   constexpr bool kUseFullNewton = false;
@@ -481,9 +490,9 @@ int main(int, char**)
   GridFunction  u(vectorFes);
   u.getData().setZero();
 
-  // SDRParameters no longer carry a tangent-mode flag — that's a type
-  // property of the SignedDistanceRegistration composite chosen below.
-  SDRParameters params;
+  // SDFRIntegratorParameters no longer carry a tangent-mode flag — that's a type
+  // property of the SDFRRegistration composite chosen below.
+  SDFRIntegratorParameters params;
   params.rhoS = 1;
   params.deltaW = deltaW;
   params.hRef = h;
@@ -527,13 +536,8 @@ int main(int, char**)
   // -------------------------------------------------------------------------
   auto zero = VectorFunction{ Zero(), Zero() };
 
-  // The composite captures only the variational skeleton (du, v, u).
-  // The data — phi, grad, [hess], sLF, params — is supplied at the
-  // operator() call below.
-  SignedDistanceRegistration sdr(du, v, u);
-
   // Wrap CircleLevelSet's three derivatives as Rodin form-language
-  // function objects. Each takes a `Geometry::Point`; the SDR
+  // function objects. Each takes a `Geometry::Point`; the SDFR
   // integrators construct that Point at the deformed location
   // y = X + u_h(X) per quadrature point and the lambdas read
   // p.getPhysicalCoordinates() to recover y.
@@ -558,87 +562,137 @@ int main(int, char**)
       },
       /*rows=*/2, /*cols=*/2);
 
-  // Barrier helper, same shape as `SignedDistanceRegistration`:
-  // captures (du, v, u) and the per-cell cache + index map at
-  // construction; gamma, beta and params arrive at `operator()`.
-  JacobianAdmissibilityBarrier barrier(
-      du, v, u, cellCache, geomToLocal);
+  bool solveCompleted = true;
+  bool newtonConverged = false;
+  std::size_t newtonIterations = 0;
+  std::string solveError;
+  const bool useSDFRFacade = hasFlag(argc, argv, "use-sdfr-facade");
 
-  // We use the DECOMPOSED form (one Tangent + one Residual per helper)
-  // because Rodin's form language composes individual integrators, not
-  // problem-body fragments. This is the same idiom the Solid examples
-  // use: explicit `+ tangent + residual + DirichletBC(...)`. The
-  // composite `sdr()` / `barrier()` operator() forms are convenient
-  // when they are the SOLE contribution to a Problem; combining
-  // multiple helpers into one Problem goes through Tangent/Residual.
-  Problem newton(du, v);
-  if constexpr (kUseFullNewton)
+  if (useSDFRFacade)
   {
-    // 4 data args (phi, grad, hess, sLF) + params
-    // -> SDRTangentIntegrator<Newton, ...>
-    newton =
-          sdr.Tangent(phiFn, gradFn, hessFn, sLF, params)
-        + sdr.Residual(phiFn, gradFn, sLF, params)
-        + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
-        + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
-        + DirichletBC(du, zero).on(boundaryAttribute);
+    SDFRParameters sdfrParams;
+    sdfrParams.rhoS = params.rhoS;
+    sdfrParams.deltaW = params.deltaW;
+    sdfrParams.hRef = params.hRef;
+    sdfrParams.normalizer = params.normalizer;
+    sdfrParams.shapeWeight = 1e-1;
+    sdfrParams.floorWeight = 1e-2;
+    sdfrParams.jMinRatio = barrierParams.jMin;
+    sdfrParams.jSafeRatio = barrierParams.jSafe;
+    sdfrParams.initialGuess = SDFRInitialGuess::Zero;
+    sdfrParams.tangent =
+      kUseFullNewton ? SDFRTangent::Newton : SDFRTangent::GaussNewton;
+    sdfrParams.maxNewtonIterations = 20;
+    sdfrParams.absoluteTolerance = 1e-10;
+    sdfrParams.relativeTolerance = 1e-8;
+
+    try
+    {
+      SDFR sdfr(u);
+      const SDFRReport sdfrReport =
+        sdfr.setParameters(sdfrParams).solve(sLF, phiFn, gradFn, hessFn);
+      newtonConverged = sdfrReport.converged;
+      newtonIterations = sdfrReport.iterations;
+      solveCompleted = sdfrReport.converged && !sdfrReport.lineSearchFailed;
+      if (!solveCompleted)
+        solveError = "SDFR facade did not converge";
+    }
+    catch (const std::exception& ex)
+    {
+      solveCompleted = false;
+      solveError = ex.what();
+      std::cout << "\nSDFR facade aborted: " << ex.what() << '\n';
+    }
   }
   else
   {
-    // 3 data args (phi, grad, sLF) + params
-    // -> SDRTangentIntegrator<GaussNewton, ...>
-    newton =
-          sdr.Tangent(phiFn, gradFn, sLF, params)
-        + sdr.Residual(phiFn, gradFn, sLF, params)
-        + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
-        + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
-        + DirichletBC(du, zero).on(boundaryAttribute);
-  }
+    // The composite captures only the variational skeleton (du, v, u).
+    // The data — phi, grad, [hess], sLF, params — is supplied at the
+    // operator() call below.
+    SDFRRegistration sdfrTerm(du, v, u);
 
-  Solver::SparseLU linearSolver(newton);
-  Solver::NewtonSolver solver(linearSolver);
-  std::vector<Real> residualHistory;
-  solver
-    .setMaxIterations(20)
-    .setDampingFactor(1.0)
-    .setAbsoluteTolerance(1e-10)
-    .setRelativeTolerance(1e-8)
-    .setMonitor([&](const auto& report)
+    // Barrier helper, same shape as `SDFRRegistration`:
+    // captures (du, v, u) and the per-cell cache + index map at
+    // construction; gamma, beta and params arrive at `operator()`.
+    JacobianAdmissibilityBarrier barrier(
+        du, v, u, cellCache, geomToLocal);
+
+    // We use the DECOMPOSED form (one Tangent + one Residual per helper)
+    // because Rodin's form language composes individual integrators, not
+    // problem-body fragments. This is the same idiom the Solid examples
+    // use: explicit `+ tangent + residual + DirichletBC(...)`. The
+    // composite `sdfrTerm()` / `barrier()` operator() forms are convenient
+    // when they are the SOLE contribution to a Problem; combining
+    // multiple helpers into one Problem goes through Tangent/Residual.
+    Problem newton(du, v);
+    if constexpr (kUseFullNewton)
     {
-      const auto bad = barrierInadmissibleCount().exchange(0);
-      const auto floorN = barrierFloorActiveCount().exchange(0);
-      const Real minJ = barrierMinJ().exchange(
-          std::numeric_limits<Real>::infinity(),
-          std::memory_order_relaxed);
-      std::cout << "Newton " << std::setw(2) << report.iterations
-                << ": ||R||=" << std::scientific << std::setprecision(6)
-                << report.final_residual
-                << "  step=" << report.final_step_norm
-                << "  damping=" << report.damping_factor;
-      if (std::isfinite(minJ))
-        std::cout << "  min_j=" << std::setprecision(3) << minJ;
-      if (floorN > 0)
-        std::cout << "  active_floor_cells=" << floorN;
-      if (bad > 0)
-        std::cout << "  [singular cells=" << bad << "]";
-      std::cout << '\n';
-      residualHistory.push_back(report.final_residual);
-    });
+      // 4 data args (phi, grad, hess, sLF) + params
+      // -> SDFRTangentIntegrator<Newton, ...>
+      newton =
+            sdfrTerm.Tangent(phiFn, gradFn, hessFn, sLF, params)
+          + sdfrTerm.Residual(phiFn, gradFn, sLF, params)
+          + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
+          + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
+          + DirichletBC(du, zero).on(boundaryAttribute);
+    }
+    else
+    {
+      // 3 data args (phi, grad, sLF) + params
+      // -> SDFRTangentIntegrator<GaussNewton, ...>
+      newton =
+            sdfrTerm.Tangent(phiFn, gradFn, sLF, params)
+          + sdfrTerm.Residual(phiFn, gradFn, sLF, params)
+          + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
+          + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
+          + DirichletBC(du, zero).on(boundaryAttribute);
+    }
 
-  bool solveCompleted = true;
-  std::string solveError;
-  try
-  {
-    solver.solve(u);
+    Solver::SparseLU linearSolver(newton);
+    Solver::NewtonSolver solver(linearSolver);
+    std::vector<Real> residualHistory;
+    solver
+      .setMaxIterations(20)
+      .setDampingFactor(1.0)
+      .setAbsoluteTolerance(1e-10)
+      .setRelativeTolerance(1e-8)
+      .setMonitor([&](const auto& report)
+      {
+        const auto bad = barrierInadmissibleCount().exchange(0);
+        const auto floorN = barrierFloorActiveCount().exchange(0);
+        const Real minJ = barrierMinJ().exchange(
+            std::numeric_limits<Real>::infinity(),
+            std::memory_order_relaxed);
+        std::cout << "Newton " << std::setw(2) << report.iterations
+                  << ": ||R||=" << std::scientific << std::setprecision(6)
+                  << report.final_residual
+                  << "  step=" << report.final_step_norm
+                  << "  damping=" << report.damping_factor;
+        if (std::isfinite(minJ))
+          std::cout << "  min_j=" << std::setprecision(3) << minJ;
+        if (floorN > 0)
+          std::cout << "  active_floor_cells=" << floorN;
+        if (bad > 0)
+          std::cout << "  [singular cells=" << bad << "]";
+        std::cout << '\n';
+        residualHistory.push_back(report.final_residual);
+      });
+
+    try
+    {
+      solver.solve(u);
+    }
+    catch (const std::exception& ex)
+    {
+      solveCompleted = false;
+      solveError = ex.what();
+      std::cout << "\nNewton aborted: " << ex.what() << '\n';
+    }
+    const auto report = solver.getReport();
+    newtonConverged = report.converged;
+    newtonIterations = report.iterations;
+    printConvergenceOrders(residualHistory);
   }
-  catch (const std::exception& ex)
-  {
-    solveCompleted = false;
-    solveError = ex.what();
-    std::cout << "\nNewton aborted: " << ex.what() << '\n';
-  }
-  const auto report = solver.getReport();
-  printConvergenceOrders(residualHistory);
 
   // -------------------------------------------------------------------------
   // Step 7: build moved mesh through FES dof mapping (no raw indexing).
@@ -777,9 +831,9 @@ int main(int, char**)
   // Diagnostics.
   // -------------------------------------------------------------------------
   std::cout << "\nDiagnostics\n";
-  std::cout << "  SDR tangent mode: "
-            << (kUseFullNewton ? sdrTangentModeName(SDRTangentMode::Newton)
-                               : sdrTangentModeName(SDRTangentMode::GaussNewton))
+  std::cout << "  SDFR tangent mode: "
+            << (kUseFullNewton ? sdfrIntegratorTangentModeName(SDFRIntegratorTangentMode::Newton)
+                               : sdfrIntegratorTangentModeName(SDFRIntegratorTangentMode::GaussNewton))
             << '\n';
   std::cout << "  cells inside / outside: "
             << classified.insideCells.size() << " / "
@@ -792,8 +846,11 @@ int main(int, char**)
             << ", M_w (smooth band): " << weightedBandMeasure << '\n';
   std::cout << "  final ||phi(X+u)||_RMS on Gamma_h^LF: "
             << interfacePhiRMS << '\n';
-  std::cout << "  Newton iterations: " << report.iterations
-            << ", converged: " << (report.converged ? "yes" : "no") << '\n';
+  std::cout << "  solve path: "
+            << (useSDFRFacade ? "Adaptation::SDFR" : "manual forms")
+            << '\n';
+  std::cout << "  Newton iterations: " << newtonIterations
+            << ", converged: " << (newtonConverged ? "yes" : "no") << '\n';
 
-  return report.converged ? 0 : 1;
+  return newtonConverged ? 0 : 1;
 }

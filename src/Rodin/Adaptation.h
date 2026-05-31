@@ -11,16 +11,21 @@
  * @file
  * @brief Top level include for Rodin adaptation utilities.
  *
- * Provides form-language integrators for static SDR (Surface-aware
- * Distance Reconstruction) on a P1 vector finite-element space, the
- * intrinsic shape quality energy, and the Jacobian admissibility /
- * nondegeneracy / singularity barrier. The current implementation is
- * the 2D triangular affine prototype; see the individual headers for the
- * FES-independence boundary.
+ * Provides the SDFR (signed distance function registration) solver, its
+ * form-language integrators, the intrinsic shape quality energy, and the
+ * Jacobian admissibility / nondegeneracy / singularity barrier. The current
+ * implementation is the 2D triangular affine prototype; see the individual
+ * headers for the FES-independence boundary.
  */
 
 #include "Adaptation/AnalyticFunctionAdapters.h"
 #include "Adaptation/CellGeomCache.h"
+#include "Adaptation/SDFR.h"
+#include "Adaptation/SDFRAdmissibility.h"
+#include "Adaptation/SDFRIntegrators.h"
+#include "Adaptation/SDFRParameters.h"
+#include "Adaptation/SDFRRegistration.h"
+#include "Adaptation/SDFRReport.h"
 #include "Adaptation/SDRIntegrators.h"
 #include "Adaptation/SignedDistanceRegistration.h"
 #include "Adaptation/JacobianAdmissibilityBarrier.h"

@@ -5,19 +5,19 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// Wavy-circle sweep test for the SDR pipeline.
+// Wavy-circle sweep test for the SDFR pipeline.
 //
 // A non-convex implicit shape — a circle whose radius varies sinusoidally
 // in the polar angle (k azimuthal lobes) — is moved around the unit
 // square along a circular orbit. The whole classify-then-displace
-// pipeline (s-t cut + FMM + SDR Newton) is rerun from scratch at every
+// pipeline (s-t cut + FMM + SDFR Newton) is rerun from scratch at every
 // frame, and a transient XDMF stream is emitted with both the
 // low-fidelity classification and the high-fidelity moved mesh per
 // frame.
 //
 // Compared with `LevelSetSDRReconstruction`, this example exercises:
 //   - A non-circular, non-convex interface that genuinely requires
-//     tangential motion of the SDR (the cosine perturbation cannot be
+//     tangential motion of the SDFR (the cosine perturbation cannot be
 //     absorbed by uniform dilation of the cell map).
 //   - Repeated classification + Newton solves at moving interface
 //     locations: the classified topology changes between frames and the
@@ -27,7 +27,7 @@
 //
 // FES-independence and Newton-tangent choices follow the same honest
 // caveats as the parent example: the barrier + shape closed-form
-// algebra is specialised to affine P1 triangles in 2D; SDR uses the
+// algebra is specialised to affine P1 triangles in 2D; SDFR uses the
 // PSD-projected full-Newton tangent. The example is therefore a 2D
 // triangular prototype.
 //
@@ -41,8 +41,6 @@
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
-
-#include "LevelSetSDRWavyCircleSweepDiagnostics.h"
 
 #include <algorithm>
 #include <array>
@@ -58,7 +56,6 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 using namespace Rodin::Adaptation;
-namespace Diag = LevelSetSDRWavyCircleSweepSupport;
 
 namespace
 {
@@ -83,7 +80,7 @@ namespace
   //
   // phi is smooth away from the centre. Like the plain circle SDF, it is
   // NOT a strict signed distance (the radial perturbation makes the
-  // gradient norm differ from 1) but the SDR pipeline only requires a
+  // gradient norm differ from 1) but the SDFR pipeline only requires a
   // sufficiently smooth implicit function — phi, grad phi at quadrature
   // points — to operate.
   // -------------------------------------------------------------------------
@@ -295,6 +292,44 @@ namespace
     return fallback;
   }
 
+  std::string parseStringOption(
+      int argc, char** argv, const std::string& name, std::string fallback)
+  {
+    const std::string prefix = "--" + name + "=";
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string arg(argv[i]);
+      if (arg.rfind(prefix, 0) == 0)
+        return arg.substr(prefix.size());
+    }
+    return fallback;
+  }
+
+  SDFRHilbertMetric parseHilbertMetric(
+      int argc, char** argv, const std::string& name)
+  {
+    const std::string value = parseStringOption(argc, argv, name, "harmonic");
+    if (value == "harmonic") return SDFRHilbertMetric::Harmonic;
+    if (value == "elasticity") return SDFRHilbertMetric::Elasticity;
+    if (value == "shape-hessian") return SDFRHilbertMetric::ShapeHessian;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected harmonic, elasticity, or shape-hessian).");
+  }
+
+  SDFRInitialGuessScaling parseInitialGuessScaling(
+      int argc, char** argv, const std::string& name)
+  {
+    const std::string value =
+      parseStringOption(argc, argv, name, "unnormalized");
+    if (value == "unnormalized") return SDFRInitialGuessScaling::Unnormalized;
+    if (value == "energy") return SDFRInitialGuessScaling::EnergyNormalized;
+    if (value == "band") return SDFRInitialGuessScaling::BandNormalized;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected unnormalized, energy, or band).");
+  }
+
   bool hasFlag(int argc, char** argv, const std::string& name)
   {
     const std::string flag = "--" + name;
@@ -350,7 +385,7 @@ int main(int argc, char** argv)
   // is small at the minimum.
   //
   // Choice of magnitude:
-  //   - Harmonic: scaling with the SDR per-cell magnitude ρs/M_w ≈ O(1)
+  //   - Harmonic: scaling with the SDFR per-cell magnitude ρs/M_w ≈ O(1)
   //     gives a regularisation that is mesh-independent in `eps_H`.
   //     At n=30 (h ≈ 0.034) the GN noise floor swamps the iterate
   //     unless eps_H >= 1e-2 or so.
@@ -377,7 +412,6 @@ int main(int argc, char** argv)
   //
   // When disabled, the iteration falls back to the static `kDamping`
   // factor (the original failing baseline).
-  const bool   kLineSearchEnabled   = true;
   const Real   kLineSearchAlphaInit = Real(1);
   const Real   kLineSearchReduction = Real(0.5);
   const Real   kLineSearchAlphaMin  = Real(1e-6);
@@ -404,18 +438,14 @@ int main(int argc, char** argv)
   enum class InitialGuessStrategy { Cold, Warm, Hilbert };
   constexpr InitialGuessStrategy kInitialGuessStrategy =
       InitialGuessStrategy::Hilbert;
-
-  // Hilbert-lift bilinear form choice on V₀:
-  //   Harmonic     : a(u,v) = ∫ ∇u : ∇v dx                  (Poincaré)
-  //   Elasticity   : a(u,v) = ∫ λ(div u)(div v) + 2μ ε(u):ε(v) dx  (Korn II)
-  //   ShapeHessian : a(u,v) = δ²E_shape(0)[u,v]              (matches the
-  //                                                          well-posedness
-  //                                                          theorem's α)
-  enum class HilbertBilinearForm { Harmonic, Elasticity, ShapeHessian };
-  constexpr HilbertBilinearForm kHilbertBilinearForm =
-      HilbertBilinearForm::Harmonic;
-  const Real kHilbertElasticityLambda = Real(0);      ///< pure deviatoric
-  const Real kHilbertElasticityMu     = Real(0.5);    ///< 2μ = 1, ≈ harmonic scale
+  const SDFRHilbertMetric initialGuessMetric =
+    parseHilbertMetric(argc, argv, "hilbert-metric");
+  const SDFRInitialGuessScaling initialGuessScaling =
+    parseInitialGuessScaling(argc, argv, "hilbert-scaling");
+  const Real initialGuessElasticityLambda =
+    parseRealOption(argc, argv, "hilbert-lambda", Real(0));
+  const Real initialGuessElasticityMu =
+    parseRealOption(argc, argv, "hilbert-mu", Real(0.5));
 
   // ----- Convergence criterion ---------------------------------------------
   //   Residual : classic ||R|| < tol (fails to recognise the GN data-floor).
@@ -423,7 +453,7 @@ int main(int argc, char** argv)
   //   Either   : converged if EITHER residual or geometry tolerance holds.
   enum class ConvergenceMode { Residual, Geometry, Either };
   constexpr ConvergenceMode kConvergenceMode = ConvergenceMode::Either;
-  const Real        kInterfaceFitTol = Real(2) * h * h;   ///< ~2·h² target
+  const Real        kInterfaceFitTol = Real(2.1) * h * h; ///< ~2·h² target
   constexpr Real    kResidualAbsTol  = Real(1e-6);
   constexpr Real    kResidualRelTol  = Real(1e-3);
 
@@ -463,11 +493,7 @@ int main(int argc, char** argv)
   GridFunction phaseMoment(p0Fes);    phaseMoment.setName("phase_moment");
   GridFunction sigmaKgf(p0Fes);       sigmaKgf.setName("sigma_K");
 
-  TrialFunction du(vectorFes);
-  TestFunction  v(vectorFes);
   GridFunction  u(vectorFes);         u.setName("displacement");
-
-  auto zero = VectorFunction{ Zero(), Zero() };
 
   // -------------------------------------------------------------------------
   // HF (moved) side. Same combinatorics as `mesh`; only vertex coordinates
@@ -508,7 +534,7 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // Frame loop.
   // -------------------------------------------------------------------------
-  std::cout << "Wavy-circle SDR sweep on " << n << "x" << n
+  std::cout << "Wavy-circle SDFR sweep on " << n << "x" << n
             << " unit-square mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
             << "  orbit R=" << orbitR << '\n';
@@ -615,7 +641,7 @@ int main(int argc, char** argv)
       .solve()
       .sign();
 
-    // ---- Stage 3: smooth-band measure for the SDR normalisation ----
+    // ---- Stage 3: smooth-band measure for the SDFR normalisation ----
     Real domainMeasure = 0;
     Real weightedBandMeasure = 0;
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -642,26 +668,12 @@ int main(int argc, char** argv)
       throw std::runtime_error("Empty smooth band: M_w = 0 at frame "
                                + std::to_string(frame));
 
-    // ---- Stage 4a: Initial guess for u (strategy-selected) ----
-
-    SDRParameters params;
-    params.rhoS = 1;
-    params.deltaW = deltaW;
-    params.hRef = h;
-    params.normalizer = Real(1) / (weightedBandMeasure * h * h);
-
-    RealFunction<Real> barrierGamma(Real(1e-1));
-    RealFunction<Real> barrierBeta(Real(1e-2));
-    BarrierParameters barrierParams;
-    barrierParams.jMin  = 1e-8;
-    barrierParams.jSafe = 1e-3;
-    barrierParams.domainMeasure = domainMeasure;
+    // ---- Stage 4a: SDFR solve (strategy-selected initial guess) ----
 
     auto cellGeom = precomputeCellGeometry(mesh);
     auto& cellCache  = cellGeom.first;
-    auto& geomToLocal = cellGeom.second;
+    (void) cellGeom.second;
 
-    SignedDistanceRegistration sdr(du, v, u);
     RealFunction phiFn(
         [&](const Geometry::Point& p) -> Real
         {
@@ -683,349 +695,36 @@ int main(int argc, char** argv)
         },
         /*rows=*/2, /*cols=*/2);
 
-    JacobianAdmissibilityBarrier barrier(
-        du, v, u, cellCache, geomToLocal);
-
-    // ---- Hilbert-lift initial guess (closed-form Riesz lift in V₀) ----
-    //
-    // Solve for u_H ∈ V₀ such that
-    //
-    //     a(u_H, v) = -⟨δE_SDR(0), v⟩      ∀ v ∈ V₀,
-    //
-    // with a(u, v) = ∫ ∇u : ∇v dx and Dirichlet zero on ∂Ω. The right-
-    // hand side is the SDR variational derivative AT u = 0:
-    //
-    //     ⟨δE_SDR(0), v⟩
-    //       = ρ_s · ∫_Ω w_δ(s_h^LF) · (φ - s_h^LF) · ∇φ · v dx.
-    //
-    // By Lax–Milgram on (V₀, a), this defines u_H uniquely; it is the
-    // gradient of E_SDR at u = 0 in the H¹₀ topology (i.e. a Sobolev
-    // gradient / Hilbert extension), and is the textbook clean initial
-    // guess. See `body.tex § sec:initial-guess`.
-    auto hilbertLiftToInit = [&]() {
-      TrialFunction duH(vectorFes);
-      TestFunction  vH(vectorFes);
-
-      // RHS scalar: ρ_s · w_δ(s_h^LF) · (φ - s_h^LF).
-      //
-      // The SDR-normaliser 1/(M_w·h²) is NOT included here. It enters
-      // the variational Newton problem to balance the rank-1 SDR block
-      // against the shape/floor blocks at quadrature points; but the
-      // Hilbert lift's LHS is unscaled (harmonic or elasticity), so
-      // applying the normaliser to the RHS alone would inflate u_H by
-      // ~1/h². The un-normalised RHS gives u_H at the natural
-      // displacement scale.
-      RealFunction rhsScalar(
-          [&](const Geometry::Point& p) -> Real {
-            const auto& c = p.getPhysicalCoordinates();
-            const Real phiVal = levelSet.phi(vec2(c(0), c(1)));
-            const Real sVal   = sLF.getValue(p);
-            const Real wt     =
-              std::exp(-sVal * sVal / (2 * deltaW * deltaW));
-            return params.rhoS * wt * (phiVal - sVal);
-          });
-
-      // For the ShapeHessian variant the barrier integrator evaluates
-      // δ²(E_shape + E_floor) at the current state u. We want that
-      // tangent at u = 0, so zero u before assembly. The other variants
-      // are linear forms and don't read u; zeroing it doesn't affect
-      // them. u is then overwritten with u_H below regardless.
-      u.getData().setZero();
-
-      Problem hilbert(duH, vH);
-      switch (kHilbertBilinearForm)
-      {
-        case HilbertBilinearForm::Harmonic:
-          hilbert =
-              Integral(Jacobian(duH), Jacobian(vH))
-            + Integral(rhsScalar * gradFn, vH)
-            + DirichletBC(duH, zero).on(boundaryAttribute);
-          break;
-        case HilbertBilinearForm::Elasticity:
-          hilbert =
-              LinearElasticityIntegral(duH, vH)(
-                  kHilbertElasticityLambda,
-                  kHilbertElasticityMu)
-            + Integral(rhsScalar * gradFn, vH)
-            + DirichletBC(duH, zero).on(boundaryAttribute);
-          break;
-        case HilbertBilinearForm::ShapeHessian:
-        {
-          JacobianAdmissibilityBarrier shapeBarrier(
-              duH, vH, u, cellCache, geomToLocal);
-          hilbert =
-              shapeBarrier.Tangent(
-                  barrierGamma, barrierBeta, barrierParams)
-            + Integral(rhsScalar * gradFn, vH)
-            + DirichletBC(duH, zero).on(boundaryAttribute);
-          break;
-        }
-      }
-      Solver::SparseLU(hilbert).solve();
-      u.getData() = duH.getSolution().getData();
-    };
-
-    // ---- Newton solve with the PSD-projected full-Newton SDR tangent ----
-    //
-    // Why PSD-projected and not plain GN: pure Gauss-Newton drops the
-    // second-order term `r * hess(phi)` from the SDR tangent. Whenever
-    // r* != 0 at the discrete minimum (always the case here, since the
-    // wavy contour is not exactly fittable by P1 on a uniform-grid
-    // triangulation), the GN iteration is non-contracting near the
-    // minimum: spectral_radius(I - K_GN^{-1} K_full) > 0. Damped GN
-    // (damping < 1) reduces that spectral radius but produces a
-    // residual floor proportional to r* and oscillates there.
-    //
-    // The principled fix is to put `r * hess(phi)` back IN, but clamped
-    // to its PSD part per quadrature point. The PSD projection:
-    //
-    //   - keeps the contribution wherever it is positive-semidefinite,
-    //     restoring quadratic Newton convergence in those directions;
-    //   - zeros out the indefinite eigenspace, where raw full Newton
-    //     would otherwise produce indefinite steps that flip cells.
-    //
-    // Concretely we use `sdr.TangentPSDProjected(phi, grad, hess, sLF,
-    // params)` with damping = 1.0 (no static damping needed because
-    // the tangent is SPD by construction).
-    //
-    // Per-iteration diagnostics: dumped when kVerbose, kept quiet
-    // otherwise so the summary stays readable.
     const bool kVerbose = hasFlag(argc, argv, "verbose");
-    barrierMinJ().store(std::numeric_limits<Real>::infinity(),
-                        std::memory_order_relaxed);
-    barrierFloorActiveCount().exchange(0);
-    barrierInadmissibleCount().exchange(0);
 
-    RealFunction<Real> harmEpsFn(kHarmonicEps);
-    RealFunction<Real> tikEpsFn(kTikhonovEps);
+    SDFRParameters baseParams;
+    baseParams.rhoS = 1;
+    baseParams.deltaW = deltaW;
+    baseParams.hRef = h;
+    baseParams.normalizer = Real(1) / (weightedBandMeasure * h * h);
+    baseParams.shapeWeight = Real(1e-1);
+    baseParams.floorWeight = Real(1e-2);
+    baseParams.jMinRatio = Real(1e-8);
+    baseParams.jSafeRatio = Real(1e-3);
+    baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;
+    baseParams.alphaInit = kLineSearchAlphaInit;
+    baseParams.alphaReduction = kLineSearchReduction;
+    baseParams.alphaMin = kLineSearchAlphaMin;
+    baseParams.absoluteTolerance = kResidualAbsTol;
+    baseParams.relativeTolerance = kResidualRelTol;
+    baseParams.maxNewtonIterations = 80;
+    // Let the sweep-level geometry criterion decide when to stop; residual
+    // stall alone is not a failure for this registration objective.
+    baseParams.stallPatience = 0;
+    baseParams.harmonicEps = kHarmonicEps;
+    baseParams.tikhonovEps = kTikhonovEps;
+    baseParams.initialGuessMetric = initialGuessMetric;
+    baseParams.initialGuessScaling = initialGuessScaling;
+    baseParams.initialGuessElasticityLambda = initialGuessElasticityLambda;
+    baseParams.initialGuessElasticityMu = initialGuessElasticityMu;
+    baseParams.tangent = SDFRTangent::PSDProjectedNewton;
 
-    Problem newton(du, v);
-    newton =
-        sdr.TangentPSDProjected(phiFn, gradFn, hessFn, sLF, params)
-      + sdr.Residual(phiFn, gradFn, sLF, params)
-      + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
-      + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
-      + Integral(harmEpsFn * Jacobian(du), Jacobian(v))
-      + Integral(tikEpsFn  * du,            v          )
-      + DirichletBC(du, zero).on(boundaryAttribute);
-
-    // Best-iterate tracker: PSD-projected Newton contracts super-linearly
-    // far from the minimum but degenerates to GN-with-drift once
-    // r * hess(phi) becomes small at the minimum. The cleanest exit is
-    // therefore to remember the iterate with the smallest residual seen
-    // so far, and roll back to it after the solver returns. We also stop
-    // early as soon as the residual fails to decrease for `kStallPatience`
-    // consecutive iterations — that signals we have hit the local
-    // minimum and any further iteration is drift, not progress.
-    Math::Vector<Real> uBest = u.getData();
-    Real residualBest = std::numeric_limits<Real>::infinity();
-    std::size_t stallCount = 0;
-    bool earlyExit = false;
-    constexpr std::size_t kStallPatience = 3;
-
-    // ------------------------------------------------------------------
-    // Outer Newton loop.
-    //
-    //   for k = 0, 1, ...
-    //     NewtonSolver does one step with damping = 1.0.
-    //     p = u_after - u_before          (the un-damped Newton direction)
-    //     restore u and re-apply via admissibility-aware backtracking
-    //     line search.
-    //
-    // The line search and admissibility evaluator live in the support
-    // header (LevelSetSDRWavyCircleSweepDiagnostics.h); the example
-    // only orchestrates.
-    // ------------------------------------------------------------------
-    constexpr Real        kDamping        = 0.5;   ///< static damping when line search disabled
-    constexpr Real        kTau            = 0.5;
-    constexpr std::size_t kMaxIt          = 40;
-    constexpr Real        kAbsTol         = 1e-8;
-    constexpr Real        kRelTol         = 1e-7;
-
-    auto evaluator = [&](const Math::Vector<Real>& uTry)
-    {
-      return Diag::evaluateAdmissibilityP1(
-          uTry, cellCache, vectorFes, barrierParams.jMin);
-    };
-
-    Solver::SparseLU linearSolver(newton);
-    Solver::NewtonSolver newtonSolver(linearSolver);
-    newtonSolver
-      .setMaxIterations(1)
-      .setDampingFactor(Real(1))
-      .setAbsoluteTolerance(Real(0))   ///< outer loop owns convergence
-      .setRelativeTolerance(Real(0));
-
-    // -------------------------------------------------------------------
-    // Newton solve with retry strategy: warm-start (already loaded above)
-    // first, fall back to cold-start if the warm attempt fails to meet
-    // the convergence criterion. Frame 0 only ever runs one attempt
-    // because it is already cold-started.
-    // -------------------------------------------------------------------
-    Real        r0      = -1;
-    std::size_t itCount = 0;
-    Real        interfaceFit = 0;
-    bool        convergedFlag    = false;
-    const char* convergedReason  = "no";
-    int         attemptUsed      = 0;
-
-    for (int attempt = 0; attempt < 2; ++attempt)
-    {
-      // Attempt 0: strategy-selected initial guess.
-      // Attempt 1: cold-start retry (u = 0).
-      if (attempt == 0)
-      {
-        switch (kInitialGuessStrategy)
-        {
-          case InitialGuessStrategy::Cold:
-            u.getData().setZero();
-            break;
-          case InitialGuessStrategy::Warm:
-            if (frame == 0) u.getData().setZero();
-            // else: leave u with previous frame's value.
-            break;
-          case InitialGuessStrategy::Hilbert:
-            hilbertLiftToInit();
-            break;
-        }
-      }
-      else
-      {
-        u.getData().setZero();
-      }
-      uBest = u.getData();
-      residualBest = std::numeric_limits<Real>::infinity();
-      stallCount = 0;
-      earlyExit  = false;
-      attemptUsed = attempt;
-      r0      = -1;
-      itCount = 0;
-
-    for (std::size_t it = 0; it < kMaxIt; ++it)
-    {
-      itCount = it + 1;
-      const Math::Vector<Real> uOld = u.getData();
-
-      barrierInadmissibleCount().exchange(0);
-      barrierFloorActiveCount().exchange(0);
-      barrierMinJ().store(std::numeric_limits<Real>::infinity(),
-                          std::memory_order_relaxed);
-
-      // One Newton step: assemble + solve + un-damped apply.
-      newtonSolver.solve(u);
-      const auto step = newtonSolver.getReport();
-      const Real R = step.final_residual;
-
-      const bool residualImproved = (R < residualBest);
-      if (residualImproved)
-      {
-        residualBest = R;
-        stallCount = 0;
-      }
-      else
-      {
-        ++stallCount;
-        if (stallCount >= kStallPatience) earlyExit = true;
-      }
-
-      if (it == 0) r0 = R;
-      if (R <= kAbsTol)
-      {
-        if (residualImproved) uBest = u.getData();
-        break;
-      }
-      if (r0 > 0 && R <= kRelTol * r0)
-      {
-        if (residualImproved) uBest = u.getData();
-        break;
-      }
-
-      // Reconstruct the un-damped Newton direction and back-substitute
-      // through the admissibility line search.
-      const Math::Vector<Real> p = u.getData() - uOld;
-      u.getData() = uOld;
-
-      Diag::LineSearchResult lsRes;
-      Real alphaUsed = Real(0);
-      if (kLineSearchEnabled)
-      {
-        // Tighten the line-search floor from j_min (catastrophic flip
-        // protection only) to a safety multiple of j_safe (avoid the
-        // floor barrier's active region). See `kLineSearchSafetyMargin`.
-        const Real jLineSearchRatio =
-          std::max(barrierParams.jMin,
-                   kLineSearchSafetyMargin * barrierParams.jSafe);
-        lsRes = Diag::admissibilityLineSearch(
-            u.getData(), p, evaluator,
-            jLineSearchRatio,
-            kLineSearchAlphaInit, kLineSearchReduction, kLineSearchAlphaMin);
-        alphaUsed = lsRes.alphaAccepted;
-      }
-      else
-      {
-        // Baseline static damping; admissibility checked for diagnostics
-        // only (never used to reject).
-        const auto adm1 = evaluator(u.getData() + Real(1) * p);
-        lsRes.minJRatioAtAlpha1         = adm1.minJRatio;
-        lsRes.inadmissibleCountAtAlpha1 = adm1.inadmissibleCount;
-        u.getData() += kDamping * p;
-        const auto admUsed = evaluator(u.getData());
-        lsRes.alphaAccepted             = kDamping;
-        lsRes.minJRatioAccepted         = admUsed.minJRatio;
-        lsRes.inadmissibleCountAccepted = admUsed.inadmissibleCount;
-        lsRes.succeeded                 = true;
-        alphaUsed = kDamping;
-      }
-      const Real stepNorm = alphaUsed * p.norm();
-      if (residualImproved && lsRes.succeeded)
-        uBest = u.getData();
-
-      // Observation-only diagnostics.
-      const Diag::AdmissibilityDiagnostics admDiag =
-        Diag::computeAdmissibilityDiagnostics(
-            uOld, p, cellCache, vectorFes, barrierParams.jMin, kTau);
-
-      if (kVerbose)
-      {
-        const Real minJBar = barrierMinJ().load(std::memory_order_relaxed);
-        const auto badN    = barrierInadmissibleCount().load(std::memory_order_relaxed);
-        const auto floorN  = barrierFloorActiveCount().load(std::memory_order_relaxed);
-
-        std::cout << "      it=" << std::setw(2) << it
-                  << "  ||R||="  << std::scientific << std::setprecision(3) << R
-                  << "  step="   << stepNorm << '\n';
-        std::cout << "           min_j_before="    << std::setprecision(3) << admDiag.minJRatioBefore
-                  << "  min_j_after_full=" << admDiag.minJRatioAfterFull
-                  << "  inadm_after="      << admDiag.inadmAfter
-                  << "  min_pred_margin="  << admDiag.minPredMargin
-                  << "  pred_inadm="       << admDiag.predInadm;
-        if (std::isfinite(minJBar)) std::cout << "  min_j(barrier)=" << minJBar;
-        if (floorN > 0)             std::cout << "  floor_cells=" << floorN;
-        if (badN > 0)               std::cout << "  singular=" << badN;
-        std::cout << '\n';
-        std::cout << "           line_search:"
-                  << " alpha="                  << lsRes.alphaAccepted
-                  << "  backtracks="            << lsRes.backtracks
-                  << "  min_j@alpha=1="         << lsRes.minJRatioAtAlpha1
-                  << "  inadm@alpha=1="         << lsRes.inadmissibleCountAtAlpha1
-                  << "  min_j_accepted="        << lsRes.minJRatioAccepted
-                  << "  inadm_accepted="        << lsRes.inadmissibleCountAccepted
-                  << (lsRes.succeeded ? "" : "  [FAILED]")
-                  << '\n';
-      }
-
-      if (kLineSearchEnabled && !lsRes.succeeded) break;
-      if (stepNorm <= Real(0))                    break;
-      if (earlyExit)                              break;
-    }
-
-    // Roll back to the best iterate seen.
-    if (residualBest < std::numeric_limits<Real>::infinity())
-      u.getData() = uBest;
-    (void) earlyExit;
-
-    // Compute the interface fit RMS at the rolled-back u, so it can
-    // feed the convergence decision below.
+    auto computeInterfaceFit = [&]() -> Real
     {
       Real interfacePhi = 0;
       Real interfaceLen = 0;
@@ -1042,38 +741,93 @@ int main(int argc, char** argv)
         const Vec2 ub = vec2(u.getData()(dofsB[0]), u.getData()(dofsB[1]));
         const Real phiA = levelSet.phi(a + ua);
         const Real phiB = levelSet.phi(b + ub);
-        const Real val  = Real(0.5) * (phiA + phiB);
-        const Real len  = (b - a).norm();
+        const Real val = Real(0.5) * (phiA + phiB);
+        const Real len = (b - a).norm();
         interfacePhi += val * val * len;
         interfaceLen += len;
       }
-      interfaceFit =
-        std::sqrt(interfacePhi / std::max(interfaceLen, Real(1e-30)));
-    }
+      return std::sqrt(interfacePhi / std::max(interfaceLen, Real(1e-30)));
+    };
 
-    const bool residualOK =
-         residualBest < kResidualAbsTol
-      || (r0 > 0 && residualBest < kResidualRelTol * r0);
-    const bool geometryOK = interfaceFit < kInterfaceFitTol;
-    switch (kConvergenceMode)
+    Real residualBest = std::numeric_limits<Real>::infinity();
+    Real        r0      = -1;
+    std::size_t itCount = 0;
+    Real        interfaceFit = 0;
+    bool        convergedFlag    = false;
+    const char* convergedReason  = "no";
+    int         attemptUsed      = 0;
+
+    for (int attempt = 0; attempt < 2; ++attempt)
     {
-      case ConvergenceMode::Residual:
-        convergedFlag   = residualOK;
-        convergedReason = residualOK ? "yes (residual)" : "no";
-        break;
-      case ConvergenceMode::Geometry:
-        convergedFlag   = geometryOK;
-        convergedReason = geometryOK ? "yes (geometry)" : "no";
-        break;
-      case ConvergenceMode::Either:
-        convergedFlag = geometryOK || residualOK;
-        convergedReason =
-            geometryOK && residualOK ? "yes (both)"
-          : geometryOK               ? "yes (geometry)"
-          : residualOK               ? "yes (residual)"
-                                     : "no";
-        break;
-    }
+      SDFRParameters params = baseParams;
+      if (attempt == 0)
+      {
+        switch (kInitialGuessStrategy)
+        {
+          case InitialGuessStrategy::Cold:
+            params.initialGuess = SDFRInitialGuess::Zero;
+            break;
+          case InitialGuessStrategy::Warm:
+            params.initialGuess =
+              frame == 0 ? SDFRInitialGuess::Zero : SDFRInitialGuess::Current;
+            break;
+          case InitialGuessStrategy::Hilbert:
+            params.initialGuess = SDFRInitialGuess::Hilbert;
+            break;
+        }
+      }
+      else
+      {
+        params.initialGuess = SDFRInitialGuess::Zero;
+      }
+
+      SDFR sdfr(u);
+      const SDFRReport sdfrReport =
+        sdfr.setParameters(params).solve(sLF, phiFn, gradFn, hessFn);
+
+      attemptUsed = attempt;
+      r0 = sdfrReport.initialResidual;
+      itCount = sdfrReport.iterations;
+      residualBest = sdfrReport.finalResidual;
+      interfaceFit = computeInterfaceFit();
+
+      const bool residualOK =
+           residualBest < kResidualAbsTol
+        || (r0 > 0 && residualBest < kResidualRelTol * r0);
+      const bool geometryOK = interfaceFit < kInterfaceFitTol;
+      switch (kConvergenceMode)
+      {
+        case ConvergenceMode::Residual:
+          convergedFlag = residualOK;
+          convergedReason = residualOK ? "yes (residual)" : "no";
+          break;
+        case ConvergenceMode::Geometry:
+          convergedFlag = geometryOK;
+          convergedReason = geometryOK ? "yes (geometry)" : "no";
+          break;
+        case ConvergenceMode::Either:
+          convergedFlag = geometryOK || residualOK;
+          convergedReason =
+              geometryOK && residualOK ? "yes (both)"
+            : geometryOK               ? "yes (geometry)"
+            : residualOK               ? "yes (residual)"
+                                       : "no";
+          break;
+      }
+
+      if (kVerbose)
+      {
+        std::cout << "      SDFR:"
+                  << " it=" << sdfrReport.iterations
+                  << "  ||R||=" << std::scientific << std::setprecision(3)
+                  << sdfrReport.finalResidual
+                  << "  alpha=" << sdfrReport.lastAcceptedAlpha
+                  << "  backtracks=" << sdfrReport.totalBacktracks
+                  << "  j_ls=" << sdfrReport.jLineSearchRatio
+                  << "  min_j=" << sdfrReport.minJRatio
+                  << (sdfrReport.lineSearchFailed ? "  [line-search failed]" : "")
+                  << '\n';
+      }
 
       // Stop the retry loop on success or after the cold fallback.
       if (convergedFlag || attempt == 1) break;

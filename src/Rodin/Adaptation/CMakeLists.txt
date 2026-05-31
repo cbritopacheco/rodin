@@ -8,6 +8,12 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinAdaptation_HEADERS
   AnalyticFunctionAdapters.h
   CellGeomCache.h
+  SDFR.h
+  SDFRAdmissibility.h
+  SDFRIntegrators.h
+  SDFRParameters.h
+  SDFRRegistration.h
+  SDFRReport.h
   SDRIntegrators.h
   SignedDistanceRegistration.h
   JacobianAdmissibilityBarrier.h
@@ -32,6 +38,7 @@ target_link_libraries(RodinAdaptation
   INTERFACE
     Rodin::Geometry
     Rodin::QF
+    Rodin::Solver
     Rodin::Variational
 )
 
