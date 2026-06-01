@@ -137,13 +137,13 @@ public:
    */
   struct OutletFlowLaw {
     /// @brief Proximal surrogate vessel radius.
-    Real proximalRadius = 6.0e-4;
+    Real proximalRadius = 6.e-4;
     /// @brief Proximal surrogate vessel length.
-    Real proximalLength = 0.00025;
+    Real proximalLength = 0.00075;
     /// @brief Distal surrogate vessel radius.
-    Real distalRadius = 1.0e-4;
+    Real distalRadius = 1e-4;
     /// @brief Distal surrogate vessel length.
-    Real distalLength = 0.002;
+    Real distalLength = 0.0025;
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
     Real pressureDropTolerance = 1.0e-12;
     /// @brief Minimum shear-rate bracket.
@@ -183,15 +183,15 @@ public:
     /// @brief Period of the prescribed cardiac cycle.
     Real period = 0.85;
     /// @brief Activation ramp start.
-    Real tRampStart = 0.15 - 0.1;
+    Real tRampStart = 0.15 - 0.05;
     /// @brief Activation ramp end.
-    Real tRampEnd = 0.21 - 0.1;
+    Real tRampEnd = 0.21 - 0.05;
     /// @brief Activation plateau end.
-    Real tPlateauEnd = 0.36 - 0.1;
+    Real tPlateauEnd = 0.36 - 0.05;
     /// @brief Relaxation ramp end.
-    Real tRelaxEnd = 0.45 - 0.1;
+    Real tRelaxEnd = 0.45 - 0.05;
     /// @brief Negative activation plateau end.
-    Real tNegativeEnd = 0.6 - 0.1;
+    Real tNegativeEnd = 0.6 - 0.05;
     /// @brief Positive activation plateau value.
     Real positiveValue = 35.0;
     /// @brief Negative activation plateau value.
@@ -418,7 +418,7 @@ public:
     /// @brief 0D LV model parameters and initial conditions.
     LVModel lv;
     /// @brief Default RCR parameters copied to every outlet at startup.
-    RCR defaultRCR{5.0e8, 5.0e-11, 1.0e9, 500.0, 10300.0, 10800.0};
+    RCR defaultRCR{5.0e8, 5.0e-11, 1.0e9, 500.0, 10400.0, 10800.0};
 
     Real inletTangentialDamping = 1e3;
     Real inletVelocityDamping = 0.0;

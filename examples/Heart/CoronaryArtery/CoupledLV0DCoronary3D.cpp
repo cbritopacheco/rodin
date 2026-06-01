@@ -469,7 +469,7 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
  // const Real Qim = bc.C * dPim;
 
   auto distalResidual = [&](Real pc) -> std::pair<Real, Real> {
-    const Real x = pc - 0.5 * s.pv;
+    const Real x = pc - 0.6 * s.pv;
     const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
 
     const Real f = cap * (pc - pcOld) + qd - Q;
@@ -512,7 +512,7 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
     }
   }
 
-  const auto [qd, dqd] = flowLaw(bc.pc - 0.5 * s.pv, lengthD, radiusD);
+  const auto [qd, dqd] = flowLaw(bc.pc - 0.6 * s.pv, lengthD, radiusD);
   (void)dqd;
   bc.qd = qd;
 
@@ -718,27 +718,12 @@ void CoupledLV0DCoronary3D::solveStatic() {
   const auto &s = m_model.getState();
   const Real pin = s.par;
 
-  // ----------------------------------------------------------------
-  // Viscosity: use muInf (high-shear limit), representative of bulk
-  // coronary flow.
-  // ----------------------------------------------------------------
-  const Real mu = m_cfg.viscosity.muInf;
+  const Real mu = m_cfg.viscosity.mu0;
 
-  // ----------------------------------------------------------------
-  // Symmetric gradient of trial/test functions — must be recomputed
-  // locally
-  // ----------------------------------------------------------------
   const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
   const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
 
-  // ----------------------------------------------------------------
-  // Oseen convection: linearized around m_uOld.
-  // If m_uOld == 0 on the first call this reduces to Stokes,
-  // so there is no cost to including it — but if you call
-  // solveStatic() after an initial Stokes pass it immediately
-  // picks up convective effects and gives a much better IC.
-  // ----------------------------------------------------------------
   const auto &uLag = m_uOld;
   const auto oseenConvection = Mult(Jacobian(m_u), uLag); // (uLag·∇)du
   const auto divLag = Div(uLag);
@@ -750,14 +735,11 @@ void CoupledLV0DCoronary3D::solveStatic() {
       0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
 
   m_flow =
-      // --- Viscous term (Stokes core) ---
       2.0 * Integral(mu * symDU, symV)
 
-      // --- Pressure-velocity coupling ---
       - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) +
       m_cfg.eps * Integral(m_p, m_q)
 
-      // --- Boundary conditions ---
       + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
       +
@@ -1587,9 +1569,9 @@ int CoupledLV0DCoronary3D::run() {
     //computeFluxes();
     //for (const Attribute tag : m_cfg.outlets)
       //updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
-        //              m_cfg.dt);
+                     // m_cfg.dt);
 
-   // updateHistory();
+    //updateHistory();
    }
 
   while (m_model.getState().t <
