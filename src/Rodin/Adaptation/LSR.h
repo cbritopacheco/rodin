@@ -18,6 +18,7 @@
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Solid/Linear/LinearElasticityIntegral.h"
+#include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Solver/SparseLU.h"
 #include "Rodin/Variational.h"
 
@@ -147,6 +148,7 @@ namespace Rodin::Adaptation
         }
 
         Solver::SparseLU linearSolver(newton);
+        Solver::NewtonSolver newtonSolver(linearSolver);
 
         auto evaluator = [&](const Math::Vector<Real>& uTry)
         {
@@ -177,47 +179,40 @@ namespace Rodin::Adaptation
         Real energyBest = std::numeric_limits<Real>::infinity();
         Real residualBest = std::numeric_limits<Real>::infinity();
         std::size_t stallCount = 0;
-        Real r0 = 0;
+        bool initialized = false;
 
-        for (std::size_t it = 0; it < params.maxNewtonIterations; ++it)
+        newtonSolver
+          .setMaxIterations(params.maxNewtonIterations)
+          .setAbsoluteTolerance(params.absoluteTolerance)
+          .setRelativeTolerance(params.relativeTolerance)
+          .setStepTolerance(Real(0))
+          .setDampingFactor(Real(1));
+
+        newtonSolver.setStepPolicy(
+          typename decltype(newtonSolver)::StepPolicy(
+          [&](auto& x, auto& linearSystem, auto& solverReport)
+            -> typename decltype(newtonSolver)::StepResult
         {
-          const Math::Vector<Real> uOld = u.getData();
-
-          u.getData() = uOld;
-          newton.assemble();
-          auto& linearSystem = newton.getLinearSystem();
-          const Real residual = linearSystem.getVector().norm();
+          const Math::Vector<Real> uOld = x;
+          const Real residual = solverReport.final_residual;
           const Real energy = objective(uOld);
 
           if (!std::isfinite(residual) || !std::isfinite(energy))
           {
             m_report.converged = false;
-            u.getData() = uBest;
-            return m_report;
+            x = uBest;
+            return {false, false, Real(0)};
           }
 
-          if (it == 0)
+          if (!initialized)
           {
-            r0 = residual;
             m_report.initialResidual = residual;
             m_report.initialEnergy = energy;
             uBest = uOld;
             energyBest = energy;
             residualBest = residual;
+            initialized = true;
           }
-
-          if (residual <= params.absoluteTolerance
-              || (r0 > 0 && residual <= params.relativeTolerance * r0))
-          {
-            m_report.iterations = it;
-            m_report.finalResidual = residual;
-            m_report.finalEnergy = energy;
-            m_report.converged = true;
-            u.getData() = uOld;
-            return m_report;
-          }
-
-          linearSolver.solve(linearSystem);
 
           Math::Vector<Real> newtonDirection = linearSystem.getSolution();
           Math::Vector<Real> residualDirection = linearSystem.getVector();
@@ -225,8 +220,8 @@ namespace Rodin::Adaptation
           if (!std::isfinite(newtonDirectionNorm))
           {
             m_report.converged = false;
-            u.getData() = uBest;
-            return m_report;
+            x = uBest;
+            return {false, false, Real(0)};
           }
 
           LSRLineSearchResult ls;
@@ -317,17 +312,17 @@ namespace Rodin::Adaptation
 
           if (!ls.succeeded)
           {
-            u.getData() = uOld;
+            x = uOld;
             ls.minJRatioAccepted = lastAdm.minJRatio;
             ls.inadmissibleCountAccepted = lastAdm.inadmissibleCount;
             ls.maxQShapeAccepted = lastAdm.maxQShape;
           }
           else
           {
-            u.getData() = acceptedU;
+            x = acceptedU;
           }
 
-          m_report.iterations = it + 1;
+          m_report.iterations = solverReport.iterations + 1;
           m_report.finalResidual =
             ls.succeeded ? acceptedResidual : residualBest;
           m_report.finalEnergy =
@@ -344,8 +339,10 @@ namespace Rodin::Adaptation
           {
             m_report.lineSearchFailed = true;
             m_report.converged = false;
-            u.getData() = uBest;
-            return m_report;
+            x = uBest;
+            solverReport.final_residual = m_report.finalResidual;
+            solverReport.final_step_norm = m_report.finalStepNorm;
+            return {false, false, m_report.finalStepNorm};
           }
 
           const bool energyImproved =
@@ -368,34 +365,66 @@ namespace Rodin::Adaptation
               && params.acceptedStateConvergenceTest(m_report))
           {
             m_report.converged = true;
-            return m_report;
+            solverReport.final_residual = m_report.finalResidual;
+            solverReport.final_step_norm = m_report.finalStepNorm;
+            return {true, true, m_report.finalStepNorm};
           }
 
           if (acceptedResidual <= params.absoluteTolerance
-              || (r0 > 0 && acceptedResidual <= params.relativeTolerance * r0))
+              || (m_report.initialResidual > 0
+                  && acceptedResidual <= params.relativeTolerance
+                    * m_report.initialResidual))
           {
             m_report.converged = true;
-            return m_report;
+            solverReport.final_residual = m_report.finalResidual;
+            solverReport.final_step_norm = m_report.finalStepNorm;
+            return {true, true, m_report.finalStepNorm};
           }
 
-          if (m_report.finalStepNorm <= params.stepTolerance)
+          if (params.stepTolerance > Real(0)
+              && m_report.finalStepNorm <= params.stepTolerance)
           {
             m_report.converged = true;
-            return m_report;
+            solverReport.final_residual = m_report.finalResidual;
+            solverReport.final_step_norm = m_report.finalStepNorm;
+            return {true, true, m_report.finalStepNorm};
           }
 
           if (params.stallPatience > 0 && stallCount >= params.stallPatience)
           {
             m_report.converged = true;
-            u.getData() = uBest;
-            return m_report;
+            x = uBest;
+            m_report.finalResidual = residualBest;
+            m_report.finalEnergy = energyBest;
+            solverReport.final_residual = m_report.finalResidual;
+            solverReport.final_step_norm = m_report.finalStepNorm;
+            return {true, true, m_report.finalStepNorm};
           }
+
+          solverReport.final_residual = m_report.finalResidual;
+          solverReport.final_step_norm = m_report.finalStepNorm;
+          return {true, false, m_report.finalStepNorm};
+        }));
+
+        newtonSolver.solve(u.getData());
+        const auto& solverReport = newtonSolver.getReport();
+
+        if (!initialized)
+        {
+          m_report.iterations = solverReport.iterations;
+          m_report.initialResidual = solverReport.initial_residual;
+          m_report.finalResidual = solverReport.final_residual;
+          m_report.converged = solverReport.converged;
+          return m_report;
         }
 
-        u.getData() = uBest;
-        m_report.converged = false;
-        m_report.finalResidual = residualBest;
-        m_report.finalEnergy = energyBest;
+        if (!solverReport.converged && !m_report.lineSearchFailed)
+        {
+          u.getData() = uBest;
+          m_report.finalResidual = residualBest;
+          m_report.finalEnergy = energyBest;
+        }
+        m_report.converged = solverReport.converged;
         return m_report;
       }
 
