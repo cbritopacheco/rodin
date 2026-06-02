@@ -38,7 +38,6 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Math.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
-#include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
@@ -330,6 +329,18 @@ namespace
         + " (expected unnormalized, energy, or band).");
   }
 
+  LSRTangent parseTangentMode(
+      int argc, char** argv, const std::string& name)
+  {
+    const std::string value = parseStringOption(argc, argv, name, "psd");
+    if (value == "psd") return LSRTangent::PSDProjectedNewton;
+    if (value == "newton") return LSRTangent::Newton;
+    if (value == "gn") return LSRTangent::GaussNewton;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected psd, newton, or gn).");
+  }
+
   bool hasFlag(int argc, char** argv, const std::string& name)
   {
     const std::string flag = "--" + name;
@@ -356,32 +367,12 @@ int main(int argc, char** argv)
   constexpr Real        R0     = 0.20; ///< Wavy-circle nominal radius.
   constexpr Real        kLobes = 6;    ///< Number of azimuthal lobes.
 
-  // With orbitR=0.10 and R0=0.20 the contour reach is at most 0.30 from
-  // the orbit-of-orbit centre (0.5, 0.5), so the contour stays in
-  // [0.20, 0.80] on each axis — i.e. >= 0.20 from the Dirichlet
-  // boundary in every direction. This is the headroom that lets Newton
-  // take the first un-damped step (damping=1.0 below) without any cell
-  // immediately flipping orientation. See the comments around the
-  // NewtonSolver setup for the damping rationale.
-
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;
   const Real delta   = 1.75 * h;
   const Real deltaW  = 1.5 * delta;
 
-  // -------------------------------------------------------------------------
-  // Admissibility-first backtracking line search.
-  //
-  //   while (alpha >= alphaMin)
-  //     uTrial = u + alpha * p
-  //     adm    = evaluateAdmissibility(uTrial)
-  //     if (adm.minJRatio > jLineSearchRatio
-  //         && adm.inadmissibleCount == 0): accept
-  //     else: alpha *= reduction
-  //
-  // When disabled, the iteration falls back to the static `kDamping`
-  // factor (the original failing baseline).
   const Real   kLineSearchAlphaInit = Real(1);
   const Real   kLineSearchReduction = Real(0.5);
   const Real   kLineSearchAlphaMin  = Real(1e-6);
@@ -396,15 +387,14 @@ int main(int argc, char** argv)
   // very stiff and subsequent Newton directions become explosively
   // compressive. Keeping the iterate safely above j_safe avoids this.
   const Real   kLineSearchSafetyMargin = Real(10);
+  const Real   kQShapeMax =
+    parseRealOption(argc, argv, "qshape-max", Real(10));
 
   // ----- Initial guess strategy --------------------------------------------
   //   Cold    : u₀ = 0
-  //   Warm    : u₀ = previous frame's converged u (cold fallback on failure)
+  //   Warm    : u₀ = previous frame's converged u
   //   Hilbert : u₀ = Riesz lift of −δE_LSR(0) in the H¹₀ inner product
   //             (a(u₀, v) = −⟨δE_LSR(0), v⟩  on V₀)
-  //
-  // All three drop back to a cold-start retry if the first attempt fails
-  // the convergence criterion (Cold is its own retry; this is a no-op).
   enum class InitialGuessStrategy { Cold, Warm, Hilbert };
   constexpr InitialGuessStrategy kInitialGuessStrategy =
       InitialGuessStrategy::Hilbert;
@@ -416,6 +406,8 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "hilbert-lambda", Real(0));
   const Real initialGuessElasticityMu =
     parseRealOption(argc, argv, "hilbert-mu", Real(0.5));
+  const LSRTangent tangentMode =
+    parseTangentMode(argc, argv, "tangent");
 
   // ----- Convergence criterion ---------------------------------------------
   //   Residual : classic ||R|| < tol (fails to recognise the GN data-floor).
@@ -423,15 +415,8 @@ int main(int argc, char** argv)
   //   Either   : converged if EITHER residual or geometry tolerance holds.
   enum class ConvergenceMode { Residual, Geometry, Either };
   constexpr ConvergenceMode kConvergenceMode = ConvergenceMode::Either;
-  // Knobs are CLI-overridable so we can sweep convergence settings without
-  // rebuilding. Defaults reproduce the previous behaviour.
-  // Defaults tuned by the 50-frame proxy sweep (see task FF): the combined
-  // setting (fittol-mult=4, rrtol=5e-3, stall=5) raised converged from
-  // 39/50 to 50/50 and cut wall-time 5.2x at essentially identical RMS.
-  // Relaxing the geometry target to 4*h^2 reflects the achievable accuracy
-  // floor of the smooth-band LSR fit; relaxing rrtol to 5e-3 matches the
-  // PSD-projected Newton noise floor; stall=5 only exits early once
-  // geometryOK is reachable.
+  // Knobs are CLI-overridable so convergence settings can be swept without
+  // rebuilding.
   const Real        kFitTolMult      =
     parseRealOption(argc, argv, "fittol-mult", Real(4.0)); ///< fitTol = mult * h^2
   const Real        kInterfaceFitTol = kFitTolMult * h * h;
@@ -694,6 +679,7 @@ int main(int argc, char** argv)
     baseParams.jMinRatio = Real(1e-8);
     baseParams.jSafeRatio = Real(1e-3);
     baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;
+    baseParams.qShapeMax = kQShapeMax;
     baseParams.alphaInit = kLineSearchAlphaInit;
     baseParams.alphaReduction = kLineSearchReduction;
     baseParams.alphaMin = kLineSearchAlphaMin;
@@ -707,7 +693,7 @@ int main(int argc, char** argv)
     baseParams.initialGuessScaling = initialGuessScaling;
     baseParams.initialGuessElasticityLambda = initialGuessElasticityLambda;
     baseParams.initialGuessElasticityMu = initialGuessElasticityMu;
-    baseParams.tangent = LSRTangent::PSDProjectedNewton;
+    baseParams.tangent = tangentMode;
 
     auto computeInterfaceFit = [&]() -> Real
     {
@@ -740,82 +726,74 @@ int main(int argc, char** argv)
     Real        interfaceFit = 0;
     bool        convergedFlag    = false;
     const char* convergedReason  = "no";
-    int         attemptUsed      = 0;
 
-    for (int attempt = 0; attempt < 2; ++attempt)
+    LSRParameters params = baseParams;
+    switch (kInitialGuessStrategy)
     {
-      LSRParameters params = baseParams;
-      if (attempt == 0)
-      {
-        switch (kInitialGuessStrategy)
-        {
-          case InitialGuessStrategy::Cold:
-            params.initialGuess = LSRInitialGuess::Zero;
-            break;
-          case InitialGuessStrategy::Warm:
-            params.initialGuess =
-              frame == 0 ? LSRInitialGuess::Zero : LSRInitialGuess::Current;
-            break;
-          case InitialGuessStrategy::Hilbert:
-            params.initialGuess = LSRInitialGuess::Hilbert;
-            break;
-        }
-      }
-      else
-      {
+      case InitialGuessStrategy::Cold:
         params.initialGuess = LSRInitialGuess::Zero;
-      }
+        break;
+      case InitialGuessStrategy::Warm:
+        params.initialGuess =
+          frame == 0 ? LSRInitialGuess::Zero : LSRInitialGuess::Current;
+        break;
+      case InitialGuessStrategy::Hilbert:
+        params.initialGuess = LSRInitialGuess::Hilbert;
+        break;
+    }
+    params.acceptedStateConvergenceTest =
+      [&](const LSRReport&) -> bool
+      {
+        interfaceFit = computeInterfaceFit();
+        return interfaceFit < kInterfaceFitTol;
+      };
 
-      LSR lsr(u);
-      const LSRReport lsrReport =
-        lsr.setParameters(params).solve(sLF, phiFn, gradFn, hessFn);
+    LSR lsr(u);
+    const LSRReport lsrReport =
+      lsr.setParameters(params).solve(sLF, phiFn, gradFn, hessFn);
 
-      attemptUsed = attempt;
-      r0 = lsrReport.initialResidual;
-      itCount = lsrReport.iterations;
-      residualBest = lsrReport.finalResidual;
+    r0 = lsrReport.initialResidual;
+    itCount = lsrReport.iterations;
+    residualBest = lsrReport.finalResidual;
+    if (interfaceFit == Real(0))
       interfaceFit = computeInterfaceFit();
 
-      const bool residualOK =
-           residualBest < kResidualAbsTol
-        || (r0 > 0 && residualBest < kResidualRelTol * r0);
-      const bool geometryOK = interfaceFit < kInterfaceFitTol;
-      switch (kConvergenceMode)
-      {
-        case ConvergenceMode::Residual:
-          convergedFlag = residualOK;
-          convergedReason = residualOK ? "yes (residual)" : "no";
-          break;
-        case ConvergenceMode::Geometry:
-          convergedFlag = geometryOK;
-          convergedReason = geometryOK ? "yes (geometry)" : "no";
-          break;
-        case ConvergenceMode::Either:
-          convergedFlag = geometryOK || residualOK;
-          convergedReason =
-              geometryOK && residualOK ? "yes (both)"
-            : geometryOK               ? "yes (geometry)"
-            : residualOK               ? "yes (residual)"
-                                       : "no";
-          break;
-      }
+    const bool residualOK =
+         residualBest < kResidualAbsTol
+      || (r0 > 0 && residualBest < kResidualRelTol * r0);
+    const bool geometryOK = interfaceFit < kInterfaceFitTol;
+    switch (kConvergenceMode)
+    {
+      case ConvergenceMode::Residual:
+        convergedFlag = residualOK;
+        convergedReason = residualOK ? "yes (residual)" : "no";
+        break;
+      case ConvergenceMode::Geometry:
+        convergedFlag = geometryOK;
+        convergedReason = geometryOK ? "yes (geometry)" : "no";
+        break;
+      case ConvergenceMode::Either:
+        convergedFlag = geometryOK || residualOK;
+        convergedReason =
+            geometryOK && residualOK ? "yes (both)"
+          : geometryOK               ? "yes (geometry)"
+          : residualOK               ? "yes (residual)"
+                                     : "no";
+        break;
+    }
 
-      if (kVerbose)
-      {
-        std::cout << "      LSR:"
-                  << " it=" << lsrReport.iterations
-                  << "  ||R||=" << std::scientific << std::setprecision(3)
-                  << lsrReport.finalResidual
-                  << "  alpha=" << lsrReport.lastAcceptedAlpha
-                  << "  backtracks=" << lsrReport.totalBacktracks
-                  << "  j_ls=" << lsrReport.jLineSearchRatio
-                  << "  min_j=" << lsrReport.minJRatio
-                  << (lsrReport.lineSearchFailed ? "  [line-search failed]" : "")
-                  << '\n';
-      }
-
-      // Stop the retry loop on success or after the cold fallback.
-      if (convergedFlag || attempt == 1) break;
+    if (kVerbose)
+    {
+      std::cout << "      LSR:"
+                << " it=" << lsrReport.iterations
+                << "  ||R||=" << std::scientific << std::setprecision(3)
+                << lsrReport.finalResidual
+                << "  alpha=" << lsrReport.lastAcceptedAlpha
+                << "  backtracks=" << lsrReport.totalBacktracks
+                << "  j_ls=" << lsrReport.jLineSearchRatio
+                << "  min_j=" << lsrReport.minJRatio
+                << (lsrReport.lineSearchFailed ? "  [line-search failed]" : "")
+                << '\n';
     }
     finalFitPerFrame.push_back(interfaceFit);
 
@@ -927,7 +905,7 @@ int main(int argc, char** argv)
               << "  ||R||=" << std::scientific << std::setprecision(3)
               << report.final_residual
               << "  fit=" << std::setprecision(3) << interfaceFit
-              << "  init=" << (attemptUsed == 0 ? strategyName : "cold")
+              << "  init=" << strategyName
               << "  converged=" << convergedReason << '\n';
     if (report.converged)
       ++framesConverged;

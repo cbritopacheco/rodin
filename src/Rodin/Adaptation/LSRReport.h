@@ -24,6 +24,8 @@ namespace Rodin::Adaptation
 
     Real initialResidual = 0;
     Real finalResidual = 0;
+    Real initialEnergy = 0;
+    Real finalEnergy = 0;
     Real finalStepNorm = 0;
     Real minJRatio = 0;
     Real jLineSearchRatio = 0;

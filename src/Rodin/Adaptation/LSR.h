@@ -18,7 +18,6 @@
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Solid/Linear/LinearElasticityIntegral.h"
-#include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Solver/SparseLU.h"
 #include "Rodin/Variational.h"
 
@@ -80,6 +79,7 @@ namespace Rodin::Adaptation
         using Variational::Zero;
 
         m_report = {};
+        m_prevAcceptedAlpha = Real(0);
 
         auto& u = m_u.get();
         const auto& fes = u.getFiniteElementSpace();
@@ -147,13 +147,6 @@ namespace Rodin::Adaptation
         }
 
         Solver::SparseLU linearSolver(newton);
-        Solver::NewtonSolver newtonSolver(linearSolver);
-        newtonSolver
-          .setMaxIterations(1)
-          .setDampingFactor(Real(1))
-          .setAbsoluteTolerance(Real(0))
-          .setRelativeTolerance(Real(0))
-          .setStepTolerance(params.stepTolerance);
 
         auto evaluator = [&](const Math::Vector<Real>& uTry)
         {
@@ -166,7 +159,22 @@ namespace Rodin::Adaptation
                    params.lineSearchSafetyMargin * params.jSafeRatio);
         m_report.jLineSearchRatio = jLineSearchRatio;
 
+        auto objective = [&](const Math::Vector<Real>& uTry) -> Real
+        {
+          u.getData() = uTry;
+          return computeObjective(
+              sLF, phi, params, barrierParams, cellCache);
+        };
+
+        auto residualNorm = [&](const Math::Vector<Real>& uTry) -> Real
+        {
+          u.getData() = uTry;
+          newton.assemble();
+          return newton.getLinearSystem().getVector().norm();
+        };
+
         Math::Vector<Real> uBest = u.getData();
+        Real energyBest = std::numeric_limits<Real>::infinity();
         Real residualBest = std::numeric_limits<Real>::infinity();
         std::size_t stallCount = 0;
         Real r0 = 0;
@@ -175,39 +183,160 @@ namespace Rodin::Adaptation
         {
           const Math::Vector<Real> uOld = u.getData();
 
-          newtonSolver.solve(u.getData());
-          const auto step = newtonSolver.getReport();
-          const Real residual = step.final_residual;
+          u.getData() = uOld;
+          newton.assemble();
+          auto& linearSystem = newton.getLinearSystem();
+          const Real residual = linearSystem.getVector().norm();
+          const Real energy = objective(uOld);
+
+          if (!std::isfinite(residual) || !std::isfinite(energy))
+          {
+            m_report.converged = false;
+            u.getData() = uBest;
+            return m_report;
+          }
+
           if (it == 0)
           {
             r0 = residual;
             m_report.initialResidual = residual;
+            m_report.initialEnergy = energy;
+            uBest = uOld;
+            energyBest = energy;
+            residualBest = residual;
           }
 
-          const bool residualImproved = (residual < residualBest);
-          if (residualImproved)
+          if (residual <= params.absoluteTolerance
+              || (r0 > 0 && residual <= params.relativeTolerance * r0))
           {
-            residualBest = residual;
-            stallCount = 0;
+            m_report.iterations = it;
+            m_report.finalResidual = residual;
+            m_report.finalEnergy = energy;
+            m_report.converged = true;
+            u.getData() = uOld;
+            return m_report;
+          }
+
+          linearSolver.solve(linearSystem);
+
+          Math::Vector<Real> newtonDirection = linearSystem.getSolution();
+          Math::Vector<Real> residualDirection = linearSystem.getVector();
+          const Real newtonDirectionNorm = newtonDirection.norm();
+          if (!std::isfinite(newtonDirectionNorm))
+          {
+            m_report.converged = false;
+            u.getData() = uBest;
+            return m_report;
+          }
+
+          LSRLineSearchResult ls;
+          Real acceptedResidual = std::numeric_limits<Real>::quiet_NaN();
+          Real acceptedEnergy = std::numeric_limits<Real>::quiet_NaN();
+          Math::Vector<Real> acceptedU = uOld;
+          Real acceptedStepNorm = Real(0);
+          LSRAdmissibilityReport lastAdm;
+          const Real energyTol =
+            params.energyDecreaseTolerance
+            * std::max<Real>(Real(1), std::abs(energy));
+
+          auto tryLineSearchDirection =
+            [&](const Math::Vector<Real>& direction) -> bool
+          {
+            const Real directionNorm = direction.norm();
+            if (!std::isfinite(directionNorm) || directionNorm == Real(0))
+              return false;
+
+            // Warm-start the initial step from the previously accepted
+            // alpha (no-op on the first iteration and whenever the
+            // previous iteration accepted alpha = 1).
+            Real alphaStart = params.alphaInit;
+            if (params.useWarmStartAlpha
+                && m_prevAcceptedAlpha > Real(0))
+            {
+              alphaStart = std::min<Real>(
+                  Real(1),
+                  params.alphaWarmStartGrowth * m_prevAcceptedAlpha);
+              alphaStart = std::max<Real>(alphaStart, params.alphaMin);
+            }
+
+            Real alpha = alphaStart;
+            while (alpha >= params.alphaMin)
+            {
+              const Math::Vector<Real> uTrial = uOld + alpha * direction;
+              const LSRAdmissibilityReport adm = evaluator(uTrial);
+
+              lastAdm = adm;
+
+              const bool jOK =
+                   adm.minJRatio > jLineSearchRatio
+                && adm.inadmissibleCount == 0;
+              const bool qOK = adm.maxQShape <= params.qShapeMax;
+
+              bool energyOK = false;
+              Real trialEnergy = std::numeric_limits<Real>::infinity();
+              if (jOK && qOK)
+              {
+                trialEnergy = objective(uTrial);
+                energyOK =
+                     std::isfinite(trialEnergy)
+                  && trialEnergy <= energy + energyTol;
+              }
+
+              if (jOK && qOK && energyOK)
+              {
+                acceptedResidual = residualNorm(uTrial);
+                if (std::isfinite(acceptedResidual))
+                {
+                  acceptedEnergy = trialEnergy;
+                  acceptedU = uTrial;
+                  acceptedStepNorm = alpha * directionNorm;
+                  ls.alphaAccepted = alpha;
+                  ls.minJRatioAccepted = adm.minJRatio;
+                  ls.inadmissibleCountAccepted = adm.inadmissibleCount;
+                  ls.maxQShapeAccepted = adm.maxQShape;
+                  ls.succeeded = true;
+                  return true;
+                }
+              }
+
+              alpha *= params.alphaReduction;
+              ++ls.backtracks;
+            }
+            return false;
+          };
+
+          const bool acceptedNewton =
+            tryLineSearchDirection(newtonDirection);
+          if (!acceptedNewton)
+          {
+            const bool acceptedResidualDirection =
+              tryLineSearchDirection(residualDirection);
+            if (!acceptedResidualDirection)
+              tryLineSearchDirection(-residualDirection);
+          }
+
+          if (!ls.succeeded)
+          {
+            u.getData() = uOld;
+            ls.minJRatioAccepted = lastAdm.minJRatio;
+            ls.inadmissibleCountAccepted = lastAdm.inadmissibleCount;
+            ls.maxQShapeAccepted = lastAdm.maxQShape;
           }
           else
           {
-            ++stallCount;
+            u.getData() = acceptedU;
           }
 
-          Math::Vector<Real> p = u.getData() - uOld;
-          u.getData() = uOld;
-
-          const auto ls = runLSRAdmissibilityLineSearch(
-              u.getData(), p, evaluator, jLineSearchRatio,
-              params.alphaInit, params.alphaReduction, params.alphaMin,
-              params.qShapeMax);
-
           m_report.iterations = it + 1;
-          m_report.finalResidual = residual;
-          m_report.finalStepNorm = ls.alphaAccepted * p.norm();
+          m_report.finalResidual =
+            ls.succeeded ? acceptedResidual : residualBest;
+          m_report.finalEnergy =
+            ls.succeeded ? acceptedEnergy : energyBest;
+          m_report.finalStepNorm = acceptedStepNorm;
           m_report.lastAcceptedAlpha = ls.alphaAccepted;
           m_report.totalBacktracks += ls.backtracks;
+          if (ls.succeeded)
+            m_prevAcceptedAlpha = ls.alphaAccepted;
           m_report.minJRatio = ls.minJRatioAccepted;
           m_report.inadmissibleCount = ls.inadmissibleCountAccepted;
 
@@ -219,11 +348,31 @@ namespace Rodin::Adaptation
             return m_report;
           }
 
-          if (residualImproved)
+          const bool energyImproved =
+            acceptedEnergy < energyBest
+              - params.energyDecreaseTolerance
+                * std::max<Real>(Real(1), std::abs(energyBest));
+          if (energyImproved)
+          {
             uBest = u.getData();
+            energyBest = acceptedEnergy;
+            residualBest = acceptedResidual;
+            stallCount = 0;
+          }
+          else
+          {
+            ++stallCount;
+          }
 
-          if (residual <= params.absoluteTolerance
-              || (r0 > 0 && residual <= params.relativeTolerance * r0))
+          if (params.acceptedStateConvergenceTest
+              && params.acceptedStateConvergenceTest(m_report))
+          {
+            m_report.converged = true;
+            return m_report;
+          }
+
+          if (acceptedResidual <= params.absoluteTolerance
+              || (r0 > 0 && acceptedResidual <= params.relativeTolerance * r0))
           {
             m_report.converged = true;
             return m_report;
@@ -246,10 +395,68 @@ namespace Rodin::Adaptation
         u.getData() = uBest;
         m_report.converged = false;
         m_report.finalResidual = residualBest;
+        m_report.finalEnergy = energyBest;
         return m_report;
       }
 
     private:
+      template <class SLF, class PhiDerived>
+      Real computeObjective(
+          const SLF& sLF,
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const LSRParameters& params,
+          const BarrierParameters& barrierParams,
+          const std::vector<CellGeomCache>& cellCache) const
+      {
+        const auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+
+        Real energy = 0;
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const auto& cell = *cellIt;
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(
+                lsrQuadOrderFor(fe.getOrder()),
+                cell.getGeometry());
+          const auto& quadrature = cell.getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& pt = quadrature.getPoint(q);
+            const Variational::IntegrationPoint ip(pt, &qf, q);
+            const Real s = sLF.getValue(ip);
+            const auto uq = u.getValue(ip);
+            Math::SpatialVector<Real> y(cell.getDimension());
+            for (std::size_t c = 0; c < fes.getVectorDimension(); ++c)
+              y(c) = pt.getCoordinates()(c) + uq(c);
+
+            const Geometry::Point movedPoint =
+              detail::makeMovedPoint(pt, y);
+            const Real r = phi.getValue(movedPoint) - s;
+            const Real W =
+              std::exp(-s * s / (2 * params.deltaW * params.deltaW));
+            energy += Real(0.5)
+              * qf.getWeight(q) * pt.getDistortion()
+              * params.rhoS * W * params.normalizer * r * r;
+          }
+        }
+
+        for (const auto& cell : cellCache)
+        {
+          const auto uv = extractCellU(cell, u);
+          const auto local =
+            evaluateBarrierLocal(
+                cell, uv, params.shapeWeight, barrierParams);
+          if (!local.valid)
+            return std::numeric_limits<Real>::infinity();
+          energy += local.energy;
+        }
+        return energy;
+      }
+
       template <class SLF>
       Real computeWeightedBandMeasure(const SLF& sLF, Real deltaW) const
       {
@@ -409,6 +616,7 @@ namespace Rodin::Adaptation
       std::reference_wrapper<Displacement> m_u;
       LSRParameters m_params;
       LSRReport m_report;
+      Real m_prevAcceptedAlpha = Real(0);
   };
 
   template <class Displacement>

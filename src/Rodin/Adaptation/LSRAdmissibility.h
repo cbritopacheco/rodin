@@ -37,9 +37,6 @@ namespace Rodin::Adaptation
   {
     Real alphaAccepted = Real(0);
     std::size_t backtracks = 0;
-    Real minJRatioAtAlpha1 = std::numeric_limits<Real>::quiet_NaN();
-    std::size_t inadmissibleCountAtAlpha1 = 0;
-    Real maxQShapeAtAlpha1 = std::numeric_limits<Real>::quiet_NaN();
     Real minJRatioAccepted = std::numeric_limits<Real>::quiet_NaN();
     std::size_t inadmissibleCountAccepted = 0;
     Real maxQShapeAccepted = std::numeric_limits<Real>::quiet_NaN();
@@ -94,65 +91,6 @@ namespace Rodin::Adaptation
       }
     }
     return rep;
-  }
-
-  template <class Evaluator>
-  LSRLineSearchResult runLSRAdmissibilityLineSearch(
-      Math::Vector<Real>& u,
-      const Math::Vector<Real>& p,
-      Evaluator&& evaluator,
-      Real jLineSearchRatio,
-      Real alphaInit = Real(1),
-      Real reduction = Real(0.5),
-      Real alphaMin = Real(1e-6),
-      Real qShapeMax = std::numeric_limits<Real>::infinity())
-  {
-    LSRLineSearchResult result;
-    const Math::Vector<Real> uOld = u;
-
-    Real alpha = alphaInit;
-    bool firstIter = true;
-    LSRAdmissibilityReport lastAdm;
-
-    while (alpha >= alphaMin)
-    {
-      const Math::Vector<Real> uTrial = uOld + alpha * p;
-      const LSRAdmissibilityReport adm = evaluator(uTrial);
-
-      if (firstIter)
-      {
-        result.minJRatioAtAlpha1 = adm.minJRatio;
-        result.inadmissibleCountAtAlpha1 = adm.inadmissibleCount;
-        result.maxQShapeAtAlpha1 = adm.maxQShape;
-        firstIter = false;
-      }
-      lastAdm = adm;
-
-      const bool jOK =
-           adm.minJRatio > jLineSearchRatio
-        && adm.inadmissibleCount == 0;
-      const bool qOK = adm.maxQShape <= qShapeMax;
-
-      if (jOK && qOK)
-      {
-        u = uTrial;
-        result.alphaAccepted = alpha;
-        result.minJRatioAccepted = adm.minJRatio;
-        result.inadmissibleCountAccepted = adm.inadmissibleCount;
-        result.maxQShapeAccepted = adm.maxQShape;
-        result.succeeded = true;
-        return result;
-      }
-
-      alpha *= reduction;
-      ++result.backtracks;
-    }
-
-    u = uOld;
-    result.minJRatioAccepted = lastAdm.minJRatio;
-    result.inadmissibleCountAccepted = lastAdm.inadmissibleCount;
-    result.maxQShapeAccepted = lastAdm.maxQShape;
-    return result;
   }
 }
 

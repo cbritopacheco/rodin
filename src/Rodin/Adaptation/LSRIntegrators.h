@@ -67,11 +67,10 @@ namespace Rodin::Adaptation
     PSDProjectedNewton  ///< Full Newton with the per-quadrature-point
                         ///< correction `r * hess(phi)` clamped to its
                         ///< positive-semidefinite part (eigenvalue >= 0).
-                        ///< The global tangent stays PSD, so Newton
-                        ///< contracts super-linearly past the GN noise
-                        ///< floor without the tangential indefiniteness
-                        ///< that destabilises raw full-Newton wherever
-                        ///< the LSR residual r changes sign.
+                        ///< This removes the indefinite component of the
+                        ///< second-order correction; it is therefore a
+                        ///< safeguarded Newton model, not the exact Newton
+                        ///< tangent whenever the projection is active.
   };
 
   inline const char* lsrIntegratorTangentModeName(LSRIntegratorTangentMode m)
@@ -602,19 +601,12 @@ namespace Rodin::Adaptation
   //
   // Identical to the full-Newton specialisation up to the per-quadrature-point
   // assembly of the second-order correction `r * hess(phi)`. Here that 2x2
-  // matrix is projected to its PSD part (`(M)+`) BEFORE being contracted with
-  // the test/trial basis. The result: the global tangent stays SPD, so Newton
-  // contracts even when r changes sign across the band — which is exactly the
-  // regime where raw full-Newton breaks (the tangential eigenvalue r/||p-c||
-  // becomes negative and the indefinite step flips cells through the singular
-  // floor).
-  //
-  // Where r * hess(phi) is already PSD this mode is identical to full Newton
-  // and recovers quadratic convergence. Where it is mixed-sign, this mode
-  // keeps only the PSD-contributing eigenspace and degenerates gracefully
-  // toward GN on the indefinite directions — but does NOT cycle around the
-  // GN minimum, because the PSD piece is supplied at every iteration and
-  // contracts the dropped-term spectral radius.
+  // matrix is projected to its PSD part (`(M)+`) before being contracted with
+  // the test/trial basis. This produces a safeguarded local model when the
+  // residual-weighted Hessian is indefinite. If the projection is inactive on
+  // the active quadrature set, the tangent coincides with full Newton. If the
+  // projection is active, the method is a modified Newton method and no
+  // quadratic residual convergence is implied by the tangent alone.
   //
   template <class PhiDerived, class GradDerived, class HessDerived,
             class SLFType, class TrialType, class TestType, class StateType>

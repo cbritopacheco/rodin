@@ -7,9 +7,12 @@
 #ifndef RODIN_ADAPTATION_LSRPARAMETERS_H
 #define RODIN_ADAPTATION_LSRPARAMETERS_H
 
+#include <functional>
+
 #include "Rodin/Types.h"
 
 #include "LSRIntegrators.h"
+#include "LSRReport.h"
 
 namespace Rodin::Adaptation
 {
@@ -68,12 +71,28 @@ namespace Rodin::Adaptation
     Real alphaInit = 1;
     Real alphaReduction = 0.5;
     Real alphaMin = 1e-6;
+    Real energyDecreaseTolerance = 1e-12;
+
+    /// Warm-start the next iteration's initial step at
+    /// alphaWarmStartGrowth * (previously accepted alpha), clamped to
+    /// [alphaMin, 1]. Enabled by default: on hard cases this cuts the
+    /// total backtrack count by ~50% with no convergence cost; on easy
+    /// cases the previously accepted alpha is 1 and warm-start is a
+    /// no-op.
+    bool useWarmStartAlpha = true;
+    Real alphaWarmStartGrowth = 2.0;
 
     Real absoluteTolerance = 1e-8;
     Real relativeTolerance = 1e-7;
     Real stepTolerance = 0;
     std::size_t maxNewtonIterations = 40;
     std::size_t stallPatience = 3;
+
+    // Optional problem-level stop criterion evaluated after an admissible
+    // accepted step, with the displacement already updated to that step.
+    // This lets callers stop on geometric criteria without exposing their
+    // interface diagnostics inside the LSR solver.
+    std::function<bool(const LSRReport&)> acceptedStateConvergenceTest;
 
     // Best-effort quality safeguard. Line search rejects any trial step
     // whose worst-case cell would have intrinsic shape quality
