@@ -4,31 +4,31 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_SDFRREGISTRATION_H
-#define RODIN_ADAPTATION_SDFRREGISTRATION_H
+#ifndef RODIN_ADAPTATION_LSRREGISTRATION_H
+#define RODIN_ADAPTATION_LSRREGISTRATION_H
 
 /**
  * @file
- * @brief High-level helper for the SDFR penalty, modelled on
+ * @brief High-level helper for the LSR penalty, modelled on
  *        `Rodin::Variational::LinearElasticityIntegral`.
  *
  * The composite captures the VARIATIONAL SKELETON `(du, v, u)` at
  * construction. The DATA — three Rodin form-language objects describing
- * the level set, plus the signed-distance grid function, plus parameters
+ * the level-set target grid function, plus parameters
  * — is passed at `operator()` / `Tangent` / `Residual` time:
  *
  *     phi    Variational::RealFunctionBase<...>           (always)
  *     grad   Variational::VectorFunctionBase<Real, ...>   (always)
  *     hess   Variational::MatrixFunctionBase<Real, ...>   (Newton only)
- *     sLF    GridFunction (signed distance / data target)
- *     params SDFRIntegratorParameters (defaulted)
+ *     sLF    GridFunction (level-set data target)
+ *     params LSRIntegratorParameters (defaulted)
  *
  * Usage:
  *
- *     SDFRRegistration sdfr(du, v, u);
+ *     LSRRegistration lsr(du, v, u);
  *
- *     newton = sdfr(phi, grad,        sLF, params);  // GaussNewton
- *     newton = sdfr(phi, grad, hess,  sLF, params);  // Newton
+ *     newton = lsr(phi, grad,        sLF, params);  // GaussNewton
+ *     newton = lsr(phi, grad, hess,  sLF, params);  // Newton
  *
  * The user supplies each derivative as a Rodin FunctionBase. The
  * integrators evaluate them at the deformed point y = X + u_h(X) using
@@ -37,7 +37,7 @@
  * derivatives are the user's inputs.
  *
  * Overload resolution on the call signature picks the right
- * `SDFRTangentIntegrator` specialisation at compile time. There is no
+ * `LSRTangentIntegrator` specialisation at compile time. There is no
  * runtime tangent-mode flag.
  */
 
@@ -45,15 +45,15 @@
 
 #include "Rodin/Types.h"
 
-#include "SDFRIntegrators.h"
+#include "LSRIntegrators.h"
 
 namespace Rodin::Adaptation
 {
   template <class Trial, class Test, class State>
-  class SDFRRegistration
+  class LSRRegistration
   {
     public:
-      SDFRRegistration(
+      LSRRegistration(
           const Trial& du, const Test& v, const State& u)
         : m_du(du), m_v(v), m_u(u)
       {}
@@ -64,10 +64,10 @@ namespace Rodin::Adaptation
           const Variational::RealFunctionBase<PhiDerived>& /*phi*/,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
-        return SDFRTangentIntegrator<
-                  SDFRIntegratorTangentMode::GaussNewton,
+        return LSRTangentIntegrator<
+                  LSRIntegratorTangentMode::GaussNewton,
                   PhiDerived, GradDerived, void,
                   SLF, Trial, Test, State>(
               grad, sLF,
@@ -82,10 +82,10 @@ namespace Rodin::Adaptation
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
-        return SDFRTangentIntegrator<
-                  SDFRIntegratorTangentMode::Newton,
+        return LSRTangentIntegrator<
+                  LSRIntegratorTangentMode::Newton,
                   PhiDerived, GradDerived, HessDerived,
                   SLF, Trial, Test, State>(
               phi, grad, hess, sLF,
@@ -111,10 +111,10 @@ namespace Rodin::Adaptation
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
-        return SDFRTangentIntegrator<
-                  SDFRIntegratorTangentMode::PSDProjectedNewton,
+        return LSRTangentIntegrator<
+                  LSRIntegratorTangentMode::PSDProjectedNewton,
                   PhiDerived, GradDerived, HessDerived,
                   SLF, Trial, Test, State>(
               phi, grad, hess, sLF,
@@ -128,9 +128,9 @@ namespace Rodin::Adaptation
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
-        return SDFRResidualIntegrator<
+        return LSRResidualIntegrator<
                   PhiDerived, GradDerived, SLF, Test, State>(
               phi, grad, sLF, m_v.get(), m_u.get(), params);
       }
@@ -143,7 +143,7 @@ namespace Rodin::Adaptation
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& /*hess*/,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
         return Residual(phi, grad, sLF, params);
       }
@@ -154,7 +154,7 @@ namespace Rodin::Adaptation
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
         return Tangent(phi, grad, sLF, params)
              + Residual(phi, grad, sLF, params);
@@ -167,7 +167,7 @@ namespace Rodin::Adaptation
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
           const SLF& sLF,
-          SDFRIntegratorParameters params = {}) const
+          LSRIntegratorParameters params = {}) const
       {
         return Tangent(phi, grad, hess, sLF, params)
              + Residual(phi, grad, sLF, params);
@@ -180,8 +180,8 @@ namespace Rodin::Adaptation
   };
 
   template <class Trial, class Test, class State>
-  SDFRRegistration(const Trial&, const Test&, const State&)
-    -> SDFRRegistration<Trial, Test, State>;
+  LSRRegistration(const Trial&, const Test&, const State&)
+    -> LSRRegistration<Trial, Test, State>;
 
 }
 

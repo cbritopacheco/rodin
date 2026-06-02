@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_SDFR_H
-#define RODIN_ADAPTATION_SDFR_H
+#ifndef RODIN_ADAPTATION_LSR_H
+#define RODIN_ADAPTATION_LSR_H
 
 #include <algorithm>
 #include <cmath>
@@ -24,46 +24,46 @@
 
 #include "CellGeomCache.h"
 #include "JacobianAdmissibilityBarrier.h"
-#include "SDFRAdmissibility.h"
-#include "SDFRParameters.h"
-#include "SDFRReport.h"
-#include "SDFRRegistration.h"
+#include "LSRAdmissibility.h"
+#include "LSRParameters.h"
+#include "LSRReport.h"
+#include "LSRRegistration.h"
 
 namespace Rodin::Adaptation
 {
   /**
-   * @brief Signed distance function registration solver.
+   * @brief Level-set registration solver.
    *
-   * `SDFR` owns no mesh data. It is bound to the displacement field `u`,
+   * `LSR` owns no mesh data. It is bound to the displacement field `u`,
    * infers the carrier finite-element space and mesh from that field, and
    * overwrites `u` with the accepted registration displacement.
    */
   template <class Displacement>
-  class SDFR
+  class LSR
   {
     public:
-      explicit SDFR(Displacement& u)
+      explicit LSR(Displacement& u)
         : m_u(u)
       {}
 
-      SDFR& setParameters(SDFRParameters params)
+      LSR& setParameters(LSRParameters params)
       {
         m_params = std::move(params);
         return *this;
       }
 
-      const SDFRParameters& getParameters() const noexcept
+      const LSRParameters& getParameters() const noexcept
       {
         return m_params;
       }
 
-      const SDFRReport& getReport() const noexcept
+      const LSRReport& getReport() const noexcept
       {
         return m_report;
       }
 
       template <class SLF, class PhiDerived, class GradDerived, class HessDerived>
-      SDFRReport solve(
+      LSRReport solve(
           const SLF& sLF,
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& gradPhi,
@@ -89,7 +89,7 @@ namespace Rodin::Adaptation
         const auto& cellCache = cellGeom.first;
         const auto& cellToLocal = cellGeom.second;
 
-        SDFRParameters params = m_params;
+        LSRParameters params = m_params;
         completeParameters(params, sLF);
 
         TrialFunction du(fes);
@@ -97,58 +97,51 @@ namespace Rodin::Adaptation
         auto zero = VectorFunction{ Zero(), Zero() };
 
         RealFunction<Real> shapeWeight(params.shapeWeight);
-        RealFunction<Real> floorWeight(params.floorWeight);
-        RealFunction<Real> harmonicEps(params.harmonicEps);
-        RealFunction<Real> tikhonovEps(params.tikhonovEps);
 
         BarrierParameters barrierParams;
         barrierParams.jMin = params.jMinRatio;
-        barrierParams.jSafe = params.jSafeRatio;
         barrierParams.domainMeasure = computeDomainMeasure();
+        barrierParams.qBarrierWeight = params.qBarrierWeight;
+        barrierParams.qBarrierAct    = params.qBarrierAct;
+        barrierParams.qBarrierMax    = params.qBarrierMax;
 
-        SDFRRegistration sdfTerm(du, v, u);
+        LSRRegistration lsrTerm(du, v, u);
         JacobianAdmissibilityBarrier barrier(
             du, v, u, cellCache, cellToLocal);
 
-        if (params.initialGuess == SDFRInitialGuess::Zero)
+        if (params.initialGuess == LSRInitialGuess::Zero)
           u.getData().setZero();
-        else if (params.initialGuess == SDFRInitialGuess::Hilbert)
+        else if (params.initialGuess == LSRInitialGuess::Hilbert)
           applyHilbertInitialGuess(
-              sLF, phi, gradPhi, shapeWeight, floorWeight,
+              sLF, phi, gradPhi, shapeWeight,
               barrierParams, cellCache, cellToLocal, params);
 
         Problem newton(du, v);
         switch (params.tangent)
         {
-          case SDFRTangent::GaussNewton:
+          case LSRTangent::GaussNewton:
             newton =
-                sdfTerm.Tangent(phi, gradPhi, sLF, makeSDFRIntegratorParameters(params))
-              + sdfTerm.Residual(phi, gradPhi, sLF, makeSDFRIntegratorParameters(params))
-              + barrier.Tangent(shapeWeight, floorWeight, barrierParams)
-              + barrier.Residual(shapeWeight, floorWeight, barrierParams)
-              + Integral(harmonicEps * Jacobian(du), Jacobian(v))
-              + Integral(tikhonovEps * du, v)
+                lsrTerm.Tangent(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+              + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+              + barrier.Tangent(shapeWeight, barrierParams)
+              + barrier.Residual(shapeWeight, barrierParams)
               + DirichletBC(du, zero);
             break;
-          case SDFRTangent::Newton:
+          case LSRTangent::Newton:
             newton =
-                sdfTerm.Tangent(phi, gradPhi, hessPhi, sLF, makeSDFRIntegratorParameters(params))
-              + sdfTerm.Residual(phi, gradPhi, sLF, makeSDFRIntegratorParameters(params))
-              + barrier.Tangent(shapeWeight, floorWeight, barrierParams)
-              + barrier.Residual(shapeWeight, floorWeight, barrierParams)
-              + Integral(harmonicEps * Jacobian(du), Jacobian(v))
-              + Integral(tikhonovEps * du, v)
+                lsrTerm.Tangent(phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
+              + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+              + barrier.Tangent(shapeWeight, barrierParams)
+              + barrier.Residual(shapeWeight, barrierParams)
               + DirichletBC(du, zero);
             break;
-          case SDFRTangent::PSDProjectedNewton:
+          case LSRTangent::PSDProjectedNewton:
             newton =
-                sdfTerm.TangentPSDProjected(
-                    phi, gradPhi, hessPhi, sLF, makeSDFRIntegratorParameters(params))
-              + sdfTerm.Residual(phi, gradPhi, sLF, makeSDFRIntegratorParameters(params))
-              + barrier.Tangent(shapeWeight, floorWeight, barrierParams)
-              + barrier.Residual(shapeWeight, floorWeight, barrierParams)
-              + Integral(harmonicEps * Jacobian(du), Jacobian(v))
-              + Integral(tikhonovEps * du, v)
+                lsrTerm.TangentPSDProjected(
+                    phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
+              + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+              + barrier.Tangent(shapeWeight, barrierParams)
+              + barrier.Residual(shapeWeight, barrierParams)
               + DirichletBC(du, zero);
             break;
         }
@@ -164,7 +157,7 @@ namespace Rodin::Adaptation
 
         auto evaluator = [&](const Math::Vector<Real>& uTry)
         {
-          return evaluateSDFRAdmissibilityP1(
+          return evaluateLSRAdmissibilityP1(
               uTry, cellCache, fes, params.jMinRatio);
         };
 
@@ -205,9 +198,10 @@ namespace Rodin::Adaptation
           Math::Vector<Real> p = u.getData() - uOld;
           u.getData() = uOld;
 
-          const auto ls = runSDFRAdmissibilityLineSearch(
+          const auto ls = runLSRAdmissibilityLineSearch(
               u.getData(), p, evaluator, jLineSearchRatio,
-              params.alphaInit, params.alphaReduction, params.alphaMin);
+              params.alphaInit, params.alphaReduction, params.alphaMin,
+              params.qShapeMax);
 
           m_report.iterations = it + 1;
           m_report.finalResidual = residual;
@@ -305,7 +299,7 @@ namespace Rodin::Adaptation
       }
 
       template <class SLF>
-      void completeParameters(SDFRParameters& params, const SLF& sLF) const
+      void completeParameters(LSRParameters& params, const SLF& sLF) const
       {
         const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
         const Real domainMeasure = computeDomainMeasure();
@@ -318,37 +312,36 @@ namespace Rodin::Adaptation
         {
           const Real weightedBandMeasure = computeWeightedBandMeasure(sLF, params.deltaW);
           if (weightedBandMeasure <= 0)
-            throw std::runtime_error("SDFR: weighted signed-distance band is empty.");
+            throw std::runtime_error("LSR: weighted level-set band is empty.");
           params.normalizer = Real(1) / (weightedBandMeasure * params.hRef * params.hRef);
         }
       }
 
-      Real initialGuessScaleFactor(const SDFRParameters& params) const
+      Real initialGuessScaleFactor(const LSRParameters& params) const
       {
         switch (params.initialGuessScaling)
         {
-          case SDFRInitialGuessScaling::Unnormalized:
+          case LSRInitialGuessScaling::Unnormalized:
             return Real(1);
-          case SDFRInitialGuessScaling::EnergyNormalized:
+          case LSRInitialGuessScaling::EnergyNormalized:
             return params.normalizer;
-          case SDFRInitialGuessScaling::BandNormalized:
+          case LSRInitialGuessScaling::BandNormalized:
             return params.normalizer * params.hRef * params.hRef;
         }
         return Real(1);
       }
 
       template <class SLF, class PhiDerived, class GradDerived,
-                class ShapeWeightDerived, class FloorWeightDerived>
+                class ShapeWeightDerived>
       void applyHilbertInitialGuess(
           const SLF& sLF,
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& gradPhi,
           const Variational::RealFunctionBase<ShapeWeightDerived>& shapeWeight,
-          const Variational::RealFunctionBase<FloorWeightDerived>& floorWeight,
           const BarrierParameters& barrierParams,
           const std::vector<CellGeomCache>& cellCache,
           const std::unordered_map<Index, std::size_t>& cellToLocal,
-          const SDFRParameters& params)
+          const LSRParameters& params)
       {
         using Variational::DirichletBC;
         using Variational::Integral;
@@ -384,13 +377,13 @@ namespace Rodin::Adaptation
         Problem hilbert(duH, vH);
         switch (params.initialGuessMetric)
         {
-          case SDFRHilbertMetric::Harmonic:
+          case LSRHilbertMetric::Harmonic:
             hilbert =
                 Integral(Jacobian(duH), Jacobian(vH))
               + Integral(rhsScalar * gradPhi, vH)
               + DirichletBC(duH, zero);
             break;
-          case SDFRHilbertMetric::Elasticity:
+          case LSRHilbertMetric::Elasticity:
             hilbert =
                 LinearElasticityIntegral(duH, vH)(
                     params.initialGuessElasticityLambda,
@@ -398,12 +391,12 @@ namespace Rodin::Adaptation
               + Integral(rhsScalar * gradPhi, vH)
               + DirichletBC(duH, zero);
             break;
-          case SDFRHilbertMetric::ShapeHessian:
+          case LSRHilbertMetric::ShapeHessian:
           {
             JacobianAdmissibilityBarrier barrier(
                 duH, vH, u, cellCache, cellToLocal);
             hilbert =
-                barrier.Tangent(shapeWeight, floorWeight, barrierParams)
+                barrier.Tangent(shapeWeight, barrierParams)
               + Integral(rhsScalar * gradPhi, vH)
               + DirichletBC(duH, zero);
             break;
@@ -414,12 +407,12 @@ namespace Rodin::Adaptation
       }
 
       std::reference_wrapper<Displacement> m_u;
-      SDFRParameters m_params;
-      SDFRReport m_report;
+      LSRParameters m_params;
+      LSRReport m_report;
   };
 
   template <class Displacement>
-  SDFR(Displacement&) -> SDFR<Displacement>;
+  LSR(Displacement&) -> LSR<Displacement>;
 }
 
 #endif

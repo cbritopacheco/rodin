@@ -69,24 +69,15 @@ namespace
     return mesh;
   }
 
-  // Default scalar weights for the test (gamma and beta are passed
-  // alongside `BarrierParameters` to `evaluateBarrierLocal` now that
-  // they're form-language-friendly RealFunctionBase inputs at the
-  // integrator boundary).
+  // Default scalar shape weight for the test (`gamma` is passed
+  // alongside `BarrierParameters` to `evaluateBarrierLocal` as a
+  // RealFunctionBase at the integrator boundary).
   constexpr Real kGamma = 1e-1;
-  constexpr Real kBeta  = 1e-2;
 
-  // For the FD test we INTENTIONALLY pick jSafe large enough that the
-  // floor barrier is active at the test displacement (j ~ 1 < jSafe).
-  // This exercises the active-branch closed-form Hessian; the inactive
-  // branch is trivial (identically zero B-contribution, so only the
-  // shape block is exercised — that block is unchanged from the previous
-  // implementation).
   BarrierParameters defaultParams(Real domainMeasure)
   {
     BarrierParameters p;
     p.jMin = Real(0.1);
-    p.jSafe = Real(1.5);
     p.domainMeasure = domainMeasure;
     return p;
   }
@@ -132,9 +123,9 @@ namespace
         uvMinus[k](l) -= eps * p(k * 2 + l);
       }
     const auto localPlus =
-      evaluateBarrierLocal(cell, uvPlus, kGamma, kBeta, params);
+      evaluateBarrierLocal(cell, uvPlus, kGamma, params);
     const auto localMinus =
-      evaluateBarrierLocal(cell, uvMinus, kGamma, kBeta, params);
+      evaluateBarrierLocal(cell, uvMinus, kGamma, params);
     return (localPlus.grad - localMinus.grad) / (2 * eps);
   }
 
@@ -158,7 +149,7 @@ namespace Rodin::Tests::Unit
     ASSERT_FALSE(cellCache.empty());
     const auto& cell = cellCache[0];
     auto uv = deterministicUv(0, /*scale=*/Real(1e-3));
-    const auto local = evaluateBarrierLocal(cell, uv, kGamma, kBeta, defaultParams(1));
+    const auto local = evaluateBarrierLocal(cell, uv, kGamma, defaultParams(1));
     EXPECT_TRUE(local.valid);
     EXPECT_GT(local.j, Real(0));
   }
@@ -193,10 +184,9 @@ namespace Rodin::Tests::Unit
 
         BarrierParameters params;
         params.jMin = jMinRatio;
-        params.jSafe = jSafeRatio;
         params.domainMeasure = Real(1);
         const auto local =
-          evaluateBarrierLocal(cell, uv, kGamma, kBeta, params);
+          evaluateBarrierLocal(cell, uv, kGamma, params);
         ASSERT_TRUE(local.valid);
         minJIdentity = std::min(minJIdentity, local.j);
         maxIdentityError =
@@ -231,7 +221,7 @@ namespace Rodin::Tests::Unit
       {
         const auto& cell = cellCache[ci];
         const auto uv = deterministicUv(s, Real(1e-3));
-        const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, kBeta, params);
+        const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, params);
         ASSERT_TRUE(local0.valid);
         const auto p = deterministicDir(s + ci);
         const Math::Vector<Real> Hp = local0.hess * p;
@@ -263,7 +253,7 @@ namespace Rodin::Tests::Unit
 
     const auto& cell = cellCache[cellCache.size() / 2];
     const auto uv = deterministicUv(/*seed=*/3, Real(1e-3));
-    const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, kBeta, params);
+    const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, params);
     ASSERT_TRUE(local0.valid);
     const auto p = deterministicDir(7);
     const Math::Vector<Real> Hp = local0.hess * p;
@@ -297,7 +287,7 @@ namespace Rodin::Tests::Unit
 
     const auto& cell = cellCache[cellCache.size() / 2];
     const auto uv = deterministicUv(/*seed=*/4, Real(1e-3));
-    const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, kBeta, params);
+    const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, params);
     ASSERT_TRUE(local0.valid);
     const auto p = deterministicDir(11);
     const Math::Vector<Real> Hp = local0.hess * p;
@@ -313,5 +303,165 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(e7, e9)
       << "expected e[1e-7] < e[1e-9], got "
       << "e7=" << e7 << ", e9=" << e9;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Q-shape smooth barrier tests.
+  //
+  // Sweep Qact below the achievable Q on a non-trivial displacement so
+  // the barrier is active at the test point. Verify the analytical
+  // gradient + Hessian via central FD (V-shape of the relative error
+  // curve).
+  // ---------------------------------------------------------------------------
+
+  namespace
+  {
+    BarrierParameters qBarrierActiveParams(Real domainMeasure)
+    {
+      BarrierParameters p;
+      p.jMin = Real(0.1);
+      p.domainMeasure = domainMeasure;
+      p.qBarrierWeight = Real(1.0);
+      p.qBarrierAct    = Real(1.05); // active for any cell stretched > Q=1.05
+      p.qBarrierMax    = Real(3.0);  // asymptote
+      return p;
+    }
+
+    // Deterministic shear-like displacement that pushes Q above 1.
+    std::array<Math::SpatialVector<Real>, 3> shearUv(Real scale)
+    {
+      std::array<Math::SpatialVector<Real>, 3> uv;
+      for (auto& x : uv)
+        x = Math::SpatialVector<Real>(2);
+      // Vertex 0 stays at origin; vertex 1 shears in +x; vertex 2 shears
+      // in +y. The resulting strain is anisotropic, lifting Q above 1.
+      uv[0](0) = 0;            uv[0](1) = 0;
+      uv[1](0) = scale;        uv[1](1) = 0;
+      uv[2](0) = 0;            uv[2](1) = scale;
+      return uv;
+    }
+  }
+
+  TEST(Rodin_Adaptation_Barrier, QBarrierActiveOnDeformedCell)
+  {
+    auto mesh = makeSmallTriangleMesh();
+    auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
+    const auto params = qBarrierActiveParams(1);
+    const auto& cell = cellCache[cellCache.size() / 2];
+    const auto uv = shearUv(Real(0.2));
+    const auto local = evaluateBarrierLocal(cell, uv, kGamma, params);
+    ASSERT_TRUE(local.valid);
+    EXPECT_GT(local.qShape, params.qBarrierAct)
+      << "test setup needs Q > Qact; got Q=" << local.qShape;
+    EXPECT_LT(local.qShape, params.qBarrierMax)
+      << "test setup needs Q < Qmax; got Q=" << local.qShape;
+    EXPECT_TRUE(local.qBarrierActive);
+    EXPECT_GT(local.energy, Real(0))
+      << "expected positive barrier energy on active branch";
+  }
+
+  TEST(Rodin_Adaptation_Barrier, QBarrierCentralFDMinErrorAtMachineFloor)
+  {
+    auto mesh = makeSmallTriangleMesh();
+    auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
+    const auto params = qBarrierActiveParams(1);
+
+    const std::array<std::size_t, 3> seeds{ 0, 1, 2 };
+    const std::array<std::size_t, 3> cellIdx{
+      0, cellCache.size() / 2, cellCache.size() - 1
+    };
+    for (const std::size_t s : seeds)
+      for (const std::size_t ci : cellIdx)
+      {
+        const auto& cell = cellCache[ci];
+        // Slightly randomise the shear amplitude so that we exercise
+        // multiple Q values inside (Qact, Qmax).
+        const Real amp = Real(0.15) + Real(0.02) * Real(s);
+        const auto uvBase = shearUv(amp);
+        // Mix in a small per-seed perturbation so the cell sees
+        // direction-dependent strain.
+        const auto perturb = deterministicUv(s, Real(1e-3));
+        std::array<Math::SpatialVector<Real>, 3> uv;
+        for (std::size_t k = 0; k < 3; ++k)
+        {
+          uv[k] = Math::SpatialVector<Real>(2);
+          uv[k](0) = uvBase[k](0) + perturb[k](0);
+          uv[k](1) = uvBase[k](1) + perturb[k](1);
+        }
+
+        const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, params);
+        ASSERT_TRUE(local0.valid);
+        if (!local0.qBarrierActive) continue;
+
+        const auto p = deterministicDir(s + ci + 17);
+        const Math::Vector<Real> Hp = local0.hess * p;
+
+        Real minErr = std::numeric_limits<Real>::infinity();
+        for (int e = 3; e <= 9; ++e)
+        {
+          const Real eps = std::pow(Real(10), -Real(e));
+          const auto fd = centralFD(cell, uv, params, p, eps);
+          minErr = std::min(minErr, relativeError(fd, Hp));
+        }
+        EXPECT_LT(minErr, Real(1e-6))
+            << "seed=" << s << " cell=" << ci
+            << " Q=" << local0.qShape
+            << " minErr=" << minErr;
+      }
+  }
+
+  TEST(Rodin_Adaptation_Barrier, QBarrierFDDecreasesQuadratically)
+  {
+    auto mesh = makeSmallTriangleMesh();
+    auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
+    const auto params = qBarrierActiveParams(1);
+    const auto& cell = cellCache[cellCache.size() / 2];
+    const auto uvBase = shearUv(Real(0.18));
+    const auto perturb = deterministicUv(/*seed=*/3, Real(1e-3));
+    std::array<Math::SpatialVector<Real>, 3> uv;
+    for (std::size_t k = 0; k < 3; ++k)
+    {
+      uv[k] = Math::SpatialVector<Real>(2);
+      uv[k](0) = uvBase[k](0) + perturb[k](0);
+      uv[k](1) = uvBase[k](1) + perturb[k](1);
+    }
+    const auto local0 = evaluateBarrierLocal(cell, uv, kGamma, params);
+    ASSERT_TRUE(local0.valid);
+    ASSERT_TRUE(local0.qBarrierActive);
+    const auto p = deterministicDir(23);
+    const Math::Vector<Real> Hp = local0.hess * p;
+
+    const std::array<Real, 3> epsList{ Real(1e-3), Real(1e-4), Real(1e-5) };
+    std::array<Real, 3> errs;
+    for (std::size_t i = 0; i < epsList.size(); ++i)
+      errs[i] = relativeError(centralFD(cell, uv, params, p, epsList[i]), Hp);
+    EXPECT_LT(errs[1], errs[0] * Real(0.05))
+      << "Q-barrier: expected ~1e-2 decrease, got "
+      << errs[1] / errs[0];
+    EXPECT_LT(errs[2], errs[1] * Real(0.05))
+      << "Q-barrier: expected ~1e-2 decrease, got "
+      << errs[2] / errs[1];
+  }
+
+  // Inactive branch (Q <= Qact): B_Q == 0 and barrier-on result must
+  // match barrier-off result bit-for-bit.
+  TEST(Rodin_Adaptation_Barrier, QBarrierInactiveMatchesShapeOnly)
+  {
+    auto mesh = makeSmallTriangleMesh();
+    auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
+    const auto& cell = cellCache[cellCache.size() / 2];
+    const auto uv = deterministicUv(/*seed=*/0, Real(1e-3));
+
+    auto qParams = qBarrierActiveParams(1);
+    qParams.qBarrierAct = Real(10);   // way above the achievable Q
+    qParams.qBarrierMax = Real(1000);
+    const auto withQ = evaluateBarrierLocal(cell, uv, kGamma, qParams);
+    const auto noQ   = evaluateBarrierLocal(cell, uv, kGamma, defaultParams(1));
+
+    ASSERT_TRUE(withQ.valid && noQ.valid);
+    EXPECT_FALSE(withQ.qBarrierActive);
+    EXPECT_NEAR(withQ.energy, noQ.energy, Real(1e-15));
+    EXPECT_LT((withQ.grad - noQ.grad).norm(), Real(1e-14));
+    EXPECT_LT((withQ.hess - noQ.hess).norm(), Real(1e-14));
   }
 }

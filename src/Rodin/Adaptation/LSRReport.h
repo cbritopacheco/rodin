@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_SDFRREPORT_H
-#define RODIN_ADAPTATION_SDFRREPORT_H
+#ifndef RODIN_ADAPTATION_LSRREPORT_H
+#define RODIN_ADAPTATION_LSRREPORT_H
 
 #include <cstddef>
 
@@ -13,7 +13,7 @@
 
 namespace Rodin::Adaptation
 {
-  struct SDFRReport
+  struct LSRReport
   {
     bool converged = false;
     bool lineSearchFailed = false;

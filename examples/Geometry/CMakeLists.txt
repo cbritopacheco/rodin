@@ -14,15 +14,22 @@ target_link_libraries(Displace
   Rodin::Geometry
   Rodin::Variational)
 
-add_executable(LevelSetSDRReconstruction LevelSetSDRReconstruction.cpp)
-target_link_libraries(LevelSetSDRReconstruction
+add_executable(LevelSetLSRReconstruction LevelSetLSRReconstruction.cpp)
+target_link_libraries(LevelSetLSRReconstruction
   PUBLIC
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
 
-add_executable(LevelSetSDRWavyCircleSweep LevelSetSDRWavyCircleSweep.cpp)
-target_link_libraries(LevelSetSDRWavyCircleSweep
+add_executable(LevelSetLSRWavyCircleSweep LevelSetLSRWavyCircleSweep.cpp)
+target_link_libraries(LevelSetLSRWavyCircleSweep
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
+add_executable(LevelSetLSRTwoWavyCirclesMerge LevelSetLSRTwoWavyCirclesMerge.cpp)
+target_link_libraries(LevelSetLSRTwoWavyCirclesMerge
   PUBLIC
   Rodin::Geometry
   Rodin::Solver

@@ -8,14 +8,13 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinAdaptation_HEADERS
   AnalyticFunctionAdapters.h
   CellGeomCache.h
-  SDFR.h
-  SDFRAdmissibility.h
-  SDFRIntegrators.h
-  SDFRParameters.h
-  SDFRRegistration.h
-  SDFRReport.h
-  SDRIntegrators.h
-  SignedDistanceRegistration.h
+  LSR.h
+  LSRAdmissibility.h
+  LSRIntegrators.h
+  LSRParameters.h
+  LSRRegistration.h
+  LSRReport.h
+  LevelSetRegistration.h
   JacobianAdmissibilityBarrier.h
 )
 

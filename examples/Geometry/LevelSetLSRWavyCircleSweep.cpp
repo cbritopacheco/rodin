@@ -5,19 +5,19 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// Wavy-circle sweep test for the SDFR pipeline.
+// Wavy-circle sweep test for the LSR pipeline.
 //
 // A non-convex implicit shape — a circle whose radius varies sinusoidally
 // in the polar angle (k azimuthal lobes) — is moved around the unit
 // square along a circular orbit. The whole classify-then-displace
-// pipeline (s-t cut + FMM + SDFR Newton) is rerun from scratch at every
+// pipeline (s-t cut + FMM + LSR Newton) is rerun from scratch at every
 // frame, and a transient XDMF stream is emitted with both the
 // low-fidelity classification and the high-fidelity moved mesh per
 // frame.
 //
-// Compared with `LevelSetSDRReconstruction`, this example exercises:
+// Compared with `LevelSetLSRReconstruction`, this example exercises:
 //   - A non-circular, non-convex interface that genuinely requires
-//     tangential motion of the SDFR (the cosine perturbation cannot be
+//     tangential motion of the LSR (the cosine perturbation cannot be
 //     absorbed by uniform dilation of the cell map).
 //   - Repeated classification + Newton solves at moving interface
 //     locations: the classified topology changes between frames and the
@@ -27,7 +27,7 @@
 //
 // FES-independence and Newton-tangent choices follow the same honest
 // caveats as the parent example: the barrier + shape closed-form
-// algebra is specialised to affine P1 triangles in 2D; SDFR uses the
+// algebra is specialised to affine P1 triangles in 2D; LSR uses the
 // PSD-projected full-Newton tangent. The example is therefore a 2D
 // triangular prototype.
 //
@@ -80,7 +80,7 @@ namespace
   //
   // phi is smooth away from the centre. Like the plain circle SDF, it is
   // NOT a strict signed distance (the radial perturbation makes the
-  // gradient norm differ from 1) but the SDFR pipeline only requires a
+  // gradient norm differ from 1) but the LSR pipeline only requires a
   // sufficiently smooth implicit function — phi, grad phi at quadrature
   // points — to operate.
   // -------------------------------------------------------------------------
@@ -217,7 +217,7 @@ namespace
       const auto& vertices = cellPolytope.getVertices();
       if (vertices.size() != 3)
         throw std::runtime_error(
-            "LevelSetSDRWavyCircleSweep expects triangular cells.");
+            "LevelSetLSRWavyCircleSweep expects triangular cells.");
 
       CellMomentInfo info;
       info.index = cellPolytope.getIndex();
@@ -305,26 +305,26 @@ namespace
     return fallback;
   }
 
-  SDFRHilbertMetric parseHilbertMetric(
+  LSRHilbertMetric parseHilbertMetric(
       int argc, char** argv, const std::string& name)
   {
     const std::string value = parseStringOption(argc, argv, name, "harmonic");
-    if (value == "harmonic") return SDFRHilbertMetric::Harmonic;
-    if (value == "elasticity") return SDFRHilbertMetric::Elasticity;
-    if (value == "shape-hessian") return SDFRHilbertMetric::ShapeHessian;
+    if (value == "harmonic") return LSRHilbertMetric::Harmonic;
+    if (value == "elasticity") return LSRHilbertMetric::Elasticity;
+    if (value == "shape-hessian") return LSRHilbertMetric::ShapeHessian;
     throw std::runtime_error(
         "Unknown --" + name + "=" + value
         + " (expected harmonic, elasticity, or shape-hessian).");
   }
 
-  SDFRInitialGuessScaling parseInitialGuessScaling(
+  LSRInitialGuessScaling parseInitialGuessScaling(
       int argc, char** argv, const std::string& name)
   {
     const std::string value =
       parseStringOption(argc, argv, name, "unnormalized");
-    if (value == "unnormalized") return SDFRInitialGuessScaling::Unnormalized;
-    if (value == "energy") return SDFRInitialGuessScaling::EnergyNormalized;
-    if (value == "band") return SDFRInitialGuessScaling::BandNormalized;
+    if (value == "unnormalized") return LSRInitialGuessScaling::Unnormalized;
+    if (value == "energy") return LSRInitialGuessScaling::EnergyNormalized;
+    if (value == "band") return LSRInitialGuessScaling::BandNormalized;
     throw std::runtime_error(
         "Unknown --" + name + "=" + value
         + " (expected unnormalized, energy, or band).");
@@ -371,36 +371,6 @@ int main(int argc, char** argv)
   const Real deltaW  = 1.5 * delta;
 
   // -------------------------------------------------------------------------
-  // Tikhonov + harmonic regularization knobs.
-  //
-  // Adding `eps_T * ∫ du·v + eps_H * ∫ ∇du:∇v` to the Newton tangent makes
-  // the local quadratic model
-  //
-  //   min  ½ ‖R + K du‖² + (eps_T/2) ‖du‖_L²² + (eps_H/2) ‖∇du‖_L²²,
-  //
-  // which is the classic Tikhonov / harmonic regularisation. Both terms are
-  // symmetric positive (semi)definite; together with the shape-energy
-  // coercivity on H¹₀, they raise the smallest eigenvalue of the global
-  // tangent, so Newton contracts even when the PSD-projected r·∇²φ term
-  // is small at the minimum.
-  //
-  // Choice of magnitude:
-  //   - Harmonic: scaling with the SDFR per-cell magnitude ρs/M_w ≈ O(1)
-  //     gives a regularisation that is mesh-independent in `eps_H`.
-  //     At n=30 (h ≈ 0.034) the GN noise floor swamps the iterate
-  //     unless eps_H >= 1e-2 or so.
-  //   - Tikhonov: the mass matrix has h² scaling per cell, so for
-  //     mesh-independent regularisation `eps_T` must scale ~1/h². We
-  //     default to 0 here and rely on harmonic.
-  //
-  // Both knobs are opt-in. Set to 0 to recover the un-regularised
-  // PSD-projected Newton iteration that was already used at n=60.
-  const Real kHarmonicEps =
-    parseRealOption(argc, argv, "harmonic-eps", Real(0));
-  const Real kTikhonovEps =
-    parseRealOption(argc, argv, "tikhonov-eps", Real(0));
-
-  // -------------------------------------------------------------------------
   // Admissibility-first backtracking line search.
   //
   //   while (alpha >= alphaMin)
@@ -430,17 +400,17 @@ int main(int argc, char** argv)
   // ----- Initial guess strategy --------------------------------------------
   //   Cold    : u₀ = 0
   //   Warm    : u₀ = previous frame's converged u (cold fallback on failure)
-  //   Hilbert : u₀ = Riesz lift of −δE_SDR(0) in the H¹₀ inner product
-  //             (a(u₀, v) = −⟨δE_SDR(0), v⟩  on V₀)
+  //   Hilbert : u₀ = Riesz lift of −δE_LSR(0) in the H¹₀ inner product
+  //             (a(u₀, v) = −⟨δE_LSR(0), v⟩  on V₀)
   //
   // All three drop back to a cold-start retry if the first attempt fails
   // the convergence criterion (Cold is its own retry; this is a no-op).
   enum class InitialGuessStrategy { Cold, Warm, Hilbert };
   constexpr InitialGuessStrategy kInitialGuessStrategy =
       InitialGuessStrategy::Hilbert;
-  const SDFRHilbertMetric initialGuessMetric =
+  const LSRHilbertMetric initialGuessMetric =
     parseHilbertMetric(argc, argv, "hilbert-metric");
-  const SDFRInitialGuessScaling initialGuessScaling =
+  const LSRInitialGuessScaling initialGuessScaling =
     parseInitialGuessScaling(argc, argv, "hilbert-scaling");
   const Real initialGuessElasticityLambda =
     parseRealOption(argc, argv, "hilbert-lambda", Real(0));
@@ -459,7 +429,7 @@ int main(int argc, char** argv)
   // setting (fittol-mult=4, rrtol=5e-3, stall=5) raised converged from
   // 39/50 to 50/50 and cut wall-time 5.2x at essentially identical RMS.
   // Relaxing the geometry target to 4*h^2 reflects the achievable accuracy
-  // floor of the smooth-band SDFR fit; relaxing rrtol to 5e-3 matches the
+  // floor of the smooth-band LSR fit; relaxing rrtol to 5e-3 matches the
   // PSD-projected Newton noise floor; stall=5 only exits early once
   // geometryOK is reachable.
   const Real        kFitTolMult      =
@@ -534,7 +504,7 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // XDMF writer in transient mode (two grids: LF and HF).
   // -------------------------------------------------------------------------
-  IO::XDMF xdmf("LevelSetSDRWavyCircleSweep");
+  IO::XDMF xdmf("LevelSetLSRWavyCircleSweep");
   auto lfGrid = xdmf.grid("LF");
   lfGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   lfGrid.add(cellLabel,   IO::XDMF::Center::Cell);
@@ -554,7 +524,7 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // Frame loop.
   // -------------------------------------------------------------------------
-  std::cout << "Wavy-circle SDFR sweep on " << n << "x" << n
+  std::cout << "Wavy-circle LSR sweep on " << n << "x" << n
             << " unit-square mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
             << "  orbit R=" << orbitR << '\n';
@@ -661,7 +631,7 @@ int main(int argc, char** argv)
       .solve()
       .sign();
 
-    // ---- Stage 3: smooth-band measure for the SDFR normalisation ----
+    // ---- Stage 3: smooth-band measure for the LSR normalisation ----
     Real domainMeasure = 0;
     Real weightedBandMeasure = 0;
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -688,7 +658,7 @@ int main(int argc, char** argv)
       throw std::runtime_error("Empty smooth band: M_w = 0 at frame "
                                + std::to_string(frame));
 
-    // ---- Stage 4a: SDFR solve (strategy-selected initial guess) ----
+    // ---- Stage 4a: LSR solve (strategy-selected initial guess) ----
 
     auto& cellCache = cellCacheBg;
 
@@ -715,13 +685,12 @@ int main(int argc, char** argv)
 
     const bool kVerbose = hasFlag(argc, argv, "verbose");
 
-    SDFRParameters baseParams;
+    LSRParameters baseParams;
     baseParams.rhoS = 1;
     baseParams.deltaW = deltaW;
     baseParams.hRef = h;
     baseParams.normalizer = Real(1) / (weightedBandMeasure * h * h);
     baseParams.shapeWeight = Real(1e-1);
-    baseParams.floorWeight = Real(1e-2);
     baseParams.jMinRatio = Real(1e-8);
     baseParams.jSafeRatio = Real(1e-3);
     baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;
@@ -734,13 +703,11 @@ int main(int argc, char** argv)
     // Let the sweep-level geometry criterion decide when to stop; residual
     // stall alone is not a failure for this registration objective.
     baseParams.stallPatience = kStallPatience;
-    baseParams.harmonicEps = kHarmonicEps;
-    baseParams.tikhonovEps = kTikhonovEps;
     baseParams.initialGuessMetric = initialGuessMetric;
     baseParams.initialGuessScaling = initialGuessScaling;
     baseParams.initialGuessElasticityLambda = initialGuessElasticityLambda;
     baseParams.initialGuessElasticityMu = initialGuessElasticityMu;
-    baseParams.tangent = SDFRTangent::PSDProjectedNewton;
+    baseParams.tangent = LSRTangent::PSDProjectedNewton;
 
     auto computeInterfaceFit = [&]() -> Real
     {
@@ -777,36 +744,36 @@ int main(int argc, char** argv)
 
     for (int attempt = 0; attempt < 2; ++attempt)
     {
-      SDFRParameters params = baseParams;
+      LSRParameters params = baseParams;
       if (attempt == 0)
       {
         switch (kInitialGuessStrategy)
         {
           case InitialGuessStrategy::Cold:
-            params.initialGuess = SDFRInitialGuess::Zero;
+            params.initialGuess = LSRInitialGuess::Zero;
             break;
           case InitialGuessStrategy::Warm:
             params.initialGuess =
-              frame == 0 ? SDFRInitialGuess::Zero : SDFRInitialGuess::Current;
+              frame == 0 ? LSRInitialGuess::Zero : LSRInitialGuess::Current;
             break;
           case InitialGuessStrategy::Hilbert:
-            params.initialGuess = SDFRInitialGuess::Hilbert;
+            params.initialGuess = LSRInitialGuess::Hilbert;
             break;
         }
       }
       else
       {
-        params.initialGuess = SDFRInitialGuess::Zero;
+        params.initialGuess = LSRInitialGuess::Zero;
       }
 
-      SDFR sdfr(u);
-      const SDFRReport sdfrReport =
-        sdfr.setParameters(params).solve(sLF, phiFn, gradFn, hessFn);
+      LSR lsr(u);
+      const LSRReport lsrReport =
+        lsr.setParameters(params).solve(sLF, phiFn, gradFn, hessFn);
 
       attemptUsed = attempt;
-      r0 = sdfrReport.initialResidual;
-      itCount = sdfrReport.iterations;
-      residualBest = sdfrReport.finalResidual;
+      r0 = lsrReport.initialResidual;
+      itCount = lsrReport.iterations;
+      residualBest = lsrReport.finalResidual;
       interfaceFit = computeInterfaceFit();
 
       const bool residualOK =
@@ -835,15 +802,15 @@ int main(int argc, char** argv)
 
       if (kVerbose)
       {
-        std::cout << "      SDFR:"
-                  << " it=" << sdfrReport.iterations
+        std::cout << "      LSR:"
+                  << " it=" << lsrReport.iterations
                   << "  ||R||=" << std::scientific << std::setprecision(3)
-                  << sdfrReport.finalResidual
-                  << "  alpha=" << sdfrReport.lastAcceptedAlpha
-                  << "  backtracks=" << sdfrReport.totalBacktracks
-                  << "  j_ls=" << sdfrReport.jLineSearchRatio
-                  << "  min_j=" << sdfrReport.minJRatio
-                  << (sdfrReport.lineSearchFailed ? "  [line-search failed]" : "")
+                  << lsrReport.finalResidual
+                  << "  alpha=" << lsrReport.lastAcceptedAlpha
+                  << "  backtracks=" << lsrReport.totalBacktracks
+                  << "  j_ls=" << lsrReport.jLineSearchRatio
+                  << "  min_j=" << lsrReport.minJRatio
+                  << (lsrReport.lineSearchFailed ? "  [line-search failed]" : "")
                   << '\n';
       }
 

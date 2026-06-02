@@ -5,17 +5,17 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// 2D triangular static prototype of SDFR (signed distance function
-// registration) displacement, on a P1 vector finite-element space,
+// 2D triangular static prototype of LSR (level-set registration)
+// displacement, on a P1 vector finite-element space,
 // expressed through Rodin::Variational::Problem.
 //
 // Scope.
 //   - Planar 2D meshes; affine triangle cells.
-//   - A single static SDFR solve.
+//   - A single static LSR solve.
 //   - An analytic level set with closed-form phi, grad phi, hess phi.
 //
 // FES-independence — honest version.
-//   - The SDFR integrators (Rodin::Adaptation::SDFR{Residual,Tangent}Integrator)
+//   - The LSR integrators (Rodin::Adaptation::LSR{Residual,Tangent}Integrator)
 //     use Rodin's FES interface for per-cell finite-element lookup and
 //     vector-valued basis evaluation; they are FES-generic within the
 //     planar 2D vector setting and have not been exercised on higher-order
@@ -36,11 +36,11 @@
 //     assumption).
 //
 // Energy and well-posedness, in words.
-//   - The SDFR data term controls (in the sense of dominating the Hessian)
+//   - The LSR data term controls (in the sense of dominating the Hessian)
 //     the component of u along grad_y phi at every quadrature point with
 //     non-negligible weight. It does NOT control motion tangent to the
 //     level set, nor mesh motion in the far field. The Gaussian smoothing
-//     widens the support of the SDFR Hessian but does not make the SDFR
+//     widens the support of the LSR Hessian but does not make the LSR
 //     functional coercive on its own.
 //   - The intrinsic shape quality energy (Q_shape - 1, cell-area-weighted)
 //     supplies tangential control and far-field regularisation.
@@ -61,16 +61,16 @@
 // FullNewton vs GaussNewton — what we actually observe here.
 //
 //   Mode selection follows the Rodin::Variational::LinearElasticityIntegral
-//   pattern. The SDFRRegistration helper captures the
+//   pattern. The LSRRegistration helper captures the
 //   VARIATIONAL SKELETON (trial du, test v, state u) at construction,
 //   and the DATA (level set, optional Hessian callable, signed-distance
 //   field, parameters) is passed at `operator()` / `Tangent` /
 //   `Residual` time. Overload resolution on the call signature picks
-//   the right SDFRTangentIntegrator specialisation:
+//   the right LSRTangentIntegrator specialisation:
 //
-//     SDFRRegistration sdfrTerm(du, v, u);
-//     newton = sdfrTerm(phi, grad,        sLF, params);   // -> GaussNewton
-//     newton = sdfrTerm(phi, grad, hess,  sLF, params);   // -> Newton
+//     LSRRegistration lsrTerm(du, v, u);
+//     newton = lsrTerm(phi, grad,        sLF, params);   // -> GaussNewton
+//     newton = lsrTerm(phi, grad, hess,  sLF, params);   // -> Newton
 //
 //   The three derivatives of the level set (phi, grad, hess) are
 //   first-class equal arguments at the call site, exactly like
@@ -83,7 +83,7 @@
 //   by the unit tests in
 //   tests/unit/Rodin/Adaptation/BarrierLocalHessianFDTest.cpp;
 //   relative error ~1e-10 at the optimum eps with V-shape signature).
-//   Only the SDFR tangent flavour changes between modes.
+//   Only the LSR tangent flavour changes between modes.
 //
 //   GaussNewton (default).
 //     - K_GN = (grad phi)(grad phi)^T per quadrature point.
@@ -94,14 +94,15 @@
 //
 //           r * hess(phi)
 //
-//       does not vanish at the GN minimum because the SDFR L2 fit is
+//       does not vanish at the GN minimum because the LSR L2 fit is
 //       approximate (r* != 0). The linear contraction floor is set by
 //       the spectral radius of the GN-vs-Newton tangent mismatch on
 //       that nonzero residual.
 //
 //   Newton (full Hessian).
 //     - K_N = (grad phi)(grad phi)^T + r * hess(phi).
-//     - phi is the signed distance to a circle. Its Hessian
+//     - In this run, phi is chosen as the distance level set of a circle.
+//       Its Hessian
 //
 //           hess(phi) = (I - n n^T) / ||p - c||,  n = (p - c)/||p - c||
 //
@@ -250,7 +251,7 @@ namespace
       const auto& vertices = cellPolytope.getVertices();
       if (vertices.size() != 3)
         throw std::runtime_error(
-            "LevelSetSDRReconstruction expects triangular cells.");
+            "LevelSetLSRReconstruction expects triangular cells.");
 
       CellMomentInfo info;
       info.index = cellPolytope.getIndex();
@@ -334,8 +335,8 @@ int main(int argc, char** argv)
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;
 
-  // Pick the SDFR tangent flavour for this run. Flip to
-  // SDFRIntegratorTangentMode::Newton to audit the full-Newton tangent.
+  // Pick the LSR tangent flavour for this run. Flip to
+  // LSRIntegratorTangentMode::Newton to audit the full-Newton tangent.
   //
   // For this prototype, empirically:
   //   - GaussNewton converges monotonically with factor ~3 per iter early
@@ -343,10 +344,10 @@ int main(int argc, char** argv)
   //   - Newton matches GaussNewton for the first few iterations, then the
   //     indefinite r * hess(phi) term takes over and produces residual
   //     spikes. On this circle level set inside the sphere phi has a
-  //     non-PSD Hessian, so the SDFR full Newton tangent is genuinely
+  //     non-PSD Hessian, so the LSR full Newton tangent is genuinely
   //     indefinite away from the solution.
-  // The SDFR tangent mode is selected by the constructor call site of
-  // `SDFRRegistration` below, not by a runtime flag. Flip
+  // The LSR tangent mode is selected by the constructor call site of
+  // `LSRRegistration` below, not by a runtime flag. Flip
   // `kUseFullNewton` to instantiate the Newton specialisation (which
   // also requires passing the level-set Hessian as a callable).
   constexpr bool kUseFullNewton = false;
@@ -435,7 +436,7 @@ int main(int argc, char** argv)
     mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
                       boundaryAttribute);
 
-  mesh.save("LevelSetSDRReconstruction_LF.mesh", IO::FileFormat::MFEM);
+  mesh.save("LevelSetLSRReconstruction_LF.mesh", IO::FileFormat::MFEM);
 
   // -------------------------------------------------------------------------
   // Step 4: signed distance s_h^LF via Distance::Eikonal (FMM).
@@ -490,26 +491,22 @@ int main(int argc, char** argv)
   GridFunction  u(vectorFes);
   u.getData().setZero();
 
-  // SDFRIntegratorParameters no longer carry a tangent-mode flag — that's a type
-  // property of the SDFRRegistration composite chosen below.
-  SDFRIntegratorParameters params;
+  // LSRIntegratorParameters no longer carry a tangent-mode flag — that's a type
+  // property of the LSRRegistration composite chosen below.
+  LSRIntegratorParameters params;
   params.rhoS = 1;
   params.deltaW = deltaW;
   params.hRef = h;
   params.normalizer = Real(1) / (weightedBandMeasure * h * h);
 
-  // gamma and beta are now form-language scalar fields. Constant
-  // weights are wrapped in `RealFunction<Real>(value)` exactly like
-  // any other scalar constant in Rodin form language; spatially
-  // varying weights can be any `Variational::RealFunctionBase<...>`.
-  // gamma weighs the shape term E_shape; beta weighs the singularity
-  // floor term E_floor. The floor barrier is active ONLY when
-  // j_K^u < jSafe, so beta has no effect away from the singular set.
+  // gamma is now a form-language scalar field. Constant weights are
+  // wrapped in `RealFunction<Real>(value)` exactly like any other
+  // scalar constant in Rodin form language; spatially varying weights
+  // can be any `Variational::RealFunctionBase<...>`. gamma weighs the
+  // shape term E_shape.
   RealFunction<Real> barrierGamma(Real(1e-1));
-  RealFunction<Real> barrierBeta(Real(1e-2));
   BarrierParameters barrierParams;
   barrierParams.jMin  = 1e-8;
-  barrierParams.jSafe = 1e-3;
   barrierParams.domainMeasure = domainMeasure;
 
   // Per-cell geometry cache, indexed by local iteration order.
@@ -537,7 +534,7 @@ int main(int argc, char** argv)
   auto zero = VectorFunction{ Zero(), Zero() };
 
   // Wrap CircleLevelSet's three derivatives as Rodin form-language
-  // function objects. Each takes a `Geometry::Point`; the SDFR
+  // function objects. Each takes a `Geometry::Point`; the LSR
   // integrators construct that Point at the deformed location
   // y = X + u_h(X) per quadrature point and the lambdas read
   // p.getPhysicalCoordinates() to recover y.
@@ -566,42 +563,41 @@ int main(int argc, char** argv)
   bool newtonConverged = false;
   std::size_t newtonIterations = 0;
   std::string solveError;
-  const bool useSDFRFacade = hasFlag(argc, argv, "use-sdfr-facade");
+  const bool useLSRFacade = hasFlag(argc, argv, "use-lsr-facade");
 
-  if (useSDFRFacade)
+  if (useLSRFacade)
   {
-    SDFRParameters sdfrParams;
-    sdfrParams.rhoS = params.rhoS;
-    sdfrParams.deltaW = params.deltaW;
-    sdfrParams.hRef = params.hRef;
-    sdfrParams.normalizer = params.normalizer;
-    sdfrParams.shapeWeight = 1e-1;
-    sdfrParams.floorWeight = 1e-2;
-    sdfrParams.jMinRatio = barrierParams.jMin;
-    sdfrParams.jSafeRatio = barrierParams.jSafe;
-    sdfrParams.initialGuess = SDFRInitialGuess::Zero;
-    sdfrParams.tangent =
-      kUseFullNewton ? SDFRTangent::Newton : SDFRTangent::GaussNewton;
-    sdfrParams.maxNewtonIterations = 20;
-    sdfrParams.absoluteTolerance = 1e-10;
-    sdfrParams.relativeTolerance = 1e-8;
+    LSRParameters lsrParams;
+    lsrParams.rhoS = params.rhoS;
+    lsrParams.deltaW = params.deltaW;
+    lsrParams.hRef = params.hRef;
+    lsrParams.normalizer = params.normalizer;
+    lsrParams.shapeWeight = 1e-1;
+    lsrParams.jMinRatio = barrierParams.jMin;
+    lsrParams.jSafeRatio = 1e-3;
+    lsrParams.initialGuess = LSRInitialGuess::Zero;
+    lsrParams.tangent =
+      kUseFullNewton ? LSRTangent::Newton : LSRTangent::GaussNewton;
+    lsrParams.maxNewtonIterations = 20;
+    lsrParams.absoluteTolerance = 1e-10;
+    lsrParams.relativeTolerance = 1e-8;
 
     try
     {
-      SDFR sdfr(u);
-      const SDFRReport sdfrReport =
-        sdfr.setParameters(sdfrParams).solve(sLF, phiFn, gradFn, hessFn);
-      newtonConverged = sdfrReport.converged;
-      newtonIterations = sdfrReport.iterations;
-      solveCompleted = sdfrReport.converged && !sdfrReport.lineSearchFailed;
+      LSR lsr(u);
+      const LSRReport lsrReport =
+        lsr.setParameters(lsrParams).solve(sLF, phiFn, gradFn, hessFn);
+      newtonConverged = lsrReport.converged;
+      newtonIterations = lsrReport.iterations;
+      solveCompleted = lsrReport.converged && !lsrReport.lineSearchFailed;
       if (!solveCompleted)
-        solveError = "SDFR facade did not converge";
+        solveError = "LSR facade did not converge";
     }
     catch (const std::exception& ex)
     {
       solveCompleted = false;
       solveError = ex.what();
-      std::cout << "\nSDFR facade aborted: " << ex.what() << '\n';
+      std::cout << "\nLSR facade aborted: " << ex.what() << '\n';
     }
   }
   else
@@ -609,9 +605,9 @@ int main(int argc, char** argv)
     // The composite captures only the variational skeleton (du, v, u).
     // The data — phi, grad, [hess], sLF, params — is supplied at the
     // operator() call below.
-    SDFRRegistration sdfrTerm(du, v, u);
+    LSRRegistration lsrTerm(du, v, u);
 
-    // Barrier helper, same shape as `SDFRRegistration`:
+    // Barrier helper, same shape as `LSRRegistration`:
     // captures (du, v, u) and the per-cell cache + index map at
     // construction; gamma, beta and params arrive at `operator()`.
     JacobianAdmissibilityBarrier barrier(
@@ -621,30 +617,30 @@ int main(int argc, char** argv)
     // because Rodin's form language composes individual integrators, not
     // problem-body fragments. This is the same idiom the Solid examples
     // use: explicit `+ tangent + residual + DirichletBC(...)`. The
-    // composite `sdfrTerm()` / `barrier()` operator() forms are convenient
+    // composite `lsrTerm()` / `barrier()` operator() forms are convenient
     // when they are the SOLE contribution to a Problem; combining
     // multiple helpers into one Problem goes through Tangent/Residual.
     Problem newton(du, v);
     if constexpr (kUseFullNewton)
     {
       // 4 data args (phi, grad, hess, sLF) + params
-      // -> SDFRTangentIntegrator<Newton, ...>
+      // -> LSRTangentIntegrator<Newton, ...>
       newton =
-            sdfrTerm.Tangent(phiFn, gradFn, hessFn, sLF, params)
-          + sdfrTerm.Residual(phiFn, gradFn, sLF, params)
-          + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
-          + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
+            lsrTerm.Tangent(phiFn, gradFn, hessFn, sLF, params)
+          + lsrTerm.Residual(phiFn, gradFn, sLF, params)
+          + barrier.Tangent(barrierGamma, barrierParams)
+          + barrier.Residual(barrierGamma, barrierParams)
           + DirichletBC(du, zero).on(boundaryAttribute);
     }
     else
     {
       // 3 data args (phi, grad, sLF) + params
-      // -> SDFRTangentIntegrator<GaussNewton, ...>
+      // -> LSRTangentIntegrator<GaussNewton, ...>
       newton =
-            sdfrTerm.Tangent(phiFn, gradFn, sLF, params)
-          + sdfrTerm.Residual(phiFn, gradFn, sLF, params)
-          + barrier.Tangent(barrierGamma, barrierBeta, barrierParams)
-          + barrier.Residual(barrierGamma, barrierBeta, barrierParams)
+            lsrTerm.Tangent(phiFn, gradFn, sLF, params)
+          + lsrTerm.Residual(phiFn, gradFn, sLF, params)
+          + barrier.Tangent(barrierGamma, barrierParams)
+          + barrier.Residual(barrierGamma, barrierParams)
           + DirichletBC(du, zero).on(boundaryAttribute);
     }
 
@@ -659,7 +655,6 @@ int main(int argc, char** argv)
       .setMonitor([&](const auto& report)
       {
         const auto bad = barrierInadmissibleCount().exchange(0);
-        const auto floorN = barrierFloorActiveCount().exchange(0);
         const Real minJ = barrierMinJ().exchange(
             std::numeric_limits<Real>::infinity(),
             std::memory_order_relaxed);
@@ -670,8 +665,6 @@ int main(int argc, char** argv)
                   << "  damping=" << report.damping_factor;
         if (std::isfinite(minJ))
           std::cout << "  min_j=" << std::setprecision(3) << minJ;
-        if (floorN > 0)
-          std::cout << "  active_floor_cells=" << floorN;
         if (bad > 0)
           std::cout << "  [singular cells=" << bad << "]";
         std::cout << '\n';
@@ -711,7 +704,7 @@ int main(int argc, char** argv)
       moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
     }
   }
-  moved.save("LevelSetSDRReconstruction_HF.mesh", IO::FileFormat::MFEM);
+  moved.save("LevelSetLSRReconstruction_HF.mesh", IO::FileFormat::MFEM);
 
   // Interface ||phi(X+u)|| RMS on Gamma_h^LF.
   Real interfacePhi = 0;
@@ -808,7 +801,7 @@ int main(int argc, char** argv)
 
   u.setName("displacement");
 
-  IO::XDMF xdmf("LevelSetSDRReconstruction");
+  IO::XDMF xdmf("LevelSetLSRReconstruction");
   auto lfGrid = xdmf.grid("LF");
   lfGrid.setMesh(mesh);
   lfGrid.add(cellLabel, IO::XDMF::Center::Cell);
@@ -831,9 +824,9 @@ int main(int argc, char** argv)
   // Diagnostics.
   // -------------------------------------------------------------------------
   std::cout << "\nDiagnostics\n";
-  std::cout << "  SDFR tangent mode: "
-            << (kUseFullNewton ? sdfrIntegratorTangentModeName(SDFRIntegratorTangentMode::Newton)
-                               : sdfrIntegratorTangentModeName(SDFRIntegratorTangentMode::GaussNewton))
+  std::cout << "  LSR tangent mode: "
+            << (kUseFullNewton ? lsrIntegratorTangentModeName(LSRIntegratorTangentMode::Newton)
+                               : lsrIntegratorTangentModeName(LSRIntegratorTangentMode::GaussNewton))
             << '\n';
   std::cout << "  cells inside / outside: "
             << classified.insideCells.size() << " / "
@@ -847,7 +840,7 @@ int main(int argc, char** argv)
   std::cout << "  final ||phi(X+u)||_RMS on Gamma_h^LF: "
             << interfacePhiRMS << '\n';
   std::cout << "  solve path: "
-            << (useSDFRFacade ? "Adaptation::SDFR" : "manual forms")
+            << (useLSRFacade ? "Adaptation::LSR" : "manual forms")
             << '\n';
   std::cout << "  Newton iterations: " << newtonIterations
             << ", converged: " << (newtonConverged ? "yes" : "no") << '\n';

@@ -5,7 +5,7 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// Diagnostic + line-search helpers for `LevelSetSDRWavyCircleSweep.cpp`.
+// Diagnostic + line-search helpers for `LevelSetLSRWavyCircleSweep.cpp`.
 //
 // Kept in a separate header to keep the example itself focused on the
 // per-frame orchestration. The contents here are:
@@ -21,8 +21,8 @@
 //       min_pred_margin, pred_inadm). Useful for understanding WHY a
 //       step had to backtrack but never used to decide whether to accept.
 //
-#ifndef LEVELSETSDRWAVYCIRCLESWEEP_DIAGNOSTICS_H
-#define LEVELSETSDRWAVYCIRCLESWEEP_DIAGNOSTICS_H
+#ifndef LEVELSETLSRWAVYCIRCLESWEEP_DIAGNOSTICS_H
+#define LEVELSETLSRWAVYCIRCLESWEEP_DIAGNOSTICS_H
 
 #include <cstddef>
 #include <limits>
@@ -33,7 +33,7 @@
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
 
-namespace LevelSetSDRWavyCircleSweepSupport
+namespace LevelSetLSRWavyCircleSweepSupport
 {
   using Rodin::Index;
   using Rodin::Real;
@@ -217,4 +217,4 @@ namespace LevelSetSDRWavyCircleSweepSupport
   }
 }
 
-#endif // LEVELSETSDRWAVYCIRCLESWEEP_DIAGNOSTICS_H
+#endif // LEVELSETLSRWAVYCIRCLESWEEP_DIAGNOSTICS_H

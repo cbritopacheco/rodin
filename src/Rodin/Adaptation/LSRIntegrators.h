@@ -4,13 +4,13 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ADAPTATION_SDFRINTEGRATORS_H
-#define RODIN_ADAPTATION_SDFRINTEGRATORS_H
+#ifndef RODIN_ADAPTATION_LSRINTEGRATORS_H
+#define RODIN_ADAPTATION_LSRINTEGRATORS_H
 
 /**
  * @file
- * @brief Form-language integrators for the SDFR (signed distance function
- *        registration) data term.
+ * @brief Form-language integrators for the LSR (level-set registration)
+ *        data term.
  *
  * The level set is described by three Rodin form-language objects of
  * equal status:
@@ -24,7 +24,7 @@
  * `lambda` and `mu`.
  *
  * Evaluation.
- *   The SDFR penalty needs `phi(X + u_h(X))`. At each quadrature point of
+ *   The LSR penalty needs `phi(X + u_h(X))`. At each quadrature point of
  *   the parent mesh we construct a `Geometry::Point` whose physical
  *   coordinates are overridden with `X + u_h(X)` and whose polytope and
  *   reference coordinates are copied from the original quadrature
@@ -33,8 +33,8 @@
  *   integrator does NOT invoke `Grad(phi)` or `Hess(phi)` itself — the
  *   derivatives are the user's inputs.
  *
- * The SDFR tangent flavour is selected at the TYPE level via the
- * non-type template parameter `SDFRIntegratorTangentMode`.
+ * The LSR tangent flavour is selected at the TYPE level via the
+ * non-type template parameter `LSRIntegratorTangentMode`.
  */
 
 #include <algorithm>
@@ -60,7 +60,7 @@
 
 namespace Rodin::Adaptation
 {
-  enum class SDFRIntegratorTangentMode
+  enum class LSRIntegratorTangentMode
   {
     GaussNewton,
     Newton,
@@ -71,16 +71,16 @@ namespace Rodin::Adaptation
                         ///< contracts super-linearly past the GN noise
                         ///< floor without the tangential indefiniteness
                         ///< that destabilises raw full-Newton wherever
-                        ///< the SDFR residual r changes sign.
+                        ///< the LSR residual r changes sign.
   };
 
-  inline const char* sdfrIntegratorTangentModeName(SDFRIntegratorTangentMode m)
+  inline const char* lsrIntegratorTangentModeName(LSRIntegratorTangentMode m)
   {
     switch (m)
     {
-      case SDFRIntegratorTangentMode::GaussNewton:        return "GaussNewton";
-      case SDFRIntegratorTangentMode::Newton:             return "Newton";
-      case SDFRIntegratorTangentMode::PSDProjectedNewton: return "PSDProjectedNewton";
+      case LSRIntegratorTangentMode::GaussNewton:        return "GaussNewton";
+      case LSRIntegratorTangentMode::Newton:             return "Newton";
+      case LSRIntegratorTangentMode::PSDProjectedNewton: return "PSDProjectedNewton";
     }
     return "?";
   }
@@ -137,7 +137,7 @@ namespace Rodin::Adaptation
     }
   }
 
-  struct SDFRIntegratorParameters
+  struct LSRIntegratorParameters
   {
     Real rhoS = 1;
     Real deltaW = 0;
@@ -145,7 +145,7 @@ namespace Rodin::Adaptation
     Real normalizer = 1;
   };
 
-  inline std::size_t sdfrQuadOrderFor(std::size_t feOrder)
+  inline std::size_t lsrQuadOrderFor(std::size_t feOrder)
   {
     return std::max<std::size_t>(2, 2 * feOrder);
   }
@@ -168,7 +168,7 @@ namespace Rodin::Adaptation
   }
 
   /**
-   * @brief Linear-form integrator: SDFR residual.
+   * @brief Linear-form integrator: LSR residual.
    *
    *   R[te] = sum_q wq * |J_q| * rhoS * W(s_q) * normalizer
    *           * (phi(y_q) - s_q) * (grad(y_q) . v_te).
@@ -177,7 +177,7 @@ namespace Rodin::Adaptation
    */
   template <class PhiDerived, class GradDerived,
             class SLFType, class TestType, class StateType>
-  class SDFRResidualIntegrator final
+  class LSRResidualIntegrator final
     : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
@@ -185,19 +185,19 @@ namespace Rodin::Adaptation
       using PhiType  = Variational::RealFunctionBase<PhiDerived>;
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-      SDFRResidualIntegrator(
+      LSRResidualIntegrator(
           const PhiType& phi, const GradType& grad,
           const SLFType& sLF,
           const TestType& v,
           const StateType& u,
-          SDFRIntegratorParameters params)
+          LSRIntegratorParameters params)
         : Variational::LinearFormIntegratorBase<Real>(v),
           m_phi(phi.copy()), m_grad(grad.copy()),
           m_sLF(sLF), m_test(v), m_state(u),
           m_params(params)
       {}
 
-      SDFRResidualIntegrator(const SDFRResidualIntegrator& other)
+      LSRResidualIntegrator(const LSRResidualIntegrator& other)
         : Variational::LinearFormIntegratorBase<Real>(other),
           m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
@@ -207,7 +207,7 @@ namespace Rodin::Adaptation
           m_elemVec()
       {}
 
-      SDFRResidualIntegrator& setPolytope(
+      LSRResidualIntegrator& setPolytope(
           const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -224,7 +224,7 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              sdfrQuadOrderFor(testFE.getOrder()),
+              lsrQuadOrderFor(testFE.getOrder()),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -276,8 +276,8 @@ namespace Rodin::Adaptation
       Geometry::Region getRegion() const final override
       { return Geometry::Region::Cells; }
 
-      SDFRResidualIntegrator* copy() const noexcept final override
-      { return new SDFRResidualIntegrator(*this); }
+      LSRResidualIntegrator* copy() const noexcept final override
+      { return new LSRResidualIntegrator(*this); }
 
     private:
       std::unique_ptr<PhiType>  m_phi;
@@ -285,22 +285,22 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const SLFType> m_sLF;
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_state;
-      SDFRIntegratorParameters m_params;
+      LSRIntegratorParameters m_params;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Vector<ScalarType> m_elemVec;
   };
 
   template <class P, class G, class S, class V, class U>
-  SDFRResidualIntegrator(
+  LSRResidualIntegrator(
       const Variational::RealFunctionBase<P>&,
       const Variational::VectorFunctionBase<Real, G>&,
-      const S&, const V&, const U&, SDFRIntegratorParameters)
-    -> SDFRResidualIntegrator<P, G, S, V, U>;
+      const S&, const V&, const U&, LSRIntegratorParameters)
+    -> LSRResidualIntegrator<P, G, S, V, U>;
 
-  template <SDFRIntegratorTangentMode Mode,
+  template <LSRIntegratorTangentMode Mode,
             class PhiDerived, class GradDerived, class HessDerived,
             class SLFType, class TrialType, class TestType, class StateType>
-  class SDFRTangentIntegrator;
+  class LSRTangentIntegrator;
 
   // ---- GaussNewton specialisation ------------------------------------------
   //
@@ -308,8 +308,8 @@ namespace Rodin::Adaptation
   //                  * (grad(y_q) . v_te) * (grad(y_q) . u_tr).
   template <class PhiDerived, class GradDerived, class HessDerived,
             class SLFType, class TrialType, class TestType, class StateType>
-  class SDFRTangentIntegrator<
-            SDFRIntegratorTangentMode::GaussNewton,
+  class LSRTangentIntegrator<
+            LSRIntegratorTangentMode::GaussNewton,
             PhiDerived, GradDerived, HessDerived,
             SLFType, TrialType, TestType, StateType>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>
@@ -317,22 +317,22 @@ namespace Rodin::Adaptation
     public:
       using ScalarType = Real;
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
-      static constexpr SDFRIntegratorTangentMode Mode = SDFRIntegratorTangentMode::GaussNewton;
+      static constexpr LSRIntegratorTangentMode Mode = LSRIntegratorTangentMode::GaussNewton;
 
-      SDFRTangentIntegrator(
+      LSRTangentIntegrator(
           const GradType& grad,
           const SLFType& sLF,
           const TrialType& du,
           const TestType& v,
           const StateType& u,
-          SDFRIntegratorParameters params)
+          LSRIntegratorParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
           m_grad(grad.copy()),
           m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
           m_params(params)
       {}
 
-      SDFRTangentIntegrator(const SDFRTangentIntegrator& other)
+      LSRTangentIntegrator(const LSRTangentIntegrator& other)
         : Variational::LocalBilinearFormIntegratorBase<Real>(other),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
           m_sLF(other.m_sLF), m_trial(other.m_trial),
@@ -341,7 +341,7 @@ namespace Rodin::Adaptation
           m_matrix()
       {}
 
-      SDFRTangentIntegrator& setPolytope(
+      LSRTangentIntegrator& setPolytope(
           const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -361,7 +361,7 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              sdfrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              lsrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -423,8 +423,8 @@ namespace Rodin::Adaptation
       Geometry::Region getRegion() const final override
       { return Geometry::Region::Cells; }
 
-      SDFRTangentIntegrator* copy() const noexcept final override
-      { return new SDFRTangentIntegrator(*this); }
+      LSRTangentIntegrator* copy() const noexcept final override
+      { return new LSRTangentIntegrator(*this); }
 
     private:
       std::unique_ptr<GradType> m_grad;
@@ -432,7 +432,7 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType>  m_test;
       std::reference_wrapper<const StateType> m_state;
-      SDFRIntegratorParameters m_params;
+      LSRIntegratorParameters m_params;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -443,8 +443,8 @@ namespace Rodin::Adaptation
   //                * (phi(y_q) - s_q) * v_te^T * hess(y_q) * u_tr.
   template <class PhiDerived, class GradDerived, class HessDerived,
             class SLFType, class TrialType, class TestType, class StateType>
-  class SDFRTangentIntegrator<
-            SDFRIntegratorTangentMode::Newton,
+  class LSRTangentIntegrator<
+            LSRIntegratorTangentMode::Newton,
             PhiDerived, GradDerived, HessDerived,
             SLFType, TrialType, TestType, StateType>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>
@@ -454,22 +454,22 @@ namespace Rodin::Adaptation
       using PhiType  = Variational::RealFunctionBase<PhiDerived>;
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
       using HessType = Variational::MatrixFunctionBase<Real, HessDerived>;
-      static constexpr SDFRIntegratorTangentMode Mode = SDFRIntegratorTangentMode::Newton;
+      static constexpr LSRIntegratorTangentMode Mode = LSRIntegratorTangentMode::Newton;
 
-      SDFRTangentIntegrator(
+      LSRTangentIntegrator(
           const PhiType& phi, const GradType& grad, const HessType& hess,
           const SLFType& sLF,
           const TrialType& du,
           const TestType& v,
           const StateType& u,
-          SDFRIntegratorParameters params)
+          LSRIntegratorParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
           m_phi(phi.copy()), m_grad(grad.copy()), m_hess(hess.copy()),
           m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
           m_params(params)
       {}
 
-      SDFRTangentIntegrator(const SDFRTangentIntegrator& other)
+      LSRTangentIntegrator(const LSRTangentIntegrator& other)
         : Variational::LocalBilinearFormIntegratorBase<Real>(other),
           m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
@@ -480,7 +480,7 @@ namespace Rodin::Adaptation
           m_matrix()
       {}
 
-      SDFRTangentIntegrator& setPolytope(
+      LSRTangentIntegrator& setPolytope(
           const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -500,7 +500,7 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              sdfrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              lsrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -582,8 +582,8 @@ namespace Rodin::Adaptation
       Geometry::Region getRegion() const final override
       { return Geometry::Region::Cells; }
 
-      SDFRTangentIntegrator* copy() const noexcept final override
-      { return new SDFRTangentIntegrator(*this); }
+      LSRTangentIntegrator* copy() const noexcept final override
+      { return new LSRTangentIntegrator(*this); }
 
     private:
       std::unique_ptr<PhiType>  m_phi;
@@ -593,7 +593,7 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType>  m_test;
       std::reference_wrapper<const StateType> m_state;
-      SDFRIntegratorParameters m_params;
+      LSRIntegratorParameters m_params;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -618,8 +618,8 @@ namespace Rodin::Adaptation
   //
   template <class PhiDerived, class GradDerived, class HessDerived,
             class SLFType, class TrialType, class TestType, class StateType>
-  class SDFRTangentIntegrator<
-            SDFRIntegratorTangentMode::PSDProjectedNewton,
+  class LSRTangentIntegrator<
+            LSRIntegratorTangentMode::PSDProjectedNewton,
             PhiDerived, GradDerived, HessDerived,
             SLFType, TrialType, TestType, StateType>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>
@@ -629,22 +629,22 @@ namespace Rodin::Adaptation
       using PhiType  = Variational::RealFunctionBase<PhiDerived>;
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
       using HessType = Variational::MatrixFunctionBase<Real, HessDerived>;
-      static constexpr SDFRIntegratorTangentMode Mode = SDFRIntegratorTangentMode::PSDProjectedNewton;
+      static constexpr LSRIntegratorTangentMode Mode = LSRIntegratorTangentMode::PSDProjectedNewton;
 
-      SDFRTangentIntegrator(
+      LSRTangentIntegrator(
           const PhiType& phi, const GradType& grad, const HessType& hess,
           const SLFType& sLF,
           const TrialType& du,
           const TestType& v,
           const StateType& u,
-          SDFRIntegratorParameters params)
+          LSRIntegratorParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
           m_phi(phi.copy()), m_grad(grad.copy()), m_hess(hess.copy()),
           m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
           m_params(params)
       {}
 
-      SDFRTangentIntegrator(const SDFRTangentIntegrator& other)
+      LSRTangentIntegrator(const LSRTangentIntegrator& other)
         : Variational::LocalBilinearFormIntegratorBase<Real>(other),
           m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
@@ -655,7 +655,7 @@ namespace Rodin::Adaptation
           m_matrix()
       {}
 
-      SDFRTangentIntegrator& setPolytope(
+      LSRTangentIntegrator& setPolytope(
           const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -675,7 +675,7 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              sdfrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              lsrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -763,8 +763,8 @@ namespace Rodin::Adaptation
       Geometry::Region getRegion() const final override
       { return Geometry::Region::Cells; }
 
-      SDFRTangentIntegrator* copy() const noexcept final override
-      { return new SDFRTangentIntegrator(*this); }
+      LSRTangentIntegrator* copy() const noexcept final override
+      { return new LSRTangentIntegrator(*this); }
 
     private:
       std::unique_ptr<PhiType>  m_phi;
@@ -774,35 +774,11 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType>  m_test;
       std::reference_wrapper<const StateType> m_state;
-      SDFRIntegratorParameters m_params;
+      LSRIntegratorParameters m_params;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Matrix<ScalarType> m_matrix;
   };
 
-  using SDRTangentMode = SDFRIntegratorTangentMode;
-  using SDRParameters = SDFRIntegratorParameters;
-
-  inline const char* sdrTangentModeName(SDRTangentMode m)
-  {
-    return sdfrIntegratorTangentModeName(m);
-  }
-
-  inline std::size_t sdrQuadOrderFor(std::size_t feOrder)
-  {
-    return sdfrQuadOrderFor(feOrder);
-  }
-
-  template <class PhiDerived, class GradDerived,
-            class SLFType, class TestType, class StateType>
-  using SDRResidualIntegrator =
-    SDFRResidualIntegrator<PhiDerived, GradDerived, SLFType, TestType, StateType>;
-
-  template <SDFRIntegratorTangentMode Mode,
-            class PhiDerived, class GradDerived, class HessDerived,
-            class SLFType, class TrialType, class TestType, class StateType>
-  using SDRTangentIntegrator =
-    SDFRTangentIntegrator<Mode, PhiDerived, GradDerived, HessDerived,
-                          SLFType, TrialType, TestType, StateType>;
 }
 
 #endif

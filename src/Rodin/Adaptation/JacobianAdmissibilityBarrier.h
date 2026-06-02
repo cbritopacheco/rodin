@@ -9,8 +9,7 @@
 
 /**
  * @file
- * @brief Intrinsic shape quality energy + singularity floor barrier
- *        ("nondegeneracy floor", a.k.a. `E_floor`) — fully analytical
+ * @brief Intrinsic shape quality energy `E_shape` — fully analytical
  *        residual and tangent for the 2D triangular affine prototype.
  *
  * Scope.
@@ -28,47 +27,36 @@
  *     Q_shape(A_K^u) = (1/d) ||A_K^u||_F^2 / (sigma_K det(A_K^u))^(2/d),
  *     well-defined whenever sigma_K det(A_K^u) > 0.
  *
- *   Singularity floor (active ONLY near the singular set j -> j_min+):
- *     For j_min < j_safe set s := j_safe - j_min, and
- *       B(j) =  0,                                              j >= j_safe,
- *       B(j) = -log((j - j_min) / s) + (j - j_safe) / s,        j <  j_safe.
- *     Properties: B(j_safe) = 0, B'(j_safe) = 0, B(j) -> +oo as
- *     j -> j_min+.  B is monotonically decreasing on (j_min, j_safe]
- *     and identically zero above j_safe, so it does NOT bias the
- *     element toward any particular volume — only protects against
- *     singularity.
- *
  *   Per-cell energy (area-weighted at assembly):
- *     E_cell = w_s * (Q_shape - 1) + w_d * B(j_K^u),
- *   with w_s = gamma * |K|/|Omega|, w_d = beta * |K|/|Omega|. The
- *   global energy is `E_shape(u) + E_floor(u)`, where `E_floor` is
- *   the sum of the B-contributions.
+ *     E_cell = w_s * (Q_shape - 1),
+ *   with w_s = gamma * |K|/|Omega|. The global energy is `E_shape(u)`.
  *
- *   This is NOT an orientation barrier; it is NOT a volume regulariser;
- *   it does NOT prefer j=1. It is a one-sided lower-floor barrier.
+ *   The line search of `LSRAdmissibility` is the sole admissibility
+ *   mechanism: with the safety margin xi > 1, every accepted iterate
+ *   stays strictly above j_safe and the older floor-barrier B(j) that
+ *   used to live here is identically zero. It has been removed; the
+ *   singular-cell fallback below remains as a defensive measure for
+ *   the (rare) case where a cell becomes formally singular during
+ *   assembly outside of a line-search-protected step (e.g. inside the
+ *   Hilbert lift linear solve).
  *
  * Form-language API.
- *   gamma (shape weight) and beta (floor weight) are passed as
- *   `Variational::RealFunctionBase<...>` objects, mirroring the
- *   (lambda, mu) Lamé parameters in
- *   `Rodin::Variational::LinearElasticityIntegral`. The integrator
- *   evaluates them at the cell centroid (in physical coordinates),
- *   pulling out the per-cell scalar values before calling the
- *   closed-form `evaluateBarrierLocal`.
+ *   gamma (shape weight) is passed as a
+ *   `Variational::RealFunctionBase<...>` object, mirroring `lambda`
+ *   /`mu` in `Rodin::Variational::LinearElasticityIntegral`. The
+ *   integrator evaluates it at the cell centroid (in physical
+ *   coordinates), pulling out the per-cell scalar value before calling
+ *   the closed-form `evaluateBarrierLocal`.
  *
- *   `jMin` (singular floor ratio), `jSafe` (activation threshold ratio)
- *   and `domainMeasure` are algorithmic / mesh-global scalars and stay
- *   as `Real` fields on `BarrierParameters`. They are dimensionless
- *   thresholds for j_K^u = sigma_K det(A_K^u) / J_K_scale, never raw
- *   determinant thresholds. Recommended defaults:
- *     jMin  ~ 1e-8 .. 1e-6,  jSafe ~ 1e-3 .. 1e-2.
+ *   `jMin` (singular floor ratio) and `domainMeasure` are algorithmic
+ *   scalars carried on `BarrierParameters`. `jMin` is dimensionless on
+ *   j_K^u = sigma_K det(A_K^u) / J_K_scale (recommended ~ 1e-8).
  *
  *   The user-facing helper `JacobianAdmissibilityBarrier` mirrors
- *   `SDFRRegistration`: variational skeleton + cell cache
- *   captured at construction; gamma, beta and params supplied at
- *   `operator()` / `Tangent` / `Residual`. The class name is retained
- *   for backward compatibility; conceptually the energy it produces is
- *   `E_shape + E_floor`.
+ *   `LSRRegistration`: variational skeleton + cell cache captured at
+ *   construction; gamma and params supplied at `operator()` /
+ *   `Tangent` / `Residual`. The class name is retained for backward
+ *   compatibility; conceptually the energy it produces is `E_shape`.
  */
 
 #include <array>
@@ -98,32 +86,44 @@
 namespace Rodin::Adaptation
 {
   /**
-   * @brief Scalar parameters for the shape + singularity-floor energy.
+   * @brief Scalar parameters for the shape-quality energy.
    *
-   *   jMin          = dimensionless singularity floor ratio
-   *                   (strictly positive, e.g. 1e-8)
-   *   jSafe         = dimensionless activation threshold ratio of the
-   *                   floor barrier, jMin < jSafe (e.g. 1e-3).
-   *                   B(j) = 0 for j >= jSafe.
+   *   jMin          = dimensionless singularity floor ratio for the
+   *                   defensive singular-cell fallback (strictly
+   *                   positive, e.g. 1e-8).
    *   domainMeasure = |Omega| (mesh-global normalisation)
    *
-   * The spatial weights gamma (shape) and beta (floor) are NOT carried
-   * here — they are `Variational::RealFunctionBase` objects passed
-   * alongside.
+   * The spatial weight gamma (shape) is NOT carried here — it is a
+   * `Variational::RealFunctionBase` object passed alongside.
    */
   struct BarrierParameters
   {
     Real jMin = 1e-8;  ///< dimensionless ratio, not raw det(A_K^u)
-    Real jSafe = 1e-3; ///< dimensionless ratio, not raw det(A_K^u)
     Real domainMeasure = 0;
+
+    /// Smooth Q-shape barrier (interior-point penalty on cell
+    /// anisotropy). Inactive by default: when `qBarrierWeight = 0` or
+    /// `qBarrierMax = +inf`, the barrier contributes nothing.
+    ///
+    /// Active form on (qBarrierAct, qBarrierMax):
+    ///   B_Q(Q) = -log((Qmax - Q) / (Qmax - Qact)) - (Q - Qact)/(Qmax - Qact)
+    /// with B_Q(Qact) = B_Q'(Qact) = 0 and B_Q(Q) -> +oo as Q -> Qmax.
+    /// Identically zero for Q <= Qact.
+    ///
+    /// Per-cell density: w_Q = qBarrierWeight * |K| / domainMeasure,
+    /// energy contribution w_Q * B_Q(Q_K^u).
+    Real qBarrierWeight    = 0;
+    Real qBarrierAct       = std::numeric_limits<Real>::infinity();
+    Real qBarrierMax       = std::numeric_limits<Real>::infinity();
   };
 
   struct BarrierLocal
   {
     Real energy = 0;
     Real j = 0;
+    Real qShape = 0;            ///< intrinsic shape quality (>= 1)
     bool valid = true;          ///< j > jMin (cell is on its initial branch)
-    bool floorActive = false;   ///< j < jSafe (B-contribution is nonzero)
+    bool qBarrierActive = false; ///< Q > Qact (B_Q contribution nonzero)
     Math::Vector<Real> grad;
     Math::Matrix<Real> hess;
   };
@@ -146,9 +146,9 @@ namespace Rodin::Adaptation
    * The fallback freezes the cell's six DOFs for this Newton step by
    * contributing a large multiple of the identity to the local Hessian
    * (and zero to the residual). The penalty must dominate any other
-   * contribution to that cell — most notably the SDFR rank-one block,
+   * contribution to that cell — most notably the LSR rank-one block,
    * which scales like `rho_s * params.normalizer * area` and can easily
-   * reach `O(10)` per cell on realistic mesh / SDFR weights.
+   * reach `O(10)` per cell on realistic mesh / LSR weights.
    *
    * `1e10` is large enough that the resulting Newton update in the
    * frozen DOFs is below floating-point noise:
@@ -160,23 +160,13 @@ namespace Rodin::Adaptation
    * step at neighbouring cells continues unobstructed.
    *
    * The previous fallback used a unit diagonal (`1`), which is the same
-   * magnitude as the SDFR contribution on typical meshes and therefore
+   * magnitude as the LSR contribution on typical meshes and therefore
    * failed to freeze the cell — producing massive Newton updates in the
    * singular DOFs (we observed `step ~ 14` on a unit-square mesh in the
    * wavy-circle sweep) that immediately drove tens of neighbouring
    * cells through the singular floor and triggered a cascade.
    */
   inline constexpr Real kBarrierSingularPenalty = Real(1e10);
-
-  /**
-   * @brief Process-wide counter for cells where the floor barrier was
-   *        active (j < jSafe) during the last assembly. Diagnostic only.
-   */
-  inline std::atomic<unsigned long>& barrierFloorActiveCount()
-  {
-    static std::atomic<unsigned long> count{0};
-    return count;
-  }
 
   /**
    * @brief Process-wide minimum of j_K^u over all assembled cells
@@ -204,14 +194,14 @@ namespace Rodin::Adaptation
   }
 
   /**
-   * @brief Closed-form local barrier energy + first and second
-   *        derivatives w.r.t. the six nodal coefficients. `gamma` and
-   *        `beta` are evaluated scalar values for this cell.
+   * @brief Closed-form local shape-quality energy + first and second
+   *        derivatives w.r.t. the six nodal coefficients. `gamma` is
+   *        the evaluated scalar weight for this cell.
    */
   inline BarrierLocal evaluateBarrierLocal(
       const CellGeomCache& cell,
       const std::array<Math::SpatialVector<Real>, 3>& uv,
-      Real gamma, Real beta,
+      Real gamma,
       const BarrierParameters& params)
   {
     BarrierLocal out;
@@ -246,50 +236,58 @@ namespace Rodin::Adaptation
 
     const Real areaWeight = cell.area / params.domainMeasure;
     const Real w_s = gamma * areaWeight;
-    const Real w_d = beta  * areaWeight;
+    const Real w_Q = params.qBarrierWeight * areaWeight;
 
-    // Singularity floor barrier B(j); identically zero (and so are its
-    // derivatives) when j >= jSafe — no volume bias above the activation
-    // threshold. Below jSafe it diverges as j -> jMin+.
+    out.qShape = qShape;
+
+    // Q-shape barrier B_Q (interior-point penalty on cell anisotropy).
+    // Active on (Qact, Qmax); identically zero with vanishing first and
+    // second derivatives at Q <= Qact. The derivation enforces
+    //   B_Q(Qact) = 0,  B_Q'(Qact) = 0,  B_Q(Q) -> +oo as Q -> Qmax-.
     //
-    // Reuse the OLD log-barrier code path with effective coefficients
-    // h_eff and Kd_eff (zero in the inactive branch). For j < jSafe:
-    //     s        := jSafe - jMin           (> 0)
-    //     h        := j / (j - jMin)         (the OLD log-barrier h)
-    //     Kd       := jMin*j / (j - jMin)^2  (the OLD log-barrier Kd)
-    //     h_eff    := h  - j/s
-    //     Kd_eff   := Kd + j/s
-    //     E_floor  := w_d * (-log((j-jMin)/s) + (j - jSafe)/s)
-    // Identity check: in the active branch the residual
-    //     +w_d * B'(j) * j * FinvT
-    // equals  -w_d * h_eff * FinvT, which has the exact same form as the
-    // old `-w_d h FinvT` block; analogously for the Hessian (Kd, h) ->
-    // (Kd_eff, h_eff). Cf. the file-level docstring for the derivation.
-    Real h_eff   = 0;
-    Real Kd_eff  = 0;
-    Real eFloor  = 0;
-    const bool floorActive = (j < params.jSafe);
-    out.floorActive = floorActive;
-    if (floorActive)
+    // For Qact < Q < Qmax:
+    //   Bp = 1/(Qmax-Q) - 1/(Qmax-Qact)  (>= 0)
+    //   Bpp = 1/(Qmax-Q)^2               (> 0)
+    Real B_Q   = 0;
+    Real B_Qp  = 0;
+    Real B_Qpp = 0;
+    const bool qBarrierEligible =
+         params.qBarrierWeight > Real(0)
+      && std::isfinite(params.qBarrierMax)
+      && std::isfinite(params.qBarrierAct)
+      && params.qBarrierAct < params.qBarrierMax;
+    if (qBarrierEligible && qShape > params.qBarrierAct)
     {
-      const Real s    = params.jSafe - params.jMin;
-      const Real djm  = j - params.jMin;
-      const Real h    = j / djm;
-      const Real Kd   = params.jMin * j / (djm * djm);
-      const Real jOs  = j / s;
-      h_eff   = h - jOs;
-      Kd_eff  = Kd + jOs;
-      eFloor  = -std::log(djm / s) + (j - params.jSafe) / s;
+      if (qShape >= params.qBarrierMax)
+      {
+        // Outside the barrier domain; report infeasibility.
+        out.valid = false;
+        out.qBarrierActive = true;
+        return out;
+      }
+      out.qBarrierActive = true;
+      const Real span = params.qBarrierMax - params.qBarrierAct;
+      const Real toMax = params.qBarrierMax - qShape;
+      const Real invToMax = Real(1) / toMax;
+      const Real invSpan  = Real(1) / span;
+      B_Q   = -std::log(toMax * invSpan) - (qShape - params.qBarrierAct) * invSpan;
+      B_Qp  = invToMax - invSpan;
+      B_Qpp = invToMax * invToMax;
     }
 
-    out.energy = w_s * (qShape - Real(1)) + w_d * eFloor;
+    out.energy = w_s * (qShape - Real(1)) + w_Q * B_Q;
+
+    // Combined effective shape weight for gradient + scaled Hessian.
+    // Density: w_s*(Q-1) + w_Q*B_Q(Q); gradient: w_eff * dQ/dF; Hessian:
+    //   w_eff * d2Q/dF^2  +  w_Q * B_Qpp * dQ/dF tensor dQ/dF
+    // where w_eff = w_s + w_Q * B_Qp.
+    const Real w_eff = w_s + w_Q * B_Qp;
 
     const Math::SpatialMatrix<Real> FinvT = F.inverse().transpose();
     const Math::SpatialMatrix<Real> FC = F * cell.C;
-    const Real wsOverD = w_s / D;
+    const Real weffOverD = w_eff / D;
     Math::SpatialMatrix<Real> S =
-        wsOverD * (FC - Real(0.5) * n2 * FinvT)
-      - w_d * h_eff * FinvT;
+        weffOverD * (FC - Real(0.5) * n2 * FinvT);
 
     for (std::size_t k = 0; k < 3; ++k)
       for (std::size_t l = 0; l < 2; ++l)
@@ -314,6 +312,19 @@ namespace Rodin::Adaptation
 
     const Real halfN = Real(0.5) * n2;
 
+    // Precompute dQ/dF . grad N_k per local dof (k*2+l): dQ/dF = (1/D) * (FC - (N/2)*FinvT)
+    // dQdF_dot_g[k][l] = sum_j (FC - (N/2)FinvT)(l, j) * gN[k](j) / D
+    //                 = (FCgk[k](l) - (N/2) * FinvTgk[k](l)) / D.
+    std::array<std::array<Real, 2>, 3> dQdF_dot_g;
+    if (out.qBarrierActive)
+    {
+      const Real invD = Real(1) / D;
+      for (std::size_t k = 0; k < 3; ++k)
+        for (std::size_t l = 0; l < 2; ++l)
+          dQdF_dot_g[k][l] =
+              invD * (FCgk[k](l) - halfN * FinvTgk[k](l));
+    }
+
     for (std::size_t k = 0; k < 3; ++k)
       for (std::size_t m = 0; m < 3; ++m)
       {
@@ -328,12 +339,10 @@ namespace Rodin::Adaptation
               + halfN * (FinvTgk[k](l) * FinvTgk[m](p)
                        + FinvTgk[k](p) * FinvTgk[m](l));
 
-            const Real det =
-                Kd_eff * FinvTgk[k](l) * FinvTgk[m](p)
-              + h_eff  * FinvTgk[k](p) * FinvTgk[m](l);
-
-            out.hess(k * 2 + l, m * 2 + p) =
-                wsOverD * shape + w_d * det;
+            Real H = weffOverD * shape;
+            if (out.qBarrierActive)
+              H += w_Q * B_Qpp * dQdF_dot_g[k][l] * dQdF_dot_g[m][p];
+            out.hess(k * 2 + l, m * 2 + p) = H;
           }
       }
 
@@ -374,13 +383,13 @@ namespace Rodin::Adaptation
   }
 
   /**
-   * @brief Linear-form integrator: shape + Jacobian admissibility residual.
+   * @brief Linear-form integrator: shape-quality residual.
    *
-   * `gamma` and `beta` are stored as `unique_ptr<RealFunctionBase<...>>`
-   * after `.copy()` — same pattern as `LinearElasticityIntegrator`'s
-   * `m_lambda` / `m_mu`. They're queried at the cell centroid per cell.
+   * `gamma` is stored as `unique_ptr<RealFunctionBase<...>>` after
+   * `.copy()` — same pattern as `LinearElasticityIntegrator`'s
+   * `m_lambda` / `m_mu`. It is queried at the cell centroid per cell.
    */
-  template <class GammaDerived, class BetaDerived,
+  template <class GammaDerived,
             class TestType, class StateType>
   class BarrierResidualIntegrator final
     : public Variational::LinearFormIntegratorBase<Real>
@@ -388,17 +397,16 @@ namespace Rodin::Adaptation
     public:
       using ScalarType = Real;
       using GammaType = Variational::RealFunctionBase<GammaDerived>;
-      using BetaType  = Variational::RealFunctionBase<BetaDerived>;
 
       BarrierResidualIntegrator(
-          const GammaType& gamma, const BetaType& beta,
+          const GammaType& gamma,
           const std::vector<CellGeomCache>& cellCache,
           const std::unordered_map<Index, std::size_t>& cellToLocal,
           const TestType& v,
           const StateType& u,
           BarrierParameters params)
         : Variational::LinearFormIntegratorBase<Real>(v),
-          m_gamma(gamma.copy()), m_beta(beta.copy()),
+          m_gamma(gamma.copy()),
           m_cellCache(cellCache), m_cellToLocal(cellToLocal),
           m_test(v), m_state(u), m_params(params)
       {}
@@ -406,7 +414,6 @@ namespace Rodin::Adaptation
       BarrierResidualIntegrator(const BarrierResidualIntegrator& other)
         : Variational::LinearFormIntegratorBase<Real>(other),
           m_gamma(other.m_gamma ? other.m_gamma->copy() : nullptr),
-          m_beta(other.m_beta ? other.m_beta->copy() : nullptr),
           m_cellCache(other.m_cellCache), m_cellToLocal(other.m_cellToLocal),
           m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params),
@@ -429,22 +436,19 @@ namespace Rodin::Adaptation
         const auto& cell = m_cellCache.get()[it->second];
         const auto uv = extractCellU(cell, m_state.get());
 
-        // Evaluate gamma and beta at the cell centroid.
+        // Evaluate gamma at the cell centroid.
         const Geometry::Point centroid(
             polytope, detail::triangleReferenceCentroid());
         const Real gammaVal = m_gamma->getValue(centroid);
-        const Real betaVal  = m_beta->getValue(centroid);
 
         const auto local = evaluateBarrierLocal(
-            cell, uv, gammaVal, betaVal, m_params);
+            cell, uv, gammaVal, m_params);
         if (!local.valid)
         {
           barrierInadmissibleCount().fetch_add(1, std::memory_order_relaxed);
           return *this;
         }
         barrierUpdateMinJ(local.j);
-        if (local.floorActive)
-          barrierFloorActiveCount().fetch_add(1, std::memory_order_relaxed);
         m_elemVec = local.grad;
         return *this;
       }
@@ -463,7 +467,6 @@ namespace Rodin::Adaptation
 
     private:
       std::unique_ptr<GammaType> m_gamma;
-      std::unique_ptr<BetaType>  m_beta;
       std::reference_wrapper<const std::vector<CellGeomCache>> m_cellCache;
       std::reference_wrapper<const std::unordered_map<Index, std::size_t>>
         m_cellToLocal;
@@ -475,9 +478,9 @@ namespace Rodin::Adaptation
   };
 
   /**
-   * @brief Bilinear-form integrator: shape + Jacobian admissibility tangent.
+   * @brief Bilinear-form integrator: shape-quality tangent.
    */
-  template <class GammaDerived, class BetaDerived,
+  template <class GammaDerived,
             class TrialType, class TestType, class StateType>
   class BarrierTangentIntegrator final
     : public Variational::LocalBilinearFormIntegratorBase<Real>
@@ -485,10 +488,9 @@ namespace Rodin::Adaptation
     public:
       using ScalarType = Real;
       using GammaType = Variational::RealFunctionBase<GammaDerived>;
-      using BetaType  = Variational::RealFunctionBase<BetaDerived>;
 
       BarrierTangentIntegrator(
-          const GammaType& gamma, const BetaType& beta,
+          const GammaType& gamma,
           const std::vector<CellGeomCache>& cellCache,
           const std::unordered_map<Index, std::size_t>& cellToLocal,
           const TrialType& du,
@@ -496,7 +498,7 @@ namespace Rodin::Adaptation
           const StateType& u,
           BarrierParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
-          m_gamma(gamma.copy()), m_beta(beta.copy()),
+          m_gamma(gamma.copy()),
           m_cellCache(cellCache), m_cellToLocal(cellToLocal),
           m_trial(du), m_test(v), m_state(u), m_params(params)
       {}
@@ -504,7 +506,6 @@ namespace Rodin::Adaptation
       BarrierTangentIntegrator(const BarrierTangentIntegrator& other)
         : Variational::LocalBilinearFormIntegratorBase<Real>(other),
           m_gamma(other.m_gamma ? other.m_gamma->copy() : nullptr),
-          m_beta(other.m_beta ? other.m_beta->copy() : nullptr),
           m_cellCache(other.m_cellCache), m_cellToLocal(other.m_cellToLocal),
           m_trial(other.m_trial), m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params),
@@ -530,10 +531,9 @@ namespace Rodin::Adaptation
         const Geometry::Point centroid(
             polytope, detail::triangleReferenceCentroid());
         const Real gammaVal = m_gamma->getValue(centroid);
-        const Real betaVal  = m_beta->getValue(centroid);
 
         const auto local = evaluateBarrierLocal(
-            cell, uv, gammaVal, betaVal, m_params);
+            cell, uv, gammaVal, m_params);
         if (!local.valid)
         {
           barrierInadmissibleCount().fetch_add(1, std::memory_order_relaxed);
@@ -545,8 +545,6 @@ namespace Rodin::Adaptation
           return *this;
         }
         barrierUpdateMinJ(local.j);
-        if (local.floorActive)
-          barrierFloorActiveCount().fetch_add(1, std::memory_order_relaxed);
         m_matrix = local.hess;
         return *this;
       }
@@ -565,7 +563,6 @@ namespace Rodin::Adaptation
 
     private:
       std::unique_ptr<GammaType> m_gamma;
-      std::unique_ptr<BetaType>  m_beta;
       std::reference_wrapper<const std::vector<CellGeomCache>> m_cellCache;
       std::reference_wrapper<const std::unordered_map<Index, std::size_t>>
         m_cellToLocal;
@@ -578,29 +575,25 @@ namespace Rodin::Adaptation
   };
 
   /**
-   * @brief High-level helper for the shape + Jacobian admissibility
-   *        barrier, modelled on `SDFRRegistration` and
-   *        `LinearElasticityIntegral`.
+   * @brief High-level helper for the shape-quality energy, modelled on
+   *        `LSRRegistration` and `LinearElasticityIntegral`.
    *
    * Holds the variational skeleton `(du, v, u)` together with the
    * per-cell geometry cache and the mesh-cell-index -> local-index map
    * — both of which are tied to the mesh of `(du, v, u)` and don't
-   * change between calls. `gamma` and `beta` (energy weights, possibly
-   * spatially varying) and `BarrierParameters` (the scalar jMin /
-   * domainMeasure) arrive at `operator()` / `Tangent` / `Residual`.
+   * change between calls. `gamma` (energy weight, possibly spatially
+   * varying) and `BarrierParameters` (the scalar jMin / domainMeasure)
+   * arrive at `operator()` / `Tangent` / `Residual`.
    *
    * Usage:
    *
    *     JacobianAdmissibilityBarrier barrier(du, v, u, cellCache, cellToLocal);
    *
-   *     newton = barrier(gamma, beta, params);
-   *
-   *     // Mixing form-language gammaFn with a constant beta:
-   *     newton = barrier(gammaFn, 0.01, params);
+   *     newton = barrier(gamma, params);
    *
    *     // Decomposed access:
-   *     newton = barrier.Tangent(gamma, beta, params)
-   *            + barrier.Residual(gamma, beta, params);
+   *     newton = barrier.Tangent(gamma, params)
+   *            + barrier.Residual(gamma, params);
    */
   template <class Trial, class Test, class State>
   class JacobianAdmissibilityBarrier
@@ -615,51 +608,42 @@ namespace Rodin::Adaptation
       {}
 
       // ---- Decomposed: Tangent ----------------------------------------------
-      template <class GammaDerived, class BetaDerived>
+      template <class GammaDerived>
       auto Tangent(
           const Variational::RealFunctionBase<GammaDerived>& gamma,
-          const Variational::RealFunctionBase<BetaDerived>& beta,
           BarrierParameters params) const
       {
         return BarrierTangentIntegrator<
-                  GammaDerived, BetaDerived,
+                  GammaDerived,
                   Trial, Test, State>(
-              gamma, beta,
+              gamma,
               m_cellCache.get(), m_cellToLocal.get(),
               m_du.get(), m_v.get(), m_u.get(),
               params);
       }
 
       // ---- Decomposed: Residual ---------------------------------------------
-      template <class GammaDerived, class BetaDerived>
+      template <class GammaDerived>
       auto Residual(
           const Variational::RealFunctionBase<GammaDerived>& gamma,
-          const Variational::RealFunctionBase<BetaDerived>& beta,
           BarrierParameters params) const
       {
         return BarrierResidualIntegrator<
-                  GammaDerived, BetaDerived,
+                  GammaDerived,
                   Test, State>(
-              gamma, beta,
+              gamma,
               m_cellCache.get(), m_cellToLocal.get(),
               m_v.get(), m_u.get(),
               params);
       }
 
       // ---- Composite --------------------------------------------------------
-      //
-      // For constant weights, wrap a `Real` value via
-      // `Variational::RealFunction<Real>(value)` at the call site —
-      // exactly the same idiom Rodin's other form-language helpers
-      // expect for scalar constants.
-      template <class GammaDerived, class BetaDerived>
+      template <class GammaDerived>
       auto operator()(
           const Variational::RealFunctionBase<GammaDerived>& gamma,
-          const Variational::RealFunctionBase<BetaDerived>& beta,
           BarrierParameters params) const
       {
-        return Tangent(gamma, beta, params)
-             + Residual(gamma, beta, params);
+        return Tangent(gamma, params) + Residual(gamma, params);
       }
 
     private:
