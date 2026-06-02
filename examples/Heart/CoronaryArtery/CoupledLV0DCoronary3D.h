@@ -135,6 +135,14 @@ public:
    * @brief Geometry and nonlinear-solve parameters for the coronary
    *        outlet flow law used in the non-Newtonian RCR update.
    */
+
+  struct GeoArtery {
+    Real Rp;
+    Real Lp;
+    Real Rd;
+    Real Ld;
+  };
+
   struct OutletFlowLaw {
     /// @brief Proximal surrogate vessel radius.
     Real proximalRadius = 6.e-4;
@@ -144,6 +152,15 @@ public:
     Real distalRadius = 1e-4;
     /// @brief Distal surrogate vessel length.
     Real distalLength = 0.0025;
+    /// @brief Array with radius and large for each branch
+    std::unordered_map<Attribute, GeoArtery> geometricParam{
+        {7,  {8.e-4,  0.015, 5e-4, 0.0025}},
+        {8,  {6.e-4,  0.012,  3e-4, 0.005 }},
+        {9,  {6.e-4,  0.012,  3e-4, 0.005 }},
+        {10, {6.e-4,  0.012,  3e-4, 0.005 }},
+        {14, {8.e-4,  0.015, 5e-4, 0.0025}},
+        {15, {8.e-4,  0.015, 5e-4, 0.0025}},
+    };
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
     Real pressureDropTolerance = 1.0e-12;
     /// @brief Minimum shear-rate bracket.
@@ -378,8 +395,9 @@ public:
     Attribute wall = 2;
     /// @brief Inlet boundary attribute.
     Attribute inlet = 4;
+
     /// @brief Outlet boundary attributes, in the same order used by RCR data.
-    std::array<Attribute, 6> outlets{{7, 8, 9, 10, 14,15}};
+    std::array<Attribute, 6> outlets{{7, 8, 9, 10, 14, 15}};
 
     /// @brief Mesh coordinate scale applied after partitioning.
     Real meshScale = 1.0e-3;
@@ -392,7 +410,7 @@ public:
     /// @brief Inlet normal impedance coefficient in Pa s / m. Set to 0 to
     /// disable.
     /// @details Defaults to defaultRCR.Rp times the scaled inlet area.
-    Real inletImpedance = 5.e1;
+    Real inletImpedance = 1.e3;
     /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
     Real outletBackflowStabilization = 1.0;
 
@@ -418,7 +436,7 @@ public:
     /// @brief 0D LV model parameters and initial conditions.
     LVModel lv;
     /// @brief Default RCR parameters copied to every outlet at startup.
-    RCR defaultRCR{5.0e8, 5.0e-11, 1.0e9, 500.0, 10400.0, 10800.0};
+    RCR defaultRCR{5.0e8, 1.0e-11, 1.0e9, 500.0, 10400.0, 10400.0};
 
     Real inletTangentialDamping = 1e3;
     Real inletVelocityDamping = 0.0;
@@ -479,7 +497,7 @@ private:
                            const Config &cfg);
 
   static void updateRCR(const Model &model, RCR &bc, Real Q, Real dt);
-  static void updateRCRNonNew(const Config &cfg, const Model &model, RCR &bc,
+  static void updateRCRNonNew(const Config &cfg, const Attribute& tag, const Model &model, RCR &bc,
                               Real Q, Real dt);
   static Real periodic_activation(const Activation &cfg, Real t);
   static Real atrial_pressure(const AtrialPressure &cfg, Real t);

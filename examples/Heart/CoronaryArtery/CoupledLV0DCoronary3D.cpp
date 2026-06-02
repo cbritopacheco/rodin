@@ -293,7 +293,7 @@ void CoupledLV0DCoronary3D::updateRCR(const Model &model, RCR &bc, Real Q,
   bc.pout = bc.pc + bc.Rp * Q;
 }
 
-void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
+void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg, const Attribute& tag,
                                             const Model &model, RCR &bc, Real Q,
                                             Real dt) {
   const auto &s = model.getState();
@@ -305,11 +305,11 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   const auto &law = cfg.outletFlowLaw;
   const auto &cy = cfg.viscosity;
 
-  const Real radiusP = law.proximalRadius;
-  const Real lengthP = law.proximalLength;
+  const Real radiusP = law.geometricParam.at(tag).Rp;
+  const Real lengthP = law.geometricParam.at(tag).Lp;
 
-  const Real radiusD = law.distalRadius;
-  const Real lengthD = law.distalLength;
+  const Real radiusD = law.geometricParam.at(tag).Rd;
+  const Real lengthD = law.geometricParam.at(tag).Ld;
 
   auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real> {
     const Real mu0 = cy.mu0;
@@ -1188,15 +1188,15 @@ bool CoupledLV0DCoronary3D::solve3D() {
         /*
          * Inlet normal impedance.
          */
-        //+ m_cfg.inletImpedance *
-          //  BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
-            //  .over(m_cfg.inlet)
+        + m_cfg.inletImpedance *
+            BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
+              .over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping.
          */
-        //+ m_cfg.inletTangentialDamping *
-          //  BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+        + m_cfg.inletTangentialDamping *
+            BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Backflow stabilization.
@@ -1656,7 +1656,7 @@ int CoupledLV0DCoronary3D::run() {
       const auto outletRCRStart = CoronaryClock::now();
       m_cfg.dt = physicalDt;
       for (const Attribute tag : m_cfg.outlets)
-        updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
+        updateRCRNonNew(m_cfg, tag, m_model, m_wk[tag], m_stepData.qOut.at(tag),
                         m_cfg.dt);
       m_stepTiming.outletRCR = secondsSince(outletRCRStart);
 
