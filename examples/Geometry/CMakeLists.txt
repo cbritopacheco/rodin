@@ -28,8 +28,28 @@ target_link_libraries(LevelSetLSRWavyCircleSweep
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetLSRWavyCircleSweepP2 LevelSetLSRWavyCircleSweep.cpp)
+target_compile_definitions(LevelSetLSRWavyCircleSweepP2
+  PRIVATE
+  RODIN_LSR_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetLSRWavyCircleSweepP2
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(LevelSetLSRTwoWavyCirclesMerge LevelSetLSRTwoWavyCirclesMerge.cpp)
 target_link_libraries(LevelSetLSRTwoWavyCirclesMerge
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
+add_executable(LevelSetLSRTwoWavyCirclesMergeP2 LevelSetLSRTwoWavyCirclesMerge.cpp)
+target_compile_definitions(LevelSetLSRTwoWavyCirclesMergeP2
+  PRIVATE
+  RODIN_LSR_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetLSRTwoWavyCirclesMergeP2
   PUBLIC
   Rodin::Geometry
   Rodin::Solver

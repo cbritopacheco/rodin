@@ -142,11 +142,20 @@ namespace Rodin::Adaptation
     Real deltaW = 0;
     Real hRef = 0;
     Real normalizer = 1;
+    std::size_t quadratureOrder = 0; ///< 0 selects the default FE-based rule.
   };
 
   inline std::size_t lsrQuadOrderFor(std::size_t feOrder)
   {
     return std::max<std::size_t>(2, 2 * feOrder);
+  }
+
+  inline std::size_t lsrQuadOrderFor(
+      std::size_t feOrder, const LSRIntegratorParameters& params)
+  {
+    return params.quadratureOrder > 0
+      ? params.quadratureOrder
+      : lsrQuadOrderFor(feOrder);
   }
 
   namespace detail
@@ -223,7 +232,7 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              lsrQuadOrderFor(testFE.getOrder()),
+              lsrQuadOrderFor(testFE.getOrder(), m_params),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -360,7 +369,8 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              lsrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -499,7 +509,8 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              lsrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();
@@ -667,7 +678,8 @@ namespace Rodin::Adaptation
 
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(
-              lsrQuadOrderFor(std::max(testFE.getOrder(), trialFE.getOrder())),
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
               polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const std::size_t nqp = quadrature.getSize();

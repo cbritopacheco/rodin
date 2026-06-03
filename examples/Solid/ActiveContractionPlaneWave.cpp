@@ -356,20 +356,15 @@ int main(int, char**)
       << " |u_guess| = " << u.getData().norm()
       << std::endl;
 
-    Solid::MaterialTangent tangent(law, du, v, u);
-    tangent.setInput(activeInput);
-
-    Solid::InternalForce residual(law, v, u);
-    residual.setInput(activeInput);
+    auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
 
     Problem newton(du, v);
     newton =
-             (rho * bdfA0 / dtStep) * Integral(du, v)
-           + tangent
+             ivw(du, v)
+           + (rho * bdfA0 / dtStep) * Integral(du, v)
            + (rho / dtStep)
              * Integral(bdfA0 * u + bdfA1 * uPrevious
                         + bdfA2 * uPreviousPrevious, v)
-           + residual
            + DirichletBC(du, zero).on(topBC);
 
     SparseLU linearSolver(newton);

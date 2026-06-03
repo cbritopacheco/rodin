@@ -28,5 +28,6 @@
 #include "Adaptation/LSRReport.h"
 #include "Adaptation/LevelSetRegistration.h"
 #include "Adaptation/JacobianAdmissibilityBarrier.h"
+#include "Adaptation/JacobianAdmissibilityBarrierSampled.h"
 
 #endif

@@ -8,14 +8,20 @@
 #define RODIN_ADAPTATION_LSRADMISSIBILITY_H
 
 #include <cstddef>
+#include <cmath>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 #include "Rodin/Math/SpatialMatrix.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Types.h"
+#include "Rodin/QF/PolytopeQuadratureFormula.h"
+#include "Rodin/Variational/IntegrationPoint.h"
+#include "Rodin/Variational/Jacobian.h"
 
 #include "CellGeomCache.h"
+#include "LSRIntegrators.h"
 
 namespace Rodin::Adaptation
 {
@@ -88,6 +94,81 @@ namespace Rodin::Adaptation
           Real(2) * std::pow(sigDetA * detF, dExp);
         const Real q = numerator / denom;
         if (q > rep.maxQShape) rep.maxQShape = q;
+      }
+    }
+    return rep;
+  }
+
+  template <class Displacement>
+  LSRAdmissibilityReport evaluateLSRAdmissibilitySampled(
+      Displacement& u,
+      const Math::Vector<Real>& uData,
+      Real jMinRatio,
+      std::size_t quadratureOrder = 0)
+  {
+    using Variational::IntegrationPoint;
+    using Variational::Jacobian;
+
+    auto& uMutable = u;
+    uMutable.getData() = uData;
+
+    LSRAdmissibilityReport rep;
+    const auto& fes = uMutable.getFiniteElementSpace();
+    const auto& mesh = fes.getMesh();
+    const std::size_t dim = mesh.getDimension();
+    const std::size_t vdim = fes.getVectorDimension();
+    if (dim != vdim)
+      throw std::runtime_error(
+          "evaluateLSRAdmissibilitySampled: displacement dimension "
+          "must equal mesh dimension.");
+
+    auto gradU = Jacobian(uMutable);
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      const auto& fe =
+        fes.getFiniteElement(cell.getDimension(), cell.getIndex());
+      const auto& qf =
+        QF::PolytopeQuadratureFormula::get(
+            quadratureOrder > 0 ? quadratureOrder : lsrQuadOrderFor(fe.getOrder()),
+            cell.getGeometry());
+      const auto& quadrature = cell.getQuadrature(qf);
+      for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+      {
+        const auto& pt = quadrature.getPoint(q);
+        const IntegrationPoint ip(pt, &qf, q);
+        Math::SpatialMatrix<Real> F =
+          Math::SpatialMatrix<Real>::Identity(dim, dim)
+          + gradU.getValue(ip);
+        const Real j = F.determinant();
+
+        if (j < rep.minJRatio)
+          rep.minJRatio = j;
+        if (j <= jMinRatio)
+          ++rep.inadmissibleCount;
+
+        if (j > Real(0))
+        {
+          Math::SpatialMatrix<Real> A;
+          cell.getTransformation().jacobian(
+              A, pt.getReferenceCoordinates());
+          const Real detA = A.determinant();
+          if (detA != Real(0))
+          {
+            const Real sigma = detA > Real(0) ? Real(1) : Real(-1);
+            const Math::SpatialMatrix<Real> FA = F * A;
+            const Real sigDetFA = sigma * FA.determinant();
+            if (sigDetFA > Real(0))
+            {
+              const Real qShape =
+                FA.squaredNorm()
+                / (static_cast<Real>(dim)
+                   * std::pow(sigDetFA, Real(2) / static_cast<Real>(dim)));
+              if (qShape > rep.maxQShape)
+                rep.maxQShape = qShape;
+            }
+          }
+        }
       }
     }
     return rep;

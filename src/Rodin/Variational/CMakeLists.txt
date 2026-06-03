@@ -30,6 +30,7 @@ set(RodinVariational_HEADERS
   Jacobian.h
   LinearForm.h
   LinearFormIntegrator.h
+  NonlinearFormIntegrator.h
   MatrixFunction.h
   Problem.h
   ProblemBody.h

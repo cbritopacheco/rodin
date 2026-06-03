@@ -12,7 +12,6 @@
 #include <cstddef>
 #include <limits>
 #include <stdexcept>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -23,7 +22,7 @@
 #include "Rodin/Variational.h"
 
 #include "CellGeomCache.h"
-#include "JacobianAdmissibilityBarrier.h"
+#include "JacobianAdmissibilityBarrierSampled.h"
 #include "LSRAdmissibility.h"
 #include "LSRParameters.h"
 #include "LSRReport.h"
@@ -86,18 +85,19 @@ namespace Rodin::Adaptation
         const auto& fes = u.getFiniteElementSpace();
         const auto& mesh = fes.getMesh();
 
-        auto cellGeom = precomputeCellGeometry(mesh);
-        const auto& cellCache = cellGeom.first;
-        const auto& cellToLocal = cellGeom.second;
-
         LSRParameters params = m_params;
         completeParameters(params, sLF);
+        const bool barrierEnabled =
+             params.shapeWeight != Real(0)
+          || params.qBarrierWeight != Real(0);
 
         TrialFunction du(fes);
         TestFunction  v(fes);
         auto zero = VectorFunction{ Zero(), Zero() };
 
-        RealFunction<Real> shapeWeight(params.shapeWeight);
+	        RealFunction<Real> shapeWeight(params.shapeWeight);
+	        RealFunction<Real> h1RegularizationWeight(
+	            params.h1RegularizationWeight);
 
         BarrierParameters barrierParams;
         barrierParams.jMin = params.jMinRatio;
@@ -107,66 +107,98 @@ namespace Rodin::Adaptation
         barrierParams.qBarrierMax    = params.qBarrierMax;
 
         LSRRegistration lsrTerm(du, v, u);
-        JacobianAdmissibilityBarrier barrier(
-            du, v, u, cellCache, cellToLocal);
+        JacobianAdmissibilityBarrierSampled barrier(
+            du, v, u, params.quadratureOrder);
 
         if (params.initialGuess == LSRInitialGuess::Zero)
           u.getData().setZero();
         else if (params.initialGuess == LSRInitialGuess::Hilbert)
           applyHilbertInitialGuess(
               sLF, phi, gradPhi, shapeWeight,
-              barrierParams, cellCache, cellToLocal, params);
+              barrierParams, params);
 
         Problem newton(du, v);
         switch (params.tangent)
         {
           case LSRTangent::GaussNewton:
-            newton =
-                lsrTerm.Tangent(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
-              + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
-              + barrier.Tangent(shapeWeight, barrierParams)
-              + barrier.Residual(shapeWeight, barrierParams)
-              + DirichletBC(du, zero);
+            if (barrierEnabled)
+	              newton =
+	                  lsrTerm.Tangent(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + barrier.Tangent(shapeWeight, barrierParams)
+	                + barrier.Residual(shapeWeight, barrierParams)
+	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+	                + DirichletBC(du, zero);
+	            else
+	              newton =
+	                  lsrTerm.Tangent(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+	                + DirichletBC(du, zero);
             break;
           case LSRTangent::Newton:
-            newton =
-                lsrTerm.Tangent(phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
-              + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
-              + barrier.Tangent(shapeWeight, barrierParams)
-              + barrier.Residual(shapeWeight, barrierParams)
-              + DirichletBC(du, zero);
+            if (barrierEnabled)
+	              newton =
+	                  lsrTerm.Tangent(phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
+	                + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + barrier.Tangent(shapeWeight, barrierParams)
+	                + barrier.Residual(shapeWeight, barrierParams)
+	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+	                + DirichletBC(du, zero);
+	            else
+	              newton =
+	                  lsrTerm.Tangent(phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
+	                + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+	                + DirichletBC(du, zero);
             break;
           case LSRTangent::PSDProjectedNewton:
-            newton =
-                lsrTerm.TangentPSDProjected(
-                    phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
-              + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
-              + barrier.Tangent(shapeWeight, barrierParams)
-              + barrier.Residual(shapeWeight, barrierParams)
-              + DirichletBC(du, zero);
+            if (barrierEnabled)
+	              newton =
+	                  lsrTerm.TangentPSDProjected(
+	                      phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
+	                + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + barrier.Tangent(shapeWeight, barrierParams)
+	                + barrier.Residual(shapeWeight, barrierParams)
+	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+	                + DirichletBC(du, zero);
+	            else
+	              newton =
+	                  lsrTerm.TangentPSDProjected(
+	                      phi, gradPhi, hessPhi, sLF, makeLSRIntegratorParameters(params))
+	                + lsrTerm.Residual(phi, gradPhi, sLF, makeLSRIntegratorParameters(params))
+	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+	                + DirichletBC(du, zero);
             break;
         }
 
         Solver::SparseLU linearSolver(newton);
         Solver::NewtonSolver newtonSolver(linearSolver);
 
-        auto evaluator = [&](const Math::Vector<Real>& uTry)
-        {
-          return evaluateLSRAdmissibilityP1(
-              uTry, cellCache, fes, params.jMinRatio);
-        };
+          auto evaluator = [&](const Math::Vector<Real>& uTry)
+          {
+            return evaluateLSRAdmissibilitySampled(
+                u, uTry, params.jMinRatio, params.quadratureOrder);
+          };
 
         const Real jLineSearchRatio =
           std::max(params.jMinRatio,
                    params.lineSearchSafetyMargin * params.jSafeRatio);
         m_report.jLineSearchRatio = jLineSearchRatio;
 
-        auto objective = [&](const Math::Vector<Real>& uTry) -> Real
-        {
-          u.getData() = uTry;
-          return computeObjective(
-              sLF, phi, params, barrierParams, cellCache);
-        };
+          auto objective = [&](const Math::Vector<Real>& uTry) -> Real
+          {
+            u.getData() = uTry;
+            return computeObjective(
+                sLF, phi, params, barrierParams,
+                barrierEnabled);
+          };
 
         auto residualNorm = [&](const Math::Vector<Real>& uTry) -> Real
         {
@@ -435,7 +467,7 @@ namespace Rodin::Adaptation
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const LSRParameters& params,
           const BarrierParameters& barrierParams,
-          const std::vector<CellGeomCache>& cellCache) const
+          bool barrierEnabled) const
       {
         const auto& u = m_u.get();
         const auto& fes = u.getFiniteElementSpace();
@@ -447,10 +479,10 @@ namespace Rodin::Adaptation
           const auto& cell = *cellIt;
           const auto& fe = fes.getFiniteElement(
               cell.getDimension(), cell.getIndex());
-          const auto& qf =
-            QF::PolytopeQuadratureFormula::get(
-                lsrQuadOrderFor(fe.getOrder()),
-                cell.getGeometry());
+	          const auto& qf =
+	            QF::PolytopeQuadratureFormula::get(
+	                lsrQuadOrderFor(fe.getOrder(), makeLSRIntegratorParameters(params)),
+	                cell.getGeometry());
           const auto& quadrature = cell.getQuadrature(qf);
           for (std::size_t q = 0; q < quadrature.getSize(); ++q)
           {
@@ -473,18 +505,59 @@ namespace Rodin::Adaptation
           }
         }
 
-        for (const auto& cell : cellCache)
+        if (barrierEnabled)
         {
-          const auto uv = extractCellU(cell, u);
-          const auto local =
-            evaluateBarrierLocal(
-                cell, uv, params.shapeWeight, barrierParams);
-          if (!local.valid)
-            return std::numeric_limits<Real>::infinity();
-          energy += local.energy;
+          for (auto cellIt2 = mesh.getCell(); cellIt2; ++cellIt2)
+          {
+            const auto& barrierCell = *cellIt2;
+            const Real e = computeBarrierSampledCellEnergy(
+                barrierCell, u, params.shapeWeight, barrierParams);
+            if (!std::isfinite(e))
+              return std::numeric_limits<Real>::infinity();
+            energy += e;
+          }
         }
-        return energy;
-      }
+	        if (params.h1RegularizationWeight != Real(0))
+	          energy += computeH1RegularizationEnergy(params);
+	        return energy;
+	      }
+
+	      Real computeH1RegularizationEnergy(const LSRParameters& params) const
+	      {
+	        using Variational::IntegrationPoint;
+	        using Variational::Jacobian;
+
+	        const auto& u = m_u.get();
+	        const auto& fes = u.getFiniteElementSpace();
+	        const auto& mesh = fes.getMesh();
+	        auto gradU = Jacobian(u);
+
+	        Real energy = 0;
+	        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+	        {
+	          const auto& cell = *cellIt;
+	          const auto& fe =
+	            fes.getFiniteElement(cell.getDimension(), cell.getIndex());
+	          const auto& qf =
+	            QF::PolytopeQuadratureFormula::get(
+	                lsrQuadOrderFor(
+	                    fe.getOrder(), makeLSRIntegratorParameters(params)),
+	                cell.getGeometry());
+	          const auto& quadrature = cell.getQuadrature(qf);
+	          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+	          {
+	            const auto& pt = quadrature.getPoint(q);
+	            const IntegrationPoint ip(pt, &qf, q);
+	            energy += Real(0.5)
+	              * params.h1RegularizationWeight
+	              * qf.getWeight(q)
+	              * pt.getDistortion()
+	              * gradU.getValue(ip).squaredNorm();
+	          }
+	        }
+	        return energy;
+	      }
+
 
       template <class SLF>
       Real computeWeightedBandMeasure(const SLF& sLF, Real deltaW) const
@@ -575,8 +648,6 @@ namespace Rodin::Adaptation
           const Variational::VectorFunctionBase<Real, GradDerived>& gradPhi,
           const Variational::RealFunctionBase<ShapeWeightDerived>& shapeWeight,
           const BarrierParameters& barrierParams,
-          const std::vector<CellGeomCache>& cellCache,
-          const std::unordered_map<Index, std::size_t>& cellToLocal,
           const LSRParameters& params)
       {
         using Variational::DirichletBC;
@@ -629,8 +700,8 @@ namespace Rodin::Adaptation
             break;
           case LSRHilbertMetric::ShapeHessian:
           {
-            JacobianAdmissibilityBarrier barrier(
-                duH, vH, u, cellCache, cellToLocal);
+            JacobianAdmissibilityBarrierSampled barrier(
+                duH, vH, u, params.quadratureOrder);
             hilbert =
                 barrier.Tangent(shapeWeight, barrierParams)
               + Integral(rhsScalar * gradPhi, vH)

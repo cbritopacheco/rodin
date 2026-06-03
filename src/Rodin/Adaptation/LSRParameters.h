@@ -50,8 +50,10 @@ namespace Rodin::Adaptation
     Real deltaW = 0;
     Real hRef = 0;
     Real normalizer = 0; ///< <= 0 means compute 1 / (M_w h_ref^2).
+    std::size_t quadratureOrder = 0; ///< 0 selects the default FE-based rule.
 
     Real shapeWeight = 1e-1;
+    Real h1RegularizationWeight = 0;
 
     /// Smooth Q-shape barrier weight (`qBarrierWeight = 0` disables).
     Real qBarrierWeight = 0;
@@ -121,6 +123,7 @@ namespace Rodin::Adaptation
     out.deltaW = params.deltaW;
     out.hRef = params.hRef;
     out.normalizer = params.normalizer;
+    out.quadratureOrder = params.quadratureOrder;
     return out;
   }
 

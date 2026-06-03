@@ -389,6 +389,17 @@ int main(int argc, char** argv)
   const Real   kLineSearchSafetyMargin = Real(10);
   const Real   kQShapeMax =
     parseRealOption(argc, argv, "qshape-max", Real(10));
+  const std::size_t kLSRQuadratureOrder =
+    parseSizeTOption(argc, argv, "lsr-quad-order", 0);
+  const Real kH1RegularizationWeight =
+    parseRealOption(argc, argv, "h1-reg", Real(0));
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  const Real kShapeWeight =
+    parseRealOption(argc, argv, "gamma", Real(1e-1));
+#else
+  const Real kShapeWeight =
+    parseRealOption(argc, argv, "gamma", Real(1e-1));
+#endif
 
   // ----- Initial guess strategy --------------------------------------------
   //   Cold    : u₀ = 0
@@ -449,12 +460,20 @@ int main(int argc, char** argv)
   // FE spaces and persistent grid functions used across frames.
   // -------------------------------------------------------------------------
   using ScalarP1 = P1<Real, LocalMesh>;
-  using VectorP1 = P1<Math::SpatialVector<Real>, LocalMesh>;
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  using VectorFES = H1<2, Math::SpatialVector<Real>, LocalMesh>;
+#else
+  using VectorFES = P1<Math::SpatialVector<Real>, LocalMesh>;
+#endif
   using ScalarP0 = P0<Real, LocalMesh>;
 
   ScalarP1 p1Fes(mesh);
   ScalarP0 p0Fes(mesh);
-  VectorP1 vectorFes(mesh, 2);
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
+#else
+  VectorFES vectorFes(mesh, 2);
+#endif
 
   // Background mesh is invariant across the sweep, so the per-cell geometry
   // cache (sigma_K, det A_K, J_scale, gradN, area) only needs to be built
@@ -675,7 +694,9 @@ int main(int argc, char** argv)
     baseParams.deltaW = deltaW;
     baseParams.hRef = h;
     baseParams.normalizer = Real(1) / (weightedBandMeasure * h * h);
-    baseParams.shapeWeight = Real(1e-1);
+    baseParams.quadratureOrder = kLSRQuadratureOrder;
+    baseParams.h1RegularizationWeight = kH1RegularizationWeight;
+    baseParams.shapeWeight = kShapeWeight;
     baseParams.jMinRatio = Real(1e-8);
     baseParams.jSafeRatio = Real(1e-3);
     baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;

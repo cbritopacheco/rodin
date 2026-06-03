@@ -471,12 +471,17 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "softmin-eps-mult", Real(0.5));
   const Real kSoftMinEps = kSoftMinEpsMult * h;
 
-  // Shape-weight knob. The two-circles geometry forces O(amp)
-  // tangential motion across the merge ridge; if the shape term is too
-  // weak, cells shear and produce anisotropic elements. Default
-  // gamma = 0.3 (3x parent) for the merge example.
+  // Shape-weight knob. The P1 target keeps the affine closed-form barrier
+  // enabled by default. The P2 target disables it because the current barrier
+  // derivatives are affine-P1 only; sampled admissibility and the hard
+  // Q-shape line-search cap remain active.
+#ifdef RODIN_LSR_P2_DISPLACEMENT
   const Real kShapeWeight =
     parseRealOption(argc, argv, "gamma", Real(0.3));
+#else
+  const Real kShapeWeight =
+    parseRealOption(argc, argv, "gamma", Real(0.3));
+#endif
 
   const Real   kLineSearchAlphaInit = Real(1);
   const Real   kLineSearchReduction = Real(0.5);
@@ -488,6 +493,10 @@ int main(int argc, char** argv)
   // early iterate. Increase --qshape-max to reproduce the un-capped behaviour.
   const Real   kQShapeMax =
     parseRealOption(argc, argv, "qshape-max", Real(10));
+  const std::size_t kLSRQuadratureOrder =
+    parseSizeTOption(argc, argv, "lsr-quad-order", 0);
+  const Real kH1RegularizationWeight =
+    parseRealOption(argc, argv, "h1-reg", Real(0));
 
   // Smooth Q-shape barrier (interior-point penalty steering Newton
   // away from the high-anisotropy region). With qbar-weight > 0 and a
@@ -549,12 +558,20 @@ int main(int argc, char** argv)
                       boundaryAttribute);
 
   using ScalarP1 = P1<Real, LocalMesh>;
-  using VectorP1 = P1<Math::SpatialVector<Real>, LocalMesh>;
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  using VectorFES = H1<2, Math::SpatialVector<Real>, LocalMesh>;
+#else
+  using VectorFES = P1<Math::SpatialVector<Real>, LocalMesh>;
+#endif
   using ScalarP0 = P0<Real, LocalMesh>;
 
   ScalarP1 p1Fes(mesh);
   ScalarP0 p0Fes(mesh);
-  VectorP1 vectorFes(mesh, 2);
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
+#else
+  VectorFES vectorFes(mesh, 2);
+#endif
 
   auto cellGeomBg = precomputeCellGeometry(mesh);
   auto& cellCacheBg = cellGeomBg.first;
@@ -777,6 +794,8 @@ int main(int argc, char** argv)
     baseParams.deltaW = deltaW;
     baseParams.hRef = h;
     baseParams.normalizer = Real(1) / (weightedBandMeasure * h * h);
+    baseParams.quadratureOrder = kLSRQuadratureOrder;
+    baseParams.h1RegularizationWeight = kH1RegularizationWeight;
     baseParams.shapeWeight = kShapeWeight;
     baseParams.jMinRatio = Real(1e-8);
     baseParams.jSafeRatio = Real(1e-3);
