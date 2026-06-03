@@ -154,12 +154,12 @@ public:
     Real distalLength = 0.0025;
     /// @brief Array with radius and large for each branch
     std::unordered_map<Attribute, GeoArtery> geometricParam{
-        {7,  {8.e-4,  0.015, 5e-4, 0.0025}},
-        {8,  {6.e-4,  0.012,  3e-4, 0.005 }},
-        {9,  {6.e-4,  0.012,  3e-4, 0.005 }},
-        {10, {6.e-4,  0.012,  3e-4, 0.005 }},
-        {14, {8.e-4,  0.015, 5e-4, 0.0025}},
-        {15, {8.e-4,  0.015, 5e-4, 0.0025}},
+        {7,  {6.e-4,  0.0125, 3e-4, 0.0025}},
+        {8,  {4.e-4,  0.01,  2e-4, 0.0025 }},
+        {9,  {4.e-4,  0.01,  2e-4, 0.0025 }},
+        {10, {4.e-4,  0.01,  2e-4, 0.0025 }},
+        {14, {6.e-4,  0.0125, 3e-4, 0.0025}},
+        {15, {6.e-4,  0.0125, 3e-4, 0.0025}},
     };
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
     Real pressureDropTolerance = 1.0e-12;
@@ -200,15 +200,15 @@ public:
     /// @brief Period of the prescribed cardiac cycle.
     Real period = 0.85;
     /// @brief Activation ramp start.
-    Real tRampStart = 0.15 - 0.05;
+    Real tRampStart = 0.15;
     /// @brief Activation ramp end.
-    Real tRampEnd = 0.21 - 0.05;
+    Real tRampEnd = 0.21;
     /// @brief Activation plateau end.
-    Real tPlateauEnd = 0.36 - 0.05;
+    Real tPlateauEnd = 0.36;
     /// @brief Relaxation ramp end.
-    Real tRelaxEnd = 0.45 - 0.05;
+    Real tRelaxEnd = 0.45;
     /// @brief Negative activation plateau end.
-    Real tNegativeEnd = 0.6 - 0.05;
+    Real tNegativeEnd = 0.6;
     /// @brief Positive activation plateau value.
     Real positiveValue = 35.0;
     /// @brief Negative activation plateau value.
@@ -273,13 +273,13 @@ public:
     /// @brief Distal arterial resistance.
     Real Rd = 1.0e8;
     /// @brief Distal arterial compliance.
-    Real Cd = 5.0e-10;
+    Real Cd = 6.0e-10;
     /// @brief Atrial valve coefficient.
-    Real Kat = 4.0e-6;
+    Real Kat = 2.0e-6;
     /// @brief Peripheral valve coefficient.
     Real Kp = 5.0e-10;
     /// @brief Arterial valve coefficient.
-    Real Kar = 2.e-7;
+    Real Kar = 1.75e-7;
     /// @brief LV cavity capacity.
     Real cavityCapacity = 5.0e-12;
     /// @brief Local 0D Newton absolute tolerance.

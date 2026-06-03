@@ -293,7 +293,8 @@ void CoupledLV0DCoronary3D::updateRCR(const Model &model, RCR &bc, Real Q,
   bc.pout = bc.pc + bc.Rp * Q;
 }
 
-void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg, const Attribute& tag,
+void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
+                                            const Attribute &tag,
                                             const Model &model, RCR &bc, Real Q,
                                             Real dt) {
   const auto &s = model.getState();
@@ -465,16 +466,17 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg, const Attribute& 
     return sgn * (*root);
   };
 
-  //const Real dPim = (s.pv - h.nm1.pv) / dt;
- // const Real Qim = bc.C * dPim;
+  const Real alpha = 0.7;
+  const Real dPim = alpha * (s.pv - h.nm1.pv) / dt;
+  const Real Qim = bc.C * dPim;
 
   auto distalResidual = [&](Real pc) -> std::pair<Real, Real> {
-    const Real x = pc - 0.6 * s.pv;
+    const Real pim = alpha * s.pv;
+    const Real x = std::max(pc - pim, Real(0.0));
     const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
 
-    const Real f = cap * (pc - pcOld) + qd - Q;
-    const Real df = cap + dqd;
-
+    const Real f = cap * (pc - pcOld) - Qim + qd - Q;
+    const Real df = cap + (pc > pim ? dqd : Real(0.0));
     return {f, df};
   };
 
@@ -512,8 +514,9 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg, const Attribute& 
     }
   }
 
-  const auto [qd, dqd] = flowLaw(bc.pc - 0.6 * s.pv, lengthD, radiusD);
-  (void)dqd;
+  const Real pim_f = alpha * s.pv;
+  const auto [qd, dqd_f] = flowLaw(std::max(bc.pc - pim_f, Real(0.0)), lengthD, radiusD);
+  (void)dqd_f;
   bc.qd = qd;
 
   const Real oldGuess = bc.pout - bc.pc;
@@ -920,7 +923,8 @@ bool CoupledLV0DCoronary3D::solve3D() {
         Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
 
         for (size_t c = 0; c < out.size(); ++c) {
-          out[c] = tau * m_cfg.rho * (1./m_cfg.dt * old[c] - (conv[c] - proj[c]));
+          out[c] =
+              tau * m_cfg.rho * (1. / m_cfg.dt * old[c] - (conv[c] - proj[c]));
         }
 
         return out;
@@ -1069,16 +1073,16 @@ bool CoupledLV0DCoronary3D::solve3D() {
          * Must use uState, not m_u.
          */
         //+ m_cfg.inletImpedance *
-          //    BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
-            //      .over(m_cfg.inlet)
+        //    BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
+        //      .over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping residual.
          *
          * Must use uStateTangential, not duTangential.
          */
-       // + m_cfg.inletTangentialDamping *
-         //     BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
+        // + m_cfg.inletTangentialDamping *
+        //     BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Outlet pressure Neumann residuals.
@@ -1189,14 +1193,14 @@ bool CoupledLV0DCoronary3D::solve3D() {
          * Inlet normal impedance.
          */
         + m_cfg.inletImpedance *
-            BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
-              .over(m_cfg.inlet)
+              BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
+                  .over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping.
          */
         + m_cfg.inletTangentialDamping *
-            BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+              BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Backflow stabilization.
@@ -1564,15 +1568,15 @@ int CoupledLV0DCoronary3D::run() {
   int acceptedStep = 0;
 
   {
-    //solveStatic();
+    // solveStatic();
 
-    //computeFluxes();
-    //for (const Attribute tag : m_cfg.outlets)
-      //updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
-                     // m_cfg.dt);
+    // computeFluxes();
+    // for (const Attribute tag : m_cfg.outlets)
+    // updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
+    //  m_cfg.dt);
 
-    //updateHistory();
-   }
+    // updateHistory();
+  }
 
   while (m_model.getState().t <
          finalTime - 0.5 * std::numeric_limits<Real>::epsilon()) {
