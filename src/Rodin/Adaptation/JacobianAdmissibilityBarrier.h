@@ -115,6 +115,24 @@ namespace Rodin::Adaptation
     Real qBarrierWeight    = 0;
     Real qBarrierAct       = std::numeric_limits<Real>::infinity();
     Real qBarrierMax       = std::numeric_limits<Real>::infinity();
+
+    /// Smooth admissibility barrier on the dimensionless Jacobian ratio.
+    /// The sampled implementation uses
+    ///   j = det(I + grad u_h)
+    /// and activates the barrier only when jMin < j < jBarrierSafe.
+    /// The energy density is zero for j >= jBarrierSafe and tends to
+    /// +oo as j approaches jMin from above. This term shapes the Newton
+    /// direction; the line search remains the admissibility authority.
+    Real jBarrierWeight    = 0;
+    Real jBarrierSafeRatio = 0;
+
+    /// Centered volume tether on the same dimensionless Jacobian ratio.
+    /// The sampled implementation uses
+    ///   E_vol density = 0.5 * jVolumeTetherWeight * (log j)^2 / |Omega|.
+    /// Its residual vanishes at the identity, but its Hessian is active
+    /// there, so it can shape the first Newton direction without biasing
+    /// the undeformed configuration.
+    Real jVolumeTetherWeight = 0;
   };
 
   struct BarrierLocal

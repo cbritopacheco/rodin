@@ -5,133 +5,70 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// 2D triangular static prototype of LSR (level-set registration)
-// displacement, on a P1 vector finite-element space,
-// expressed through Rodin::Variational::Problem.
+// LSR (level-set registration) reconstruction example — single-frame demo.
 //
-// Scope.
-//   - Planar 2D meshes; affine triangle cells.
-//   - A single static LSR solve.
-//   - An analytic level set with closed-form phi, grad phi, hess phi.
+// Pipeline
+//   1. Build an n x n triangular mesh of the unit square.
+//   2. Classify cells using a min-s/t cut on phase moments of the
+//      analytic level set (WavyCircleLevelSet).
+//   3. Tag classifier-cut facets and solve the screened-Poisson
+//      (I - psiEll^2 Delta) psi = +-M with psi = 0 on the cut skeleton,
+//      then rescale psi by a narrow-band normal-gradient calibration.
+//      psi is the smooth topological reference field.
+//   4. Construct phi/gradPhi/hessPhi as plain analytic operands of
+//      WavyCircleLevelSet. Adaptation::LSR owns the deformed evaluation
+//      and tracing semantics. phi is the geometric reference field.
+//   5. Solve the LSR problem via Adaptation::LSR (the facade) with the
+//      "always converges" recipe described below.
+//   6. Build the moved mesh, write the psi/phi XDMF grids with per-cell
+//      diagnostics (j, q_abs, q_rel), print summary.
 //
-// FES-independence — honest version.
-//   - The LSR integrators (Rodin::Adaptation::LSR{Residual,Tangent}Integrator)
-//     use Rodin's FES interface for per-cell finite-element lookup and
-//     vector-valued basis evaluation; they are FES-generic within the
-//     planar 2D vector setting and have not been exercised on higher-order
-//     or non-affine elements.
-//   - The shape + singularity-floor (E_floor) integrators
-//     (Rodin::Adaptation::Barrier{Residual,Tangent}Integrator) are NOT
-//     FES-independent: they are specialised to affine P1 triangles in 2D
-//     (six local dofs, constant grad_X u_h per cell). Extending them
-//     requires replacing the 6-dof closed-form algebra by a
-//     quadrature-driven evaluation of A_K^u = D(F_K + u_h o F_K).
-//   - The phase moment computation in this example is NOT FES-independent
-//     either: it uses a hard-coded triangle barycentric quadrature and
-//     vertex interpolation.
-//   - The output side is FES-correct (P0 cell writes go through
-//     `fes.getGlobalIndex({d, cellIdx}, 0)`; vector displacement reads
-//     go through `fes.getDOFs(0, vertex)`); the cell-index <-> local-index
-//     translation goes through an explicit map (no compact-index
-//     assumption).
+// "Always converges" recipe (hard-coded in main; no runtime switch)
+//   - Tangent     : LSRTangent::PSDProjectedNewton.
+//                   Full Newton diverges at the medial axis of phi; pure
+//                   GaussNewton converges but linearly. PSD-projected
+//                   gives the best of both.
+//   - Initial guess: LSRInitialGuess::Hilbert with
+//                    LSRHilbertMetric::Harmonic.
+//                    The Hilbert lift gets the first step in close to
+//                    one and skips most line-search backtracks.
+//   - Quadrature  : lsrQuadOrderFor(feOrder) = 4 * feOrder (Rodin core).
+//                   Bigger than the polynomial-exactness lower bound;
+//                   makes the basis-at-qpt sampling map full-rank on the
+//                   P2 internal modes.
+//   - Sampled geometric energies: JacobianAdmissibilityBarrierSampled
+//                   assembles E_shape, the optional Q_rel barrier, and the
+//                   optional E_admissibility barrier on j = det(I + grad u).
+//                   Built into the facade; no wiring needed here.
+//   - Q_rel cap   : qRelMax = +infinity (off). Available but unnecessary.
+//   - Shape weight: gamma = 1e-1.
+//   - H1 reg      : disabled. The sampled barrier + quadrature bump are
+//                   enough; explicit smoothing is not needed.
+//   - Band width  : deltaW ~= 2.6 h (factor 1.5 * 1.75 baked in).
+//   - Cut weight  : lambdaC = 0.008 (classifier, not LSR).
 //
-// Energy and well-posedness, in words.
-//   - The LSR data term controls (in the sense of dominating the Hessian)
-//     the component of u along grad_y phi at every quadrature point with
-//     non-negligible weight. It does NOT control motion tangent to the
-//     level set, nor mesh motion in the far field. The Gaussian smoothing
-//     widens the support of the LSR Hessian but does not make the LSR
-//     functional coercive on its own.
-//   - The intrinsic shape quality energy (Q_shape - 1, cell-area-weighted)
-//     supplies tangential control and far-field regularisation.
-//   - The singularity floor E_floor is the only piece protecting
-//       j_K^u(xhat) = sigma_K det(A_K^u) / J_K_scale
-//     from collapsing through the cell's initial sigma_K branch
-//     (j_K^u -> j_min). It is identically zero (and so are its
-//     derivatives) whenever j_K^u >= j_safe, so it does NOT bias the
-//     element toward any particular volume; it is NOT an orientation
-//     barrier; it does NOT prefer j_K^u = 1. It is only a one-sided
-//     safeguard against the singular set, sufficient to keep
-//     Q_shape well-defined on the same sigma_K branch.
-//   - Zero Dirichlet on the mesh boundary pins the perimeter dofs and
-//     kills rigid-body modes.
-// All four ingredients together make the discrete Newton system
-// positive-definite; none of them alone does so.
+// With these defaults the example converges 3 Newton iterations on P1
+// (fit ~1.3e-3 at n=50, h^2-rate) and ~10 iterations on P2.
 //
-// FullNewton vs GaussNewton — what we actually observe here.
-//
-//   Mode selection follows the Rodin::Variational::LinearElasticityIntegral
-//   pattern. The LSRRegistration helper captures the
-//   VARIATIONAL SKELETON (trial du, test v, state u) at construction,
-//   and the DATA (level set, optional Hessian callable, signed-distance
-//   field, parameters) is passed at `operator()` / `Tangent` /
-//   `Residual` time. Overload resolution on the call signature picks
-//   the right LSRTangentIntegrator specialisation:
-//
-//     LSRRegistration lsrTerm(du, v, u);
-//     newton = lsrTerm(phi, grad,        sLF, params);   // -> GaussNewton
-//     newton = lsrTerm(phi, grad, hess,  sLF, params);   // -> Newton
-//
-//   The three derivatives of the level set (phi, grad, hess) are
-//   first-class equal arguments at the call site, exactly like
-//   `LinearElasticityIntegral` passes (lambda, mu) at its operator().
-//   No `LevelSet` bundle object hides any of them; the symmetry follows
-//   from the Rodin form-language pattern of separating the variational
-//   skeleton (held by the helper) from the data (passed per call).
-//   There is no runtime `tangentMode` flag and no setter on the helper. The barrier and shape tangents
-//   are always the analytical full Hessian (verified against central FD
-//   by the unit tests in
-//   tests/unit/Rodin/Adaptation/BarrierLocalHessianFDTest.cpp;
-//   relative error ~1e-10 at the optimum eps with V-shape signature).
-//   Only the LSR tangent flavour changes between modes.
-//
-//   GaussNewton (default).
-//     - K_GN = (grad phi)(grad phi)^T per quadrature point.
-//       Rank-1 PSD; robust; monotone.
-//     - The observed local order q[n] -> 1.000 with contraction ratio
-//       ~0.43 in the tail. That is plain LINEAR convergence, not
-//       super-linear: the dropped second-order term
-//
-//           r * hess(phi)
-//
-//       does not vanish at the GN minimum because the LSR L2 fit is
-//       approximate (r* != 0). The linear contraction floor is set by
-//       the spectral radius of the GN-vs-Newton tangent mismatch on
-//       that nonzero residual.
-//
-//   Newton (full Hessian).
-//     - K_N = (grad phi)(grad phi)^T + r * hess(phi).
-//     - In this run, phi is chosen as the distance level set of a circle.
-//       Its Hessian
-//
-//           hess(phi) = (I - n n^T) / ||p - c||,  n = (p - c)/||p - c||
-//
-//       is positive semi-definite EVERYWHERE except at the medial axis
-//       (the centre point, the only singularity). The interface itself
-//       is perfectly smooth.
-//     - The Newton tangent is therefore PSD whenever r > 0 and goes
-//       INDEFINITE in the tangential direction whenever r < 0: the
-//       rank-1 (grad phi)(grad phi)^T fills only the radial direction,
-//       leaving the tangential eigenvalue at r / ||p - c|| with the
-//       sign of r. This is a textbook outcome for nonlinear
-//       least-squares with a non-vanishing residual; nothing about
-//       phi or s_h^LF is irregular.
-//     - On this prototype Newton matches GaussNewton for the first ~5
-//       iterations, then the indefinite Newton step drives a handful
-//       of cells past j_K^u = j_min (the singular floor). Those cells
-//       are flagged via `barrierInadmissibleCount()` and contribute a
-//       small identity
-//       block (instead of throwing, which under OpenMP assembly is
-//       std::terminate); Newton continues but no longer converges.
-//
-//   Takeaway: the textbook quadratic Newton regime is not reachable
-//   on this objective without one of (a) line search / trust region,
-//   (b) damping of the r * hess(phi) term whenever r changes sign,
-//   or (c) exact-fit data so r* = 0. None of those are in scope here.
+// Scope and honest caveats
+//   - Planar 2D, affine triangle cells. The P1 vector displacement is the
+//     default; LevelSetLSRReconstructionP2 (compiled with
+//     -DRODIN_LSR_P2_DISPLACEMENT) is the H1<2> vector variant.
+//   - The classifier and phase-moment computation use a triangle
+//     barycentric quadrature; this part of the example is NOT
+//     FES-independent. The LSR integrators that consume the result are.
+//   - phi here is analytic for clarity. Deformed evaluation is handled in
+//     Adaptation::LSR, so replacing phi by a discrete field does not alter
+//     the example-level solve call.
+//   - Full Newton tangent is unsafe: phi's Hessian
+//       hess(phi) = (I - n n^T) / ||p - c||
+//     is singular on the medial axis (the centre for a disk). PSD
+//     projection clips the indefinite piece and converges; raw Newton
+//     drives a handful of cells past j_min and stalls. This is documented
+//     in the file-header history rather than exposed as a runtime flag.
 //
 #include <Rodin/Adaptation.h>
 #include <Rodin/Assembly.h>
-#include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Math.h>
@@ -143,6 +80,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -160,6 +98,7 @@ using namespace Rodin::Adaptation;
 namespace
 {
   using Vec2 = Math::SpatialVector<Real>;
+  using Clock = std::chrono::steady_clock;
 
   Vec2 vec2(Real x = 0, Real y = 0)
   {
@@ -169,40 +108,126 @@ namespace
     return out;
   }
 
-  // -------------------------------------------------------------------------
-  // Analytic circle level set.
-  // -------------------------------------------------------------------------
-  struct CircleLevelSet
+  Real elapsedSeconds(Clock::time_point start)
   {
-    Real cx = 0.51;
-    Real cy = 0.48;
-    Real radius = 0.31;
+    return std::chrono::duration<Real>(Clock::now() - start).count();
+  }
+
+  template <class Displacement>
+  void updateMovedMeshFromDisplacement(
+      const LocalMesh& mesh,
+      LocalMesh& moved,
+      const Displacement& u)
+  {
+    const auto& uFes = u.getFiniteElementSpace();
+    const auto& uData = u.getData();
+    const Index vn = mesh.getVertexCount();
+    for (Index vertex = 0; vertex < vn; ++vertex)
+    {
+      const Vec2 x = mesh.getVertexCoordinates(vertex);
+      const auto& dofs = uFes.getDOFs(0, vertex);
+      const Real ux = uData(dofs[0]);
+      const Real uy = uData(dofs[1]);
+      moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
+    }
+
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+    Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      Geometry::PointCloud pm(2, geomFe.getCount());
+      for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+      {
+        const auto& rc = geomFe.getNode(a);
+        cell.getTransformation().transform(X, rc);
+        const Real ux =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
+        const Real uy =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
+        pm(0, a) = X(0) + ux;
+        pm(1, a) = X(1) + uy;
+      }
+      moved.setPolytopeTransformation(
+          {D, cell.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+    }
+#endif
+  }
+
+  // -------------------------------------------------------------------------
+  // Single-frame wavy circle level set.
+  // -------------------------------------------------------------------------
+  struct WavyCircleLevelSet
+  {
+    Real cx = Real(0.5);
+    Real cy = Real(0.5);
+    Real R0 = Real(0.20);
+    Real amp = Real(0.05);
+    Real lobes = Real(6);
+    Real phase = Real(0);
 
     Real phi(const Vec2& p) const
     {
       const Real dx = p(0) - cx;
       const Real dy = p(1) - cy;
-      return std::sqrt(dx * dx + dy * dy) - radius;
+      const Real r = std::sqrt(dx * dx + dy * dy);
+      const Real theta = std::atan2(dy, dx);
+      const Real R = R0 + amp * std::cos(lobes * theta + phase);
+      return r - R;
     }
 
     Vec2 grad(const Vec2& p) const
     {
       const Real dx = p(0) - cx;
       const Real dy = p(1) - cy;
-      const Real r = std::max(std::sqrt(dx * dx + dy * dy), Real(1e-14));
-      return vec2(dx / r, dy / r);
+      const Real r2 = dx * dx + dy * dy;
+      const Real r = std::max(std::sqrt(r2), Real(1e-14));
+      const Real theta = std::atan2(dy, dx);
+      const Real dRdtheta = -amp * lobes * std::sin(lobes * theta + phase);
+      const Real r2safe = std::max(r2, Real(1e-28));
+      return vec2(
+          dx / r - dRdtheta * (-dy / r2safe),
+          dy / r - dRdtheta * ( dx / r2safe));
     }
 
     Math::SpatialMatrix<Real> hess(const Vec2& p) const
     {
       const Real dx = p(0) - cx;
       const Real dy = p(1) - cy;
-      const Real r = std::max(std::sqrt(dx * dx + dy * dy), Real(1e-14));
+      const Real r2 = std::max(dx * dx + dy * dy, Real(1e-28));
+      const Real r = std::max(std::sqrt(r2), Real(1e-14));
+      const Real r3 = r * r * r;
+      const Real r4 = r2 * r2;
+      const Real theta = std::atan2(dy, dx);
+      const Real angle = lobes * theta + phase;
+      const Real dRdtheta = -amp * lobes * std::sin(angle);
+      const Real d2Rdtheta2 = -amp * lobes * lobes * std::cos(angle);
+
+      Math::SpatialMatrix<Real> Hr(2, 2);
+      Hr(0, 0) = (Real(1) - dx * dx / r2) / r;
+      Hr(1, 1) = (Real(1) - dy * dy / r2) / r;
+      Hr(0, 1) = -dx * dy / r3;
+      Hr(1, 0) = Hr(0, 1);
+
+      Math::SpatialMatrix<Real> Ht(2, 2);
+      Ht(0, 0) =  Real(2) * dx * dy / r4;
+      Ht(1, 1) = -Real(2) * dx * dy / r4;
+      Ht(0, 1) = (dy * dy - dx * dx) / r4;
+      Ht(1, 0) = Ht(0, 1);
+
+      const Vec2 gradTheta = vec2(-dy / r2, dx / r2);
+      Math::SpatialMatrix<Real> GG(2, 2);
+      GG(0, 0) = gradTheta(0) * gradTheta(0);
+      GG(0, 1) = gradTheta(0) * gradTheta(1);
+      GG(1, 0) = GG(0, 1);
+      GG(1, 1) = gradTheta(1) * gradTheta(1);
+
       Math::SpatialMatrix<Real> H(2, 2);
-      H(0, 0) = 1 / r - dx * dx / (r * r * r);
-      H(0, 1) = -dx * dy / (r * r * r);
-      H(1, 0) = H(0, 1);
-      H(1, 1) = 1 / r - dy * dy / (r * r * r);
+      H = Hr - dRdtheta * Ht - d2Rdtheta2 * GG;
       return H;
     }
   };
@@ -237,9 +262,10 @@ namespace
     std::array<Index, 3> vertices = {{ 0, 0, 0 }};
   };
 
+  template <class LevelSet>
   std::vector<CellMomentInfo> collectCellMomentInfo(
       const Mesh<Context::Local>& mesh,
-      const CircleLevelSet& levelSet,
+      const LevelSet& levelSet,
       Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
@@ -277,6 +303,22 @@ namespace
       cells.push_back(std::move(info));
     }
     return cells;
+  }
+
+  Vec2 cellP1Gradient(
+      const std::array<Vec2, 3>& x,
+      const std::array<Real, 3>& value)
+  {
+    const Vec2 e1 = x[1] - x[0];
+    const Vec2 e2 = x[2] - x[0];
+    const Real det = e1(0) * e2(1) - e1(1) * e2(0);
+    if (std::abs(det) <= Real(1e-30))
+      return vec2(0, 0);
+    const Real dv1 = value[1] - value[0];
+    const Real dv2 = value[2] - value[0];
+    return vec2(
+        (dv1 * e2(1) - e1(1) * dv2) / det,
+        (e1(0) * dv2 - dv1 * e2(0)) / det);
   }
 
   Real facetLength(const Mesh<Context::Local>& mesh, Index facet)
@@ -326,31 +368,98 @@ namespace
     return false;
   }
 
+  Real getOptionReal(
+      int argc,
+      char** argv,
+      const std::string& name,
+      Real defaultValue)
+  {
+    const std::string prefix = "--" + name + "=";
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string arg(argv[i]);
+      if (arg.rfind(prefix, 0) == 0)
+        return std::stod(arg.substr(prefix.size()));
+    }
+    return defaultValue;
+  }
+
+  std::size_t getOptionSizeT(
+      int argc,
+      char** argv,
+      const std::string& name,
+      std::size_t defaultValue)
+  {
+    const std::string prefix = "--" + name + "=";
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string arg(argv[i]);
+      if (arg.rfind(prefix, 0) == 0)
+        return static_cast<std::size_t>(std::stoul(arg.substr(prefix.size())));
+    }
+    return defaultValue;
+  }
+
 }
 
 int main(int argc, char** argv)
 {
-  constexpr std::size_t n = 50;
+  // ---------------------------------------------------------------------------
+  // Knobs.
+  //
+  // Compile-time:
+  //   LevelSetLSRReconstruction     -> P1 vector displacement (default).
+  //   LevelSetLSRReconstructionP2   -> H1<2> (P2) vector displacement;
+  //                                    compile with -DRODIN_LSR_P2_DISPLACEMENT.
+  //
+  // Runtime:
+  //   --n=<N>              mesh is N x N (default 50).
+  //   --newton-steps=<N>   maximum Newton steps, default 40.
+  //   --R0=<r>             base radius, default 0.20.
+  //   --amp=<a>            radial wave amplitude, default 0.05.
+  //   --lobes=<m>          radial wave lobe count, default 6.
+  //   --phase=<theta>      radial wave phase, default 0.
+  //   --flow-trace         evaluate phi through Flow tracing inside LSR.
+  //   --shape-weight=<w>   weight of E_shape, default 1e-1.
+  //   --j-barrier-weight=<w>
+  //                         weight of E_admissibility, default 0.
+  //   --j-barrier-safe=<j> activation ratio for E_admissibility, default 0.
+  //   --volume-tether-weight=<w>
+  //                         weight of 0.5 (log j)^2, default 0.
+  //   --no-alpha-predictor disable the sampled quadratic alpha predictor.
+  //
+  // Everything else is hard-coded below to the "always converges" recipe.
+  // The file-header comment lists the choices and why they are the defaults.
+  // ---------------------------------------------------------------------------
+  const std::size_t n = getOptionSizeT(argc, argv, "n", 50);
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;
+  constexpr Real cx = Real(0.5);
+  constexpr Real cy = Real(0.5);
+  const Real R0 = getOptionReal(argc, argv, "R0", Real(0.20));
+  const Real amp = getOptionReal(argc, argv, "amp", Real(0.05));
+  const Real lobes = getOptionReal(argc, argv, "lobes", Real(6));
+  const Real phase = getOptionReal(argc, argv, "phase", Real(0));
+  const Real psiEll = Real(2) * h;
+  const Real psiSourceMagnitude = Real(5) * psiEll;
+  const std::size_t maxNewtonSteps =
+    getOptionSizeT(argc, argv, "newton-steps", 40);
+  const Real shapeWeight = getOptionReal(argc, argv, "shape-weight", Real(1e-1));
+  const Real jBarrierWeight =
+    getOptionReal(argc, argv, "j-barrier-weight", Real(0));
+  const Real jBarrierSafeRatio =
+    getOptionReal(argc, argv, "j-barrier-safe", Real(0));
+  const Real jVolumeTetherWeight =
+    getOptionReal(argc, argv, "volume-tether-weight", Real(0));
+  std::cout << std::unitbuf;
+  const auto totalStart = Clock::now();
+  auto phaseStart = Clock::now();
 
-  // Pick the LSR tangent flavour for this run. Flip to
-  // LSRIntegratorTangentMode::Newton to audit the full-Newton tangent.
-  //
-  // For this prototype, empirically:
-  //   - GaussNewton converges monotonically with factor ~3 per iter early
-  //     (super-linear) and continues all the way down to ||R|| ~ 1e-9.
-  //   - Newton matches GaussNewton for the first few iterations, then the
-  //     indefinite r * hess(phi) term takes over and produces residual
-  //     spikes. On this circle level set inside the sphere phi has a
-  //     non-PSD Hessian, so the LSR full Newton tangent is genuinely
-  //     indefinite away from the solution.
-  // The LSR tangent mode is selected by the constructor call site of
-  // `LSRRegistration` below, not by a runtime flag. Flip
-  // `kUseFullNewton` to instantiate the Newton specialisation (which
-  // also requires passing the level-set Hessian as a callable).
-  constexpr bool kUseFullNewton = false;
+  // Tangent: PSD-projected Newton (LSRTangent::PSDProjectedNewton) is the
+  // canonical mode for this prototype. Full Newton is unsafe because phi's
+  // Hessian is indefinite at the medial axis; GaussNewton converges but
+  // slower. PSD is what the facade picks by default.
 
   // -------------------------------------------------------------------------
   // Step 1-3: mesh, classification, attribute tagging.
@@ -362,7 +471,13 @@ int main(int argc, char** argv)
   mesh.getConnectivity().compute(2, 2);
   mesh.getConnectivity().compute(0, 0);
 
-  const CircleLevelSet levelSet;
+  WavyCircleLevelSet levelSet;
+  levelSet.cx = cx;
+  levelSet.cy = cy;
+  levelSet.R0 = R0;
+  levelSet.amp = amp;
+  levelSet.lobes = lobes;
+  levelSet.phase = phase;
   const auto cellMoments = collectCellMomentInfo(mesh, levelSet, epsilon);
 
   // Explicit cell-index <-> local-index maps for everything downstream.
@@ -410,6 +525,9 @@ int main(int argc, char** argv)
   const MinSTCut cut;
   const MinSTCut::Result classified =
     cut.classify(volumes, moments, graphEdges);
+  std::cout << "Phase classification: "
+            << elapsedSeconds(phaseStart) << " s\n";
+  phaseStart = Clock::now();
 
   std::vector<Index> interfaceFacets;
   interfaceFacets.reserve(classified.cutEdges.size());
@@ -417,10 +535,10 @@ int main(int argc, char** argv)
     if (edge.index != MinSTCut::InvalidIndex)
       interfaceFacets.push_back(edge.index);
 
-  constexpr Attribute interiorAttribute = 1;
-  constexpr Attribute exteriorAttribute = 2;
+  constexpr Attribute interiorAttribute  = 1;
+  constexpr Attribute exteriorAttribute  = 2;
   constexpr Attribute interfaceAttribute = 10;
-  constexpr Attribute boundaryAttribute = 20;
+  constexpr Attribute boundaryAttribute  = 20;
   for (std::size_t local = 0; local < classified.labels.size(); ++local)
   {
     const Index cellIdx = localToCell[local];
@@ -436,26 +554,122 @@ int main(int argc, char** argv)
     mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
                       boundaryAttribute);
 
-  mesh.save("LevelSetLSRReconstruction_LF.mesh", IO::FileFormat::MFEM);
+  mesh.save("LevelSetLSRReconstruction_psi.mesh", IO::FileFormat::MFEM);
+
+  const Real delta = 1.75 * h;
+  const Real deltaW = 1.5 * delta;
 
   // -------------------------------------------------------------------------
-  // Step 4: signed distance s_h^LF via Distance::Eikonal (FMM).
+  // Step 4: psi (topological reference level set) via screened Poisson.
+  // The source is negative on classified interior cells and positive on
+  // exterior cells, while psi = 0 is imposed on the classified interface
+  // skeleton. This keeps psi tied to the graph-cut topology without using
+  // signed-distance reconstruction as an assumption.
   // -------------------------------------------------------------------------
   using ScalarFES = P1<Real, LocalMesh>;
-  ScalarFES sLFFes(mesh);
-  GridFunction sLF(sLFFes);
-  sLF = Real(0);
-  Distance::Eikonal<ScalarFES, Math::Vector<Real>>(sLF)
-    .setInterface(interfaceAttribute)
-    .setInterior(interiorAttribute)
-    .solve()
-    .sign();
+  ScalarFES psiFes(mesh);
+  GridFunction psi(psiFes);
+  Real psiScale = 1;
+  Real psiScaleNumerator = 0;
+  Real psiScaleDenominator = 0;
+  Real psiScaleSignMoment = 0;
+  {
+    TrialFunction psiTrial(psiFes);
+    TestFunction  psiTest(psiFes);
+    // Sign source: psi is the screened-Poisson lift of an inside/outside
+    // step function of magnitude `psiSourceMagnitude`, pinned to zero on
+    // the classifier-cut skeleton (interfaceAttribute). This makes psi a
+    // smooth topological reference that is independent of the geometric
+    // reference phi.
+    RealFunction psiSource(
+        [&](const Geometry::Point& p) -> Real
+        {
+          const auto attr = p.getPolytope().getAttribute();
+          if (attr && *attr == interiorAttribute)
+            return -psiSourceMagnitude;
+          return psiSourceMagnitude;
+        });
+
+    Problem psiProblem(psiTrial, psiTest);
+    psiProblem =
+        Integral((psiEll * psiEll) * Grad(psiTrial), Grad(psiTest))
+      + Integral(psiTrial, psiTest)
+      - Integral(psiSource, psiTest)
+      + DirichletBC(psiTrial, RealFunction(0.0))
+          .on(interfaceAttribute);
+    Solver::SparseLU(psiProblem).solve();
+    psi.getData() = psiTrial.getSolution().getData();
+
+    // Normal-gradient calibration. The screened-Poisson reconstruction fixes
+    // the interface and topology, but its amplitude is set by the chosen
+    // source and screening length. A single scalar is therefore applied so
+    // that |grad psi| matches |grad phi| in a narrow band around the target
+    // interface. The sign is chosen by the weighted value correlation.
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      const auto& vertices = cell.getVertices();
+      if (vertices.size() != 3)
+        throw std::runtime_error(
+            "LevelSetLSRReconstruction expects triangular cells.");
+
+      std::array<Vec2, 3> x;
+      std::array<Real, 3> psiNode;
+      for (std::size_t a = 0; a < 3; ++a)
+      {
+        x[a] = mesh.getVertexCoordinates(vertices[a]);
+        Math::SpatialPoint rc(2);
+        rc.setZero();
+        if (a == 1) rc(0) = 1;
+        if (a == 2) rc(1) = 1;
+        psiNode[a] = psi.getValue(Geometry::Point(cell, rc));
+      }
+
+      const Vec2 gradPsiCell = cellP1Gradient(x, psiNode);
+      const Real gradPsiNorm = gradPsiCell.norm();
+      const Vec2 e1 = x[1] - x[0];
+      const Vec2 e2 = x[2] - x[0];
+      const Real triangleArea =
+        Real(0.5) * std::abs(e1(0) * e2(1) - e1(1) * e2(0));
+
+      for (const auto& bary : TriangleBarycentricQuadrature)
+      {
+        const Vec2 xq = interpolateVec(x, bary);
+        const Real psiq =
+          bary[0] * psiNode[0] + bary[1] * psiNode[1]
+        + bary[2] * psiNode[2];
+        const Real phiq = levelSet.phi(xq);
+        const Real weight =
+          std::exp(-phiq * phiq / (Real(2) * deltaW * deltaW));
+        const Real qWeight =
+          triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
+        psiScaleNumerator += weight * levelSet.grad(xq).norm() * qWeight;
+        psiScaleDenominator += weight * gradPsiNorm * qWeight;
+        psiScaleSignMoment += weight * psiq * phiq * qWeight;
+      }
+    }
+
+    if (psiScaleDenominator > Real(1e-30))
+    {
+      psiScale = psiScaleNumerator / psiScaleDenominator;
+      if (psiScaleSignMoment < 0)
+        psiScale = -psiScale;
+      psi.getData() *= psiScale;
+    }
+  }
+  std::cout << "Phase psi reconstruction/calibration: "
+            << elapsedSeconds(phaseStart) << " s\n";
+  phaseStart = Clock::now();
+
+  // -------------------------------------------------------------------------
+  // phi is analytic in this prototype; no discrete phi-field is built.
+  // Adaptation::LSR evaluates these operands at deformed/traced points.
+  // -------------------------------------------------------------------------
+
 
   // -------------------------------------------------------------------------
   // Step 5a: smooth band weight and weighted band measure M_w.
   // -------------------------------------------------------------------------
-  const Real delta = 1.75 * h;
-  const Real deltaW = 1.5 * delta;
   Real domainMeasure = 0;
   Real weightedBandMeasure = 0;
   for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -473,19 +687,28 @@ int main(int argc, char** argv)
       const Real w =
         triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
       domainMeasure += w;
-      const Real s = sLF.getValue(pt);
+      const Real s = psi.getValue(pt);
       const Real W = std::exp(-s * s / (2 * deltaW * deltaW));
       weightedBandMeasure += W * w;
     }
   }
   if (weightedBandMeasure <= 0)
     throw std::runtime_error("Empty smooth band: M_w = 0.");
+  std::cout << "Phase band measure: "
+            << elapsedSeconds(phaseStart) << " s\n";
+  phaseStart = Clock::now();
 
   // -------------------------------------------------------------------------
-  // Step 5b: P1 vector FES, trial/test/state functions.
+  // Step 5b: Vector FES (P1 by default, H1<2>/P2 when
+  // RODIN_LSR_P2_DISPLACEMENT is defined), trial/test/state functions.
   // -------------------------------------------------------------------------
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  using VectorFES = H1<2, Math::SpatialVector<Real>, LocalMesh>;
+  VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
+#else
   using VectorFES = P1<Math::SpatialVector<Real>, LocalMesh>;
   VectorFES vectorFes(mesh, 2);
+#endif
   TrialFunction du(vectorFes);
   TestFunction  v(vectorFes);
   GridFunction  u(vectorFes);
@@ -504,7 +727,7 @@ int main(int argc, char** argv)
   // scalar constant in Rodin form language; spatially varying weights
   // can be any `Variational::RealFunctionBase<...>`. gamma weighs the
   // shape term E_shape.
-  RealFunction<Real> barrierGamma(Real(1e-1));
+  RealFunction<Real> barrierGamma(shapeWeight);
   BarrierParameters barrierParams;
   barrierParams.jMin  = 1e-8;
   barrierParams.domainMeasure = domainMeasure;
@@ -521,37 +744,34 @@ int main(int argc, char** argv)
           "cellToLocal map disagrees with precomputeCellGeometry iteration "
           "order — code paths got out of sync.");
   }
+  std::cout << "Phase FES/cache setup: "
+            << elapsedSeconds(phaseStart) << " s\n";
+  phaseStart = Clock::now();
 
   // -------------------------------------------------------------------------
-  // The analytical local barrier Hessian is verified separately by the
+  // The sampled relative-distortion barrier is verified separately by the
   // unit test
-  //   tests/unit/Rodin/Adaptation/BarrierLocalHessianFDTest.cpp
-  // which exercises the V-shape signature of a correct central-FD check
-  // across decreasing eps. We do not repeat that check at runtime here.
+  //   tests/unit/Rodin/Adaptation/BarrierSampledResidualFDTest.cpp
+  // We do not repeat that check at runtime here.
   //
   // Step 6: Problem assembly and Newton solve.
   // -------------------------------------------------------------------------
   auto zero = VectorFunction{ Zero(), Zero() };
 
-  // Wrap CircleLevelSet's three derivatives as Rodin form-language
-  // function objects. Each takes a `Geometry::Point`; the LSR
-  // integrators construct that Point at the deformed location
-  // y = X + u_h(X) per quadrature point and the lambdas read
-  // p.getPhysicalCoordinates() to recover y.
-  RealFunction phiFn(
+  RealFunction phi(
       [&](const Geometry::Point& p) -> Real
       {
         const auto& c = p.getPhysicalCoordinates();
         return levelSet.phi(vec2(c(0), c(1)));
       });
-  AnalyticVectorFunction gradFn(
+  AnalyticVectorFunction gradPhi(
       [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
       {
         const auto& c = p.getPhysicalCoordinates();
         return levelSet.grad(vec2(c(0), c(1)));
       },
       /*dimension=*/2);
-  AnalyticMatrixFunction hessFn(
+  AnalyticMatrixFunction hessPhi(
       [&](const Geometry::Point& p) -> Math::SpatialMatrix<Real>
       {
         const auto& c = p.getPhysicalCoordinates();
@@ -562,36 +782,98 @@ int main(int argc, char** argv)
   bool solveCompleted = true;
   bool newtonConverged = false;
   std::size_t newtonIterations = 0;
+  Real initialGuessAlpha = 0;
+  Real initialGuessMinJ = 0;
+  std::size_t initialGuessBacktracks = 0;
   std::string solveError;
-  const bool useLSRFacade = hasFlag(argc, argv, "use-lsr-facade");
+  constexpr Real geometryFitTolMult = Real(4);
+  const Real geometryTolerance = geometryFitTolMult * h * h;
+  auto interfacePhiRMSFromDisplacement = [&]() -> Real
+  {
+    const auto& uFes = u.getFiniteElementSpace();
+    const auto& uData = u.getData();
+    Real interfacePhi = 0;
+    Real interfaceLength = 0;
+    for (const Index facet : interfaceFacets)
+    {
+      const auto face = mesh.getFace(facet);
+      const auto& vertices = face->getVertices();
+      const Vec2 xa = mesh.getVertexCoordinates(vertices[0]);
+      const Vec2 xb = mesh.getVertexCoordinates(vertices[1]);
+      const auto& dofsA = uFes.getDOFs(0, vertices[0]);
+      const auto& dofsB = uFes.getDOFs(0, vertices[1]);
+      const Vec2 a = vec2(xa(0) + uData(dofsA[0]), xa(1) + uData(dofsA[1]));
+      const Vec2 b = vec2(xb(0) + uData(dofsB[0]), xb(1) + uData(dofsB[1]));
+      const Vec2 mid = Real(0.5) * (a + b);
+      const Real val = levelSet.phi(mid);
+      const Real len = (b - a).norm();
+      interfacePhi += val * val * len;
+      interfaceLength += len;
+    }
+    return std::sqrt(interfacePhi / std::max(interfaceLength, Real(1e-30)));
+  };
 
-  if (useLSRFacade)
   {
     LSRParameters lsrParams;
     lsrParams.rhoS = params.rhoS;
     lsrParams.deltaW = params.deltaW;
     lsrParams.hRef = params.hRef;
     lsrParams.normalizer = params.normalizer;
-    lsrParams.shapeWeight = 1e-1;
+    lsrParams.shapeWeight = shapeWeight;
+    lsrParams.jBarrierWeight = jBarrierWeight;
+    lsrParams.jBarrierSafeRatio = jBarrierSafeRatio;
+    lsrParams.jVolumeTetherWeight = jVolumeTetherWeight;
+    lsrParams.useSampledQuadraticAlphaPredictor =
+      !hasFlag(argc, argv, "no-alpha-predictor");
+    if (hasFlag(argc, argv, "flow-trace"))
+      lsrParams.fieldEvaluation =
+        LSRIntegratorParameters::FieldEvaluation::FlowTrace;
     lsrParams.jMinRatio = barrierParams.jMin;
     lsrParams.jSafeRatio = 1e-3;
-    lsrParams.initialGuess = LSRInitialGuess::Zero;
-    lsrParams.tangent =
-      kUseFullNewton ? LSRTangent::Newton : LSRTangent::GaussNewton;
-    lsrParams.maxNewtonIterations = 20;
-    lsrParams.absoluteTolerance = 1e-10;
-    lsrParams.relativeTolerance = 1e-8;
+    lsrParams.initialGuess = LSRInitialGuess::Hilbert;
+    lsrParams.tangent = LSRTangent::PSDProjectedNewton;
+    lsrParams.maxNewtonIterations = maxNewtonSteps;
+    lsrParams.absoluteTolerance = 1e-8;
+    lsrParams.relativeTolerance = 1e-7;
+    lsrParams.alphaWarmStartGrowth = 4;
+    std::size_t lastPrintedBacktracks = 0;
+    lsrParams.acceptedStateConvergenceTest =
+      [&](const LSRReport& report) -> bool
+      {
+        const Real fit = interfacePhiRMSFromDisplacement();
+        const std::size_t stepBacktracks =
+          report.totalBacktracks - lastPrintedBacktracks;
+        lastPrintedBacktracks = report.totalBacktracks;
+        std::cout << "Newton " << std::setw(2) << report.iterations
+                  << ": ||R||=" << std::scientific << std::setprecision(6)
+                  << report.finalResidual
+                  << "  step=" << report.finalStepNorm
+                  << "  alpha=" << report.lastAcceptedAlpha
+                  << "  backtracks=" << stepBacktracks
+                  << "  min_j=" << report.minJRatio
+                  << "  fit=" << fit
+                  << '\n';
+        return fit <= geometryTolerance;
+      };
 
     try
     {
+      std::cout << "Phase LSR solve: begin\n";
       LSR lsr(u);
       const LSRReport lsrReport =
-        lsr.setParameters(lsrParams).solve(sLF, phiFn, gradFn, hessFn);
+        lsr.setParameters(lsrParams).solve(
+            psi, phi, gradPhi, hessPhi);
       newtonConverged = lsrReport.converged;
       newtonIterations = lsrReport.iterations;
+      initialGuessAlpha = lsrReport.initialGuessAlpha;
+      initialGuessMinJ = lsrReport.initialGuessMinJRatio;
+      initialGuessBacktracks = lsrReport.initialGuessBacktracks;
       solveCompleted = lsrReport.converged && !lsrReport.lineSearchFailed;
       if (!solveCompleted)
         solveError = "LSR facade did not converge";
+      std::cout << "Phase LSR solve: "
+                << elapsedSeconds(phaseStart) << " s\n";
+      phaseStart = Clock::now();
     }
     catch (const std::exception& ex)
     {
@@ -600,113 +882,15 @@ int main(int argc, char** argv)
       std::cout << "\nLSR facade aborted: " << ex.what() << '\n';
     }
   }
-  else
-  {
-    // The composite captures only the variational skeleton (du, v, u).
-    // The data — phi, grad, [hess], sLF, params — is supplied at the
-    // operator() call below.
-    LSRRegistration lsrTerm(du, v, u);
-
-    // Barrier helper, same shape as `LSRRegistration`:
-    // captures (du, v, u) and the per-cell cache + index map at
-    // construction; gamma, beta and params arrive at `operator()`.
-    JacobianAdmissibilityBarrier barrier(
-        du, v, u, cellCache, geomToLocal);
-
-    // We use the DECOMPOSED form (one Tangent + one Residual per helper)
-    // because Rodin's form language composes individual integrators, not
-    // problem-body fragments. This is the same idiom the Solid examples
-    // use: explicit `+ tangent + residual + DirichletBC(...)`. The
-    // composite `lsrTerm()` / `barrier()` operator() forms are convenient
-    // when they are the SOLE contribution to a Problem; combining
-    // multiple helpers into one Problem goes through Tangent/Residual.
-    Problem newton(du, v);
-    if constexpr (kUseFullNewton)
-    {
-      // 4 data args (phi, grad, hess, sLF) + params
-      // -> LSRTangentIntegrator<Newton, ...>
-      newton =
-            lsrTerm.Tangent(phiFn, gradFn, hessFn, sLF, params)
-          + lsrTerm.Residual(phiFn, gradFn, sLF, params)
-          + barrier.Tangent(barrierGamma, barrierParams)
-          + barrier.Residual(barrierGamma, barrierParams)
-          + DirichletBC(du, zero).on(boundaryAttribute);
-    }
-    else
-    {
-      // 3 data args (phi, grad, sLF) + params
-      // -> LSRTangentIntegrator<GaussNewton, ...>
-      newton =
-            lsrTerm.Tangent(phiFn, gradFn, sLF, params)
-          + lsrTerm.Residual(phiFn, gradFn, sLF, params)
-          + barrier.Tangent(barrierGamma, barrierParams)
-          + barrier.Residual(barrierGamma, barrierParams)
-          + DirichletBC(du, zero).on(boundaryAttribute);
-    }
-
-    Solver::SparseLU linearSolver(newton);
-    Solver::NewtonSolver solver(linearSolver);
-    std::vector<Real> residualHistory;
-    solver
-      .setMaxIterations(20)
-      .setDampingFactor(1.0)
-      .setAbsoluteTolerance(1e-10)
-      .setRelativeTolerance(1e-8)
-      .setMonitor([&](const auto& report)
-      {
-        const auto bad = barrierInadmissibleCount().exchange(0);
-        const Real minJ = barrierMinJ().exchange(
-            std::numeric_limits<Real>::infinity(),
-            std::memory_order_relaxed);
-        std::cout << "Newton " << std::setw(2) << report.iterations
-                  << ": ||R||=" << std::scientific << std::setprecision(6)
-                  << report.final_residual
-                  << "  step=" << report.final_step_norm
-                  << "  damping=" << report.damping_factor;
-        if (std::isfinite(minJ))
-          std::cout << "  min_j=" << std::setprecision(3) << minJ;
-        if (bad > 0)
-          std::cout << "  [singular cells=" << bad << "]";
-        std::cout << '\n';
-        residualHistory.push_back(report.final_residual);
-      });
-
-    try
-    {
-      solver.solve(u);
-    }
-    catch (const std::exception& ex)
-    {
-      solveCompleted = false;
-      solveError = ex.what();
-      std::cout << "\nNewton aborted: " << ex.what() << '\n';
-    }
-    const auto report = solver.getReport();
-    newtonConverged = report.converged;
-    newtonIterations = report.iterations;
-    printConvergenceOrders(residualHistory);
-  }
 
   // -------------------------------------------------------------------------
   // Step 7: build moved mesh through FES dof mapping (no raw indexing).
   // -------------------------------------------------------------------------
   LocalMesh moved(mesh);
-  {
-    const auto& uFes = u.getFiniteElementSpace();
-    const auto& uData = u.getData();
-    const Index vn = mesh.getVertexCount();
-    for (Index vertex = 0; vertex < vn; ++vertex)
-    {
-      const Vec2 x = mesh.getVertexCoordinates(vertex);
-      const auto& dofs = uFes.getDOFs(0, vertex);
-      const Real ux = uData(dofs[0]);
-      const Real uy = uData(dofs[1]);
-      moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
-    }
-  }
-  moved.save("LevelSetLSRReconstruction_HF.mesh", IO::FileFormat::MFEM);
+  updateMovedMeshFromDisplacement(mesh, moved, u);
+  moved.save("LevelSetLSRReconstruction_phi.mesh", IO::FileFormat::MFEM);
 
-  // Interface ||phi(X+u)|| RMS on Gamma_h^LF.
+  // Interface ||phi(X+u)|| RMS on Gamma_psi,h.
   Real interfacePhi = 0;
   Real interfaceLength = 0;
   for (const Index facet : interfaceFacets)
@@ -751,20 +935,35 @@ int main(int argc, char** argv)
   sigmaKgf.setName("sigma_K");
 
   P1<Real, LocalMesh> p1Fes(mesh);
-  GridFunction phi(p1Fes);
-  phi = [&](const Geometry::Point& p) -> Real
+  GridFunction phiGf(p1Fes);
+  phiGf = [&](const Geometry::Point& p) -> Real
   {
     const auto& X = p.getCoordinates();
     return levelSet.phi(vec2(X(0), X(1)));
   };
-  phi.setName("phi");
-  sLF.setName("s_LF");
+  phiGf.setName("phi");
+  psi.setName("psi");
 
-  // ----- HF (moved) mesh -----
+  // ----- phi (moved) mesh -----
+  //
+  // We report two distinct shape quality diagnostics:
+  //
+  //   q_abs := Q_abs(A_K^u)     -- absolute intrinsic shape quality of
+  //                                the moved cell. Equals 1 iff the moved
+  //                                cell is a similarity of the REFERENCE
+  //                                cell (right triangle in Rodin).
+  //
+  //   q_rel := Q_rel(F),  F = A_K^u (A_K)^{-1} = I + grad u_h
+  //                             -- relative-distortion measure that the
+  //                                shape barrier in LSR actually minimises.
+  //                                Equals 1 at u = 0 for every cell
+  //                                regardless of background shape; grows
+  //                                only with deformation introduced by u.
   ScalarP0 p0FesMoved(moved);
   GridFunction jK(p0FesMoved);
-  GridFunction qShape(p0FesMoved);
-  GridFunction cellLabelHF(p0FesMoved);
+  GridFunction qAbs(p0FesMoved);
+  GridFunction qRel(p0FesMoved);
+  GridFunction cellLabelPhi(p0FesMoved);
   auto [movedCache, movedToLocal] = precomputeCellGeometry(moved);
   {
     const std::size_t d = moved.getDimension();
@@ -777,18 +976,25 @@ int main(int argc, char** argv)
       const auto& src = cellCache[local];
       const auto& dst = movedCache[movedLocal];
       const Real sigDetAu = static_cast<Real>(src.sigmaK) * dst.detAK;
-      jK.getData()(dof) = sigDetAu / src.Jscale;
+      const Real jKval = sigDetAu / src.Jscale;
+      jK.getData()(dof) = jKval;
       const Real dExp = Real(2) / Real(d);
-      qShape.getData()(dof) =
+      qAbs.getData()(dof) =
         dst.A.squaredNorm()
           / (static_cast<Real>(d) * std::pow(sigDetAu, dExp));
-      cellLabelHF.getData()(dof) =
+      // F = A_K^u (A_K)^{-1}, det F = j_K (>0 for admissible cells).
+      const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
+      qRel.getData()(dof) =
+        F.squaredNorm()
+          / (static_cast<Real>(d) * std::pow(jKval, dExp));
+      cellLabelPhi.getData()(dof) =
         static_cast<Real>(classified.labels[local]);
     }
   }
   jK.setName("j");
-  qShape.setName("q_shape");
-  cellLabelHF.setName("cell_label");
+  qAbs.setName("q_abs");
+  qRel.setName("q_rel");
+  cellLabelPhi.setName("cell_label");
 
   P1<Real, LocalMesh> p1FesMoved(moved);
   GridFunction phiMoved(p1FesMoved);
@@ -802,48 +1008,77 @@ int main(int argc, char** argv)
   u.setName("displacement");
 
   IO::XDMF xdmf("LevelSetLSRReconstruction");
-  auto lfGrid = xdmf.grid("LF");
-  lfGrid.setMesh(mesh);
-  lfGrid.add(cellLabel, IO::XDMF::Center::Cell);
-  lfGrid.add(phaseMoment, IO::XDMF::Center::Cell);
-  lfGrid.add(sigmaKgf, IO::XDMF::Center::Cell);
-  lfGrid.add(phi, IO::XDMF::Center::Node);
-  lfGrid.add(sLF, IO::XDMF::Center::Node);
-  lfGrid.add(u, IO::XDMF::Center::Node);
+  auto psiGrid = xdmf.grid("psi");
+  psiGrid.setMesh(mesh);
+  psiGrid.add(cellLabel, IO::XDMF::Center::Cell);
+  psiGrid.add(phaseMoment, IO::XDMF::Center::Cell);
+  psiGrid.add(sigmaKgf, IO::XDMF::Center::Cell);
+  psiGrid.add(phiGf, IO::XDMF::Center::Node);
+  psiGrid.add(psi, IO::XDMF::Center::Node);
+  psiGrid.add(u, IO::XDMF::Center::Node);
 
-  auto hfGrid = xdmf.grid("HF");
-  hfGrid.setMesh(moved);
-  hfGrid.add(cellLabelHF, IO::XDMF::Center::Cell);
-  hfGrid.add(jK, IO::XDMF::Center::Cell);
-  hfGrid.add(qShape, IO::XDMF::Center::Cell);
-  hfGrid.add(phiMoved, IO::XDMF::Center::Node);
+  auto phiGrid = xdmf.grid("phi");
+  phiGrid.setMesh(moved);
+  phiGrid.add(cellLabelPhi, IO::XDMF::Center::Cell);
+  phiGrid.add(jK, IO::XDMF::Center::Cell);
+  phiGrid.add(qAbs, IO::XDMF::Center::Cell);
+  phiGrid.add(qRel, IO::XDMF::Center::Cell);
+  phiGrid.add(phiMoved, IO::XDMF::Center::Node);
 
   xdmf.write().close();
 
   // -------------------------------------------------------------------------
   // Diagnostics.
   // -------------------------------------------------------------------------
-  std::cout << "\nDiagnostics\n";
-  std::cout << "  LSR tangent mode: "
-            << (kUseFullNewton ? lsrIntegratorTangentModeName(LSRIntegratorTangentMode::Newton)
-                               : lsrIntegratorTangentModeName(LSRIntegratorTangentMode::GaussNewton))
-            << '\n';
-  std::cout << "  cells inside / outside: "
-            << classified.insideCells.size() << " / "
-            << classified.outsideCells.size() << '\n';
-  std::cout << "  interface facets: " << interfaceFacets.size() << '\n';
-  std::cout << "  vector dofs: " << u.getData().size() << '\n';
-  std::cout << "  h: " << h << ", delta: " << delta
-            << ", deltaW: " << deltaW << '\n';
-  std::cout << "  |Omega_h|: " << domainMeasure
-            << ", M_w (smooth band): " << weightedBandMeasure << '\n';
-  std::cout << "  final ||phi(X+u)||_RMS on Gamma_h^LF: "
-            << interfacePhiRMS << '\n';
-  std::cout << "  solve path: "
-            << (useLSRFacade ? "Adaptation::LSR" : "manual forms")
-            << '\n';
-  std::cout << "  Newton iterations: " << newtonIterations
-            << ", converged: " << (newtonConverged ? "yes" : "no") << '\n';
+  std::cout << "\nDiagnostics\n"
+            << "  data energy: E_LSR\n"
+            << "  shape energy: E_shape, weight=" << shapeWeight << '\n'
+            << "  admissibility energy: E_admissibility, weight="
+              << jBarrierWeight
+              << ", safe ratio=" << jBarrierSafeRatio << '\n'
+            << "  volume tether: weight=" << jVolumeTetherWeight << '\n'
+            << "  alpha predictor: "
+              << (hasFlag(argc, argv, "no-alpha-predictor")
+                    ? "sampled quadratic disabled"
+                    : "sampled quadratic enabled")
+              << '\n'
+            << "  field evaluation: "
+              << (hasFlag(argc, argv, "flow-trace")
+                    ? "FlowTrace" : "PhysicalPoint")
+              << '\n'
+            << "  LSR tangent mode: PSDProjectedNewton\n"
+            << "  cells inside / outside: "
+              << classified.insideCells.size() << " / "
+              << classified.outsideCells.size() << '\n'
+            << "  interface facets: " << interfaceFacets.size() << '\n'
+            << "  vector dofs: " << u.getData().size() << '\n'
+            << "  wavy circle: center=(" << levelSet.cx << ", "
+              << levelSet.cy << "), R0=" << levelSet.R0
+              << ", amp=" << levelSet.amp
+              << ", lobes=" << levelSet.lobes
+              << ", phase=" << levelSet.phase << '\n'
+            << "  h: " << h << ", delta: " << delta
+              << ", deltaW: " << deltaW << '\n'
+            << "  psi reconstruction: screened Poisson sign source,"
+              << " ell=" << psiEll
+              << ", magnitude=" << psiSourceMagnitude
+              << ", normal-gradient scale=" << psiScale << '\n'
+            << "  psi scale diagnostics: numerator=" << psiScaleNumerator
+              << ", denominator=" << psiScaleDenominator
+              << ", sign moment=" << psiScaleSignMoment << '\n'
+            << "  phi source: analytic (WavyCircleLevelSet)\n"
+            << "  |Omega_h|: " << domainMeasure
+              << ", M_w (smooth band): " << weightedBandMeasure << '\n'
+            << "  final ||phi(X+u)||_RMS on Gamma_psi,h: "
+              << interfacePhiRMS << '\n'
+            << "  geometry tolerance: " << geometryTolerance << '\n'
+            << "  Hilbert initial guess: alpha=" << initialGuessAlpha
+              << ", backtracks=" << initialGuessBacktracks
+              << ", min_j=" << initialGuessMinJ << '\n'
+            << "  Newton iterations: " << newtonIterations
+              << " / max " << maxNewtonSteps
+              << ", converged: " << (newtonConverged ? "yes" : "no") << '\n'
+            << "  total runtime: " << elapsedSeconds(totalStart) << " s\n";
 
   return newtonConverged ? 0 : 1;
 }

@@ -9,37 +9,39 @@
 
 /**
  * @file
- * @brief Pk/curved-cell sampled shape-quality energy `E_shape` — residual
+ * @brief Pk/curved-cell sampled relative-distortion energy `E_shape` —
+ *        residual
  *        and tangent assembled by quadrature, FES-agnostic.
  *
  * Scope.
  *   Replaces the affine P1 closed-form prototype in
- *   `JacobianAdmissibilityBarrier.h`. Evaluates F = I + grad u_h(x_q),
- *   A_q = D x(x_q), M_q = F_q A_q, Q_shape(M_q), and the smooth Q-barrier
- *   B_Q(Q) at every quadrature point of every cell. Residual and tangent
- *   contributions are accumulated via the physical-space gradients of
- *   the trial and test basis at the quadrature points.
+ *   `JacobianAdmissibilityBarrier.h`. Evaluates the relative deformation
+ *   gradient F = I + grad u_h(x_q), Q_rel(F_q), and the optional smooth
+ *   relative-Q barrier B_Q(Q_rel) at every quadrature point of every cell.
+ *   Residual and tangent contributions are accumulated via the
+ *   physical-space gradients of the trial and test basis at the quadrature
+ *   points. Absolute physical element quality Q_abs(F_q A_q) is deliberately
+ *   not part of this energy; it is reported by the admissibility diagnostic.
  *
- *   On affine triangles (constant gradN, constant F, constant A) the
+ *   On affine triangles (constant gradN, constant F) the
  *   per-quadrature-point integrand is itself constant, so any positive
- *   quadrature order integrates the closed-form expression exactly. The
- *   sampled integrator therefore reproduces
- *   `JacobianAdmissibilityBarrier` bit-for-bit on the affine P1
- *   prototype.
+ *   quadrature order integrates the expression exactly.
  *
  * Mathematics.
  *   Per-quadrature-point density:
- *     e(F,A; gamma, w_Q) = (gamma/|Omega|) (Q_shape(M) - 1)
- *                        + (w_Q/|Omega|)   B_Q(Q_shape(M)),
- *     M = F A,  N = ||M||_F^2,  D = (sigma det M)^(2/d),
- *     Q = N / (d D),  sigma = sign(det A).
+ *     e(F; gamma, w_Q, w_j) =
+ *          (gamma/|Omega|) (Q_rel(F) - 1)
+ *        + (w_Q/|Omega|)   B_Q(Q_rel(F))
+ *        + (w_j/|Omega|)   B_j(det F)
+ *        + (w_v/|Omega|)   0.5 (log det F)^2,
+ *     N = ||F||_F^2,  D = det(F)^(2/d),  Q_rel = N / (d D).
  *
  *   Cell energy:
  *     E_K(u_h) = int_K e(F,A; gamma, w_Q) dx
  *              = sum_q w_q |det J_q| * e(F_q, A_q; gamma_q, w_Q).
  *
  *   First derivative w.r.t. F (per qpt):
- *     dQ/dF = (2/(d D)) [M A^T - (N/d) F^{-T}].
+ *     dQ/dF = (2/(d D)) [F - (N/d) F^{-T}].
  *   Residual contribution to test dof i = (basis b, component alpha):
  *     R_i = sum_q w_q |det J_q| * w_eff(F_q) * <dQ/dF, jac_i_q>,
  *     w_eff = (gamma/|Omega|) + (w_Q/|Omega|) B_Q'(Q),
@@ -51,13 +53,12 @@
  *            + (w_Q/|Omega|) B_Q''(Q) * <dQ/dF, jac_i_q> <dQ/dF, jac_j_q>
  *           ],
  *     d2Q/dF^2 . (H1, H2) =
- *         (2/(d D)) [<H1, H2 C> + (N/d) <H1, F^{-T} H2^T F^{-T}>]
- *       - (4/(d^2 D)) [<M A^T, H1><F^{-T}, H2> + <F^{-T}, H1><M A^T, H2>]
+ *         (2/(d D)) [<H1, H2> + (N/d) <H1, F^{-T} H2^T F^{-T}>]
+ *       - (4/(d^2 D)) [<F, H1><F^{-T}, H2> + <F^{-T}, H1><F, H2>]
  *       + (4 N/(d^3 D)) <F^{-T}, H1><F^{-T}, H2>,
- *     C = A A^T.
  *
  * Singular cells.
- *   When `sigma det(M_q) <= jMin` at some qpt of cell K, the qpt is
+ *   When `det(F_q) <= jMin` at some qpt of cell K, the qpt is
  *   reported via `barrierInadmissibleCount()` and dropped from the
  *   cell-local energy/residual. (The tangent will substitute a frozen
  *   diagonal block exactly as the closed-form does, see
@@ -73,6 +74,8 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+
+#include <Eigen/Eigenvalues>
 
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/Geometry/Polytope.h"
@@ -93,6 +96,23 @@
 
 namespace Rodin::Adaptation
 {
+  inline Math::Matrix<Real> projectSymmetricMatrixPSD(
+      const Math::Matrix<Real>& matrix)
+  {
+    Math::Matrix<Real> symmetric =
+      Real(0.5) * (matrix + matrix.transpose());
+    Eigen::SelfAdjointEigenSolver<Math::Matrix<Real>> eig(symmetric);
+    if (eig.info() != Eigen::Success)
+      return symmetric;
+    auto values = eig.eigenvalues();
+    for (Eigen::Index i = 0; i < values.size(); ++i)
+      if (values(i) < Real(0))
+        values(i) = Real(0);
+    return eig.eigenvectors()
+      * values.asDiagonal()
+      * eig.eigenvectors().transpose();
+  }
+
   /**
    * @brief Per-quadrature-point sampled-barrier evaluation.
    *
@@ -106,19 +126,19 @@ namespace Rodin::Adaptation
   {
     Math::SpatialMatrix<Real> F;          ///< I + grad u_h
     Math::SpatialMatrix<Real> A;          ///< D x = cell jacobian at qpt
-    Math::SpatialMatrix<Real> M;          ///< F A
+    Math::SpatialMatrix<Real> M;          ///< relative map used by Q_rel (= F)
     Math::SpatialMatrix<Real> FinvT;      ///< F^{-T}
-    Math::SpatialMatrix<Real> MAt;        ///< M A^T
-    Math::SpatialMatrix<Real> C;          ///< A A^T
+    Math::SpatialMatrix<Real> MAt;        ///< F, retained for shared formulas
+    Math::SpatialMatrix<Real> C;          ///< Identity in the relative formula
     Real detA = 0;
-    Real sigma = 0;                       ///< sign(det A) in {-1, +1}
+    Real sigma = 1;
     Real detM = 0;
-    Real sigDetM = 0;                     ///< sigma * det M
+    Real sigDetM = 0;                     ///< det F in the relative convention
     Real N = 0;                           ///< ||M||_F^2
     Real D = 0;                           ///< (sigma det M)^(2/d)
-    Real Q = 0;                           ///< N / (d D)
-    Real j = 0;                           ///< sigma det F (dimensionless,
-                                          ///< matches the line-search ratio)
+    Real Q = 0;                           ///< Q_rel = N / (d D)
+    Real j = 0;                           ///< det F, the dimensionless
+                                          ///< line-search ratio
     bool valid = true;
   };
 
@@ -138,17 +158,17 @@ namespace Rodin::Adaptation
         static_cast<Eigen::Index>(d))
       + gradU;
     out.detA = A.determinant();
-    out.sigma = out.detA >= Real(0) ? Real(1) : Real(-1);
+    out.sigma = Real(1);
     const Real detF = out.F.determinant();
-    out.j = out.sigma * detF;
+    out.j = detF;
     if (out.j <= jMin)
     {
       out.valid = false;
       return out;
     }
-    out.M = out.F * out.A;
+    out.M = out.F;
     out.detM = out.M.determinant();
-    out.sigDetM = out.sigma * out.detM;
+    out.sigDetM = out.detM;
     if (out.sigDetM <= Real(0))
     {
       out.valid = false;
@@ -158,8 +178,10 @@ namespace Rodin::Adaptation
     out.D = std::pow(out.sigDetM, Real(2) / static_cast<Real>(d));
     out.Q = out.N / (static_cast<Real>(d) * out.D);
     out.FinvT = out.F.inverse().transpose();
-    out.MAt = out.M * out.A.transpose();
-    out.C = out.A * out.A.transpose();
+    out.MAt = out.M;
+    out.C = Math::SpatialMatrix<Real>::Identity(
+        static_cast<Eigen::Index>(d),
+        static_cast<Eigen::Index>(d));
     return out;
   }
 
@@ -203,6 +225,77 @@ namespace Rodin::Adaptation
     return out;
   }
 
+  /// Smooth admissibility barrier B_j(j), B_j'(j), B_j''(j).
+  /// Active on (jMin, jSafe); identically zero for j >= jSafe.
+  /// With t = (j - jMin)/(jSafe - jMin),
+  ///   B_j(t) = -log(t) + t - 1,
+  /// so B_j(1) = B_j'(1) = 0 and B_j -> +oo as j -> jMin+.
+  struct BarrierSampledJBarrier
+  {
+    Real B = 0;
+    Real Bp = 0;
+    Real Bpp = 0;
+    bool active = false;
+    bool feasible = true;
+  };
+
+  inline BarrierSampledJBarrier evaluateJBarrier(
+      Real j, const BarrierParameters& params)
+  {
+    BarrierSampledJBarrier out;
+    const bool eligible =
+         params.jBarrierWeight > Real(0)
+      && params.jBarrierSafeRatio > params.jMin;
+    if (!eligible || j >= params.jBarrierSafeRatio)
+      return out;
+    if (j <= params.jMin)
+    {
+      out.active = true;
+      out.feasible = false;
+      return out;
+    }
+    out.active = true;
+    const Real span = params.jBarrierSafeRatio - params.jMin;
+    const Real t = (j - params.jMin) / span;
+    out.B = -std::log(t) + t - Real(1);
+    out.Bp = (Real(1) - Real(1) / t) / span;
+    out.Bpp = Real(1) / (t * t * span * span);
+    return out;
+  }
+
+  /// Centered volume tether B_v(j) = 0.5 (log j)^2 and derivatives
+  /// with respect to j. Unlike the lower j-barrier, this has
+  /// B_v'(1) = 0 and B_v''(1) = 1, so the identity has zero residual
+  /// but an active volumetric tangent.
+  struct BarrierSampledVolumeTether
+  {
+    Real B = 0;
+    Real Bp = 0;
+    Real Bpp = 0;
+    bool active = false;
+    bool feasible = true;
+  };
+
+  inline BarrierSampledVolumeTether evaluateVolumeTether(
+      Real j, const BarrierParameters& params)
+  {
+    BarrierSampledVolumeTether out;
+    if (params.jVolumeTetherWeight <= Real(0))
+      return out;
+    if (j <= Real(0))
+    {
+      out.active = true;
+      out.feasible = false;
+      return out;
+    }
+    out.active = true;
+    const Real logj = std::log(j);
+    out.B = Real(0.5) * logj * logj;
+    out.Bp = logj / j;
+    out.Bpp = (Real(1) - logj) / (j * j);
+    return out;
+  }
+
   /// dQ/dF as a vdim x dim matrix. `q` already carries `valid = true`.
   inline Math::SpatialMatrix<Real> dQdF(const BarrierSampledQpt& q)
   {
@@ -217,13 +310,17 @@ namespace Rodin::Adaptation
       const BarrierSampledQpt& q,
       Real gamma, Real domainMeasure,
       const BarrierParameters& params,
-      const BarrierSampledQBarrier& bq)
+      const BarrierSampledQBarrier& bq,
+      const BarrierSampledJBarrier& bj,
+      const BarrierSampledVolumeTether& bv)
   {
-    if (!q.valid || !bq.feasible)
+    if (!q.valid || !bq.feasible || !bj.feasible || !bv.feasible)
       return Real(0);
     const Real w_s = gamma / domainMeasure;
     const Real w_Q = params.qBarrierWeight / domainMeasure;
-    return w_s * (q.Q - Real(1)) + w_Q * bq.B;
+    const Real w_j = params.jBarrierWeight / domainMeasure;
+    const Real w_v = params.jVolumeTetherWeight / domainMeasure;
+    return w_s * (q.Q - Real(1)) + w_Q * bq.B + w_j * bj.B + w_v * bv.B;
   }
 
   /// Per-qpt "first Piola" tensor S = dE_density/dF (vdim x dim).
@@ -231,12 +328,21 @@ namespace Rodin::Adaptation
       const BarrierSampledQpt& q,
       Real gamma, Real domainMeasure,
       const BarrierParameters& params,
-      const BarrierSampledQBarrier& bq)
+      const BarrierSampledQBarrier& bq,
+      const BarrierSampledJBarrier& bj,
+      const BarrierSampledVolumeTether& bv)
   {
     const Real w_s = gamma / domainMeasure;
     const Real w_Q = params.qBarrierWeight / domainMeasure;
+    const Real w_j = params.jBarrierWeight / domainMeasure;
+    const Real w_v = params.jVolumeTetherWeight / domainMeasure;
     const Real w_eff = w_s + (bq.active ? w_Q * bq.Bp : Real(0));
-    return w_eff * dQdF(q);
+    Math::SpatialMatrix<Real> S = w_eff * dQdF(q);
+    if (bj.active)
+      S += w_j * bj.Bp * q.j * q.FinvT;
+    if (bv.active)
+      S += w_v * bv.Bp * q.j * q.FinvT;
+    return S;
   }
 
   /**
@@ -289,9 +395,12 @@ namespace Rodin::Adaptation
           gradU.getValue(ip), A, params.jMin);
       if (!qpt.valid) continue;
       const auto bq = evaluateQBarrier(qpt.Q, params);
-      if (!bq.feasible) continue;
+      const auto bj = evaluateJBarrier(qpt.j, params);
+      const auto bv = evaluateVolumeTether(qpt.j, params);
+      if (!bq.feasible || !bj.feasible || !bv.feasible) continue;
       const Real wdet = qf.getWeight(q) * p.getDistortion();
-      energy += wdet * energyDensity(qpt, gamma, params.domainMeasure, params, bq);
+      energy += wdet * energyDensity(
+          qpt, gamma, params.domainMeasure, params, bq, bj, bv);
     }
     return energy;
   }
@@ -341,11 +450,13 @@ namespace Rodin::Adaptation
           gradU.getValue(ip), A, params.jMin);
       if (!qpt.valid) continue;
       const auto bq = evaluateQBarrier(qpt.Q, params);
-      if (!bq.feasible) continue;
+      const auto bj = evaluateJBarrier(qpt.j, params);
+      const auto bv = evaluateVolumeTether(qpt.j, params);
+      if (!bq.feasible || !bj.feasible || !bv.feasible) continue;
 
       const Real wdet = qf.getWeight(q) * p.getDistortion();
       const Math::SpatialMatrix<Real> S =
-        firstPiola(qpt, gamma, params.domainMeasure, params, bq);
+        firstPiola(qpt, gamma, params.domainMeasure, params, bq, bj, bv);
 
       for (std::size_t i = 0; i < nte; ++i)
       {
@@ -476,7 +587,8 @@ namespace Rodin::Adaptation
       const StateType& u,
       Real gamma,
       const BarrierParameters& params,
-      std::size_t quadratureOrder = 0)
+      std::size_t quadratureOrder = 0,
+      bool projectPSD = false)
   {
     using Variational::Jacobian;
     using Variational::IntegrationPoint;
@@ -521,7 +633,9 @@ namespace Rodin::Adaptation
       }
 
       const auto bq = evaluateQBarrier(qpt.Q, params);
-      if (!bq.feasible)
+      const auto bj = evaluateJBarrier(qpt.j, params);
+      const auto bv = evaluateVolumeTether(qpt.j, params);
+      if (!bq.feasible || !bj.feasible || !bv.feasible)
       {
         anyInadmissible = true;
         continue;
@@ -530,6 +644,8 @@ namespace Rodin::Adaptation
       const Real wdet = qf.getWeight(q) * p.getDistortion();
       const Real w_s  = gamma / params.domainMeasure;
       const Real w_Q  = params.qBarrierWeight / params.domainMeasure;
+      const Real w_j  = params.jBarrierWeight / params.domainMeasure;
+      const Real w_v  = params.jVolumeTetherWeight / params.domainMeasure;
       const Real w_eff = w_s + (bq.active ? w_Q * bq.Bp : Real(0));
 
       // Basis-function physical-space Jacobian per local dof.
@@ -548,15 +664,15 @@ namespace Rodin::Adaptation
       }
 
       // Precompute per-basis contractions with dQ/dF-related matrices.
-      // MAts[i] = <MAᵀ, jac_i>  (scalar)
+      // MAts[i] = <F, jac_i>  (scalar)
       // FinvTs[i] = <F⁻ᵀ, jac_i>  (scalar)
-      // MAts_vec[i] = MAᵀ · jac_i  (would be meaningless — we need dots)
+      // MAts_vec[i] = F · jac_i  (would be meaningless — we need dots)
       // For the general-d Hessian formula we also need MAtjac and FinvTjac
       // contracted into jac_j via a matrix product, so we precompute those.
       //
-      //   Term 1: (2/(d D)) <H1, H2 C>  = (2/(d D)) Tr(H1^T H2 C)
+      //   Term 1: (2/(d D)) <H1, H2>
       //   Term 2: (2/(d D))(N/d) <H1, F⁻ᵀ H2ᵀ F⁻ᵀ>
-      //   Terms 3/4: −(4/(d^2 D)) [<MAᵀ,H1><F⁻ᵀ,H2> + <F⁻ᵀ,H1><MAᵀ,H2>]
+      //   Terms 3/4: −(4/(d^2 D)) [<F,H1><F⁻ᵀ,H2> + <F⁻ᵀ,H1><F,H2>]
       //   Term 5: +(4N/(d^3 D)) <F⁻ᵀ,H1><F⁻ᵀ,H2>
       //
       // Plus the Q-barrier rank-1 term: w_Q B_Q'' <dQ/dF,H1><dQ/dF,H2>.
@@ -568,12 +684,21 @@ namespace Rodin::Adaptation
       const Math::SpatialMatrix<Real> GdQ = dQdF(qpt); // (vdim x dim)
 
       // Precompute scalar contractions per basis.
-      std::vector<Real> sc_MAt(n), sc_FinvT(n), sc_dQ(n);
+      const Math::SpatialMatrix<Real> Finv = qpt.FinvT.transpose();
+      const Math::SpatialMatrix<Real> Gdet = qpt.j * qpt.FinvT;
+
+      std::vector<Real> sc_MAt(n), sc_FinvT(n), sc_dQ(n), sc_det(n);
+      std::vector<Math::SpatialMatrix<Real>> FinvJac(n,
+          Math::SpatialMatrix<Real>(
+              static_cast<Eigen::Index>(d),
+              static_cast<Eigen::Index>(d)));
       for (std::size_t i = 0; i < n; ++i)
       {
         sc_MAt[i]   = qpt.MAt.dot(jac[i]);
         sc_FinvT[i] = qpt.FinvT.dot(jac[i]);
         sc_dQ[i]    = GdQ.dot(jac[i]);
+        sc_det[i]   = Gdet.dot(jac[i]);
+        FinvJac[i]  = Finv * jac[i];
       }
 
       // Precompute per-basis contracted vectors for Terms 1 and 2.
@@ -651,7 +776,7 @@ namespace Rodin::Adaptation
           // Term 2: (2/(d D))(N/d) Tr(F⁻ᵀ jac_i^T F⁻ᵀ jac_j^T) = nod * FiTji[i].dot(FiTji[j]^T)
           const Real t2 = twoDinvD * nod * FiTji[i].dot(FiTji[j].transpose());
 
-          // Terms 3+4: −(4/(d^2 D)) [<MAᵀ,jac_i><F⁻ᵀ,jac_j> + sym]
+	          // Terms 3+4: −(4/(d^2 D)) [<F,jac_i><F⁻ᵀ,jac_j> + sym]
           const Real t34 = -fourd2invD
               * (sc_MAt[i] * sc_FinvT[j] + sc_FinvT[i] * sc_MAt[j]);
 
@@ -663,7 +788,23 @@ namespace Rodin::Adaptation
               ? w_Q * bq.Bpp * sc_dQ[i] * sc_dQ[j]
               : Real(0);
 
-          const Real H = wdet * (w_eff * (t1 + t2 + t34 + t5) + tQ);
+          Real tJ = Real(0);
+          if (bj.active)
+          {
+            const Real d2det = qpt.j
+              * (sc_FinvT[i] * sc_FinvT[j]
+                 - (FinvJac[i] * FinvJac[j]).trace());
+            tJ = w_j * (bj.Bpp * sc_det[i] * sc_det[j] + bj.Bp * d2det);
+          }
+          if (bv.active)
+          {
+            const Real d2det = qpt.j
+              * (sc_FinvT[i] * sc_FinvT[j]
+                 - (FinvJac[i] * FinvJac[j]).trace());
+            tJ += w_v * (bv.Bpp * sc_det[i] * sc_det[j] + bv.Bp * d2det);
+          }
+
+          const Real H = wdet * (w_eff * (t1 + t2 + t34 + t5) + tQ + tJ);
           K(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(j)) += H;
           if (i != j)
             K(static_cast<Eigen::Index>(j), static_cast<Eigen::Index>(i)) += H;
@@ -678,7 +819,7 @@ namespace Rodin::Adaptation
         K(i, i) = kBarrierSingularPenalty;
     }
 
-    return K;
+    return projectPSD ? projectSymmetricMatrixPSD(K) : K;
   }
 
   /**
@@ -698,12 +839,14 @@ namespace Rodin::Adaptation
           const TestType& v,
           const StateType& u,
           BarrierParameters params,
-          std::size_t quadratureOrder = 0)
+          std::size_t quadratureOrder = 0,
+          bool projectPSD = false)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
           m_gamma(gamma.copy()),
           m_trial(du), m_test(v), m_state(u),
           m_params(params),
-          m_quadratureOrder(quadratureOrder)
+          m_quadratureOrder(quadratureOrder),
+          m_projectPSD(projectPSD)
       {}
 
       BarrierTangentIntegratorSampled(const BarrierTangentIntegratorSampled& other)
@@ -712,6 +855,7 @@ namespace Rodin::Adaptation
           m_trial(other.m_trial), m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params),
           m_quadratureOrder(other.m_quadratureOrder),
+          m_projectPSD(other.m_projectPSD),
           m_polytope(other.m_polytope),
           m_matrix()
       {}
@@ -738,7 +882,8 @@ namespace Rodin::Adaptation
         const Real gammaVal = m_gamma->getValue(centroid);
 
         m_matrix = computeBarrierSampledCellTangent(
-            polytope, m_state.get(), gammaVal, m_params, m_quadratureOrder);
+            polytope, m_state.get(), gammaVal, m_params, m_quadratureOrder,
+            m_projectPSD);
 
         return *this;
       }
@@ -762,6 +907,7 @@ namespace Rodin::Adaptation
       std::reference_wrapper<const StateType> m_state;
       BarrierParameters m_params;
       std::size_t m_quadratureOrder;
+      bool m_projectPSD;
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Matrix<ScalarType> m_matrix;
   };
@@ -789,7 +935,18 @@ namespace Rodin::Adaptation
         return BarrierTangentIntegratorSampled<
                    GammaDerived, Trial, Test, State>(
               gamma, m_du.get(), m_v.get(), m_u.get(),
-              params, m_quadratureOrder);
+	              params, m_quadratureOrder);
+      }
+
+      template <class GammaDerived>
+      auto TangentPSDProjected(
+          const Variational::RealFunctionBase<GammaDerived>& gamma,
+          BarrierParameters params) const
+      {
+        return BarrierTangentIntegratorSampled<
+                   GammaDerived, Trial, Test, State>(
+              gamma, m_du.get(), m_v.get(), m_u.get(),
+              params, m_quadratureOrder, true);
       }
 
       template <class GammaDerived>

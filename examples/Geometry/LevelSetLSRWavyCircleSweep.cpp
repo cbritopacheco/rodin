@@ -12,7 +12,7 @@
 // square along a circular orbit. The whole classify-then-displace
 // pipeline (s-t cut + FMM + LSR Newton) is rerun from scratch at every
 // frame, and a transient XDMF stream is emitted with both the
-// low-fidelity classification and the high-fidelity moved mesh per
+// topological reference classification and the geometric reference moved mesh per
 // frame.
 //
 // Compared with `LevelSetLSRReconstruction`, this example exercises:
@@ -26,10 +26,8 @@
 //     turnover.
 //
 // FES-independence and Newton-tangent choices follow the same honest
-// caveats as the parent example: the barrier + shape closed-form
-// algebra is specialised to affine P1 triangles in 2D; LSR uses the
-// PSD-projected full-Newton tangent. The example is therefore a 2D
-// triangular prototype.
+// caveats as the parent example: LSR uses sampled admissibility and a
+// sampled relative-distortion energy, with PSD-projected Newton tangents.
 //
 #include <Rodin/Adaptation.h>
 #include <Rodin/Assembly.h>
@@ -67,6 +65,49 @@ namespace
     out(0) = x;
     out(1) = y;
     return out;
+  }
+
+  template <class Displacement>
+  void updateMovedMeshFromDisplacement(
+      const LocalMesh& mesh,
+      LocalMesh& moved,
+      const Displacement& u)
+  {
+    const auto& uFes = u.getFiniteElementSpace();
+    const auto& uData = u.getData();
+    const Index vn = mesh.getVertexCount();
+    for (Index vertex = 0; vertex < vn; ++vertex)
+    {
+      const Vec2 x = mesh.getVertexCoordinates(vertex);
+      const auto& dofs = uFes.getDOFs(0, vertex);
+      const Real ux = uData(dofs[0]);
+      const Real uy = uData(dofs[1]);
+      moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
+    }
+
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+    Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      Geometry::PointCloud pm(2, geomFe.getCount());
+      for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+      {
+        const auto& rc = geomFe.getNode(a);
+        cell.getTransformation().transform(X, rc);
+        const Real ux = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
+        const Real uy = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
+        pm(0, a) = X(0) + ux;
+        pm(1, a) = X(1) + uy;
+      }
+      moved.setPolytopeTransformation(
+          {D, cell.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+    }
+#endif
   }
 
   // -------------------------------------------------------------------------
@@ -205,7 +246,7 @@ namespace
   // any level set type.
   template <class PhiFn>
   std::vector<CellMomentInfo> collectCellMomentInfo(
-      const LocalMesh& mesh, PhiFn&& phiFn, Real epsilon)
+      const LocalMesh& mesh, PhiFn&& phi, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -235,7 +276,7 @@ namespace
       for (const auto& bary : TriangleBarycentricQuadrature)
       {
         const Vec2 xq = interpolateVec(info.x, bary);
-        moment += applyPhaseMomentMap(phiFn(xq), epsilon);
+        moment += applyPhaseMomentMap(phi(xq), epsilon);
       }
       info.moment = moment / TriangleBarycentricQuadrature.size();
       cells.push_back(std::move(info));
@@ -341,6 +382,23 @@ namespace
         + " (expected psd, newton, or gn).");
   }
 
+  // Cold    : u0 = 0 every frame.
+  // Warm    : u0 = previous frame's converged u (zero on frame 0).
+  // Hilbert : u0 = Riesz lift of -delta E_LSR(0) in H^1_0.
+  enum class InitialGuessStrategy { Cold, Warm, Hilbert };
+
+  InitialGuessStrategy parseInitialGuessStrategy(
+      int argc, char** argv, const std::string& name)
+  {
+    const std::string value = parseStringOption(argc, argv, name, "hilbert");
+    if (value == "cold") return InitialGuessStrategy::Cold;
+    if (value == "warm") return InitialGuessStrategy::Warm;
+    if (value == "hilbert") return InitialGuessStrategy::Hilbert;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected cold, warm, or hilbert).");
+  }
+
   bool hasFlag(int argc, char** argv, const std::string& name)
   {
     const std::string flag = "--" + name;
@@ -387,15 +445,18 @@ int main(int argc, char** argv)
   // very stiff and subsequent Newton directions become explosively
   // compressive. Keeping the iterate safely above j_safe avoids this.
   const Real   kLineSearchSafetyMargin = Real(10);
-  const Real   kQShapeMax =
-    parseRealOption(argc, argv, "qshape-max", Real(10));
+  // Relative-distortion cap for the line search (identity-neutral):
+  //   Q_rel(F) = ||F||^2 / (d * det(F)^(2/d)),  F = I + grad u_h.
+  // Default 10 leaves the historical effective behaviour untouched.
+  const Real   kQRelMax =
+    parseRealOption(argc, argv, "qrel-max", Real(10));
   const std::size_t kLSRQuadratureOrder =
     parseSizeTOption(argc, argv, "lsr-quad-order", 0);
   const Real kH1RegularizationWeight =
     parseRealOption(argc, argv, "h1-reg", Real(0));
 #ifdef RODIN_LSR_P2_DISPLACEMENT
   const Real kShapeWeight =
-    parseRealOption(argc, argv, "gamma", Real(1e-1));
+    parseRealOption(argc, argv, "gamma", Real(0.3));
 #else
   const Real kShapeWeight =
     parseRealOption(argc, argv, "gamma", Real(1e-1));
@@ -406,9 +467,9 @@ int main(int argc, char** argv)
   //   Warm    : u₀ = previous frame's converged u
   //   Hilbert : u₀ = Riesz lift of −δE_LSR(0) in the H¹₀ inner product
   //             (a(u₀, v) = −⟨δE_LSR(0), v⟩  on V₀)
-  enum class InitialGuessStrategy { Cold, Warm, Hilbert };
-  constexpr InitialGuessStrategy kInitialGuessStrategy =
-      InitialGuessStrategy::Hilbert;
+  // Selected at runtime via --init=cold|warm|hilbert (default: hilbert).
+  const InitialGuessStrategy kInitialGuessStrategy =
+      parseInitialGuessStrategy(argc, argv, "init");
   const LSRHilbertMetric initialGuessMetric =
     parseHilbertMetric(argc, argv, "hilbert-metric");
   const LSRInitialGuessScaling initialGuessScaling =
@@ -428,8 +489,13 @@ int main(int argc, char** argv)
   constexpr ConvergenceMode kConvergenceMode = ConvergenceMode::Either;
   // Knobs are CLI-overridable so convergence settings can be swept without
   // rebuilding.
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  constexpr Real kDefaultFitTolMult = Real(5.0);
+#else
+  constexpr Real kDefaultFitTolMult = Real(4.0);
+#endif
   const Real        kFitTolMult      =
-    parseRealOption(argc, argv, "fittol-mult", Real(4.0)); ///< fitTol = mult * h^2
+    parseRealOption(argc, argv, "fittol-mult", kDefaultFitTolMult); ///< fitTol = mult * h^2
   const Real        kInterfaceFitTol = kFitTolMult * h * h;
   constexpr Real    kResidualAbsTol  = Real(1e-6);
   const Real        kResidualRelTol  =
@@ -481,7 +547,7 @@ int main(int argc, char** argv)
   auto cellGeomBg = precomputeCellGeometry(mesh);
   auto& cellCacheBg = cellGeomBg.first;
 
-  GridFunction sLF(p1Fes);            sLF.setName("s_LF");
+  GridFunction psi(p1Fes);            psi.setName("psi");
   GridFunction phiGf(p1Fes);          phiGf.setName("phi");
   GridFunction cellLabel(p0Fes);      cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);    phaseMoment.setName("phase_moment");
@@ -490,40 +556,47 @@ int main(int argc, char** argv)
   GridFunction  u(vectorFes);         u.setName("displacement");
 
   // -------------------------------------------------------------------------
-  // HF (moved) side. Same combinatorics as `mesh`; only vertex coordinates
-  // change per frame, so the FES on `moved` is stable across frames and
-  // we can register persistent GridFunctions with the transient XDMF
-  // grid. The XDMF writer dumps the moved mesh anew at every snapshot
+  // phi (moved) side. Same combinatorics as `mesh`; coordinates and, for
+  // P2 displacement, cell polytope transformations change per frame. The
+  // XDMF writer dumps the moved mesh anew at every snapshot
   // (MeshPolicy::Transient) so ParaView sees the curved fit per frame.
   // -------------------------------------------------------------------------
   LocalMesh moved(mesh);
   ScalarP1 p1FesMoved(moved);
   ScalarP0 p0FesMoved(moved);
 
-  GridFunction cellLabelHF(p0FesMoved); cellLabelHF.setName("cell_label");
+  GridFunction cellLabelPhi(p0FesMoved); cellLabelPhi.setName("cell_label");
   GridFunction jKgf(p0FesMoved);        jKgf.setName("j");
-  GridFunction qShape(p0FesMoved);      qShape.setName("q_shape");
+  // q_abs = Q_abs(A_K^u): absolute intrinsic shape quality of the moved
+  //                       cell (similarity of REFERENCE cell at value 1).
+  // q_rel = Q_rel(F),  F = A_K^u (A_K)^{-1} = I + grad u:
+  //                       relative-distortion measure minimised by the
+  //                       LSR shape barrier; equals 1 at u = 0 for every
+  //                       cell regardless of background shape.
+  GridFunction qAbs(p0FesMoved);        qAbs.setName("q_abs");
+  GridFunction qRel(p0FesMoved);        qRel.setName("q_rel");
   GridFunction phiMoved(p1FesMoved);    phiMoved.setName("phi_moved");
 
   // -------------------------------------------------------------------------
-  // XDMF writer in transient mode (two grids: LF and HF).
+  // XDMF writer in transient mode (two grids: psi and phi).
   // -------------------------------------------------------------------------
   IO::XDMF xdmf("LevelSetLSRWavyCircleSweep");
-  auto lfGrid = xdmf.grid("LF");
-  lfGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
-  lfGrid.add(cellLabel,   IO::XDMF::Center::Cell);
-  lfGrid.add(phaseMoment, IO::XDMF::Center::Cell);
-  lfGrid.add(sigmaKgf,    IO::XDMF::Center::Cell);
-  lfGrid.add(phiGf,       IO::XDMF::Center::Node);
-  lfGrid.add(sLF,         IO::XDMF::Center::Node);
-  lfGrid.add(u,           IO::XDMF::Center::Node);
+  auto psiGrid = xdmf.grid("psi");
+  psiGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
+  psiGrid.add(cellLabel,   IO::XDMF::Center::Cell);
+  psiGrid.add(phaseMoment, IO::XDMF::Center::Cell);
+  psiGrid.add(sigmaKgf,    IO::XDMF::Center::Cell);
+  psiGrid.add(phiGf,       IO::XDMF::Center::Node);
+  psiGrid.add(psi,         IO::XDMF::Center::Node);
+  psiGrid.add(u,           IO::XDMF::Center::Node);
 
-  auto hfGrid = xdmf.grid("HF");
-  hfGrid.setMesh(moved, IO::XDMF::MeshPolicy::Transient);
-  hfGrid.add(cellLabelHF, IO::XDMF::Center::Cell);
-  hfGrid.add(jKgf,        IO::XDMF::Center::Cell);
-  hfGrid.add(qShape,      IO::XDMF::Center::Cell);
-  hfGrid.add(phiMoved,    IO::XDMF::Center::Node);
+  auto phiGrid = xdmf.grid("phi");
+  phiGrid.setMesh(moved, IO::XDMF::MeshPolicy::Transient);
+  phiGrid.add(cellLabelPhi, IO::XDMF::Center::Cell);
+  phiGrid.add(jKgf,        IO::XDMF::Center::Cell);
+  phiGrid.add(qAbs,        IO::XDMF::Center::Cell);
+  phiGrid.add(qRel,        IO::XDMF::Center::Cell);
+  phiGrid.add(phiMoved,    IO::XDMF::Center::Node);
 
   // -------------------------------------------------------------------------
   // Frame loop.
@@ -627,9 +700,9 @@ int main(int argc, char** argv)
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
 
-    // ---- Stage 2: FMM signed distance s_h^LF ----
-    sLF = Real(0);
-    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(sLF)
+    // ---- Stage 2: FMM signed distance psi_h ----
+    psi = Real(0);
+    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psi)
       .setInterface(interfaceAttribute)
       .setInterior(interiorAttribute)
       .solve()
@@ -653,7 +726,7 @@ int main(int argc, char** argv)
         const Real w =
           triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
         domainMeasure += w;
-        const Real s = sLF.getValue(pt);
+        const Real s = psi.getValue(pt);
         const Real W = std::exp(-s * s / (2 * deltaW * deltaW));
         weightedBandMeasure += W * w;
       }
@@ -666,20 +739,20 @@ int main(int argc, char** argv)
 
     auto& cellCache = cellCacheBg;
 
-    RealFunction phiFn(
+    RealFunction phi(
         [&](const Geometry::Point& p) -> Real
         {
           const auto& c = p.getPhysicalCoordinates();
           return levelSet.phi(vec2(c(0), c(1)));
         });
-    AnalyticVectorFunction gradFn(
+    AnalyticVectorFunction gradPhi(
         [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
         {
           const auto& c = p.getPhysicalCoordinates();
           return levelSet.grad(vec2(c(0), c(1)));
         },
         /*dimension=*/2);
-    AnalyticMatrixFunction hessFn(
+    AnalyticMatrixFunction hessPhi(
         [&](const Geometry::Point& p) -> Math::SpatialMatrix<Real>
         {
           const auto& c = p.getPhysicalCoordinates();
@@ -700,7 +773,7 @@ int main(int argc, char** argv)
     baseParams.jMinRatio = Real(1e-8);
     baseParams.jSafeRatio = Real(1e-3);
     baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;
-    baseParams.qShapeMax = kQShapeMax;
+    baseParams.qRelMax = kQRelMax;
     baseParams.alphaInit = kLineSearchAlphaInit;
     baseParams.alphaReduction = kLineSearchReduction;
     baseParams.alphaMin = kLineSearchAlphaMin;
@@ -771,7 +844,7 @@ int main(int argc, char** argv)
 
     LSR lsr(u);
     const LSRReport lsrReport =
-      lsr.setParameters(params).solve(sLF, phiFn, gradFn, hessFn);
+      lsr.setParameters(params).solve(psi, phi, gradPhi, hessPhi);
 
     r0 = lsrReport.initialResidual;
     itCount = lsrReport.iterations;
@@ -831,7 +904,7 @@ int main(int argc, char** argv)
       convergedFlag
     };
 
-    // ---- Stage 5a: LF cell-P0 fields + nodal phi ----
+    // ---- Stage 5a: psi-side cell-P0 fields + nodal phi ----
     {
       const std::size_t d = mesh.getDimension();
       for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -852,24 +925,15 @@ int main(int argc, char** argv)
       return levelSet.phi(vec2(X(0), X(1)));
     };
 
-    // ---- Stage 5b: build the moved (HF) mesh and its HF fields ----
+    // ---- Stage 5b: build the moved (phi) mesh and its phi fields ----
     //
-    // The HF mesh shares combinatorics with `mesh`; only vertex
-    // coordinates are pushed by u. Region attributes (interior /
-    // exterior / interface / boundary) carry over so the HF grid carries
-    // the same classification ParaView sees on LF.
+    // The phi mesh shares combinatorics with `mesh`; its geometry is pushed
+    // by u. For P2 displacement this includes P2 cell transformations.
+    // Region attributes (interior /
+    // exterior / interface / boundary) carry over so the phi grid carries
+    // the same classification ParaView sees on psi.
     {
-      const auto& uFes = u.getFiniteElementSpace();
-      const auto& uData = u.getData();
-      const Index vn = mesh.getVertexCount();
-      for (Index vertex = 0; vertex < vn; ++vertex)
-      {
-        const Vec2 x = mesh.getVertexCoordinates(vertex);
-        const auto& dofs = uFes.getDOFs(0, vertex);
-        const Real ux = uData(dofs[0]);
-        const Real uy = uData(dofs[1]);
-        moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
-      }
+      updateMovedMeshFromDisplacement(mesh, moved, u);
       const std::size_t D = mesh.getDimension();
       for (Index i = 0; i < static_cast<Index>(mesh.getCellCount()); ++i)
       {
@@ -888,9 +952,10 @@ int main(int argc, char** argv)
       }
     }
 
-    // Per-cell j_K^u and Q_shape on the moved mesh — same closed-form
-    // expressions as the parent example (the σ_K branch is fixed on the
-    // original mesh; the moved Jacobian is read from `movedCache`).
+    // Per-cell centroid j_K^u and absolute Q diagnostics on the moved mesh.
+    // The sigma_K branch is fixed on the original mesh; for curved P2 cells
+    // the affine cache reports a centroid summary, while the line search uses
+    // sampled admissibility on the actual displacement field.
     auto [movedCache, movedToLocal] = precomputeCellGeometry(moved);
     {
       const std::size_t d = moved.getDimension();
@@ -903,12 +968,17 @@ int main(int argc, char** argv)
         const auto& src = cellCache[local];
         const auto& dst = movedCache[movedLocal];
         const Real sigDetAu = static_cast<Real>(src.sigmaK) * dst.detAK;
-        jKgf.getData()(dof) = sigDetAu / src.Jscale;
+        const Real jKval = sigDetAu / src.Jscale;
+        jKgf.getData()(dof) = jKval;
         const Real dExp = Real(2) / Real(d);
-        qShape.getData()(dof) =
+        qAbs.getData()(dof) =
           dst.A.squaredNorm()
             / (static_cast<Real>(d) * std::pow(sigDetAu, dExp));
-        cellLabelHF.getData()(dof) =
+        const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
+        qRel.getData()(dof) =
+          F.squaredNorm()
+            / (static_cast<Real>(d) * std::pow(jKval, dExp));
+        cellLabelPhi.getData()(dof) =
           static_cast<Real>(classified.labels[local]);
       }
     }

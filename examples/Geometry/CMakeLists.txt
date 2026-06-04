@@ -21,6 +21,16 @@ target_link_libraries(LevelSetLSRReconstruction
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetLSRReconstructionP2 LevelSetLSRReconstruction.cpp)
+target_compile_definitions(LevelSetLSRReconstructionP2
+  PRIVATE
+  RODIN_LSR_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetLSRReconstructionP2
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(LevelSetLSRWavyCircleSweep LevelSetLSRWavyCircleSweep.cpp)
 target_link_libraries(LevelSetLSRWavyCircleSweep
   PUBLIC

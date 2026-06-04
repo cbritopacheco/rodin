@@ -56,6 +56,7 @@
 #include "Rodin/Variational/LinearFormIntegrator.h"
 #include "Rodin/Variational/MatrixFunction.h"
 #include "Rodin/Variational/RealFunction.h"
+#include "Rodin/Variational/Flow.h"
 #include "Rodin/Variational/VectorFunction.h"
 
 namespace Rodin::Adaptation
@@ -138,16 +139,28 @@ namespace Rodin::Adaptation
 
   struct LSRIntegratorParameters
   {
+    enum class FieldEvaluation
+    {
+      PhysicalPoint,
+      FlowTrace
+    };
+
     Real rhoS = 1;
     Real deltaW = 0;
     Real hRef = 0;
     Real normalizer = 1;
     std::size_t quadratureOrder = 0; ///< 0 selects the default FE-based rule.
+    FieldEvaluation fieldEvaluation = FieldEvaluation::PhysicalPoint;
   };
 
   inline std::size_t lsrQuadOrderFor(std::size_t feOrder)
   {
-    return std::max<std::size_t>(2, 2 * feOrder);
+    // Need (#qpts * vdim) >= n_dof_per_cell with a comfortable margin
+    // so the basis-at-qpt evaluation map B is well-conditioned on every
+    // cell DOF, including P2 edge-midpoint internal modes. The
+    // polynomial-exactness lower bound is 2*feOrder; 4*feOrder gives an
+    // overdetermined B on P2 vector cells without changing P1.
+    return std::max<std::size_t>(2, 4 * feOrder);
   }
 
   inline std::size_t lsrQuadOrderFor(
@@ -173,6 +186,39 @@ namespace Rodin::Adaptation
           original.getReferenceCoordinates(),
           yPhysical);
     }
+
+    template <class Phi>
+    struct TracedPoint
+    {
+      Geometry::Point point;
+      Real correction = 0;
+      bool exited = false;
+    };
+
+    template <class Phi>
+    TracedPoint<Phi> traceMovedPoint(
+        const Geometry::Point& original,
+        const Math::SpatialVector<Real>& displacement,
+        const Phi& phi,
+        LSRIntegratorParameters::FieldEvaluation mode)
+    {
+      if (mode == LSRIntegratorParameters::FieldEvaluation::PhysicalPoint)
+      {
+        Math::SpatialVector<Real> y(original.getPolytope().getDimension());
+        for (std::size_t c = 0; c < static_cast<std::size_t>(y.size()); ++c)
+          y(c) = original.getCoordinates()(c) + displacement(c);
+        return { makeMovedPoint(original, y), Real(0), false };
+      }
+
+      auto velocity =
+        [displacement](const Geometry::Point&)
+        {
+          return displacement;
+        };
+      Variational::Flow flow(Real(1), phi, velocity);
+      const auto trace = flow.trace(original);
+      return { trace.getPoint(), trace.getCorrection(), trace.exited() };
+    }
   }
 
   /**
@@ -184,7 +230,7 @@ namespace Rodin::Adaptation
    * Both `phi` and `grad` are evaluated at the deformed point y_q.
    */
   template <class PhiDerived, class GradDerived,
-            class SLFType, class TestType, class StateType>
+            class PsiType, class TestType, class StateType>
   class LSRResidualIntegrator final
     : public Variational::LinearFormIntegratorBase<Real>
   {
@@ -195,13 +241,13 @@ namespace Rodin::Adaptation
 
       LSRResidualIntegrator(
           const PhiType& phi, const GradType& grad,
-          const SLFType& sLF,
+          const PsiType& psi,
           const TestType& v,
           const StateType& u,
           LSRIntegratorParameters params)
         : Variational::LinearFormIntegratorBase<Real>(v),
           m_phi(phi.copy()), m_grad(grad.copy()),
-          m_sLF(sLF), m_test(v), m_state(u),
+          m_psi(psi), m_test(v), m_state(u),
           m_params(params)
       {}
 
@@ -209,7 +255,7 @@ namespace Rodin::Adaptation
         : Variational::LinearFormIntegratorBase<Real>(other),
           m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
-          m_sLF(other.m_sLF), m_test(other.m_test), m_state(other.m_state),
+          m_psi(other.m_psi), m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params),
           m_polytope(other.m_polytope),
           m_elemVec()
@@ -245,16 +291,22 @@ namespace Rodin::Adaptation
           const Real distortion = pt.getDistortion();
           const auto& rc = pt.getReferenceCoordinates();
 
-          const Real s = m_sLF.get().getValue(ip);
+          const Real s = m_psi.get().getValue(ip);
           const auto uqRange = m_state.get().getValue(ip);
-          Math::SpatialVector<Real> y(d);
+          Math::SpatialVector<Real> displacement(d);
+          displacement.setZero();
           for (std::size_t c = 0; c < vdim; ++c)
-            y(c) = pt.getCoordinates()(c) + uqRange(c);
+            displacement(c) = uqRange(c);
 
-          const Geometry::Point movedPoint = detail::makeMovedPoint(pt, y);
+          const auto traced =
+            detail::traceMovedPoint(
+                pt, displacement, *m_phi, m_params.fieldEvaluation);
+          if (traced.exited)
+            continue;
 
-          const Real phi_y = m_phi->getValue(movedPoint);
-          const auto gradPhi = m_grad->getValue(movedPoint);
+          const Real phi_y =
+            m_phi->getValue(traced.point) + traced.correction;
+          const auto gradPhi = m_grad->getValue(traced.point);
 
           const Real r = phi_y - s;
           const Real weight =
@@ -290,7 +342,7 @@ namespace Rodin::Adaptation
     private:
       std::unique_ptr<PhiType>  m_phi;
       std::unique_ptr<GradType> m_grad;
-      std::reference_wrapper<const SLFType> m_sLF;
+      std::reference_wrapper<const PsiType> m_psi;
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_state;
       LSRIntegratorParameters m_params;
@@ -307,7 +359,7 @@ namespace Rodin::Adaptation
 
   template <LSRIntegratorTangentMode Mode,
             class PhiDerived, class GradDerived, class HessDerived,
-            class SLFType, class TrialType, class TestType, class StateType>
+            class PsiType, class TrialType, class TestType, class StateType>
   class LSRTangentIntegrator;
 
   // ---- GaussNewton specialisation ------------------------------------------
@@ -315,35 +367,38 @@ namespace Rodin::Adaptation
   //   K_GN[te, tr] = sum_q wq * |J_q| * rhoS * W(s_q) * normalizer
   //                  * (grad(y_q) . v_te) * (grad(y_q) . u_tr).
   template <class PhiDerived, class GradDerived, class HessDerived,
-            class SLFType, class TrialType, class TestType, class StateType>
+            class PsiType, class TrialType, class TestType, class StateType>
   class LSRTangentIntegrator<
             LSRIntegratorTangentMode::GaussNewton,
             PhiDerived, GradDerived, HessDerived,
-            SLFType, TrialType, TestType, StateType>
+            PsiType, TrialType, TestType, StateType>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
       using ScalarType = Real;
+      using PhiType  = Variational::RealFunctionBase<PhiDerived>;
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
       static constexpr LSRIntegratorTangentMode Mode = LSRIntegratorTangentMode::GaussNewton;
 
       LSRTangentIntegrator(
+          const PhiType& phi,
           const GradType& grad,
-          const SLFType& sLF,
+          const PsiType& psi,
           const TrialType& du,
           const TestType& v,
           const StateType& u,
           LSRIntegratorParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
-          m_grad(grad.copy()),
-          m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
+          m_phi(phi.copy()), m_grad(grad.copy()),
+          m_psi(psi), m_trial(du), m_test(v), m_state(u),
           m_params(params)
       {}
 
       LSRTangentIntegrator(const LSRTangentIntegrator& other)
         : Variational::LocalBilinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
-          m_sLF(other.m_sLF), m_trial(other.m_trial),
+          m_psi(other.m_psi), m_trial(other.m_trial),
           m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params), m_polytope(other.m_polytope),
           m_matrix()
@@ -383,14 +438,19 @@ namespace Rodin::Adaptation
           const Real distortion = pt.getDistortion();
           const auto& rc = pt.getReferenceCoordinates();
 
-          const Real s = m_sLF.get().getValue(ip);
+          const Real s = m_psi.get().getValue(ip);
           const auto uqRange = m_state.get().getValue(ip);
-          Math::SpatialVector<Real> y(d);
+          Math::SpatialVector<Real> displacement(d);
+          displacement.setZero();
           for (std::size_t c = 0; c < vdim; ++c)
-            y(c) = pt.getCoordinates()(c) + uqRange(c);
+            displacement(c) = uqRange(c);
 
-          const Geometry::Point movedPoint = detail::makeMovedPoint(pt, y);
-          const auto gradPhi = m_grad->getValue(movedPoint);
+          const auto traced =
+            detail::traceMovedPoint(
+                pt, displacement, *m_phi, m_params.fieldEvaluation);
+          if (traced.exited)
+            continue;
+          const auto gradPhi = m_grad->getValue(traced.point);
 
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
@@ -436,8 +496,9 @@ namespace Rodin::Adaptation
       { return new LSRTangentIntegrator(*this); }
 
     private:
+      std::unique_ptr<PhiType> m_phi;
       std::unique_ptr<GradType> m_grad;
-      std::reference_wrapper<const SLFType>  m_sLF;
+      std::reference_wrapper<const PsiType>  m_psi;
       std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType>  m_test;
       std::reference_wrapper<const StateType> m_state;
@@ -451,11 +512,11 @@ namespace Rodin::Adaptation
   //   K_N = K_GN + sum_q wq * |J_q| * rhoS * W(s_q) * normalizer
   //                * (phi(y_q) - s_q) * v_te^T * hess(y_q) * u_tr.
   template <class PhiDerived, class GradDerived, class HessDerived,
-            class SLFType, class TrialType, class TestType, class StateType>
+            class PsiType, class TrialType, class TestType, class StateType>
   class LSRTangentIntegrator<
             LSRIntegratorTangentMode::Newton,
             PhiDerived, GradDerived, HessDerived,
-            SLFType, TrialType, TestType, StateType>
+            PsiType, TrialType, TestType, StateType>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
@@ -467,14 +528,14 @@ namespace Rodin::Adaptation
 
       LSRTangentIntegrator(
           const PhiType& phi, const GradType& grad, const HessType& hess,
-          const SLFType& sLF,
+          const PsiType& psi,
           const TrialType& du,
           const TestType& v,
           const StateType& u,
           LSRIntegratorParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
           m_phi(phi.copy()), m_grad(grad.copy()), m_hess(hess.copy()),
-          m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
+          m_psi(psi), m_trial(du), m_test(v), m_state(u),
           m_params(params)
       {}
 
@@ -483,7 +544,7 @@ namespace Rodin::Adaptation
           m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
           m_hess(other.m_hess ? other.m_hess->copy() : nullptr),
-          m_sLF(other.m_sLF), m_trial(other.m_trial),
+          m_psi(other.m_psi), m_trial(other.m_trial),
           m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params), m_polytope(other.m_polytope),
           m_matrix()
@@ -523,17 +584,23 @@ namespace Rodin::Adaptation
           const Real distortion = pt.getDistortion();
           const auto& rc = pt.getReferenceCoordinates();
 
-          const Real s = m_sLF.get().getValue(ip);
+          const Real s = m_psi.get().getValue(ip);
           const auto uqRange = m_state.get().getValue(ip);
-          Math::SpatialVector<Real> y(d);
+          Math::SpatialVector<Real> displacement(d);
+          displacement.setZero();
           for (std::size_t c = 0; c < vdim; ++c)
-            y(c) = pt.getCoordinates()(c) + uqRange(c);
+            displacement(c) = uqRange(c);
 
-          const Geometry::Point movedPoint = detail::makeMovedPoint(pt, y);
+          const auto traced =
+            detail::traceMovedPoint(
+                pt, displacement, *m_phi, m_params.fieldEvaluation);
+          if (traced.exited)
+            continue;
 
-          const Real r = m_phi->getValue(movedPoint) - s;
-          const auto gradPhi = m_grad->getValue(movedPoint);
-          const auto hessPhi = m_hess->getValue(movedPoint);
+          const Real r =
+            m_phi->getValue(traced.point) + traced.correction - s;
+          const auto gradPhi = m_grad->getValue(traced.point);
+          const auto hessPhi = m_hess->getValue(traced.point);
 
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
@@ -599,7 +666,7 @@ namespace Rodin::Adaptation
       std::unique_ptr<PhiType>  m_phi;
       std::unique_ptr<GradType> m_grad;
       std::unique_ptr<HessType> m_hess;
-      std::reference_wrapper<const SLFType>  m_sLF;
+      std::reference_wrapper<const PsiType>  m_psi;
       std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType>  m_test;
       std::reference_wrapper<const StateType> m_state;
@@ -620,11 +687,11 @@ namespace Rodin::Adaptation
   // quadratic residual convergence is implied by the tangent alone.
   //
   template <class PhiDerived, class GradDerived, class HessDerived,
-            class SLFType, class TrialType, class TestType, class StateType>
+            class PsiType, class TrialType, class TestType, class StateType>
   class LSRTangentIntegrator<
             LSRIntegratorTangentMode::PSDProjectedNewton,
             PhiDerived, GradDerived, HessDerived,
-            SLFType, TrialType, TestType, StateType>
+            PsiType, TrialType, TestType, StateType>
     final : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
@@ -636,14 +703,14 @@ namespace Rodin::Adaptation
 
       LSRTangentIntegrator(
           const PhiType& phi, const GradType& grad, const HessType& hess,
-          const SLFType& sLF,
+          const PsiType& psi,
           const TrialType& du,
           const TestType& v,
           const StateType& u,
           LSRIntegratorParameters params)
         : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
           m_phi(phi.copy()), m_grad(grad.copy()), m_hess(hess.copy()),
-          m_sLF(sLF), m_trial(du), m_test(v), m_state(u),
+          m_psi(psi), m_trial(du), m_test(v), m_state(u),
           m_params(params)
       {}
 
@@ -652,7 +719,7 @@ namespace Rodin::Adaptation
           m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
           m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
           m_hess(other.m_hess ? other.m_hess->copy() : nullptr),
-          m_sLF(other.m_sLF), m_trial(other.m_trial),
+          m_psi(other.m_psi), m_trial(other.m_trial),
           m_test(other.m_test), m_state(other.m_state),
           m_params(other.m_params), m_polytope(other.m_polytope),
           m_matrix()
@@ -692,17 +759,23 @@ namespace Rodin::Adaptation
           const Real distortion = pt.getDistortion();
           const auto& rc = pt.getReferenceCoordinates();
 
-          const Real s = m_sLF.get().getValue(ip);
+          const Real s = m_psi.get().getValue(ip);
           const auto uqRange = m_state.get().getValue(ip);
-          Math::SpatialVector<Real> y(d);
+          Math::SpatialVector<Real> displacement(d);
+          displacement.setZero();
           for (std::size_t c = 0; c < vdim; ++c)
-            y(c) = pt.getCoordinates()(c) + uqRange(c);
+            displacement(c) = uqRange(c);
 
-          const Geometry::Point movedPoint = detail::makeMovedPoint(pt, y);
+          const auto traced =
+            detail::traceMovedPoint(
+                pt, displacement, *m_phi, m_params.fieldEvaluation);
+          if (traced.exited)
+            continue;
 
-          const Real r = m_phi->getValue(movedPoint) - s;
-          const auto gradPhi = m_grad->getValue(movedPoint);
-          const auto hessPhi = m_hess->getValue(movedPoint);
+          const Real r =
+            m_phi->getValue(traced.point) + traced.correction - s;
+          const auto gradPhi = m_grad->getValue(traced.point);
+          const auto hessPhi = m_hess->getValue(traced.point);
 
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
@@ -774,7 +847,7 @@ namespace Rodin::Adaptation
       std::unique_ptr<PhiType>  m_phi;
       std::unique_ptr<GradType> m_grad;
       std::unique_ptr<HessType> m_hess;
-      std::reference_wrapper<const SLFType>  m_sLF;
+      std::reference_wrapper<const PsiType>  m_psi;
       std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType>  m_test;
       std::reference_wrapper<const StateType> m_state;
@@ -782,6 +855,7 @@ namespace Rodin::Adaptation
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
       Math::Matrix<ScalarType> m_matrix;
   };
+
 
 }
 

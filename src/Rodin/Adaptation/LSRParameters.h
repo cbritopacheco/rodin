@@ -51,16 +51,29 @@ namespace Rodin::Adaptation
     Real hRef = 0;
     Real normalizer = 0; ///< <= 0 means compute 1 / (M_w h_ref^2).
     std::size_t quadratureOrder = 0; ///< 0 selects the default FE-based rule.
+    LSRIntegratorParameters::FieldEvaluation fieldEvaluation =
+      LSRIntegratorParameters::FieldEvaluation::PhysicalPoint;
 
+    /// Weight for the relative distortion energy Q_rel(I + grad u) - 1.
     Real shapeWeight = 1e-1;
     Real h1RegularizationWeight = 0;
 
-    /// Smooth Q-shape barrier weight (`qBarrierWeight = 0` disables).
+    /// Smooth relative-Q barrier weight (`qBarrierWeight = 0` disables).
     Real qBarrierWeight = 0;
     /// Activation threshold; default +inf disables.
     Real qBarrierAct = std::numeric_limits<Real>::infinity();
     /// Asymptote; default +inf disables.
     Real qBarrierMax = std::numeric_limits<Real>::infinity();
+
+    /// Smooth admissibility barrier on the dimensionless Jacobian ratio
+    /// j = det(I + grad u_h). Inactive when the weight is zero or the
+    /// safe ratio is not larger than jMinRatio.
+    Real jBarrierWeight = 0;
+    Real jBarrierSafeRatio = 0;
+
+    /// Centered volume tether 0.5 * (log j)^2 on the same dimensionless
+    /// ratio. The residual is zero at j = 1, but the tangent is active.
+    Real jVolumeTetherWeight = 0;
 
     // jMinRatio: dimensionless singularity floor for the line-search
     // admissibility check + the defensive singular-cell fallback.
@@ -83,6 +96,8 @@ namespace Rodin::Adaptation
     /// no-op.
     bool useWarmStartAlpha = true;
     Real alphaWarmStartGrowth = 2.0;
+    bool useSampledQuadraticAlphaPredictor = true;
+    Real alphaPredictorSafety = 0.9;
 
     Real absoluteTolerance = 1e-8;
     Real relativeTolerance = 1e-7;
@@ -96,15 +111,14 @@ namespace Rodin::Adaptation
     // interface diagnostics inside the LSR solver.
     std::function<bool(const LSRReport&)> acceptedStateConvergenceTest;
 
-    // Best-effort quality safeguard. Line search rejects any trial step
-    // whose worst-case cell would have intrinsic shape quality
-    // Q_shape = ||A_K^u||_F^2 / (d * (sigma_K det A_K^u)^(2/d))
-    // exceeding `qShapeMax`. The default infinity disables the cap.
-    // A finite cap turns Newton into a "best-effort" iteration: it
-    // proceeds as long as the mesh stays below the quality threshold,
-    // and halts (returning the best-residual iterate) when no further
-    // step satisfies it.
-    Real qShapeMax = std::numeric_limits<Real>::infinity();
+    // Optional cap on the relative-distortion quality of the moved cell:
+    //   Q_rel(F) = ||F||^2 / (d * det(F)^(2/d)),  F = I + grad u_h.
+    // Identity-neutral (Q_rel = 1 at u = 0, regardless of background shape).
+    // The line search rejects any step that pushes max_K Q_rel above this
+    // cap. Default +infinity disables the cap. A value of ~1.5 means
+    // "no cell may be distorted by more than ~50% from its background
+    // shape during this Newton step".
+    Real qRelMax = std::numeric_limits<Real>::infinity();
 
     LSRInitialGuess initialGuess = LSRInitialGuess::Hilbert;
     LSRHilbertMetric initialGuessMetric = LSRHilbertMetric::Harmonic;
@@ -124,6 +138,7 @@ namespace Rodin::Adaptation
     out.hRef = params.hRef;
     out.normalizer = params.normalizer;
     out.quadratureOrder = params.quadratureOrder;
+    out.fieldEvaluation = params.fieldEvaluation;
     return out;
   }
 

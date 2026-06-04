@@ -16,9 +16,6 @@
 // V-shape: decreasing as eps^2 in the truncation regime (1e-3..1e-5) and
 // increasing for eps < 1e-7 (roundoff regime). The minimum must be < 1e-5.
 //
-// On affine P1 cells, computeBarrierSampledCellResidual must reproduce
-// evaluateBarrierLocal().grad to within floating-point round-off (< 1e-10).
-//
 
 #include <gtest/gtest.h>
 
@@ -152,6 +149,21 @@ namespace
     p.domainMeasure = Real(1);
     return p;
   }
+
+  BarrierParameters activeJBarrierParams()
+  {
+    BarrierParameters p = defaultParams();
+    p.jBarrierWeight = Real(0.2);
+    p.jBarrierSafeRatio = Real(1.2);
+    return p;
+  }
+
+  BarrierParameters activeVolumeTetherParams()
+  {
+    BarrierParameters p = defaultParams();
+    p.jVolumeTetherWeight = Real(0.2);
+    return p;
+  }
 }
 
 namespace Rodin::Tests::Unit
@@ -165,6 +177,7 @@ namespace Rodin::Tests::Unit
     const Real E = totalEnergy(mesh, u, kGamma, defaultParams());
     EXPECT_TRUE(std::isfinite(E));
     EXPECT_GE(E, Real(0));
+    EXPECT_NEAR(E, Real(0), Real(1e-14));
   }
 
   // V-shape: minimum FD error < 1e-5.
@@ -241,57 +254,66 @@ namespace Rodin::Tests::Unit
         << "Expected roundoff increase e8=" << e8 << " e9=" << e9;
   }
 
-  // On affine P1 cells, sampled residual must match closed-form to round-off.
-  TEST(Rodin_Adaptation_BarrierSampled, MatchesClosedFormOnAffineP1)
+  TEST(Rodin_Adaptation_BarrierSampled, JBarrierResidualVShapeMinError)
   {
     auto mesh = makeUnitSquareMesh(5);
-    auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
-
     VectorFES fes(mesh, 2);
     VectorGF u(fes);
-    setDeterministicDisplacement(u, Real(1e-3), /*seed=*/42);
+    setDeterministicDisplacement(u, Real(1e-2), /*seed=*/21);
 
-    const BarrierParameters params = defaultParams();
-    std::size_t checked = 0;
+    const auto params = activeJBarrierParams();
+    const Math::Vector<Real> R =
+      assembleGlobalResidual(mesh, u, /*gamma=*/Real(0), params);
 
-    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    const std::size_t n = static_cast<std::size_t>(R.size());
+    const Math::Vector<Real> dir = deterministicDir(n, /*seed=*/23);
+    const Real Rp = R.dot(dir);
+
+    Real minErr = std::numeric_limits<Real>::infinity();
+    for (int e = 3; e <= 9; ++e)
     {
-      const auto& cell = *cellIt;
-      const Index idx = cell.getIndex();
-      const auto it = cellToLocal.find(idx);
-      if (it == cellToLocal.end()) continue;
-      const auto& cg = cellCache[it->second];
-
-      const auto uv = extractCellU(cg, u);
-      const auto local = evaluateBarrierLocal(cg, uv, kGamma, params);
-      if (!local.valid) continue;
-
-      const Math::Vector<Real> sampledR =
-        computeBarrierSampledCellResidual(cell, u, kGamma, params);
-
-      ASSERT_EQ(local.grad.size(), sampledR.size())
-          << "DOF count mismatch on cell " << idx;
-
-      for (Eigen::Index i = 0; i < local.grad.size(); ++i)
-      {
-        const Real ref = local.grad(i);
-        const Real got = sampledR(i);
-        const Real re  = std::abs(ref - got) / std::max(Real(1e-14), std::abs(ref));
-        EXPECT_LT(re, Real(1e-10))
-            << "cell=" << idx << " dof=" << i
-            << " closed=" << ref << " sampled=" << got;
-      }
-      ++checked;
+      const Real eps = std::pow(Real(10), -Real(e));
+      const Real fd =
+        centralFDAlongDir(mesh, u, Real(0), params, dir, eps);
+      minErr = std::min(minErr, relErr(fd, Rp));
     }
-    EXPECT_GT(checked, 0u);
+    EXPECT_LT(minErr, Real(1e-5))
+        << "J-barrier residual V-shape minimum relative error: " << minErr;
+  }
+
+  TEST(Rodin_Adaptation_BarrierSampled, VolumeTetherResidualVShapeMinError)
+  {
+    auto mesh = makeUnitSquareMesh(5);
+    VectorFES fes(mesh, 2);
+    VectorGF u(fes);
+    setDeterministicDisplacement(u, Real(1e-2), /*seed=*/31);
+
+    const auto params = activeVolumeTetherParams();
+    const Math::Vector<Real> R =
+      assembleGlobalResidual(mesh, u, /*gamma=*/Real(0), params);
+
+    const std::size_t n = static_cast<std::size_t>(R.size());
+    const Math::Vector<Real> dir = deterministicDir(n, /*seed=*/33);
+    const Real Rp = R.dot(dir);
+
+    Real minErr = std::numeric_limits<Real>::infinity();
+    for (int e = 3; e <= 9; ++e)
+    {
+      const Real eps = std::pow(Real(10), -Real(e));
+      const Real fd =
+        centralFDAlongDir(mesh, u, Real(0), params, dir, eps);
+      minErr = std::min(minErr, relErr(fd, Rp));
+    }
+    EXPECT_LT(minErr, Real(1e-5))
+        << "Volume-tether residual V-shape minimum relative error: "
+        << minErr;
   }
 
   // --------------------------------------------------------------------------
   // Tangent FD tests
   //
   // The tangent K satisfies: (K p)[i] ~= (R(u + eps * p) - R(u - eps * p))[i] / (2 eps)
-  // for each component i. We check the V-shape on K.p and closed-form
-  // agreement on affine P1 cells.
+  // for each component i. We check the V-shape on K.p.
 
   namespace
   {
@@ -409,52 +431,62 @@ namespace Rodin::Tests::Unit
         << "1e-4->1e-5 ratio: " << errs[2] / errs[1];
   }
 
-  // On affine P1 cells, sampled tangent must match the closed-form Hessian.
-  TEST(Rodin_Adaptation_BarrierSampled, TangentMatchesClosedFormOnAffineP1)
+  TEST(Rodin_Adaptation_BarrierSampled, JBarrierTangentVShapeMinError)
   {
     auto mesh = makeUnitSquareMesh(5);
-    auto [cellCache, cellToLocal] = precomputeCellGeometry(mesh);
-
     VectorFES fes(mesh, 2);
     VectorGF u(fes);
-    setDeterministicDisplacement(u, Real(1e-3), /*seed=*/42);
+    setDeterministicDisplacement(u, Real(1e-2), /*seed=*/25);
 
-    const BarrierParameters params = defaultParams();
-    std::size_t checked = 0;
+    const auto params = activeJBarrierParams();
+    const Math::Matrix<Real> K =
+      assembleGlobalTangent(mesh, u, /*gamma=*/Real(0), params);
 
-    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    const std::size_t n = static_cast<std::size_t>(K.rows());
+    const Math::Vector<Real> dir = deterministicDir(n, /*seed=*/27);
+    const Math::Vector<Real> Kp  = K * dir;
+
+    Real minErr = std::numeric_limits<Real>::infinity();
+    for (int e = 3; e <= 8; ++e)
     {
-      const auto& cell = *cellIt;
-      const Index idx = cell.getIndex();
-      const auto it = cellToLocal.find(idx);
-      if (it == cellToLocal.end()) continue;
-      const auto& cg = cellCache[it->second];
-
-      const auto uv = extractCellU(cg, u);
-      const auto local = evaluateBarrierLocal(cg, uv, kGamma, params);
-      if (!local.valid) continue;
-
-      const Math::Matrix<Real> sampledK =
-        computeBarrierSampledCellTangent(cell, u, kGamma, params);
-
-      ASSERT_EQ(local.hess.rows(), sampledK.rows())
-          << "Row count mismatch on cell " << idx;
-      ASSERT_EQ(local.hess.cols(), sampledK.cols())
-          << "Col count mismatch on cell " << idx;
-
-      for (Eigen::Index i = 0; i < local.hess.rows(); ++i)
-        for (Eigen::Index j = 0; j < local.hess.cols(); ++j)
-        {
-          const Real ref = local.hess(i, j);
-          const Real got = sampledK(i, j);
-          const Real re  = std::abs(ref - got)
-              / std::max(Real(1e-14), std::abs(ref));
-          EXPECT_LT(re, Real(1e-9))
-              << "cell=" << idx << " (" << i << "," << j << ")"
-              << " closed=" << ref << " sampled=" << got;
-        }
-      ++checked;
+      const Real eps = std::pow(Real(10), -Real(e));
+      const Math::Vector<Real> fd =
+        centralFDResidual(mesh, u, Real(0), params, dir, eps);
+      const Real err =
+        (fd - Kp).norm() / std::max(Real(1), Kp.norm());
+      minErr = std::min(minErr, err);
     }
-    EXPECT_GT(checked, 0u);
+    EXPECT_LT(minErr, Real(1e-5))
+        << "J-barrier tangent V-shape minimum error: " << minErr;
   }
+
+  TEST(Rodin_Adaptation_BarrierSampled, VolumeTetherTangentVShapeMinError)
+  {
+    auto mesh = makeUnitSquareMesh(5);
+    VectorFES fes(mesh, 2);
+    VectorGF u(fes);
+    setDeterministicDisplacement(u, Real(1e-2), /*seed=*/35);
+
+    const auto params = activeVolumeTetherParams();
+    const Math::Matrix<Real> K =
+      assembleGlobalTangent(mesh, u, /*gamma=*/Real(0), params);
+
+    const std::size_t n = static_cast<std::size_t>(K.rows());
+    const Math::Vector<Real> dir = deterministicDir(n, /*seed=*/37);
+    const Math::Vector<Real> Kp  = K * dir;
+
+    Real minErr = std::numeric_limits<Real>::infinity();
+    for (int e = 3; e <= 8; ++e)
+    {
+      const Real eps = std::pow(Real(10), -Real(e));
+      const Math::Vector<Real> fd =
+        centralFDResidual(mesh, u, Real(0), params, dir, eps);
+      const Real err =
+        (fd - Kp).norm() / std::max(Real(1), Kp.norm());
+      minErr = std::min(minErr, err);
+    }
+    EXPECT_LT(minErr, Real(1e-5))
+        << "Volume-tether tangent V-shape minimum error: " << minErr;
+  }
+
 }

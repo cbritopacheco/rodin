@@ -21,6 +21,7 @@ namespace Rodin::Adaptation
     std::size_t iterations = 0;
     std::size_t totalBacktracks = 0;
     std::size_t inadmissibleCount = 0;
+    std::size_t initialGuessBacktracks = 0;
 
     Real initialResidual = 0;
     Real finalResidual = 0;
@@ -30,6 +31,8 @@ namespace Rodin::Adaptation
     Real minJRatio = 0;
     Real jLineSearchRatio = 0;
     Real lastAcceptedAlpha = 0;
+    Real initialGuessAlpha = 0;
+    Real initialGuessMinJRatio = 0;
   };
 }
 

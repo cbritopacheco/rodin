@@ -20,15 +20,15 @@
  *     phi    Variational::RealFunctionBase<...>           (always)
  *     grad   Variational::VectorFunctionBase<Real, ...>   (always)
  *     hess   Variational::MatrixFunctionBase<Real, ...>   (Newton only)
- *     sLF    GridFunction (level-set data target)
+ *     psi    GridFunction (level-set data target)
  *     params LSRIntegratorParameters (defaulted)
  *
  * Usage:
  *
  *     LSRRegistration lsr(du, v, u);
  *
- *     newton = lsr(phi, grad,        sLF, params);  // GaussNewton
- *     newton = lsr(phi, grad, hess,  sLF, params);  // Newton
+ *     newton = lsr(phi, grad,        psi, params);  // GaussNewton
+ *     newton = lsr(phi, grad, hess,  psi, params);  // Newton
  *
  * The user supplies each derivative as a Rodin FunctionBase. The
  * integrators evaluate them at the deformed point y = X + u_h(X) using
@@ -59,36 +59,36 @@ namespace Rodin::Adaptation
       {}
 
       // ---- Decomposed: Tangent ----------------------------------------------
-      template <class PhiDerived, class GradDerived, class SLF>
+      template <class PhiDerived, class GradDerived, class Psi>
       auto Tangent(
-          const Variational::RealFunctionBase<PhiDerived>& /*phi*/,
+          const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
         return LSRTangentIntegrator<
                   LSRIntegratorTangentMode::GaussNewton,
                   PhiDerived, GradDerived, void,
-                  SLF, Trial, Test, State>(
-              grad, sLF,
+                  Psi, Trial, Test, State>(
+              phi, grad, psi,
               m_du.get(), m_v.get(), m_u.get(),
               params);
       }
 
       template <class PhiDerived, class GradDerived, class HessDerived,
-                class SLF>
+                class Psi>
       auto Tangent(
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
         return LSRTangentIntegrator<
                   LSRIntegratorTangentMode::Newton,
                   PhiDerived, GradDerived, HessDerived,
-                  SLF, Trial, Test, State>(
-              phi, grad, hess, sLF,
+                  Psi, Trial, Test, State>(
+              phi, grad, hess, psi,
               m_du.get(), m_v.get(), m_u.get(),
               params);
       }
@@ -96,7 +96,7 @@ namespace Rodin::Adaptation
       /**
        * @brief PSD-projected full-Newton tangent.
        *
-       * Same call signature as `Tangent(phi, grad, hess, sLF, params)`
+       * Same call signature as `Tangent(phi, grad, hess, psi, params)`
        * (CTAD on the level-set Hessian), but the per-qpt second-order
        * correction `r * hess(phi)` is clamped to its PSD part before
        * being added to the local block. The global tangent stays SPD
@@ -105,72 +105,72 @@ namespace Rodin::Adaptation
        * destabilises raw full-Newton on this objective.
        */
       template <class PhiDerived, class GradDerived, class HessDerived,
-                class SLF>
+                class Psi>
       auto TangentPSDProjected(
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
         return LSRTangentIntegrator<
                   LSRIntegratorTangentMode::PSDProjectedNewton,
                   PhiDerived, GradDerived, HessDerived,
-                  SLF, Trial, Test, State>(
-              phi, grad, hess, sLF,
+                  Psi, Trial, Test, State>(
+              phi, grad, hess, psi,
               m_du.get(), m_v.get(), m_u.get(),
               params);
       }
 
       // ---- Decomposed: Residual ---------------------------------------------
-      template <class PhiDerived, class GradDerived, class SLF>
+      template <class PhiDerived, class GradDerived, class Psi>
       auto Residual(
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
         return LSRResidualIntegrator<
-                  PhiDerived, GradDerived, SLF, Test, State>(
-              phi, grad, sLF, m_v.get(), m_u.get(), params);
+                  PhiDerived, GradDerived, Psi, Test, State>(
+              phi, grad, psi, m_v.get(), m_u.get(), params);
       }
 
       // Hess accepted for call-site symmetry with Tangent; ignored here.
       template <class PhiDerived, class GradDerived, class HessDerived,
-                class SLF>
+                class Psi>
       auto Residual(
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& /*hess*/,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
-        return Residual(phi, grad, sLF, params);
+        return Residual(phi, grad, psi, params);
       }
 
       // ---- Composite --------------------------------------------------------
-      template <class PhiDerived, class GradDerived, class SLF>
+      template <class PhiDerived, class GradDerived, class Psi>
       auto operator()(
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
-        return Tangent(phi, grad, sLF, params)
-             + Residual(phi, grad, sLF, params);
+        return Tangent(phi, grad, psi, params)
+             + Residual(phi, grad, psi, params);
       }
 
       template <class PhiDerived, class GradDerived, class HessDerived,
-                class SLF>
+                class Psi>
       auto operator()(
           const Variational::RealFunctionBase<PhiDerived>& phi,
           const Variational::VectorFunctionBase<Real, GradDerived>& grad,
           const Variational::MatrixFunctionBase<Real, HessDerived>& hess,
-          const SLF& sLF,
+          const Psi& psi,
           LSRIntegratorParameters params = {}) const
       {
-        return Tangent(phi, grad, hess, sLF, params)
-             + Residual(phi, grad, sLF, params);
+        return Tangent(phi, grad, hess, psi, params)
+             + Residual(phi, grad, psi, params);
       }
 
     private:
