@@ -8,6 +8,7 @@ target_link_libraries(CCMLC2014_0D
 add_executable(CoronarySolid CoronarySolid.cpp)
 target_link_libraries(CoronarySolid
   PUBLIC
+  Rodin::Heart
   Rodin::Solver
   Rodin::Geometry
   Rodin::Assembly
