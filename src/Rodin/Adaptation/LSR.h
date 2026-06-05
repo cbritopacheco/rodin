@@ -200,6 +200,178 @@ namespace Rodin::Adaptation
             barrierParams, jLineSearchRatio);
       }
 
+      /**
+       * @brief Pull-back LSR solve.
+       *
+       * E_pull(u) = (rhoS/2) integral W(psi(X)) ( phi(X) - psi(X - u(X)) )^2 dX.
+       *
+       * The data residual evaluates phi at the original X and psi at the
+       * pulled-back point X - u(X). The caller supplies:
+       *
+       *   psi          : the band-weight psi field (used in W(psi(X))).
+       *   phi, gradPhi : at original X. gradPhi is only needed for the
+       *                  Hilbert initial guess; the data term itself uses
+       *                  grad psi at the pulled-back point.
+       *   psiDisp      : RealFunctionBase returning psi at X - u(X).
+       *   gradPsiDisp  : VectorFunctionBase returning grad psi at X - u(X).
+       *   hessPsiDisp  : MatrixFunctionBase returning Hess psi at X - u(X).
+       *
+       * Tangent. The same LSRTangent selector used by the push form is
+       * honoured here. The exact pull Newton correction is
+       * `-r * hess(psi)(X-u)`, with `r = phi(X) - psi(X-u)`.
+       */
+      template <class Psi, class PhiDerived, class GradPhiDerived,
+                class PsiDispDerived, class GradPsiDispDerived,
+                class HessPsiDispDerived>
+      LSRReport solvePull(
+          const Psi& psi,
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::VectorFunctionBase<Real, GradPhiDerived>& gradPhi,
+          const Variational::RealFunctionBase<PsiDispDerived>& psiDisp,
+          const Variational::VectorFunctionBase<Real, GradPsiDispDerived>& gradPsiDisp,
+          const Variational::MatrixFunctionBase<Real, HessPsiDispDerived>& hessPsiDisp)
+      {
+        using Variational::DirichletBC;
+        using Variational::Integral;
+        using Variational::Jacobian;
+        using Variational::Problem;
+        using Variational::RealFunction;
+        using Variational::TestFunction;
+        using Variational::TrialFunction;
+        using Variational::VectorFunction;
+        using Variational::Zero;
+
+        m_report = {};
+        m_prevAcceptedAlpha = Real(0);
+
+        auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+
+        LSRParameters params = m_params;
+        completeMeshParameters(params);
+        const Real jLineSearchRatio =
+          std::max(params.jMinRatio,
+                   params.lineSearchSafetyMargin * params.jSafeRatio);
+        m_report.jLineSearchRatio = jLineSearchRatio;
+        const bool barrierEnabled =
+             params.shapeWeight != Real(0)
+          || params.qBarrierWeight != Real(0);
+
+        TrialFunction du(fes);
+        TestFunction  v(fes);
+        auto zero = VectorFunction{ Zero(), Zero() };
+
+        RealFunction<Real> shapeWeight(params.shapeWeight);
+        RealFunction<Real> h1RegularizationWeight(
+            params.h1RegularizationWeight);
+
+        BarrierParameters barrierParams;
+        barrierParams.jMin = params.jMinRatio;
+        barrierParams.domainMeasure = computeDomainMeasure();
+        barrierParams.qBarrierWeight = params.qBarrierWeight;
+        barrierParams.qBarrierAct    = params.qBarrierAct;
+        barrierParams.qBarrierMax    = params.qBarrierMax;
+        barrierParams.jBarrierWeight = params.jBarrierWeight;
+        barrierParams.jBarrierSafeRatio = params.jBarrierSafeRatio;
+        barrierParams.jVolumeTetherWeight = params.jVolumeTetherWeight;
+
+        LSRRegistration lsrTerm(du, v, u);
+        JacobianAdmissibilityBarrierSampled barrier(
+            du, v, u, params.quadratureOrder);
+
+        if (params.initialGuess == LSRInitialGuess::Zero)
+          u.getData().setZero();
+        else if (params.initialGuess == LSRInitialGuess::Hilbert)
+          applyHilbertInitialGuess(
+              psi, phi, gradPhi, shapeWeight,
+              barrierParams, params);
+
+        Problem newton(du, v);
+        switch (params.tangent)
+        {
+          case LSRTangent::GaussNewton:
+            if (barrierEnabled)
+              newton =
+                  lsrTerm.PullTangent(psi, gradPsiDisp, makeLSRIntegratorParameters(params))
+                + lsrTerm.PullResidual(phi, psi, psiDisp, gradPsiDisp,
+                                       makeLSRIntegratorParameters(params))
+                + barrier.TangentPSDProjected(shapeWeight, barrierParams)
+                + barrier.Residual(shapeWeight, barrierParams)
+                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                + DirichletBC(du, zero);
+            else
+              newton =
+                  lsrTerm.PullTangent(psi, gradPsiDisp, makeLSRIntegratorParameters(params))
+                + lsrTerm.PullResidual(phi, psi, psiDisp, gradPsiDisp,
+                                       makeLSRIntegratorParameters(params))
+                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                + DirichletBC(du, zero);
+            break;
+          case LSRTangent::Newton:
+            if (barrierEnabled)
+              newton =
+                  lsrTerm.PullTangent(
+                      phi, psi, psiDisp, gradPsiDisp, hessPsiDisp,
+                      makeLSRIntegratorParameters(params))
+                + lsrTerm.PullResidual(phi, psi, psiDisp, gradPsiDisp,
+                                       makeLSRIntegratorParameters(params))
+                + barrier.TangentPSDProjected(shapeWeight, barrierParams)
+                + barrier.Residual(shapeWeight, barrierParams)
+                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                + DirichletBC(du, zero);
+            else
+              newton =
+                  lsrTerm.PullTangent(
+                      phi, psi, psiDisp, gradPsiDisp, hessPsiDisp,
+                      makeLSRIntegratorParameters(params))
+                + lsrTerm.PullResidual(phi, psi, psiDisp, gradPsiDisp,
+                                       makeLSRIntegratorParameters(params))
+                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                + DirichletBC(du, zero);
+            break;
+          case LSRTangent::PSDProjectedNewton:
+            if (barrierEnabled)
+              newton =
+                  lsrTerm.PullTangentPSDProjected(
+                      phi, psi, psiDisp, gradPsiDisp, hessPsiDisp,
+                      makeLSRIntegratorParameters(params))
+                + lsrTerm.PullResidual(phi, psi, psiDisp, gradPsiDisp,
+                                       makeLSRIntegratorParameters(params))
+                + barrier.TangentPSDProjected(shapeWeight, barrierParams)
+                + barrier.Residual(shapeWeight, barrierParams)
+                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                + DirichletBC(du, zero);
+            else
+              newton =
+                  lsrTerm.PullTangentPSDProjected(
+                      phi, psi, psiDisp, gradPsiDisp, hessPsiDisp,
+                      makeLSRIntegratorParameters(params))
+                + lsrTerm.PullResidual(phi, psi, psiDisp, gradPsiDisp,
+                                       makeLSRIntegratorParameters(params))
+                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
+                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                + DirichletBC(du, zero);
+            break;
+        }
+
+        auto objective =
+          [&](const Math::Vector<Real>& uTry) -> Real
+          {
+            u.getData() = uTry;
+            return computeObjectivePull(
+                psi, phi, psiDisp, params, barrierParams, barrierEnabled);
+          };
+
+        return driveNewton(
+            newton, params, objective,
+            barrierParams, jLineSearchRatio);
+      }
+
     private:
       // Newton driver for the standard E_LSR solve.
       // Takes the already-assembled Problem; sets up SparseLU + NewtonSolver
@@ -571,6 +743,78 @@ namespace Rodin::Adaptation
 	          energy += computeH1RegularizationEnergy(params);
 	        return energy;
 	      }
+
+      // E_pull objective: (1/2) integral W(psi(X)) ( phi(X) - psi(X-u))^2 dX
+      // + barrier + h1 reg.
+      template <class Psi, class PhiDerived, class PsiDispDerived>
+      Real computeObjectivePull(
+          const Psi& psi,
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::RealFunctionBase<PsiDispDerived>& psiDisp,
+          const LSRParameters& params,
+          const BarrierParameters& barrierParams,
+          bool barrierEnabled) const
+      {
+        const auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto lsrParams = makeLSRIntegratorParameters(params);
+
+        Real energy = 0;
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const auto& cell = *cellIt;
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(
+                lsrQuadOrderFor(fe.getOrder(), lsrParams),
+                cell.getGeometry());
+          const auto& quadrature = cell.getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& pt = quadrature.getPoint(q);
+            const Variational::IntegrationPoint ip(pt, &qf, q);
+            const Real s = psi.getValue(ip);
+            const Real phi_X = phi.getValue(ip);
+
+            const auto uq = u.getValue(ip);
+            const std::size_t d = cell.getDimension();
+            const std::size_t vdim = fes.getVectorDimension();
+            Math::SpatialVector<Real> yMinus(d);
+            for (std::size_t c = 0; c < vdim; ++c)
+              yMinus(c) = pt.getCoordinates()(c) - uq(c);
+            const Geometry::Point pulledPoint(
+                pt.getPolytope(),
+                pt.getReferenceCoordinates(),
+                yMinus);
+            const Real psi_disp = psiDisp.getValue(pulledPoint);
+
+            const Real r = phi_X - psi_disp;
+            const Real W =
+              std::exp(-s * s / (2 * params.deltaW * params.deltaW));
+            energy += Real(0.5)
+              * qf.getWeight(q) * pt.getDistortion()
+              * params.rhoS * W * params.normalizer * r * r;
+          }
+        }
+
+        if (barrierEnabled)
+        {
+          for (auto cellIt2 = mesh.getCell(); cellIt2; ++cellIt2)
+          {
+            const auto& barrierCell = *cellIt2;
+            const Real e = computeBarrierSampledCellEnergy(
+                barrierCell, u, params.shapeWeight, barrierParams);
+            if (!std::isfinite(e))
+              return std::numeric_limits<Real>::infinity();
+            energy += e;
+          }
+        }
+        if (params.h1RegularizationWeight != Real(0))
+          energy += computeH1RegularizationEnergy(params);
+        return energy;
+      }
 
 		      Real computeH1RegularizationEnergy(const LSRParameters& params) const
 	      {

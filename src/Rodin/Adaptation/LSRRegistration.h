@@ -173,6 +173,96 @@ namespace Rodin::Adaptation
              + Residual(phi, grad, psi, params);
       }
 
+      // ---- E_pull data term --------------------------------------------------
+      //
+      // Energy form:
+      //   E_pull(u) = (rhoS/2) integral W(psi(X)) ( phi(X) - psi(X - u(X)) )^2 dX.
+      //
+      // Inputs.
+      //   phi          : RealFunctionBase, evaluated at X. (Analytic or any
+      //                  function callable at original integration points.)
+      //   psiBand      : the scalar field used by the band weight w(psi(X)).
+      //                  Typically the raw psi GridFunction.
+      //   psiDisp      : RealFunctionBase adapter returning psi at X - u(X).
+      //                  For analytic psi this is the analytic closure
+      //                  reading physical coords. For a discrete psi this is
+      //                  a Variational::Flow wrapper with constant velocity
+      //                  -u(X) at the starting integration point.
+      //   gradPsiDisp  : VectorFunctionBase adapter returning grad psi at
+      //                  X - u(X). Same wiring as psiDisp.
+      //
+      template <class PhiDerived, class PsiBand,
+                class PsiDispDerived, class GradPsiDispDerived>
+      auto PullResidual(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const PsiBand& psiBand,
+          const Variational::RealFunctionBase<PsiDispDerived>& psiDisp,
+          const Variational::VectorFunctionBase<Real, GradPsiDispDerived>& gradPsiDisp,
+          LSRIntegratorParameters params = {}) const
+      {
+        return LSRPullResidualIntegrator<
+                  PhiDerived, PsiBand,
+                  PsiDispDerived, GradPsiDispDerived,
+                  Test, State>(
+              phi, psiBand, psiDisp, gradPsiDisp,
+              m_v.get(), m_u.get(), params);
+      }
+
+      template <class PsiBand, class GradPsiDispDerived>
+      auto PullTangent(
+          const PsiBand& psiBand,
+          const Variational::VectorFunctionBase<Real, GradPsiDispDerived>& gradPsiDisp,
+          LSRIntegratorParameters params = {}) const
+      {
+        return LSRPullTangentIntegrator<
+                  LSRIntegratorTangentMode::GaussNewton,
+                  void, PsiBand,
+                  void, GradPsiDispDerived, void,
+                  Trial, Test, State>(
+              psiBand, gradPsiDisp,
+              m_du.get(), m_v.get(), m_u.get(), params);
+      }
+
+      template <class PhiDerived, class PsiBand,
+                class PsiDispDerived, class GradPsiDispDerived,
+                class HessPsiDispDerived>
+      auto PullTangent(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const PsiBand& psiBand,
+          const Variational::RealFunctionBase<PsiDispDerived>& psiDisp,
+          const Variational::VectorFunctionBase<Real, GradPsiDispDerived>& gradPsiDisp,
+          const Variational::MatrixFunctionBase<Real, HessPsiDispDerived>& hessPsiDisp,
+          LSRIntegratorParameters params = {}) const
+      {
+        return LSRPullTangentIntegrator<
+                  LSRIntegratorTangentMode::Newton,
+                  PhiDerived, PsiBand,
+                  PsiDispDerived, GradPsiDispDerived, HessPsiDispDerived,
+                  Trial, Test, State>(
+              phi, psiBand, psiDisp, gradPsiDisp, hessPsiDisp,
+              m_du.get(), m_v.get(), m_u.get(), params);
+      }
+
+      template <class PhiDerived, class PsiBand,
+                class PsiDispDerived, class GradPsiDispDerived,
+                class HessPsiDispDerived>
+      auto PullTangentPSDProjected(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const PsiBand& psiBand,
+          const Variational::RealFunctionBase<PsiDispDerived>& psiDisp,
+          const Variational::VectorFunctionBase<Real, GradPsiDispDerived>& gradPsiDisp,
+          const Variational::MatrixFunctionBase<Real, HessPsiDispDerived>& hessPsiDisp,
+          LSRIntegratorParameters params = {}) const
+      {
+        return LSRPullTangentIntegrator<
+                  LSRIntegratorTangentMode::PSDProjectedNewton,
+                  PhiDerived, PsiBand,
+                  PsiDispDerived, GradPsiDispDerived, HessPsiDispDerived,
+                  Trial, Test, State>(
+              phi, psiBand, psiDisp, gradPsiDisp, hessPsiDisp,
+              m_du.get(), m_v.get(), m_u.get(), params);
+      }
+
     private:
       std::reference_wrapper<const Trial> m_du;
       std::reference_wrapper<const Test>  m_v;

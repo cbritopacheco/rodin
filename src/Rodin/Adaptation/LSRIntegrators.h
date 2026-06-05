@@ -26,9 +26,9 @@
  * Evaluation.
  *   The LSR penalty needs `phi(X + u_h(X))`. At each quadrature point of
  *   the parent mesh we construct a `Geometry::Point` whose physical
- *   coordinates are overridden with `X + u_h(X)` and whose polytope and
- *   reference coordinates are copied from the original quadrature
- *   point, then call `phi->getValue(movedPoint)`,
+ *   coordinates are `X + u_h(X)` and whose reference coordinates are
+ *   obtained by localising that physical point in the background mesh,
+ *   then call `phi->getValue(movedPoint)`,
  *   `grad->getValue(movedPoint)`, `hess->getValue(movedPoint)`. The
  *   integrator does NOT invoke `Grad(phi)` or `Hess(phi)` itself — the
  *   derivatives are the user's inputs.
@@ -41,6 +41,7 @@
 #include <cmath>
 #include <cstddef>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -173,17 +174,82 @@ namespace Rodin::Adaptation
 
   namespace detail
   {
-    /// Build a Geometry::Point at the deformed location y = X + u(X),
-    /// reusing the parent polytope and reference coordinates of the
-    /// original quadrature point and overriding the physical
-    /// coordinates with `y`.
+    inline Real referenceCellMargin(
+        Geometry::Polytope::Type geometry,
+        const Math::SpatialPoint& rc,
+        std::size_t& mostViolatedFace)
+    {
+      const Geometry::Polytope::Traits traits(geometry);
+      const auto& hs = traits.getHalfSpace();
+      Real margin = std::numeric_limits<Real>::infinity();
+      mostViolatedFace = 0;
+      for (std::size_t j = 0; j < static_cast<std::size_t>(hs.vector.size()); ++j)
+      {
+        const Real phi = hs.vector[j] - rc.dot(hs.matrix.row(j).transpose());
+        if (phi < margin)
+        {
+          margin = phi;
+          mostViolatedFace = j;
+        }
+      }
+      return margin;
+    }
+
+    /// Build a Geometry::Point at the deformed location y = X + u(X).
+    ///
+    /// GridFunction evaluation is reference-coordinate based when the point
+    /// belongs to the same mesh. Consequently the moved physical point must
+    /// be localised before it is passed to phi, grad, or hess. The routine
+    /// first inverts the original cell and then walks through adjacent cells
+    /// through the most violated reference half-space. If localisation fails
+    /// at the boundary, it returns the parent-cell extrapolation.
     inline Geometry::Point makeMovedPoint(
         const Geometry::Point& original,
         const Math::SpatialVector<Real>& yPhysical)
     {
+      const auto& parent = original.getPolytope();
+      const auto& mesh = parent.getMesh();
+      const std::size_t cd = parent.getDimension();
+      Index cell = parent.getIndex();
+      Math::SpatialPoint movedReference;
+      const Real tol = Real(64) * std::numeric_limits<Real>::epsilon();
+
+      for (std::size_t hop = 0; hop < 64; ++hop)
+      {
+        mesh.getPolytopeTransformation(cd, cell).inverse(
+            movedReference, yPhysical);
+        std::size_t mostViolatedFace = 0;
+        const Real margin = referenceCellMargin(
+            mesh.getGeometry(cd, cell), movedReference, mostViolatedFace);
+        if (margin >= -tol)
+        {
+          const auto it = mesh.getPolytope(cd, cell);
+          return Geometry::Point(*it, movedReference, yPhysical);
+        }
+
+        const auto& conn = mesh.getConnectivity();
+        const auto& faces = conn.getIncidence(cd, cd - 1).at(cell);
+        if (mostViolatedFace >= faces.size())
+          break;
+
+        const Index face = faces[mostViolatedFace];
+        if (mesh.isBoundary(face))
+          break;
+
+        const auto& nbrs = conn.getIncidence(cd - 1, cd).at(face);
+        if (nbrs.size() != 2)
+          break;
+
+        const Index next = (nbrs[0] == cell) ? nbrs[1] : nbrs[0];
+        if (next == cell)
+          break;
+        cell = next;
+      }
+
+      parent.getTransformation().inverse(movedReference, yPhysical);
       return Geometry::Point(
-          original.getPolytope(),
-          original.getReferenceCoordinates(),
+          parent,
+          movedReference,
           yPhysical);
     }
 
@@ -856,6 +922,719 @@ namespace Rodin::Adaptation
       Math::Matrix<ScalarType> m_matrix;
   };
 
+
+  // ---------------------------------------------------------------------------
+  // E_pull data term.
+  //
+  // Energy:
+  //   E_pull(u) = (rhoS/2) * integral_Omega
+  //                 w_delta(psi(X)) * normalizer
+  //                 * ( phi(X) - psi(X - u(X)) )^2 dX.
+  //
+  // Notes.
+  //   - phi is evaluated at X (no displacement).
+  //   - psi is evaluated at the pulled-back point X - u(X). The integrator
+  //     constructs a Geometry::Point whose physical coordinates are
+  //     X - u(X) and whose polytope is the ORIGINAL cell. The user-supplied
+  //     psi-displaced / grad-psi-displaced adapters decide how to interpret
+  //     that point. The analytic case simply reads the physical
+  //     coordinates; for a discrete psi the caller wraps it through
+  //     Variational::Flow with a constant velocity equal to -u(X) at the
+  //     starting integration point (Phi_1(X) = X - u(X) exactly).
+  //   - The band weight uses psi at X. A separate `psiBand` input is taken;
+  //     it can be the raw GridFunction in the discrete case.
+  //
+  // Residual:
+  //   delta r / delta u = grad psi(X - u(X)).
+  //   R[i] = sum_q w_q * |J_q| * rhoS * w_delta(psi(X)) * normalizer
+  //          * ( phi(X) - psi(X - u(X)) )
+  //          * ( grad psi(X - u(X)) . b_i(X) ).
+  //
+  // Gauss-Newton tangent (per qpt rank-1; PSD by construction):
+  //   K[i, j] = sum_q w_q * |J_q| * rhoS * w_delta(psi(X)) * normalizer
+  //             * ( grad psi(X - u(X)) . b_i ) ( grad psi(X - u(X)) . b_j ).
+  // ---------------------------------------------------------------------------
+  namespace detail
+  {
+    inline Geometry::Point makeDisplacedPoint(
+        const Geometry::Point& original,
+        const Math::SpatialVector<Real>& yPhysical)
+    {
+      return Geometry::Point(
+          original.getPolytope(),
+          original.getReferenceCoordinates(),
+          yPhysical);
+    }
+  }
+
+  template <class PhiDerived, class PsiBandType,
+            class PsiDispDerived, class GradPsiDispDerived,
+            class TestType, class StateType>
+  class LSRPullResidualIntegrator final
+    : public Variational::LinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType       = Real;
+      using PhiType          = Variational::RealFunctionBase<PhiDerived>;
+      using PsiDispType      = Variational::RealFunctionBase<PsiDispDerived>;
+      using GradPsiDispType  = Variational::VectorFunctionBase<Real, GradPsiDispDerived>;
+
+      LSRPullResidualIntegrator(
+          const PhiType& phi,
+          const PsiBandType& psiBand,
+          const PsiDispType& psiDisp,
+          const GradPsiDispType& gradPsiDisp,
+          const TestType& v,
+          const StateType& u,
+          LSRIntegratorParameters params)
+        : Variational::LinearFormIntegratorBase<Real>(v),
+          m_phi(phi.copy()),
+          m_psiBand(psiBand),
+          m_psiDisp(psiDisp.copy()),
+          m_gradPsiDisp(gradPsiDisp.copy()),
+          m_test(v), m_state(u),
+          m_params(params)
+      {}
+
+      LSRPullResidualIntegrator(const LSRPullResidualIntegrator& other)
+        : Variational::LinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+          m_psiBand(other.m_psiBand),
+          m_psiDisp(other.m_psiDisp ? other.m_psiDisp->copy() : nullptr),
+          m_gradPsiDisp(other.m_gradPsiDisp ? other.m_gradPsiDisp->copy() : nullptr),
+          m_test(other.m_test), m_state(other.m_state),
+          m_params(other.m_params),
+          m_polytope(other.m_polytope),
+          m_elemVec()
+      {}
+
+      LSRPullResidualIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const std::size_t d = polytope.getDimension();
+        const Index cellIdx = polytope.getIndex();
+        const auto& testFES = m_test.get().getFiniteElementSpace();
+        const auto& testFE = testFES.getFiniteElement(d, cellIdx);
+        const std::size_t testDofs = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_elemVec.resize(testDofs);
+        m_elemVec.setZero();
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              lsrQuadOrderFor(testFE.getOrder(), m_params),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+        const std::size_t nqp = quadrature.getSize();
+
+        for (std::size_t q = 0; q < nqp; ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Real wq = qf.getWeight(q);
+          const Real distortion = pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          // Band weight uses psi at X.
+          const Real s = m_psiBand.get().getValue(ip);
+
+          // Pulled-back evaluation point: X - u(X).
+          const auto uqRange = m_state.get().getValue(ip);
+          Math::SpatialVector<Real> yMinus(d);
+          for (std::size_t c = 0; c < vdim; ++c)
+            yMinus(c) = pt.getCoordinates()(c) - uqRange(c);
+          const Geometry::Point pulledPoint =
+            detail::makeDisplacedPoint(pt, yMinus);
+
+          const Real phi_X = m_phi->getValue(ip);
+          const Real psiDisp = m_psiDisp->getValue(pulledPoint);
+          const auto gradPsiDisp = m_gradPsiDisp->getValue(pulledPoint);
+
+          const Real r = phi_X - psiDisp;
+          const Real weight =
+            std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real coef =
+            m_params.rhoS * weight * r * m_params.normalizer;
+          const Real measure = wq * distortion;
+
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            const auto testValue = testFE.getBasis(te)(rc);
+            Real dot = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              dot += gradPsiDisp(c) * testValue(c);
+            m_elemVec(te) += measure * coef * dot;
+          }
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t te) final override
+      { return m_elemVec(te); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Cells; }
+
+      LSRPullResidualIntegrator* copy() const noexcept final override
+      { return new LSRPullResidualIntegrator(*this); }
+
+    private:
+      std::unique_ptr<PhiType>         m_phi;
+      std::reference_wrapper<const PsiBandType> m_psiBand;
+      std::unique_ptr<PsiDispType>     m_psiDisp;
+      std::unique_ptr<GradPsiDispType> m_gradPsiDisp;
+      std::reference_wrapper<const TestType>  m_test;
+      std::reference_wrapper<const StateType> m_state;
+      LSRIntegratorParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Vector<ScalarType> m_elemVec;
+  };
+
+  template <class P, class B, class PD, class GP, class V, class U>
+  LSRPullResidualIntegrator(
+      const Variational::RealFunctionBase<P>&,
+      const B&,
+      const Variational::RealFunctionBase<PD>&,
+      const Variational::VectorFunctionBase<Real, GP>&,
+      const V&, const U&, LSRIntegratorParameters)
+    -> LSRPullResidualIntegrator<P, B, PD, GP, V, U>;
+
+  template <LSRIntegratorTangentMode Mode,
+            class PhiDerived, class PsiBandType,
+            class PsiDispDerived, class GradPsiDispDerived,
+            class HessPsiDispDerived,
+            class TrialType, class TestType, class StateType>
+  class LSRPullTangentIntegrator;
+
+  // ---- E_pull Gauss-Newton tangent ------------------------------------------
+  template <class PhiDerived, class PsiBandType,
+            class PsiDispDerived, class GradPsiDispDerived,
+            class HessPsiDispDerived,
+            class TrialType, class TestType, class StateType>
+  class LSRPullTangentIntegrator<
+            LSRIntegratorTangentMode::GaussNewton,
+            PhiDerived, PsiBandType,
+            PsiDispDerived, GradPsiDispDerived, HessPsiDispDerived,
+            TrialType, TestType, StateType>
+    final
+    : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType = Real;
+      using GradPsiDispType =
+        Variational::VectorFunctionBase<Real, GradPsiDispDerived>;
+      static constexpr LSRIntegratorTangentMode Mode =
+        LSRIntegratorTangentMode::GaussNewton;
+
+      LSRPullTangentIntegrator(
+          const PsiBandType& psiBand,
+          const GradPsiDispType& gradPsiDisp,
+          const TrialType& du,
+          const TestType& v,
+          const StateType& u,
+          LSRIntegratorParameters params)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
+          m_psiBand(psiBand),
+          m_gradPsiDisp(gradPsiDisp.copy()),
+          m_trial(du), m_test(v), m_state(u),
+          m_params(params)
+      {}
+
+      LSRPullTangentIntegrator(const LSRPullTangentIntegrator& other)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(other),
+          m_psiBand(other.m_psiBand),
+          m_gradPsiDisp(other.m_gradPsiDisp ? other.m_gradPsiDisp->copy() : nullptr),
+          m_trial(other.m_trial), m_test(other.m_test),
+          m_state(other.m_state),
+          m_params(other.m_params),
+          m_polytope(other.m_polytope),
+          m_matrix()
+      {}
+
+      LSRPullTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const std::size_t d = polytope.getDimension();
+        const Index cellIdx = polytope.getIndex();
+        const auto& trialFES = m_trial.get().getFiniteElementSpace();
+        const auto& testFES  = m_test.get().getFiniteElementSpace();
+        const auto& trialFE  = trialFES.getFiniteElement(d, cellIdx);
+        const auto& testFE   = testFES.getFiniteElement(d, cellIdx);
+        const std::size_t trialDofs = trialFE.getCount();
+        const std::size_t testDofs  = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_matrix.resize(testDofs, trialDofs);
+        m_matrix.setZero();
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+        const std::size_t nqp = quadrature.getSize();
+
+        for (std::size_t q = 0; q < nqp; ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Real wq = qf.getWeight(q);
+          const Real distortion = pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          const Real s = m_psiBand.get().getValue(ip);
+
+          const auto uqRange = m_state.get().getValue(ip);
+          Math::SpatialVector<Real> yMinus(d);
+          for (std::size_t c = 0; c < vdim; ++c)
+            yMinus(c) = pt.getCoordinates()(c) - uqRange(c);
+          const Geometry::Point pulledPoint =
+            detail::makeDisplacedPoint(pt, yMinus);
+
+          const auto gradPsiDisp = m_gradPsiDisp->getValue(pulledPoint);
+
+          const Real weight =
+            std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real coef = m_params.rhoS * weight * m_params.normalizer;
+          const Real measure = wq * distortion;
+
+          std::vector<Real> gpDotV(testDofs);
+          std::vector<Real> gpDotU(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            const auto basis = testFE.getBasis(te)(rc);
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPsiDisp(c) * basis(c);
+            gpDotV[te] = acc;
+          }
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+          {
+            const auto basis = trialFE.getBasis(tr)(rc);
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPsiDisp(c) * basis(c);
+            gpDotU[tr] = acc;
+          }
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+              m_matrix(te, tr) +=
+                measure * coef * gpDotU[tr] * gpDotV[te];
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t tr, std::size_t te) final override
+      { return m_matrix(te, tr); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Cells; }
+
+      LSRPullTangentIntegrator* copy() const noexcept final override
+      { return new LSRPullTangentIntegrator(*this); }
+
+    private:
+      std::reference_wrapper<const PsiBandType> m_psiBand;
+      std::unique_ptr<GradPsiDispType> m_gradPsiDisp;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType>  m_test;
+      std::reference_wrapper<const StateType> m_state;
+      LSRIntegratorParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Matrix<ScalarType> m_matrix;
+  };
+
+  template <class B, class GP, class DU, class V, class U>
+  LSRPullTangentIntegrator(
+      const B&,
+      const Variational::VectorFunctionBase<Real, GP>&,
+      const DU&, const V&, const U&, LSRIntegratorParameters)
+    -> LSRPullTangentIntegrator<
+         LSRIntegratorTangentMode::GaussNewton,
+         void, B, void, GP, void, DU, V, U>;
+
+  // ---- E_pull full Newton tangent -------------------------------------------
+  //
+  // With r(u) = phi(X) - psi(X - u(X)), one has
+  //   D r[u][w] = grad psi(X-u) . w
+  // and
+  //   D^2 r[u][z,w] = - z^T hess psi(X-u) w.
+  // Hence the exact data Hessian is
+  //   grad psi \otimes grad psi - r hess psi.
+  template <class PhiDerived, class PsiBandType,
+            class PsiDispDerived, class GradPsiDispDerived,
+            class HessPsiDispDerived,
+            class TrialType, class TestType, class StateType>
+  class LSRPullTangentIntegrator<
+            LSRIntegratorTangentMode::Newton,
+            PhiDerived, PsiBandType,
+            PsiDispDerived, GradPsiDispDerived, HessPsiDispDerived,
+            TrialType, TestType, StateType>
+    final
+    : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType = Real;
+      using PhiType = Variational::RealFunctionBase<PhiDerived>;
+      using PsiDispType = Variational::RealFunctionBase<PsiDispDerived>;
+      using GradPsiDispType =
+        Variational::VectorFunctionBase<Real, GradPsiDispDerived>;
+      using HessPsiDispType =
+        Variational::MatrixFunctionBase<Real, HessPsiDispDerived>;
+      static constexpr LSRIntegratorTangentMode Mode =
+        LSRIntegratorTangentMode::Newton;
+
+      LSRPullTangentIntegrator(
+          const PhiType& phi,
+          const PsiBandType& psiBand,
+          const PsiDispType& psiDisp,
+          const GradPsiDispType& gradPsiDisp,
+          const HessPsiDispType& hessPsiDisp,
+          const TrialType& du,
+          const TestType& v,
+          const StateType& u,
+          LSRIntegratorParameters params)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
+          m_phi(phi.copy()),
+          m_psiBand(psiBand),
+          m_psiDisp(psiDisp.copy()),
+          m_gradPsiDisp(gradPsiDisp.copy()),
+          m_hessPsiDisp(hessPsiDisp.copy()),
+          m_trial(du), m_test(v), m_state(u),
+          m_params(params)
+      {}
+
+      LSRPullTangentIntegrator(const LSRPullTangentIntegrator& other)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+          m_psiBand(other.m_psiBand),
+          m_psiDisp(other.m_psiDisp ? other.m_psiDisp->copy() : nullptr),
+          m_gradPsiDisp(other.m_gradPsiDisp ? other.m_gradPsiDisp->copy() : nullptr),
+          m_hessPsiDisp(other.m_hessPsiDisp ? other.m_hessPsiDisp->copy() : nullptr),
+          m_trial(other.m_trial), m_test(other.m_test),
+          m_state(other.m_state),
+          m_params(other.m_params),
+          m_polytope(other.m_polytope),
+          m_matrix()
+      {}
+
+      LSRPullTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const std::size_t d = polytope.getDimension();
+        const Index cellIdx = polytope.getIndex();
+        const auto& trialFES = m_trial.get().getFiniteElementSpace();
+        const auto& testFES  = m_test.get().getFiniteElementSpace();
+        const auto& trialFE  = trialFES.getFiniteElement(d, cellIdx);
+        const auto& testFE   = testFES.getFiniteElement(d, cellIdx);
+        const std::size_t trialDofs = trialFE.getCount();
+        const std::size_t testDofs  = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_matrix.resize(testDofs, trialDofs);
+        m_matrix.setZero();
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+
+        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Real wq = qf.getWeight(q);
+          const Real distortion = pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          const Real s = m_psiBand.get().getValue(ip);
+
+          const auto uqRange = m_state.get().getValue(ip);
+          Math::SpatialVector<Real> yMinus(d);
+          for (std::size_t c = 0; c < vdim; ++c)
+            yMinus(c) = pt.getCoordinates()(c) - uqRange(c);
+          const Geometry::Point pulledPoint =
+            detail::makeDisplacedPoint(pt, yMinus);
+
+          const Real phiX = m_phi->getValue(ip);
+          const Real psiDisp = m_psiDisp->getValue(pulledPoint);
+          const Real r = phiX - psiDisp;
+          const auto gradPsiDisp = m_gradPsiDisp->getValue(pulledPoint);
+          const auto hessPsiDisp = m_hessPsiDisp->getValue(pulledPoint);
+
+          const Real weight =
+            std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real coef = m_params.rhoS * weight * m_params.normalizer;
+          const Real measure = wq * distortion;
+
+          std::vector<Math::SpatialVector<Real>> testValues(testDofs);
+          std::vector<Math::SpatialVector<Real>> trialValues(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+            testValues[te] = testFE.getBasis(te)(rc);
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            trialValues[tr] = trialFE.getBasis(tr)(rc);
+
+          std::vector<Real> gpDotV(testDofs);
+          std::vector<Real> gpDotU(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPsiDisp(c) * testValues[te](c);
+            gpDotV[te] = acc;
+          }
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+          {
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPsiDisp(c) * trialValues[tr](c);
+            gpDotU[tr] = acc;
+          }
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+              m_matrix(te, tr) +=
+                measure * coef * gpDotU[tr] * gpDotV[te];
+
+          std::vector<Math::SpatialVector<Real>> HU(trialDofs);
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            HU[tr] = hessPsiDisp * trialValues[tr];
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            {
+              Real vTHu = 0;
+              for (std::size_t c = 0; c < vdim; ++c)
+                vTHu += testValues[te](c) * HU[tr](c);
+              m_matrix(te, tr) -= measure * coef * r * vTHu;
+            }
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t tr, std::size_t te) final override
+      { return m_matrix(te, tr); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Cells; }
+
+      LSRPullTangentIntegrator* copy() const noexcept final override
+      { return new LSRPullTangentIntegrator(*this); }
+
+    private:
+      std::unique_ptr<PhiType> m_phi;
+      std::reference_wrapper<const PsiBandType> m_psiBand;
+      std::unique_ptr<PsiDispType> m_psiDisp;
+      std::unique_ptr<GradPsiDispType> m_gradPsiDisp;
+      std::unique_ptr<HessPsiDispType> m_hessPsiDisp;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType>  m_test;
+      std::reference_wrapper<const StateType> m_state;
+      LSRIntegratorParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Matrix<ScalarType> m_matrix;
+  };
+
+  // ---- E_pull PSD-projected Newton tangent ----------------------------------
+  template <class PhiDerived, class PsiBandType,
+            class PsiDispDerived, class GradPsiDispDerived,
+            class HessPsiDispDerived,
+            class TrialType, class TestType, class StateType>
+  class LSRPullTangentIntegrator<
+            LSRIntegratorTangentMode::PSDProjectedNewton,
+            PhiDerived, PsiBandType,
+            PsiDispDerived, GradPsiDispDerived, HessPsiDispDerived,
+            TrialType, TestType, StateType>
+    final
+    : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType = Real;
+      using PhiType = Variational::RealFunctionBase<PhiDerived>;
+      using PsiDispType = Variational::RealFunctionBase<PsiDispDerived>;
+      using GradPsiDispType =
+        Variational::VectorFunctionBase<Real, GradPsiDispDerived>;
+      using HessPsiDispType =
+        Variational::MatrixFunctionBase<Real, HessPsiDispDerived>;
+      static constexpr LSRIntegratorTangentMode Mode =
+        LSRIntegratorTangentMode::PSDProjectedNewton;
+
+      LSRPullTangentIntegrator(
+          const PhiType& phi,
+          const PsiBandType& psiBand,
+          const PsiDispType& psiDisp,
+          const GradPsiDispType& gradPsiDisp,
+          const HessPsiDispType& hessPsiDisp,
+          const TrialType& du,
+          const TestType& v,
+          const StateType& u,
+          LSRIntegratorParameters params)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
+          m_phi(phi.copy()),
+          m_psiBand(psiBand),
+          m_psiDisp(psiDisp.copy()),
+          m_gradPsiDisp(gradPsiDisp.copy()),
+          m_hessPsiDisp(hessPsiDisp.copy()),
+          m_trial(du), m_test(v), m_state(u),
+          m_params(params)
+      {}
+
+      LSRPullTangentIntegrator(const LSRPullTangentIntegrator& other)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+          m_psiBand(other.m_psiBand),
+          m_psiDisp(other.m_psiDisp ? other.m_psiDisp->copy() : nullptr),
+          m_gradPsiDisp(other.m_gradPsiDisp ? other.m_gradPsiDisp->copy() : nullptr),
+          m_hessPsiDisp(other.m_hessPsiDisp ? other.m_hessPsiDisp->copy() : nullptr),
+          m_trial(other.m_trial), m_test(other.m_test),
+          m_state(other.m_state),
+          m_params(other.m_params),
+          m_polytope(other.m_polytope),
+          m_matrix()
+      {}
+
+      LSRPullTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const std::size_t d = polytope.getDimension();
+        const Index cellIdx = polytope.getIndex();
+        const auto& trialFES = m_trial.get().getFiniteElementSpace();
+        const auto& testFES  = m_test.get().getFiniteElementSpace();
+        const auto& trialFE  = trialFES.getFiniteElement(d, cellIdx);
+        const auto& testFE   = testFES.getFiniteElement(d, cellIdx);
+        const std::size_t trialDofs = trialFE.getCount();
+        const std::size_t testDofs  = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_matrix.resize(testDofs, trialDofs);
+        m_matrix.setZero();
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+
+        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const Variational::IntegrationPoint ip(pt, &qf, q);
+          const Real wq = qf.getWeight(q);
+          const Real distortion = pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          const Real s = m_psiBand.get().getValue(ip);
+
+          const auto uqRange = m_state.get().getValue(ip);
+          Math::SpatialVector<Real> yMinus(d);
+          for (std::size_t c = 0; c < vdim; ++c)
+            yMinus(c) = pt.getCoordinates()(c) - uqRange(c);
+          const Geometry::Point pulledPoint =
+            detail::makeDisplacedPoint(pt, yMinus);
+
+          const Real phiX = m_phi->getValue(ip);
+          const Real psiDisp = m_psiDisp->getValue(pulledPoint);
+          const Real r = phiX - psiDisp;
+          const auto gradPsiDisp = m_gradPsiDisp->getValue(pulledPoint);
+          const auto hessPsiDisp = m_hessPsiDisp->getValue(pulledPoint);
+
+          const Real weight =
+            std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real coef = m_params.rhoS * weight * m_params.normalizer;
+          const Real measure = wq * distortion;
+
+          std::vector<Math::SpatialVector<Real>> testValues(testDofs);
+          std::vector<Math::SpatialVector<Real>> trialValues(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+            testValues[te] = testFE.getBasis(te)(rc);
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            trialValues[tr] = trialFE.getBasis(tr)(rc);
+
+          std::vector<Real> gpDotV(testDofs);
+          std::vector<Real> gpDotU(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPsiDisp(c) * testValues[te](c);
+            gpDotV[te] = acc;
+          }
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+          {
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += gradPsiDisp(c) * trialValues[tr](c);
+            gpDotU[tr] = acc;
+          }
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+              m_matrix(te, tr) +=
+                measure * coef * gpDotU[tr] * gpDotV[te];
+
+          const Math::SpatialMatrix<Real> second = -r * hessPsiDisp;
+          const Math::SpatialMatrix<Real> secondPlus =
+            detail::psdProject2x2(second);
+
+          std::vector<Math::SpatialVector<Real>> HU(trialDofs);
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            HU[tr] = secondPlus * trialValues[tr];
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+            {
+              Real vTHu = 0;
+              for (std::size_t c = 0; c < vdim; ++c)
+                vTHu += testValues[te](c) * HU[tr](c);
+              m_matrix(te, tr) += measure * coef * vTHu;
+            }
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t tr, std::size_t te) final override
+      { return m_matrix(te, tr); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Cells; }
+
+      LSRPullTangentIntegrator* copy() const noexcept final override
+      { return new LSRPullTangentIntegrator(*this); }
+
+    private:
+      std::unique_ptr<PhiType> m_phi;
+      std::reference_wrapper<const PsiBandType> m_psiBand;
+      std::unique_ptr<PsiDispType> m_psiDisp;
+      std::unique_ptr<GradPsiDispType> m_gradPsiDisp;
+      std::unique_ptr<HessPsiDispType> m_hessPsiDisp;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType>  m_test;
+      std::reference_wrapper<const StateType> m_state;
+      LSRIntegratorParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Matrix<ScalarType> m_matrix;
+  };
 
 }
 

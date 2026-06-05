@@ -17,6 +17,7 @@ target_link_libraries(Displace
 add_executable(LevelSetLSRReconstruction LevelSetLSRReconstruction.cpp)
 target_link_libraries(LevelSetLSRReconstruction
   PUBLIC
+  Rodin::Advection
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
@@ -27,6 +28,29 @@ target_compile_definitions(LevelSetLSRReconstructionP2
   RODIN_LSR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetLSRReconstructionP2
   PUBLIC
+  Rodin::Advection
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
+add_executable(LevelSetLSRReconstructionPhiP2 LevelSetLSRReconstruction.cpp)
+target_compile_definitions(LevelSetLSRReconstructionPhiP2
+  PRIVATE
+  RODIN_LSR_PHI_P2=1)
+target_link_libraries(LevelSetLSRReconstructionPhiP2
+  PUBLIC
+  Rodin::Advection
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
+add_executable(LevelSetLSRReconstructionPhiP3 LevelSetLSRReconstruction.cpp)
+target_compile_definitions(LevelSetLSRReconstructionPhiP3
+  PRIVATE
+  RODIN_LSR_PHI_P3=1)
+target_link_libraries(LevelSetLSRReconstructionPhiP3
+  PUBLIC
+  Rodin::Advection
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
@@ -44,6 +68,15 @@ target_compile_definitions(LevelSetLSRWavyCircleSweepP2
   RODIN_LSR_P2_DISPLACEMENT=1)
 target_link_libraries(LevelSetLSRWavyCircleSweepP2
   PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
+add_executable(LevelSetLSRWavyCircleAdvectedSweep
+  LevelSetLSRWavyCircleAdvectedSweep.cpp)
+target_link_libraries(LevelSetLSRWavyCircleAdvectedSweep
+  PUBLIC
+  Rodin::Advection
   Rodin::Geometry
   Rodin::Solver
   Rodin::Variational)
