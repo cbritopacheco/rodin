@@ -16,6 +16,22 @@ target_link_libraries(CoronarySolid
   )
 
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)
+  add_executable(CoronaryArterySolid_PETSc_MPI CoronaryArterySolid_PETSc_MPI.cpp)
+  target_link_libraries(CoronaryArterySolid_PETSc_MPI
+    PUBLIC
+    Rodin::Heart 
+    Rodin::Variational 
+    Rodin::PETSc 
+Rodin::MPI
+    Rodin::Alert Rodin::Solver 
+    Rodin::Geometry 
+    Rodin::Assembly)
+  if (RODIN_USE_SCOTCH)
+    target_link_libraries(CoronaryArterySolid_PETSc_MPI PUBLIC Rodin::Scotch)
+  endif()
+endif()
+
+if (RODIN_USE_PETSC AND RODIN_USE_MPI)
   add_executable(CoronaryArtery
     CoronaryArtery.cpp
     CoronaryArtery/CoupledLV0DCoronary3D.cpp

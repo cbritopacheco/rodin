@@ -789,9 +789,10 @@ namespace Rodin::Variational
        * @return Pushforward wrapper mapping physical points to reference evaluation.
        */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, const CallableType& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return typename FESType::template Pushforward<CallableType>(v);
+        return typename FESType::template Pushforward<CallableType>(
+            std::forward<CallableType>(v));
       }
 
       /**
