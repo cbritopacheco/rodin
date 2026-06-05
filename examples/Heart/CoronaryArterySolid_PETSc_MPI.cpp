@@ -270,7 +270,7 @@ int main(int argc, char** argv) {
 
   const char *meshFile = "../resources/examples/Heart/CoronaryArterySolid.mesh";
   // Boundary attributes
-  Attribute GammaRing = 100, Gamma1 = 101, Gamma2 = 105;
+  Attribute GammaRing = 100, Gamma1 = 101, Gamma2 = 102, Gamma3 = 103, Gamma4 = 104, Gamma5 = 105, Gamma6 = 106, Gamma8 = 108, Gamma9 = 109;
 
   Rodin::MPI::Sharder sharder(context);
   if (isRoot) {
@@ -321,27 +321,25 @@ int main(int argc, char** argv) {
   P1 Vh(mesh, dim);   // vector P1 on the distributed mesh
 
   // ---- Laplacian "map" problem (PETSc KSP / CG) ---------------------------
-  //P1 V_lh(mesh);
-  //PETSc::Variational::TrialFunction u_l(V_lh);
-  //PETSc::Variational::TestFunction  v_l(V_lh);
-  //auto zero_lap = RealFunction{Zero()};
+  P1 V_lh(mesh);
+  PETSc::Variational::TrialFunction u_l(V_lh);
+  PETSc::Variational::TestFunction  v_l(V_lh);
+  auto zero_lap = RealFunction{Zero()};
 
-  //Problem Laplacian(u_l, v_l);
-  //Laplacian = Integral(Grad(u_l), Grad(v_l))
-   //         + DirichletBC(u_l, zero_lap).on(GammaRing);
-  //{
-   // Laplacian.assemble();
-   // Solver::KSP lapSolver(Laplacian);
-   // lapSolver.setType(KSPCG);
-   // Laplacian.solve(lapSolver);
-   //}
-  //CP("Laplacian solved");
+  Problem Laplacian(u_l, v_l);
+  Laplacian = Integral(Grad(u_l), Grad(v_l))
+            + DirichletBC(u_l, zero_lap).on(GammaRing);
+  {
+    Laplacian.assemble();
+    Solver::KSP lapSolver(Laplacian);
+    lapSolver.setType(KSPCG);
+    Laplacian.solve(lapSolver);
+   }
 
-  //IO::XDMF xdmf_lap("Laplacian");
-  //xdmf_lap.setMesh(mesh);
-  //xdmf_lap.add("map", u_l.getSolution());
-  //xdmf_lap.write(0.0);
-  //CP("Laplacian XDMF written");
+  IO::XDMF xdmf_lap("Laplacian");
+  xdmf_lap.setMesh(mesh);
+  xdmf_lap.add("map", u_l.getSolution());
+  xdmf_lap.write(0.0);
 
   // ---- Solid Material -----------------------------------------------------------
   const Real E = 5e5;
@@ -394,7 +392,11 @@ int main(int argc, char** argv) {
   PETSc::Variational::TestFunction  w(Vh);
 
   const auto normal = BoundaryNormal(mesh);
-  const Real k = 1.e5;
+  const Real k = 4e5;
+
+  const Real a = 8e4;
+  const Real b = 4e4;
+  const Real aVel = b * gamma / (beta * dt);
 
 
   Real disp0DValue = 0.0;
@@ -406,11 +408,16 @@ int main(int argc, char** argv) {
   Problem newton(du, w);
   newton = tangent + aMass * Integral(du, w) + internal
          + aMass * Integral(u, w)
-         + k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(Gamma1, Gamma2)
-         + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(Gamma1, Gamma2)
-         - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(Gamma1, Gamma2)
+         + k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
+         + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
+         - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
          - aMass * Integral(uPred, w)
-         + DirichletBC(du, zero).on(GammaRing);
+         + a   * BoundaryIntegral(du, w).over(GammaRing)
+         + aVel * BoundaryIntegral(du, w).over(GammaRing)
+         + a    * BoundaryIntegral(u, w).over(GammaRing)
+         + aVel * BoundaryIntegral(u, w).over(GammaRing)
+         - aVel * BoundaryIntegral(uPred, w).over(GammaRing)
+         + b    * BoundaryIntegral(vPred, w).over(GammaRing);
 
   newton.assemble();
 
