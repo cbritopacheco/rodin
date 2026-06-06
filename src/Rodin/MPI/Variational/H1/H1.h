@@ -304,18 +304,18 @@ namespace Rodin::Variational
        */
       template <class CallableType>
       auto getPushforward(
-          const std::pair<size_t, Index>&, const CallableType& v) const
+          const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
       /**
        * @brief Returns a pushforward wrapper for an explicit polytope object.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
     private:
@@ -1205,18 +1205,18 @@ namespace Rodin::Variational
        */
       template <class CallableType>
       auto getPushforward(
-          const std::pair<size_t, Index>&, const CallableType& v) const
+          const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
       /**
        * @brief Returns a pushforward wrapper for an explicit polytope object.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
     private:
