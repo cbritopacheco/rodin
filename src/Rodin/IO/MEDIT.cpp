@@ -145,8 +145,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx1 = static_cast<Index>(m_build.getConnectivity().getCount(1));
             m_build.polytope(Geometry::Polytope::Type::Segment, std::move(data->vertices));
-            m_build.attribute({ 1, i }, data->attribute);
+            m_build.attribute({ 1, idx1 }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -166,8 +167,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx2 = static_cast<Index>(m_build.getConnectivity().getCount(2));
             m_build.polytope(Geometry::Polytope::Type::Triangle, std::move(data->vertices));
-            m_build.attribute({ 2, i }, data->attribute);
+            m_build.attribute({ 2, idx2 }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -187,8 +189,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx2 = static_cast<Index>(m_build.getConnectivity().getCount(2));
             m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices));
-            m_build.attribute({ 2, i }, data->attribute);
+            m_build.attribute({ 2, idx2 }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -208,8 +211,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx3 = static_cast<Index>(m_build.getConnectivity().getCount(3));
             m_build.polytope(Geometry::Polytope::Type::Wedge, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            m_build.attribute({ 3, idx3 }, data->attribute);
           }
           continue;
         }
@@ -229,8 +233,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx3 = static_cast<Index>(m_build.getConnectivity().getCount(3));
             m_build.polytope(Geometry::Polytope::Type::Pyramid, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            m_build.attribute({ 3, idx3 }, data->attribute);
           }
           continue;
         }
@@ -250,8 +255,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx3t = static_cast<Index>(m_build.getConnectivity().getCount(3));
             m_build.polytope(Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            m_build.attribute({ 3, idx3t }, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -271,8 +277,9 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
+            const Index idx3h = static_cast<Index>(m_build.getConnectivity().getCount(3));
             m_build.polytope(Geometry::Polytope::Type::Hexahedron, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            m_build.attribute({ 3, idx3h }, data->attribute);
           }
           continue; // Continue the while loop
         }

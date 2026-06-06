@@ -62,6 +62,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
+#include <type_traits>
 #ifdef RODIN_USE_SCOTCH
 #include <Rodin/Scotch/MeshPartitioner.h>
 #endif
@@ -268,12 +269,11 @@ int main(int argc, char** argv) {
   }
 
 
-  const char *meshFile = "../resources/examples/Heart/CoronaryArterySolid.mesh";
-  // Boundary attributes
-  Attribute GammaRing = 100, Gamma1 = 101, Gamma2 = 102, Gamma3 = 103, Gamma4 = 104, Gamma5 = 105, Gamma6 = 106, Gamma8 = 108, Gamma9 = 109;
+  const char *meshFile = "../resources/examples/Heart/malla_solido.mesh";
 
   Rodin::MPI::Sharder sharder(context);
-  if (isRoot) {
+  if (comm.rank() == RootRank)
+  {
     Geometry::Mesh<Context::Local> local;
     local.load(meshFile, IO::FileFormat::MEDIT);
 
@@ -310,36 +310,40 @@ int main(int argc, char** argv) {
   mesh.getConnectivity().compute(D - 1, 0);
   mesh.getConnectivity().compute(D - 1, 1);
   mesh.getConnectivity().compute(1, 0);
-  // Match the reference coronary MPI pipeline (CoupledLV0DCoronary3D::makeMesh):
-  // reconcile facets (D-1) and edges (1). The edge reconciliation needs the
-  // (D-1, 1) and (1, 0) incidences computed just above.
   mesh.reconcile(2);
   mesh.reconcile(1);
 
+
+  std::array<Attribute, 6> SolidOutlets{{18, 19, 20, 21, 22, 31}};
+  Attribute SolidRing = 17;
+  Attribute SolidExt = 102;
+
+
+
   // ---- Finite-element space -----------------------------------------------
   const size_t dim = mesh.getSpaceDimension();
-  P1 Vh(mesh, dim);   // vector P1 on the distributed mesh
+  H1 Vh(std::integral_constant<size_t,1>{}, mesh, dim);   // vector P1 on the distributed mesh
 
   // ---- Laplacian "map" problem (PETSc KSP / CG) ---------------------------
-  P1 V_lh(mesh);
-  PETSc::Variational::TrialFunction u_l(V_lh);
-  PETSc::Variational::TestFunction  v_l(V_lh);
-  auto zero_lap = RealFunction{Zero()};
+  //H1 V_lh(mesh);
+  //PETSc::Variational::TrialFunction u_l(V_lh);
+  //PETSc::Variational::TestFunction  v_l(V_lh);
+  //auto zero_lap = RealFunction{Zero()};
 
-  Problem Laplacian(u_l, v_l);
-  Laplacian = Integral(Grad(u_l), Grad(v_l))
-            + DirichletBC(u_l, zero_lap).on(GammaRing);
-  {
-    Laplacian.assemble();
-    Solver::KSP lapSolver(Laplacian);
-    lapSolver.setType(KSPCG);
-    Laplacian.solve(lapSolver);
-   }
+  //Problem Laplacian(u_l, v_l);
+  //Laplacian = Integral(Grad(u_l), Grad(v_l))
+    //        + DirichletBC(u_l, zero_lap).on(GammaRing);
+ // {
+   // Laplacian.assemble();
+   // Solver::KSP lapSolver(Laplacian);
+   // lapSolver.setType(KSPCG);
+   // Laplacian.solve(lapSolver);
+   // }
 
-  IO::XDMF xdmf_lap("Laplacian");
-  xdmf_lap.setMesh(mesh);
-  xdmf_lap.add("map", u_l.getSolution());
-  xdmf_lap.write(0.0);
+  //IO::XDMF xdmf_lap("Laplacian");
+  //xdmf_lap.setMesh(mesh);
+  //xdmf_lap.add("map", u_l.getSolution());
+  //xdmf_lap.write(0.0);
 
   // ---- Solid Material -----------------------------------------------------------
   const Real E = 5e5;
@@ -392,10 +396,10 @@ int main(int argc, char** argv) {
   PETSc::Variational::TestFunction  w(Vh);
 
   const auto normal = BoundaryNormal(mesh);
-  const Real k = 1e5;
 
-  const Real a = 5e5;
-  const Real b = 1e5;
+  const Real k = 1e5;
+  const Real a = 1e5;
+  const Real b = 5e4;
   const Real aVel = b * gamma / (beta * dt);
 
 
@@ -408,17 +412,17 @@ int main(int argc, char** argv) {
   Problem newton(du, w);
   newton = tangent + aMass * Integral(du, w) + internal
          + aMass * Integral(u, w)
-         + k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
-         + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
-         - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
+         + k * BoundaryIntegral(Dot(du, normal), Dot(w, normal)).over(SolidExt)
+         + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(SolidExt)
+         - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(SolidExt)
          - aMass * Integral(uPred, w)
-         + DirichletBC(du, zero).on(GammaRing);
-         //+ a   * BoundaryIntegral(du, w).over(GammaRing)
-         //+ aVel * BoundaryIntegral(du, w).over(GammaRing)
-         //+ a    * BoundaryIntegral(u, w).over(GammaRing)
-         //+ aVel * BoundaryIntegral(u, w).over(GammaRing)
-         //- aVel * BoundaryIntegral(uPred, w).over(GammaRing)
-         //+ b    * BoundaryIntegral(vPred, w).over(GammaRing);
+         + DirichletBC(du, zero).on(SolidRing);
+         + a   * BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
+         + aVel * BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
+         + a    * BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
+         + aVel * BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
+         - aVel * BoundaryIntegral(uPred, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
+         + b    * BoundaryIntegral(vPred, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5]);
 
   newton.assemble();
 
