@@ -382,6 +382,96 @@ namespace
     }
   }
 
+  Geometry::Mesh<Context::Local> makeAttributeRegressionMesh(size_t dim)
+  {
+    Mesh<Context::Local>::Builder builder;
+    builder.initialize(dim);
+
+    switch (dim)
+    {
+      case 1:
+      {
+        builder
+          .nodes(3)
+          .vertex({ 0.0 })
+          .vertex({ 1.0 })
+          .vertex({ 2.0 })
+          .polytope(Polytope::Type::Segment, { 0, 1 })
+          .attribute({ 1, 0 }, 11)
+          .polytope(Polytope::Type::Segment, { 1, 2 })
+          .attribute({ 1, 1 }, 22);
+        break;
+      }
+      case 2:
+      {
+        builder
+          .nodes(5)
+          .vertex({ 0.0, 0.0 })
+          .vertex({ 1.0, 0.0 })
+          .vertex({ 0.0, 1.0 })
+          .vertex({ 2.0, 0.0 })
+          .vertex({ 2.0, 1.0 })
+          .polytope(Polytope::Type::Triangle, { 0, 1, 2 })
+          .attribute({ 2, 0 }, 11)
+          .polytope(Polytope::Type::Quadrilateral, { 1, 3, 4, 2 })
+          .attribute({ 2, 1 }, 22);
+        break;
+      }
+      case 3:
+      {
+        builder
+          .nodes(8)
+          .vertex({ 0.0, 0.0, 0.0 })
+          .vertex({ 1.0, 0.0, 0.0 })
+          .vertex({ 1.0, 1.0, 0.0 })
+          .vertex({ 0.0, 1.0, 0.0 })
+          .vertex({ 0.0, 0.0, 1.0 })
+          .vertex({ 1.0, 0.0, 1.0 })
+          .vertex({ 1.0, 1.0, 1.0 })
+          .vertex({ 0.0, 1.0, 1.0 })
+          .polytope(Polytope::Type::Tetrahedron, { 0, 1, 2, 4 })
+          .attribute({ 3, 0 }, 11)
+          .polytope(Polytope::Type::Hexahedron, { 0, 1, 2, 3, 4, 5, 6, 7 })
+          .attribute({ 3, 1 }, 22);
+        break;
+      }
+      default:
+        ADD_FAILURE() << "Unsupported dimension for attribute regression mesh";
+    }
+    return builder.finalize();
+  }
+
+  void expectAttributeRegressionMesh(
+      const Geometry::Mesh<Context::Local>& mesh,
+      size_t dim)
+  {
+    ASSERT_EQ(mesh.getSpaceDimension(), dim);
+    ASSERT_EQ(mesh.getDimension(), dim);
+    ASSERT_EQ(mesh.getCellCount(), 2);
+    ASSERT_EQ(mesh.getPolytopeCount(dim), 2);
+
+    EXPECT_EQ(mesh.getAttribute(dim, 0), 11);
+    EXPECT_EQ(mesh.getAttribute(dim, 1), 22);
+
+    switch (dim)
+    {
+      case 1:
+        EXPECT_EQ(mesh.getGeometry(1, 0), Polytope::Type::Segment);
+        EXPECT_EQ(mesh.getGeometry(1, 1), Polytope::Type::Segment);
+        break;
+      case 2:
+        EXPECT_EQ(mesh.getGeometry(2, 0), Polytope::Type::Triangle);
+        EXPECT_EQ(mesh.getGeometry(2, 1), Polytope::Type::Quadrilateral);
+        break;
+      case 3:
+        EXPECT_EQ(mesh.getGeometry(3, 0), Polytope::Type::Tetrahedron);
+        EXPECT_EQ(mesh.getGeometry(3, 1), Polytope::Type::Hexahedron);
+        break;
+      default:
+        FAIL() << "Unsupported dimension " << dim;
+    }
+  }
+
   // Helper to return a human-readable label for test names
   std::string polytopeLabel(Polytope::Type type)
   {
@@ -400,6 +490,7 @@ namespace
   }
   // Parameterized test fixture
   class HDF5MultiDim : public ::testing::TestWithParam<Polytope::Type> {};
+  class HDF5AttributeRegression : public ::testing::TestWithParam<size_t> {};
 
   // --- Mesh round-trip persistence across dimensions -------------------------
 
@@ -441,6 +532,23 @@ namespace
     EXPECT_EQ(
         loaded.getPolytopeCount(mesh.getDimension()),
         mesh.getPolytopeCount(mesh.getDimension()));
+
+    std::remove(meshFile.c_str());
+  }
+
+  TEST_P(HDF5AttributeRegression, MeshRoundTripPreservesDimensionAttributes)
+  {
+    const size_t dim = GetParam();
+    const std::string meshFile =
+        "/tmp/rodin_hdf5_attr_regression_" + std::to_string(dim) + "d.h5";
+
+    Mesh mesh = makeAttributeRegressionMesh(dim);
+    mesh.save(meshFile, FileFormat::HDF5);
+
+    Mesh loaded;
+    loaded.load(meshFile, FileFormat::HDF5);
+
+    expectAttributeRegressionMesh(loaded, dim);
 
     std::remove(meshFile.c_str());
   }
@@ -862,4 +970,13 @@ namespace
           Polytope::Type::Wedge          // 3D
       ),
       PolytopeNameGenerator());
+
+  INSTANTIATE_TEST_SUITE_P(
+      Dimensions,
+      HDF5AttributeRegression,
+      ::testing::Values(1, 2, 3),
+      [](const ::testing::TestParamInfo<size_t>& info)
+      {
+        return "Dim" + std::to_string(info.param) + "D";
+      });
 }
