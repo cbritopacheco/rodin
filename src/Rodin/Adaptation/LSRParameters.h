@@ -9,6 +9,7 @@
 
 #include <functional>
 
+#include "Rodin/Geometry/Types.h"
 #include "Rodin/Types.h"
 
 #include "LSRIntegrators.h"
@@ -57,6 +58,15 @@ namespace Rodin::Adaptation
     /// Weight for the relative distortion energy Q_rel(I + grad u) - 1.
     Real shapeWeight = 1e-1;
     Real h1RegularizationWeight = 0;
+
+    /// Interface-distance term
+    ///   E_Gamma = 0.5 * interfaceWeight * interfaceNormalizer
+    ///             * int_{Gamma_h} (phi(X + u) / |grad phi(X + u)|)^2 ds.
+    /// This term does not assume that phi is a signed distance function.
+    Real interfaceWeight = 0;
+    Geometry::Attribute interfaceAttribute = 0;
+    Real interfaceNormalizer = 0; ///< <= 0 means compute 1 / (|Gamma_h| h_ref^2).
+    Real interfaceGradientFloor = 1e-12;
 
     /// Smooth relative-Q barrier weight (`qBarrierWeight = 0` disables).
     Real qBarrierWeight = 0;
@@ -139,6 +149,10 @@ namespace Rodin::Adaptation
     out.normalizer = params.normalizer;
     out.quadratureOrder = params.quadratureOrder;
     out.fieldEvaluation = params.fieldEvaluation;
+    out.interfaceWeight = params.interfaceWeight;
+    out.interfaceAttribute = params.interfaceAttribute;
+    out.interfaceNormalizer = params.interfaceNormalizer;
+    out.interfaceGradientFloor = params.interfaceGradientFloor;
     return out;
   }
 

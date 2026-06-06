@@ -148,6 +148,28 @@ namespace Rodin::Adaptation
         return Residual(phi, grad, psi, params);
       }
 
+      template <class PhiDerived, class GradDerived>
+      auto InterfaceResidual(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+          LSRIntegratorParameters params = {}) const
+      {
+        return LSRInterfaceDistanceResidualIntegrator<
+                  PhiDerived, GradDerived, Test, State>(
+              phi, grad, m_v.get(), m_u.get(), params);
+      }
+
+      template <class PhiDerived, class GradDerived>
+      auto InterfaceTangent(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::VectorFunctionBase<Real, GradDerived>& grad,
+          LSRIntegratorParameters params = {}) const
+      {
+        return LSRInterfaceDistanceTangentIntegrator<
+                  PhiDerived, GradDerived, Trial, Test, State>(
+              phi, grad, m_du.get(), m_v.get(), m_u.get(), params);
+      }
+
       // ---- Composite --------------------------------------------------------
       template <class PhiDerived, class GradDerived, class Psi>
       auto operator()(

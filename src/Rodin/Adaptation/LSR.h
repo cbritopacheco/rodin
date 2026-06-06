@@ -134,6 +134,8 @@ namespace Rodin::Adaptation
 	              newton =
 	                  lsrTerm.Tangent(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
 	                + lsrTerm.Residual(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceTangent(phi, gradPhi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 		                + barrier.TangentPSDProjected(shapeWeight, barrierParams)
 	                + barrier.Residual(shapeWeight, barrierParams)
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
@@ -143,6 +145,8 @@ namespace Rodin::Adaptation
 	              newton =
 	                  lsrTerm.Tangent(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
 	                + lsrTerm.Residual(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceTangent(phi, gradPhi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
 	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
 	                + DirichletBC(du, zero);
@@ -152,6 +156,8 @@ namespace Rodin::Adaptation
 	              newton =
 	                  lsrTerm.Tangent(phi, gradPhi, hessPhi, psi, makeLSRIntegratorParameters(params))
 	                + lsrTerm.Residual(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceTangent(phi, gradPhi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 		                + barrier.TangentPSDProjected(shapeWeight, barrierParams)
 	                + barrier.Residual(shapeWeight, barrierParams)
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
@@ -161,6 +167,8 @@ namespace Rodin::Adaptation
 	              newton =
 	                  lsrTerm.Tangent(phi, gradPhi, hessPhi, psi, makeLSRIntegratorParameters(params))
 	                + lsrTerm.Residual(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceTangent(phi, gradPhi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
 	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
 	                + DirichletBC(du, zero);
@@ -171,6 +179,8 @@ namespace Rodin::Adaptation
 	                  lsrTerm.TangentPSDProjected(
 	                      phi, gradPhi, hessPhi, psi, makeLSRIntegratorParameters(params))
 	                + lsrTerm.Residual(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceTangent(phi, gradPhi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 	                + barrier.TangentPSDProjected(shapeWeight, barrierParams)
 	                + barrier.Residual(shapeWeight, barrierParams)
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
@@ -181,6 +191,8 @@ namespace Rodin::Adaptation
 	                  lsrTerm.TangentPSDProjected(
 	                      phi, gradPhi, hessPhi, psi, makeLSRIntegratorParameters(params))
 	                + lsrTerm.Residual(phi, gradPhi, psi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceTangent(phi, gradPhi, makeLSRIntegratorParameters(params))
+                  + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
 	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
 	                + DirichletBC(du, zero);
@@ -192,7 +204,7 @@ namespace Rodin::Adaptation
           {
             u.getData() = uTry;
             return computeObjective(
-                psi, phi, params, barrierParams, barrierEnabled);
+                psi, phi, gradPhi, params, barrierParams, barrierEnabled);
           };
 
         return driveNewton(
@@ -677,10 +689,11 @@ namespace Rodin::Adaptation
           params.normalizer = Real(1);
       }
 
-      template <class Psi, class PhiDerived>
+      template <class Psi, class PhiDerived, class GradDerived>
       Real computeObjective(
           const Psi& psi,
           const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::VectorFunctionBase<Real, GradDerived>& gradPhi,
           const LSRParameters& params,
           const BarrierParameters& barrierParams,
           bool barrierEnabled) const
@@ -741,8 +754,79 @@ namespace Rodin::Adaptation
         }
 	        if (params.h1RegularizationWeight != Real(0))
 	          energy += computeH1RegularizationEnergy(params);
+        if (params.interfaceWeight != Real(0))
+          energy += computeInterfaceDistanceEnergy(phi, gradPhi, params);
 	        return energy;
 	      }
+
+      template <class PhiDerived, class GradDerived>
+      Real computeInterfaceDistanceEnergy(
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const Variational::VectorFunctionBase<Real, GradDerived>& gradPhi,
+          const LSRParameters& params) const
+      {
+        const auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto lsrParams = makeLSRIntegratorParameters(params);
+
+        Real energy = 0;
+        for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+        {
+          const auto& face = *faceIt;
+          const auto attr = face.getAttribute();
+          if (!attr || *attr != params.interfaceAttribute)
+            continue;
+
+          const auto& fe = fes.getFiniteElement(
+              face.getDimension(), face.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(
+                lsrQuadOrderFor(fe.getOrder(), lsrParams),
+                face.getGeometry());
+          const auto& quadrature = face.getQuadrature(qf);
+
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& pt = quadrature.getPoint(q);
+            const auto cellIdx = detail::firstIncidentCell(face);
+            if (!cellIdx)
+              continue;
+            const auto cellIt = mesh.getCell(*cellIdx);
+            const auto& cell = *cellIt;
+            Math::SpatialPoint rcCell(face.getDimension() + 1);
+            cell.getTransformation().inverse(
+                rcCell, pt.getPhysicalCoordinates());
+            const Geometry::Point original(
+                cell, rcCell, pt.getPhysicalCoordinates());
+
+            const auto uq = u.getValue(original);
+            Math::SpatialVector<Real> displacement(mesh.getSpaceDimension());
+            displacement.setZero();
+            for (std::size_t c = 0; c < fes.getVectorDimension(); ++c)
+              displacement(c) = uq(c);
+
+            const auto traced =
+              detail::traceMovedPoint(
+                  original, displacement, phi, lsrParams.fieldEvaluation);
+            if (traced.exited)
+              continue;
+
+            const Real phi_y =
+              phi.getValue(traced.point) + traced.correction;
+            const auto grad = gradPhi.getValue(traced.point);
+            const Real gradNorm =
+              std::max(grad.norm(), params.interfaceGradientFloor);
+            const Real distance = phi_y / gradNorm;
+            energy += Real(0.5)
+              * qf.getWeight(q) * pt.getDistortion()
+              * params.interfaceWeight
+              * params.interfaceNormalizer
+              * distance * distance;
+          }
+        }
+        return energy;
+      }
 
       // E_pull objective: (1/2) integral W(psi(X)) ( phi(X) - psi(X-u))^2 dX
       // + barrier + h1 reg.
@@ -901,6 +985,26 @@ namespace Rodin::Adaptation
         return measure;
       }
 
+      Real computeInterfaceMeasure(Geometry::Attribute attr) const
+      {
+        const auto& mesh = m_u.get().getFiniteElementSpace().getMesh();
+        Real measure = 0;
+        for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+        {
+          const auto& face = *faceIt;
+          const auto faceAttr = face.getAttribute();
+          if (!faceAttr || *faceAttr != attr)
+            continue;
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(
+                face.getDimension(), face.getGeometry());
+          const auto& quadrature = face.getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+            measure += qf.getWeight(q) * quadrature.getPoint(q).getDistortion();
+        }
+        return measure;
+      }
+
       template <class Psi>
       void completeParameters(LSRParameters& params, const Psi& psi) const
       {
@@ -917,6 +1021,16 @@ namespace Rodin::Adaptation
           if (weightedBandMeasure <= 0)
             throw std::runtime_error("LSR: weighted level-set band is empty.");
           params.normalizer = Real(1) / (weightedBandMeasure * params.hRef * params.hRef);
+        }
+        if (params.interfaceWeight != Real(0)
+            && params.interfaceNormalizer <= 0)
+        {
+          const Real interfaceMeasure =
+            computeInterfaceMeasure(params.interfaceAttribute);
+          if (interfaceMeasure <= 0)
+            throw std::runtime_error("LSR: interface-distance term is enabled but the interface set is empty.");
+          params.interfaceNormalizer =
+            Real(1) / (interfaceMeasure * params.hRef * params.hRef);
         }
       }
 

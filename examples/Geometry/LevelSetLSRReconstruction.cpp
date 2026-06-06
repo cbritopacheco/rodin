@@ -457,6 +457,7 @@ int main(int argc, char** argv)
   //                         optional componentwise Hessian smoothing.
   //   --hess-smooth-ell=<l> length for h1 Hessian smoothing, default h.
   //   --shape-weight=<w>   weight of E_shape, default 1e-1.
+  //   --gamma-weight=<w>   weight of E_Gamma, default 1.
   //   --j-barrier-weight=<w>
   //                         weight of E_admissibility, default 0.
   //   --j-barrier-safe=<j> activation ratio for E_admissibility, default 0.
@@ -482,6 +483,7 @@ int main(int argc, char** argv)
   const std::size_t maxNewtonSteps =
     getOptionSizeT(argc, argv, "newton-steps", 40);
   const Real shapeWeight = getOptionReal(argc, argv, "shape-weight", Real(1e-1));
+  const Real gammaWeight = getOptionReal(argc, argv, "gamma-weight", Real(1));
   const Real jBarrierWeight =
     getOptionReal(argc, argv, "j-barrier-weight", Real(0));
   const Real jBarrierSafeRatio =
@@ -553,17 +555,29 @@ int main(int argc, char** argv)
   // psi reconstruction.
   //   poisson : screened-Poisson lift of a +/-M sign source. Smooth field
   //             with |grad psi| ~ M / psiEll, not a true SDF.
-  //   fmm     : Fast Marching Method (Distance::Eikonal). True SDF
-  //             reconstruction with |grad psi| = 1 a.e.
-  enum class PsiReconstruction { Poisson, Fmm };
+  //   fmm           : Fast Marching Method (Distance::Eikonal). True SDF
+  //                   reconstruction with |grad psi| = 1 a.e.
+  //   projected-phi    : L2 projection of the input phi with homogeneous
+  //                      Dirichlet data on the classified skeleton.
+  //   projected-phi-h1 : H1 projection of the input phi with the same
+  //                      skeleton constraint.
+  enum class PsiReconstruction { Poisson, Fmm, ProjectedPhi, ProjectedPhiH1 };
   const std::string psiStr =
     getOptionString(argc, argv, "psi", "poisson");
   const PsiReconstruction psiReconstruction =
-    (psiStr == "fmm")
-      ? PsiReconstruction::Fmm
-      : (psiStr == "poisson")
-          ? PsiReconstruction::Poisson
-          : throw std::runtime_error("Unknown --psi. Expected poisson or fmm.");
+      psiStr == "fmm"
+        ? PsiReconstruction::Fmm
+    : psiStr == "poisson"
+        ? PsiReconstruction::Poisson
+    : psiStr == "projected-phi" || psiStr == "projection"
+        ? PsiReconstruction::ProjectedPhi
+    : psiStr == "projected-phi-h1" || psiStr == "projection-h1"
+        ? PsiReconstruction::ProjectedPhiH1
+    : throw std::runtime_error(
+        "Unknown --psi. Expected poisson, fmm, projected-phi, "
+        "or projected-phi-h1.");
+  const Real psiProjectEll =
+    getOptionReal(argc, argv, "psi-project-ell", h);
   enum class PhiValueSource { Analytic, Screened };
   const std::string phiStr =
     getOptionString(argc, argv, "phi", "analytic");
@@ -991,6 +1005,52 @@ int main(int argc, char** argv)
       .setInterior(interiorAttribute)
       .solve()
       .sign();
+  }
+  else if (psiReconstruction == PsiReconstruction::ProjectedPhi
+           || psiReconstruction == PsiReconstruction::ProjectedPhiH1)
+  {
+    TrialFunction psiTrial(psiFes);
+    TestFunction  psiTest(psiFes);
+    RealFunction phiData(
+        [&](const Geometry::Point& p) -> Real
+        {
+          if (advectOn)
+            return phiHAdv.getValue(p);
+          const auto& X = p.getCoordinates();
+          return levelSet.phi(vec2(X(0), X(1)));
+        });
+    auto gradPhiHAdvData = Grad(phiHAdv);
+    AnalyticVectorFunction gradPhiData(
+        [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+        {
+          if (advectOn)
+            return gradPhiHAdvData.getValue(p);
+          const auto& X = p.getCoordinates();
+          return levelSet.grad(vec2(X(0), X(1)));
+        },
+        /*dimension=*/2);
+    Problem psiProblem(psiTrial, psiTest);
+    if (psiReconstruction == PsiReconstruction::ProjectedPhiH1)
+    {
+      RealFunction<Real> ell2(psiProjectEll * psiProjectEll);
+      psiProblem =
+          Integral(psiTrial, psiTest)
+        + Integral(ell2 * Grad(psiTrial), Grad(psiTest))
+        - Integral(phiData, psiTest)
+        - Integral(ell2 * gradPhiData, Grad(psiTest))
+        + DirichletBC(psiTrial, RealFunction(0.0))
+            .on(interfaceAttribute);
+    }
+    else
+    {
+      psiProblem =
+          Integral(psiTrial, psiTest)
+        - Integral(phiData, psiTest)
+        + DirichletBC(psiTrial, RealFunction(0.0))
+            .on(interfaceAttribute);
+    }
+    Solver::SparseLU(psiProblem).solve();
+    psi.getData() = psiTrial.getSolution().getData();
   }
   else
   {
@@ -1504,27 +1564,68 @@ int main(int argc, char** argv)
   std::string solveError;
   constexpr Real geometryFitTolMult = Real(4);
   const Real geometryTolerance = geometryFitTolMult * h * h;
+  auto interfaceFacetSamples =
+    [&](const Index facet, const auto& callback)
+    {
+      const auto face = mesh.getFace(facet);
+      const auto& faceVertices = face->getVertices();
+      const auto& incident =
+        mesh.getConnectivity().getIncidence({1, 2}, facet);
+      if (faceVertices.size() != 2 || incident.empty())
+        return;
+      const Index cellIdx = incident[0];
+      const auto cellIt = mesh.getCell(cellIdx);
+      const auto& cell = *cellIt;
+      const auto& cellVertices = cell.getVertices();
+      std::array<int, 2> local = {{-1, -1}};
+      for (std::size_t a = 0; a < cellVertices.size(); ++a)
+      {
+        if (cellVertices[a] == faceVertices[0])
+          local[0] = static_cast<int>(a);
+        if (cellVertices[a] == faceVertices[1])
+          local[1] = static_cast<int>(a);
+      }
+      if (local[0] < 0 || local[1] < 0)
+        return;
+
+      const Vec2 xa = mesh.getVertexCoordinates(faceVertices[0]);
+      const Vec2 xb = mesh.getVertexCoordinates(faceVertices[1]);
+      const Real len = (xb - xa).norm();
+      constexpr std::array<Real, 2> sPts = {{
+        Real(0.21132486540518713),
+        Real(0.78867513459481287)
+      }};
+      for (const Real s : sPts)
+      {
+        std::array<Real, 3> lambda = {{Real(0), Real(0), Real(0)}};
+        lambda[static_cast<std::size_t>(local[0])] = Real(1) - s;
+        lambda[static_cast<std::size_t>(local[1])] = s;
+        Math::SpatialPoint rc(2);
+        rc(0) = lambda[1];
+        rc(1) = lambda[2];
+        Math::SpatialPoint X(2);
+        cell.getTransformation().transform(X, rc);
+        callback(Geometry::Point(cell, rc, X), len * Real(0.5));
+      }
+    };
+
   auto interfacePhiRMSFromDisplacement = [&]() -> Real
   {
-    const auto& uFes = u.getFiniteElementSpace();
-    const auto& uData = u.getData();
     Real interfacePhi = 0;
     Real interfaceLength = 0;
     for (const Index facet : interfaceFacets)
     {
-      const auto face = mesh.getFace(facet);
-      const auto& vertices = face->getVertices();
-      const Vec2 xa = mesh.getVertexCoordinates(vertices[0]);
-      const Vec2 xb = mesh.getVertexCoordinates(vertices[1]);
-      const auto& dofsA = uFes.getDOFs(0, vertices[0]);
-      const auto& dofsB = uFes.getDOFs(0, vertices[1]);
-      const Vec2 a = vec2(xa(0) + uData(dofsA[0]), xa(1) + uData(dofsA[1]));
-      const Vec2 b = vec2(xb(0) + uData(dofsB[0]), xb(1) + uData(dofsB[1]));
-      const Vec2 mid = Real(0.5) * (a + b);
-      const Real val = levelSet.phi(mid);
-      const Real len = (b - a).norm();
-      interfacePhi += val * val * len;
-      interfaceLength += len;
+      interfaceFacetSamples(
+          facet,
+          [&](const Geometry::Point& pt, Real weight)
+          {
+            const auto& X = pt.getPhysicalCoordinates();
+            const auto uX = u.getValue(pt);
+            const Vec2 y = vec2(X(0) + uX(0), X(1) + uX(1));
+            const Real val = levelSet.phi(y);
+            interfacePhi += val * val * weight;
+            interfaceLength += weight;
+          });
     }
     return std::sqrt(interfacePhi / std::max(interfaceLength, Real(1e-30)));
   };
@@ -1540,41 +1641,36 @@ int main(int argc, char** argv)
   auto interfacePhiHRMSFromDisplacement = [&]() -> Real
   {
     if (!advectOn) return interfacePhiRMSFromDisplacement();
-    const auto& uFes = u.getFiniteElementSpace();
-    const auto& uData = u.getData();
     Real interfacePhi = 0;
     Real interfaceLength = 0;
     for (const Index facet : interfaceFacets)
     {
-      const auto face = mesh.getFace(facet);
-      const auto& vertices = face->getVertices();
-      const Vec2 xa = mesh.getVertexCoordinates(vertices[0]);
-      const Vec2 xb = mesh.getVertexCoordinates(vertices[1]);
-      const auto& dofsA = uFes.getDOFs(0, vertices[0]);
-      const auto& dofsB = uFes.getDOFs(0, vertices[1]);
-      const Vec2 a = vec2(xa(0) + uData(dofsA[0]), xa(1) + uData(dofsA[1]));
-      const Vec2 b = vec2(xb(0) + uData(dofsB[0]), xb(1) + uData(dofsB[1]));
-      const Vec2 mid = Real(0.5) * (a + b);
-      // Find the background cell containing `mid` (brute force).
-      Real val = 0;
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-      {
-        const auto& cell = *cellIt;
-        Math::SpatialPoint Y(2);
-        Y(0) = mid(0); Y(1) = mid(1);
-        Math::SpatialPoint rc(2);
-        cell.getTransformation().inverse(rc, Y);
-        const Real tol = Real(1e-9);
-        if (rc(0) >= -tol && rc(1) >= -tol
-            && rc(0) + rc(1) <= Real(1) + tol)
-        {
-          val = phiHAdv.getValue(Geometry::Point(cell, rc, Y));
-          break;
-        }
-      }
-      const Real len = (b - a).norm();
-      interfacePhi += val * val * len;
-      interfaceLength += len;
+      interfaceFacetSamples(
+          facet,
+          [&](const Geometry::Point& pt, Real weight)
+          {
+            const auto& X = pt.getPhysicalCoordinates();
+            const auto uX = u.getValue(pt);
+            const Vec2 y = vec2(X(0) + uX(0), X(1) + uX(1));
+            Real val = 0;
+            for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+            {
+              const auto& cell = *cellIt;
+              Math::SpatialPoint Y(2);
+              Y(0) = y(0); Y(1) = y(1);
+              Math::SpatialPoint rc(2);
+              cell.getTransformation().inverse(rc, Y);
+              const Real tol = Real(1e-9);
+              if (rc(0) >= -tol && rc(1) >= -tol
+                  && rc(0) + rc(1) <= Real(1) + tol)
+              {
+                val = phiHAdv.getValue(Geometry::Point(cell, rc, Y));
+                break;
+              }
+            }
+            interfacePhi += val * val * weight;
+            interfaceLength += weight;
+          });
     }
     return std::sqrt(interfacePhi / std::max(interfaceLength, Real(1e-30)));
   };
@@ -1587,6 +1683,8 @@ int main(int argc, char** argv)
     lsrParams.hRef = params.hRef;
     lsrParams.normalizer = params.normalizer;
     lsrParams.shapeWeight = shapeWeight;
+    lsrParams.interfaceWeight = gammaWeight;
+    lsrParams.interfaceAttribute = interfaceAttribute;
     lsrParams.jBarrierWeight = jBarrierWeight;
     lsrParams.jBarrierSafeRatio = jBarrierSafeRatio;
     lsrParams.jVolumeTetherWeight = jVolumeTetherWeight;
@@ -1926,23 +2024,7 @@ int main(int argc, char** argv)
   updateMovedMeshFromDisplacement(mesh, moved, u);
   moved.save("LevelSetLSRReconstruction_phi.mesh", IO::FileFormat::MFEM);
 
-  // Interface ||phi(X+u)|| RMS on Gamma_psi,h.
-  Real interfacePhi = 0;
-  Real interfaceLength = 0;
-  for (const Index facet : interfaceFacets)
-  {
-    const auto face = mesh.getFace(facet);
-    const auto& vertices = face->getVertices();
-    const Vec2 a = moved.getVertexCoordinates(vertices[0]);
-    const Vec2 b = moved.getVertexCoordinates(vertices[1]);
-    const Vec2 mid = Real(0.5) * (a + b);
-    const Real val = levelSet.phi(mid);
-    const Real len = (b - a).norm();
-    interfacePhi += val * val * len;
-    interfaceLength += len;
-  }
-  const Real interfacePhiRMS =
-    std::sqrt(interfacePhi / std::max(interfaceLength, Real(1e-30)));
+  const Real interfacePhiRMS = interfacePhiRMSFromDisplacement();
 
   // -------------------------------------------------------------------------
   // Step 8: XDMF output. P0 cell writes go through FES.getGlobalIndex; the
@@ -2077,6 +2159,8 @@ int main(int argc, char** argv)
   std::cout << "\nDiagnostics\n"
             << "  data energy: " << dataEnergyName << '\n'
             << "  shape energy: E_shape, weight=" << shapeWeight << '\n'
+            << "  interface energy: E_Gamma, weight=" << gammaWeight
+              << " (normalized phi/|grad phi|)\n"
             << "  admissibility energy: E_admissibility, weight="
               << jBarrierWeight
               << ", safe ratio=" << jBarrierSafeRatio << '\n'
@@ -2132,8 +2216,13 @@ int main(int argc, char** argv)
             << "  psi reconstruction: "
               << (psiReconstruction == PsiReconstruction::Fmm
                     ? "FMM signed-distance"
-                    : "screened Poisson sign source")
+                    : psiReconstruction == PsiReconstruction::ProjectedPhi
+                        ? "L2 projection of phi with skeleton Dirichlet"
+                        : psiReconstruction == PsiReconstruction::ProjectedPhiH1
+                            ? "H1 projection of phi with skeleton Dirichlet"
+                        : "screened Poisson sign source")
               << ", ell=" << psiEll
+              << ", project ell=" << psiProjectEll
               << ", magnitude=" << psiSourceMagnitude
               << ", normal-gradient scale=" << psiScale << '\n'
             << "  psi scale diagnostics: numerator=" << psiScaleNumerator

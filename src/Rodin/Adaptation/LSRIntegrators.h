@@ -152,6 +152,10 @@ namespace Rodin::Adaptation
     Real normalizer = 1;
     std::size_t quadratureOrder = 0; ///< 0 selects the default FE-based rule.
     FieldEvaluation fieldEvaluation = FieldEvaluation::PhysicalPoint;
+    Real interfaceWeight = 0;
+    Geometry::Attribute interfaceAttribute = 0;
+    Real interfaceNormalizer = 1;
+    Real interfaceGradientFloor = 1e-12;
   };
 
   inline std::size_t lsrQuadOrderFor(std::size_t feOrder)
@@ -422,6 +426,306 @@ namespace Rodin::Adaptation
       const Variational::VectorFunctionBase<Real, G>&,
       const S&, const V&, const U&, LSRIntegratorParameters)
     -> LSRResidualIntegrator<P, G, S, V, U>;
+
+  namespace detail
+  {
+    inline Optional<Index> firstIncidentCell(
+        const Geometry::Polytope& face)
+    {
+      const auto& mesh = face.getMesh();
+      const std::size_t fd = face.getDimension();
+      const auto& incident =
+        mesh.getConnectivity().getIncidence({fd, fd + 1}, face.getIndex());
+      if (incident.size() == 0)
+        return {};
+      return incident[0];
+    }
+  }
+
+  /**
+   * @brief Residual for the geometric interface term
+   *        int_Gamma 0.5 * (phi(X+u) / |grad phi(X+u)|)^2 ds.
+   *
+   * The assembled variation uses the Gauss-Newton distance derivative
+   * n_phi . v, where n_phi = grad(phi) / |grad(phi)|. This makes the term
+   * independent of the arbitrary scale of a regular level-set representative.
+   */
+  template <class PhiDerived, class GradDerived, class TestType, class StateType>
+  class LSRInterfaceDistanceResidualIntegrator final
+    : public Variational::LinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType = Real;
+      using PhiType  = Variational::RealFunctionBase<PhiDerived>;
+      using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
+
+      LSRInterfaceDistanceResidualIntegrator(
+          const PhiType& phi,
+          const GradType& grad,
+          const TestType& v,
+          const StateType& u,
+          LSRIntegratorParameters params)
+        : Variational::LinearFormIntegratorBase<Real>(v),
+          m_phi(phi.copy()), m_grad(grad.copy()),
+          m_test(v), m_state(u), m_params(params)
+      {}
+
+      LSRInterfaceDistanceResidualIntegrator(
+          const LSRInterfaceDistanceResidualIntegrator& other)
+        : Variational::LinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+          m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
+          m_test(other.m_test), m_state(other.m_state),
+          m_params(other.m_params), m_polytope(other.m_polytope),
+          m_elemVec()
+      {}
+
+      LSRInterfaceDistanceResidualIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const auto& testFES = m_test.get().getFiniteElementSpace();
+        const auto& testFE =
+          testFES.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        const std::size_t testDofs = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_elemVec.resize(testDofs);
+        m_elemVec.setZero();
+
+        const auto attr = polytope.getAttribute();
+        if (!attr || *attr != m_params.interfaceAttribute
+            || m_params.interfaceWeight == Real(0))
+          return *this;
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              lsrQuadOrderFor(testFE.getOrder(), m_params),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+
+        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const auto cellIdx = detail::firstIncidentCell(polytope);
+          if (!cellIdx)
+            continue;
+          const auto cellIt = polytope.getMesh().getCell(*cellIdx);
+          const auto& cell = *cellIt;
+          Math::SpatialPoint rcCell(polytope.getDimension() + 1);
+          cell.getTransformation().inverse(rcCell, pt.getPhysicalCoordinates());
+          const Geometry::Point original(
+              cell, rcCell, pt.getPhysicalCoordinates());
+
+          const auto uqRange = m_state.get().getValue(original);
+          Math::SpatialVector<Real> displacement(
+              polytope.getMesh().getSpaceDimension());
+          displacement.setZero();
+          for (std::size_t c = 0; c < vdim; ++c)
+            displacement(c) = uqRange(c);
+
+          const auto traced =
+            detail::traceMovedPoint(
+                original, displacement, *m_phi, m_params.fieldEvaluation);
+          if (traced.exited)
+            continue;
+
+          const Real phi_y =
+            m_phi->getValue(traced.point) + traced.correction;
+          const auto gradPhi = m_grad->getValue(traced.point);
+          const Real gradNorm =
+            std::max(gradPhi.norm(), m_params.interfaceGradientFloor);
+          const Real distance = phi_y / gradNorm;
+          const Math::SpatialVector<Real> normal = gradPhi / gradNorm;
+
+          const Real coef =
+              m_params.interfaceWeight
+            * m_params.interfaceNormalizer
+            * distance;
+          const Real measure = qf.getWeight(q) * pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            const auto testValue = testFE.getBasis(te)(rc);
+            Real dot = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              dot += normal(c) * testValue(c);
+            m_elemVec(te) += measure * coef * dot;
+          }
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t te) final override
+      { return m_elemVec(te); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Faces; }
+
+      LSRInterfaceDistanceResidualIntegrator* copy() const noexcept final override
+      { return new LSRInterfaceDistanceResidualIntegrator(*this); }
+
+    private:
+      std::unique_ptr<PhiType>  m_phi;
+      std::unique_ptr<GradType> m_grad;
+      std::reference_wrapper<const TestType> m_test;
+      std::reference_wrapper<const StateType> m_state;
+      LSRIntegratorParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Vector<ScalarType> m_elemVec;
+  };
+
+  template <class PhiDerived, class GradDerived, class TrialType,
+            class TestType, class StateType>
+  class LSRInterfaceDistanceTangentIntegrator final
+    : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      using ScalarType = Real;
+      using PhiType  = Variational::RealFunctionBase<PhiDerived>;
+      using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
+
+      LSRInterfaceDistanceTangentIntegrator(
+          const PhiType& phi,
+          const GradType& grad,
+          const TrialType& du,
+          const TestType& v,
+          const StateType& u,
+          LSRIntegratorParameters params)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(du, v),
+          m_phi(phi.copy()), m_grad(grad.copy()),
+          m_trial(du), m_test(v), m_state(u), m_params(params)
+      {}
+
+      LSRInterfaceDistanceTangentIntegrator(
+          const LSRInterfaceDistanceTangentIntegrator& other)
+        : Variational::LocalBilinearFormIntegratorBase<Real>(other),
+          m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+          m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
+          m_trial(other.m_trial), m_test(other.m_test),
+          m_state(other.m_state), m_params(other.m_params),
+          m_polytope(other.m_polytope), m_matrix()
+      {}
+
+      LSRInterfaceDistanceTangentIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+
+        const auto& trialFES = m_trial.get().getFiniteElementSpace();
+        const auto& testFES  = m_test.get().getFiniteElementSpace();
+        const auto& trialFE =
+          trialFES.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        const auto& testFE =
+          testFES.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        const std::size_t trialDofs = trialFE.getCount();
+        const std::size_t testDofs = testFE.getCount();
+        const std::size_t vdim = testFES.getVectorDimension();
+
+        m_matrix.resize(testDofs, trialDofs);
+        m_matrix.setZero();
+
+        const auto attr = polytope.getAttribute();
+        if (!attr || *attr != m_params.interfaceAttribute
+            || m_params.interfaceWeight == Real(0))
+          return *this;
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(
+              lsrQuadOrderFor(
+                  std::max(testFE.getOrder(), trialFE.getOrder()), m_params),
+              polytope.getGeometry());
+        const auto& quadrature = polytope.getQuadrature(qf);
+
+        for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+        {
+          const auto& pt = quadrature.getPoint(q);
+          const auto cellIdx = detail::firstIncidentCell(polytope);
+          if (!cellIdx)
+            continue;
+          const auto cellIt = polytope.getMesh().getCell(*cellIdx);
+          const auto& cell = *cellIt;
+          Math::SpatialPoint rcCell(polytope.getDimension() + 1);
+          cell.getTransformation().inverse(rcCell, pt.getPhysicalCoordinates());
+          const Geometry::Point original(
+              cell, rcCell, pt.getPhysicalCoordinates());
+
+          const auto uqRange = m_state.get().getValue(original);
+          Math::SpatialVector<Real> displacement(
+              polytope.getMesh().getSpaceDimension());
+          displacement.setZero();
+          for (std::size_t c = 0; c < vdim; ++c)
+            displacement(c) = uqRange(c);
+
+          const auto traced =
+            detail::traceMovedPoint(
+                original, displacement, *m_phi, m_params.fieldEvaluation);
+          if (traced.exited)
+            continue;
+
+          const auto gradPhi = m_grad->getValue(traced.point);
+          const Real gradNorm =
+            std::max(gradPhi.norm(), m_params.interfaceGradientFloor);
+          const Math::SpatialVector<Real> normal = gradPhi / gradNorm;
+
+          const Real coef =
+              m_params.interfaceWeight
+            * m_params.interfaceNormalizer;
+          const Real measure = qf.getWeight(q) * pt.getDistortion();
+          const auto& rc = pt.getReferenceCoordinates();
+
+          std::vector<Real> nDotV(testDofs);
+          std::vector<Real> nDotU(trialDofs);
+          for (std::size_t te = 0; te < testDofs; ++te)
+          {
+            const auto basis = testFE.getBasis(te)(rc);
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += normal(c) * basis(c);
+            nDotV[te] = acc;
+          }
+          for (std::size_t tr = 0; tr < trialDofs; ++tr)
+          {
+            const auto basis = trialFE.getBasis(tr)(rc);
+            Real acc = 0;
+            for (std::size_t c = 0; c < vdim; ++c)
+              acc += normal(c) * basis(c);
+            nDotU[tr] = acc;
+          }
+          for (std::size_t te = 0; te < testDofs; ++te)
+            for (std::size_t tr = 0; tr < trialDofs; ++tr)
+              m_matrix(te, tr) += measure * coef * nDotU[tr] * nDotV[te];
+        }
+        return *this;
+      }
+
+      ScalarType integrate(std::size_t tr, std::size_t te) final override
+      { return m_matrix(te, tr); }
+
+      const Geometry::Polytope& getPolytope() const final override
+      { return m_polytope->get(); }
+
+      Geometry::Region getRegion() const final override
+      { return Geometry::Region::Faces; }
+
+      LSRInterfaceDistanceTangentIntegrator* copy() const noexcept final override
+      { return new LSRInterfaceDistanceTangentIntegrator(*this); }
+
+    private:
+      std::unique_ptr<PhiType>  m_phi;
+      std::unique_ptr<GradType> m_grad;
+      std::reference_wrapper<const TrialType> m_trial;
+      std::reference_wrapper<const TestType> m_test;
+      std::reference_wrapper<const StateType> m_state;
+      LSRIntegratorParameters m_params;
+      Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
+      Math::Matrix<ScalarType> m_matrix;
+  };
 
   template <LSRIntegratorTangentMode Mode,
             class PhiDerived, class GradDerived, class HessDerived,

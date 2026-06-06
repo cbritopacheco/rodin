@@ -389,10 +389,7 @@ namespace
   LSRTangent parseTangentMode(
       int argc, char** argv, const std::string& name)
   {
-    // Default GN for the advected sweep: phi_h is discrete P1, so a
-    // discrete Hess is not available and Newton/PSD modes would silently
-    // see zero Hess and degrade. Make the degradation explicit.
-    const std::string value = parseStringOption(argc, argv, name, "gn");
+    const std::string value = parseStringOption(argc, argv, name, "psd");
     if (value == "psd") return LSRTangent::PSDProjectedNewton;
     if (value == "newton") return LSRTangent::Newton;
     if (value == "gn") return LSRTangent::GaussNewton;
@@ -422,6 +419,48 @@ namespace
     throw std::runtime_error(
         "Unknown --" + name + "=" + value
         + " (expected rotation or none).");
+  }
+
+  enum class LevelSetRepresentative { Screened, Fmm };
+
+  LevelSetRepresentative parseLevelSetRepresentative(
+      int argc, char** argv, const std::string& name,
+      const std::string& fallback)
+  {
+    const std::string value = parseStringOption(argc, argv, name, fallback);
+    if (value == "screened") return LevelSetRepresentative::Screened;
+    if (value == "fmm")      return LevelSetRepresentative::Fmm;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected screened or fmm).");
+  }
+
+  enum class PhiInitialRepresentative { Analytic, Screened, Fmm };
+
+  PhiInitialRepresentative parsePhiInitialRepresentative(
+      int argc, char** argv, const std::string& name)
+  {
+    const std::string value = parseStringOption(argc, argv, name, "analytic");
+    if (value == "analytic") return PhiInitialRepresentative::Analytic;
+    if (value == "screened") return PhiInitialRepresentative::Screened;
+    if (value == "fmm")      return PhiInitialRepresentative::Fmm;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected analytic, screened, or fmm).");
+  }
+
+  enum class PhiRedistance { Off, ScreenedMoved, FmmMoved };
+
+  PhiRedistance parsePhiRedistance(
+      int argc, char** argv, const std::string& name)
+  {
+    const std::string value = parseStringOption(argc, argv, name, "off");
+    if (value == "off") return PhiRedistance::Off;
+    if (value == "screened-moved") return PhiRedistance::ScreenedMoved;
+    if (value == "fmm-moved") return PhiRedistance::FmmMoved;
+    throw std::runtime_error(
+        "Unknown --" + name + "=" + value
+        + " (expected off, screened-moved, or fmm-moved).");
   }
 
   // Cold    : u0 = 0 every frame.
@@ -454,6 +493,7 @@ namespace
 
 int main(int argc, char** argv)
 {
+  std::cout << std::unitbuf;
   // -------------------------------------------------------------------------
   // Step 0: frame schedule, mesh, and constants.
   // -------------------------------------------------------------------------
@@ -522,6 +562,10 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "hilbert-mu", Real(0.5));
   const LSRTangent tangentMode =
     parseTangentMode(argc, argv, "tangent");
+  const LevelSetRepresentative psiRepresentative =
+    parseLevelSetRepresentative(argc, argv, "psi", "fmm");
+  const PhiInitialRepresentative phiInitialRepresentative =
+    parsePhiInitialRepresentative(argc, argv, "phi-init");
 
   // -----  phi_h initial reconstruction (screened-Poisson)  ---------------
   // Source magnitude and screening length identical to
@@ -538,6 +582,8 @@ int main(int argc, char** argv)
   // -----  Advection velocity  ---------------------------------------------
   const VelocityField velocityField =
     parseVelocityField(argc, argv, "velocity");
+  const PhiRedistance phiRedistance =
+    parsePhiRedistance(argc, argv, "phi-redistance");
   // dt per frame is one orbit step (T = 1, n frames => dt = 1/n).
   const Real kAdvectionDt = Real(1) / static_cast<Real>(nFrames);
 
@@ -595,6 +641,10 @@ int main(int argc, char** argv)
 
   ScalarP1 p1Fes(mesh);
   ScalarP0 p0Fes(mesh);
+  using VectorP1Phi = P1<Math::SpatialVector<Real>, LocalMesh>;
+  VectorP1Phi gradPhiFes(mesh, /*vdim=*/2);
+  GridFunction gradPhiSmoothed(gradPhiFes);
+  gradPhiSmoothed.getData().setZero();
 #ifdef RODIN_LSR_P2_DISPLACEMENT
   VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
 #else
@@ -684,6 +734,25 @@ int main(int argc, char** argv)
             << " unit-square mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
             << "  orbit R=" << orbitR << '\n';
+  std::cout << "  tangent="
+            << (tangentMode == LSRTangent::GaussNewton ? "gn"
+                : tangentMode == LSRTangent::Newton ? "newton" : "psd")
+            << "  psi="
+            << (psiRepresentative == LevelSetRepresentative::Fmm
+                  ? "fmm" : "screened")
+            << "  phi-init="
+            << (phiInitialRepresentative == PhiInitialRepresentative::Analytic
+                  ? "analytic"
+                  : phiInitialRepresentative == PhiInitialRepresentative::Fmm
+                      ? "fmm"
+                      : "screened")
+            << "  phi-redistance="
+            << (phiRedistance == PhiRedistance::FmmMoved
+                  ? "fmm-moved"
+                  : phiRedistance == PhiRedistance::ScreenedMoved
+                      ? "screened-moved"
+                      : "off")
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -1098,6 +1167,28 @@ int main(int argc, char** argv)
       const Real psiScale = meanGrad > Real(1e-30) ? Real(1) / meanGrad : Real(1);
       psi.getData() *= psiScale;
     }
+    if (frame == 0
+        && phiInitialRepresentative == PhiInitialRepresentative::Screened)
+    {
+      phiH.getData() = psi.getData();
+    }
+    if (psiRepresentative == LevelSetRepresentative::Fmm
+        || (frame == 0
+            && phiInitialRepresentative == PhiInitialRepresentative::Fmm))
+    {
+      GridFunction psiFmm(p1Fes);
+      psiFmm = Real(0);
+      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psiFmm)
+        .setInterface(interfaceAttribute)
+        .setInterior(interiorAttribute)
+        .solve()
+        .sign();
+      if (psiRepresentative == LevelSetRepresentative::Fmm)
+        psi.getData() = psiFmm.getData();
+      if (frame == 0
+          && phiInitialRepresentative == PhiInitialRepresentative::Fmm)
+        phiH.getData() = psiFmm.getData();
+    }
 
     // ---- Diagnostic: classifier interior centroid vs analytic centre ---
     {
@@ -1159,59 +1250,43 @@ int main(int argc, char** argv)
 
     auto& cellCache = cellCacheBg;
 
-    // phi for the LSR push solve.
-    //   Frame 0     : analytic phi (no discrete phi_h yet -- this is the
-    //                 bootstrap LSR against the ground truth).
-    //   Frame k > 0 : the ADVECTED discrete phi_h from end of frame k-1
-    //                 (which itself was FMM(classifier_{k-1}) before the
-    //                 advection step at the top of this frame).
-    //
-    // The Newton tangent overload resolution needs a hessPhi argument;
-    // pass analytic Hess at frame 0 (used by --tangent=psd if selected),
-    // zero Hess at frame k > 0 (we are forced to --tangent=gn there
-    // since discrete phi_h has no recoverable Hess).
+    if (frame == 0
+        && phiInitialRepresentative == PhiInitialRepresentative::Analytic)
+    {
+      phiH = [&](const Geometry::Point& p) -> Real
+      {
+        const auto& X = p.getCoordinates();
+        return levelSet.phi(vec2(X(0), X(1)));
+      };
+    }
+
+    auto gradPhiDiscrete = Grad(phiH);
+    {
+      TrialFunction gtrial(gradPhiFes);
+      TestFunction  gtest(gradPhiFes);
+      Problem gpb(gtrial, gtest);
+      gpb = Integral(gtrial, gtest)
+          - Integral(gradPhiDiscrete, gtest);
+      Solver::SparseLU(gpb).solve();
+      gradPhiSmoothed.getData() = gtrial.getSolution().getData();
+    }
+    auto hessFromSmoothedGrad = Jacobian(gradPhiSmoothed);
+
     RealFunction phi(
-        [&, frame](const Geometry::Point& p) -> Real
+        [&](const Geometry::Point& p) -> Real
         {
-          if (frame == 0)
-          {
-            const auto& c = p.getPhysicalCoordinates();
-            return levelSet.phi(vec2(c(0), c(1)));
-          }
           return phiH.getValue(p);
         });
-    AnalyticVectorFunction gradPhiAnalytic(
+    AnalyticVectorFunction gradPhi(
         [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
         {
-          const auto& c = p.getPhysicalCoordinates();
-          return levelSet.grad(vec2(c(0), c(1)));
-        },
-        /*dimension=*/2);
-    auto gradPhiDiscrete = Grad(phiH);
-    // We need a single VectorFunctionBase type for the LSR call; wrap
-    // both branches into a per-point selector.
-    AnalyticVectorFunction gradPhi(
-        [&, frame](const Geometry::Point& p) -> Math::SpatialVector<Real>
-        {
-          if (frame == 0)
-          {
-            const auto& c = p.getPhysicalCoordinates();
-            return levelSet.grad(vec2(c(0), c(1)));
-          }
-          return gradPhiDiscrete.getValue(p);
+          return gradPhiSmoothed.getValue(p);
         },
         /*dimension=*/2);
     AnalyticMatrixFunction hessPhi(
-        [&, frame](const Geometry::Point& p) -> Math::SpatialMatrix<Real>
+        [&](const Geometry::Point& p) -> Math::SpatialMatrix<Real>
         {
-          if (frame == 0)
-          {
-            const auto& c = p.getPhysicalCoordinates();
-            return levelSet.hess(vec2(c(0), c(1)));
-          }
-          Math::SpatialMatrix<Real> Z(2, 2);
-          Z.setZero();
-          return Z;
+          return hessFromSmoothedGrad.getValue(p);
         },
         /*rows=*/2, /*cols=*/2);
 
@@ -1334,19 +1409,6 @@ int main(int argc, char** argv)
     LSR lsr(u);
     const LSRReport lsrReport =
       lsr.setParameters(params).solve(psi, phi, gradPhi, hessPhi);
-
-    // Initialise the high-fidelity phi_h at frame 0 by nodal
-    // interpolation of the analytic level set. This is the best P1
-    // approximation we can carry forward; subsequent frames evolve it
-    // purely by semi-Lagrangian advection (no reconstruction).
-    if (frame == 0)
-    {
-      phiH = [&](const Geometry::Point& p) -> Real
-      {
-        const auto& X = p.getCoordinates();
-        return levelSet.phi(vec2(X(0), X(1)));
-      };
-    }
 
     r0 = lsrReport.initialResidual;
     itCount = lsrReport.iterations;
@@ -1514,19 +1576,7 @@ int main(int argc, char** argv)
     if (report.converged)
       ++framesConverged;
 
-#if 0
-    // (DISABLED) Per-frame redistance of phi.
-    //
-    // Removed at user request: phi is the HIGH-FIDELITY geometry field
-    // and must NOT be reconstructed at every frame. We keep psi as the
-    // classifier-derived representative (built once per frame in
-    // Stage 2 above) but the phi consumed by LSR and carried into the
-    // next advection step is just the advected high-fidelity field --
-    // no FMM, no screened-Poisson lift, no snap to the classifier
-    // skeleton. The price is per-step semi-Lagrangian dissipation;
-    // counter-measures (higher polynomial order for phi, refined mesh,
-    // non-dissipative advection, ...) belong in the advection driver,
-    // not in a post-step reconstruction.
+#if 1
     // ---- Stage 5c: screened-Poisson redistance of the LSR-reconstructed
     //                domain (on the MOVED mesh).
     //
@@ -1542,6 +1592,7 @@ int main(int argc, char** argv)
     // semi-Lagrangian step at the next iteration, which dissipates
     // band-localised high-frequency content. The smoother input means
     // less per-step relative dissipation.
+    if (phiRedistance == PhiRedistance::ScreenedMoved)
     {
       TrialFunction phiTrial(p1FesMoved);
       TestFunction  phiTest(p1FesMoved);
@@ -1613,11 +1664,28 @@ int main(int argc, char** argv)
       phiRedist.getData() *= phiScale;
     }
     // Background-grid copy for psiGrid visualisation; same DOF layout.
-    phiRedistBg.getData() = phiRedist.getData();
+    if (phiRedistance == PhiRedistance::ScreenedMoved)
+    {
+      phiRedistBg.getData() = phiRedist.getData();
+      phiH.getData() = phiRedist.getData();
+    }
 #endif
-    // phi_redist visualisation fields kept zeroed (the lift is disabled).
-    phiRedist = Real(0);
-    phiRedistBg = Real(0);
+    if (phiRedistance == PhiRedistance::FmmMoved)
+    {
+      phiRedist = Real(0);
+      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiRedist)
+        .setInterface(interfaceAttribute)
+        .setInterior(interiorAttribute)
+        .solve()
+        .sign();
+      phiRedistBg.getData() = phiRedist.getData();
+      phiH.getData() = phiRedist.getData();
+    }
+    else if (phiRedistance == PhiRedistance::Off)
+    {
+      phiRedist = Real(0);
+      phiRedistBg = Real(0);
+    }
 
     // ---- Stage 6: append XDMF snapshot ----
     // XDMF write captures `phi` (the high-fidelity advected field). No
