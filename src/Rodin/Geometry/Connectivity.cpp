@@ -74,11 +74,19 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::polytope(Polytope::Type t, const Polytope::Key& in)
   {
+    Index index;
+    return polytope(t, in, index);
+  }
+
+  Connectivity<Context::Local>&
+  Connectivity<Context::Local>::polytope(Polytope::Type t, const Polytope::Key& in, Index& index)
+  {
     assert(in.size() > 0);
     const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
     const auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
+    index = it->second;
     if (inserted)
     {
       m_index[d].left.push_back(&it->first);
@@ -97,11 +105,19 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::polytope(Polytope::Type t, Polytope::Key&& in)
   {
+    Index index;
+    return polytope(t, std::move(in), index);
+  }
+
+  Connectivity<Context::Local>&
+  Connectivity<Context::Local>::polytope(Polytope::Type t, Polytope::Key&& in, Index& index)
+  {
     assert(in.size() > 0);
     const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
     const auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });
+    index = it->second;
     if (inserted)
     {
       m_index[d].left.push_back(&it->first);

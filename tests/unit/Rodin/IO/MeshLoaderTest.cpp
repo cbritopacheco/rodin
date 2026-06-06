@@ -172,6 +172,28 @@ namespace Rodin::Tests::Unit
       }
     }
 
+    void expectSameMeshWithAttributes(
+        const Mesh<Context::Local>& actual,
+        const Mesh<Context::Local>& expected)
+    {
+      expectSameMeshShape(actual, expected);
+
+      for (size_t d = 0; d <= expected.getDimension(); ++d)
+      {
+        for (Index i = 0; i < static_cast<Index>(expected.getPolytopeCount(d)); ++i)
+        {
+          EXPECT_EQ(actual.getGeometry(d, i), expected.getGeometry(d, i))
+            << "polytope (" << d << ", " << i << ")";
+          EXPECT_TRUE(Polytope::Key::SymmetricEquality()(
+              actual.getConnectivity().getPolytope(d, i),
+              expected.getConnectivity().getPolytope(d, i)))
+            << "polytope (" << d << ", " << i << ")";
+          EXPECT_EQ(actual.getAttribute(d, i), expected.getAttribute(d, i))
+            << "polytope (" << d << ", " << i << ")";
+        }
+      }
+    }
+
     void expectAttributeRegressionMesh(
         const Mesh<Context::Local>& mesh,
         size_t dim)
@@ -262,6 +284,55 @@ namespace Rodin::Tests::Unit
   TEST_P(MeshAttributeRegression, MFEMPreservesDimensionAttributes)
   {
     expectAttributeRegressionStringRoundTrip<FileFormat::MFEM>(GetParam());
+  }
+
+  TEST(Rodin_IO_MeshLoader, MEDITLoadSaveLoadPreservesCanonicalAttributes)
+  {
+    const std::string input =
+      "MeshVersionFormatted 1\n"
+      "Dimension 3\n"
+      "\n"
+      "Vertices\n"
+      "4\n"
+      "0 0 0 0\n"
+      "1 0 0 0\n"
+      "0 1 0 0\n"
+      "0 0 1 0\n"
+      "\n"
+      "Tetrahedra\n"
+      "1\n"
+      "1 2 3 4 7\n"
+      "\n"
+      "Triangles\n"
+      "3\n"
+      "1 2 3 11\n"
+      "1 2 3 22\n"
+      "1 2 4 33\n"
+      "\n"
+      "End\n";
+
+    Mesh first;
+    std::stringstream in(input);
+    MeshLoader<FileFormat::MEDIT, Context::Local> loader(first);
+    loader.load(in);
+
+    ASSERT_EQ(first.getPolytopeCount(2), 2);
+    EXPECT_EQ(first.getAttribute(2, 0), 22);
+    EXPECT_EQ(first.getAttribute(2, 1), 33);
+    ASSERT_EQ(first.getPolytopeCount(3), 1);
+    EXPECT_EQ(first.getAttribute(3, 0), 7);
+
+    first.scale(1);
+
+    std::stringstream out;
+    MeshPrinter<FileFormat::MEDIT, Context::Local> printer(first);
+    printer.print(out);
+
+    Mesh second;
+    MeshLoader<FileFormat::MEDIT, Context::Local> reloader(second);
+    reloader.load(out);
+
+    expectSameMeshWithAttributes(second, first);
   }
 
   INSTANTIATE_TEST_SUITE_P(
