@@ -392,10 +392,10 @@ int main(int argc, char** argv) {
   PETSc::Variational::TestFunction  w(Vh);
 
   const auto normal = BoundaryNormal(mesh);
-  const Real k = 4e5;
+  const Real k = 1e5;
 
-  const Real a = 8e4;
-  const Real b = 4e4;
+  const Real a = 5e5;
+  const Real b = 1e5;
   const Real aVel = b * gamma / (beta * dt);
 
 
@@ -412,12 +412,13 @@ int main(int argc, char** argv) {
          + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
          - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(Gamma1, Gamma2, Gamma3, Gamma4, Gamma5, Gamma6, Gamma8, Gamma9)
          - aMass * Integral(uPred, w)
-         + a   * BoundaryIntegral(du, w).over(GammaRing)
-         + aVel * BoundaryIntegral(du, w).over(GammaRing)
-         + a    * BoundaryIntegral(u, w).over(GammaRing)
-         + aVel * BoundaryIntegral(u, w).over(GammaRing)
-         - aVel * BoundaryIntegral(uPred, w).over(GammaRing)
-         + b    * BoundaryIntegral(vPred, w).over(GammaRing);
+         + DirichletBC(du, zero).on(GammaRing);
+         //+ a   * BoundaryIntegral(du, w).over(GammaRing)
+         //+ aVel * BoundaryIntegral(du, w).over(GammaRing)
+         //+ a    * BoundaryIntegral(u, w).over(GammaRing)
+         //+ aVel * BoundaryIntegral(u, w).over(GammaRing)
+         //- aVel * BoundaryIntegral(uPred, w).over(GammaRing)
+         //+ b    * BoundaryIntegral(vPred, w).over(GammaRing);
 
   newton.assemble();
 
