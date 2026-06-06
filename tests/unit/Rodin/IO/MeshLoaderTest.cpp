@@ -56,6 +56,65 @@ namespace Rodin::Tests::Unit
       return {};
     }
 
+    Mesh<Context::Local> makeAttributeRegressionMesh(size_t dim)
+    {
+      Mesh<Context::Local>::Builder builder;
+      builder.initialize(dim);
+
+      switch (dim)
+      {
+        case 1:
+        {
+          builder
+            .nodes(3)
+            .vertex({ 0.0 })
+            .vertex({ 1.0 })
+            .vertex({ 2.0 })
+            .polytope(Polytope::Type::Segment, { 0, 1 })
+            .attribute({ 1, 0 }, 11)
+            .polytope(Polytope::Type::Segment, { 1, 2 })
+            .attribute({ 1, 1 }, 22);
+          break;
+        }
+        case 2:
+        {
+          builder
+            .nodes(5)
+            .vertex({ 0.0, 0.0 })
+            .vertex({ 1.0, 0.0 })
+            .vertex({ 0.0, 1.0 })
+            .vertex({ 2.0, 0.0 })
+            .vertex({ 2.0, 1.0 })
+            .polytope(Polytope::Type::Triangle, { 0, 1, 2 })
+            .attribute({ 2, 0 }, 11)
+            .polytope(Polytope::Type::Quadrilateral, { 1, 3, 4, 2 })
+            .attribute({ 2, 1 }, 22);
+          break;
+        }
+        case 3:
+        {
+          builder
+            .nodes(8)
+            .vertex({ 0.0, 0.0, 0.0 })
+            .vertex({ 1.0, 0.0, 0.0 })
+            .vertex({ 1.0, 1.0, 0.0 })
+            .vertex({ 0.0, 1.0, 0.0 })
+            .vertex({ 0.0, 0.0, 1.0 })
+            .vertex({ 1.0, 0.0, 1.0 })
+            .vertex({ 1.0, 1.0, 1.0 })
+            .vertex({ 0.0, 1.0, 1.0 })
+            .polytope(Polytope::Type::Tetrahedron, { 0, 1, 2, 4 })
+            .attribute({ 3, 0 }, 11)
+            .polytope(Polytope::Type::Hexahedron, { 0, 1, 2, 3, 4, 5, 6, 7 })
+            .attribute({ 3, 1 }, 22);
+          break;
+        }
+        default:
+          assert(false);
+      }
+      return builder.finalize();
+    }
+
     std::string geometryName(Polytope::Type geometry)
     {
       switch (geometry)
@@ -113,6 +172,37 @@ namespace Rodin::Tests::Unit
       }
     }
 
+    void expectAttributeRegressionMesh(
+        const Mesh<Context::Local>& mesh,
+        size_t dim)
+    {
+      ASSERT_EQ(mesh.getSpaceDimension(), dim);
+      ASSERT_EQ(mesh.getDimension(), dim);
+      ASSERT_EQ(mesh.getCellCount(), 2);
+      ASSERT_EQ(mesh.getPolytopeCount(dim), 2);
+
+      EXPECT_EQ(mesh.getAttribute(dim, 0), 11);
+      EXPECT_EQ(mesh.getAttribute(dim, 1), 22);
+
+      switch (dim)
+      {
+        case 1:
+          EXPECT_EQ(mesh.getGeometry(1, 0), Polytope::Type::Segment);
+          EXPECT_EQ(mesh.getGeometry(1, 1), Polytope::Type::Segment);
+          break;
+        case 2:
+          EXPECT_EQ(mesh.getGeometry(2, 0), Polytope::Type::Triangle);
+          EXPECT_EQ(mesh.getGeometry(2, 1), Polytope::Type::Quadrilateral);
+          break;
+        case 3:
+          EXPECT_EQ(mesh.getGeometry(3, 0), Polytope::Type::Tetrahedron);
+          EXPECT_EQ(mesh.getGeometry(3, 1), Polytope::Type::Hexahedron);
+          break;
+        default:
+          FAIL() << "Unsupported dimension " << dim;
+      }
+    }
+
     template <FileFormat Format>
     void expectMeshStringRoundTrip(Polytope::Type geometry)
     {
@@ -130,6 +220,22 @@ namespace Rodin::Tests::Unit
 
       expectSameMeshShape(loaded, mesh);
     }
+
+    template <FileFormat Format>
+    void expectAttributeRegressionStringRoundTrip(size_t dim)
+    {
+      Mesh mesh = makeAttributeRegressionMesh(dim);
+
+      std::stringstream out;
+      MeshPrinter<Format, Context::Local> printer(mesh);
+      printer.print(out);
+
+      Mesh loaded;
+      MeshLoader<Format, Context::Local> loader(loaded);
+      loader.load(out);
+
+      expectAttributeRegressionMesh(loaded, dim);
+    }
   }
 
   class MeshFormatCoverage : public ::testing::TestWithParam<Polytope::Type>
@@ -144,6 +250,28 @@ namespace Rodin::Tests::Unit
   {
     expectMeshStringRoundTrip<FileFormat::MFEM>(GetParam());
   }
+
+  class MeshAttributeRegression : public ::testing::TestWithParam<size_t>
+  {};
+
+  TEST_P(MeshAttributeRegression, MEDITPreservesDimensionAttributes)
+  {
+    expectAttributeRegressionStringRoundTrip<FileFormat::MEDIT>(GetParam());
+  }
+
+  TEST_P(MeshAttributeRegression, MFEMPreservesDimensionAttributes)
+  {
+    expectAttributeRegressionStringRoundTrip<FileFormat::MFEM>(GetParam());
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+      Dimensions,
+      MeshAttributeRegression,
+      ::testing::Values(1, 2, 3),
+      [](const ::testing::TestParamInfo<size_t>& info)
+      {
+        return "Dim" + std::to_string(info.param) + "D";
+      });
 
   INSTANTIATE_TEST_SUITE_P(
       AllSupportedGeometries,
