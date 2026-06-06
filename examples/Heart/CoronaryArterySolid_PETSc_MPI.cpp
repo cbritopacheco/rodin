@@ -356,9 +356,12 @@ int main(int argc, char** argv) {
   const Real rho = 1060.;
   const Real dt = 1e-3;
   const int nSteps = 3 * static_cast<int>(0.85 / dt);
-  // Newmark average acceleration
-  const Real beta = 0.25;
-  const Real gamma = 0.5;
+  // HHT-α parameters (Hilber-Hughes-Taylor, α ∈ [-1/3, 0])
+  // α=0  → standard Newmark (no damping); α<0 → algorithmic damping of high-frequency modes.
+  // For cardiac mechanics at dt=1ms the 1st-order temporal error (~α·dt) is negligible.
+  const Real alpha_hht = -0.1;
+  const Real beta  = (1.0 - alpha_hht) * (1.0 - alpha_hht) / 4.0;  // 0.275625
+  const Real gamma = (1.0 - 2.0 * alpha_hht) / 2.0;                 // 0.55
   // Effective coefficients
   const Real aMass = rho / (beta * dt * dt);
 
@@ -416,7 +419,7 @@ int main(int argc, char** argv) {
          + k * BoundaryIntegral(Dot(u,  normal), Dot(w, normal)).over(SolidExt)
          - k * BoundaryIntegral(disp_0D, Dot(w, normal)).over(SolidExt)
          - aMass * Integral(uPred, w)
-         + DirichletBC(du, zero).on(SolidRing);
+         + DirichletBC(du, zero).on(SolidRing)
          + a   * BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
          + aVel * BoundaryIntegral(du, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
          + a    * BoundaryIntegral(u, w).over(SolidOutlets[0], SolidOutlets[1], SolidOutlets[2], SolidOutlets[3], SolidOutlets[4], SolidOutlets[5])
