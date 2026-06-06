@@ -1446,7 +1446,7 @@
 <g id="node121" class="node">
 <title>Rodin/Solver/LinearSolver.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="22212" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="22212" y="-1329.8" font-family="Times,serif" font-size="9.00">Rodin/Solver/LinearSolver.h</text>
+<text text-anchor="middle" x="22212" y="-1330.1" font-family="Times,serif" font-size="8.00">Rodin/Solver/LinearSolver.h</text>
 </g>
 <!-- Rodin/Solver.h&#45;&gt;Rodin/Solver/LinearSolver.h -->
 <g id="edge120" class="edge">
@@ -8178,7 +8178,7 @@
 <g id="node277" class="node">
 <title>Rodin/Solid/Kinematics/KinematicState.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="3318" cy="-1332" rx="72" ry="72"/>
-<text text-anchor="middle" x="3318" y="-1330.4" font-family="Times,serif" font-size="7.00">Rodin/Solid/Kinematics/KinematicState.h</text>
+<text text-anchor="middle" x="3318" y="-1330.7" font-family="Times,serif" font-size="6.00">Rodin/Solid/Kinematics/KinematicState.h</text>
 </g>
 <!-- Rodin/Solid.h&#45;&gt;Rodin/Solid/Kinematics/KinematicState.h -->
 <g id="edge714" class="edge">
@@ -10416,7 +10416,7 @@
 <g id="node368" class="node">
 <title>Rodin/Variational/H1/Dubiner.h</title>
 <ellipse fill="#66c2a5" stroke="black" cx="12458" cy="-1728" rx="72" ry="72"/>
-<text text-anchor="middle" x="12458" y="-1726.4" font-family="Times,serif" font-size="7.00">Rodin/Variational/H1/Dubiner.h</text>
+<text text-anchor="middle" x="12458" y="-1726.1" font-family="Times,serif" font-size="8.00">Rodin/Variational/H1/Dubiner.h</text>
 </g>
 <!-- Rodin/Variational/H1/H1Element.hpp&#45;&gt;Rodin/Variational/H1/Dubiner.h -->
 <g id="edge1316" class="edge">
