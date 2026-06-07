@@ -1223,6 +1223,14 @@ namespace Rodin::Math
         }
       }
 
+      constexpr
+      SpatialMatrix operator-() const noexcept
+      {
+        SpatialMatrix result(*this);
+        result *= Scalar(-1);
+        return result;
+      }
+
       /**
        * @brief In-place matrix multiplication.
        *

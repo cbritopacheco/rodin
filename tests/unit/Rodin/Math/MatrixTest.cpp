@@ -172,6 +172,28 @@ TEST_F(MatrixTest, SpatialMatrix)
   }
 }
 
+TEST_F(MatrixTest, SpatialMatrixUnaryMinus)
+{
+  SpatialMatrix<Real> sm(2, 3);
+  sm(0, 0) = 1.0;
+  sm(0, 1) = -2.0;
+  sm(0, 2) = 3.0;
+  sm(1, 0) = -4.0;
+  sm(1, 1) = 5.0;
+  sm(1, 2) = -6.0;
+
+  const auto negated = -sm;
+
+  EXPECT_EQ(negated.rows(), 2);
+  EXPECT_EQ(negated.cols(), 3);
+  EXPECT_DOUBLE_EQ(negated(0, 0), -1.0);
+  EXPECT_DOUBLE_EQ(negated(0, 1), 2.0);
+  EXPECT_DOUBLE_EQ(negated(0, 2), -3.0);
+  EXPECT_DOUBLE_EQ(negated(1, 0), 4.0);
+  EXPECT_DOUBLE_EQ(negated(1, 1), -5.0);
+  EXPECT_DOUBLE_EQ(negated(1, 2), 6.0);
+}
+
 // Test complex matrix operations
 TEST_F(MatrixTest, ComplexMatrix)
 {
