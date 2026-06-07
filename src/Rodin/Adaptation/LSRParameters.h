@@ -68,6 +68,27 @@ namespace Rodin::Adaptation
     Real interfaceNormalizer = 0; ///< <= 0 means compute 1 / (|Gamma_h| h_ref^2).
     Real interfaceGradientFloor = 1e-12;
 
+    /// Band-weighted Hilbert metric stiffness:
+    ///   a(u, v) = int_Omega (1 + s_H * (1 - W(psi))^2) grad u : grad v dX.
+    /// With s_H = 0 the Harmonic metric is recovered. With s_H > 0 the
+    /// Riesz lift used by the Hilbert initial guess is stiffer outside
+    /// the data band W(psi), so the lift is localised to the band and the
+    /// harmonic-extension extremum in the geometric centre of the
+    /// classified interior is suppressed. Only affects LSRHilbertMetric::
+    /// Harmonic; ignored for Elasticity and ShapeHessian.
+    Real bandHilbertStiffness = 0;
+
+    /// Outside-band L^2 Tikhonov damping
+    ///   E_damp = 0.5 * outsideBandTikhonovWeight
+    ///            * int_Omega (1 - W(psi(X)))^2 |u|^2 dX,
+    ///   W(s) = exp(-s^2 / (2 deltaW^2)).
+    /// Localises u to the data band by penalising L^2 mass of u where the
+    /// LSR data weight W(psi) is small (interior + far exterior). Cures
+    /// the harmonic-extension bulge in the geometric centre of the
+    /// classified interior that the Hilbert initial guess otherwise
+    /// produces. Identity-neutral (zero at u = 0).
+    Real outsideBandTikhonovWeight = 0;
+
     /// Smooth relative-Q barrier weight (`qBarrierWeight = 0` disables).
     Real qBarrierWeight = 0;
     /// Activation threshold; default +inf disables.

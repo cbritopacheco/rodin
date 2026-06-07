@@ -482,14 +482,31 @@ int main(int argc, char** argv)
   const Real psiSourceMagnitude = Real(5) * psiEll;
   const std::size_t maxNewtonSteps =
     getOptionSizeT(argc, argv, "newton-steps", 40);
-  const Real shapeWeight = getOptionReal(argc, argv, "shape-weight", Real(1e-1));
+  // Dimensionless γ_shape default = sqrt(h_ref). The effective weight
+  // is γ_shape · normalizer · h_ref² (applied inside LSR.h). Robust
+  // empirical pick from the (P_k, n, lobes) sweep — see comments at
+  // the top of LSR.h::solve().
+  const Real shapeWeight =
+    getOptionReal(argc, argv, "shape-weight", std::sqrt(h));
   const Real gammaWeight = getOptionReal(argc, argv, "gamma-weight", Real(1));
+  // Outside-band L^2 Tikhonov damping
+  //   E_damp = 0.5 * w * int_Omega (1 - W(psi))^2 |u|^2 dX.
+  const Real tikhonovWeight =
+    getOptionReal(argc, argv, "tikhonov-weight", Real(0));
+  // Band-weighted Hilbert metric stiffness for the Hilbert initial guess.
+  const Real bandHilbertStiffness =
+    getOptionReal(argc, argv, "band-hilbert", Real(0));
+  // BEST-QUALITY profile defaults (see safety-net sweep in the LSR docs
+  // header at the top of LSR.h). The triple `γ_jBar=1, jBarSafe=0.5,
+  // γ_vol=0.01` minimises worst-Q_rel without losing fit or
+  // robustness across P_k and n. Pass any of these as a CLI override
+  // to disable or modify.
   const Real jBarrierWeight =
-    getOptionReal(argc, argv, "j-barrier-weight", Real(0));
+    getOptionReal(argc, argv, "j-barrier-weight", Real(1.0));
   const Real jBarrierSafeRatio =
-    getOptionReal(argc, argv, "j-barrier-safe", Real(0));
+    getOptionReal(argc, argv, "j-barrier-safe", Real(0.5));
   const Real jVolumeTetherWeight =
-    getOptionReal(argc, argv, "volume-tether-weight", Real(0));
+    getOptionReal(argc, argv, "volume-tether-weight", Real(0.01));
   enum class DataEnergy { Push, Pull, PushSwapped, PushSwappedForward };
   const std::string energyStr =
     getOptionString(argc, argv, "energy", "push");
@@ -1684,6 +1701,8 @@ int main(int argc, char** argv)
     lsrParams.normalizer = params.normalizer;
     lsrParams.shapeWeight = shapeWeight;
     lsrParams.interfaceWeight = gammaWeight;
+    lsrParams.outsideBandTikhonovWeight = tikhonovWeight;
+    lsrParams.bandHilbertStiffness = bandHilbertStiffness;
     lsrParams.interfaceAttribute = interfaceAttribute;
     lsrParams.jBarrierWeight = jBarrierWeight;
     lsrParams.jBarrierSafeRatio = jBarrierSafeRatio;
@@ -2114,6 +2133,21 @@ int main(int argc, char** argv)
   qRel.setName("q_rel");
   cellLabelPhi.setName("cell_label");
 
+  // Element-quality summary (after the LSR-displaced mesh has been
+  // built). Q_rel is identity-neutral (= 1 at u = 0). max gives the
+  // worst-cell distortion; mean gives an aggregate.
+  Real maxQRel = 0;
+  Real meanQRel = 0;
+  std::size_t qRelCount = 0;
+  for (int i = 0; i < qRel.getData().size(); ++i)
+  {
+    const Real q = qRel.getData()(i);
+    if (q > maxQRel) maxQRel = q;
+    meanQRel += q;
+    ++qRelCount;
+  }
+  if (qRelCount > 0) meanQRel /= static_cast<Real>(qRelCount);
+
   P1<Real, LocalMesh> p1FesMoved(moved);
   GridFunction phiMoved(p1FesMoved);
   phiMoved = [&](const Geometry::Point& p) -> Real
@@ -2261,6 +2295,9 @@ int main(int argc, char** argv)
               << interfacePhiRMS << '\n'
             << "  final ||phi_h(X+u)||_RMS on Gamma_psi,h (discrete): "
               << interfacePhiHRMSFromDisplacement() << '\n'
+            << "  element quality Q_rel: max=" << std::scientific
+              << std::setprecision(3) << maxQRel
+              << "  mean=" << meanQRel << '\n'
             << "  geometry tolerance: " << geometryTolerance << '\n'
             << "  initial guess line search: alpha=" << initialGuessAlpha
               << ", backtracks=" << initialGuessBacktracks

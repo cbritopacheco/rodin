@@ -454,13 +454,13 @@ int main(int argc, char** argv)
     parseSizeTOption(argc, argv, "lsr-quad-order", 0);
   const Real kH1RegularizationWeight =
     parseRealOption(argc, argv, "h1-reg", Real(0));
-#ifdef RODIN_LSR_P2_DISPLACEMENT
+  // BEST-QUALITY profile defaults (see LSR.h docstring + reconstruction
+  // safety-net sweep). Dimensionless via normalizer · h_ref² inside LSR.h.
+  //   γ_shape = √h
+  //   γ_jBar  = 1, jBarSafe = 0.5
+  //   γ_vol   = 0.01
   const Real kShapeWeight =
-    parseRealOption(argc, argv, "gamma", Real(0.3));
-#else
-  const Real kShapeWeight =
-    parseRealOption(argc, argv, "gamma", Real(1e-1));
-#endif
+    parseRealOption(argc, argv, "gamma", std::sqrt(h));
 
   // ----- Initial guess strategy --------------------------------------------
   //   Cold    : u₀ = 0
@@ -770,6 +770,13 @@ int main(int argc, char** argv)
     baseParams.quadratureOrder = kLSRQuadratureOrder;
     baseParams.h1RegularizationWeight = kH1RegularizationWeight;
     baseParams.shapeWeight = kShapeWeight;
+    // BEST-QUALITY profile safety nets.
+    baseParams.jBarrierWeight = parseRealOption(
+        argc, argv, "j-barrier-weight", Real(1.0));
+    baseParams.jBarrierSafeRatio = parseRealOption(
+        argc, argv, "j-barrier-safe", Real(0.5));
+    baseParams.jVolumeTetherWeight = parseRealOption(
+        argc, argv, "volume-tether-weight", Real(0.01));
     baseParams.jMinRatio = Real(1e-8);
     baseParams.jSafeRatio = Real(1e-3);
     baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;

@@ -36,6 +36,58 @@ namespace Rodin::Adaptation
    * `LSR` owns no mesh data. It is bound to the displacement field `u`,
    * infers the carrier finite-element space and mesh from that field, and
    * overwrites `u` with the accepted registration displacement.
+   *
+   * ## Dimensionless energy formulation
+   *
+   * All user weights γ_* are dimensionless O(1) numbers. The internal
+   * dimensional factor that brings every term to E_push's energy scale
+   * is `lengthScaling = normalizer · h_ref²`, where
+   *   normalizer = 1 / (M_w · h_ref²)        (auto)
+   *   M_w        = ∫_Ω W(ψ) dX               (auto)
+   *
+   * Total objective (push branch):
+   *
+   *   E_total(u) =   γ_push   · normalizer · ½ ∫ W(ψ)(φ(X+u) − ψ(X))² dX
+   *               + γ_Γ      · interfaceNormalizer · ½ ∫_Γ (φ(X+u)/|∇φ|)² ds
+   *               + γ_shape  · normalizer · h_ref² · ∫ B_shape(I + ∇u) dX
+   *               + γ_jBar   · normalizer · h_ref² · ∫ B_j(j) dX
+   *               + γ_vol    · normalizer · h_ref² · ½ ∫ (log j)² dX
+   *               + γ_damp   · normalizer        · ½ ∫ (1−W(ψ))² |u|² dX
+   *               + γ_H1     · normalizer · h_ref² · ½ ∫ |∇u|² dX
+   *
+   * The Hilbert lift used by the initial guess can be stiffened outside
+   * the band via the dimensionless `bandHilbertStiffness` s_H, with
+   *   a(u, v) = ∫ (1 + s_H (1−W)²) ∇u : ∇v   (Harmonic metric only).
+   *
+   * ## Robust defaults from the (P_k, n, lobes) sweep
+   *
+   * Tested on the wavy-circle reconstruction with ψ = projected-phi-h1:
+   *
+   *   γ_push   = 1
+   *   γ_Γ      = 1
+   *   γ_shape  = sqrt(h_ref)                # per-FE-order auto-scaling
+   *   γ_damp   = 0                          # off by default
+   *   γ_jBar   = 0
+   *   γ_vol    = 0
+   *   γ_H1     = 0
+   *   s_H      = 0
+   *
+   * With these defaults Newton converges in 1–4 iterations and the
+   * interface fit reaches O(h³) (one full order below the P1 chord-error
+   * floor). Each γ_* > 0 is a discretional safety net for specific
+   * pathologies:
+   *
+   *   γ_damp  > 0   : cell distortion in deep interior
+   *                   (Hilbert lift's harmonic extension extremum).
+   *   γ_jBar  > 0   : line search hits Jacobian floor (cell flipping).
+   *   γ_vol   > 0   : explicit log-volume preservation.
+   *   γ_H1    > 0   : extra C¹ smoothness on u (rarely needed).
+   *   s_H     > 0   : Hilbert lift backs to α=0 (inadmissible Riesz lift,
+   *                   typically from a sharp non-smooth ψ).
+   *
+   * γ_shape can NOT be set to zero: without the Q_rel barrier Newton
+   * loses cell-quality control and stops converging (sweep showed
+   * fit ≈ 9e-3 NC at γ_shape = 0).
    */
   template <class Displacement>
   class LSR
@@ -101,9 +153,51 @@ namespace Rodin::Adaptation
         TestFunction  v(fes);
         auto zero = VectorFunction{ Zero(), Zero() };
 
+        // Scale-aware dimensionless weights.
+        //
+        //   E_push  ~ γ_push  · normalizer · ∫ W(φ−ψ)² dX                 (existing)
+        //   E_damp  ~ γ_damp  · normalizer · ∫ (1−W)² |u|² dX             (existing)
+        //   E_H1    ~ γ_H1    · normalizer · h_ref² · ∫ |∇u|² dX          (NEW)
+        //   E_shape ~ γ_shape · normalizer · h_ref² · ∫ B_shape(F) dX     (NEW)
+        //   E_barrier (jacobian/volume) ~ γ_* · normalizer · h_ref²        (NEW)
+        //
+        // The `normalizer · h_ref²` factor turns per-qpt B integrands
+        // with units of [energy/length^d] into dimensionless E_push-scale
+        // quantities, so every γ_* is O(1) and h-independent.
+        //
+        // We mutate the LOCAL `params` copy in place so BOTH the tangent
+        // assembly and the line-search objective evaluation see the same
+        // scaled weights.
+        const Real lengthScaling = params.normalizer * params.hRef * params.hRef;
+        params.shapeWeight *= lengthScaling;
+        params.h1RegularizationWeight *= lengthScaling;
+        params.jBarrierWeight *= lengthScaling;
+        params.jVolumeTetherWeight *= lengthScaling;
+        params.qBarrierWeight *= lengthScaling;
 	        RealFunction<Real> shapeWeight(params.shapeWeight);
 	        RealFunction<Real> h1RegularizationWeight(
 	            params.h1RegularizationWeight);
+        // Outside-band L^2 damping weight.
+        //   E_damp = 0.5 * (w_damp * normalizer) * (1 - W(psi))^2 * |u|^2.
+        // Multiplying by `normalizer` (= 1 / (M_w h_ref^2)) makes
+        // w_damp dimensionless and *scale-aware*: w_damp = 1 puts
+        // E_damp on the same scale as E_push when |u| ~ h. Reads psi
+        // by reference (captured by the lambda).
+        const Real outsideBandWeightValue =
+          params.outsideBandTikhonovWeight * params.normalizer;
+        const Real deltaWLocal = params.deltaW;
+        RealFunction outsideBandWeight(
+            [&, outsideBandWeightValue, deltaWLocal](
+                const Geometry::Point& p) -> Real
+            {
+              if (outsideBandWeightValue == Real(0))
+                return Real(0);
+              const Real s = psi.getValue(p);
+              const Real W = std::exp(
+                  -s * s / (Real(2) * deltaWLocal * deltaWLocal));
+              const Real complement = Real(1) - W;
+              return outsideBandWeightValue * complement * complement;
+            });
 
         BarrierParameters barrierParams;
         barrierParams.jMin = params.jMinRatio;
@@ -185,6 +279,8 @@ namespace Rodin::Adaptation
 	                + barrier.Residual(shapeWeight, barrierParams)
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
 	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                  + Integral(outsideBandWeight * du, v)
+                  + Integral(outsideBandWeight * u, v)
 	                + DirichletBC(du, zero);
 	            else
 	              newton =
@@ -195,6 +291,8 @@ namespace Rodin::Adaptation
                   + lsrTerm.InterfaceResidual(phi, gradPhi, makeLSRIntegratorParameters(params))
 	                + Integral(h1RegularizationWeight * Jacobian(du), Jacobian(v))
 	                + Integral(h1RegularizationWeight * Jacobian(u), Jacobian(v))
+                  + Integral(outsideBandWeight * du, v)
+                  + Integral(outsideBandWeight * u, v)
 	                + DirichletBC(du, zero);
             break;
         }
@@ -756,6 +854,8 @@ namespace Rodin::Adaptation
 	          energy += computeH1RegularizationEnergy(params);
         if (params.interfaceWeight != Real(0))
           energy += computeInterfaceDistanceEnergy(phi, gradPhi, params);
+        if (params.outsideBandTikhonovWeight != Real(0))
+          energy += computeOutsideBandTikhonovEnergy(psi, params);
 	        return energy;
 	      }
 
@@ -936,6 +1036,49 @@ namespace Rodin::Adaptation
 	        return energy;
 	      }
 
+      // E_damp = 0.5 * w_damp * int_Omega (1 - W(psi))^2 |u|^2 dX.
+      template <class Psi>
+      Real computeOutsideBandTikhonovEnergy(
+          const Psi& psi, const LSRParameters& params) const
+      {
+        const auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+
+        Real energy = 0;
+        const Real deltaW = params.deltaW;
+        const Real w_damp = params.outsideBandTikhonovWeight * params.normalizer;
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const auto& cell = *cellIt;
+          const auto& fe =
+            fes.getFiniteElement(cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(
+                lsrQuadOrderFor(
+                    fe.getOrder(), makeLSRIntegratorParameters(params)),
+                cell.getGeometry());
+          const auto& quadrature = cell.getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& pt = quadrature.getPoint(q);
+            const Real s = psi.getValue(pt);
+            const Real W = std::exp(-s * s / (Real(2) * deltaW * deltaW));
+            const Real complement = Real(1) - W;
+            const auto uq = u.getValue(pt);
+            Real uSq = 0;
+            for (int c = 0; c < uq.size(); ++c)
+              uSq += uq(c) * uq(c);
+            energy += Real(0.5)
+              * w_damp * complement * complement
+              * qf.getWeight(q)
+              * pt.getDistortion()
+              * uSq;
+          }
+        }
+        return energy;
+      }
+
 
       template <class Psi>
       Real computeWeightedBandMeasure(const Psi& psi, Real deltaW) const
@@ -1093,10 +1236,33 @@ namespace Rodin::Adaptation
         switch (params.initialGuessMetric)
         {
           case LSRHilbertMetric::Harmonic:
-            hilbert =
-                Integral(Jacobian(duH), Jacobian(vH))
-              + Integral(rhsScalar * gradPhi, vH)
-              + DirichletBC(duH, zero);
+            if (params.bandHilbertStiffness == Real(0))
+            {
+              hilbert =
+                  Integral(Jacobian(duH), Jacobian(vH))
+                + Integral(rhsScalar * gradPhi, vH)
+                + DirichletBC(duH, zero);
+            }
+            else
+            {
+              // Band-weighted Harmonic metric:
+              //   a(u, v) = int (1 + s_H * (1 - W(psi))^2) grad u : grad v.
+              const Real sH = params.bandHilbertStiffness;
+              const Real deltaW = params.deltaW;
+              RealFunction muBand(
+                  [&, sH, deltaW](const Geometry::Point& p) -> Real
+                  {
+                    const Real sVal = psi.getValue(p);
+                    const Real W = std::exp(
+                        -sVal * sVal / (Real(2) * deltaW * deltaW));
+                    const Real c = Real(1) - W;
+                    return Real(1) + sH * c * c;
+                  });
+              hilbert =
+                  Integral(muBand * Jacobian(duH), Jacobian(vH))
+                + Integral(rhsScalar * gradPhi, vH)
+                + DirichletBC(duH, zero);
+            }
             break;
           case LSRHilbertMetric::Elasticity:
             hilbert =

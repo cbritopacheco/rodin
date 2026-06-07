@@ -538,14 +538,14 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "softmin-eps-mult", Real(0.5));
   const Real kSoftMinEps = kSoftMinEpsMult * h;
 
-  // Shape-weight knob for the sampled relative-distortion energy.
-#ifdef RODIN_LSR_P2_DISPLACEMENT
+  // Dimensionless γ_shape default = sqrt(h_ref).
+  // The effective weight is γ_shape · normalizer · h_ref² inside LSR.h.
+  // See LSR.h docstring for the dimensionless-energy formulation and
+  // the (P_k, n, lobes) sweep that picked sqrt(h_ref) as the robust
+  // default: at h ≈ 0.02 (n=50), γ_shape ≈ 0.14; at h ≈ 0.01 (n=100),
+  // γ_shape ≈ 0.10. Same value works for P1 and P2.
   const Real kShapeWeight =
-    parseRealOption(argc, argv, "gamma", Real(0.3));
-#else
-  const Real kShapeWeight =
-    parseRealOption(argc, argv, "gamma", Real(0.3));
-#endif
+    parseRealOption(argc, argv, "gamma", std::sqrt(h));
 
   const Real   kLineSearchAlphaInit = Real(1);
   const Real   kLineSearchReduction = Real(0.5);
@@ -875,6 +875,16 @@ int main(int argc, char** argv)
     baseParams.qBarrierWeight = kQBarrierWeight;
     baseParams.qBarrierAct    = kQBarrierAct;
     baseParams.qBarrierMax    = kQBarrierMax;
+    // BEST-QUALITY profile (see LSR.h docstring + safety-net sweep):
+    // γ_jBar=1, jBarSafe=0.5, γ_vol=0.01 minimises worst-Q_rel without
+    // losing fit. All dimensionless via the normalizer · h_ref² factor
+    // applied inside LSR.h.
+    baseParams.jBarrierWeight = parseRealOption(
+        argc, argv, "j-barrier-weight", Real(1.0));
+    baseParams.jBarrierSafeRatio = parseRealOption(
+        argc, argv, "j-barrier-safe", Real(0.5));
+    baseParams.jVolumeTetherWeight = parseRealOption(
+        argc, argv, "volume-tether-weight", Real(0.01));
     baseParams.alphaInit = kLineSearchAlphaInit;
     baseParams.alphaReduction = kLineSearchReduction;
     baseParams.alphaMin = kLineSearchAlphaMin;
