@@ -61,26 +61,25 @@ namespace Rodin::Adaptation
    *
    * ## Robust defaults from the (P_k, n, lobes) sweep
    *
-   * Tested on the wavy-circle reconstruction with ψ = projected-phi-h1:
+   * Tested on the wavy-circle reconstruction with ψ = projected-phi-h1.
+   * The interface term is assembled only by the push branch.
    *
    *   γ_push   = 1
-   *   γ_Γ      = 1
+   *   γ_Γ      = min(cap_k, 1 / h_ref)      # cap_1 = 10, cap_2 = 100
    *   γ_shape  = sqrt(h_ref)                # per-FE-order auto-scaling
    *   γ_damp   = 0                          # off by default
-   *   γ_jBar   = 0
-   *   γ_vol    = 0
+   *   γ_jBar   = 1                          # active near j < jBarSafe
+   *   jBarSafe = 0.5
+   *   γ_vol    = 0.01
    *   γ_H1     = 0
    *   s_H      = 0
    *
-   * With these defaults Newton converges in 1–4 iterations and the
-   * interface fit reaches O(h³) (one full order below the P1 chord-error
-   * floor). Each γ_* > 0 is a discretional safety net for specific
-   * pathologies:
+   * These values are empirical defaults for the tested benchmark family,
+   * not theoretical constants. The optional safety-net terms should be
+   * enabled separately, according to the observed failure mode:
    *
    *   γ_damp  > 0   : cell distortion in deep interior
    *                   (Hilbert lift's harmonic extension extremum).
-   *   γ_jBar  > 0   : line search hits Jacobian floor (cell flipping).
-   *   γ_vol   > 0   : explicit log-volume preservation.
    *   γ_H1    > 0   : extra C¹ smoothness on u (rarely needed).
    *   s_H     > 0   : Hilbert lift backs to α=0 (inadmissible Riesz lift,
    *                   typically from a sharp non-smooth ψ).
@@ -219,6 +218,16 @@ namespace Rodin::Adaptation
           applyHilbertInitialGuess(
               psi, phi, gradPhi, shapeWeight,
               barrierParams, params);
+
+        // Adaptive σ via MAD on active-band residuals at the initial
+        // guess. Computed once per solve(); overrides params.lossSigma.
+        if (params.useAdaptiveLossSigma)
+        {
+          const Real sigmaEstimate =
+            estimateLossSigmaMAD(psi, phi, params);
+          if (sigmaEstimate > Real(0))
+            params.lossSigma = sigmaEstimate;
+        }
 
         Problem newton(du, v);
         switch (params.tangent)
@@ -518,6 +527,21 @@ namespace Rodin::Adaptation
         std::size_t stallCount = 0;
         bool initialized = false;
 
+        // --- Trust region state (A3 + A4) ---
+        // trustRadius caps ‖du‖_∞ per Newton iteration. It grows on
+        // successful steps with little backtracking and shrinks on
+        // step rejections. Set trustRadiusFactorInit ≤ 0 to disable.
+        const Real h_ref = std::max(params.hRef, Real(1e-30));
+        const bool trustRegionEnabled = params.trustRadiusFactorInit > Real(0);
+        Real trustRadius = trustRegionEnabled
+          ? params.trustRadiusFactorInit * h_ref
+          : std::numeric_limits<Real>::infinity();
+        const Real trustRadiusMin =
+          std::max(params.trustRadiusFactorMin * h_ref, params.alphaMin * h_ref);
+        const Real trustRadiusMax = params.trustRadiusFactorMax * h_ref;
+        std::size_t trustRadiusShrinks = 0;
+        std::size_t trustRadiusExpansions = 0;
+
         newtonSolver
           .setMaxIterations(params.maxNewtonIterations)
           .setAbsoluteTolerance(params.absoluteTolerance)
@@ -559,6 +583,22 @@ namespace Rodin::Adaptation
             m_report.converged = false;
             x = uBest;
             return {false, false, Real(0)};
+          }
+
+          // --- A4: step-norm cap via trust radius ---
+          // Bound ‖du‖_∞ ≤ trustRadius. Direction is scaled by a
+          // single scalar; sign and shape preserved.
+          bool stepWasCapped = false;
+          if (trustRegionEnabled && std::isfinite(trustRadius))
+          {
+            const Real maxCoeff =
+              newtonDirection.cwiseAbs().maxCoeff();
+            if (maxCoeff > trustRadius && maxCoeff > Real(0))
+            {
+              const Real scaleFactor = trustRadius / maxCoeff;
+              newtonDirection *= scaleFactor;
+              stepWasCapped = true;
+            }
           }
 
           LSRLineSearchResult ls;
@@ -680,6 +720,51 @@ namespace Rodin::Adaptation
           m_report.minJRatio = ls.minJRatioAccepted;
           m_report.inadmissibleCount = ls.inadmissibleCountAccepted;
 
+          // --- A3: trust-region radius update ---
+          // Heuristic based on accepted α as a proxy for model quality.
+          //   α ≥ growExpandThreshold (≈ 0.5): step matched the model
+          //      well — expand Δ.
+          //   α ≤ shrinkThreshold (≈ 0.1): step needed heavy line
+          //      search — shrink Δ.
+          //   Line search failed: shrink Δ aggressively.
+          // Δ only adapts when the cap was active or the step needed
+          // significant backtracking; healthy uncapped Newton steps
+          // with α = 1 leave Δ alone. Otherwise default Δ_init can be
+          // smaller than the natural step and Δ collapses on iter 0.
+          if (trustRegionEnabled)
+          {
+            if (ls.succeeded)
+            {
+              if (stepWasCapped
+                  && ls.alphaAccepted >= params.trustRadiusGrowExpandThresh
+                  && ls.backtracks == 0)
+              {
+                trustRadius = std::min(
+                  trustRadius * params.trustRadiusGrowRate,
+                  trustRadiusMax);
+                ++trustRadiusExpansions;
+              }
+              else if (ls.alphaAccepted <= params.trustRadiusShrinkThresh
+                       || ls.backtracks >= 4)
+              {
+                trustRadius = std::max(
+                  trustRadius * params.trustRadiusShrinkRate,
+                  trustRadiusMin);
+                ++trustRadiusShrinks;
+              }
+            }
+            else
+            {
+              trustRadius = std::max(
+                trustRadius * params.trustRadiusFailShrinkRate,
+                trustRadiusMin);
+              ++trustRadiusShrinks;
+            }
+            m_report.lastTrustRadius = trustRadius;
+            m_report.trustRadiusShrinks = trustRadiusShrinks;
+            m_report.trustRadiusExpansions = trustRadiusExpansions;
+          }
+
           if (!ls.succeeded)
           {
             m_report.lineSearchFailed = true;
@@ -787,6 +872,82 @@ namespace Rodin::Adaptation
           params.normalizer = Real(1);
       }
 
+      /// Estimate Welsch σ via MAD on active-band residuals at the
+      /// current `u`. Returns 0 on empty band (no estimate possible).
+      ///
+      ///   σ ≈ multiplier · 1.4826 · median |r|,
+      ///
+      /// where the median is over quadrature points with W(ψ) > band-
+      /// Threshold. For an approximately symmetric inlier residual
+      /// distribution `median(r) ≈ 0`, so MAD = median(|r − median(r)|)
+      /// reduces to median(|r|). The factor 1.4826 makes σ the
+      /// consistent estimator of the inlier standard deviation; the
+      /// multiplier scales the saturation cutoff (residuals beyond
+      /// multiplier·σ_inlier get downweighted).
+      template <class Psi, class PhiDerived>
+      Real estimateLossSigmaMAD(
+          const Psi& psi,
+          const Variational::RealFunctionBase<PhiDerived>& phi,
+          const LSRParameters& params) const
+      {
+        const auto& u = m_u.get();
+        const auto& fes = u.getFiniteElementSpace();
+        const auto& mesh = fes.getMesh();
+        const auto lsrParams = makeLSRIntegratorParameters(params);
+
+        std::vector<Real> absResiduals;
+        absResiduals.reserve(mesh.getCellCount() * 4);
+
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const auto& cell = *cellIt;
+          const auto& fe = fes.getFiniteElement(
+              cell.getDimension(), cell.getIndex());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(
+                lsrQuadOrderFor(fe.getOrder(), lsrParams),
+                cell.getGeometry());
+          const auto& quadrature = cell.getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& pt = quadrature.getPoint(q);
+            const Variational::IntegrationPoint ip(pt, &qf, q);
+            const Real s = psi.getValue(ip);
+            const Real W =
+              std::exp(-s * s / (2 * params.deltaW * params.deltaW));
+            if (W < params.adaptiveLossSigmaBandThreshold)
+              continue;
+            const auto uq = u.getValue(ip);
+            Math::SpatialVector<Real> displacement(cell.getDimension());
+            displacement.setZero();
+            for (std::size_t c = 0; c < fes.getVectorDimension(); ++c)
+              displacement(c) = uq(c);
+            const auto traced =
+              detail::traceMovedPoint(
+                  pt, displacement, phi, lsrParams.fieldEvaluation);
+            if (traced.exited)
+              continue;
+            const Real r =
+              phi.getValue(traced.point) + traced.correction - s;
+            absResiduals.push_back(std::abs(r));
+          }
+        }
+
+        if (absResiduals.empty())
+          return Real(0);
+
+        const std::size_t mid = absResiduals.size() / 2;
+        std::nth_element(
+            absResiduals.begin(),
+            absResiduals.begin() + mid,
+            absResiduals.end());
+        const Real medianAbsR = absResiduals[mid];
+
+        return params.adaptiveLossSigmaMultiplier
+             * Real(1.4826)
+             * medianAbsR;
+      }
+
       template <class Psi, class PhiDerived, class GradDerived>
       Real computeObjective(
           const Psi& psi,
@@ -832,9 +993,23 @@ namespace Rodin::Adaptation
               phi.getValue(traced.point) + traced.correction - s;
             const Real W =
               std::exp(-s * s / (2 * params.deltaW * params.deltaW));
+            Real lossContrib;
+            if (params.lossSigma > Real(0) && params.useWelschEnergy)
+            {
+              // Family A: Welsch energy ρ(r) = (σ²/2)(1 − exp(−r²/σ²)).
+              const Real sigma2 = params.lossSigma * params.lossSigma;
+              lossContrib = sigma2 * (Real(1) - std::exp(-r * r / sigma2));
+            }
+            else
+            {
+              // Family B (or quadratic baseline): line search sees ½r²
+              // — the IRLS-W tangent has already attenuated, but the
+              // energy reported here is the raw quadratic loss.
+              lossContrib = r * r;
+            }
             energy += Real(0.5)
               * qf.getWeight(q) * pt.getDistortion()
-              * params.rhoS * W * params.normalizer * r * r;
+              * params.rhoS * W * params.normalizer * lossContrib;
           }
         }
 

@@ -68,6 +68,40 @@ namespace Rodin::Adaptation
     Real interfaceNormalizer = 0; ///< <= 0 means compute 1 / (|Gamma_h| h_ref^2).
     Real interfaceGradientFloor = 1e-12;
 
+    /// Welsch robust-loss bandwidth on the LSR push residual.
+    /// `lossSigma <= 0` keeps the quadratic loss; `lossSigma > 0`
+    /// activates Welsch with ρ(r) = (σ²/2)(1 − exp(−r²/σ²)). Useful at
+    /// topology changes where some residuals have a positive lower
+    /// bound; bad cells contribute a bounded penalty with IRLS weight
+    /// decaying as exp(−r²/σ²).
+    Real lossSigma = 0;
+
+    /// Adaptive σ estimation via MAD (median absolute deviation) on the
+    /// active-band quadrature residuals. When true, the manual
+    /// `lossSigma` is replaced once per `solve()` call by
+    ///   σ = `adaptiveLossSigmaMultiplier` · 1.4826 · MAD(|r|),
+    /// computed from r(X, u_init) at quadrature points where W(ψ) > 0.1.
+    /// The 1.4826 factor is the consistent σ estimator for an
+    /// approximately Gaussian inlier distribution; the multiplier
+    /// scales the saturation threshold relative to that estimate.
+    /// Removes the need to tune `--loss-sigma`.
+    bool useAdaptiveLossSigma = false;
+    Real adaptiveLossSigmaMultiplier = 1.5;
+    Real adaptiveLossSigmaBandThreshold = 0.1;
+
+    /// Selector between Family A (Welsch energy) and Family B (IRLS-W).
+    /// When `lossSigma > 0`:
+    ///   - true  (A): line-search energy uses Welsch loss
+    ///                ρ(r) = ½σ²(1 − exp(−r²/σ²)). Energy bounded above
+    ///                — line search accepts steps into saturated cells.
+    ///   - false (B): line-search energy stays quadratic ½r². The IRLS
+    ///                weight exp(−r²/σ²) still attenuates the tangent
+    ///                contribution of the same cell, but the line
+    ///                search keeps trying to drive r → 0.
+    /// Both modes share the same tangent assembly; only the objective
+    /// used by the line-search Armijo test differs.
+    bool useWelschEnergy = true;
+
     /// Band-weighted Hilbert metric stiffness:
     ///   a(u, v) = int_Omega (1 + s_H * (1 - W(psi))^2) grad u : grad v dX.
     /// With s_H = 0 the Harmonic metric is recovered. With s_H > 0 the
@@ -117,6 +151,35 @@ namespace Rodin::Adaptation
     Real alphaInit = 1;
     Real alphaReduction = 0.5;
     Real alphaMin = 1e-6;
+
+    /// Trust region globalization (A3 + A4).
+    ///
+    /// The Newton step `du` is capped to satisfy `‖du‖_∞ ≤ Δ` where
+    /// `Δ = trustRadiusFactor · h_ref` is an adaptive radius that
+    /// grows on successful, well-stepped iterations and shrinks on
+    /// backtracked or failed line searches. Without trust region the
+    /// PSD-projected Newton tangent can produce wild over-confident
+    /// steps when the residual `r = φ − ψ` is large (the second-order
+    /// term `r·Hess(φ)` is indefinite even after PSD-projection, so
+    /// the implied step magnitude is wrong even though the direction
+    /// is descent-aligned).
+    ///
+    /// Set `trustRadiusFactorInit = 0` to disable (no cap). Default
+    /// `2 · h_ref` allows up to ~2 cells of motion per iteration —
+    /// the empirical regime where the line search backtracks 0–2
+    /// times on the easy frames; harder frames shrink Δ adaptively.
+    Real trustRadiusFactorInit = 10;
+    Real trustRadiusFactorMin  = 0.25;
+    Real trustRadiusFactorMax  = 50;
+    /// Growth/shrink rates for the trust-region update.
+    /// Step accepted with α ≥ growExpandThreshold ⇒ Δ ← min(Δ · growRate, Δ_max).
+    /// Step accepted with α ≤ shrinkThreshold     ⇒ Δ ← max(Δ · shrinkRate, Δ_min).
+    /// Line search failed                          ⇒ Δ ← max(Δ · failShrinkRate, Δ_min).
+    Real trustRadiusGrowRate         = 2.0;
+    Real trustRadiusGrowExpandThresh = 0.5;
+    Real trustRadiusShrinkRate       = 0.5;
+    Real trustRadiusShrinkThresh     = 0.1;
+    Real trustRadiusFailShrinkRate   = 0.25;
     Real energyDecreaseTolerance = 1e-12;
 
     /// Warm-start the next iteration's initial step at
@@ -174,6 +237,7 @@ namespace Rodin::Adaptation
     out.interfaceAttribute = params.interfaceAttribute;
     out.interfaceNormalizer = params.interfaceNormalizer;
     out.interfaceGradientFloor = params.interfaceGradientFloor;
+    out.lossSigma = params.lossSigma;
     return out;
   }
 

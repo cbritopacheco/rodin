@@ -72,6 +72,13 @@ target_link_libraries(LevelSetLSRWavyCircleSweepP2
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetDemonsWavyCircleSweep LevelSetDemonsWavyCircleSweep.cpp)
+target_link_libraries(LevelSetDemonsWavyCircleSweep
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(LevelSetLSRWavyCircleAdvectedSweep
   LevelSetLSRWavyCircleAdvectedSweep.cpp)
 target_link_libraries(LevelSetLSRWavyCircleAdvectedSweep

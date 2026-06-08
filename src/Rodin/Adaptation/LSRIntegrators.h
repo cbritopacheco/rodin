@@ -138,6 +138,12 @@ namespace Rodin::Adaptation
     }
   }
 
+  enum class InterfaceLossKind
+  {
+    Charbonnier, ///< ρ'(r) = r/√(1 + r²/σ²); saturates at σ.
+    Welsch       ///< ρ'(r) = r · exp(−r²/σ²); fully drops at |r| ≫ σ.
+  };
+
   struct LSRIntegratorParameters
   {
     enum class FieldEvaluation
@@ -156,16 +162,66 @@ namespace Rodin::Adaptation
     Geometry::Attribute interfaceAttribute = 0;
     Real interfaceNormalizer = 1;
     Real interfaceGradientFloor = 1e-12;
+
+    /// Welsch robust-loss bandwidth on the LSR push residual.
+    ///   ρ(r) = (σ²/2) · (1 − exp(−r²/σ²)),    w(r) = exp(−r²/σ²).
+    /// With `lossSigma <= 0` the quadratic loss is used (current default).
+    /// With `lossSigma > 0`, cells with |r| ≫ σ contribute a bounded
+    /// energy and zero IRLS-tangent weight — topology-mismatched regions
+    /// are smoothly dropped from the Newton tangent.
+    Real lossSigma = 0;
+
+    /// Robust-loss bandwidth on the interface residual r_Γ = φ/|∇φ|.
+    /// `interfaceLossSigma <= 0` ⇒ quadratic surface energy (default).
+    /// Otherwise the loss is selected by `interfaceLossKind`.
+    Real interfaceLossSigma = 0;
+    InterfaceLossKind interfaceLossKind = InterfaceLossKind::Charbonnier;
   };
+
+  /// Charbonnier IRLS weight w(r) = 1/√(1 + r²/σ²); returns 1 when σ ≤ 0.
+  inline Real charbonnierWeight(Real r, Real sigma) noexcept
+  {
+    if (sigma <= Real(0)) return Real(1);
+    const Real s = r / sigma;
+    return Real(1) / std::sqrt(Real(1) + s * s);
+  }
+
+  /// Dispatch IRLS weight by InterfaceLossKind.
+  inline Real interfaceLossWeight(
+      Real r, Real sigma, InterfaceLossKind kind) noexcept
+  {
+    if (sigma <= Real(0)) return Real(1);
+    switch (kind)
+    {
+      case InterfaceLossKind::Welsch:
+      {
+        const Real s = r / sigma;
+        return std::exp(-s * s);
+      }
+      case InterfaceLossKind::Charbonnier:
+      default:
+        return charbonnierWeight(r, sigma);
+    }
+  }
+
+  /// Welsch IRLS weight w(r) = exp(−r²/σ²); returns 1 when σ <= 0.
+  inline Real welschWeight(Real r, Real sigma) noexcept
+  {
+    if (sigma <= Real(0)) return Real(1);
+    const Real s = r / sigma;
+    return std::exp(-s * s);
+  }
 
   inline std::size_t lsrQuadOrderFor(std::size_t feOrder)
   {
-    // Need (#qpts * vdim) >= n_dof_per_cell with a comfortable margin
-    // so the basis-at-qpt evaluation map B is well-conditioned on every
-    // cell DOF, including P2 edge-midpoint internal modes. The
-    // polynomial-exactness lower bound is 2*feOrder; 4*feOrder gives an
-    // overdetermined B on P2 vector cells without changing P1.
-    return std::max<std::size_t>(2, 4 * feOrder);
+    // Use the standard polynomial lower bound for P_k products. The
+    // sampled LSR terms are nonlinear in phi(X + u), j, and Q_rel, so
+    // no fixed polytope rule is exact; using 4*k overintegrates P2 and
+    // higher spaces and makes each Newton step substantially more
+    // expensive without improving the sampled minimizer in the current
+    // benchmarks. Callers can still request overintegration explicitly
+    // through LSRIntegratorParameters::quadratureOrder.
+    return std::max<std::size_t>(2, 2 * feOrder);
   }
 
   inline std::size_t lsrQuadOrderFor(
@@ -381,8 +437,9 @@ namespace Rodin::Adaptation
           const Real r = phi_y - s;
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real welsch = welschWeight(r, m_params.lossSigma);
           const Real coef =
-            m_params.rhoS * weight * r * m_params.normalizer;
+            m_params.rhoS * weight * r * welsch * m_params.normalizer;
           const Real measure = wq * distortion;
 
           for (std::size_t te = 0; te < testDofs; ++te)
@@ -539,10 +596,19 @@ namespace Rodin::Adaptation
           const Real distance = phi_y / gradNorm;
           const Math::SpatialVector<Real> normal = gradPhi / gradNorm;
 
+          // Optional Charbonnier robust loss on the surface residual.
+          // For demons-style iteration the moved skeleton point may sit
+          // far from the φ=0 contour at topology changes; Charbonnier
+          // damps the outlier surface force without flat saturation
+          // (linear in |r| for |r| ≫ σ). For LSR Newton we keep
+          // interfaceLossSigma = 0 (see lossSigma note: surface
+          // residual converges to 0 there even at mismatches).
+          const Real charb =
+            interfaceLossWeight(distance, m_params.interfaceLossSigma, m_params.interfaceLossKind);
           const Real coef =
               m_params.interfaceWeight
             * m_params.interfaceNormalizer
-            * distance;
+            * distance * charb;
           const Real measure = qf.getWeight(q) * pt.getDistortion();
           const auto& rc = pt.getReferenceCoordinates();
 
@@ -673,9 +739,22 @@ namespace Rodin::Adaptation
             std::max(gradPhi.norm(), m_params.interfaceGradientFloor);
           const Math::SpatialVector<Real> normal = gradPhi / gradNorm;
 
+          // Charbonnier IRLS weight on the surface tangent. Collapses
+          // to 1 when interfaceLossSigma ≤ 0 (LSR Newton path).
+          Real charb = Real(1);
+          if (m_params.interfaceLossSigma > Real(0))
+          {
+            const Real phi_y =
+              m_phi->getValue(traced.point) + traced.correction;
+            const Real distance = phi_y / gradNorm;
+            charb =
+              interfaceLossWeight(distance, m_params.interfaceLossSigma, m_params.interfaceLossKind);
+          }
+
           const Real coef =
               m_params.interfaceWeight
-            * m_params.interfaceNormalizer;
+            * m_params.interfaceNormalizer
+            * charb;
           const Real measure = qf.getWeight(q) * pt.getDistortion();
           const auto& rc = pt.getReferenceCoordinates();
 
@@ -821,10 +900,22 @@ namespace Rodin::Adaptation
           if (traced.exited)
             continue;
           const auto gradPhi = m_grad->getValue(traced.point);
+          // Welsch IRLS weight needs r = φ(y) − ψ(X). When lossSigma ≤ 0
+          // the welsch factor is 1 and the φ evaluation collapses to a
+          // dead branch the compiler can elide.
+          Real welsch = Real(1);
+          if (m_params.lossSigma > Real(0))
+          {
+            const Real phi_y =
+              m_phi->getValue(traced.point) + traced.correction;
+            const Real r = phi_y - s;
+            welsch = welschWeight(r, m_params.lossSigma);
+          }
 
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
-          const Real coef = m_params.rhoS * weight * m_params.normalizer;
+          const Real coef =
+            m_params.rhoS * weight * welsch * m_params.normalizer;
           const Real measure = wq * distortion;
 
           std::vector<Real> gpDotV(testDofs);
@@ -974,6 +1065,10 @@ namespace Rodin::Adaptation
 
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real welsch = welschWeight(r, m_params.lossSigma);
+          // IRLS-Welsch: GN block scaled by w(r); Hess block scaled by
+          // ρ'(r) = r·w(r). At |r|≫σ both terms decay → Newton ignores
+          // the cell. Reduces to quadratic when lossSigma ≤ 0.
           const Real coef = m_params.rhoS * weight * m_params.normalizer;
           const Real measure = wq * distortion;
 
@@ -1003,8 +1098,9 @@ namespace Rodin::Adaptation
           for (std::size_t te = 0; te < testDofs; ++te)
             for (std::size_t tr = 0; tr < trialDofs; ++tr)
               m_matrix(te, tr) +=
-                measure * coef * gpDotU[tr] * gpDotV[te];
+                measure * coef * welsch * gpDotU[tr] * gpDotV[te];
 
+          const Real rHessCoef = r * welsch;
           std::vector<Math::SpatialVector<Real>> HU(trialDofs);
           for (std::size_t tr = 0; tr < trialDofs; ++tr)
             HU[tr] = hessPhi * trialValues[tr];
@@ -1014,7 +1110,7 @@ namespace Rodin::Adaptation
               Real vTHu = 0;
               for (std::size_t c = 0; c < vdim; ++c)
                 vTHu += testValues[te](c) * HU[tr](c);
-              m_matrix(te, tr) += measure * coef * r * vTHu;
+              m_matrix(te, tr) += measure * coef * rHessCoef * vTHu;
             }
         }
         return *this;
@@ -1149,6 +1245,10 @@ namespace Rodin::Adaptation
 
           const Real weight =
             std::exp(-s * s / (2 * m_params.deltaW * m_params.deltaW));
+          const Real welsch = welschWeight(r, m_params.lossSigma);
+          // IRLS-Welsch: GN block ∝ w(r); r·Hess block uses ρ'(r) =
+          // r·w(r) before PSD projection. Reduces to quadratic when
+          // lossSigma ≤ 0 (welsch ≡ 1).
           const Real coef = m_params.rhoS * weight * m_params.normalizer;
           const Real measure = wq * distortion;
 
@@ -1178,12 +1278,11 @@ namespace Rodin::Adaptation
           for (std::size_t te = 0; te < testDofs; ++te)
             for (std::size_t tr = 0; tr < trialDofs; ++tr)
               m_matrix(te, tr) +=
-                measure * coef * gpDotU[tr] * gpDotV[te];
+                measure * coef * welsch * gpDotU[tr] * gpDotV[te];
 
-          // The second-order correction is `r * hess(phi)`. Project to PSD
-          // before contracting with the basis — this is the entire point of
-          // this specialisation, see the class docstring.
-          const Math::SpatialMatrix<Real> rH = r * hessPhi;
+          // The second-order correction is `ρ'(r) * hess(phi) = r·w·hess`.
+          // Project to PSD before contracting with the basis.
+          const Math::SpatialMatrix<Real> rH = (r * welsch) * hessPhi;
           const Math::SpatialMatrix<Real> rHplus = detail::psdProject2x2(rH);
 
           std::vector<Math::SpatialVector<Real>> HU(trialDofs);

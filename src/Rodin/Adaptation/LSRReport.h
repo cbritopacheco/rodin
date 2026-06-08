@@ -33,6 +33,11 @@ namespace Rodin::Adaptation
     Real lastAcceptedAlpha = 0;
     Real initialGuessAlpha = 0;
     Real initialGuessMinJRatio = 0;
+
+    /// Trust-region diagnostics (A3 + A4). Final radius and update counts.
+    Real lastTrustRadius = 0;
+    std::size_t trustRadiusShrinks = 0;
+    std::size_t trustRadiusExpansions = 0;
   };
 }
 

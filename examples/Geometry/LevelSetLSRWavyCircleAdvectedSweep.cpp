@@ -10,12 +10,9 @@
 // Same orbit + lobed-circle geometry as `LevelSetLSRWavyCircleSweep`, but
 // the data level set phi is NOT supplied analytically per frame. Instead:
 //
-//   Frame 0:  phi_h is built from the analytic wavy circle by a
-//             screened-Poisson reconstruction
-//                 (I - psiEll^2 Delta) phi_h = +- M    with  phi_h = 0
-//             on the classifier-cut skeleton of the initial analytic
-//             level set. A normal-gradient calibration rescales phi_h so
-//             |grad phi_h| ~ |grad phi_analytic| in the band.
+//   Frame 0:  phi_h is built from the analytic wavy circle. Runtime options
+//             select analytic sampling, screened-Poisson reconstruction, or
+//             FMM reconstruction through --phi-init.
 //
 //   Frame k > 0:  phi_h is advected by ONE semi-Lagrangian step with a
 //                 prescribed velocity v(x) using `Advection::Lagrangian`.
@@ -35,9 +32,11 @@
 //
 // Goal of this example: assess how the LSR fit degrades when phi_h drifts
 // from its analytic reference under repeated advection -- i.e. whether
-// the push + FMM-psi + alpha-predictor + line-search pipeline is stable
-// when phi loses its SDF-like property and its zero level set stops
-// matching the ground-truth geometry exactly.
+// the push + psi-reconstruction + alpha-predictor + line-search pipeline is
+// stable when phi loses its SDF-like property and its zero level set stops
+// matching the ground-truth geometry exactly. Runtime options include
+//   --psi=screened|fmm|projected-phi-h1
+//   --phi-redistance=off|screened-moved|fmm-moved|projected-phi-h1-moved
 //
 // Tangent. The discrete phi has no recoverable Hess; the LSR solve
 // defaults to Gauss-Newton (--tangent=gn). A zero Hess function is
@@ -421,7 +420,7 @@ namespace
         + " (expected rotation or none).");
   }
 
-  enum class LevelSetRepresentative { Screened, Fmm };
+  enum class LevelSetRepresentative { Screened, Fmm, ProjectedPhiH1 };
 
   LevelSetRepresentative parseLevelSetRepresentative(
       int argc, char** argv, const std::string& name,
@@ -430,9 +429,11 @@ namespace
     const std::string value = parseStringOption(argc, argv, name, fallback);
     if (value == "screened") return LevelSetRepresentative::Screened;
     if (value == "fmm")      return LevelSetRepresentative::Fmm;
+    if (value == "projected-phi-h1" || value == "projection-h1")
+      return LevelSetRepresentative::ProjectedPhiH1;
     throw std::runtime_error(
         "Unknown --" + name + "=" + value
-        + " (expected screened or fmm).");
+        + " (expected screened, fmm, or projected-phi-h1).");
   }
 
   enum class PhiInitialRepresentative { Analytic, Screened, Fmm };
@@ -449,7 +450,7 @@ namespace
         + " (expected analytic, screened, or fmm).");
   }
 
-  enum class PhiRedistance { Off, ScreenedMoved, FmmMoved };
+  enum class PhiRedistance { Off, ScreenedMoved, FmmMoved, ProjectedPhiH1Moved };
 
   PhiRedistance parsePhiRedistance(
       int argc, char** argv, const std::string& name)
@@ -458,9 +459,11 @@ namespace
     if (value == "off") return PhiRedistance::Off;
     if (value == "screened-moved") return PhiRedistance::ScreenedMoved;
     if (value == "fmm-moved") return PhiRedistance::FmmMoved;
+    if (value == "projected-phi-h1-moved" || value == "projection-h1-moved")
+      return PhiRedistance::ProjectedPhiH1Moved;
     throw std::runtime_error(
         "Unknown --" + name + "=" + value
-        + " (expected off, screened-moved, or fmm-moved).");
+        + " (expected off, screened-moved, fmm-moved, or projected-phi-h1-moved).");
   }
 
   // Cold    : u0 = 0 every frame.
@@ -560,6 +563,8 @@ int main(int argc, char** argv)
   const LSRTangent tangentMode =
     parseTangentMode(argc, argv, "tangent");
   const LevelSetRepresentative psiRepresentative =
+    // ψ default = FMM for robustness; survives the discrete-φ
+    // dissipation noise per frame without depending on φ-regularity.
     parseLevelSetRepresentative(argc, argv, "psi", "fmm");
   const PhiInitialRepresentative phiInitialRepresentative =
     parsePhiInitialRepresentative(argc, argv, "phi-init");
@@ -736,7 +741,10 @@ int main(int argc, char** argv)
                 : tangentMode == LSRTangent::Newton ? "newton" : "psd")
             << "  psi="
             << (psiRepresentative == LevelSetRepresentative::Fmm
-                  ? "fmm" : "screened")
+                  ? "fmm"
+                  : psiRepresentative == LevelSetRepresentative::ProjectedPhiH1
+                      ? "projected-phi-h1"
+                      : "screened")
             << "  phi-init="
             << (phiInitialRepresentative == PhiInitialRepresentative::Analytic
                   ? "analytic"
@@ -746,6 +754,8 @@ int main(int argc, char** argv)
             << "  phi-redistance="
             << (phiRedistance == PhiRedistance::FmmMoved
                   ? "fmm-moved"
+                  : phiRedistance == PhiRedistance::ProjectedPhiH1Moved
+                      ? "projected-phi-h1-moved"
                   : phiRedistance == PhiRedistance::ScreenedMoved
                       ? "screened-moved"
                       : "off")
@@ -1168,6 +1178,45 @@ int main(int argc, char** argv)
         && phiInitialRepresentative == PhiInitialRepresentative::Screened)
     {
       phiH.getData() = psi.getData();
+    }
+    if (psiRepresentative == LevelSetRepresentative::ProjectedPhiH1)
+    {
+      TrialFunction psiTrial(p1Fes);
+      TestFunction  psiTest(p1Fes);
+      RealFunction phiData(
+          [&](const Geometry::Point& p) -> Real
+          {
+            if (frame == 0)
+            {
+              const auto& X = p.getCoordinates();
+              return levelSet.phi(vec2(X(0), X(1)));
+            }
+            return phiH.getValue(p);
+          });
+      auto gradPhiHData = Grad(phiH);
+      AnalyticVectorFunction gradPhiData(
+          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+          {
+            if (frame == 0)
+            {
+              const auto& X = p.getCoordinates();
+              return levelSet.grad(vec2(X(0), X(1)));
+            }
+            return gradPhiHData.getValue(p);
+          },
+          /*dimension=*/2);
+
+      Problem psiProblem(psiTrial, psiTest);
+      RealFunction<Real> ell2(kPsiEll * kPsiEll);
+      psiProblem =
+          Integral(psiTrial, psiTest)
+        + Integral(ell2 * Grad(psiTrial), Grad(psiTest))
+        - Integral(phiData, psiTest)
+        - Integral(ell2 * gradPhiData, Grad(psiTest))
+        + DirichletBC(psiTrial, RealFunction(Real(0)))
+            .on(interfaceAttribute);
+      Solver::SparseLU(psiProblem).solve();
+      psi.getData() = psiTrial.getSolution().getData();
     }
     if (psiRepresentative == LevelSetRepresentative::Fmm
         || (frame == 0
@@ -1674,6 +1723,64 @@ int main(int argc, char** argv)
       phiH.getData() = phiRedist.getData();
     }
 #endif
+    if (phiRedistance == PhiRedistance::ProjectedPhiH1Moved)
+    {
+      auto gradPhiHCurrent = Grad(phiH);
+      auto localizedOnBackground =
+        [&](const Geometry::Point& p, const auto& callback)
+        {
+          const auto& Yphys = p.getPhysicalCoordinates();
+          for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+          {
+            const auto& cell = *cellIt;
+            Math::SpatialPoint rc(2);
+            cell.getTransformation().inverse(rc, Yphys);
+            const Real xi = rc(0), eta = rc(1);
+            const Real tol = Real(1e-9);
+            if (xi >= -tol && eta >= -tol
+                && xi + eta <= Real(1) + tol)
+              return callback(Geometry::Point(cell, rc, Yphys));
+          }
+          return callback(p);
+        };
+      RealFunction phiDataMoved(
+          [&](const Geometry::Point& p) -> Real
+          {
+            return localizedOnBackground(
+                p,
+                [&](const Geometry::Point& q) -> Real
+                {
+                  return phiH.getValue(q);
+                });
+          });
+      AnalyticVectorFunction gradPhiDataMoved(
+          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+          {
+            return localizedOnBackground(
+                p,
+                [&](const Geometry::Point& q) -> Math::SpatialVector<Real>
+                {
+                  return gradPhiHCurrent.getValue(q);
+                });
+          },
+          /*dimension=*/2);
+
+      TrialFunction phiTrial(p1FesMoved);
+      TestFunction  phiTest(p1FesMoved);
+      RealFunction<Real> ell2(kPsiEll * kPsiEll);
+      Problem phiProblem(phiTrial, phiTest);
+      phiProblem =
+          Integral(phiTrial, phiTest)
+        + Integral(ell2 * Grad(phiTrial), Grad(phiTest))
+        - Integral(phiDataMoved, phiTest)
+        - Integral(ell2 * gradPhiDataMoved, Grad(phiTest))
+        + DirichletBC(phiTrial, RealFunction(Real(0)))
+            .on(interfaceAttribute);
+      Solver::SparseLU(phiProblem).solve();
+      phiRedist.getData() = phiTrial.getSolution().getData();
+      phiRedistBg.getData() = phiRedist.getData();
+      phiH.getData() = phiRedist.getData();
+    }
     if (phiRedistance == PhiRedistance::FmmMoved)
     {
       phiRedist = Real(0);

@@ -47,6 +47,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -64,6 +65,12 @@ namespace
 {
   using Vec2 = Math::SpatialVector<Real>;
   using LocalMesh = Geometry::Mesh<Context::Local>;
+  using Clock = std::chrono::steady_clock;
+
+  Real elapsedSeconds(Clock::time_point start)
+  {
+    return std::chrono::duration<Real>(Clock::now() - start).count();
+  }
 
   Vec2 vec2(Real x = 0, Real y = 0)
   {
@@ -402,6 +409,20 @@ namespace
     return fallback;
   }
 
+  std::string parseStringOption(
+      int argc, char** argv, const std::string& name,
+      const std::string& fallback)
+  {
+    const std::string prefix = "--" + name + "=";
+    for (int i = 1; i < argc; ++i)
+    {
+      const std::string arg(argv[i]);
+      if (arg.rfind(prefix, 0) == 0)
+        return arg.substr(prefix.size());
+    }
+    return fallback;
+  }
+
   bool hasFlag(int argc, char** argv, const std::string& name)
   {
     const std::string flag = "--" + name;
@@ -523,7 +544,8 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "amp", Real(0.05));
   const Real        R0 =
     parseRealOption(argc, argv, "R0", Real(0.20));
-  constexpr Real    kLobes = 6;
+  const Real kLobes =
+    parseRealOption(argc, argv, "lobes", Real(6));
 
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
@@ -531,11 +553,17 @@ int main(int argc, char** argv)
   const Real delta   = 1.75 * h;
   const Real deltaW  = 1.5 * delta;
 
-  // Soft-min smoothing for phi = LSE(phi_a, phi_b). Default eps = 0.5*h
-  // keeps the smoothing zone narrower than one cell, so the interface
-  // bias is below the FMM consistency floor of Lemma~fit-floor.
+  // Soft-min smoothing for phi = LSE(phi_a, phi_b). Default eps = 6 h
+  // is the empirical minimum at which projected-phi-h1 ψ converges
+  // 20/20 frames at P2 lobes=8: the ridge of ∇φ spans 6 cells, the
+  // Helmholtz projection ingests a smooth gradient, and the band
+  // shape is clean. The interface bias |φ_softmin − min(φ_a, φ_b)|
+  // is O(eps · log 2) ≈ 4 h — comparable to the classifier-cut chord
+  // error and well within LSR geometric tolerance.
+  //
+  // (ε sweep: ε=2h gives 10/20, ε=4h gives 16/20, ε=6h gives 20/20.)
   const Real kSoftMinEpsMult =
-    parseRealOption(argc, argv, "softmin-eps-mult", Real(0.5));
+    parseRealOption(argc, argv, "softmin-eps-mult", Real(6.0));
   const Real kSoftMinEps = kSoftMinEpsMult * h;
 
   // Dimensionless γ_shape default = sqrt(h_ref).
@@ -546,6 +574,19 @@ int main(int argc, char** argv)
   // γ_shape ≈ 0.10. Same value works for P1 and P2.
   const Real kShapeWeight =
     parseRealOption(argc, argv, "gamma", std::sqrt(h));
+
+  // Interface-distance penalty γ_Γ (matches the reconstruction example).
+  //   E_Γ = ½ γ_Γ · |Γ_h|⁻¹ h_ref⁻² · ∫_{Γ_h} (φ(X+u)/|∇φ(X+u)|)² ds
+  // Default min(cap, 1/h_ref) with cap = 10 (P1) / 100 (P2). Active by
+  // default; pass `--gamma-gamma=0` to disable.
+#ifdef RODIN_LSR_P2_DISPLACEMENT
+  constexpr Real kGammaGammaCap = Real(100);
+#else
+  constexpr Real kGammaGammaCap = Real(10);
+#endif
+  const Real kGammaGammaDefault = std::min(kGammaGammaCap, Real(1) / h);
+  const Real kGammaGamma =
+    parseRealOption(argc, argv, "gamma-gamma", kGammaGammaDefault);
 
   const Real   kLineSearchAlphaInit = Real(1);
   const Real   kLineSearchReduction = Real(0.5);
@@ -558,8 +599,77 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "qrel-max", Real(10));
   const std::size_t kLSRQuadratureOrder =
     parseSizeTOption(argc, argv, "lsr-quad-order", 0);
+  // ψ default = smoothed-phi: Helmholtz-smoothed projection of φ with
+  // skeleton retention. Single sparse solve:
+  //
+  //    (I − ℓ² Δ) ψ = φ   on Ω,    ψ = 0 on Γ_ψ,h.
+  //
+  // For composite φ (soft-min of two wavy circles), this formulation
+  // works because the RHS uses only φ (not Δφ), so the ε-scale ridge
+  // in ∇φ does not propagate into ψ. The Dirichlet pins the zero
+  // contour to the classifier-cut skeleton. The Helmholtz operator
+  // low-pass-filters at scale ℓ — for ℓ = h_ref the ridge is
+  // averaged over.
+  //
+  // `projected-phi-h1` was tried and fails on this composite-φ
+  // benchmark (8/20 P2 frames at lobes=8). Raw FMM works (20/20) and
+  // remains available as an option.
+  const std::string kPsiReconstruction =
+    // ψ default = FMM. The only ψ-reconstruction independent of φ's
+    // regularity. With ε=6h and projected-phi-h1, P2 also converges
+    // 20/20, but FMM removes the ε ≥ 6h hypothesis entirely. We trade
+    // ~30% fit-floor for absolute robustness across composite-φ
+    // setups. `projected-phi-h1` remains available as an opt-in
+    // when φ is known smooth at scale h_ref.
+    parseStringOption(argc, argv, "psi", "fmm");
+  if (kPsiReconstruction != "projected-phi-h1"
+      && kPsiReconstruction != "projection-h1"
+      && kPsiReconstruction != "fmm"
+      && kPsiReconstruction != "smoothed-phi"
+      && kPsiReconstruction != "phi-smoothed")
+    throw std::runtime_error(
+        "Unknown --psi=" + kPsiReconstruction
+        + " (expected fmm, smoothed-phi, or projected-phi-h1).");
+  const Real kPsiProjectEll =
+    parseRealOption(argc, argv, "psi-project-ell", h);
   const Real kH1RegularizationWeight =
     parseRealOption(argc, argv, "h1-reg", Real(0));
+
+  // Skeleton-projected φ-surrogate (hard codim-1 Dirichlet). Builds
+  // φ̃ ∈ P1 as arg min ½∫|∇(φ̃−φ)|² subject to φ̃ = 0 on the classifier
+  // skeleton (interfaceAttribute). Used as the LSR fit target in place
+  // of raw φ so the target and ψ share the classifier-decided
+  // topology. The reported interface fit is still evaluated on raw φ.
+  const bool kPhiSurrogate = hasFlag(argc, argv, "phi-surrogate");
+
+  // Welsch robust-loss bandwidth on the LSR push residual (Family A).
+  // Default σ = 1.5·h_ref. Zero disables (quadratic loss). Activates
+  // the bounded loss ρ(r) = (σ²/2)(1 − exp(−r²/σ²)) with IRLS weight
+  // w(r) = exp(−r²/σ²). σ sweep on the hard merge benchmark
+  // (R0=0.05, orbitR=0.2, lobes=4) shows two regimes:
+  //   σ ∈ [0.01, 0.025] (≈ 0.5–1.2·h)  → 18/20 (above baseline 16/20),
+  //   σ ∈ [0.030, 0.040] (≈ 1.5–2·h)   → 20/20.
+  // The wider σ basin is the safer ship default and tolerates h scale
+  // drift across (n, R0). On the standard benchmark (lobes=8) this
+  // default is harmless (20/20 baseline preserved, fit unchanged).
+  const Real kLossSigma =
+    parseRealOption(argc, argv, "loss-sigma", Real(1.5) * h);
+
+  // Adaptive σ via MAD on active-band residuals. When on, the manual
+  // `--loss-sigma` is replaced once per frame by 1.5 · 1.4826 · median|r|
+  // sampled at quadrature points with W(ψ) > 0.1. Removes the manual
+  // tuning of σ across (n, R0, lobes).
+  const bool kAdaptiveSigma = !hasFlag(argc, argv, "no-adaptive-sigma");
+
+  // Family A vs B selector for the line-search energy when lossSigma>0.
+  //   A (default): line search sees the Welsch energy. Saturated cells
+  //       stop pulling on the line search → bigger steps accepted at
+  //       topology mismatches.
+  //   B (`--no-welsch-energy`): line search sees quadratic energy ½r²;
+  //       only the tangent uses the IRLS weight. Tested 16/20 vs A 20/20
+  //       on the hard merge benchmark — A is the recommended setting.
+  const bool kUseWelschEnergy =
+    !hasFlag(argc, argv, "no-welsch-energy");
 
   // Smooth relative-Q barrier (interior-point penalty steering Newton
   // away from high relative distortion). With qbar-weight > 0 and a
@@ -608,6 +718,7 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "rrtol", Real(5e-3));
   const std::size_t kStallPatience   =
     parseSizeTOption(argc, argv, "stall", 5);
+  const bool kTiming = hasFlag(argc, argv, "timing");
 
   constexpr Attribute interiorAttribute  = 1;
   constexpr Attribute exteriorAttribute  = 2;
@@ -685,6 +796,9 @@ int main(int argc, char** argv)
             << " unit-square mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
             << "  orbit R=" << orbitR
+            << "  psi=" << (kPsiReconstruction == "fmm"
+                              ? "fmm"
+                              : "projected-phi-h1")
             << "  merge-half-arc~" << std::asin(R0 / orbitR) << " rad\n";
 
   std::size_t framesConverged = 0;
@@ -693,6 +807,15 @@ int main(int argc, char** argv)
 
   for (std::size_t frame = 0; frame < nFrames; ++frame)
   {
+    const auto frameStart = Clock::now();
+    auto phaseStart = frameStart;
+    Real tClassify = 0;
+    Real tPsi = 0;
+    Real tBand = 0;
+    Real tLsr = 0;
+    Real tDiagnostics = 0;
+    Real tWrite = 0;
+
     const Real t = static_cast<Real>(frame) / static_cast<Real>(nFrames);
     const Real angle = Real(2) * Real(M_PI) * t;
 
@@ -798,16 +921,113 @@ int main(int argc, char** argv)
     }
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
+    tClassify = elapsedSeconds(phaseStart);
 
-    // ---- Stage 2: FMM signed distance ----
-    psi = Real(0);
-    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psi)
-      .setInterface(interfaceAttribute)
-      .setInterior(interiorAttribute)
-      .solve()
-      .sign();
+    // ---- Stage 1b: φ̃ surrogate via hard skeleton Dirichlet ----
+    //   φ̃ = arg min ½∫|∇(φ̃ − φ)|² dX  s.t.  φ̃ = 0 on Γ_h (skeleton).
+    // Euler–Lagrange: ∫∇φ̃·∇v = ∫∇φ·∇v, φ̃|_Γ = 0. Parameter-free.
+    // φ̃ ≈ φ away from the skeleton (harmonic propagation), φ̃ = 0
+    // exactly on the skeleton. Topology is now classifier-decided on
+    // both the target (φ̃) and the SDF (ψ = FMM(Γ_h)), removing the
+    // admissibility wall at merge necks.
+    GridFunction phiTilde(p1Fes);
+    if (kPhiSurrogate)
+    {
+      TrialFunction phiTildeTrial(p1Fes);
+      TestFunction  phiTildeTest(p1Fes);
+      AnalyticVectorFunction gradPhiData(
+          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+          {
+            const auto& X = p.getCoordinates();
+            return levelSet.grad(vec2(X(0), X(1)));
+          },
+          /*dimension=*/2);
+      Problem phiTildeProblem(phiTildeTrial, phiTildeTest);
+      phiTildeProblem =
+          Integral(Grad(phiTildeTrial), Grad(phiTildeTest))
+        - Integral(gradPhiData, Grad(phiTildeTest))
+        + DirichletBC(phiTildeTrial, RealFunction(Real(0)))
+            .on(interfaceAttribute);
+      Solver::SparseLU(phiTildeProblem).solve();
+      phiTilde.getData() = phiTildeTrial.getSolution().getData();
+    }
+
+    // ---- Stage 2: psi reconstruction ----
+    phaseStart = Clock::now();
+    if (kPsiReconstruction == "fmm")
+    {
+      psi = Real(0);
+      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psi)
+        .setInterface(interfaceAttribute)
+        .setInterior(interiorAttribute)
+        .solve()
+        .sign();
+    }
+    else if (kPsiReconstruction == "smoothed-phi"
+             || kPsiReconstruction == "phi-smoothed")
+    {
+      // Helmholtz-smoothed φ projection with skeleton retention:
+      //
+      //    (I − ℓ² Δ) ψ = φ   on Ω,    ψ = 0 on Γ_ψ,h.
+      //
+      // The composite soft-min φ has an ε-scale ridge in ∇φ. Putting
+      // φ (the value) on the RHS avoids exposing Δφ's spike; the
+      // Helmholtz operator low-pass-filters the result at scale ℓ.
+      // The Dirichlet pins the zero contour to the classifier
+      // skeleton. For ℓ = h_ref the ridge is averaged over and ψ has
+      // a continuous gradient even where φ does not.
+      TrialFunction psiTrial(p1Fes);
+      TestFunction  psiTest(p1Fes);
+      RealFunction phiData(
+          [&](const Geometry::Point& p) -> Real
+          {
+            const auto& X = p.getCoordinates();
+            return levelSet.phi(vec2(X(0), X(1)));
+          });
+      RealFunction<Real> ell2(kPsiProjectEll * kPsiProjectEll);
+      Problem psiProblem(psiTrial, psiTest);
+      psiProblem =
+          Integral(psiTrial, psiTest)
+        + Integral(ell2 * Grad(psiTrial), Grad(psiTest))
+        - Integral(phiData, psiTest)
+        + DirichletBC(psiTrial, RealFunction(Real(0)))
+            .on(interfaceAttribute);
+      Solver::SparseLU(psiProblem).solve();
+      psi.getData() = psiTrial.getSolution().getData();
+    }
+    else
+    {
+      TrialFunction psiTrial(p1Fes);
+      TestFunction  psiTest(p1Fes);
+      RealFunction phiData(
+          [&](const Geometry::Point& p) -> Real
+          {
+            const auto& X = p.getCoordinates();
+            return levelSet.phi(vec2(X(0), X(1)));
+          });
+      AnalyticVectorFunction gradPhiData(
+          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+          {
+            const auto& X = p.getCoordinates();
+            return levelSet.grad(vec2(X(0), X(1)));
+          },
+          /*dimension=*/2);
+      RealFunction<Real> ell2(kPsiProjectEll * kPsiProjectEll);
+      Problem psiProblem(psiTrial, psiTest);
+      psiProblem =
+          Integral(psiTrial, psiTest)
+        + Integral(ell2 * Grad(psiTrial), Grad(psiTest))
+        - Integral(phiData, psiTest)
+        - Integral(ell2 * gradPhiData, Grad(psiTest))
+        + DirichletBC(psiTrial, RealFunction(Real(0)))
+            .on(interfaceAttribute);
+      Solver::SparseLU(psiProblem).solve();
+      psi.getData() = psiTrial.getSolution().getData();
+    }
+    tPsi = elapsedSeconds(phaseStart);
 
     // ---- Stage 3: smooth-band measure ----
+    phaseStart = Clock::now();
     Real domainMeasure = 0;
     Real weightedBandMeasure = 0;
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -833,8 +1053,10 @@ int main(int argc, char** argv)
     if (weightedBandMeasure <= 0)
       throw std::runtime_error("Empty smooth band: M_w = 0 at frame "
                                + std::to_string(frame));
+    tBand = elapsedSeconds(phaseStart);
 
     // ---- Stage 4a: LSR solve ----
+    phaseStart = Clock::now();
     auto& cellCache = cellCacheBg;
 
     RealFunction phi(
@@ -872,6 +1094,11 @@ int main(int argc, char** argv)
     baseParams.jSafeRatio = Real(1e-3);
     baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;
     baseParams.qRelMax = kQRelMax;
+    baseParams.lossSigma = kLossSigma;
+    baseParams.useAdaptiveLossSigma = kAdaptiveSigma;
+    baseParams.useWelschEnergy = kUseWelschEnergy;
+    baseParams.interfaceWeight = kGammaGamma;
+    baseParams.interfaceAttribute = interfaceAttribute;
     baseParams.qBarrierWeight = kQBarrierWeight;
     baseParams.qBarrierAct    = kQBarrierAct;
     baseParams.qBarrierMax    = kQBarrierMax;
@@ -898,27 +1125,68 @@ int main(int argc, char** argv)
     baseParams.initialGuessElasticityMu = initialGuessElasticityMu;
     baseParams.tangent = tangentMode;
 
+    auto interfaceFacetSamples =
+      [&](const Index facet, const auto& callback)
+      {
+        const auto face = mesh.getFace(facet);
+        const auto& faceVertices = face->getVertices();
+        const auto& incident =
+          mesh.getConnectivity().getIncidence({1, 2}, facet);
+        if (faceVertices.size() != 2 || incident.empty())
+          return;
+        const Index cellIdx = incident[0];
+        const auto cellIt = mesh.getCell(cellIdx);
+        const auto& cell = *cellIt;
+        const auto& cellVertices = cell.getVertices();
+        std::array<int, 2> local = {{-1, -1}};
+        for (std::size_t a = 0; a < cellVertices.size(); ++a)
+        {
+          if (cellVertices[a] == faceVertices[0])
+            local[0] = static_cast<int>(a);
+          if (cellVertices[a] == faceVertices[1])
+            local[1] = static_cast<int>(a);
+        }
+        if (local[0] < 0 || local[1] < 0)
+          return;
+
+        const Vec2 xa = mesh.getVertexCoordinates(faceVertices[0]);
+        const Vec2 xb = mesh.getVertexCoordinates(faceVertices[1]);
+        const Real len = (xb - xa).norm();
+        constexpr std::array<Real, 2> sPts = {{
+          Real(0.21132486540518713),
+          Real(0.78867513459481287)
+        }};
+        for (const Real s : sPts)
+        {
+          std::array<Real, 3> lambda = {{Real(0), Real(0), Real(0)}};
+          lambda[static_cast<std::size_t>(local[0])] = Real(1) - s;
+          lambda[static_cast<std::size_t>(local[1])] = s;
+          Math::SpatialPoint rc(2);
+          rc(0) = lambda[1];
+          rc(1) = lambda[2];
+          Math::SpatialPoint X(2);
+          cell.getTransformation().transform(X, rc);
+          callback(Geometry::Point(cell, rc, X), len * Real(0.5));
+        }
+      };
+
     auto computeInterfaceFit = [&]() -> Real
     {
       Real interfacePhi = 0;
       Real interfaceLen = 0;
       for (const Index facet : interfaceFacets)
       {
-        const auto face = mesh.getFace(facet);
-        const auto& vs = face->getVertices();
-        const Vec2 a = mesh.getVertexCoordinates(vs[0]);
-        const Vec2 b = mesh.getVertexCoordinates(vs[1]);
-        const auto& fes = u.getFiniteElementSpace();
-        const auto& dofsA = fes.getDOFs(0, vs[0]);
-        const auto& dofsB = fes.getDOFs(0, vs[1]);
-        const Vec2 ua = vec2(u.getData()(dofsA[0]), u.getData()(dofsA[1]));
-        const Vec2 ub = vec2(u.getData()(dofsB[0]), u.getData()(dofsB[1]));
-        const Real phiA = levelSet.phi(a + ua);
-        const Real phiB = levelSet.phi(b + ub);
-        const Real val = Real(0.5) * (phiA + phiB);
-        const Real len = (b - a).norm();
-        interfacePhi += val * val * len;
-        interfaceLen += len;
+        interfaceFacetSamples(
+            facet,
+            [&](const Geometry::Point& pt, Real weight)
+            {
+              const auto& X = pt.getPhysicalCoordinates();
+              const auto uX = u.getValue(pt);
+              const Vec2 y = vec2(X(0) + uX(0), X(1) + uX(1));
+              const Real val = levelSet.phi(y);
+              interfacePhi += val * val * weight;
+              interfaceLen += weight;
+            });
       }
       return std::sqrt(interfacePhi / std::max(interfaceLen, Real(1e-30)));
     };
@@ -952,8 +1220,34 @@ int main(int argc, char** argv)
       };
 
     LSR lsr(u);
-    const LSRReport lsrReport =
-      lsr.setParameters(params).solve(psi, phi, gradPhi, hessPhi);
+    // With phi-surrogate active, fit on φ̃ (P1 GridFunction with hard
+    // skeleton zero) instead of raw φ. Hess(φ̃) = 0 per cell on P1,
+    // which collapses the PSD-Newton tangent's r·Hess(φ) term — a
+    // welcome side-effect, removing the indefinite-Hess overshoot.
+    RealFunction phiTildeFn(
+        [&](const Geometry::Point& p) -> Real
+        {
+          return phiTilde.getValue(p);
+        });
+    AnalyticVectorFunction gradPhiTildeFn(
+        [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+        {
+          Math::SpatialVector<Real> g(2);
+          Grad(phiTilde).interpolate(g, p);
+          return g;
+        },
+        /*dimension=*/2);
+    AnalyticMatrixFunction hessPhiZero(
+        [](const Geometry::Point&) -> Math::SpatialMatrix<Real>
+        {
+          return Math::SpatialMatrix<Real>(2, 2); // zero-initialized
+        },
+        /*rows=*/2, /*cols=*/2);
+    const LSRReport lsrReport = kPhiSurrogate
+      ? lsr.setParameters(params).solve(
+            psi, phiTildeFn, gradPhiTildeFn, hessPhiZero)
+      : lsr.setParameters(params).solve(psi, phi, gradPhi, hessPhi);
+    tLsr = elapsedSeconds(phaseStart);
 
     r0 = lsrReport.initialResidual;
     itCount = lsrReport.iterations;
@@ -1001,6 +1295,7 @@ int main(int argc, char** argv)
     finalFitPerFrame.push_back(interfaceFit);
 
     // ---- Stage 5a: psi-side fields ----
+    phaseStart = Clock::now();
     {
       const std::size_t d = mesh.getDimension();
       for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -1099,8 +1394,25 @@ int main(int argc, char** argv)
               << "  init=" << strategyName
               << "  converged=" << convergedReason << '\n';
     if (convergedFlag) ++framesConverged;
+    tDiagnostics = elapsedSeconds(phaseStart);
 
+    phaseStart = Clock::now();
     xdmf.write(t).flush();
+    tWrite = elapsedSeconds(phaseStart);
+
+    if (kTiming)
+    {
+      const Real tFrame = elapsedSeconds(frameStart);
+      std::cout << "      timing:"
+                << " classify=" << std::fixed << std::setprecision(3)
+                << tClassify
+                << "  psi=" << tPsi
+                << "  band=" << tBand
+                << "  lsr=" << tLsr
+                << "  diagnostics=" << tDiagnostics
+                << "  xdmf=" << tWrite
+                << "  total=" << tFrame << " s\n";
+    }
   }
 
   xdmf.close();

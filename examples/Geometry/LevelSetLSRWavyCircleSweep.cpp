@@ -419,11 +419,14 @@ int main(int argc, char** argv)
     parseSizeTOption(argc, argv, "n", 50);          ///< n x n nodes.
   const std::size_t nFrames =
     parseSizeTOption(argc, argv, "frames", 200);    ///< orbit snapshots.
-  constexpr Real        orbitR = 0.10; ///< Radius of the centre's orbit.
+  const Real            orbitR =
+    parseRealOption(argc, argv, "orbitR", Real(0.10));
   const Real            amp =
     parseRealOption(argc, argv, "amp", Real(0.05)); ///< radial amplitude.
-  constexpr Real        R0     = 0.20; ///< Wavy-circle nominal radius.
-  constexpr Real        kLobes = 6;    ///< Number of azimuthal lobes.
+  const Real            R0 =
+    parseRealOption(argc, argv, "R0", Real(0.05));
+  const Real            kLobes =
+    parseRealOption(argc, argv, "lobes", Real(6));
 
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
@@ -452,6 +455,18 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "qrel-max", Real(10));
   const std::size_t kLSRQuadratureOrder =
     parseSizeTOption(argc, argv, "lsr-quad-order", 0);
+  const std::string kPsiReconstruction =
+    // ψ default = FMM for robustness. projected-phi-h1 is available
+    // as an opt-in. See LSR.h docstring on ℓ_φ ≥ h_ref hypothesis.
+    parseStringOption(argc, argv, "psi", "fmm");
+  if (kPsiReconstruction != "projected-phi-h1"
+      && kPsiReconstruction != "projection-h1"
+      && kPsiReconstruction != "fmm")
+    throw std::runtime_error(
+        "Unknown --psi=" + kPsiReconstruction
+        + " (expected projected-phi-h1 or fmm).");
+  const Real kPsiProjectEll =
+    parseRealOption(argc, argv, "psi-project-ell", h);
   const Real kH1RegularizationWeight =
     parseRealOption(argc, argv, "h1-reg", Real(0));
   // BEST-QUALITY profile defaults (see LSR.h docstring + reconstruction
@@ -604,7 +619,11 @@ int main(int argc, char** argv)
   std::cout << "Wavy-circle LSR sweep on " << n << "x" << n
             << " unit-square mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
-            << "  orbit R=" << orbitR << '\n';
+            << "  orbit R=" << orbitR
+            << "  psi=" << (kPsiReconstruction == "fmm"
+                              ? "fmm"
+                              : "projected-phi-h1")
+            << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -700,13 +719,45 @@ int main(int argc, char** argv)
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
 
-    // ---- Stage 2: FMM signed distance psi_h ----
-    psi = Real(0);
-    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psi)
-      .setInterface(interfaceAttribute)
-      .setInterior(interiorAttribute)
-      .solve()
-      .sign();
+    // ---- Stage 2: projected-H1 psi_h, with FMM kept as an option ----
+    if (kPsiReconstruction == "fmm")
+    {
+      psi = Real(0);
+      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psi)
+        .setInterface(interfaceAttribute)
+        .setInterior(interiorAttribute)
+        .solve()
+        .sign();
+    }
+    else
+    {
+      TrialFunction psiTrial(p1Fes);
+      TestFunction  psiTest(p1Fes);
+      RealFunction phiData(
+          [&](const Geometry::Point& p) -> Real
+          {
+            const auto& X = p.getCoordinates();
+            return levelSet.phi(vec2(X(0), X(1)));
+          });
+      AnalyticVectorFunction gradPhiData(
+          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+          {
+            const auto& X = p.getCoordinates();
+            return levelSet.grad(vec2(X(0), X(1)));
+          },
+          /*dimension=*/2);
+      RealFunction<Real> ell2(kPsiProjectEll * kPsiProjectEll);
+      Problem psiProblem(psiTrial, psiTest);
+      psiProblem =
+          Integral(psiTrial, psiTest)
+        + Integral(ell2 * Grad(psiTrial), Grad(psiTest))
+        - Integral(phiData, psiTest)
+        - Integral(ell2 * gradPhiData, Grad(psiTest))
+        + DirichletBC(psiTrial, RealFunction(Real(0)))
+            .on(interfaceAttribute);
+      Solver::SparseLU(psiProblem).solve();
+      psi.getData() = psiTrial.getSolution().getData();
+    }
 
     // ---- Stage 3: smooth-band measure for the LSR normalisation ----
     Real domainMeasure = 0;
