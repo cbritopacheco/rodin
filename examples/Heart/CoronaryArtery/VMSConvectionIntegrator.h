@@ -277,7 +277,7 @@ namespace Rodin::Examples::Heart
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const Variational::IntegrationPoint ip(p, qf, qp);
+          const Variational::IntegrationPoint ip(p, &qf, qp);
 
           const ScalarType wdet =
             static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
@@ -579,7 +579,7 @@ namespace Rodin::Examples::Heart
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const Variational::IntegrationPoint ip(p, qf, qp);
+          const Variational::IntegrationPoint ip(p, &qf, qp);
 
           const ScalarType wdet =
             static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
