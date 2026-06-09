@@ -730,11 +730,11 @@ int main(int argc, char** argv)
        *
        * The fluid is solved on the mesh induced by the old solid displacement.
        */
-      fluidDisplacementOld.setData(fluidDisplacement.getData());
-      solveHarmonicALE(solidDisplacementOld);
+      //fluidDisplacementOld.setData(fluidDisplacement.getData());
+      //solveHarmonicALE(solidDisplacementOld);
 
-      meshVelocity =
-        (1.0 / dt) * (fluidDisplacement - fluidDisplacementOld);
+      //meshVelocity =
+        //(1.0 / dt) * (fluidDisplacement - fluidDisplacementOld);
 
       inletVelocity = VectorFunction(dim, [&](const Point& x)
       {

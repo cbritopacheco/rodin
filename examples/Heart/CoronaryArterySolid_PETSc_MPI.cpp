@@ -318,11 +318,9 @@ int main(int argc, char** argv) {
   Attribute SolidRing = 17;
   Attribute SolidExt = 102;
 
-
-
   // ---- Finite-element space -----------------------------------------------
   const size_t dim = mesh.getSpaceDimension();
-  H1 Vh(std::integral_constant<size_t,1>{}, mesh, dim);   // vector P1 on the distributed mesh
+  H1 Vh(std::integral_constant<size_t,2>{}, mesh, dim);   // vector P1 on the distributed mesh
 
   // ---- Laplacian "map" problem (PETSc KSP / CG) ---------------------------
   //H1 V_lh(mesh);
