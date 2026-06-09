@@ -64,6 +64,7 @@
 #include <cctype>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <numbers>
@@ -74,6 +75,8 @@
 #include <boost/mpi/communicator.hpp>
 #include <boost/mpi/environment.hpp>
 
+#include <mpi.h>
+#include <petscmat.h>
 #include <petscsys.h>
 #include <petscvec.h>
 
@@ -110,6 +113,96 @@ namespace
 
   constexpr int RootRank = 0;
 
+  static double beginTimer(MPI_Comm comm, bool isRoot, const std::string& label)
+  {
+    MPI_Barrier(comm);
+    if (isRoot)
+      std::cout << "[timer] begin " << label << std::endl;
+    return MPI_Wtime();
+  }
+
+  static void endTimer(
+      MPI_Comm comm,
+      bool isRoot,
+      const std::string& label,
+      double start)
+  {
+    const double local = MPI_Wtime() - start;
+    double global = 0.0;
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MAX, comm);
+
+    if (isRoot)
+    {
+      std::cout << std::fixed << std::setprecision(6)
+                << "[timer] end   " << label
+                << " : " << global << " s max/rank"
+                << std::endl;
+    }
+  }
+
+  static void printLinearSystemInfo(
+      MPI_Comm comm,
+      bool isRoot,
+      const char* label,
+      ::Mat A,
+      ::Vec x,
+      ::Vec b)
+  {
+    (void) isRoot;
+
+    const char* xtype = PETSC_NULLPTR;
+    const char* btype = PETSC_NULLPTR;
+    const char* atype = PETSC_NULLPTR;
+
+    PetscErrorCode ierr = VecGetType(x, &xtype);
+    if (ierr != PETSC_SUCCESS)
+      xtype = "(VecGetType failed)";
+
+    ierr = VecGetType(b, &btype);
+    if (ierr != PETSC_SUCCESS)
+      btype = "(VecGetType failed)";
+
+    ierr = MatGetType(A, &atype);
+    if (ierr != PETSC_SUCCESS)
+      atype = "(MatGetType failed)";
+
+    PetscInt xLocal = 0, xGlobal = 0;
+    PetscInt bLocal = 0, bGlobal = 0;
+    PetscInt mLocal = 0, nLocal = 0;
+    PetscInt mGlobal = 0, nGlobal = 0;
+
+    ierr = VecGetLocalSize(x, &xLocal);
+    if (ierr != PETSC_SUCCESS) xLocal = -1;
+    ierr = VecGetSize(x, &xGlobal);
+    if (ierr != PETSC_SUCCESS) xGlobal = -1;
+
+    ierr = VecGetLocalSize(b, &bLocal);
+    if (ierr != PETSC_SUCCESS) bLocal = -1;
+    ierr = VecGetSize(b, &bGlobal);
+    if (ierr != PETSC_SUCCESS) bGlobal = -1;
+
+    ierr = MatGetLocalSize(A, &mLocal, &nLocal);
+    if (ierr != PETSC_SUCCESS) { mLocal = -1; nLocal = -1; }
+    ierr = MatGetSize(A, &mGlobal, &nGlobal);
+    if (ierr != PETSC_SUCCESS) { mGlobal = -1; nGlobal = -1; }
+
+    PetscPrintf(
+        comm,
+        "[petsc] %s\n"
+        "        A type=%s local=%" PetscInt_FMT "x%" PetscInt_FMT
+        " global=%" PetscInt_FMT "x%" PetscInt_FMT "\n"
+        "        x type=%s local=%" PetscInt_FMT " global=%" PetscInt_FMT "\n"
+        "        b type=%s local=%" PetscInt_FMT " global=%" PetscInt_FMT "\n",
+        label,
+        atype ? atype : "(null)",
+        mLocal, nLocal, mGlobal, nGlobal,
+        xtype ? xtype : "(null)",
+        xLocal, xGlobal,
+        btype ? btype : "(null)",
+        bLocal, bGlobal);
+  }
+
+
   struct Volume
   {
     static constexpr Attribute Fluid = 1;
@@ -119,9 +212,9 @@ namespace
   struct Boundary
   {
     static constexpr Attribute FSI = 2;
-    static constexpr Attribute Inlet = 3;
-    static constexpr std::array<Attribute, 6> Outlets{{4, 5, 6, 7, 8, 9}};
-    static constexpr Attribute SolidRing = 100;
+    static constexpr Attribute Inlet = 4;
+    static constexpr std::array<Attribute, 6> Outlets{{10, 15, 9, 14, 8, 7}};
+    static constexpr Attribute SolidRing = 17;
   };
 
   enum class FlowMode
@@ -153,7 +246,7 @@ namespace
 
   struct Config
   {
-    std::string meshPath = "../resources/examples/Heart/CoronaryArtery_FSI.medit.mesh";
+    std::string meshPath = "malla_merge.mesh";
     std::string xdmfBasename = "CoronaryArtery_FSI";
     std::string csvPath = "CoronaryArtery_FSI.csv";
     Real meshScale = 1.0e-3;
@@ -169,13 +262,13 @@ namespace
     CarreauYasuda viscosity;
 
     Real solidDensity = 1060.0;
-    Real solidYoungModulus = 5.0e5;
+    Real solidYoungModulus = 5.0e4;
     Real solidPoissonRatio = 0.3;
     Real newmarkBeta = 0.25;
     Real newmarkGamma = 0.5;
 
     Real ringStiffness = 8.0e4;
-    Real ringDamping = 4.0e4;
+    Real ringDamping = 0;
     Real inactiveRegularization = 1.0e-10;
     PetscBool moveMeshDuringNewton = PETSC_FALSE;
   };
@@ -398,8 +491,10 @@ namespace
       local.getConnectivity().compute(1, 0);
 
 #ifdef RODIN_USE_SCOTCH
+      std::cout << "Using Scotch for mesh partitioning.\n";
       Scotch::Partitioner partitioner(local);
 #else
+      std::cout << "Using BalancedCompactPartitioner for mesh partitioning.\n";
       Geometry::BalancedCompactPartitioner partitioner(local);
 #endif
       partitioner.partition(static_cast<size_t>(comm.size()));
@@ -527,6 +622,9 @@ int main(int argc, char** argv)
   const auto& comm = context.getCommunicator();
   const bool isRoot = comm.rank() == RootRank;
 
+  if (isRoot)
+    std::cout << "Starting CoronaryArtery_FSI_PETSc_MPI on " << comm.size() << " processes." << std::endl;
+
   try
   {
     Config cfg;
@@ -536,11 +634,18 @@ int main(int argc, char** argv)
     Model model(modelInput);
     initializeModel(model, modelInput);
 
+    const double makeMeshStart = beginTimer(PETSC_COMM_WORLD, isRoot, "makeMesh");
     MeshType mesh = makeMesh(context, cfg);
+    endTimer(PETSC_COMM_WORLD, isRoot, "makeMesh", makeMeshStart);
+
     const size_t dim = mesh.getSpaceDimension();
 
     std::vector<Math::SpatialPoint> referenceVertices;
-    saveReferenceVertices(mesh, referenceVertices);
+    {
+      const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "saveReferenceVertices");
+      saveReferenceVertices(mesh, referenceVertices);
+      endTimer(PETSC_COMM_WORLD, isRoot, "saveReferenceVertices", t0);
+    }
 
     using VelocityFES =
       H1<2, Math::SpatialVector<Real>, MeshType>;
@@ -549,9 +654,21 @@ int main(int argc, char** argv)
     using DisplacementFES =
       H1<1, Math::SpatialVector<Real>, MeshType>;
 
+    const double fesStart = beginTimer(PETSC_COMM_WORLD, isRoot, "construct finite element spaces");
     VelocityFES uh(std::integral_constant<size_t, 2>{}, mesh, dim);
     PressureFES ph(std::integral_constant<size_t, 1>{}, mesh);
     DisplacementFES dh(std::integral_constant<size_t, 1>{}, mesh, dim);
+    endTimer(PETSC_COMM_WORLD, isRoot, "construct finite element spaces", fesStart);
+
+    if (isRoot)
+    {
+      std::cout << "[dofs] velocity uh = " << uh.getSize() << std::endl;
+      std::cout << "[dofs] pressure ph = " << ph.getSize() << std::endl;
+      std::cout << "[dofs] displacement dh = " << dh.getSize() << std::endl;
+      std::cout << "[dofs] monolithic total = "
+                << (uh.getSize() + ph.getSize() + dh.getSize())
+                << std::endl;
+    }
 
     PETSc::Variational::TrialFunction du(uh);
     PETSc::Variational::TrialFunction dp(ph);
@@ -589,6 +706,9 @@ int main(int argc, char** argv)
       return value;
     });
 
+    {
+      const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "initialize grid functions");
+
     uState = zero;
     pState = 0.0;
     etaState = zero;
@@ -606,6 +726,9 @@ int main(int argc, char** argv)
     meshVelocity = zero;
     one = 1.0;
 
+      endTimer(PETSC_COMM_WORLD, isRoot, "initialize grid functions", t0);
+    }
+
     uState.setName("FluidVelocity");
     pState.setName("FluidPressure");
     etaState.setName("DisplacementIncrement");
@@ -614,6 +737,13 @@ int main(int argc, char** argv)
     solidAcceleration.setName("SolidAcceleration");
     meshVelocity.setName("ALEMeshVelocity");
 
+    size_t nv = mesh.getVertexCount();
+    size_t nc = mesh.getCellCount();
+    if (isRoot)
+    {
+      std::cout << "Mesh loaded with " << nv << " vertices and " << nc << " cells." << std::endl;
+    }
+
     IO::XDMF xdmf(comm, cfg.xdmfBasename, RootRank);
     xdmf.setMesh(mesh);
     xdmf.add("FluidVelocity", uState);
@@ -621,7 +751,11 @@ int main(int argc, char** argv)
     xdmf.add("Displacement", dState);
     xdmf.add("SolidVelocity", solidVelocity);
     xdmf.add("ALEMeshVelocity", meshVelocity);
-    xdmf.write(0.0).flush();
+    {
+      const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "initial XDMF write");
+      xdmf.write(0.0).flush();
+      endTimer(PETSC_COMM_WORLD, isRoot, "initial XDMF write", t0);
+    }
 
     std::ofstream csv;
     if (isRoot)
@@ -729,6 +863,9 @@ int main(int argc, char** argv)
 
     Problem fsi(du, dp, deta, v, q, z);
 
+    {
+      const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "build variational FSI form expression");
+
     if (cfg.flowMode == FlowMode::Newton)
     {
       fsi =
@@ -809,6 +946,8 @@ int main(int argc, char** argv)
     }
     else
     {
+const Real fsiPenalty = 1e2; // tune
+
       fsi =
           /* Oseen ALE fluid tangent with lagged transport and viscosity. */
             (cfg.fluidDensity / dt) * Integral(du, v).over(Volume::Fluid)
@@ -866,22 +1005,64 @@ int main(int argc, char** argv)
           + cfg.inactiveRegularization * Integral(dp, q).over(Volume::Solid)
           + cfg.inactiveRegularization * Integral(pState, q).over(Volume::Solid)
 
++ fsiPenalty * BoundaryIntegral(Dot(du, v)).over(Boundary::FSI)
+
+- fsiPenalty * solidVelocityCoeff
+    * BoundaryIntegral(Dot(deta, v)).over(Boundary::FSI)
+
+- fsiPenalty
+    * BoundaryIntegral(Dot(solidVelocityState - uState, v)).over(Boundary::FSI)
+
+- fsiPenalty * solidVelocityCoeff
+    * BoundaryIntegral(Dot(du, z)).over(Boundary::FSI)
+
++ fsiPenalty * solidVelocityCoeff * solidVelocityCoeff
+    * BoundaryIntegral(Dot(deta, z)).over(Boundary::FSI)
+
++ fsiPenalty * solidVelocityCoeff
+    * BoundaryIntegral(Dot(solidVelocityState - uState, z)).over(Boundary::FSI)
+
           /* Essential and FSI kinematic constraints. */
           + DirichletBC(deta, -etaState).on(
               Boundary::Inlet,
               Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
-              Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5])
-          + DirichletBC(
-              du,
-              solidVelocityCoeff * deta,
-              solidVelocityState - uState).on(Boundary::FSI);
+              Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5]);
     }
 
-    fsi.assemble().setFieldSplits();
+      endTimer(PETSC_COMM_WORLD, isRoot, "build variational FSI form expression", t0);
+    }
 
+    if (isRoot)
+      std::cout << "Setting up solver...\n";
+
+    {
+      const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "initial fsi.assemble");
+      fsi.assemble(); // .setFieldSplits();
+      endTimer(PETSC_COMM_WORLD, isRoot, "initial fsi.assemble", t0);
+
+      auto& system = fsi.getLinearSystem();
+      printLinearSystemInfo(
+          PETSC_COMM_WORLD,
+          isRoot,
+          "after initial fsi.assemble",
+          system.getOperator(),
+          system.getSolution(),
+          system.getVector());
+    }
+
+    if (isRoot)
+      std::cout << "Configuring SNES solver...\n";
+
+    const double solverConfigStart =
+      beginTimer(PETSC_COMM_WORLD, isRoot, "construct/configure KSP and SNES");
     Solver::KSP ksp(fsi);
     Solver::SNES snes(ksp);
     snes.setTolerances(1.0e-10, 1.0e-8, 1.0e-10, 50, 10000);
+    endTimer(
+        PETSC_COMM_WORLD,
+        isRoot,
+        "construct/configure KSP and SNES",
+        solverConfigStart);
 
     auto moveMeshToCurrentDisplacement = [&]()
     {
@@ -922,7 +1103,13 @@ int main(int argc, char** argv)
 
     for (size_t step = 1; step <= cfg.nsteps; ++step)
     {
+      if (isRoot)
+        std::cout << "Starting step " << step << " / " << cfg.nsteps << std::endl;
+
+      const double modelStepStart =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "0D model.step");
       const auto rep = model.step(dt);
+      endTimer(PETSC_COMM_WORLD, isRoot, "0D model.step", modelStepStart);
       if (!rep.converged)
       {
         if (isRoot)
@@ -936,6 +1123,8 @@ int main(int argc, char** argv)
       for (const auto& [tag, bc] : wk)
         outletPressureValue[tag] = bc.pout;
 
+      const double predictorStart =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "Newmark predictor/state reset");
       dPred = dOld;
       auto tmp = solidVelocityOld;
       tmp *= dt;
@@ -957,6 +1146,11 @@ int main(int argc, char** argv)
       meshVelocity = etaState;
       meshVelocity *= 1.0 / dt;
       moveMeshToCurrentDisplacement();
+      endTimer(
+          PETSC_COMM_WORLD,
+          isRoot,
+          "Newmark predictor/state reset",
+          predictorStart);
 
       if (isRoot)
       {
@@ -968,7 +1162,28 @@ int main(int argc, char** argv)
           << Alert::Raise;
       }
 
-      snes.solve();
+      {
+        auto& system = fsi.getLinearSystem();
+        printLinearSystemInfo(
+            PETSC_COMM_WORLD,
+            isRoot,
+            "before snes.solve",
+            system.getOperator(),
+            system.getSolution(),
+            system.getVector());
+
+        const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "snes.solve");
+        snes.solve();
+        endTimer(PETSC_COMM_WORLD, isRoot, "snes.solve", t0);
+
+        printLinearSystemInfo(
+            PETSC_COMM_WORLD,
+            isRoot,
+            "after snes.solve",
+            system.getOperator(),
+            system.getSolution(),
+            system.getVector());
+      }
 
       if (!snes.converged())
       {
@@ -979,6 +1194,8 @@ int main(int argc, char** argv)
         break;
       }
 
+      const double fluxStart =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "flux assembly/evaluation");
       std::map<Attribute, Real> qOut;
       Real qOutSum = 0.0;
       Real qIn = 0.0;
@@ -995,22 +1212,33 @@ int main(int argc, char** argv)
         qOut[outlet] = q;
         qOutSum += q;
       }
+      endTimer(PETSC_COMM_WORLD, isRoot, "flux assembly/evaluation", fluxStart);
 
+      const double rcrStart =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "RCR update");
       for (const Attribute outlet : Boundary::Outlets)
         updateRCR(model, wk[outlet], qOut[outlet], dt);
+      endTimer(PETSC_COMM_WORLD, isRoot, "RCR update", rcrStart);
 
+      const double historyStart =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "history update");
       uOld.setData(uState.getData());
       pOld.setData(pState.getData());
       etaOld.setData(etaState.getData());
       dOld.setData(dState.getData());
       solidVelocityOld.setData(solidVelocity.getData());
       solidAccelerationOld.setData(solidAcceleration.getData());
+      endTimer(PETSC_COMM_WORLD, isRoot, "history update", historyStart);
 
+      const double outputStart =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "move mesh + XDMF write");
       moveMeshToCurrentDisplacement();
       xdmf.write(s.t).flush();
+      endTimer(PETSC_COMM_WORLD, isRoot, "move mesh + XDMF write", outputStart);
 
       if (isRoot && csv)
       {
+        const double csvStart = MPI_Wtime();
         csv << s.t << ','
             << s.y << ','
             << s.v << ','
@@ -1023,6 +1251,11 @@ int main(int argc, char** argv)
           csv << ',' << qOut[outlet] << ',' << wk[outlet].pout;
         csv << '\n';
         csv.flush();
+        std::cout << std::fixed << std::setprecision(6)
+                  << "[timer] end   CSV write : "
+                  << (MPI_Wtime() - csvStart)
+                  << " s rank/root"
+                  << std::endl;
       }
     }
 

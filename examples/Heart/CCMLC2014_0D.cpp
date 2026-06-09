@@ -113,26 +113,26 @@ int main()
 
   // Geometry / inertia
   in.rho = 1.0e3;
-  in.R0 = 2.36e-2;
-  in.d0 = 1.42e-2;
+  in.R0 = 2.4e-2;
+  in.d0 = 1.45e-2;
 
   // Active law parameters
-  in.Es = 3.0e7;
+  in.Es = 3.0e6;
   in.mu = 70.0;
   in.eta = 70.0;
   in.alpha = 1.5;
   in.alphaR = 0.12;
   in.k0 = 1.0e5;
-  in.sigma0 = 1.24e5;
+  in.sigma0 = 1.25e5;
 
   // Windkessel
-  in.Rp = 8.0e6;
-  in.Cp = 2.5e-9;
+  in.Rp = 5.0e7;
+  in.Cp = 4e-9;
   in.Rd = 1.0e8;
   in.Cd = 1.0e-8;
 
-  in.mu_0 = 0.0526559;
-  in.mu_Inf = 0.0052704;
+  in.mu_0 = 0.0186058;
+  in.mu_Inf = 0.0042963;
   in.lambda = 0.2435;
   in.n = 0.2079;
   in.m = 0.0035;
@@ -141,19 +141,17 @@ int main()
   in.k_0 = 3.5678;
   in.gamma_c = 10.2754;
   in.k_Inf = 1.5352;
-  in.proximalRadius = 0.015;
-  in.proximalLength = 0.4;
-  in.distalRadius = 0.0007;
-  in.distalLength = 0.004;
+  in.proximalRadius = 0.0015;
+  in.proximalLength = 0.05;
+  in.distalRadius = 0.0005;
+  in.distalLength = 0.2;
   in.windkesselRheology =
-    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
-
-
+    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
 
   // Valve parameters
-  in.Kat = 9.0e-6;
-  in.Kp  = 5.0e-10;
-  in.Kar = 1.3e-5;
+  in.Kat = 5.0e-7;
+  in.Kp  = 5.0e-11;
+  in.Kar = 1e-7;
 
   in.cavityCapacity = 5.0e-12;
 

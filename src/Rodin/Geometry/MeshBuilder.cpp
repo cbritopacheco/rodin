@@ -89,9 +89,23 @@ namespace Rodin::Geometry
   }
 
   Mesh<Context::Local>::Builder&
+  Mesh<Context::Local>::Builder::polytope(Polytope::Type t, const Array<Index>& vs, Index& index)
+  {
+    m_connectivity.polytope(t, vs, index);
+    return *this;
+  }
+
+  Mesh<Context::Local>::Builder&
   Mesh<Context::Local>::Builder::polytope(Polytope::Type t, Array<Index>&& vs)
   {
     m_connectivity.polytope(t, std::move(vs));
+    return *this;
+  }
+
+  Mesh<Context::Local>::Builder&
+  Mesh<Context::Local>::Builder::polytope(Polytope::Type t, Array<Index>&& vs, Index& index)
+  {
+    m_connectivity.polytope(t, std::move(vs), index);
     return *this;
   }
 

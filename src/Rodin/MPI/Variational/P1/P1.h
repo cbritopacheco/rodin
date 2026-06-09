@@ -777,7 +777,7 @@ namespace Rodin::Variational
       {
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
-        return CallablePullback<std::decay_t<CallableType>>(
+        return CallablePullback<CallableType>(
             *mesh.getPolytope(d, i), std::forward<CallableType>(v));
       }
 
@@ -803,9 +803,10 @@ namespace Rodin::Variational
        * @return Pushforward wrapper mapping physical points to reference evaluation.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return typename FESType::Pushforward(v);
+        return typename FESType::template Pushforward<CallableType>(
+            std::forward<CallableType>(v));
       }
 
     private:
