@@ -714,7 +714,7 @@
 <g id="node60" class="node">
 <title>Rodin/Variational/Sum.h</title>
 <ellipse fill="#e6f598" stroke="black" cx="19205" cy="-4032" rx="108" ry="108"/>
-<text text-anchor="middle" x="19205" y="-4027.6" font-family="Times,serif" font-size="18.00">Rodin/Variational/Sum.h</text>
+<text text-anchor="middle" x="19205" y="-4027.9" font-family="Times,serif" font-size="17.00">Rodin/Variational/Sum.h</text>
 </g>
 <!-- Rodin/Variational.h&#45;&gt;Rodin/Variational/Sum.h -->
 <g id="edge59" class="edge">
@@ -1254,7 +1254,7 @@
 <g id="node105" class="node">
 <title>Rodin/Variational/VectorFunction.h</title>
 <ellipse fill="#e6f598" stroke="black" cx="12043" cy="-4032" rx="108" ry="108"/>
-<text text-anchor="middle" x="12043" y="-4027.6" font-family="Times,serif" font-size="18.00">Rodin/Variational/VectorFunction.h</text>
+<text text-anchor="middle" x="12043" y="-4027.9" font-family="Times,serif" font-size="17.00">Rodin/Variational/VectorFunction.h</text>
 </g>
 <!-- Rodin/Variational.h&#45;&gt;Rodin/Variational/VectorFunction.h -->
 <g id="edge104" class="edge">
@@ -1626,7 +1626,7 @@
 <g id="node136" class="node">
 <title>Rodin/Heart/CCMLC2014.h</title>
 <ellipse fill="#ffffbf" stroke="black" cx="8373" cy="-6804" rx="144" ry="144"/>
-<text text-anchor="middle" x="8373" y="-6797.8" font-family="Times,serif" font-size="24.00">Rodin/Heart/CCMLC2014.h</text>
+<text text-anchor="middle" x="8373" y="-6798.1" font-family="Times,serif" font-size="23.00">Rodin/Heart/CCMLC2014.h</text>
 </g>
 <!-- Rodin/Heart.h&#45;&gt;Rodin/Heart/CCMLC2014.h -->
 <g id="edge135" class="edge">
@@ -2579,7 +2579,7 @@
 <!-- Rodin/IO/MEDIT.h -->
 <g id="node206" class="node">
 <title>Rodin/IO/MEDIT.h</title>
-<ellipse fill="#abdda4" stroke="black" cx="5714" cy="-2232" rx="108" ry="108"/>
+<ellipse fill="#e6f598" stroke="black" cx="5714" cy="-2232" rx="108" ry="108"/>
 <text text-anchor="middle" x="5714" y="-2228.5" font-family="Times,serif" font-size="15.00">Rodin/IO/MEDIT.h</text>
 </g>
 <!-- Rodin/Variational/GridFunction.h&#45;&gt;Rodin/IO/MEDIT.h -->
@@ -4206,7 +4206,7 @@
 <g id="node246" class="node">
 <title>Rodin/Variational/H1/Jacobian.h</title>
 <ellipse fill="#e6f598" stroke="black" cx="11619" cy="-4032" rx="108" ry="108"/>
-<text text-anchor="middle" x="11619" y="-4027.6" font-family="Times,serif" font-size="18.00">Rodin/Variational/H1/Jacobian.h</text>
+<text text-anchor="middle" x="11619" y="-4027.9" font-family="Times,serif" font-size="17.00">Rodin/Variational/H1/Jacobian.h</text>
 </g>
 <!-- Rodin/Variational/H1.h&#45;&gt;Rodin/Variational/H1/Jacobian.h -->
 <g id="edge524" class="edge">
@@ -5892,7 +5892,7 @@
 <g id="node187" class="node">
 <title>Rodin/MPI/Assembly/MPI.h</title>
 <ellipse fill="#ffffbf" stroke="black" cx="9647" cy="-5328" rx="144" ry="144"/>
-<text text-anchor="middle" x="9647" y="-5322.4" font-family="Times,serif" font-size="22.00">Rodin/MPI/Assembly/MPI.h</text>
+<text text-anchor="middle" x="9647" y="-5322.7" font-family="Times,serif" font-size="21.00">Rodin/MPI/Assembly/MPI.h</text>
 </g>
 <!-- Rodin/MPI/Assembly.h&#45;&gt;Rodin/MPI/Assembly/MPI.h -->
 <g id="edge214" class="edge">
@@ -10464,7 +10464,7 @@
 <g id="node365" class="node">
 <title>Rodin/Variational/RelativeError.h</title>
 <ellipse fill="#fee08b" stroke="black" cx="10367" cy="-6804" rx="144" ry="144"/>
-<text text-anchor="middle" x="10367" y="-6797.4" font-family="Times,serif" font-size="27.00">Rodin/Variational/RelativeError.h</text>
+<text text-anchor="middle" x="10367" y="-6797.7" font-family="Times,serif" font-size="26.00">Rodin/Variational/RelativeError.h</text>
 </g>
 <!-- Rodin/Variational/RelativeError.h&#45;&gt;Rodin/Assembly.h -->
 <g id="edge1272" class="edge">
