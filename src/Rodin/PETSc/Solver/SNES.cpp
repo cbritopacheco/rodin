@@ -1,4 +1,6 @@
 #include <cassert>
+#include <petscmat.h>
+#include <petscvec.h>
 #include <utility>
 #include <petsc.h>
 #include <petscsnes.h>
@@ -78,13 +80,15 @@ namespace Rodin::Solver
 
   SNES& SNES::setStateUpdate(StateUpdate update)
   {
-    m_stateUpdate = std::move(update);
+    m_update = std::move(update);
     return *this;
   }
 
   void SNES::solve()
   {
-    auto& x = this->getProblem().getLinearSystem().getSolution();
+    auto& problem = this->getProblem();
+    auto& system = problem.getLinearSystem();
+    auto& x = system.getSolution();
     solve(x);
   }
 
@@ -115,22 +119,56 @@ namespace Rodin::Solver
     return reason > 0;
   }
 
+  PetscErrorCode SNES::Update(::Vec x, void* ctx)
+  {
+    auto* self = static_cast<SNES*>(ctx);
+    assert(self);
+    PetscObjectState state;
+    PetscErrorCode ierr = VecGetState(x, &state);
+    if (ierr)
+      return ierr;
+    if (self->m_updated && *self->m_updated == state)
+      return PETSC_SUCCESS;
+    if (self->m_update)
+      self->m_update(x);
+    self->m_updated = state;
+    self->m_assembled.reset();
+    return PETSC_SUCCESS;
+  }
+
+  PetscErrorCode SNES::Assemble(::Vec x, void* ctx)
+  {
+    auto* self = static_cast<SNES*>(ctx);
+    assert(self);
+    PetscErrorCode ierr = Update(x, ctx);
+    if (ierr)
+      return ierr;
+    PetscObjectState state;
+    ierr = VecGetState(x, &state);
+    if (ierr)
+      return ierr;
+    if (self->m_assembled && *self->m_assembled == state)
+      return PETSC_SUCCESS;
+    auto& problem = self->getProblem();
+    problem.assemble();
+    self->m_assembled = state;
+    return PETSC_SUCCESS;
+  }
+
   PetscErrorCode SNES::Residual(::SNES, ::Vec x, ::Vec f, void* ctx)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
-
-    auto& system = self->getProblem().getLinearSystem();
-    if (self->m_stateUpdate)
-      self->m_stateUpdate(x);
-    self->getProblem().assemble();
-
-    PetscErrorCode ierr = VecCopy(system.getVector(), f);
-    assert(ierr == PETSC_SUCCESS);
-    if (ierr != PETSC_SUCCESS)
+    PetscErrorCode ierr = Assemble(x, ctx);
+    if (ierr)
+      return ierr;
+    auto& problem = self->getProblem();
+    auto& system = problem.getLinearSystem();
+    auto& b = system.getVector();
+    ierr = VecCopy(b, f);
+    if (ierr)
       return ierr;
     ierr = VecScale(f, -1.0);
-    assert(ierr == PETSC_SUCCESS);
     return ierr;
   }
 
@@ -139,34 +177,37 @@ namespace Rodin::Solver
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
 
-    auto& system = self->getProblem().getLinearSystem();
-    if (self->m_stateUpdate)
-      self->m_stateUpdate(x);
-    self->getProblem().assemble();
+    PetscErrorCode ierr = Assemble(x, ctx);
+    if (ierr)
+      return ierr;
 
-    const auto& assembledJ = system.getOperator();
-    PetscErrorCode ierr = PETSC_SUCCESS;
-    // PETSc may pass callback workspace matrices distinct from the problem-managed
-    // operator; copy assembled data when handles differ.
-    if (J != assembledJ)
+    auto& problem = self->getProblem();
+    auto& system = problem.getLinearSystem();
+    const auto& A = system.getOperator();
+
+    if (J != A)
     {
-      ierr = MatCopy(assembledJ, J, DIFFERENT_NONZERO_PATTERN);
-      assert(ierr == PETSC_SUCCESS);
+      ierr = MatCopy(A, J, DIFFERENT_NONZERO_PATTERN);
+      if (ierr)
+        return ierr;
     }
 
-    // Keep preconditioner matrix synchronized as well when PETSc uses a
-    // separate handle for P.
-    if (P && P != J && P != assembledJ)
+    if (P && P != J && P != A)
     {
-      ierr = MatCopy(assembledJ, P, DIFFERENT_NONZERO_PATTERN);
-      assert(ierr == PETSC_SUCCESS);
+      ierr = MatCopy(A, P, DIFFERENT_NONZERO_PATTERN);
+      if (ierr)
+        return ierr;
     }
-    return ierr;
+
+    return PETSC_SUCCESS;
   }
 
   void SNES::solve(VectorType& x)
   {
     PetscErrorCode ierr;
+
+    m_updated.reset();
+    m_assembled.reset();
 
     ierr = SNESSetType(m_snes, m_type);
     assert(ierr == PETSC_SUCCESS);
@@ -180,9 +221,11 @@ namespace Rodin::Solver
     ierr = SNESSolve(m_snes, PETSC_NULLPTR, x);
     assert(ierr == PETSC_SUCCESS);
 
-    if (m_stateUpdate)
-      m_stateUpdate(x);
-    (void) ierr;
+    ierr = Update(x, this);
+    assert(ierr == PETSC_SUCCESS);
+
+    // State is synchronized, but no assembled system should be trusted after solve.
+    m_assembled.reset();
   }
 
   ::SNES& SNES::getHandle() noexcept
