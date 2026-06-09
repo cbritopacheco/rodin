@@ -940,7 +940,8 @@ bool CoupledLV0DCoronary3D::solve3D() {
   m_subProjection.assemble();
   m_subProjectionSolver.solve();
 
-  if (m_cfg.flowMode == FlowMode::Newton) {
+  if (m_cfg.flowMode == FlowMode::Newton)
+  {
     m_flow =
         /*
          * =========================
@@ -973,14 +974,14 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *   2 mu D(du) : D(v)
          * + 2 dmu[du] D(uState) : D(v)
          */
-        + 2.0 * Integral(mu * symDU, symV) +
-        2.0 * Integral(dmu * symU, symV)
+        + 2.0 * Integral(mu * symDU, symV)
+        + 2.0 * Integral(dmu * symU, symV)
 
         /*
          * Stokes pressure/divergence block.
          */
-        - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) +
-        m_cfg.eps * Integral(m_p, m_q)
+        - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q)
+        + m_cfg.eps * Integral(m_p, m_q)
 
         /*
          * Inlet normal impedance tangent.
@@ -1072,17 +1073,17 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *
          * Must use uState, not m_u.
          */
-        //+ m_cfg.inletImpedance *
-        //    BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
-        //      .over(m_cfg.inlet)
+        + m_cfg.inletImpedance *
+            BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
+              .over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping residual.
          *
          * Must use uStateTangential, not duTangential.
          */
-        // + m_cfg.inletTangentialDamping *
-        //     BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
+        + m_cfg.inletTangentialDamping *
+            BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Outlet pressure Neumann residuals.

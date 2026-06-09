@@ -154,12 +154,12 @@ public:
     Real distalLength = 0.0025;
     /// @brief Array with radius and large for each branch
     std::unordered_map<Attribute, GeoArtery> geometricParam{
-        {7,  {6.e-4,  0.0125, 3e-4, 0.0025}},
-        {8,  {4.e-4,  0.01,  2e-4, 0.0025 }},
-        {9,  {4.e-4,  0.01,  2e-4, 0.0025 }},
-        {10, {4.e-4,  0.01,  2e-4, 0.0025 }},
-        {14, {6.e-4,  0.0125, 3e-4, 0.0025}},
-        {15, {6.e-4,  0.0125, 3e-4, 0.0025}},
+        {4,  {6.e-4,  0.0125, 3e-4, 0.0025}},
+        {5,  {4.e-4,  0.01,  2e-4, 0.0025 }},
+        {6,  {4.e-4,  0.01,  2e-4, 0.0025 }},
+        {7, {4.e-4,  0.01,  2e-4, 0.0025 }},
+        {8, {6.e-4,  0.0125, 3e-4, 0.0025}},
+        {9, {6.e-4,  0.0125, 3e-4, 0.0025}},
     };
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
     Real pressureDropTolerance = 1.0e-12;
@@ -394,10 +394,10 @@ public:
     /// @brief No-slip wall boundary attribute.
     Attribute wall = 2;
     /// @brief Inlet boundary attribute.
-    Attribute inlet = 4;
+    Attribute inlet = 3;
 
     /// @brief Outlet boundary attributes, in the same order used by RCR data.
-    std::array<Attribute, 6> outlets{{7, 8, 9, 10, 14, 15}};
+    std::array<Attribute, 6> outlets{{ 4, 5, 6, 7, 8, 9 }};
 
     /// @brief Mesh coordinate scale applied after partitioning.
     Real meshScale = 1.0e-3;
