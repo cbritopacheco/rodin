@@ -186,8 +186,14 @@ namespace Rodin::Examples::Heart
     auto cellCount = m_mesh.getCellCount();
     auto vertexCount = m_mesh.getVertexCount();
     auto spaceDim = m_mesh.getSpaceDimension();
-    auto velocityDOFs = m_uh.getSize();
-    auto pressureDOFs = m_ph.getSize();
+    const auto velocityDOFs = m_uh.getSize();
+    const auto pressureDOFs = m_ph.getSize();
+    const auto displacementDOFs = m_dh.getSize();
+    const auto vmsDOFs = m_uph.getSize();
+    const auto tauDOFs = m_tauh.getSize();
+
+    // The monolithic flow system couples (u, p, d) in one matrix.
+    const auto monolithicDOFs = velocityDOFs + pressureDOFs + displacementDOFs;
 
     if (isRoot())
     {
@@ -199,8 +205,18 @@ namespace Rodin::Examples::Heart
                     << Alert::Raise;
 
       Alert::Info() << "---- Function spaces ----" << Alert::NewLine
-                    << "Velocity space has " << velocityDOFs << " DOFs."
-                    << Alert::NewLine << "Pressure space has " << pressureDOFs
+                    << "Velocity (H1^2 vector)     : " << velocityDOFs
+                    << " DOFs." << Alert::NewLine
+                    << "Pressure (H1^1 scalar)     : " << pressureDOFs
+                    << " DOFs." << Alert::NewLine
+                    << "Displacement (H1^1 vector) : " << displacementDOFs
+                    << " DOFs." << Alert::NewLine
+                    << "---- Monolithic flow system ----" << Alert::NewLine
+                    << "Total unknowns (u + p + d) : " << monolithicDOFs
+                    << Alert::NewLine << "Monolithic matrix size     : "
+                    << monolithicDOFs << " x " << monolithicDOFs << Alert::NewLine
+                    << "Auxiliary VMS space        : " << vmsDOFs << " DOFs."
+                    << Alert::NewLine << "Auxiliary tau space        : " << tauDOFs
                     << " DOFs." << Alert::Raise;
     }
   }
