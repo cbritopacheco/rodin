@@ -124,7 +124,7 @@ namespace Rodin::Solver
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
     PetscObjectState state;
-    PetscErrorCode ierr = VecGetState(x, &state);
+    PetscErrorCode ierr = PetscObjectStateGet(reinterpret_cast<PetscObject>(x), &state);
     if (ierr)
       return ierr;
     if (self->m_updated && *self->m_updated == state)
@@ -144,7 +144,7 @@ namespace Rodin::Solver
     if (ierr)
       return ierr;
     PetscObjectState state;
-    ierr = VecGetState(x, &state);
+    ierr = PetscObjectStateGet(reinterpret_cast<PetscObject>(x), &state);
     if (ierr)
       return ierr;
     if (self->m_assembled && *self->m_assembled == state)
