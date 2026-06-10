@@ -13,6 +13,7 @@
 
 #include <Rodin/Alert.h>
 #include <Rodin/Configure.h>
+#include <Rodin/Solid.h>
 #include <Rodin/Solver.h>
 
 #ifdef RODIN_USE_SCOTCH
@@ -1016,7 +1017,6 @@ namespace Rodin::Examples::Heart
     const Real rayleighAlpha = m_cfg.solidRayleighAlpha;
     const Real rayleighBeta = m_cfg.solidRayleighBeta;
 
-    const Real solidClampPenalty = m_cfg.solidClampPenalty;
     const Real inactivePenalty = m_cfg.inactivePenalty;
 
     // Weak FSI kinematic penalty:  gammaTilde (u - (d - dOld)/dt) on Gamma_fsi.
@@ -1071,6 +1071,19 @@ namespace Rodin::Examples::Heart
     const auto temamResidual = divU * Dot(uState, m_v);
 
     const auto oseenTemamJacobian = divTransport * Dot(m_u, m_v);
+
+    // ALE transport for the Newton fluid block: c = uState - w_mesh, with the
+    // lagged mesh velocity (mirroring the Oseen branch). Convection is then
+    // linearized fully with respect to the velocity correction m_u.
+    const auto transportState = uState - meshVelocity;
+    const auto newtonConvectionALE =
+        Mult(gradDU, transportState) + Mult(gradU, m_u);
+    const auto stateConvectionALE = Mult(gradU, transportState);
+    const auto divTransportState = divU -
+                                   (1.0 / m_cfg.dt) * Div(m_dOld) +
+                                   (1.0 / m_cfg.dt) * Div(m_dOldOld);
+    const auto temamJacobian2ALE = divTransportState * Dot(m_u, m_v);
+    const auto temamResidualALE = divTransportState * Dot(uState, m_v);
 
     const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
     const auto inletBeta = Max(Dot(m_uOld, normal), 0.0);
@@ -1205,82 +1218,50 @@ namespace Rodin::Examples::Heart
 
     if (m_cfg.flowMode == FlowMode::Newton)
     {
+      // Solid state and nonlinear NeoHookean operators, evaluated at the
+      // current displacement iterate dState.
+      const auto &dState = m_d.getSolution();
+      const auto symDState =
+          0.5 * (Jacobian(dState) + Transpose(Jacobian(dState)));
+
+      Rodin::Solid::NeoHookean solidLaw(lambdaS, muS);
+      Rodin::Solid::MaterialTangent solidTangent(solidLaw, m_d, m_w, dState);
+      Rodin::Solid::InternalForce solidInternal(solidLaw, m_w, dState);
+
       m_flow =
           /*
            * =========================
-           * Newton Jacobian / tangent
+           * Fluid Newton tangent (ALE Navier-Stokes over the fluid)
            * =========================
-           *
-           * Unknowns here are Newton corrections:
-           *   m_u : velocity correction
-           *   m_p : pressure correction
+           * Unknowns are Newton corrections m_u, m_p, m_d.
            */
+          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v).over(m_cfg.fluidVolume)
 
-          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
+          // ALE convection: rho ((c . grad) du + (du . grad) uState, v).
+          + m_cfg.rho *
+                Integral(Dot(newtonConvectionALE, m_v)).over(m_cfg.fluidVolume)
 
-          /*
-           * Newton linearization of convection:
-           *   rho ((du · grad) uState + (uState · grad) du, v)
-           *
-           * In your notation this is encoded by newtonConvection.
-           */
-          + m_cfg.rho * Integral(Dot(newtonConvection, m_v))
+          // Temam/skew correction tangent.
+          + 0.5 * m_cfg.rho * Integral(temamJacobian1).over(m_cfg.fluidVolume) +
+          0.5 * m_cfg.rho * Integral(temamJacobian2ALE).over(m_cfg.fluidVolume)
 
-          /*
-           * Temam/skew-symmetric convection correction tangent.
-           */
-          + 0.5 * m_cfg.rho * Integral(temamJacobian1) +
-          0.5 * m_cfg.rho * Integral(temamJacobian2)
+          // Nonlinear Carreau-Yasuda viscous tangent.
+          + 2.0 * Integral(mu * symDU, symV).over(m_cfg.fluidVolume) +
+          2.0 * Integral(dmu * symU, symV).over(m_cfg.fluidVolume)
 
-          /*
-           * Nonlinear viscous tangent:
-           *   2 mu D(du) : D(v)
-           * + 2 dmu[du] D(uState) : D(v)
-           */
-          + 2.0 * Integral(mu * symDU, symV)
-          + 2.0 * Integral(dmu * symU, symV)
+          // Stokes pressure/divergence block.
+          - Integral(m_p, Div(m_v)).over(m_cfg.fluidVolume) +
+          Integral(Div(m_u), m_q).over(m_cfg.fluidVolume) +
+          m_cfg.eps * Integral(m_p, m_q).over(m_cfg.fluidVolume)
 
-          /*
-           * Stokes pressure/divergence block.
-           */
-          - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q)
-          + m_cfg.eps * Integral(m_p, m_q)
-
-          /*
-           * Inlet normal impedance tangent.
-           *
-           * Boundary pressure law:
-           *   p_inlet_boundary = pin + Z (u · n)
-           *
-           * Tangent:
-           *   Z (du · n) (v · n)
-           */
+          // Inlet impedance / tangential / backflow tangents (boundary).
           + m_cfg.inletImpedance *
                 BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
                     .over(m_cfg.inlet)
-
-          /*
-           * Inlet tangential damping tangent.
-           *
-           * Controls u_tau without directly prescribing normal inflow.
-           */
           + m_cfg.inletTangentialDamping *
                 BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
-
-          /*
-           * Backflow stabilization tangent.
-           *
-           * inletBeta activates when inlet behaves as an outlet:
-           *   uOld · n > 0
-           *
-           * outletBeta activates when outlet behaves as an inlet:
-           *   uOld · n < 0
-           *
-           * Since beta is lagged with m_uOld, the tangent is simply beta * du.
-           */
           +
           BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
-
           +
           BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
           BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
@@ -1291,106 +1272,135 @@ namespace Rodin::Examples::Heart
 
           /*
            * =========================
-           * Newton residual
+           * Fluid Newton residual (uses the state uState, pState)
            * =========================
-           *
-           * Everything below must use the current nonlinear state:
-           *   uState, pState
-           *
-           * Do not use m_u here, except inside DirichletBC correction terms.
            */
+          + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v).over(m_cfg.fluidVolume) -
+          (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v).over(m_cfg.fluidVolume)
 
-          + (m_cfg.rho / m_cfg.dt) * Integral(uState, m_v) -
-          (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+          + m_cfg.rho *
+                Integral(Dot(stateConvectionALE, m_v)).over(m_cfg.fluidVolume)
 
-          /*
-           * Convective residual:
-           *   rho ((uState · grad) uState, v)
-           */
-          + m_cfg.rho * Integral(Dot(stateConvection, m_v))
+          + 0.5 * m_cfg.rho * Integral(temamResidualALE).over(m_cfg.fluidVolume)
 
-          /*
-           * Temam/skew residual.
-           */
-          + 0.5 * m_cfg.rho * Integral(temamResidual)
+          + 2.0 * Integral(mu * symU, symV).over(m_cfg.fluidVolume)
 
-          /*
-           * Viscous residual:
-           *   2 mu(uState) D(uState) : D(v)
-           */
-          + 2.0 * Integral(mu * symU, symV)
+          - Integral(pState, Div(m_v)).over(m_cfg.fluidVolume) +
+          Integral(Div(uState), m_q).over(m_cfg.fluidVolume) +
+          m_cfg.eps * Integral(pState, m_q).over(m_cfg.fluidVolume)
 
-          /*
-           * Pressure/divergence residual.
-           */
-          - Integral(pState, Div(m_v)) + Integral(Div(uState), m_q) +
-          m_cfg.eps * Integral(pState, m_q)
-
-          /*
-           * Inlet pressure source.
-           */
           + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
-
-          /*
-           * Inlet normal impedance residual.
-           *
-           * Must use uState, not m_u.
-           */
           + m_cfg.inletImpedance *
-              BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
-                .over(m_cfg.inlet)
-
-          /*
-           * Inlet tangential damping residual.
-           *
-           * Must use uStateTangential, not duTangential.
-           */
+                BoundaryIntegral(Dot(Dot(uState, normal) * normal, m_v))
+                    .over(m_cfg.inlet)
           + m_cfg.inletTangentialDamping *
-              BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
+                BoundaryIntegral(Dot(uStateTangential, m_v)).over(m_cfg.inlet)
 
-          /*
-           * Outlet pressure Neumann residuals.
-           */
-          + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal))
-                .over(outlet0) +
-          BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal))
-              .over(outlet1) +
-          BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal))
-              .over(outlet2) +
-          BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal))
-              .over(outlet3) +
-          BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal))
-              .over(outlet4) +
-          BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
+          + BoundaryIntegral(outletPressure(outlet0) * Dot(m_v, normal)).over(outlet0) +
+          BoundaryIntegral(outletPressure(outlet1) * Dot(m_v, normal)).over(outlet1) +
+          BoundaryIntegral(outletPressure(outlet2) * Dot(m_v, normal)).over(outlet2) +
+          BoundaryIntegral(outletPressure(outlet3) * Dot(m_v, normal)).over(outlet3) +
+          BoundaryIntegral(outletPressure(outlet4) * Dot(m_v, normal)).over(outlet4) +
+          BoundaryIntegral(outletPressure(outlet5) * Dot(m_v, normal)).over(outlet5)
 
-          /*
-           * Backflow stabilization residual.
-           *
-           * Must use uState.
-           */
-          + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v))
-                .over(m_cfg.inlet)
-
-          + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-                .over(outlet0) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-              .over(outlet1) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-              .over(outlet2) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-              .over(outlet3) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-              .over(outlet4) +
+          + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v)).over(m_cfg.inlet)
+          + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet0) +
+          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet1) +
+          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet2) +
+          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet3) +
+          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet4) +
           BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet5)
 
           /*
-           * Variational elimination of wall Dirichlet condition.
-           *
-           * Since unknown is Newton correction, impose:
-           *   du = -uState
-           * on the wall.
+           * =========================
+           * Solid NeoHookean elastodynamics over the solid (Newton form)
+           * =========================
            */
-          + DirichletBC(m_u, -uState).on(m_cfg.wall);
+          // Inertia + Rayleigh damping tangent.
+          + (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(m_d, m_w).over(m_cfg.solidVolume)
+          + (rayleighAlpha * solidRho / m_cfg.dt) *
+                Integral(m_d, m_w).over(m_cfg.solidVolume)
+          + (rayleighBeta / m_cfg.dt) * lambdaS *
+                Integral(Div(m_d), Div(m_w)).over(m_cfg.solidVolume)
+          + (rayleighBeta / m_cfg.dt) * 2.0 * muS *
+                Integral(symD, symW).over(m_cfg.solidVolume)
+          // NeoHookean material tangent.
+          + solidTangent.over(m_cfg.solidVolume)
+
+          // Inertia + Rayleigh damping residual.
+          + (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(dState, m_w).over(m_cfg.solidVolume)
+          - 2.0 * (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+          + (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(m_dOldOld, m_w).over(m_cfg.solidVolume)
+          + (rayleighAlpha * solidRho / m_cfg.dt) *
+                Integral(dState, m_w).over(m_cfg.solidVolume)
+          - (rayleighAlpha * solidRho / m_cfg.dt) *
+                Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+          + (rayleighBeta / m_cfg.dt) * lambdaS *
+                Integral(Div(dState), Div(m_w)).over(m_cfg.solidVolume)
+          + (rayleighBeta / m_cfg.dt) * 2.0 * muS *
+                Integral(symDState, symW).over(m_cfg.solidVolume)
+          - (rayleighBeta / m_cfg.dt) * lambdaS *
+                Integral(Div(m_dOld), Div(m_w)).over(m_cfg.solidVolume)
+          - (rayleighBeta / m_cfg.dt) * 2.0 * muS *
+                Integral(symDOld, symW).over(m_cfg.solidVolume)
+          // NeoHookean internal force residual.
+          + solidInternal.over(m_cfg.solidVolume)
+
+          /*
+           * ALE harmonic extension of the displacement into the fluid.
+           */
+          + m_cfg.aleStiffness *
+                Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.fluidVolume)
+          + m_cfg.aleStiffness *
+                Integral(Jacobian(dState), Jacobian(m_w)).over(m_cfg.fluidVolume)
+
+          /*
+           * Weak FSI interface coupling on Gamma_fsi (no DirichletBC).
+           * Penalized kinematic constraint t = gammaTilde (u - (d - dOld)/dt),
+           * action on fluid (+t.v), reaction on solid (-t.w), Newton form.
+           */
+          // Fluid tangent.
+          + gammaTilde * InterfaceIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
+          - (gammaTilde / m_cfg.dt) * InterfaceIntegral(Dot(m_d, m_v)).over(m_cfg.fsi)
+          // Fluid residual.
+          + gammaTilde * InterfaceIntegral(Dot(uState, m_v)).over(m_cfg.fsi)
+          - (gammaTilde / m_cfg.dt) * InterfaceIntegral(Dot(dState, m_v)).over(m_cfg.fsi)
+          + (gammaTilde / m_cfg.dt) * InterfaceIntegral(Dot(m_dOld, m_v)).over(m_cfg.fsi)
+          // Solid reaction tangent.
+          - gammaTilde * InterfaceIntegral(Dot(m_u, m_w)).over(m_cfg.fsi)
+          + (gammaTilde / m_cfg.dt) * InterfaceIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
+          // Solid reaction residual.
+          - gammaTilde * InterfaceIntegral(Dot(uState, m_w)).over(m_cfg.fsi)
+          + (gammaTilde / m_cfg.dt) * InterfaceIntegral(Dot(dState, m_w)).over(m_cfg.fsi)
+          - (gammaTilde / m_cfg.dt) * InterfaceIntegral(Dot(m_dOld, m_w)).over(m_cfg.fsi)
+
+          /*
+           * Inactive-domain regularization for the fluid fields in the solid.
+           */
+          + inactivePenalty * Integral(m_u, m_v).over(m_cfg.solidVolume)
+          + inactivePenalty * Integral(uState, m_v).over(m_cfg.solidVolume)
+          + inactivePenalty * Integral(m_p, m_q).over(m_cfg.solidVolume)
+          + inactivePenalty * Integral(pState, m_q).over(m_cfg.solidVolume)
+
+          /*
+           * Solid ring clamps and fluid cap anchors as exact Dirichlet rows
+           * in Newton correction form: dd = -dState  =>  d + dd = 0.
+           *
+           * These replace the former 1e12 penalty terms, which dominated the
+           * matrix conditioning and set the achievable residual floor.
+           */
+          + DirichletBC(m_d, -dState)
+                .on(m_cfg.solidRings[0], m_cfg.solidRings[1],
+                    m_cfg.solidRings[2], m_cfg.solidRings[3],
+                    m_cfg.solidRings[4], m_cfg.solidRings[5])
+
+          + DirichletBC(m_d, -dState)
+                .on(m_cfg.inlet, outlet0, outlet1, outlet2, outlet3, outlet4,
+                    outlet5);
     }
     else
     {
@@ -1555,21 +1565,6 @@ namespace Rodin::Examples::Heart
                 Integral(m_dOldOld, m_w).over(m_cfg.solidVolume)
 
           /*
-           * Weak clamp of the solid rings (Dirichlet-by-penalty).
-           */
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[0])
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[1])
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[2])
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[3])
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[4])
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[5])
-
-          /*
            * Weak FSI interface coupling on Gamma_fsi (no DirichletBC).
            *
            * Penalized kinematic constraint with action-reaction, which also
@@ -1609,21 +1604,10 @@ namespace Rodin::Examples::Heart
            * ALE harmonic extension of the displacement into the fluid.
            *
            * On the fluid, d is the mesh-motion field: a vector-Laplacian
-           * extends the interface motion smoothly through the fluid, and the
-           * fixed fluid end caps (inlet, outlets) are weakly anchored to d = 0
-           * so the mesh does not slide there.
+           * extends the interface motion smoothly through the fluid.
            */
           + m_cfg.aleStiffness *
                 Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.fluidVolume)
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.inlet)
-
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet0)
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet1)
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet2)
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet3)
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet4)
-          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet5)
 
           /*
            * Inactive-domain algebraic regularization for the globally-defined
@@ -1631,7 +1615,22 @@ namespace Rodin::Examples::Heart
            */
           + inactivePenalty * Integral(m_u, m_v).over(m_cfg.solidVolume)
 
-          + inactivePenalty * Integral(m_p, m_q).over(m_cfg.solidVolume);
+          + inactivePenalty * Integral(m_p, m_q).over(m_cfg.solidVolume)
+
+          /*
+           * Solid ring clamps and fluid cap anchors as exact Dirichlet rows.
+           *
+           * These replace the former 1e12 penalty terms, which dominated the
+           * matrix conditioning and set the achievable residual floor.
+           */
+          + DirichletBC(m_d, Zero(m_mesh.getSpaceDimension()))
+                .on(m_cfg.solidRings[0], m_cfg.solidRings[1],
+                    m_cfg.solidRings[2], m_cfg.solidRings[3],
+                    m_cfg.solidRings[4], m_cfg.solidRings[5])
+
+          + DirichletBC(m_d, Zero(m_mesh.getSpaceDimension()))
+                .on(m_cfg.inlet, outlet0, outlet1, outlet2, outlet3, outlet4,
+                    outlet5);
     }
 
     m_stepTiming.setup3DForm = secondsSince(setup3DStart);
