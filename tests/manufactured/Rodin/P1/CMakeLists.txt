@@ -158,7 +158,7 @@ target_link_libraries(RodinManufacturedLinearElasticity3D
   Rodin::Solver
 )
 set(RodinManufacturedLinearElasticity3D_SLOW_TESTS
-  "*MixedComponents_Tetrahedron*")
+  "*MixedComponents*")
 gtest_discover_tests(RodinManufacturedLinearElasticity3D
   TEST_FILTER
     "-${RodinManufacturedLinearElasticity3D_SLOW_TESTS}"
@@ -183,6 +183,21 @@ target_link_libraries(RodinManufacturedP1HyperElasticity
   Rodin::Solid
 )
 gtest_discover_tests(RodinManufacturedP1HyperElasticity
+  PROPERTIES
+    LABELS manufactured
+)
+
+add_executable(RodinManufacturedDirichletBCIdentification
+  DirichletBCIdentification.cpp)
+target_link_libraries(RodinManufacturedDirichletBCIdentification
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solver
+)
+gtest_discover_tests(RodinManufacturedDirichletBCIdentification
   PROPERTIES
     LABELS manufactured
 )

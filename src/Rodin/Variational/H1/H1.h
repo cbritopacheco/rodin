@@ -403,6 +403,11 @@ namespace Rodin::Variational
             static thread_local const ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
             return s_element;
           }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static thread_local const ElementType s_element(Geometry::Polytope::Type::Pyramid);
+            return s_element;
+          }
           case Geometry::Polytope::Type::Wedge:
           {
             static thread_local const ElementType s_element(Geometry::Polytope::Type::Wedge);
@@ -721,6 +726,17 @@ namespace Rodin::Variational
               ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
               ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
               ElementType(Geometry::Polytope::Type::Tetrahedron, 3)
+            };
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            {
+              ElementType(Geometry::Polytope::Type::Pyramid, 0),
+              ElementType(Geometry::Polytope::Type::Pyramid, 1),
+              ElementType(Geometry::Polytope::Type::Pyramid, 2),
+              ElementType(Geometry::Polytope::Type::Pyramid, 3)
             };
             return s_elements[m_vdim];
           }

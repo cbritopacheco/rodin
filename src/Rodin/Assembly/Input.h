@@ -461,6 +461,54 @@ namespace Rodin::Assembly
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;  ///< Boundary attributes
   };
 
+  /**
+   * @brief Input data for identification-style Dirichlet BC assembly
+   *        (`u = A(v)`).
+   *
+   * Encapsulates the slave trial function @f$ u @f$, the right-hand-side
+   * shape-function expression @f$ A(v) @f$ (a @ref ShapeFunctionBase whose
+   * leaf is some master trial function), and the essential boundary
+   * attributes set.
+   *
+   * @tparam Scalar Scalar type
+   * @tparam Sol1 Solution type of the slave trial @f$ u @f$
+   * @tparam FES1 Finite element space of @f$ u @f$
+   * @tparam Derived2 CRTP-derived type of @f$ A(v) @f$
+   * @tparam FES2 Finite element space of @f$ v @f$
+   * @tparam Sp Shape function space type (Trial / Test) of @f$ A(v) @f$
+   */
+  template <class Scalar, class Sol1, class FES1,
+            class Derived2, class FES2,
+            Variational::ShapeFunctionSpaceType Sp>
+  class DirichletBCShapeFunctionAssemblyInput
+  {
+    public:
+      using OperandType = Variational::TrialFunction<Sol1, FES1>;
+      using ValueType   = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+      using DirichletBCType =
+        Variational::DirichletBC<OperandType, ValueType>;
+
+      DirichletBCShapeFunctionAssemblyInput(
+          const OperandType& u, const ValueType& v,
+          const FlatSet<Geometry::Attribute>& essBdr)
+        : m_u(u), m_v(v), m_essBdr(essBdr)
+      {}
+
+      const OperandType& getOperand() const { return m_u.get(); }
+
+      const ValueType& getShapeFunction() const { return m_v.get(); }
+
+      const FlatSet<Geometry::Attribute>& getEssentialBoundary() const
+      {
+        return m_essBdr.get();
+      }
+
+    private:
+      std::reference_wrapper<const OperandType> m_u;
+      std::reference_wrapper<const ValueType>   m_v;
+      std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
+  };
+
   template <class ... Ts>
   class ProblemAssemblyInput;
 

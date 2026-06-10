@@ -27,7 +27,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     void SetUp() override
     {
       const auto geom = GetParam();
-      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron || geom == Polytope::Type::Wedge)
+      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron || geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
       {
         m_mesh = Mesh().UniformGrid(geom, { NX, NY, NZ });
         m_mesh.scale(1.0 / (NX - 1));
@@ -230,6 +230,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge)
   );
 }

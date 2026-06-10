@@ -220,6 +220,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge
     )
   );
@@ -230,6 +231,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge
     )
   );

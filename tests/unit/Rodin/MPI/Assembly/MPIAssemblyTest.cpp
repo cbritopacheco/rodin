@@ -83,6 +83,18 @@ namespace
     }
     return sharder.gather(0);
   }
+
+  static const char* polytopeName(Polytope::Type type)
+  {
+    switch (type)
+    {
+      case Polytope::Type::Tetrahedron: return "Tetrahedron";
+      case Polytope::Type::Hexahedron:  return "Hexahedron";
+      case Polytope::Type::Pyramid:     return "Pyramid";
+      case Polytope::Type::Wedge:       return "Wedge";
+      default:                          return "Other";
+    }
+  }
 }
 
 namespace Rodin::Tests::Unit
@@ -193,7 +205,7 @@ namespace Rodin::Tests::Unit
     dbc.assemble();
 
     // At least globally some DOFs must be fixed on the boundary
-    const size_t localFixed = dbc.getDOFs().size();
+    const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
     size_t globalFixed = 0;
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
@@ -220,7 +232,7 @@ namespace Rodin::Tests::Unit
     TrialFunction uMPI(mpiFes);
     DirichletBC dbcMPI(uMPI, RealFunction(1.0));
     dbcMPI.assemble();
-    const size_t mpiFixed = dbcMPI.getDOFs().size();
+    const size_t mpiFixed = std::get<IndexMap<Real>>(dbcMPI.getDOFs()).size();
 
     // Sequential reference
     auto localMesh = makeShardableMesh(Polytope::Type::Triangle, { 4, 4 });
@@ -228,7 +240,7 @@ namespace Rodin::Tests::Unit
     TrialFunction uSeq(seqFes);
     DirichletBC dbcSeq(uSeq, RealFunction(1.0));
     dbcSeq.assemble();
-    const size_t seqFixed = dbcSeq.getDOFs().size();
+    const size_t seqFixed = std::get<IndexMap<Real>>(dbcSeq.getDOFs()).size();
 
     EXPECT_EQ(mpiFixed, seqFixed);
   }
@@ -254,12 +266,13 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(gValue));
     dbc.assemble();
 
-    for (const auto& [local, value] : dbc.getDOFs())
+    for (const auto& [local, value]
+           : std::get<IndexMap<Real>>(dbc.getDOFs()))
       EXPECT_NEAR(value, gValue, 1e-12);
   }
 
   // =========================================================================
-  // All-geometry MPIIteration tests — Segment (1D), Tetrahedron/Hexahedron (3D)
+  // All-geometry MPIIteration tests — Segment (1D), all supported 3D cells
   // =========================================================================
 
   /**
@@ -320,43 +333,31 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief MPIIteration over a Tetrahedron mesh yields at least one cell.
+   * @brief MPIIteration over every supported 3D cell mesh yields cells.
    */
-  TEST(Assembly_MPI_Iteration, TetrahedronMesh_HasCells)
+  TEST(Assembly_MPI_Iteration, All3DMeshes_HaveCells)
   {
     const auto& world = *g_world;
     if (world.size() > 3)
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
+    {
+      SCOPED_TRACE(polytopeName(type));
+      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
 
-    size_t localCount = 0;
-    Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
-    for (auto it = iter.getIterator(); it; ++it)
-      ++localCount;
+      size_t localCount = 0;
+      Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
+      for (auto it = iter.getIterator(); it; ++it)
+        ++localCount;
 
-    EXPECT_GT(localCount, 0u);
-  }
-
-  /**
-   * @brief MPIIteration over a Hexahedron mesh yields at least one cell.
-   */
-  TEST(Assembly_MPI_Iteration, HexahedronMesh_HasCells)
-  {
-    const auto& world = *g_world;
-    if (world.size() > 3)
-      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
-
-    Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Hexahedron, { 3, 3, 3 });
-
-    size_t localCount = 0;
-    Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
-    for (auto it = iter.getIterator(); it; ++it)
-      ++localCount;
-
-    EXPECT_GT(localCount, 0u);
+      EXPECT_GT(localCount, 0u);
+    }
   }
 
   // =========================================================================
@@ -384,7 +385,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(gValue));
     dbc.assemble();
 
-    const size_t localFixed = dbc.getDOFs().size();
+    const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
     size_t globalFixed = 0;
     boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
@@ -393,65 +394,53 @@ namespace Rodin::Tests::Unit
       EXPECT_GT(globalFixed, 0u);
     }
 
-    for (const auto& [local, value] : dbc.getDOFs())
+    for (const auto& [local, value]
+           : std::get<IndexMap<Real>>(dbc.getDOFs()))
       EXPECT_NEAR(value, gValue, 1e-12);
   }
 
   /**
-   * @brief MPI DirichletBC assembly on Tetrahedron (3D) mesh: at least one
-   * boundary DOF found globally.
+   * @brief MPI DirichletBC assembly on every 3D cell fixes boundary DOFs.
    */
-  TEST(Assembly_MPI_DirichletBC, ConstantBC_NonEmpty_Tetrahedron)
+  TEST(Assembly_MPI_DirichletBC, ConstantBC_NonEmpty_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 3)
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, { 3, 3, 3 });
 
-    P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
-    TrialFunction u(fes);
-
-    DirichletBC dbc(u, RealFunction(1.0));
-    dbc.assemble();
-
-    const size_t localFixed = dbc.getDOFs().size();
-    size_t globalFixed = 0;
-    boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
-
-    if (world.rank() == 0)
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
     {
-      EXPECT_GT(globalFixed, 0u);
-    }
-  }
+      SCOPED_TRACE(polytopeName(type));
 
-  /**
-   * @brief MPI DirichletBC assembly on Hexahedron (3D) mesh: at least one
-   * boundary DOF found globally.
-   */
-  TEST(Assembly_MPI_DirichletBC, ConstantBC_NonEmpty_Hexahedron)
-  {
-    const auto& world = *g_world;
-    if (world.size() > 3)
-      GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
+      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
 
-    Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Hexahedron, { 3, 3, 3 });
+      P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
+      TrialFunction u(fes);
 
-    P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
-    TrialFunction u(fes);
+      DirichletBC dbc(u, RealFunction(1.0));
+      dbc.assemble();
 
-    DirichletBC dbc(u, RealFunction(1.0));
-    dbc.assemble();
+      const size_t localFixed =
+        std::get<IndexMap<Real>>(dbc.getDOFs()).size();
 
-    const size_t localFixed = dbc.getDOFs().size();
-    size_t globalFixed = 0;
-    boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
+      size_t globalFixed = 0;
+      boost::mpi::reduce(
+          world,
+          localFixed,
+          globalFixed,
+          std::plus<size_t>(),
+          0);
 
-    if (world.rank() == 0)
-    {
-      EXPECT_GT(globalFixed, 0u);
+      if (world.rank() == 0)
+      {
+        EXPECT_GT(globalFixed, 0u);
+      }
     }
   }
 }

@@ -105,6 +105,33 @@ namespace Rodin::Geometry
       {}
 
       /**
+       * @brief Copy constructor.
+       *
+       * The quadrature cache is intentionally rebuilt lazily because cached
+       * quadrature points store references to the mesh object that created
+       * them.
+       */
+      Mesh(const Mesh& other);
+
+      /**
+       * @brief Move constructor.
+       *
+       * The quadrature cache is intentionally not moved because cached
+       * quadrature points store references to the source mesh object.
+       */
+      Mesh(Mesh&& other);
+
+      /**
+       * @brief Copy assignment operator.
+       */
+      Mesh& operator=(const Mesh& other);
+
+      /**
+       * @brief Move assignment operator.
+       */
+      Mesh& operator=(Mesh&& other);
+
+      /**
        * @brief Returns the local mesh shard stored on the current MPI rank.
        *
        * The shard contains the local portion of the distributed mesh, including
@@ -843,6 +870,8 @@ namespace Rodin::Geometry
       Context::MPI m_context;
       /// Rank-local shard containing geometry, topology, and ownership metadata.
       Shard m_shard;
+      /// Mesh-level quadrature cache whose points are attached to this MPI mesh.
+      mutable PolytopeQuadratureIndex m_quadratures;
   };
 
   Mesh(const Context::MPI& context) -> Mesh<Context::MPI>;

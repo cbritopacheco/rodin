@@ -164,7 +164,7 @@ namespace Rodin::Tests::Unit
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
     QF::Centroid qf(Polytope::Type::Triangle);
-    IntegrationPoint ip(p, qf, 7);
+    IntegrationPoint ip(p, &qf, 7);
 
     RealFunction f(IntegrationPointRealCallable{});
 
@@ -179,7 +179,7 @@ namespace Rodin::Tests::Unit
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
     QF::Centroid qf(Polytope::Type::Triangle);
-    IntegrationPoint ip(p, qf, 8);
+    IntegrationPoint ip(p, &qf, 8);
 
     auto f = abs(-RealFunction(IntegrationPointRealCallable{})) + 1.0;
 

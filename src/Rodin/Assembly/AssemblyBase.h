@@ -191,6 +191,46 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief AssemblyBase specialization for the identification Dirichlet BC
+   *        `u = A(v)`.
+   *
+   * Output type encodes, for each slave DOF, the master DOF index array and
+   * the matching scalar coefficient vector.
+   */
+  template <class Scalar, class Sol1, class FES1,
+            class Derived2, class FES2,
+            Variational::ShapeFunctionSpaceType Sp>
+  class AssemblyBase<
+    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<
+      Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+    : public FormLanguage::Base
+  {
+    public:
+      using ScalarType = Scalar;
+
+      using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+
+      using InputType =
+        DirichletBCShapeFunctionAssemblyInput<Scalar, Sol1, FES1, Derived2, FES2, Sp>;
+
+      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+
+      AssemblyBase() = default;
+
+      AssemblyBase(const AssemblyBase&) = default;
+
+      AssemblyBase(AssemblyBase&&) = default;
+
+      virtual ~AssemblyBase() = default;
+
+      virtual void execute(OutputType& out, const InputType& data) const = 0;
+
+      virtual AssemblyBase* copy() const noexcept = 0;
+  };
+
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
     : public FormLanguage::Base

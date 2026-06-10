@@ -21,7 +21,7 @@ using namespace Rodin::Test::Random;
 
 
 /**
- * @brief Manufactured solutions for the 3D Poisson problem on Tetrahedron meshes.
+ * @brief Manufactured solutions for the 3D Poisson problem on supported 3D meshes.
  *
  * The system is given by:
  * @f[
@@ -45,12 +45,13 @@ using namespace Rodin::Test::Random;
 namespace Rodin::Tests::Manufactured::Poisson3D
 {
   template <size_t M>
-  class Manufactured_Poisson3D_Test : public ::testing::Test
+  class Manufactured_Poisson3D_Test
+    : public ::testing::TestWithParam<Polytope::Type>
   {
   protected:
     void SetUp() override
     {
-      m_mesh = Mesh().UniformGrid(Polytope::Type::Tetrahedron, {M, M, M});
+      m_mesh = Mesh().UniformGrid(GetParam(), {M, M, M});
       m_mesh.scale(1.0 / (M - 1));
       m_mesh.getConnectivity().compute(2, 3);
     }
@@ -82,7 +83,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
   using Manufactured_Poisson3D_Test_32 =
     Rodin::Tests::Manufactured::Poisson3D::Manufactured_Poisson3D_Test<32>;
 
-  TEST_F(Manufactured_Poisson3D_Test_16, MeshVolumeIsOne)
+  TEST_P(Manufactured_Poisson3D_Test_16, MeshVolumeIsOne)
   {
     const auto& mesh = this->getMesh();
     P1 vh(mesh);
@@ -94,7 +95,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     EXPECT_NEAR(vol, 1.0, 1e-12);
   }
 
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_P1ExactResidual)
+  TEST_P(Manufactured_Poisson3D_Test_8, Poisson3D_P1ExactResidual)
   {
     const auto& mesh = this->getMesh();
     P1 vh(mesh);
@@ -153,7 +154,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_16, Poisson3D_SimpleSine)
+  TEST_P(Manufactured_Poisson3D_Test_16, Poisson3D_SimpleSine)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -198,7 +199,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_Polynomial)
+  TEST_P(Manufactured_Poisson3D_Test_8, Poisson3D_Polynomial)
   {
     const auto& mesh = this->getMesh();
 
@@ -243,7 +244,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_16, Poisson3D_TrigonometricPolynomial)
+  TEST_P(Manufactured_Poisson3D_Test_16, Poisson3D_TrigonometricPolynomial)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -289,7 +290,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_16, Poisson3D_NonhomogeneousDirichlet)
+  TEST_P(Manufactured_Poisson3D_Test_16, Poisson3D_NonhomogeneousDirichlet)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -335,7 +336,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_32, Poisson3D_MixedBoundary)
+  TEST_P(Manufactured_Poisson3D_Test_32, Poisson3D_MixedBoundary)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -380,7 +381,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    *  g(x,y,z) = u(x,y,z)
    * @f]
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, Poisson3D_LinearNonhomogeneous)
+  TEST_P(Manufactured_Poisson3D_Test_8, Poisson3D_LinearNonhomogeneous)
   {
     const auto& mesh = this->getMesh();
     P1 vh(mesh);
@@ -427,7 +428,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_32, VectorPoisson3D_SimpleSine)
+  TEST_P(Manufactured_Poisson3D_Test_32, VectorPoisson3D_SimpleSine)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -492,7 +493,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_8, VectorPoisson3D_Polynomial)
+  TEST_P(Manufactured_Poisson3D_Test_8, VectorPoisson3D_Polynomial)
   {
     const auto& mesh = this->getMesh();
 
@@ -558,7 +559,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_16, VectorPoisson3D_TrigonometricPolynomial)
+  TEST_P(Manufactured_Poisson3D_Test_16, VectorPoisson3D_TrigonometricPolynomial)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -625,7 +626,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
    * @f]
    *
    */
-  TEST_F(Manufactured_Poisson3D_Test_32, VectorPoisson3D_NonhomogeneousDirichlet)
+  TEST_P(Manufactured_Poisson3D_Test_32, VectorPoisson3D_NonhomogeneousDirichlet)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -665,4 +666,34 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     Real error = Integral(diff).compute();
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Manufactured_Poisson3D_Test_8,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Manufactured_Poisson3D_Test_16,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
+
+  INSTANTIATE_TEST_SUITE_P(
+    PolytopeCoverage3D,
+    Manufactured_Poisson3D_Test_32,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge)
+  );
 }

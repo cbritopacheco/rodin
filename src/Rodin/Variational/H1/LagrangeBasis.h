@@ -239,7 +239,7 @@ namespace Rodin::Variational
         return result;
       }
 
-      // deriv_dim = 0 -> ∂/∂x, deriv_dim = 1 -> ∂/∂y
+      // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
       static constexpr
       Real getDerivative(size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
@@ -353,7 +353,7 @@ namespace Rodin::Variational
         return result;
       }
 
-      // deriv_dim = 0 -> ∂/∂x, 1 -> ∂/∂y, 2 -> ∂/∂z
+      // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
       static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)
@@ -485,7 +485,7 @@ namespace Rodin::Variational
         return Lix * Ljy;
       }
 
-      // deriv_dim = 0 -> ∂/∂x, deriv_dim = 1 -> ∂/∂y
+      // deriv_dim = 0 -> \partial/\partialx, deriv_dim = 1 -> \partial/\partialy
       static constexpr Real getDerivative(
           size_t i, size_t j, size_t deriv_dim, Real x, Real y)
       {
@@ -493,7 +493,7 @@ namespace Rodin::Variational
 
         if (deriv_dim == 0)
         {
-          // ∂/∂x L_i(x) * L_j(y)
+          // \partial/\partialx L_i(x) * L_j(y)
           // dL_i/dx
           const Real xi = nodes[i];
           Real dLix = 0;
@@ -534,7 +534,7 @@ namespace Rodin::Variational
         }
         else
         {
-          // ∂/∂y L_i(x) * dL_j/dy
+          // \partial/\partialy L_i(x) * dL_j/dy
           // L_i(x)
           Real Lix = 1;
           const Real xi = nodes[i];
@@ -643,7 +643,7 @@ namespace Rodin::Variational
         return tri_val * seg_val;
       }
 
-      // deriv_dim = 0 -> ∂/∂x, 1 -> ∂/∂y, 2 -> ∂/∂z
+      // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
       static constexpr Real getDerivative(
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)

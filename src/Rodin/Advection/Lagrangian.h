@@ -167,7 +167,8 @@ namespace Rodin::Advection
         Geometry::Point qface(cell, r, x);
         const auto JinvT = qface.getJacobianInverse().transpose();
 
-        Math::SpatialVector<Real> nu = JinvT * nref; // unnormalized physical normal
+        Math::SpatialMatrix<Real> JinvT_nref = (JinvT * nref);
+        Math::SpatialVector<Real> nu = (JinvT * nref).col(0); // unnormalized physical normal
         Real nn = nu.dot(nu);
         if (!(nn > Real(0)) || !std::isfinite(nn))
         {
@@ -179,7 +180,7 @@ namespace Rodin::Advection
         Math::SpatialVector<Real> nhat = nu / std::sqrt(nn);
 
         // Orient nhat so the cell centroid is on the "interior" side:
-        // interior condition: (nhat·x_face - nhat·x_centroid) >= 0
+        // interior condition: (nhat\cdotx_face - nhat\cdotx_centroid) >= 0
         const auto& rcent = ts.getCentroid();
         Math::SpatialPoint xc;
         mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
@@ -317,7 +318,7 @@ namespace Rodin::Advection
         Math::SpatialPoint x_hit;
         mesh.getPolytopeTransformation(cd, c).transform(x_hit, r);
 
-        // ---- (3) outward unit normal on ∂D in physical space
+        // ---- (3) outward unit normal on \partialD in physical space
         const auto nref = hs.matrix.row(j).transpose();
 
         const auto itc   = mesh.getPolytope(cd, c);
@@ -326,7 +327,7 @@ namespace Rodin::Advection
         Geometry::Point q_hit(cell, r, x_hit);
         const auto JinvT = q_hit.getJacobianInverse().transpose();
 
-        Math::SpatialVector<Real> nu = JinvT * nref; // unnormalized physical normal
+        Math::SpatialVector<Real> nu = (JinvT * nref).col(0); // unnormalized physical normal
         const Real nn = nu.dot(nu);
         if (!(nn > Real(0)) || !std::isfinite(nn))
         {
@@ -337,7 +338,7 @@ namespace Rodin::Advection
 
         Math::SpatialVector<Real> nD = nu / std::sqrt(nn);
 
-        // orient nD so centroid is interior: (nD·x_face - nD·x_centroid) >= 0
+        // orient nD so centroid is interior: (nD\cdotx_face - nD\cdotx_centroid) >= 0
         const auto rcent = ts.getCentroid();
         Math::SpatialPoint xc;
         mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
@@ -360,7 +361,7 @@ namespace Rodin::Advection
         //
         // We will evaluate phi at the nudged point x_new (since we set hit.rref to it).
         // To approximate the *unshifted* hit value, use:
-        //   phi(x_hit) ≈ phi(x_new) + gradphi · (x_hit - x_new)
+        //   phi(x_hit) ≈ phi(x_new) + gradphi \cdot (x_hit - x_new)
         const auto gphi = Variational::Grad(m_phi.get()).getValue(q_hit);
 
         // dx = x_hit - x_new  (NOTE THE SIGN)

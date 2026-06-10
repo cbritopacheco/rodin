@@ -130,7 +130,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a divergence-free field: (-y, x)
-    // div(u) = ∂(-y)/∂x + ∂(x)/∂y = 0 + 0 = 0
+    // div(u) = \partial(-y)/\partialx + \partial(x)/\partialy = 0 + 0 = 0
     VectorFunction divergence_free{
       [](const Geometry::Point& p) { return -p.y(); },
       [](const Geometry::Point& p) { return p.x(); }
@@ -172,7 +172,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a quadratic vector field: (x^2, y^2)
-    // div(u) = ∂(x^2)/∂x + ∂(y^2)/∂y = 2x + 2y
+    // div(u) = \partial(x^2)/\partialx + \partial(y^2)/\partialy = 2x + 2y
     VectorFunction quadratic_func{
       [](const Geometry::Point& p) { return p.x() * p.x(); },
       [](const Geometry::Point& p) { return p.y() * p.y(); }
@@ -218,7 +218,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a quadratic vector field: (x^2 - y^2, 2xy)
-    // div(u) = ∂(x^2 - y^2)/∂x + ∂(2xy)/∂y = 2x + 2x = 4x
+    // div(u) = \partial(x^2 - y^2)/\partialx + \partial(2xy)/\partialy = 2x + 2x = 4x
     VectorFunction quadratic_func{
       [](const Geometry::Point& p) { return p.x() * p.x() - p.y() * p.y(); },
       [](const Geometry::Point& p) { return 2.0 * p.x() * p.y(); }
@@ -263,7 +263,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a linear vector field: (2x + y, x - y)
-    // div(u) = ∂(2x + y)/∂x + ∂(x - y)/∂y = 2 + (-1) = 1
+    // div(u) = \partial(2x + y)/\partialx + \partial(x - y)/\partialy = 2 + (-1) = 1
     VectorFunction linear_func{
       [](const Geometry::Point& p) { return 2.0 * p.x() + p.y(); },
       [](const Geometry::Point& p) { return p.x() - p.y(); }
@@ -374,7 +374,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // ∫ div(u) * div(v) dx - part of mixed elasticity formulations
+    // \int div(u) * div(v) dx - part of mixed elasticity formulations
     bf = Integral(Div(u), Div(v));
 
     EXPECT_FALSE(bf.getLocalIntegrators().empty());
@@ -467,7 +467,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(fes);
 
     // Project a quartic vector field: u = (x^4 + x^2*y, y^4 + xy^2)
-    // div(u) = ∂(x^4 + x^2*y)/∂x + ∂(y^4 + xy^2)/∂y
+    // div(u) = \partial(x^4 + x^2*y)/\partialx + \partial(y^4 + xy^2)/\partialy
     //        = 4x^3 + 2xy + 4y^3 + 2xy
     //        = 4x^3 + 4y^3 + 4xy
     auto quartic_lambda = [](const Geometry::Point& p) {

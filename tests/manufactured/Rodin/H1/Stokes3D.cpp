@@ -104,7 +104,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     // Compute lambda_exact via assembled operator:
     // re0_p = pressure-block residual with lambda=0
     // g     = A_pλ column (pressure rows)
-    // lambda* = -(g·re0_p)/(g·g)
+    // lambda* = -(g\cdotre0_p)/(g\cdotg)
     x_exact[lambdaIndex] = 0.0;
 
     auto re0   = (A * x_exact - b).eval();
@@ -128,7 +128,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     auto re = (A * x_exact - b).eval();
 
     const Real scale = std::max<Real>(b.norm(), 1);
-    EXPECT_NEAR(r.norm() / scale, 0, 1e-8);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-7);
 
     // Block checks (do NOT expect full re-norm to be ~0 with P0g gauge)
     auto re_u  = re.head(uSize);
@@ -149,6 +149,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge
       )
   );

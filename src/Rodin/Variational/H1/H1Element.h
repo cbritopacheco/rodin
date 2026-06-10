@@ -97,7 +97,7 @@ namespace Rodin::Variational
    *   - Triangle: (K+1)(K+2)/2
    *   - Quadrilateral: (K+1)²
    *   - Tetrahedron: (K+1)(K+2)(K+3)/6
-   *   - Wedge: (K+1)·(K+1)(K+2)/2
+   *   - Wedge: (K+1)\cdot(K+1)(K+2)/2
    * - **Basis functions**: Lagrange polynomials of degree K satisfying the Lagrange property:
    *   @f$ \phi_i(x_j) = \delta_{ij} @f$ where @f$ x_j @f$ are the Lagrange nodes
    * - **Gradient**: Polynomial of degree K-1
@@ -474,6 +474,101 @@ namespace Rodin::Variational
             return s_nodes;
           }
 
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              constexpr size_t count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
+
+              auto offset = [](size_t layer)
+              {
+                size_t out = 0;
+                for (size_t k = 0; k < layer; ++k)
+                {
+                  const size_t n = K - k + 1;
+                  out += n * n;
+                }
+                return out;
+              };
+
+              auto idx = [&](size_t i, size_t j, size_t k)
+              {
+                const size_t n = K - k + 1;
+                return offset(k) + j * n + i;
+              };
+
+              auto triLattice = [](size_t alpha)
+              {
+                struct IJ { size_t i, j; };
+                size_t pos = 0;
+                for (size_t j = 0; j <= K; ++j)
+                {
+                  for (size_t i = 0; i <= K - j; ++i, ++pos)
+                  {
+                    if (pos == alpha)
+                      return IJ{ i, j };
+                  }
+                }
+                return IJ{ 0, 0 };
+              };
+
+              std::vector<Math::SpatialPoint> nodes(count);
+              std::vector<char> assigned(count, 0);
+              const auto& xi = GLL01<K>::getNodes();
+              const auto& tri = FeketeTriangle<K>::getNodes();
+
+              auto set = [&](size_t node, Real x, Real y, Real z)
+              {
+                nodes[node] = Math::SpatialPoint{{ x, y, z }};
+                assigned[node] = 1;
+              };
+
+              for (size_t j = 0; j <= K; ++j)
+              {
+                for (size_t i = 0; i <= K; ++i)
+                  set(idx(i, j, 0), xi[i], xi[j], Real(0));
+              }
+
+              for (size_t alpha = 0; alpha < tri.size(); ++alpha)
+              {
+                const auto ij = triLattice(alpha);
+                const size_t i = ij.i;
+                const size_t k = ij.j;
+                const size_t n = K - k;
+                const Real u = tri[alpha].x();
+                const Real v = tri[alpha].y();
+
+                set(idx(i, 0, k), u, Real(0), v);
+                set(idx(n, i, k), Real(1) - v, u, v);
+                set(idx(n - i, n, k), Real(1) - u - v, Real(1) - v, v);
+                set(idx(0, n - i, k), Real(0), Real(1) - u - v, v);
+              }
+
+              for (size_t k = 1; k < K; ++k)
+              {
+                const size_t n = K - k;
+                const Real z = static_cast<Real>(k) / static_cast<Real>(K);
+                const Real q = Real(1) - z;
+                for (size_t j = 1; j < n; ++j)
+                {
+                  for (size_t i = 1; i < n; ++i)
+                  {
+                    const size_t node = idx(i, j, k);
+                    if (!assigned[node])
+                    {
+                      set(node,
+                          q * static_cast<Real>(i) / static_cast<Real>(n),
+                          q * static_cast<Real>(j) / static_cast<Real>(n),
+                          z);
+                    }
+                  }
+                }
+              }
+
+              return nodes;
+            }();
+            return s_nodes;
+          }
+
           case Geometry::Polytope::Type::Hexahedron:
           {
             static const std::vector<Math::SpatialPoint> s_nodes = [] {
@@ -589,7 +684,7 @@ namespace Rodin::Variational
        * - Triangle: (K+1)(K+2)/2
        * - Quadrilateral: (K+1)²
        * - Tetrahedron: (K+1)(K+2)(K+3)/6
-       * - Wedge: (K+1)·(K+1)(K+2)/2
+       * - Wedge: (K+1)\cdot(K+1)(K+2)/2
        *
        * @return Number of degrees of freedom
        */
@@ -608,6 +703,8 @@ namespace Rodin::Variational
             return (K + 1) * (K + 1);
           case Geometry::Polytope::Type::Tetrahedron:
             return (K + 1) * (K + 2) * (K + 3) / 6;
+          case Geometry::Polytope::Type::Pyramid:
+            return (K + 1) * (K + 2) * (2 * K + 3) / 6;
           case Geometry::Polytope::Type::Wedge:
             return (K + 1) * (K + 1) * (K + 2) / 2;
           case Geometry::Polytope::Type::Hexahedron:
@@ -665,6 +762,7 @@ namespace Rodin::Variational
 
           case G::Quadrilateral:
           case G::Wedge:
+          case G::Pyramid:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
 
@@ -996,6 +1094,8 @@ namespace Rodin::Variational
             return m_vdim * ((K + 1) * (K + 1));
           case Geometry::Polytope::Type::Tetrahedron:
             return m_vdim * ((K + 1) * (K + 2) * (K + 3) / 6);
+          case Geometry::Polytope::Type::Pyramid:
+            return m_vdim * ((K + 1) * (K + 2) * (2 * K + 3) / 6);
           case Geometry::Polytope::Type::Wedge:
             return m_vdim * ((K + 1) * (K + 1) * (K + 2) / 2);
           case Geometry::Polytope::Type::Hexahedron:
@@ -1040,6 +1140,7 @@ namespace Rodin::Variational
 
           case G::Quadrilateral:
           case G::Wedge:
+          case G::Pyramid:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
 

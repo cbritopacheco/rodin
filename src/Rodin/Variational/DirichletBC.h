@@ -6,43 +6,219 @@
  */
 /**
  * @file DirichletBC.h
- * @brief Dirichlet boundary condition implementation.
+ * @brief Essential (Dirichlet) boundary conditions, in two flavours.
  *
- * This file defines classes for imposing Dirichlet (essential) boundary
- * conditions in finite element problems. Dirichlet conditions prescribe the
- * solution values on specified boundaries.
+ * Rodin's @ref DirichletBC encodes a strongly-imposed essential constraint on
+ * a slave trial function @f$ u\in V_h^u @f$ over selected codimension-one
+ * mesh facets. With no `.on(...)` selector, this means the exterior boundary.
+ * With attributes, this also includes tagged interior facets such as FSI
+ * interfaces. Two flavours share
+ * the same template name and the same abstract base
+ * @ref Rodin::Variational::DirichletBCBase, separated only by the type of the
+ * second argument:
  *
- * ## Mathematical Foundation
- * A Dirichlet boundary condition specifies:
+ * 1. **Value-prescribing BC** — `DirichletBC(u, g)` with `g` a
+ *    @ref FunctionBase (scalar, vector, or matrix-valued):
+ *    @f[
+ *      u(x) \;=\; g(x), \qquad x \in \Gamma_D.
+ *    @f]
+ *    This is the classical inhomogeneous Dirichlet condition, including the
+ *    homogeneous case @f$ g\equiv 0 @f$.
+ *
+ * 2. **Identification BC** — `DirichletBC(u, A(v))` with `A(v)` a
+ *    @ref ShapeFunctionBase expression linear in another (trial) shape
+ *    function @f$ v\in V_h^v @f$:
+ *    @f[
+ *      u(x) \;=\; A(v)(x), \qquad x \in \Gamma_D,
+ *    @f]
+ *    where @f$ A @f$ is any operator producing a `ShapeFunctionBase`
+ *    (the identity, a component selection @f$ v_x @f$, a left product
+ *    @f$ f\,v @f$, a matrix product @f$ R\,v @f$, sums of these, etc.).
+ *    This is *algebraic identification* of the two unknowns' boundary DOFs:
+ *    both sides of the constraint involve degrees of freedom that are still
+ *    unknown at solve time, not pre-evaluated values.
+ *
+ *    The optional three-argument spelling `DirichletBC(u, A(v), d)` keeps the
+ *    same linear unknown-dependent part and adds a known defect:
+ *    @f[
+ *      u(x) \;=\; A(v)(x) + d(x), \qquad x \in \Gamma_D.
+ *    @f]
+ *    This is the form used for exact Newton correction rows such as
+ *    @f$ \delta u = A(\delta v) + d @f$.
+ *
+ * # Mathematical model
+ *
+ * Let @f$ V_h^u @f$ have basis @f$ \{\varphi_i^u\}_{i=1}^{N_u} @f$ and dual
+ * DOF functionals @f$ \{\ell_i^u\}_{i=1}^{N_u} @f$ satisfying
+ * @f$ \ell_i^u(\varphi_k^u) = \delta_{ik} @f$. Likewise for @f$ V_h^v @f$.
+ *
+ * The DOF functionals are FE-local: for Lagrange they are nodal point
+ * evaluations @f$ \ell_i^u(w) = w(x_i^u) @f$, for moment-based or
+ * non-nodal elements they are integrals or pairings against dual moments.
+ * Both flavours apply the same DOF functional on the slave side; they
+ * differ only in what they apply it to.
+ *
+ * **Value-prescribing.** For each slave DOF @f$ s @f$ on @f$ \Gamma_D @f$
  * @f[
- *   u = g \quad \text{on} \quad \Gamma_D
+ *   \ell_s^u(u) \;=\; \ell_s^u(g) \quad\Longleftrightarrow\quad u_s = g_s,
  * @f]
- * where @f$ u @f$ is the solution, @f$ g @f$ is the prescribed boundary value,
- * and @f$ \Gamma_D @f$ is a portion of the domain boundary.
+ * where @f$ g_s := \ell_s^u(g) @f$. The assembled object is a map
+ * @f$ s \mapsto g_s @f$ (the @ref Rodin::Variational::DirichletBCBase::ValueDOFs
+ * alternative).
  *
- * ## Implementation
- * Dirichlet conditions are typically enforced by:
- * 1. Identifying boundary degrees of freedom
- * 2. Setting their values to @f$ g @f$
- * 3. Modifying the system matrix and right-hand side
+ * **Identification.** For each slave DOF @f$ s @f$ on @f$ \Gamma_D @f$ and
+ * with @f$ A @f$ linear,
+ * @f[
+ *   \ell_s^u(u) \;=\; \ell_s^u(A(v)) + \ell_s^u(d)
+ *               \;=\; \sum_j \ell_s^u\!\bigl(A(\varphi_j^v)\bigr)\, v_j
+ *                    + d_s
+ *               \;=\; \sum_j C_{sj}\, v_j + d_s,
+ * @f]
+ * with the constraint coefficients
+ * @f[
+ *   C_{sj} \;:=\; \ell_s^u\!\bigl(A(\varphi_j^v)\bigr),
+ *   \qquad
+ *   d_s \;:=\; \ell_s^u(d).
+ * @f]
+ * The assembled object is a map @f$ s \mapsto (\{j_k\}, \{C_{s,j_k}\}) @f$
+ * over the non-zero coefficients (the
+ * @ref Rodin::Variational::DirichletBCBase::IdentifiedDOFs alternative), plus
+ * an optional defect map for the known @f$ d_s @f$ values. The two-argument
+ * spelling is exactly the homogeneous case @f$ d\equiv 0 @f$.
  *
- * ## Usage Example
- * ```cpp
- * // Homogeneous Dirichlet BC (u = 0 on boundary)
+ * For Lagrange + same FES + @f$ A=\mathrm{id} @f$: the dual property gives
+ * @f$ C_{sj}=\delta_{sj} @f$, so each slave maps to the same DOF index of
+ * @f$ v @f$ with coefficient one. For @f$ A(v)=R(x)\,v @f$ on a vector FES
+ * at a Lagrange node @f$ x_s @f$:
+ * @f$ C_{(s,\alpha),(s,\beta)} = R_{\alpha\beta}(x_s) @f$ — a multi-master
+ * row whose coefficients are exact entries of @f$ R @f$ at the slave node.
+ *
+ * # Exactness, by construction
+ *
+ * Slave/master DOF pairings are determined entirely by the selected face and
+ * the FES's own connectivity (`fes_u.getDOFs(faceDim, fi)` and
+ * `fes_v.getDOFs(faceDim, fi)`). There is no geometric search and no
+ * tolerance anywhere in the assembly — the FE's DOF-functional contract
+ * (`fe_u.getLinearForm(s)` applied to a callable
+ * `(Geometry::Point) -> value` through the slave-FES pullback) is the only
+ * machinery used. Coefficient pruning uses strict `c != 0` so that
+ * Lagrange-dual-induced sparsity is preserved bit-for-bit.
+ *
+ * The identification assembler constructs a pointwise
+ * @ref IntegrationPoint from each @ref Geometry::Point and passes it to
+ * @ref ShapeFunctionBase::setIntegrationPoint before querying
+ * @ref ShapeFunctionBase::getBasis. The pointwise integration point has
+ * `getQuadratureFormula() == nullptr`, which selects direct reference-point
+ * evaluation without inventing a single-point quadrature rule. During
+ * integration, @ref ShapeFunctionBase::setIntegrationPoint remains the
+ * preferred path with a non-null quadrature formula pointer and quadrature
+ * index so cached basis tabulations remain available.
+ *
+ * # Linear-system effect
+ *
+ * Problem assembly handles the two flavours differently by visiting the
+ * variant returned from @ref DirichletBCBase::getDOFs:
+ *
+ * - For @ref DirichletBCBase::ValueDOFs at slave global index @f$ g_s @f$:
+ *   @f[
+ *     A_{g_s,g_s} \leftarrow 1, \quad
+ *     A_{g_s,k}   \leftarrow 0 \;\forall k\neq g_s, \quad
+ *     b_{g_s}     \leftarrow g_s\text{ value},
+ *   @f]
+ *   with the column at @f$ g_s @f$ moved to the RHS as
+ *   @f$ b_{r} \mathrel{-}= A_{r,g_s}\cdot g_{s} @f$ before being zeroed
+ *   according to the current backend's classical essential-BC convention.
+ *
+ * - For @ref DirichletBCBase::IdentifiedDOFs at slave global index
+ *   @f$ g_s @f$ with masters @f$ \{g_{m_k}\} @f$ and coefficients
+ *   @f$ \{c_k\} @f$:
+ *   define an expansion map
+ *   @f[
+ *     \operatorname{expand}(i)=
+ *       \begin{cases}
+ *         \{(i,1)\}, & i \text{ unconstrained},\\
+ *         \{(g_{m_k},c_k)\}_k, & i=g_s.
+ *       \end{cases}
+ *   @f]
+ *   Every matrix entry @f$ A_{ij}\mathrel{+}=a @f$ is assembled as
+ *   @f[
+ *     A_{r,c}\mathrel{+}= \alpha_r\,a\,\alpha_c
+ *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i),\;
+ *          (c,\alpha_c)\in\operatorname{expand}(j),
+ *   @f]
+ *   and every vector entry @f$ b_i\mathrel{+}=f @f$ as
+ *   @f[
+ *     b_r\mathrel{+}= \alpha_r f
+ *     \quad\forall(r,\alpha_r)\in\operatorname{expand}(i).
+ *   @f]
+ *   For homogeneous identifications this is the variational transformation
+ *   @f[
+ *     A \leftarrow T^T A T,\qquad b \leftarrow T^T b.
+ *   @f]
+ *   For affine identifications @f$ x = T\hat{x}+\hat{d} @f$, the known
+ *   defect also shifts the RHS:
+ *   @f[
+ *     A \leftarrow T^T A T,\qquad
+ *     b \leftarrow T^T\!\left(b - A\hat{d}\right).
+ *   @f]
+ *   If slave DOFs remain in the unknown vector, reconstruction rows are then
+ *   written as
+ *   @f[
+ *     A_{g_s,g_s}\leftarrow 1,\quad
+ *     A_{g_s,g_{m_k}}\leftarrow -c_k,\quad
+ *     b_{g_s}\leftarrow d_{g_s}.
+ *   @f]
+ *
+ * Identification mode is not zero-pinning, not row-only replacement, and not
+ * merely slave-column redirection.  It is appropriate for tied fields,
+ * same-face linear identifications, periodic-like identifications, and
+ * monolithic FSI kinematic coupling where slave residuals/reactions must be
+ * transferred into the master equations.
+ *
+ * # Boundary specification
+ *
+ * `.on(attr)` (or `.on(attr1, attr2, ...)`) selects the subset
+ * @f$ \Gamma_D @f$ from the mesh's codimension-one attribute set. If no
+ * attributes are given, only exterior boundary faces are selected; if
+ * attributes are given, tagged interior interface faces are selected too.
+ * Both slave and master DOFs are read from the *same* face polytopes — the
+ * assembler never matches DOFs across distinct faces (no geometric pairing).
+ * For a
+ * cross-face periodic relation use @ref Rodin::Variational::PeriodicBC,
+ * which takes an explicit DOF adjacency map.
+ *
+ * # Usage examples
+ *
+ * @code{.cpp}
+ * // Homogeneous Dirichlet BC: u = 0 on boundary
  * auto bc = DirichletBC(u, Zero());
- * 
- * // Inhomogeneous Dirichlet BC
- * auto g = [](const Point& p) { return sin(p.x()); };
- * auto bc = DirichletBC(u, g).on(1);  // On boundary attribute 1
- * ```
+ *
+ * // Inhomogeneous Dirichlet BC on attribute 1
+ * RealFunction g = [](const Point& p) { return sin(p.x()); };
+ * auto bc = DirichletBC(u, g).on(1);
+ *
+ * // Identification: pin u on the boundary to v's DOFs
+ * auto bc = DirichletBC(u, v).on(1);
+ *
+ * // Identification: u = R(x) v on the boundary
+ * auto bc = DirichletBC(u, R * v).on(1);
+ *
+ * // Identification: scalar u equal to vector v's x-component
+ * auto bc = DirichletBC(u, v.x()).on(1);
+ *
+ * // Affine identification: u = A(v) + d
+ * auto bc = DirichletBC(u, R * v, d).on(1);
+ * @endcode
  */
 #ifndef RODIN_VARIATIONAL_DIRICHLETBC_H
 #define RODIN_VARIATIONAL_DIRICHLETBC_H
 
 #include <set>
+#include <memory>
 #include <variant>
 
 #include "Rodin/Utility.h"
+#include "Rodin/Math/Vector.h"
 #include "Rodin/FormLanguage/List.h"
 
 #include "Rodin/Assembly/ForwardDecls.h"
@@ -64,13 +240,36 @@ namespace Rodin::Variational
   /**
    * @brief Abstract base class for a Dirichlet boundary condition.
    *
-   * Used as a base class to represent the Dirichlet boundary condition:
+   * Encodes the essential constraint
    * @f[
-   *   \mathrm{Operand} = \mathrm{Value} \ \text{ on } \ \Gamma_D
+   *   \mathrm{Operand} \;=\; \mathrm{Value}
+   *   \quad\text{on}\quad
+   *   \Gamma_D \subset \mathcal{B}_h
    * @f]
-   * on some subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
+   * applied DOF-functional-wise: for each slave DOF @f$ s @f$ on
+   * @f$ \Gamma_D @f$ the assembled object encodes a row of the form
+   * @f[
+   *   \ell_s^u(\text{Operand}) \;=\; \ell_s^u(\text{Value}),
+   * @f]
+   * which @ref Problem / @ref ProblemBody enforce strongly when assembling
+   * the global linear system.
+   *
+   * The right-hand side of @f$ \ell_s^u(\text{Value}) @f$ has two
+   * representations, exposed through a discriminated union via
+   * @ref getDOFs:
+   *
+   * - **Value-prescribing** @f$ (\text{Value}=g) @f$: a scalar
+   *   @f$ g_s := \ell_s^u(g) @f$ — known at assembly time.
+   * - **Identification** @f$ (\text{Value}=A(v)) @f$: a sparse linear
+   *   combination @f$ \sum_j C_{sj}\,v_j @f$ with coefficients
+   *   @f$ C_{sj} := \ell_s^u(A(\varphi_j^v)) @f$ — coupling unknown DOFs of
+   *   @f$ u @f$ to unknown DOFs of @f$ v @f$.
+   *
+   * Concrete subclasses fill exactly one alternative of @ref DOFs.
    *
    * @see DirichletBC
+   * @see DirichletBC<TrialFunction<Sol,FES>, FunctionBase<...>>
+   * @see DirichletBC<TrialFunction<Sol1,FES1>, ShapeFunctionBase<Derived2,FES2,Sp>>
    */
   template <class Scalar>
   class DirichletBCBase : public FormLanguage::Base
@@ -78,25 +277,60 @@ namespace Rodin::Variational
     public:
       using ScalarType = Scalar;
 
-      using DOFs = IndexMap<ScalarType>;
+      /**
+       * @brief DOF map for the value-based Dirichlet condition `u = g`.
+       *
+       * Maps each constrained global FES DOF index to its prescribed scalar
+       * value @f$ g(x_i) @f$.
+       */
+      using ValueDOFs = IndexMap<ScalarType>;
+
+      /**
+       * @brief DOF map for the identification-based Dirichlet condition
+       *        `u = A(v)`.
+       *
+       * Maps each slave DOF (in @f$ u @f$'s FES) to a pair of arrays:
+       *  - the master DOF indices in @f$ v @f$'s FES (FES-global, pre-offset),
+       *  - the corresponding scalar coefficients @f$ C_{sj} = [A(\varphi_j^v)](x_s) @f$.
+       *
+       * The constraint encoded is @f$ u_s = \sum_j C_{sj}\, v_j @f$.
+       */
+      using IdentifiedDOFs =
+        IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
+
+      /**
+       * @brief Optional defects for affine identification rows.
+       *
+       * For an affine identification constraint
+       * @f[
+       *   u_s = \sum_j C_{sj}\,v_j + d_s,
+       * @f]
+       * this map stores @f$ d_s @f$ using the same slave DOF numbering as
+       * @ref IdentifiedDOFs. Missing entries mean @f$ d_s = 0 @f$, which is
+       * the historical homogeneous `DirichletBC(u, A(v))` behavior.
+       */
+      using IdentificationValues = IndexMap<ScalarType>;
+
+      /**
+       * @brief Variant DOF type covering both Dirichlet semantics.
+       *
+       * The active alternative depends on which subclass produced it: a
+       * value-prescribing BC writes the @ref ValueDOFs alternative, an
+       * identification BC writes the @ref IdentifiedDOFs alternative.
+       */
+      using DOFs = std::variant<ValueDOFs, IdentifiedDOFs>;
 
       /**
        * @brief Assembles the Dirichlet boundary condition.
        *
-       * Computes the global DOF map for the Dirichlet boundary by evaluating
-       * the prescribed value at each boundary DOF. The result is a map
-       * @f$ \{(i, g(x_i))\} @f$ where @f$ i @f$ is the global DOF index and
-       * @f$ g(x_i) @f$ is the prescribed value at that DOF.
+       * Either fills the @ref ValueDOFs alternative (for value-prescribing
+       * BCs) or the @ref IdentifiedDOFs alternative (for identification BCs).
        */
       virtual void assemble() = 0;
 
       /**
-       * @brief Gets the map of constrained DOFs and their values.
-       * @return Map from global DOF index to prescribed value
-       *
-       * Returns the assembled DOF map containing pairs @f$ (i, g_i) @f$ where
-       * @f$ i @f$ is the global DOF index and @f$ g_i @f$ is the prescribed
-       * boundary value.
+       * @brief Gets the map of constrained DOFs.
+       * @return Variant holding either the ValueDOFs or the IdentifiedDOFs map.
        */
       virtual const DOFs& getDOFs() const = 0;
 
@@ -119,6 +353,29 @@ namespace Rodin::Variational
       virtual const FormLanguage::Base& getValue() const = 0;
 
       /**
+       * @brief Returns the UUID of @f$ v @f$'s leaf trial function for an
+       *        identification BC, or @c nullopt for a value-prescribing BC.
+       *
+       * Consumer assemblies use this to locate @f$ v @f$'s trial block and
+       * apply the correct global offset when assembling identified-DOF
+       * constraints.
+       */
+      virtual Optional<Identifiable::UUID> getValueUUID() const { return {}; }
+
+      /**
+       * @brief Returns optional defects for affine identification BCs.
+       *
+       * Value-prescribing BCs and homogeneous identification BCs return an
+       * empty map. Affine identification BCs override this to provide the
+       * known additive defect value for each slave row.
+       */
+      virtual const IdentificationValues& getIdentificationValues() const
+      {
+        static const IdentificationValues empty;
+        return empty;
+      }
+
+      /**
        * @brief Creates a polymorphic copy of this BC.
        * @return Pointer to a new copy
        */
@@ -131,17 +388,43 @@ namespace Rodin::Variational
 
   /**
    * @ingroup DirichletBCSpecializations
-   * @brief Represents a Dirichlet boundary condition on a ShapeFunction
-   * object.
-   * @tparam FES Type of finite element space
-   * @tparam ValueDerived Type of value
+   * @brief Value-prescribing Dirichlet boundary condition, @f$ u = g @f$.
    *
-   * When utilized in a Problem construction, it will impose the Dirichlet
-   * condition
+   * Imposes the inhomogeneous (or homogeneous, if @f$ g\equiv 0 @f$)
+   * Dirichlet condition
    * @f[
-   *   u = g \quad \text{ on } \quad \Gamma_D
+   *   u(x) \;=\; g(x), \qquad x\in\Gamma_D \subset \mathcal{B}_h,
    * @f]
-   * on the subset of the boundary @f$ \Gamma_D \subset \mathcal{B}_h @f$.
+   * algebraically: for each slave DOF @f$ s @f$ of @f$ u @f$ on
+   * @f$ \Gamma_D @f$,
+   * @f[
+   *   u_s \;=\; \ell_s^u(g) \;=\; g_s,
+   * @f]
+   * where @f$ \ell_s^u @f$ is the slave finite element's DOF functional —
+   * point evaluation @f$ g(x_s) @f$ for Lagrange, an integral / moment
+   * pairing for non-nodal elements. The assembler streams these scalars
+   * into the @ref DirichletBCBase::ValueDOFs alternative of the variant
+   * returned by @ref getDOFs.
+   *
+   * In the global linear system the slave row is replaced by an identity
+   * row with right-hand side @f$ g_s @f$ and the slave column is moved to
+   * the RHS:
+   * @f[
+   *   A_{g_s,g_s}\leftarrow 1,\;
+   *   A_{g_s,k}\leftarrow 0\;\forall k\neq g_s,\;
+   *   b_{g_s}\leftarrow g_s,\;
+   *   b_r \mathrel{-}= A_{r,g_s}\cdot g_s,\;
+   *   A_{r,g_s}\leftarrow 0,\; r\neq g_s.
+   * @f]
+   *
+   * `.on(attr...)` selects tagged codimension-one facets for
+   * @f$ \Gamma_D @f$; without `.on(...)`, all exterior boundary faces are used.
+   *
+   * @tparam Solution Solution type of the trial function being constrained
+   * @tparam FES Finite element space of the trial function
+   * @tparam ValueDerived CRTP-derived type of the value @f$ g @f$
+   *
+   * @see DirichletBCBase
    */
   template <class Solution, class FES, class ValueDerived>
   class DirichletBC<TrialFunction<Solution, FES>, FunctionBase<ValueDerived>> final
@@ -159,8 +442,14 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<FESType>::ScalarType;
 
-      using DOFs =
-        IndexMap<ScalarType>;
+      /// Parent class
+      using Parent = DirichletBCBase<ScalarType>;
+
+      /// Value DOF map type (the alternative populated by this specialization)
+      using ValueDOFs = typename Parent::ValueDOFs;
+
+      /// Variant DOFs type, inherited from Parent
+      using DOFs = typename Parent::DOFs;
 
       /// Value type
       using ValueType =
@@ -176,13 +465,10 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FESMeshType>::ContextType;
 
       using DefaultAssemblyType =
-        typename Assembly::Default<FESMeshContextType>::template Type<DOFs, DirichletBC>;
+        typename Assembly::Default<FESMeshContextType>::template Type<ValueDOFs, DirichletBC>;
 
       using AssemblyType =
         DefaultAssemblyType;
-
-      /// Parent class
-      using Parent = DirichletBCBase<ScalarType>;
 
       /**
        * @brief Constructs the object given the Operand and Value.
@@ -276,7 +562,11 @@ namespace Rodin::Variational
        */
       void assemble() override
       {
-        m_assembly.execute(m_dofs, { m_u.get(), *m_value, m_essBdr });
+        // Ensure variant holds the ValueDOFs alternative.
+        if (!std::holds_alternative<ValueDOFs>(m_dofs))
+          m_dofs = ValueDOFs{};
+        m_assembly.execute(
+            std::get<ValueDOFs>(m_dofs), { m_u.get(), *m_value, m_essBdr });
       }
 
       bool isComponent() const override
@@ -300,7 +590,7 @@ namespace Rodin::Variational
         return m_dofs;
       }
 
-      const Assembly::AssemblyBase<IndexMap<ScalarType>, DirichletBC>& getAssembly() const
+      const Assembly::AssemblyBase<ValueDOFs, DirichletBC>& getAssembly() const
       {
         assert(m_assembly);
         return *m_assembly;
@@ -315,7 +605,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const OperandType> m_u;
       std::unique_ptr<ValueType> m_value;
       FlatSet<Geometry::Attribute> m_essBdr;
-      IndexMap<ScalarType> m_dofs;
+      DOFs m_dofs{ValueDOFs{}};
       AssemblyType m_assembly;
   };
 
@@ -328,6 +618,506 @@ namespace Rodin::Variational
   template <class Solution, class FES, class FunctionDerived>
   DirichletBC(const TrialFunction<Solution, FES>&, const FunctionBase<FunctionDerived>&)
     -> DirichletBC<TrialFunction<Solution, FES>, FunctionBase<FunctionDerived>>;
+
+  /**
+   * @ingroup DirichletBCSpecializations
+   * @brief Identification Dirichlet boundary condition,
+   *        @f$ u = A(v) @f$ or @f$ u = A(v) + d @f$.
+   *
+   * Imposes a *linear-in-DOFs* identification of the slave trial function
+   * @f$ u\in V_h^u @f$ with a shape-function expression @f$ A(v) @f$ over
+   * @f$ \Gamma_D \subset \mathcal{B}_h @f$:
+   * @f[
+   *   u(x) \;=\; A(v)(x) + d(x), \qquad x\in\Gamma_D,
+   * @f]
+   * with @f$ d\equiv 0 @f$ in the two-argument constructor. Here
+   * @f$ v\in V_h^v @f$ is another (trial) shape function and
+   * @f$ A @f$ is any operator producing a @ref ShapeFunctionBase
+   * (e.g. the identity @f$ A=\mathrm{id} @f$, a component @f$ A(v)=v_x @f$,
+   * a left product @f$ A(v)=f\,v @f$, a matrix product @f$ A(v)=R\,v @f$,
+   * sums of these, …).
+   *
+   * # Mathematical model
+   *
+   * Let @f$ \{\varphi_j^v\}_{j=1}^{N_v} @f$ be the basis of @f$ V_h^v @f$
+   * and @f$ \{\ell_s^u\}_{s=1}^{N_u} @f$ be the dual DOF functionals of
+   * @f$ V_h^u @f$ (so @f$ \ell_s^u(\varphi_k^u)=\delta_{sk} @f$). Linearity
+   * of @f$ A @f$ in @f$ v @f$ gives, for any
+   * @f$ v=\sum_j v_j\,\varphi_j^v @f$:
+   * @f[
+   *   A(v)(x) \;=\; \sum_j v_j\,A(\varphi_j^v)(x).
+   * @f]
+   *
+   * Applying the slave DOF functional @f$ \ell_s^u @f$ on both sides of
+   * @f$ u = A(v) + d @f$ yields the constraint row for each slave DOF
+   * @f$ s @f$ on @f$ \Gamma_D @f$:
+   * @f[
+   *   \boxed{\;
+   *     u_s \;=\; \ell_s^u(A(v)) + \ell_s^u(d)
+   *           \;=\; \sum_j C_{sj}\, v_j + d_s,
+   *     \quad\text{where}\quad
+   *     C_{sj} \;:=\; \ell_s^u\!\bigl(A(\varphi_j^v)\bigr),
+   *     \quad d_s := \ell_s^u(d).
+   *   \;}
+   * @f]
+   *
+   * The assembler stores the per-slave linear row as the
+   * @ref DirichletBCBase::IdentifiedDOFs alternative — a sparse list of
+   * `(master DOF index, coefficient)` pairs, with strict @f$ C_{sj}=0 @f$
+   * pruning so that Lagrange-dual sparsity (e.g. @f$ \delta_{sj} @f$ for
+   * @f$ A=\mathrm{id} @f$ on the same FES) is preserved bit-for-bit. If a
+   * defect @f$ d @f$ is provided, its slave DOF values @f$ d_s @f$ are stored
+   * separately in @ref DirichletBCBase::IdentificationValues.
+   *
+   * # Concrete examples
+   *
+   * - **Identity, same FES (Lagrange).**  @f$ A=\mathrm{id} @f$,
+   *   @f$ V_h^u=V_h^v @f$. Then
+   *   @f$ C_{sj} = \ell_s^u(\varphi_j^v) = \delta_{sj} @f$, so each slave
+   *   reduces to one master with coefficient @f$ 1 @f$:
+   *   @f$ u_s = v_s @f$.
+   *
+   * - **Scalar scaling.**  @f$ A(v)(x)=f(x)\,v(x) @f$ for a scalar field
+   *   @f$ f @f$, Lagrange same FES, slave node @f$ x_s @f$:
+   *   @f$ C_{sj} = f(x_s)\,\delta_{sj} @f$, hence
+   *   @f$ u_s = f(x_s)\,v_s @f$.
+   *
+   * - **Matrix rotation, vector FES.**  @f$ A(v)(x)=R(x)\,v(x) @f$ with
+   *   @f$ R\in\mathbb{R}^{d\times d} @f$, Lagrange vector @f$ V_h^v @f$,
+   *   slave DOF @f$ (s,\alpha) @f$:
+   *   @f[
+   *     C_{(s,\alpha),(s,\beta)} \;=\; R_{\alpha\beta}(x_s),
+   *   @f]
+   *   so each scalar slave depends on the @f$ d @f$ component-DOFs of
+   *   @f$ v @f$ at the same vertex with coefficients given by the @f$
+   *   \alpha @f$-th row of @f$ R(x_s) @f$.
+   *
+   * - **Component extraction.**  @f$ A(v)=v_x @f$ for a vector
+   *   @f$ v\in V_h^v @f$ and scalar @f$ u @f$. The
+   *   @ref Component<ShapeFunctionBase<...>> propagation projects the chosen
+   *   component, so each slave depends only on the @f$ x @f$-component DOFs
+   *   of @f$ v @f$ with coefficient @f$ 1 @f$.
+   *
+   * # Assembly: how @f$ C_{sj} @f$ is computed exactly
+   *
+   * The identification assembler computes
+   * @f$ C_{sj}=\ell_s^u(A(\varphi_j^v)) @f$ for every slave/master pair
+   * on every face by feeding the slave finite element a callable
+   * @f[
+   *   p \;\mapsto\; A(\varphi_j^v)(p), \qquad p\in K \subset \Gamma_D,
+   * @f]
+   * via the slave-FES pullback, and then asking
+   * @c fe_u.getLinearForm(s) to apply *its own* DOF functional to it. The
+   * callable in turn constructs a pointwise @ref IntegrationPoint from
+   * @f$ p @f$, passes it to @ref ShapeFunctionBase::setIntegrationPoint on
+   * @f$ A(v) @f$, and queries @ref ShapeFunctionBase::getBasis for the
+   * selected master basis. That pointwise integration point carries a null
+   * quadrature-formula pointer, so no synthetic single-point quadrature rule
+   * is needed. During quadrature integration, callers should continue to use
+   * @ref ShapeFunctionBase::setIntegrationPoint with the active quadrature
+   * formula and quadrature index so quadrature metadata remains available.
+   *
+   * The slave FE decides where to sample the callable — point evaluation
+   * for Lagrange, an integral over the face for moment-based FEs,
+   * directional samples for RT/Nedelec — and the assembler does not
+   * branch on the FE type. This is what makes the implementation
+   * **FES-generic**: the only contracts used are
+   * `fes.getDOFs(face)`, `fes.getFiniteElement(face)`,
+   * `fe.getLinearForm(s)`, and `fes.getPullback(face, callable)`.
+   *
+   * # Exactness, by construction
+   *
+   * Slave/master DOFs are paired by index on shared faces:
+   * @c fes_u.getDOFs(faceDim, fi) and @c fes_v.getDOFs(faceDim, fi) on the
+   * *same* face polytope. There is no geometric search, no tolerance, no
+   * @f$ \varepsilon @f$ anywhere. Coefficient pruning uses strict
+   * @c "c != 0" so that exact zeros from Lagrange duality (or from
+   * component projections) are eliminated bit-for-bit. For a cross-face
+   * periodic relation use @ref Rodin::Variational::PeriodicBC, which
+   * takes an explicit DOF adjacency map.
+   *
+   * # Linear-system effect
+   *
+   * For each slave global index @f$ g_s @f$ with masters
+   * @f$ \{g_{m_k}\} @f$ and coefficients @f$ \{c_k\} @f$, problem assembly
+   * distributes every matrix and vector contribution through the expansion
+   * map.  In the homogeneous case this implements
+   * @f[
+   *   A \leftarrow T^T A T,\qquad b \leftarrow T^T b,
+   * @f]
+   * while an affine defect @f$ d @f$ uses
+   * @f[
+   *   b \leftarrow T^T(b - A\hat{d}).
+   * @f]
+   * Equivalently, every matrix column contribution through an identified slave
+   * subtracts the known value @f$ A_{:,g_s}d_{g_s} @f$ from the assembled RHS.
+   * then writes reconstruction rows
+   * @f[
+   *   u_{g_s} - \sum_k c_k u_{g_{m_k}} = d_{g_s}
+   * @f]
+   * when slave DOFs remain in the unknown vector, with @f$ d_{g_s}=0 @f$ for
+   * homogeneous `DirichletBC(u, A(v))`.  This is a variational
+   * identification constraint; it is not zero-pinning, row-only replacement,
+   * or column-only redirection.
+   *
+   * @tparam Solution Solution type of the slave trial @f$ u @f$
+   * @tparam FES1 Finite element space of @f$ u @f$
+   * @tparam Derived2 CRTP-derived type of @f$ A(v) @f$
+   * @tparam FES2 Finite element space of @f$ v @f$
+   * @tparam Sp Shape function space type (Trial or Test) of @f$ A(v) @f$
+   *
+   * @see DirichletBCBase
+   * @see ShapeFunctionBase::setIntegrationPoint
+   * @see PeriodicBC
+   */
+  template <class Solution, class FES1,
+            class Derived2, class FES2, ShapeFunctionSpaceType Sp>
+  class DirichletBC<TrialFunction<Solution, FES1>,
+                    ShapeFunctionBase<Derived2, FES2, Sp>> final
+    : public DirichletBCBase<typename FormLanguage::Traits<FES1>::ScalarType>
+  {
+    public:
+      using FESType = FES1;
+
+      /// Operand type (the slave trial function)
+      using OperandType = TrialFunction<Solution, FESType>;
+
+      /// Value type (the right-hand-side shape function expression)
+      using ValueType = ShapeFunctionBase<Derived2, FES2, Sp>;
+
+      /// Scalar type
+      using ScalarType =
+        typename FormLanguage::Traits<FESType>::ScalarType;
+
+      /// Parent class
+      using Parent = DirichletBCBase<ScalarType>;
+
+      /// Identified-DOFs alternative populated by this specialization
+      using IdentifiedDOFs = typename Parent::IdentifiedDOFs;
+
+      using IdentificationValues = typename Parent::IdentificationValues;
+
+      /// Variant DOFs type
+      using DOFs = typename Parent::DOFs;
+
+      using FESMeshType =
+        typename FormLanguage::Traits<FESType>::MeshType;
+
+      using FESRangeType =
+        typename FormLanguage::Traits<FESType>::RangeType;
+
+      using FESMeshContextType =
+        typename FormLanguage::Traits<FESMeshType>::ContextType;
+
+      using DefaultAssemblyType =
+        typename Assembly::Default<FESMeshContextType>::template Type<IdentifiedDOFs, DirichletBC>;
+
+      using AssemblyType =
+        DefaultAssemblyType;
+
+      class DefectBase
+      {
+        public:
+          virtual ~DefectBase() = default;
+
+          virtual FESRangeType getValue(const Geometry::Point& p) const = 0;
+
+          virtual DefectBase* copy() const noexcept = 0;
+      };
+
+      template <class DefectDerived>
+      class Defect final : public DefectBase
+      {
+        public:
+          using FunctionType = FunctionBase<DefectDerived>;
+
+          explicit Defect(const FunctionType& value)
+            : m_value(value.copy())
+          {}
+
+          Defect(const Defect& other)
+            : m_value(other.m_value->copy())
+          {}
+
+          FESRangeType getValue(const Geometry::Point& p) const override
+          {
+            return (*m_value)(p);
+          }
+
+          Defect* copy() const noexcept override
+          {
+            return new Defect(*this);
+          }
+
+        private:
+          std::unique_ptr<FunctionType> m_value;
+      };
+
+      /**
+       * @brief Constructs the homogeneous identification Dirichlet BC.
+       * @param[in] u Slave trial function
+       * @param[in] v Right-hand-side shape function expression @f$ A(v) @f$
+       */
+      DirichletBC(const OperandType& u, const ValueType& v)
+        : m_u(u), m_v(v.copy())
+      {}
+
+      /**
+       * @brief Constructs the affine identification Dirichlet BC.
+       *
+       * The condition is
+       * @f[
+       *   u = A(v) + d
+       * @f]
+       * where @f$ A(v) @f$ is the shape-function expression used to build the
+       * slave/master coefficient rows and @f$ d @f$ is a known function
+       * evaluated by the slave DOF functional. This is useful for Newton
+       * correction rows such as @f$ \delta u = A(\delta v) + d @f$.
+       *
+       * @param[in] u Slave trial function
+       * @param[in] v Right-hand-side shape function expression @f$ A(v) @f$
+       * @param[in] defect Known additive defect @f$ d @f$
+       */
+      template <class DefectDerived>
+      DirichletBC(
+          const OperandType& u,
+          const ValueType& v,
+          const FunctionBase<DefectDerived>& defect)
+        : m_u(u),
+          m_v(v.copy()),
+          m_defect(std::make_unique<Defect<DefectDerived>>(defect))
+      {}
+
+      /// Copy constructor
+      DirichletBC(const DirichletBC& other)
+        : Parent(other),
+          m_u(other.m_u),
+          m_v(other.m_v->copy()),
+          m_defect(other.m_defect ? other.m_defect->copy() : nullptr),
+          m_essBdr(other.m_essBdr),
+          m_dofs(other.m_dofs),
+          m_values(other.m_values),
+          m_assembly(other.m_assembly)
+      {}
+
+      /// Move constructor
+      DirichletBC(DirichletBC&& other)
+        : Parent(std::move(other)),
+          m_u(std::move(other.m_u)),
+          m_v(std::move(other.m_v)),
+          m_defect(std::move(other.m_defect)),
+          m_essBdr(std::move(other.m_essBdr)),
+          m_dofs(std::move(other.m_dofs)),
+          m_values(std::move(other.m_values)),
+          m_assembly(std::move(other.m_assembly))
+      {}
+
+      /**
+       * @brief Sets @f$ \Gamma_D @f$ to a single boundary attribute.
+       *
+       * Selects tagged codimension-one facets over which the identification
+       * @f$ u=A(v) @f$ is enforced. Both slave and master DOFs are read from
+       * the *same* face polytopes — there is no cross-face matching.
+       */
+      constexpr
+      DirichletBC& on(Geometry::Attribute bdrAtr)
+      {
+        return on(FlatSet<Geometry::Attribute>{bdrAtr});
+      }
+
+      /**
+       * @brief Sets @f$ \Gamma_D @f$ to the union of multiple attributes.
+       */
+      template <class A1, class A2, class ... As>
+      constexpr
+      DirichletBC& on(A1 a1, A2 a2, As... as)
+      {
+        return on(FlatSet<Geometry::Attribute>{ a1, a2, as... });
+      }
+
+      /**
+       * @brief Sets @f$ \Gamma_D @f$ to a precomputed attribute set.
+       */
+      constexpr
+      DirichletBC& on(const FlatSet<Geometry::Attribute>& bdrAttrs)
+      {
+        assert(bdrAttrs.size() > 0);
+        m_essBdr = bdrAttrs;
+        return *this;
+      }
+
+      /**
+       * @returns The boundary attribute set defining @f$ \Gamma_D @f$.
+       */
+      constexpr
+      const FlatSet<Geometry::Attribute>& getAttributes() const
+      {
+        return m_essBdr;
+      }
+
+      /**
+       * @brief Computes the constraint rows
+       *        @f$ u_s = \sum_j C_{sj}\,v_j + d_s @f$ for every slave DOF on
+       *        @f$ \Gamma_D @f$.
+       *
+       * Iterates exterior boundary faces by default. When attributes are
+       * present, it iterates codimension-one face polytopes whose attribute
+       * lies in @ref getAttributes, including interior interface facets. For
+       * each face @f$ K @f$ and slave-local index
+       * @f$ s @f$, computes
+       * @f[
+       *   C_{sj} \;=\; \ell_s^{u,K}\!\bigl(A(\varphi_j^{v,K})\bigr),
+       *   \qquad j = 0,\dots,n_v(K)-1,
+       * @f]
+       * by handing the slave finite element the callable
+       * @f$ p\mapsto A(\varphi_j^{v,K})(p) @f$ via the slave-FES
+       * pullback and asking @c fe_u.getLinearForm(s) to apply its DOF
+       * functional to it. The callable builds a pointwise
+       * @ref IntegrationPoint with a null quadrature-formula pointer, passes
+       * it to @ref ShapeFunctionBase::setIntegrationPoint on @f$ A(v) @f$,
+       * and then queries @ref ShapeFunctionBase::getBasis. Quadrature
+       * integration code should continue to use
+       * @ref ShapeFunctionBase::setIntegrationPoint with the active
+       * quadrature formula and quadrature index.
+       *
+       * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the linear part is the
+       * @ref DirichletBCBase::IdentifiedDOFs alternative of the variant
+       * returned by @ref getDOFs. If the three-argument constructor was used,
+       * the same slave linear form is applied to the known defect and exposed
+       * through @ref getIdentificationValues.
+       */
+      void assemble() override
+      {
+        if (!std::holds_alternative<IdentifiedDOFs>(m_dofs))
+          m_dofs = IdentifiedDOFs{};
+        m_assembly.execute(
+            std::get<IdentifiedDOFs>(m_dofs), { m_u.get(), *m_v, m_essBdr });
+
+        m_values.clear();
+        if (m_defect)
+        {
+          const auto& fes = m_u.get().getFiniteElementSpace();
+          const auto& mesh = fes.getMesh();
+          const size_t faceCount = mesh.getFaceCount();
+          const size_t faceDim = mesh.getDimension() - 1;
+
+          for (Index i = 0; i < faceCount; i++)
+          {
+            if (m_essBdr.empty() && !mesh.isBoundary(i))
+              continue;
+
+            if (!m_essBdr.empty())
+            {
+              const auto a = mesh.getAttribute(faceDim, i);
+              if (!a || !m_essBdr.count(*a))
+                continue;
+            }
+
+            const auto& fe = fes.getFiniteElement(faceDim, i);
+            const auto mapping = fes.getPullback(
+                { faceDim, i },
+                [defect = m_defect.get()](const Geometry::Point& p)
+                {
+                  return defect->getValue(p);
+                });
+
+            for (Index local = 0; local < fe.getCount(); local++)
+            {
+              const Index global = fes.getGlobalIndex({ faceDim, i }, local);
+              auto find = m_values.find(global);
+              if (find == m_values.end())
+                m_values.insert(find, std::pair{ global, fe.getLinearForm(local)(mapping) });
+            }
+          }
+        }
+      }
+
+      bool isComponent() const override
+      {
+        return false;
+      }
+
+      /**
+       * @returns The slave trial function @f$ u @f$.
+       */
+      const OperandType& getOperand() const override
+      {
+        return m_u.get();
+      }
+
+      /**
+       * @returns The right-hand-side shape-function expression @f$ A(v) @f$.
+       */
+      const ValueType& getValue() const override
+      {
+        assert(m_v);
+        return *m_v;
+      }
+
+      /**
+       * @returns The variant DOFs map; this specialization writes the
+       *          @ref DirichletBCBase::IdentifiedDOFs alternative.
+       */
+      const DOFs& getDOFs() const override
+      {
+        return m_dofs;
+      }
+
+      /**
+       * @returns The UUID of @f$ v @f$'s leaf trial function — used by
+       *          consumer assemblies to locate @f$ v @f$'s trial block
+       *          and apply the correct global offset to master DOFs.
+       */
+      Optional<Identifiable::UUID> getValueUUID() const override
+      {
+        assert(m_v);
+        return m_v->getLeaf().getUUID();
+      }
+
+      const IdentificationValues& getIdentificationValues() const override
+      {
+        return m_values;
+      }
+
+      const Assembly::AssemblyBase<IdentifiedDOFs, DirichletBC>& getAssembly() const
+      {
+        return m_assembly;
+      }
+
+      DirichletBC* copy() const noexcept override
+      {
+        return new DirichletBC(*this);
+      }
+
+    private:
+      std::reference_wrapper<const OperandType> m_u;
+      std::unique_ptr<ValueType> m_v;
+      std::unique_ptr<DefectBase> m_defect;
+      FlatSet<Geometry::Attribute> m_essBdr;
+      DOFs m_dofs{IdentifiedDOFs{}};
+      IdentificationValues m_values;
+      AssemblyType m_assembly;
+  };
+
+  /**
+   * @ingroup RodinCTAD
+   * @brief CTAD for the identification DirichletBC.
+   */
+  template <class Solution, class FES1,
+            class Derived2, class FES2, ShapeFunctionSpaceType Sp>
+  DirichletBC(const TrialFunction<Solution, FES1>&,
+              const ShapeFunctionBase<Derived2, FES2, Sp>&)
+    -> DirichletBC<TrialFunction<Solution, FES1>,
+                   ShapeFunctionBase<Derived2, FES2, Sp>>;
+
+  template <class Solution, class FES1,
+            class Derived2, class FES2, ShapeFunctionSpaceType Sp,
+            class DefectDerived>
+  DirichletBC(const TrialFunction<Solution, FES1>&,
+              const ShapeFunctionBase<Derived2, FES2, Sp>&,
+              const FunctionBase<DefectDerived>&)
+    -> DirichletBC<TrialFunction<Solution, FES1>,
+                   ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 
 #endif

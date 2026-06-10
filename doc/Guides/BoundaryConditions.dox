@@ -114,7 +114,7 @@
   and appear as **boundary integrals**:
 
   @code{.cpp}
-  // ∫_ΓN g v ds
+  // \int_\GammaN g v ds
   BoundaryIntegral(g, v).over(GammaN)
   @endcode
 

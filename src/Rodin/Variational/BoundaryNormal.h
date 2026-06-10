@@ -37,11 +37,11 @@
  * ```cpp
  * BoundaryNormal n(mesh);
  * 
- * // Neumann BC: ∫_Γ g(n·∇u) v ds
+ * // Neumann BC: \int_\Gamma g(n\cdot\nablau) v ds
  * auto neumann = BoundaryIntegral(g * Dot(n, Grad(u)), v).on(boundary_attr);
  * 
  * // Normal derivative
- * auto normal_deriv = Dot(Grad(u), n);  // ∂u/∂n
+ * auto normal_deriv = Dot(Grad(u), n);  // \partialu/\partialn
  * ```
  */
 #ifndef RODIN_VARIATIONAL_BOUNDARYNORMAL_H

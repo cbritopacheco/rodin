@@ -1270,14 +1270,12 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order of the finite element space on
-      ///        the given polytope, if known.
-      ///
-      /// For general PETSc grid functions the order is not stored explicitly
-      /// and `std::nullopt` is returned.
+      ///        the given polytope.
       constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
-        return std::nullopt;
+        const auto& fes = this->getFiniteElementSpace();
+        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex()).getOrder();
       }
 
       /**

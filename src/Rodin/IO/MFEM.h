@@ -301,6 +301,18 @@ namespace Rodin::IO::MFEM
         callback(2, 3);
         break;
       }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        callback(0, 1);
+        callback(1, 2);
+        callback(2, 3);
+        callback(3, 0);
+        callback(0, 4);
+        callback(1, 4);
+        callback(2, 4);
+        callback(3, 4);
+        break;
+      }
       case Geometry::Polytope::Type::Hexahedron:
       {
         callback(0, 1);
@@ -358,6 +370,15 @@ namespace Rodin::IO::MFEM
         callback(std::array<int, 4>{ 0, 1, 4, 3 });
         callback(std::array<int, 4>{ 1, 2, 5, 4 });
         callback(std::array<int, 4>{ 2, 0, 3, 5 });
+        break;
+      }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        callback(std::array<int, 4>{ 0, 1, 2, 3 });
+        callback(std::array<int, 3>{ 0, 1, 4 });
+        callback(std::array<int, 3>{ 1, 2, 4 });
+        callback(std::array<int, 3>{ 2, 3, 4 });
+        callback(std::array<int, 3>{ 3, 0, 4 });
         break;
       }
       case Geometry::Polytope::Type::Hexahedron:
@@ -694,7 +715,7 @@ namespace Rodin::IO::MFEM
       }
       case GeometryType::PYRAMID:
       {
-        return {};
+        return Rodin::Geometry::Polytope::Type::Pyramid;
       }
     }
     return {};
@@ -723,6 +744,8 @@ namespace Rodin::IO::MFEM
         return GeometryType::SQUARE;
       case Geometry::Polytope::Type::Tetrahedron:
         return GeometryType::TETRAHEDRON;
+      case Geometry::Polytope::Type::Pyramid:
+        return GeometryType::PYRAMID;
       case Geometry::Polytope::Type::Wedge:
         return GeometryType::PRISM;
       case Geometry::Polytope::Type::Hexahedron:

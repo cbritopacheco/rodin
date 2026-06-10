@@ -192,6 +192,7 @@ namespace Rodin::Geometry
         Triangle,       ///< 2D triangular element
         Quadrilateral,  ///< 2D quadrilateral element
         Tetrahedron,    ///< 3D tetrahedral element
+        Pyramid,        ///< 3D pyramidal element (quadrilateral base)
         Hexahedron,     ///< 3D hexahedral element
         Wedge           ///< 3D prismatic element (triangular prism)
       };
@@ -325,13 +326,14 @@ namespace Rodin::Geometry
        *
        * Useful for iterating over all geometry types at compile time.
        */
-      static constexpr std::array<Type, 7> Types
+      static constexpr std::array<Type, 8> Types
       {
         Type::Point,
         Type::Segment,
         Type::Triangle,
         Type::Quadrilateral,
         Type::Tetrahedron,
+        Type::Pyramid,
         Type::Hexahedron,
         Type::Wedge
       };

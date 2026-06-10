@@ -195,15 +195,15 @@ namespace Rodin::Variational
         const auto& rc = p.getReferenceCoordinates();
 
         // Build the reference jacobian accumulator:
-        // G = Σ_v u(v) ⊗ ∇_hat φ_v   (vdim x d)
+        // G = Σ_v u(v) ⊗ \nabla_hat φ_v   (vdim x d)
         SpatialMatrixType G(vdim, d);
         G.setZero();
 
         // For each vertex basis (scalar), accumulate:
-        // for each component c: G(c, :) += u_c(v) * ∇_hat φ_v^T
+        // for each component c: G(c, :) += u_c(v) * \nabla_hat φ_v^T
         for (size_t v = 0; v < nv; ++v)
         {
-          // ∇_hat φ_v (size d)
+          // \nabla_hat φ_v (size d)
           // Avoid GradientFunction() to prevent extra vector construction.
           Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)
@@ -404,6 +404,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
+        const auto* qf = ip.getQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
@@ -442,8 +443,8 @@ namespace Rodin::Variational
         typename Cache::QpKey qkey;
         if (needs_qp)
         {
-          qkey.qf = &ip.getQuadratureFormula();
-          qkey.qp = ip.getIndex();
+          qkey.qf = qf;
+          qkey.qp = qf ? ip.getIndex() : 0;
           qkey.valid = true;
         }
         else
@@ -453,7 +454,7 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !(m_cache.qpKey == qkey);
+        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
         if (cell_changed || qp_changed)
         {
           m_cache.qpKey = qkey;
@@ -462,10 +463,11 @@ namespace Rodin::Variational
           const P1Element<ScalarType> fe_scalar(geom);
           const size_t nv = fe_scalar.getCount();
 
-          // rc at this qp
-          const auto& qf = ip.getQuadratureFormula();
-          const size_t qp = ip.getIndex();
-          const auto& rc = qf.getPoint(qp);
+          // Reference coordinates at this sample.
+          const auto& rc =
+            qf
+              ? qf->getPoint(ip.getIndex())
+              : pt.getReferenceCoordinates();
 
           // J^{-1} at this integration point
           const auto Jinv = pt.getJacobianInverse();
@@ -514,9 +516,7 @@ namespace Rodin::Variational
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.jac.size());
-        return m_cache.jac[local].getData().topLeftCorner(
-          m_cache.cellKey.vdim,
-          m_cache.cellKey.d);
+        return m_cache.jac[local];
       }
 
       constexpr

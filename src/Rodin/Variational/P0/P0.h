@@ -252,6 +252,11 @@ namespace Rodin::Variational
             static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
             return s_element;
           }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Pyramid);
+            return s_element;
+          }
           case Geometry::Polytope::Type::Wedge:
           {
             static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Wedge);

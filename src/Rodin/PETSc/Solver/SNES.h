@@ -18,6 +18,7 @@
 #include <petscsnes.h>
 
 #include <functional>
+#include <petscsystypes.h>
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
@@ -208,18 +209,22 @@ namespace Rodin::Solver
       }
 
     private:
+      static PetscErrorCode Update(::Vec x, void* ctx);
+      static PetscErrorCode Assemble(::Vec x, void* ctx);
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
-      PetscReal m_abstol,  ///< Absolute convergence tolerance.
-                m_rtol,    ///< Relative convergence tolerance.
-                m_stol;    ///< Step norm convergence tolerance.
-      PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
-               m_maxF;     ///< Maximum function evaluations.
-      StateUpdate m_stateUpdate; ///< Optional state synchronization callback.
+      ::PetscReal m_abstol,  ///< Absolute convergence tolerance.
+                  m_rtol,    ///< Relative convergence tolerance.
+                  m_stol;    ///< Step norm convergence tolerance.
+      ::PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
+                 m_maxF;     ///< Maximum function evaluations.
+      StateUpdate m_update; ///< Optional state synchronization callback.
+      Optional<::PetscObjectState> m_assembled;
+      Optional<::PetscObjectState> m_updated;
   };
 }
 

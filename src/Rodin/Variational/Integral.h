@@ -34,13 +34,13 @@
  *
  * ## Usage Examples
  * ```cpp
- * // Stiffness matrix: ∫ ∇u·∇v dx
+ * // Stiffness matrix: \int \nablau\cdot\nablav dx
  * auto stiffness = Integral(Grad(u), Grad(v));
  * 
- * // Mass matrix: ∫ u·v dx
+ * // Mass matrix: \int u\cdotv dx
  * auto mass = Integral(u, v);
  * 
- * // Load vector: ∫ f·v dx
+ * // Load vector: \int f\cdotv dx
  * auto load = Integral(f, v);
  * ```
  */
