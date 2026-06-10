@@ -95,23 +95,90 @@ namespace Rodin::Examples::Heart
 
   CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(
       const Context::MPI &context, const Config &cfg)
-    : m_cfg(cfg), m_input(makeInput(m_cfg)), m_model(m_input),
+    : m_cfg(cfg),
+      m_input(makeInput(m_cfg)),
+      m_model(m_input),
       m_mesh(makeMesh(context, m_cfg)),
       m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
-      m_uh(std::integral_constant<size_t, 2>{}, m_mesh,
+
+      /*
+       * Function spaces
+       */
+      m_uh(std::integral_constant<size_t, 2>{},
+           m_mesh,
            m_mesh.getSpaceDimension()),
+
       m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
-      m_uph(std::integral_constant<size_t, 2>{}, m_mesh,
+
+      m_dh(std::integral_constant<size_t, 1>{},
+           m_mesh,
+           m_mesh.getSpaceDimension()),
+
+      m_uph(std::integral_constant<size_t, 2>{},
+            m_mesh,
             m_mesh.getSpaceDimension()),
-      m_tauh(m_mesh), m_u(m_uh), m_p(m_ph), m_mu(m_ph), m_v(m_uh), m_q(m_ph),
-      m_r(m_ph), m_uOld(m_uh), m_pOld(m_ph), m_one(m_ph), m_qFlux(m_ph),
-      m_sub(m_uph), m_subOld(m_uph), m_up(m_uph), m_vp(m_uph), m_tau(m_tauh),
-      m_t(m_tauh), m_tauOld(m_tauh), m_flux(m_qFlux),
-      m_flow(m_u, m_p, m_v, m_q), m_flowKSP(m_flow), m_flowSolver(m_flowKSP),
+
+      m_tauh(m_mesh),
+
+      /*
+       * Trial functions
+       */
+      m_u(m_uh),
+      m_p(m_ph),
+      m_d(m_dh),
+
+      m_mu(m_ph),
+
+      /*
+       * Test functions
+       */
+      m_v(m_uh),
+      m_q(m_ph),
+      m_w(m_dh),
+
+      m_r(m_ph),
+
+      /*
+       * Old-time / auxiliary grid functions
+       */
+      m_uOld(m_uh),
+      m_pOld(m_ph),
+      m_dOld(m_dh),
+
+      m_one(m_ph),
+      m_qFlux(m_ph),
+
+      /*
+       * VMS / projection fields
+       */
+      m_sub(m_uph),
+      m_subOld(m_uph),
+      m_up(m_uph),
+      m_vp(m_uph),
+
+      m_tau(m_tauh),
+      m_t(m_tauh),
+      m_tauOld(m_tauh),
+
+      /*
+       * Forms and solvers
+       */
+      m_flux(m_qFlux),
+
+      m_flow(m_u, m_p, m_d, m_v, m_q, m_w),
+      m_flowKSP(m_flow),
+      m_flowSolver(m_flowKSP),
+
       m_viscosityProjection(m_mu, m_r),
-      m_viscosityProjectionKSP(m_viscosityProjection), m_l2ConvU(m_up, m_vp),
-      m_l2ConvUSolver(m_l2ConvU), m_subProjection(m_sub, m_vp),
-      m_subProjectionSolver(m_subProjection), m_tauProjection(m_tau, m_t),
+      m_viscosityProjectionKSP(m_viscosityProjection),
+
+      m_l2ConvU(m_up, m_vp),
+      m_l2ConvUSolver(m_l2ConvU),
+
+      m_subProjection(m_sub, m_vp),
+      m_subProjectionSolver(m_subProjection),
+
+      m_tauProjection(m_tau, m_t),
       m_tauProjectionSolver(m_tauProjection)
   {
     auto cellCount = m_mesh.getCellCount();
@@ -597,20 +664,31 @@ namespace Rodin::Examples::Heart
     Real alpha = 0.0;
     Real value = cfg.minValue;
 
-    if (tau < cfg.t1) {
+    if (tau < cfg.t1)
+    {
       alpha = -(tau - cfg.t1) / cfg.t1;
       value = alpha * cfg.minValue + (1.0 - alpha) * cfg.maxValue;
-    } else if (tau < cfg.t2) {
+    }
+    else if (tau < cfg.t2)
+    {
       value = cfg.maxValue;
-    } else if (tau < cfg.t3) {
+    }
+    else if (tau < cfg.t3)
+    {
       alpha = -(tau - cfg.t3) / (cfg.t3 - cfg.t2);
       value = alpha * cfg.maxValue + (1.0 - alpha) * cfg.minValue;
-    } else if (tau < cfg.t4) {
+    }
+    else if (tau < cfg.t4)
+    {
       alpha = -(tau - cfg.t4) / (cfg.t4 - cfg.t3);
       value = alpha * cfg.minValue + (1.0 - alpha) * cfg.secondThreshold;
-    } else if (tau < cfg.t5) {
+    }
+    else if (tau < cfg.t5)
+    {
       value = cfg.secondThreshold;
-    } else if (tau < cfg.t6) {
+    }
+    else if (tau < cfg.t6)
+    {
       alpha = -(tau - cfg.t6) / (cfg.t6 - cfg.t5);
       value = alpha * cfg.secondThreshold + (1.0 - alpha) * cfg.minValue;
     }
@@ -618,7 +696,8 @@ namespace Rodin::Examples::Heart
     return value;
   }
 
-  CoupledLV0DCoronary3D &CoupledLV0DCoronary3D::initialize() {
+  CoupledLV0DCoronary3D &CoupledLV0DCoronary3D::initialize()
+  {
     setupModel();
     setupMeshAndSpaces();
     setupDiagnostics();
@@ -628,7 +707,8 @@ namespace Rodin::Examples::Heart
     return *this;
   }
 
-  void CoupledLV0DCoronary3D::setupModel() {
+  void CoupledLV0DCoronary3D::setupModel()
+  {
     m_model.setMaxIterations(m_cfg.lv.maxIterations)
         .setAbsoluteTolerance(m_cfg.lv.absoluteTolerance)
         .setRelativeTolerance(m_cfg.lv.relativeTolerance)
@@ -652,7 +732,8 @@ namespace Rodin::Examples::Heart
     m_model.initialize(s0);
   }
 
-  void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
+  void CoupledLV0DCoronary3D::setupMeshAndSpaces()
+  {
     if (isRoot())
       Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..."
                     << Alert::Raise;
@@ -661,6 +742,7 @@ namespace Rodin::Examples::Heart
 
     m_u.setName("u");
     m_p.setName("p");
+    m_d.setName("d");
     m_mu.setName("viscosity");
     m_up.setName("projected_convection");
     m_sub.setName("subscale");
@@ -668,6 +750,12 @@ namespace Rodin::Examples::Heart
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
+    m_dOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+
+    m_u.getSolution() = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_p.getSolution() = 0.0;
+    m_d.getSolution() = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+
     m_one = 1.0;
     m_mu.getSolution() = 0.0;
     m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
@@ -675,6 +763,7 @@ namespace Rodin::Examples::Heart
 
     m_xdmf.add("velocity", m_u.getSolution());
     m_xdmf.add("pressure", m_p.getSolution());
+    m_xdmf.add("displacement", m_d.getSolution());
     m_xdmf.add("viscosity", m_mu.getSolution());
     m_xdmf.add("subscale", m_sub.getSolution());
     m_xdmf.add("tau", m_tau.getSolution());
@@ -684,13 +773,21 @@ namespace Rodin::Examples::Heart
       m_wk.emplace(tag, m_cfg.defaultRCR);
 
     m_flowSolver.setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
-        .setStateUpdate([this](const PETSc::Math::Vector &x) {
-          m_u.getSolution().setData(x, 0);
-          m_p.getSolution().setData(x, m_uh.getSize());
-        });
+        .setStateUpdate(
+            [this](const PETSc::Math::Vector &x)
+            {
+              const size_t uOffset = 0;
+              const size_t pOffset = uOffset + m_uh.getSize();
+              const size_t dOffset = pOffset + m_ph.getSize();
+
+              m_u.getSolution().setData(x, uOffset);
+              m_p.getSolution().setData(x, pOffset);
+              m_d.getSolution().setData(x, dOffset);
+            });
   }
 
-  void CoupledLV0DCoronary3D::setupDiagnostics() {
+  void CoupledLV0DCoronary3D::setupDiagnostics()
+  {
     if (!isRoot())
       return;
 
@@ -703,7 +800,8 @@ namespace Rodin::Examples::Heart
     writeCSVHeader();
   }
 
-  void CoupledLV0DCoronary3D::printInitialState() const {
+  void CoupledLV0DCoronary3D::printInitialState() const
+  {
     if (!isRoot())
       return;
 
@@ -721,24 +819,28 @@ namespace Rodin::Examples::Heart
                   << Alert::Raise;
   }
 
-  bool CoupledLV0DCoronary3D::isRoot() const {
+  bool CoupledLV0DCoronary3D::isRoot() const
+  {
     return m_mesh.getContext().getCommunicator().rank() == RootRank;
   }
 
-  bool CoupledLV0DCoronary3D::advance0D() {
+  bool CoupledLV0DCoronary3D::advance0D()
+  {
     if (isRoot())
       ZeroDInfo() << "Advancing LV model ..." << Alert::Raise;
 
     const auto rep = m_model.step(m_cfg.dt);
 
-    if (isRoot()) {
+    if (isRoot())
+    {
       ZeroDInfo() << "Newton: " << (rep.converged ? "converged" : "NOT converged")
                   << "  iter = " << rep.iterations
                   << "  |F| = " << rep.finalResidual
                   << "  |dx| = " << rep.finalStepNorm << Alert::Raise;
     }
 
-    if (isRoot() && rep.converged) {
+    if (isRoot() && rep.converged)
+    {
       const auto &s = m_model.getState();
       ZeroDInfo() << "pv  = " << s.pv << " Pa"
                   << "  par = " << s.par << " Pa"
@@ -748,7 +850,8 @@ namespace Rodin::Examples::Heart
     return rep.converged;
   }
 
-  void CoupledLV0DCoronary3D::solveStatic() {
+  void CoupledLV0DCoronary3D::solveStatic()
+  {
     if (isRoot())
       ThreeDInfo() << "Solving static initialization ..." << Alert::Raise;
 
@@ -806,7 +909,8 @@ namespace Rodin::Examples::Heart
 
     m_flow.assemble();
 
-    if (!m_flowFieldSplitsSet) {
+    if (!m_flowFieldSplitsSet)
+    {
       m_flow.setFieldSplits();
       m_flowFieldSplitsSet = true;
     }
@@ -829,7 +933,8 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  bool CoupledLV0DCoronary3D::solve3D() {
+  bool CoupledLV0DCoronary3D::solve3D()
+  {
     const auto setup3DStart = CoronaryClock::now();
 
     const auto &s = m_model.getState();
@@ -842,6 +947,14 @@ namespace Rodin::Examples::Heart
     const Attribute outlet3 = m_cfg.outlets[3];
     const Attribute outlet4 = m_cfg.outlets[4];
     const Attribute outlet5 = m_cfg.outlets[5];
+
+    // ---- SOLID PARAMETERS (for weak coupling and FSI penalty terms)
+    const Real solidMass = m_cfg.dummySolidMass;
+    const Real solidStiffness = m_cfg.dummySolidStiffness;
+    const Real solidClampPenalty = m_cfg.solidClampPenalty;
+    const Real fsiPenalty = m_cfg.fsiPenalty;
+    const Real inactivePenalty = m_cfg.inactivePenalty;
+    // ------------------------------------------
 
     const auto &uState = m_u.getSolution();
     const auto &pState = m_p.getSolution();
@@ -956,7 +1069,8 @@ namespace Rodin::Examples::Heart
 
     auto subUpdate = VectorFunction(
         m_mesh.getSpaceDimension(),
-        [=, this](const Point &p) -> Math::SpatialVector<Real> {
+        [=, this](const Point &p) -> Math::SpatialVector<Real>
+        {
           const auto conv = convectionTarget.getValue(p);
           const auto proj = m_up.getSolution().getValue(p);
           const auto old = m_subOld.getValue(p);
@@ -1170,7 +1284,9 @@ namespace Rodin::Examples::Heart
            * on the wall.
            */
           + DirichletBC(m_u, -uState).on(m_cfg.wall);
-    } else {
+    }
+    else
+    {
       m_flow =
           /*
            * =========================
@@ -1216,8 +1332,8 @@ namespace Rodin::Examples::Heart
            *     ((grad v) u^n).
            */
 
-          + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
-                                            m_cfg.rho)
+          // + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
+          //                                   m_cfg.rho)
 
           /*
            * VMS linear contribution subtracted from the residual:
@@ -1228,9 +1344,9 @@ namespace Rodin::Examples::Heart
            *       ((grad v) u^n).
            */
 
-          - VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
-                                          m_up.getSolution(), m_tau.getSolution(),
-                                          m_cfg.rho, m_cfg.dt)
+          // - VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
+          //                                 m_up.getSolution(), m_tau.getSolution(),
+          //                                 m_cfg.rho, m_cfg.dt)
 
           /*
            * Inlet normal impedance.
@@ -1294,6 +1410,72 @@ namespace Rodin::Examples::Heart
               .over(outlet4) +
           BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
+          // SOLID BLOCK ---------------------------------------------------
+          /*
+           * Dummy solid displacement block.
+           *
+           * This is not physical solid mechanics. It only gives the displacement
+           * unknown a well-defined algebraic block on the solid volume.
+           */
+          + solidMass / (m_cfg.dt * m_cfg.dt)
+              * Integral(m_d, m_w).over(m_cfg.solidVolume)
+
+          + solidStiffness
+              * Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.solidVolume)
+
+          - solidMass / (m_cfg.dt * m_cfg.dt)
+              * Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+
+          /*
+           * Weak clamp of the dummy solid rings.
+           */
+          + solidClampPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[0])
+
+          + solidClampPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[1])
+
+          + solidClampPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[2])
+
+          + solidClampPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[3])
+
+          + solidClampPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[4])
+
+          + solidClampPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[5])
+
+          /*
+           * Dummy weak FSI interface freeze.
+           *
+           * First smoke test: freeze velocity and displacement weakly on the FSI/wall
+           * interface. Later replace this by u - d_t.
+           */
+          + fsiPenalty
+              * BoundaryIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
+
+          + fsiPenalty
+              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
+
+          /*
+           * Inactive-domain algebraic regularization.
+           *
+           * Since u, p, d all live on the full mesh, this prevents dead rows where
+           * a field has no physical operator.
+           */
+          + inactivePenalty
+              * Integral(m_u, m_v).over(m_cfg.solidVolume)
+
+          + inactivePenalty
+              * Integral(m_p, m_q).over(m_cfg.solidVolume)
+
+          + inactivePenalty
+              * Integral(m_d, m_w).over(m_cfg.fluidVolume)
+
+          // ==========================================================/
+
           /*
            * Wall no-slip condition.
            *
@@ -1308,25 +1490,29 @@ namespace Rodin::Examples::Heart
     const bool isNewtonFlow = m_cfg.flowMode == FlowMode::Newton;
     const bool needsInitialSystem = !m_flowFieldSplitsSet;
 
-    if (needsInitialSystem) {
+    if (needsInitialSystem)
+    {
       if (isRoot())
         ThreeDInfo() << "Initializing flow system ..." << Alert::Raise;
     }
 
-    if (!isNewtonFlow || needsInitialSystem) {
+    if (!isNewtonFlow || needsInitialSystem)
+    {
       const auto assemble3DStart = CoronaryClock::now();
       m_flow.assemble();
       m_stepTiming.assemble3D = secondsSince(assemble3DStart);
     }
 
-    if (needsInitialSystem) {
+    if (needsInitialSystem)
+    {
       const auto fieldSplitsStart = CoronaryClock::now();
       m_flow.setFieldSplits();
       m_stepTiming.fieldSplits = secondsSince(fieldSplitsStart);
       m_flowFieldSplitsSet = true;
     }
 
-    if (isRoot()) {
+    if (isRoot())
+    {
       ThreeDInfo() << "Solving with PETSc " << (isNewtonFlow ? "SNES" : "KSP")
                    << " ..." << Alert::Raise;
     }
@@ -1338,8 +1524,10 @@ namespace Rodin::Examples::Heart
       m_flow.solve(m_flowKSP);
     m_stepTiming.solve3D = secondsSince(solve3DStart);
 
-    if (isNewtonFlow) {
-      if (isRoot()) {
+    if (isNewtonFlow)
+    {
+      if (isRoot())
+      {
         SNESInfo() << (m_flowSolver.converged() ? "Converged"
                                                 : "Did NOT converge")
                    << "  iterations = " << m_flowSolver.getIterationNumber()
@@ -1364,7 +1552,8 @@ namespace Rodin::Examples::Heart
     return reason > 0;
   }
 
-  void CoupledLV0DCoronary3D::computeFluxes() {
+  void CoupledLV0DCoronary3D::computeFluxes()
+  {
     const auto normal = BoundaryNormal(m_mesh);
     const auto &s = m_model.getState();
 
@@ -1377,7 +1566,8 @@ namespace Rodin::Examples::Heart
     m_stepData.qOut.clear();
     m_stepData.qOutSum = 0.0;
 
-    for (const Attribute tag : m_cfg.outlets) {
+    for (const Attribute tag : m_cfg.outlets)
+    {
       m_flux =
           BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux).over(tag);
 
@@ -1393,14 +1583,18 @@ namespace Rodin::Examples::Heart
     m_stepData.t = s.t;
   }
 
-  void CoupledLV0DCoronary3D::updateHistory() {
+  void CoupledLV0DCoronary3D::updateHistory()
+  {
     m_uOld.setData(m_u.getSolution().getData());
     m_pOld.setData(m_p.getSolution().getData());
+    m_dOld.setData(m_d.getSolution().getData());
+
     m_subOld.setData(m_sub.getSolution().getData());
     m_tauOld.setData(m_tau.getSolution().getData());
   }
 
-  void CoupledLV0DCoronary3D::writeOutputs() {
+  void CoupledLV0DCoronary3D::writeOutputs()
+  {
     const auto &cy = m_cfg.viscosity;
     const auto symU = 0.5 * (Jacobian(m_u.getSolution()) +
                              Transpose(Jacobian(m_u.getSolution())));
@@ -1416,7 +1610,8 @@ namespace Rodin::Examples::Heart
     m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
   }
 
-  CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const {
+  CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const
+  {
     StepData d;
 
     const auto &s = m_model.getState();
@@ -1452,7 +1647,8 @@ namespace Rodin::Examples::Heart
     d.flowBalance = m_stepData.flowBalance;
     d.qOut = m_stepData.qOut;
 
-    for (const auto &[tag, bc] : m_wk) {
+    for (const auto &[tag, bc] : m_wk)
+    {
       const auto qOutIt = m_stepData.qOut.find(tag);
       const Real qOut = (qOutIt == m_stepData.qOut.end()) ? 0.0 : qOutIt->second;
 
@@ -1466,7 +1662,8 @@ namespace Rodin::Examples::Heart
     return d;
   }
 
-  void CoupledLV0DCoronary3D::writeCSVHeader() {
+  void CoupledLV0DCoronary3D::writeCSVHeader()
+  {
     if (!isRoot())
       return;
 
@@ -1520,13 +1717,15 @@ namespace Rodin::Examples::Heart
     m_csv.flush();
   }
 
-  void CoupledLV0DCoronary3D::writeCSVRow() {
+  void CoupledLV0DCoronary3D::writeCSVRow()
+  {
     if (!isRoot())
       return;
 
     const StepData d = collectStepData();
 
-    auto get = [](const std::map<Attribute, Real> &m, Attribute a) -> Real {
+    auto get = [](const std::map<Attribute, Real> &m, Attribute a) -> Real
+    {
       const auto it = m.find(a);
       return (it == m.end()) ? 0.0 : it->second;
     };
@@ -1551,9 +1750,11 @@ namespace Rodin::Examples::Heart
     m_csv.flush();
   }
 
-  void CoupledLV0DCoronary3D::printStepTiming(int step) const {
+  void CoupledLV0DCoronary3D::printStepTiming(int step) const
+  {
     const auto &comm = m_mesh.getContext().getCommunicator();
-    auto maxTime = [&](Real local) {
+    auto maxTime = [&](Real local)
+    {
       return boost::mpi::all_reduce(comm, local, MaxReal{});
     };
 
@@ -1569,7 +1770,8 @@ namespace Rodin::Examples::Heart
     const Real history = maxTime(m_stepTiming.history);
     const Real output = maxTime(m_stepTiming.output);
 
-    if (isRoot()) {
+    if (isRoot())
+    {
       TimingInfo() << "step = " << step << "  total = " << total << " s"
                    << "  0D = " << advance0D << " s"
                    << "  3D-form = " << setup3DForm << " s"
@@ -1584,7 +1786,8 @@ namespace Rodin::Examples::Heart
     }
   }
 
-  int CoupledLV0DCoronary3D::run() {
+  int CoupledLV0DCoronary3D::run()
+  {
     if (!m_initialized)
       initialize();
 
@@ -1594,13 +1797,15 @@ namespace Rodin::Examples::Heart
     const Real startTime = m_model.getState().t;
     const Real finalTime = startTime + static_cast<Real>(m_cfg.nsteps) * baseDt;
 
-    if (!(factor > 0.0 && factor < 1.0)) {
+    if (!(factor > 0.0 && factor < 1.0))
+    {
       Alert::Exception() << "Invalid time adaptivity reduction factor: " << factor
                          << ". Expected a value in (0, 1)." << Alert::Raise;
       return 1;
     }
 
-    if (maxLevels < 0) {
+    if (maxLevels < 0)
+    {
       Alert::Exception() << "Invalid time adaptivity maximum levels: "
                          << maxLevels << ". Expected a non-negative value."
                          << Alert::Raise;
@@ -1621,8 +1826,8 @@ namespace Rodin::Examples::Heart
       // updateHistory();
     }
 
-    while (m_model.getState().t <
-           finalTime - 0.5 * std::numeric_limits<Real>::epsilon()) {
+    while (m_model.getState().t < finalTime - 0.5 * std::numeric_limits<Real>::epsilon())
+    {
       const Real t_current = m_model.getState().t;
       const Real remaining = finalTime - t_current;
       const Real physicalDt = std::min(nextDt, remaining);
@@ -1633,12 +1838,14 @@ namespace Rodin::Examples::Heart
       const StepData savedStepData = m_stepData;
       const VecSnapshot savedU(m_u.getSolution().getData());
       const VecSnapshot savedP(m_p.getSolution().getData());
+      const VecSnapshot savedD(m_d.getSolution().getData());
 
       m_cfg.dt = physicalDt;
       m_stepTiming = StepTiming{};
       const auto stepStart = CoronaryClock::now();
 
-      if (isRoot()) {
+      if (isRoot())
+      {
         Alert::Info() << "━━━ Step " << (acceptedStep + 1)
                       << "  t = " << t_current << " s"
                       << " / " << finalTime << " s"
@@ -1650,7 +1857,8 @@ namespace Rodin::Examples::Heart
       const bool advanced0D = advance0D();
       m_stepTiming.advance0D = secondsSince(advance0DStart);
 
-      if (!advanced0D) {
+      if (!advanced0D)
+      {
         Alert::Exception() << "0D solver failed to converge at step "
                            << (acceptedStep + 1)
                            << ", t = " << m_model.getState().t << Alert::Raise;
@@ -1664,18 +1872,22 @@ namespace Rodin::Examples::Heart
 
       bool accepted = false;
 
-      while (!accepted) {
+      while (!accepted)
+      {
         m_cfg.dt = solverDt;
 
-        if (!solve3D()) {
+        if (!solve3D())
+        {
           m_model.restore(advancedState, advancedHistory, advancedUnknowns,
                           advancedReport);
           m_wk = savedRCR;
           m_stepData = savedStepData;
           savedU.restore(m_u.getSolution().getData());
           savedP.restore(m_p.getSolution().getData());
+          savedD.restore(m_d.getSolution().getData());
 
-          if (level >= maxLevels) {
+          if (level >= maxLevels)
+          {
             Alert::Exception() << "3D flow solver failed to converge at step "
                                << (acceptedStep + 1) << " after " << (level + 1)
                                << " attempt(s). Minimum solver dt = " << solverDt
@@ -1686,7 +1898,8 @@ namespace Rodin::Examples::Heart
           solverDt *= factor;
           ++level;
 
-          if (isRoot()) {
+          if (isRoot())
+          {
             Alert::Info() << "[3D] Retrying step " << (acceptedStep + 1)
                           << " with reduced solver dt = " << solverDt
                           << " s  (adapt level = " << level << " / " << maxLevels

@@ -179,12 +179,12 @@ namespace Rodin::Examples::Heart
         Real distalLength = 0.0025;
         /// @brief Array with radius and large for each branch
         std::unordered_map<Attribute, GeoArtery> geometricParam{
-            {4,  {6.e-4,  0.0125, 3e-4, 0.0025}},
-            {5,  {4.e-4,  0.01,  2e-4, 0.0025 }},
-            {6,  {4.e-4,  0.01,  2e-4, 0.0025 }},
+            {15,  {6.e-4,  0.0125, 3e-4, 0.0025}},
+            {9,  {4.e-4,  0.01,  2e-4, 0.0025 }},
+            {14,  {4.e-4,  0.01,  2e-4, 0.0025 }},
             {7, {4.e-4,  0.01,  2e-4, 0.0025 }},
+            {10, {6.e-4,  0.0125, 3e-4, 0.0025}},
             {8, {6.e-4,  0.0125, 3e-4, 0.0025}},
-            {9, {6.e-4,  0.0125, 3e-4, 0.0025}},
         };
         /// @brief Pressure-drop threshold for the Poiseuille fallback.
         Real pressureDropTolerance = 1.0e-12;
@@ -415,29 +415,38 @@ namespace Rodin::Examples::Heart
       struct Config
       {
         /// @brief Input coronary fluid mesh path.
-        std::string meshPath = "CoronaryArtery.mesh";
+        std::string meshPath = "malla_merge.mesh";
         /// @brief Basename for XDMF and related output files.
         std::string xdmfBasename = "CoronaryArtery";
         /// @brief CSV diagnostics output path.
         std::string csvPath = "CoronaryArtery.csv";
 
-        /// @brief No-slip wall boundary attribute.
+        /// @brief No-slip / fluid wall boundary attribute.
         Attribute wall = 2;
+
         /// @brief Inlet boundary attribute.
         Attribute inlet = 4;
 
+        /// @brief Fluid volume cell attribute.
         Attribute fluidVolume = 1;
+
+        /// @brief Solid volume cell attribute.
         Attribute solidVolume = 2;
+
+        /// @brief FSI interface facet attribute.
         Attribute fsi = 2;
+
+        /// @brief Outlet boundary attributes.
+        std::array<Attribute, 6> outlets{{10, 15, 9, 14, 8, 7}};
+
+        /// @brief Boundary attributes where the dummy solid is weakly clamped.
+        std::array<Attribute, 6> solidRings{{17, 20, 21, 22, 18, 19}};
 
         Real dummySolidMass = 1.0;
         Real dummySolidStiffness = 1.0;
         Real solidClampPenalty = 1.0e12;
         Real fsiPenalty = 1.0e10;
         Real inactivePenalty = 1.0e-12;
-
-        /// @brief Outlet boundary attributes, in the same order used by RCR data.
-        std::array<Attribute, 6> outlets{{10, 15, 9, 14, 8, 7}};
 
         /// @brief Mesh coordinate scale applied after partitioning.
         Real meshScale = 1.0e-3;
@@ -577,24 +586,19 @@ namespace Rodin::Examples::Heart
       VelocityTrialFunctionType m_u;
       PressureTrialFunctionType m_p;
       PressureTrialFunctionType m_mu;
+      DisplacementTrialFunctionType m_d;
 
       VelocityTestFunctionType m_v;
       PressureTestFunctionType m_q;
       PressureTestFunctionType m_r;
 
+      DisplacementTestFunctionType m_w;
+      DisplacementGridFunctionType m_dOld;
+
       VelocityGridFunctionType m_uOld;
       PressureGridFunctionType m_pOld;
       PressureGridFunctionType m_one;
       PressureTestFunctionType m_qFlux;
-
-      VelocityTrialFunctionType m_u;
-      PressureTrialFunctionType m_p;
-      DisplacementTrialFunctionType m_d;
-
-      VelocityTestFunctionType m_v;
-      PressureTestFunctionType m_q;
-      DisplacementTestFunctionType m_w;
-      DisplacementGridFunctionType m_dOld;
 
       FluxLinearFormType m_flux;
 
