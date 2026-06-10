@@ -468,6 +468,11 @@ namespace Rodin::Examples::Heart
         /// @brief Stiffness of the ALE harmonic mesh-motion extension in the
         /// fluid.
         Real aleStiffness = 1.0;
+        /// @brief Enables the VMS subgrid projections (projected convection,
+        /// tau, dynamic subscale). The VMS contributions to the flow form are
+        /// currently disabled, so these projections are pure overhead unless
+        /// re-enabled. Default off.
+        bool enableVMS = false;
 
         /// @brief Mesh coordinate scale applied after partitioning.
         Real meshScale = 1.0e-4;

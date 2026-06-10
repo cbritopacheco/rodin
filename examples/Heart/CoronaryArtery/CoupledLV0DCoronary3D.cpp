@@ -1167,78 +1167,74 @@ namespace Rodin::Examples::Heart
                      std::pow(lambda, yasuda) * Pow(gamma, yasuda - 1.0) * dgamma;
 
     /*
-     * Convective residual target:
+     * VMS subgrid projections (projected convection, tau, dynamic subscale).
      *
-     *   a^n = (grad u^n) u^n.
+     * These feed only the VMS contributions to the flow form, which are
+     * currently disabled. Each is a full L2 solve on the large VMS / tau
+     * spaces, so they are skipped unless VMS is explicitly enabled.
      */
-    const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
+    if (m_cfg.enableVMS)
+    {
+      /*
+       * Convective residual target:  a^n = (grad u^n) u^n.
+       */
+      const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
-    /*
-     * L2 projection of the convective term:
-     *
-     *   int proj_conv_h · v = int u^n · grad u^n  · v.
-     */
+      // Fluid-only L2 projection; zero in the solid (solid mass term, no RHS).
+      m_l2ConvU = Integral(m_up, m_vp).over(m_cfg.fluidVolume) -
+                  Integral(convectionTarget, m_vp).over(m_cfg.fluidVolume) +
+                  Integral(m_up, m_vp).over(m_cfg.solidVolume);
+      m_l2ConvU.assemble();
+      m_l2ConvUSolver.solve();
 
-    // Fluid-only L2 projection; zero in the solid (solid mass term, no RHS).
-    m_l2ConvU = Integral(m_up, m_vp).over(m_cfg.fluidVolume) -
-                Integral(convectionTarget, m_vp).over(m_cfg.fluidVolume) +
-                Integral(m_up, m_vp).over(m_cfg.solidVolume);
-    m_l2ConvU.assemble();
-    m_l2ConvUSolver.solve();
+      RealFunction tau = [=, this](const Point &p) -> Real {
+        const auto uOld = m_uOld.getValue(p);
+        const Real mu = m_mu.getSolution().getValue(p);
+        const Real hK = std::pow(p.getPolytope().getMeasure(),
+                                 1.0 / p.getPolytope().getDimension());
+        const Real order = 2;
+        const Real speed = std::sqrt(dot(uOld, uOld));
 
-    RealFunction tau = [=, this](const Point &p) -> Real {
-      const auto uOld = m_uOld.getValue(p);
-      const Real mu = m_mu.getSolution().getValue(p);
-      const Real hK = std::pow(p.getPolytope().getMeasure(),
-                               1.0 / p.getPolytope().getDimension());
-      const Real order = 2;
-      const Real speed = std::sqrt(dot(uOld, uOld));
+        const Real Tau =
+            1. / (4.0 * std::pow(order, 4.) * mu / (m_cfg.rho * std::pow(hK, 2.0)) +
+                  2.0 * order * speed / hK);
 
-      const Real Tau =
-          1. / (4.0 * std::pow(order, 4.) * mu / (m_cfg.rho * std::pow(hK, 2.0)) +
-                2.0 * order * speed / hK);
+        return 1. / (m_cfg.rho / m_cfg.dt + m_cfg.rho / Tau);
+      };
 
-      return 1. / (m_cfg.rho / m_cfg.dt + m_cfg.rho / Tau);
-    };
+      // Fluid-only projection; zero in the solid (solid mass term, no RHS).
+      m_tauProjection = Integral(m_tau, m_t).over(m_cfg.fluidVolume) -
+                        Integral(tau, m_t).over(m_cfg.fluidVolume) +
+                        Integral(m_tau, m_t).over(m_cfg.solidVolume);
+      m_tauProjection.assemble();
+      m_tauProjectionSolver.solve();
 
-    // Fluid-only projection; zero in the solid (solid mass term, no RHS).
-    m_tauProjection = Integral(m_tau, m_t).over(m_cfg.fluidVolume) -
-                      Integral(tau, m_t).over(m_cfg.fluidVolume) +
-                      Integral(m_tau, m_t).over(m_cfg.solidVolume);
-    m_tauProjection.assemble();
-    m_tauProjectionSolver.solve();
+      auto subUpdate = VectorFunction(
+          m_mesh.getSpaceDimension(),
+          [=, this](const Point &p) -> Math::SpatialVector<Real>
+          {
+            const auto conv = convectionTarget.getValue(p);
+            const auto proj = m_up.getSolution().getValue(p);
+            const auto old = m_subOld.getValue(p);
+            const auto tau = m_tau.getSolution().getValue(p);
 
-    auto subUpdate = VectorFunction(
-        m_mesh.getSpaceDimension(),
-        [=, this](const Point &p) -> Math::SpatialVector<Real>
-        {
-          const auto conv = convectionTarget.getValue(p);
-          const auto proj = m_up.getSolution().getValue(p);
-          const auto old = m_subOld.getValue(p);
-          const auto tau = m_tau.getSolution().getValue(p);
+            Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
 
-          Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
+            for (size_t c = 0; c < out.size(); ++c) {
+              out[c] =
+                  tau * m_cfg.rho * (1. / m_cfg.dt * old[c] - (conv[c] - proj[c]));
+            }
 
-          for (size_t c = 0; c < out.size(); ++c) {
-            out[c] =
-                tau * m_cfg.rho * (1. / m_cfg.dt * old[c] - (conv[c] - proj[c]));
-          }
+            return out;
+          });
 
-          return out;
-        });
-
-    /*
-     * L2 projection of the dynamic subscale into m_sub:
-     *
-     *   int sub_h · v = int subUpdate · v.
-     */
-
-    // Fluid-only projection; zero in the solid (solid mass term, no RHS).
-    m_subProjection = Integral(m_sub, m_vp).over(m_cfg.fluidVolume) -
-                      Integral(subUpdate, m_vp).over(m_cfg.fluidVolume) +
-                      Integral(m_sub, m_vp).over(m_cfg.solidVolume);
-    m_subProjection.assemble();
-    m_subProjectionSolver.solve();
+      // Fluid-only projection; zero in the solid (solid mass term, no RHS).
+      m_subProjection = Integral(m_sub, m_vp).over(m_cfg.fluidVolume) -
+                        Integral(subUpdate, m_vp).over(m_cfg.fluidVolume) +
+                        Integral(m_sub, m_vp).over(m_cfg.solidVolume);
+      m_subProjection.assemble();
+      m_subProjectionSolver.solve();
+    }
 
     if (m_cfg.flowMode == FlowMode::Newton)
     {

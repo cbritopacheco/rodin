@@ -303,6 +303,15 @@ int main(int argc, char** argv)
       getOptionalReal("-coronary_inlet_pressure", cfg.inletPressureOverride);
       getOptionalReal("-coronary_outlet_pressure", cfg.outletPressureOverride);
       getOptionalReal("-coronary_constant_viscosity", cfg.constantViscosity);
+
+      PetscBool enableVMS = cfg.enableVMS ? PETSC_TRUE : PETSC_FALSE;
+      PetscBool enableVMSSet = PETSC_FALSE;
+      ierr = PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+                                 "-coronary_enable_vms", &enableVMS,
+                                 &enableVMSSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (enableVMSSet)
+        cfg.enableVMS = (enableVMS == PETSC_TRUE);
       getNonNegativeReal("-coronary_pressure_ramp_time", cfg.pressureRampTime);
 
       Rodin::Examples::Heart::CoupledLV0DCoronary3D simulation(context, cfg);
