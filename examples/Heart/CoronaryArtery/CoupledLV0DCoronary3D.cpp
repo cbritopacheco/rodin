@@ -1442,10 +1442,10 @@ namespace Rodin::Examples::Heart
            * First smoke test: freeze velocity and displacement weakly on the FSI/wall
            * interface. Later replace this by u - d_t.
            */
-          + fsiPenalty
-              * BoundaryIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
+          // + fsiPenalty
+          //     * BoundaryIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
 
-          + fsiPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
+          // + fsiPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
 
           /*
            * Inactive-domain algebraic regularization.
@@ -1459,6 +1459,8 @@ namespace Rodin::Examples::Heart
 
           + inactivePenalty * Integral(m_d, m_w).over(m_cfg.fluidVolume)
 
+          + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.fsi)
+
           // ==========================================================/
 
           /*
@@ -1467,7 +1469,7 @@ namespace Rodin::Examples::Heart
            * Since Oseen unknown is the new velocity itself, impose:
            *   u = 0.
            */
-          + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
+          + DirichletBC(m_d, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
     }
 
     m_stepTiming.setup3DForm = secondsSince(setup3DStart);
