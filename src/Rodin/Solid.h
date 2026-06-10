@@ -44,6 +44,7 @@
 #include "Solid/Constitutive/NeoHookean.h"
 #include "Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Solid/Constitutive/MooneyRivlin.h"
+#include "Solid/Constitutive/Yeoh.h"
 #include "Solid/Constitutive/HolzapfelOgden.h"
 #include "Solid/Constitutive/ActiveFiberLaw.h"
 #include "Solid/Constitutive/ActiveContraction.h"

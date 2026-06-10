@@ -15,6 +15,7 @@ set(RodinSolid_HEADERS
   Constitutive/NeoHookean.h
   Constitutive/SaintVenantKirchhoff.h
   Constitutive/MooneyRivlin.h
+  Constitutive/Yeoh.h
   Constitutive/HolzapfelOgden.h
   Constitutive/ActiveFiberLaw.h
   Constitutive/ActiveContraction.h
