@@ -5,10 +5,17 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * Explicit (staggered) PETSc/MPI coronary ALE FSI prototype.
+ * Explicit (staggered) PETSc SEQUENTIAL coronary ALE FSI prototype.
  *
- * Partitioned/explicit counterpart of CoronaryArtery_FSI_PETSc_MPI.cpp
- * (monolithic). Same physics (coronary Carreau-Yasuda fluid, NeoHookean/Newmark
+ * Single-process (non-MPI) sibling of CoronaryArtery_FSI_Explicit_PETSc_MPI.cpp:
+ * identical physics and numerics, but the mesh lives in Context::Local (no
+ * boost::mpi environment, no Sharder/partitioner, no distributed interface).
+ * PETSc is still used for the linear/nonlinear solves (KSP/SNES) and runs in
+ * serial, exactly as in examples/PETSc/PDEs/Seq_BDF1_ALE_FSI.cpp.  Because the
+ * fluid<->solid interface coupling was only ever valid on a single rank, this
+ * version drops the MPI scaffolding outright instead of guarding against it.
+ *
+ * Same physics (coronary Carreau-Yasuda fluid, NeoHookean/Newmark
  * solid, harmonic ALE, 0D CCMLC2014 heart model + RCR outlets) but a
  * Robin-Neumann staggered coupling instead of a monolithic SNES.
  *
@@ -53,31 +60,19 @@
 #include <vector>
 #include <unordered_set>
 
-#include <boost/mpi/communicator.hpp>
-#include <boost/mpi/environment.hpp>
-
 #include <petscsys.h>
 #include <petscvec.h>
 
 #include <Rodin/Alert.h>
 #include <Rodin/Assembly.h>
 #include <Rodin/Geometry.h>
-#include <Rodin/Geometry/BalancedCompactPartitioner.h>
 #include <Rodin/IO/XDMF.h>
-#include <Rodin/MPI.h>
-#include <Rodin/MPI/Context/MPI.h>
-#include <Rodin/MPI/Geometry/Mesh.h>
-#include <Rodin/MPI/Geometry/Sharder.h>
 #include <Rodin/Math/RootFinding/NewtonRaphson.h>
 #include <Rodin/Math/RungeKutta/RK4.h>
 #include <Rodin/PETSc.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Solver.h>
 #include <Rodin/Variational.h>
-
-#ifdef RODIN_USE_SCOTCH
-#include <Rodin/Scotch/MeshPartitioner.h>
-#endif
 
 #include "Rodin/Heart/CCMLC2014.h"
 
@@ -92,9 +87,7 @@ using namespace Rodin::Examples::Heart;
 
 namespace {
 using Model = Rodin::Heart::CCMLC2014T<>;
-using MeshType = Geometry::Mesh<Context::MPI>;
-
-constexpr int RootRank = 0;
+using MeshType = Geometry::Mesh<Context::Local>;
 
 struct BoundaryFluid {
   static constexpr Attribute FSI = 2;
@@ -234,7 +227,7 @@ struct Config {
   // the first traction exchange is balanced, and the startup pressure ramp
   // is skipped.  NOTE: this is forward pressurization (the geometry ends
   // slightly inflated w.r.t. the imaged one), not an inverse prestress.
-  size_t prestressSteps = 20;
+  size_t prestressSteps = 60;
 
   Real solidDensity = 1060.0;
   Real solidYoungModulus = 5.0e5;
@@ -250,13 +243,7 @@ struct Config {
   size_t couplingIterations = 2;   // 1 = loosely coupled; >1 = strong coupling
   Real couplingRelaxation = 1.0;   // displacement under-relaxation for k>1
   Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
-  // Robin transmission parameter alpha used on BOTH sides of the FSI
-  // interface:
-  //   fluid: sigma_f n + alpha u   = alpha u_s + sigma_f^{lag} n
-  //   solid: sigma_s n + alpha d's = alpha u_f^{lag} + t_f^{lag}
-  // The lagged traction data makes the scheme consistent at the fixed point
-  // (u = u_s, traction continuity), so alpha need not be huge; it only sets
-  // how strongly the kinematic mismatch is penalized within a step.
+
   Real robinAlpha = 1e4;
 };
 
@@ -440,38 +427,15 @@ static void initializeModel(Model &model, const Model::Input &in) {
   bc.pout = bc.pc + bc.Rp * Q;
 }
 
-static MeshType makeMesh(const Context::MPI &context, const Config &cfg,
-                         const std::string &meshPath) {
-  const auto &comm = context.getCommunicator();
+// Load the coronary FSI mesh directly into a local (single-process) mesh.
+// No partitioner / sharder: this is the sequential build.
+static MeshType makeMesh(const Config &cfg, const std::string &meshPath) {
+  MeshType mesh;
+  mesh.load(meshPath, IO::FileFormat::MEDIT);
 
-  Rodin::MPI::Sharder sharder(context);
-  if (comm.rank() == RootRank) {
-    Geometry::Mesh<Context::Local> local;
-    local.load(meshPath, IO::FileFormat::MEDIT);
+  if (mesh.getSpaceDimension() != 3)
+    throw std::runtime_error("Expected a 3D coronary FSI mesh.");
 
-    if (local.getSpaceDimension() != 3)
-      throw std::runtime_error("Expected a 3D coronary FSI mesh.");
-
-    const size_t D = local.getDimension();
-    local.getConnectivity().compute(D, D);
-    local.getConnectivity().compute(D, 0);
-    local.getConnectivity().compute(D, D - 1);
-    local.getConnectivity().compute(D - 1, D);
-    local.getConnectivity().compute(D - 1, 0);
-    local.getConnectivity().compute(D - 1, 1);
-    local.getConnectivity().compute(1, 0);
-
-#ifdef RODIN_USE_SCOTCH
-    Scotch::Partitioner partitioner(local);
-#else
-    Geometry::BalancedCompactPartitioner partitioner(local);
-#endif
-    partitioner.partition(static_cast<size_t>(comm.size()));
-    sharder.shard(partitioner);
-    sharder.scatter(RootRank);
-  }
-
-  MeshType mesh = sharder.gather(RootRank);
   mesh.scale(cfg.meshScale);
 
   const size_t D = mesh.getDimension();
@@ -482,8 +446,8 @@ static MeshType makeMesh(const Context::MPI &context, const Config &cfg,
   mesh.getConnectivity().compute(D - 1, 0);
   mesh.getConnectivity().compute(D - 1, 1);
   mesh.getConnectivity().compute(1, 0);
-  mesh.reconcile(2);
-  mesh.reconcile(1);
+  // No reconcile(): that synchronizes shared entities across MPI ranks and is
+  // only defined on the distributed mesh.  A local mesh needs no reconciliation.
 
   return mesh;
 }
@@ -609,30 +573,8 @@ static std::size_t tagFSIRingBand(MeshType &mesh, Attribute fsi, Attribute ring,
 // Match each fluid FSI face to its geometric twin on the solid FSI surface by
 // centroid proximity.  The two meshes are assumed CONFORMING on the interface
 // (coincident faces); a tolerance absorbs floating-point / ASCII round-off.
-//
-// IMPORTANT (MPI): each mesh is partitioned INDEPENDENTLY, so a fluid FSI face
-// and its solid twin are not guaranteed to live on the same rank.  This builder
-// only sees LOCAL faces, so with more than one rank some fluid faces may have no
-// local solid twin.  For a true parallel coupling the interface must be
-// co-partitioned (or matched globally); until then, run on a single MPI rank.
-//
-// TODO(mpi): make the interface coupling distributed.  Three steps:
-//   1. Global match.  Each rank Allgathers the centroids (+ global ids) of its
-//      LOCAL fluid and solid FSI faces so every rank can build the full
-//      fluid-face -> solid-face pairing, recording for each pair which rank owns
-//      the fluid face and which owns the solid twin.  Replaces the local-only
-//      centroid scan below.
-//   2. Per-iteration value exchange.  Once per coupling iteration, Allgather a
-//      compact (centroid -> interface value) buffer for the quantities the
-//      coupling consumes -- solid velocity, fluid velocity, solid displacement,
-//      and the projected interface traction.  Rewrite the interface
-//      VectorFunctions (interfaceSolidVelocity, robinInterfaceData,
-//      interfaceSolidDisplacement) and the traction projection to read from this
-//      replicated buffer instead of doing a cross-mesh getValue() on a twin face
-//      that may be off-rank.
-//   3. Collective-ordering discipline.  Every rank must reach the Allgathers in
-//      the same order every iteration (no rank skipping a collective because it
-//      happens to own no FSI faces) or the run deadlocks.
+// In this sequential build the whole interface lives on one process, so the
+// match is exact and complete (no cross-rank concerns).
 static InterfaceMap buildInterfaceMap(const MeshType &fluidReferenceMesh,
                                       const MeshType &solidReferenceMesh) {
   InterfaceMap map;
@@ -724,13 +666,12 @@ static InterfaceMap buildInterfaceMap(const MeshType &fluidReferenceMesh,
   if (unmatched > 0) {
     std::ostringstream os;
     os << "buildInterfaceMap: " << unmatched << " of " << fluidCount
-       << " local fluid FSI face(s) had no solid twin within tol=" << tol
-       << " (nearest local distance up to " << worst
-       << "; local solid FSI faces=" << solidFaces.size() << "). "
+       << " fluid FSI face(s) had no solid twin within tol=" << tol
+       << " (nearest distance up to " << worst
+       << "; solid FSI faces=" << solidFaces.size() << "). "
        << "If solid FSI faces=0 the FSI attribute is wrong/missing in the solid "
           "mesh. If the distance is ~one face size, the meshes are "
-          "non-conforming OR (MPI) the twin is on another rank: run on one rank "
-          "or build the map globally.";
+          "non-conforming on the interface.";
     throw std::runtime_error(os.str());
   }
 
@@ -1106,40 +1047,13 @@ int main(int argc, char **argv) {
   setPETScDefault("-pc_type", "lu");
   setPETScDefault("-pc_factor_mat_solver_type", "mumps");
 
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world(PETSC_COMM_WORLD, boost::mpi::comm_attach);
-  Rodin::Context::MPI context(env, world);
-  const auto &comm = context.getCommunicator();
-  const bool isRoot = comm.rank() == RootRank;
+  // Sequential build: no boost::mpi environment / communicator / context.
+  // PETSc runs in serial (PETSC_COMM_SELF) and isRoot is trivially true.
+  const bool isRoot = true;
 
   try {
     Config cfg;
     readOptions(cfg);
-
-    // -----------------------------------------------------------------------
-    // MPI status of the FSI coupling.
-    //
-    // The fluid and solid FE solves are fully MPI-distributed, but the
-    // fluid<->solid INTERFACE coupling is NOT yet distributed.  The two meshes
-    // are partitioned independently, so a fluid FSI face and its solid twin
-    // generally live on different ranks.  Both halves of the coupling assume
-    // locality and break with more than one rank:
-    //   * buildInterfaceMap only sees LOCAL faces -> incomplete map (it throws
-    //     "had no solid twin" when the twin is off-rank);
-    //   * the interface VectorFunctions sample the twin face's DOF data via a
-    //     cross-mesh getValue(), but that face/data is not owned by the calling
-    //     rank.
-    // Until a distributed interface (global match + per-iteration cross-rank
-    // value exchange, e.g. an Allgather'd centroid->value buffer) is added, run
-    // this case on a SINGLE MPI rank.
-    if (comm.size() > 1)
-      throw std::runtime_error(
-          "CoronaryArtery_FSI_Explicit: the fluid<->solid interface coupling is "
-          "not yet distributed and requires a single MPI rank. Run with "
-          "`mpirun -n 1` (use threaded MUMPS/OpenMP for parallelism within the "
-          "rank). Multi-rank support needs a global interface map plus "
-          "cross-rank interface value exchange -- see the notes above "
-          "buildInterfaceMap.");
 
     Model::Input modelInput = makeModelInput();
     Model model(modelInput);
@@ -1147,20 +1061,17 @@ int main(int argc, char **argv) {
 
     const std::string fluidMesh =
         "../resources/examples/Heart/CoronaryArtery_FSI_fluid.mesh";
-    MeshType meshFluid = makeMesh(context, cfg, fluidMesh);
+    MeshType meshFluid = makeMesh(cfg, fluidMesh);
     const size_t dimFluid = meshFluid.getSpaceDimension();
 
     const std::string solidMesh =
         "../resources/examples/Heart/CoronaryArtery_FSI_solid.mesh";
-    MeshType meshSolid = makeMesh(context, cfg, solidMesh);
+    MeshType meshSolid = makeMesh(cfg, solidMesh);
     const size_t dimSolid = meshSolid.getSpaceDimension();
 
     // Spatial dimension shared by both blocks (used by the coupling fields).
     const size_t dim = dimFluid;
 
-    // Promote the FSI faces touching the caps into the FSIRing attribute on BOTH
-    // meshes (must happen before buildInterfaceMap so the bulk FSI faces still
-    // pair up; the band is excluded from the Robin coupling on both sides).
     const std::size_t fluidRingFaces =
         tagFSIRingBand(meshFluid, BoundaryFluid::FSI, BoundaryFluid::FSIRing,
                        BoundaryFluid::Inlet, BoundaryFluid::Outlets);
@@ -1198,10 +1109,7 @@ int main(int argc, char **argv) {
     PETSc::Variational::TestFunction v(uh);
     PETSc::Variational::TestFunction q(ph);
 
-    // ---- Projected dynamic-VMS convective stabilization (mirrors
-    // CoupledLV0DCoronary3D).  Separate FES instances for the L2 projections of
-    // the convective acceleration, the stabilization parameter tau, the dynamic
-    // subscale and the lagged viscosity used inside tau.
+
     VelocityFES uph(std::integral_constant<size_t, 2>{}, meshFluid, dimFluid);
     PressureFES tauh(std::integral_constant<size_t, 1>{}, meshFluid);
 
@@ -1289,7 +1197,7 @@ int main(int argc, char **argv) {
     fluidTraction.setName("FluidTraction");
     aleDisp.setName("ALEDisp");
 
-    IO::XDMF xdmf_fluid(comm, cfg.xdmfBasename + "fluid", RootRank);
+    IO::XDMF xdmf_fluid(cfg.xdmfBasename + "fluid");
     xdmf_fluid.setMesh(meshFluid);
     xdmf_fluid.add("FluidVelocity", uOld);
     xdmf_fluid.add("FluidPressure", pOld);
@@ -1298,7 +1206,7 @@ int main(int argc, char **argv) {
     xdmf_fluid.add("ALEDisp", aleDisp);
     xdmf_fluid.write(0.0).flush();
 
-    IO::XDMF xdmf_solid(comm, cfg.xdmfBasename + "solid", RootRank);
+    IO::XDMF xdmf_solid(cfg.xdmfBasename + "solid");
     xdmf_solid.setMesh(meshSolid);
     xdmf_solid.add("Displacement", dState);
     xdmf_solid.add("SolidVelocity", solidVelocity);
@@ -1378,16 +1286,6 @@ int main(int argc, char **argv) {
     uCur = zero;
     pCur = 0.0;
 
-    // ----------------------------------------------------------------------
-    // Fluid Cauchy traction on the FSI interface, current (deformed) config:
-    //   sigma_f = -p I + mu (grad u + grad u^T)
-    //   t_f     =  p n_f - mu (grad u + grad u^T) n_f  = -sigma_f n_f
-    // 'tractionFSI' is a pure fluid-side expression evaluated directly at a
-    // FLUID interface point (used by the fluid Robin term and the traction
-    // output).  'fluidStress' maps a SOLID interface point to its fluid twin,
-    // samples t_f there, and pulls it back to the solid REFERENCE configuration
-    // via the areal stretch J_s = A_t / A_0 (total-Lagrangian solid load).
-    // ----------------------------------------------------------------------
     const auto gradUfsi = Jacobian(uCur);
     const auto strainRateFsi = gradUfsi + Transpose(gradUfsi);
     const auto symUfsi = 0.5 * strainRateFsi;
@@ -1398,16 +1296,12 @@ int main(int argc, char **argv) {
                                  (cy.n - 1.0) / cy.yasuda);
 
     // PHYSICAL (unscaled) fluid traction t_f = -sigma_f n_f: the fluid's OWN
-    // lagged Robin datum sigma_f^{lag} n and the traction output field.  The
-    // traction-scale knobs must NOT appear here: scaling the fluid-side datum
-    // moves the fluid fixed point to (1 - scale) sigma_f n = alpha (u_s - u),
-    // i.e. it violates kinematic continuity whenever scale != 1.
+    // lagged Robin datum sigma_f^{lag} n and the traction output field.
     const auto tractionFSI =
         (1.0 * pCur) * normalFluid -
         (1.0 * muFsi) * Mult(strainRateFsi, normalFluid);
 
-    // Scaled traction TRANSFERRED to the solid (their documented purpose: damp
-    // the load the wall receives, not the fluid's own Robin datum).
+    // Scaled traction TRANSFERRED to the solid
     const auto tractionToSolid =
         (tractionPScale * pCur) * normalFluid -
         (tractionVScale * muFsi) * Mult(strainRateFsi, normalFluid);
@@ -1493,16 +1387,6 @@ int main(int argc, char **argv) {
 
     const auto transportLag = uOld - meshVelocity;
     const auto convU = Mult(Jacobian(u), transportLag);
-    // Geometric + Temam coefficient for the CONSERVATIVE two-mesh BDF1 mass
-    // split.  The time term (1/dt)[(u,v)_{n+1} - (u^n,v)_n] secretly carries
-    // +rho(div w)(u.v) (Reynolds transport: the integral grows where the mesh
-    // expands), so consistency REQUIRES the full geometric companion term
-    // -rho(div w)(u.v).  The Temam part (1/2)rho div(u^n)(u.v) is consistent
-    // (div u^n ~ 0 discretely) and stabilizing.  Together, with the 1/2 factor
-    // applied below:  (1/2)[div(u^n) - 2 div(w)] = (1/2)div(u^n) - div(w).
-    // (The previous plain-Temam coefficient div(u^n) - div(w) supplied only
-    // HALF the geometric term, leaving a spurious +(1/2)rho(div w)(u.v)
-    // reaction wherever the mesh dilates/compresses.)
     const auto divGeomTemam = Div(uOld) - 2.0 * Div(meshVelocity);
 
     const auto duNormal = Dot(u, normalFluid) * normalFluid;
@@ -1526,10 +1410,7 @@ int main(int argc, char **argv) {
 
     // NOTE: the BDF1 time term has TWO parts that live on DIFFERENT meshes:
     //   (rho/dt) [ \int_{Omega^{n+1}} u . v  -  \int_{Omega^n} u^n . v ].
-    // The implicit part (over Omega^{n+1}) stays in 'flow' below.  The explicit
-    // u^n part must be integrated on the PREVIOUS configuration Omega^n; it is
-    // therefore NOT included here and is assembled separately as 'massOld'
-    // and injected into the fluid RHS at solve time.
+    // The implicit part (over Omega^{n+1}) stays in 'flow' below.
     Problem flow(u, p, v, q);
     flow =
         (cfg.fluidDensity / dt) * Integral(u, v) +
@@ -1555,34 +1436,17 @@ int main(int argc, char **argv) {
             .over(BoundaryFluid::Outlets[4]) +
         BoundaryIntegral(pout5 * Dot(v, normalFluid))
             .over(BoundaryFluid::Outlets[5])
+
         + cfg.inletImpedance *
               BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
                   .over(BoundaryFluid::Inlet)
         + cfg.inletTangentialDamping *
               BoundaryIntegral(Dot(duTangential, v)).over(BoundaryFluid::Inlet)
-        // Robin-Robin FSI transmission (fluid side).  Imposed condition:
-        //   sigma_f^{n+1} n + alpha u^{n+1} = alpha u_s + sigma_f^{lag} n,
-        // where the data traction sigma_f^{lag} n stands in for the solid
-        // traction sigma_s n (traction continuity), lagged at the previous
-        // fluid solve.  The problem is assembled in RESIDUAL form (see the
-        // reference CoupledLV0DCoronary3D: "A u - rho/dt u^n + loads = 0"),
-        // so the natural boundary term is -int (sigma_f n).v and substituting
-        // the Robin condition gives
-        //   + alpha int u.v - alpha int u_s.v - int (sigma_f^{lag} n).v.
-        // Since tractionFSI = p n - mu(grad u + grad u^T) n = -sigma_f n, the
-        // lagged data term enters with a PLUS sign:
-        //   - int (sigma_f^{lag} n).v = + int tractionFSI.v.
-        // SIGN MATTERS: with a minus sign here the imposed condition becomes
-        // sigma^{n+1} n = -sigma^{lag} n + alpha(u_s - u), whose fixed point
-        // is sigma n = 0 -- a traction-free OPEN wall: the pressure cannot be
-        // sustained, the domain never fills, and the sign-alternating lagged
-        // loop diverges as soon as the field develops.
+
         + cfg.robinAlpha * BoundaryIntegral(u,v).over(BoundaryFluid::FSI)
         - cfg.robinAlpha * BoundaryIntegral(interfaceSolidVelocity,v).over(BoundaryFluid::FSI)
         + BoundaryIntegral(tractionFSI,v).over(BoundaryFluid::FSI)
-        // Strong no-slip on the cap rings: the one-element FSI band touching
-        // the inlet/outlet caps is pinned to zero, consistent with the solid
-        // ring clamp.
+
         + DirichletBC(u, zero).on(BoundaryFluid::FSIRing);
         // Projected dynamic-VMS convective stabilization (lagged): bilinear
         // streamline term plus its projection/subscale source.  tauTrial,
@@ -1644,15 +1508,6 @@ int main(int argc, char **argv) {
     Problem subProj(subTrial, vp);
     subProj = Integral(subTrial, vp) - Integral(subUpdate, vp);
 
-    // ----------------------------------------------------------------------
-    // Solid displacement iterate d_s evaluated at a FLUID interface point: this
-    // is the ALE Dirichlet data on the FSI boundary.  'dIter' lives on the SOLID
-    // mesh, while the ALE problem (dAle) lives on the FLUID mesh, so we must map
-    // each fluid interface point to its matching solid face and sample 'dIter'
-    // there (cross-mesh).  Passing 'dIter' directly would make DirichletBC call
-    // dIter.getValue(p) with a point whose polytope belongs to meshFluid, which
-    // meshSolid cannot locate ("Point is not contained in the finite element
-    // space mesh").
 
     auto interfaceSolidDisplacement = VectorFunction(dim, [&](const Point& xf)
     {
@@ -1676,14 +1531,6 @@ int main(int argc, char **argv) {
     //   * equal to the solid displacement iterate on the FSI interface,
     //   * fixed (zero) at the inlet / outlet rings.
     // ----------------------------------------------------------------------
-    // Harmonic ALE mesh-extension solve.  The Problem is built ONCE here, but
-    // it MUST be re-assembled on every coupling iterate (after restoring the
-    // fluid mesh to its reference configuration): the FSI DirichletBC samples
-    // 'dIter' through interfaceSolidDisplacement, and assemble() is what bakes
-    // the current Dirichlet values into the linear system.  KSP::solve() alone
-    // does NOT re-evaluate the BCs, so solving without reassembling freezes the
-    // interface lift at its value at assembly time (zero) and the fluid mesh
-    // never moves.
       PETSc::Variational::TrialFunction dMove(uh);
       PETSc::Variational::TestFunction vMove(uh);
 
@@ -1696,18 +1543,7 @@ int main(int argc, char **argv) {
                     BoundaryFluid::Outlets[3], BoundaryFluid::Outlets[4],
                     BoundaryFluid::Outlets[5], BoundaryFluid::FSIRing);
 
-    // Data part of the solid Robin transmission, evaluated at a SOLID
-    // interface point and expressed per REFERENCE area (factor J_a):
-    //   J_a * [ robinVelocityCoeff (dState - dPred) + alpha vPred
-    //           - alpha u_f^{n+1,k-1} ].
-    // The first two pieces are the data part of alpha * Newmark velocity
-    // alpha d(d_s)/dt; the last is the fluid interface velocity of the LATEST
-    // coupling iterate (uCur, not the frozen step-n uOld): with uOld the
-    // datum never updates within a step and the sub-iteration fixed point
-    // carries a spurious interface traction alpha (u^n - u^{n+1}).  At the
-    // first iterate of each step uCur still holds u^n, so loose coupling
-    // (couplingIterations == 1) is unchanged.  dState is read at assembly
-    // time, so each SNES residual evaluation sees the current Newton state.
+
     auto robinInterfaceData = VectorFunction(dim, [&](const Point &xs) {
       const Point xf = forwardSolidPointToFluid(xs, meshFluid, interfaceMap);
       const Real Ja = arealStretchAt(xs);
@@ -1736,34 +1572,12 @@ int main(int argc, char **argv) {
         solidMass * Integral(dState, w) - solidMass * Integral(dPred, w)
         + solidInternal
         + DirichletBC(d, zero).on(BoundarySolid::Inlet, BoundarySolid::Outlets[0], BoundarySolid::Outlets[1], BoundarySolid::Outlets[2], BoundarySolid::Outlets[3], BoundarySolid::Outlets[4], BoundarySolid::Outlets[5])
-        // Clamp the solid FSI ring band too.  The band was promoted out of FSI
-        // (so it no longer carries the Robin transmission); pinning it to zero
-        // keeps the wall anchored at the cut ends and gives the fluid ring band
-        // a zero, consistent wall velocity for its strong no-slip clamp.
         + DirichletBC(d, zero).on(BoundarySolid::FSIRing)
-        // Robin transmission on the FSI interface (solid side), stated per
-        // CURRENT area and pulled back to the reference surface with the
-        // areal stretch J_a (so alpha acts on the same area measure as on the
-        // fluid side):
-        //   J_a [ sigma_f-consistent: sigma_s n_s + alpha d(d_s)/dt
-        //                             = alpha u_f^{n+1,k-1} + t_f^{n+1,k-1} ],
-        // with the Newmark interface velocity
-        //   d(d_s)/dt = vPred + solidVelocityCoeff (dState - dPred).
-        // The trial part alpha J_a d(d)/dt gives the bilinear term below; ALL
-        // data parts (Newmark velocity data, lagged fluid velocity uCur) are
-        // collected in 'robinInterfaceData'; the fluid traction 'fluidStress'
-        // (scaled + pulled back to the reference config) is the Neumann RHS.
+
         + robinVelocityCoeff *
               BoundaryIntegral(arealStretch * Dot(d, w))
                   .over(BoundarySolid::FSI) +
         BoundaryIntegral(robinInterfaceData, w).over(BoundarySolid::FSI)
-        // Neumann load: the traction exerted by the fluid on the solid is
-        //   t_f = sigma_f n_s = -sigma_f n_f = fluidStress  (p>0 pushes the
-        // wall OUTWARD).  In residual form a prescribed traction enters as
-        //   - int t_f . w
-        // (compare Seq_BDF1_ALE_FSI.cpp: "- BoundaryIntegral(solidFluidTraction, w)").
-        // A plus sign here loads the wall with the NEGATIVE of the fluid
-        // traction, i.e. lumen pressure sucks the wall inward.
         - BoundaryIntegral(fluidStress, w)
             .over(BoundarySolid::FSI);
 
@@ -1780,15 +1594,10 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------
     // Quasi-static wall prestress (cfg.prestressSteps > 0): ramp a uniform
     // lumen pressure 0 -> tractionPScale * par(0) on the solid FSI surface in
-    // static NeoHookean increments.  Lumen pressure pushes the wall OUTWARD:
-    // on the inner (FSI) surface the solid outward normal n_s points INTO the
-    // lumen, so the traction is t = -p n_s, entering the residual as
-    //   -int t.w = + int p (n_s . w).
-    // Follower effects are neglected (load on the reference surface) --
-    // consistent with the total-Lagrangian traction treatment above.
+    // static NeoHookean increments.
     // ----------------------------------------------------------------------
     if (cfg.prestressSteps > 0) {
-      const Real p0 = tractionPScale * model.getState().par;
+      const Real p0 = tractionPScale * 11000.;
       Real prestressPressure = 0.0;
       const auto normalSolid = BoundaryNormal(meshSolid);
       auto pPre = RealFunction([&](const Point &) { return prestressPressure; });
@@ -1836,13 +1645,9 @@ int main(int argc, char **argv) {
                       << " Pa in " << cfg.prestressSteps << " increment(s)"
                       << Alert::Raise;
 
-      // Commit the prestressed state as the dynamic initial condition (zero
-      // velocity / acceleration are already set).
       dOld.setData(dState.getData());
       dIter.setData(dState.getData());
 
-      // Lift the fluid mesh onto the prestressed wall and make it the ALE
-      // history, so meshVelocity starts at zero.
       restoreMeshToReference(meshFluid, referenceVertices);
       ale.assemble();
       Solver::KSP(ale).solve();
@@ -1850,11 +1655,6 @@ int main(int argc, char **argv) {
       aleDispOld.setData(aleDisp.getData());
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh, aleDisp);
 
-      // Balanced first traction exchange: the wall already carries p0, so the
-      // fluid starts pressurized at par(0) (fluidStress applies tractionPScale
-      // to pCur, reproducing exactly the prestress load) and the startup
-      // pressure ramp -- whose only job was to ease the un-prestressed wall
-      // into the load -- is skipped.
       pOld = model.getState().par;
       pCur = model.getState().par;
       cfg.pressureRampTime = 0.0;
@@ -1937,14 +1737,6 @@ int main(int argc, char **argv) {
       Real qIn = 0.0;
       bool stepFailed = false;
 
-      // Omega^n (= aleDispOld) and u^n (= uOld) are FIXED for the whole step,
-      // so assemble the explicit BDF1 mass term (rho/dt)(u^n, v)|_{Omega^n}
-      // ONCE per step here, not once per coupling iterate.  aleDisp/aleDispOld
-      // live on the velocity FES 'uh', so the vertex displacements MUST be
-      // indexed with 'uh'.  (The mesh is already at Omega^n at this point --
-      // it was left at aleDisp == aleDispOld by the previous step -- but the
-      // move is absolute from the reference vertices, so this is cheap and
-      // robust.)
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
                                      aleDispOld);
       massOld.assemble();
@@ -1976,11 +1768,6 @@ int main(int argc, char **argv) {
                                   static_cast<Real>(stateNorm))
                                : static_cast<Real>(deltaNorm);
 
-          // Solid velocity / acceleration consistent with the RELAXED iterate
-          // 'dIter' -- the SAME displacement the ALE lift / mesh motion sees
-          // below -- so the fluid Robin datum alpha*u_s and the mesh kinematics
-          // agree even when couplingRelaxation < 1.  (With relaxation == 1,
-          // dIter == dState and this is identical to using dState.)
           solidAcceleration = dIter;
           solidAcceleration -= dPred;
           solidAcceleration *= 1.0 / (betaN * dt * dt);
@@ -1996,17 +1783,10 @@ int main(int argc, char **argv) {
                           << Alert::Raise;
           }
 
-          // Converged: the ALE/fluid state from the PREVIOUS iterate already
-          // corresponds to an interface displacement within tolerance of
-          // dIter, so skip the redundant ALE + fluid solve.  couple == 1 must
-          // always fall through: uCur/pCur still hold step-n data and the
-          // fluid has not been solved on this step's mesh yet.
           if (couple > 1 && rel < cfg.couplingTolerance)
             break;
 
           restoreMeshToReference(meshFluid, referenceVertices);
-          // Re-assemble on the reference mesh so the FSI DirichletBC picks up
-          // the CURRENT solid displacement iterate 'dIter' (see note above).
           ale.assemble();
           Solver::KSP(ale).solve();
           aleDisp.setData(dMove.getSolution().getData());
@@ -2016,9 +1796,6 @@ int main(int argc, char **argv) {
           meshVelocity -= aleDispOld;
           meshVelocity *= 1.0 / dt;
 
-          // Move the mesh to the current ALE configuration Omega^{n+1} and
-          // assemble all Omega^{n+1} fluid terms there.  (massOld was already
-          // assembled on Omega^n before the coupling loop.)
           moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
                                          aleDisp);
 
@@ -2036,10 +1813,10 @@ int main(int argc, char **argv) {
           flow.assemble().setFieldSplits();
 
           // Inject (rho/dt)(u^n, v)|_{Omega^n} into the velocity block of RHS.
-          // NOTE (MPI): this assumes massOld's vector ordering coincides with
-          // the velocity-block ordering of the monolithic RHS (global index =
-          // vOff + i).  That holds on a single rank (enforced at startup);
-          // revisit when the interface coupling is made distributed.
+          // massOld's vector ordering coincides with the velocity-block
+          // ordering of the monolithic RHS (global index = vOff + i), which is
+          // exact in this single-process build (VecGetOwnershipRange spans the
+          // whole vector).
           {
             ::Vec b = flow.getLinearSystem().getVector();
             const PetscInt vOff = static_cast<PetscInt>(
@@ -2126,9 +1903,8 @@ int main(int argc, char **argv) {
     if (isRoot && csv)
       csv.close();
   } catch (const std::exception &e) {
-    if (comm.rank() == RootRank)
-      std::cerr << "CoronaryArtery_FSI_Explicit_PETSc_MPI failed: " << e.what()
-                << '\n';
+    std::cerr << "CoronaryArtery_FSI_Explicit_PETSc_Seq failed: " << e.what()
+              << '\n';
     PetscFinalize();
     return 1;
   }

@@ -61,6 +61,20 @@ Rodin::MPI
   endif()
 endif()
 
+# Sequential (single-process) explicit coronary FSI: PETSc only, no MPI.
+if (RODIN_USE_PETSC)
+  add_executable(CoronaryArtery_FSI_Explicit_PETSc_Seq CoronaryArtery_FSI_Explicit_PETSc_Seq.cpp)
+  target_link_libraries(CoronaryArtery_FSI_Explicit_PETSc_Seq
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
+endif()
+
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)
   add_executable(CoronaryArtery
     CoronaryArtery.cpp
