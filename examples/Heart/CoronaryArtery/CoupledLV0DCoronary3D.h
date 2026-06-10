@@ -449,6 +449,14 @@ namespace Rodin::Examples::Heart
         Real solidE = 5.0e5;
         /// @brief Solid Poisson ratio.
         Real solidNu = 0.3;
+        /// @brief Mass-proportional Rayleigh damping coefficient for the solid.
+        /// @details Adds a damping force (alpha * rho_s) * v on the solid,
+        /// with v the BDF1 velocity (d - dOld)/dt. Set to 0 to disable.
+        Real solidRayleighAlpha = 0.0;
+        /// @brief Stiffness-proportional Rayleigh damping coefficient.
+        /// @details Adds a damping force beta * K * v on the solid, where K is
+        /// the elastic stiffness operator. Set to 0 to disable.
+        Real solidRayleighBeta = 0.0;
         /// @brief Penalty weight for the weak solid-ring clamp.
         Real solidClampPenalty = 1.0e12;
         /// @brief Penalty weight for the weak FSI interface coupling.

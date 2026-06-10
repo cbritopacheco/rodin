@@ -1001,6 +1001,8 @@ namespace Rodin::Examples::Heart
     const Real lambdaS =
         solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
     const Real muS = solidE / (2.0 * (1.0 + solidNu));
+    const Real rayleighAlpha = m_cfg.solidRayleighAlpha;
+    const Real rayleighBeta = m_cfg.solidRayleighBeta;
 
     const Real solidClampPenalty = m_cfg.solidClampPenalty;
     const Real inactivePenalty = m_cfg.inactivePenalty;
@@ -1068,9 +1070,12 @@ namespace Rodin::Examples::Heart
 
     const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
 
-    // Symmetric gradients of the solid displacement trial / test functions.
+    // Symmetric gradients of the solid displacement trial / test functions,
+    // and of the previous displacement (for stiffness-proportional damping).
     const auto symD = 0.5 * (Jacobian(m_d) + Transpose(Jacobian(m_d)));
     const auto symW = 0.5 * (Jacobian(m_w) + Transpose(Jacobian(m_w)));
+    const auto symDOld =
+        0.5 * (Jacobian(m_dOld) + Transpose(Jacobian(m_dOld)));
 
     const auto symU = 0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
 
@@ -1507,12 +1512,32 @@ namespace Rodin::Examples::Heart
           + (solidRho / (m_cfg.dt * m_cfg.dt)) *
                 Integral(m_d, m_w).over(m_cfg.solidVolume)
 
+          // Mass-proportional Rayleigh damping:  (alpha rho_s / dt)(d - dOld, w).
+          + (rayleighAlpha * solidRho / m_cfg.dt) *
+                Integral(m_d, m_w).over(m_cfg.solidVolume)
+
           + lambdaS * Integral(Div(m_d), Div(m_w)).over(m_cfg.solidVolume)
 
           + 2.0 * muS * Integral(symD, symW).over(m_cfg.solidVolume)
 
+          // Stiffness-proportional Rayleigh damping:  (beta/dt) K (d - dOld).
+          + (rayleighBeta / m_cfg.dt) * lambdaS *
+                Integral(Div(m_d), Div(m_w)).over(m_cfg.solidVolume)
+
+          + (rayleighBeta / m_cfg.dt) * 2.0 * muS *
+                Integral(symD, symW).over(m_cfg.solidVolume)
+
           - 2.0 * (solidRho / (m_cfg.dt * m_cfg.dt)) *
                 Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+
+          - (rayleighAlpha * solidRho / m_cfg.dt) *
+                Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+
+          - (rayleighBeta / m_cfg.dt) * lambdaS *
+                Integral(Div(m_dOld), Div(m_w)).over(m_cfg.solidVolume)
+
+          - (rayleighBeta / m_cfg.dt) * 2.0 * muS *
+                Integral(symDOld, symW).over(m_cfg.solidVolume)
 
           + (solidRho / (m_cfg.dt * m_cfg.dt)) *
                 Integral(m_dOldOld, m_w).over(m_cfg.solidVolume)
@@ -1710,6 +1735,30 @@ namespace Rodin::Examples::Heart
     const Real maxP = maxAbs(m_p.getSolution());
     const Real maxD = maxAbs(m_d.getSolution());
 
+    // Max ALE mesh velocity:  max| (d - dOld)/dt |. A blow-up here (tracking
+    // |u|) is the signature of an added-mass / lagged-geometry instability.
+    Real maxMeshVel = 0.0;
+    {
+      ::Vec dtmp = PETSC_NULLPTR;
+      PetscErrorCode ierr = VecDuplicate(m_d.getSolution().getData(), &dtmp);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecWAXPY(dtmp, -1.0, m_dOld.getData(), m_d.getSolution().getData());
+      assert(ierr == PETSC_SUCCESS);
+      PetscReal v = 0.0;
+      ierr = VecNorm(dtmp, NORM_INFINITY, &v);
+      assert(ierr == PETSC_SUCCESS);
+      ierr = VecDestroy(&dtmp);
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+      maxMeshVel = v / m_cfg.dt;
+    }
+
+    // Subdomain volumes on the (moved) mesh. Growth or collapse signals mesh
+    // inflation / element tangling from the ALE motion.
+    const size_t D = m_mesh.getDimension();
+    const Real volFluid = m_mesh.getMeasure(D, m_cfg.fluidVolume);
+    const Real volSolid = m_mesh.getMeasure(D, m_cfg.solidVolume);
+
     // Interface area:  int_fsi 1. Gamma_fsi is an interior interface, so this
     // MUST use InterfaceIntegral (BoundaryIntegral returns 0 here). A non-zero
     // value confirms the coupling actually sees the interface facets.
@@ -1720,7 +1769,9 @@ namespace Rodin::Examples::Heart
     if (isRoot())
     {
       Alert::Info() << "[FSI diag] step " << step
-                    << "  area(fsi) = " << areaFsi << "  max|u| = " << maxU
+                    << "  area(fsi) = " << areaFsi << "  vol(f) = " << volFluid
+                    << "  vol(s) = " << volSolid << "  max|u| = " << maxU
+                    << "  max|meshVel| = " << maxMeshVel
                     << "  max|p| = " << maxP << "  max|d| = " << maxD
                     << Alert::Raise;
     }

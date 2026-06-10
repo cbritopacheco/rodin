@@ -244,6 +244,49 @@ int main(int argc, char** argv)
         cfg.timeAdaptivityMaxLevels = maxAdaptivityLevels;
       }
 
+      // ---- Solid / FSI tuning knobs ------------------------------------
+      using Real = Rodin::Real;
+      auto getPositiveReal = [&](const char *name, Real &target)
+      {
+        PetscReal value = target;
+        PetscBool set = PETSC_FALSE;
+        PetscErrorCode e = PetscOptionsGetReal(
+            PETSC_NULLPTR, PETSC_NULLPTR, name, &value, &set);
+        assert(e == PETSC_SUCCESS);
+        (void)e;
+        if (set)
+        {
+          if (value <= 0)
+            throw std::runtime_error(std::string(name) + " must be positive.");
+          target = value;
+        }
+      };
+
+      auto getNonNegativeReal = [&](const char *name, Real &target)
+      {
+        PetscReal value = target;
+        PetscBool set = PETSC_FALSE;
+        PetscErrorCode e = PetscOptionsGetReal(
+            PETSC_NULLPTR, PETSC_NULLPTR, name, &value, &set);
+        assert(e == PETSC_SUCCESS);
+        (void)e;
+        if (set)
+        {
+          if (value < 0)
+            throw std::runtime_error(std::string(name) +
+                                     " must be nonnegative.");
+          target = value;
+        }
+      };
+
+      getPositiveReal("-coronary_solid_E", cfg.solidE);
+      getPositiveReal("-coronary_solid_rho", cfg.solidRho);
+      getPositiveReal("-coronary_fsi_penalty", cfg.fsiPenalty);
+      getNonNegativeReal("-coronary_solid_rayleigh_alpha",
+                         cfg.solidRayleighAlpha);
+      getNonNegativeReal("-coronary_solid_rayleigh_beta",
+                         cfg.solidRayleighBeta);
+
       Rodin::Examples::Heart::CoupledLV0DCoronary3D simulation(context, cfg);
       status = simulation.initialize().run();
     }
