@@ -69,6 +69,17 @@ target_link_libraries(PETSc_Seq_BDF1_ALE_FSI
   Rodin::PETSc
   )
 
+add_executable(PETSc_Seq_BDF1_ALE_FSI_Monolithic Seq_BDF1_ALE_FSI_Monolithic.cpp)
+target_link_libraries(PETSc_Seq_BDF1_ALE_FSI_Monolithic
+  PUBLIC
+  Rodin::Math
+  Rodin::Solver
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Solid
+  Rodin::PETSc
+  )
+
 if (RODIN_USE_MPI)
   add_executable(PETSc_MPI_Poisson MPI_Poisson.cpp)
   target_link_libraries(PETSc_MPI_Poisson

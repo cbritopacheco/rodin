@@ -304,18 +304,18 @@ namespace Rodin::Variational
        */
       template <class CallableType>
       auto getPushforward(
-          const std::pair<size_t, Index>&, const CallableType& v) const
+          const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
       /**
        * @brief Returns a pushforward wrapper for an explicit polytope object.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
     private:
@@ -419,6 +419,36 @@ namespace Rodin::Variational
             for (size_t s = 1; s < K; ++s)
               for (const size_t triIdx : triInterior)
                 res.push_back(s * TriCount + triIdx);
+            break;
+          }
+
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            // Pyramid DOF ordering follows horizontal square layers:
+            // layer k has (K-k+1)^2 nodes. Interior DOFs are strictly away
+            // from the base and all four triangular side faces.
+            auto offset = [](size_t layer)
+            {
+              size_t out = 0;
+              for (size_t kk = 0; kk < layer; ++kk)
+              {
+                const size_t n = K - kk + 1;
+                out += n * n;
+              }
+              return out;
+            };
+
+            for (size_t k = 1; k < K; ++k)
+            {
+              const size_t n = K - k;
+              const size_t layerOffset = offset(k);
+              const size_t n1 = n + 1;
+              for (size_t j = 1; j < n; ++j)
+              {
+                for (size_t i = 1; i < n; ++i)
+                  res.push_back(layerOffset + j * n1 + i);
+              }
+            }
             break;
           }
 
@@ -1175,18 +1205,18 @@ namespace Rodin::Variational
        */
       template <class CallableType>
       auto getPushforward(
-          const std::pair<size_t, Index>&, const CallableType& v) const
+          const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
       /**
        * @brief Returns a pushforward wrapper for an explicit polytope object.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return Pushforward<CallableType>(v);
+        return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
     private:

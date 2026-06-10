@@ -34,7 +34,7 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(b.size(), 3);
 
     // Exact values on the reference triangle:
-    // ∫(x+y)φ0 = 1/12, ∫(x+y)φ1 = 1/8, ∫(x+y)φ2 = 1/8.
+    // \int(x+y)φ0 = 1/12, \int(x+y)φ1 = 1/8, \int(x+y)φ2 = 1/8.
     EXPECT_NEAR(b(0), 1.0 / 12.0, 1e-12);
     EXPECT_NEAR(b(1), 1.0 / 8.0, 1e-12);
     EXPECT_NEAR(b(2), 1.0 / 8.0, 1e-12);

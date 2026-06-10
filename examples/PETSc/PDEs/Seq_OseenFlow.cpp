@@ -19,21 +19,21 @@
  *   Find (u^{n+1}, p^{n+1}) such that, for all test functions (v, q),
  *
  *     (rho / dt) (u^{n+1}, v)
- *   + rho ((u^n · ∇) u^{n+1}, v)
- *   + (rho / 2) ((∇ · u^n) u^{n+1}, v)
- *   + mu (∇u^{n+1}, ∇v)
- *   - (p^{n+1}, ∇ · v)
- *   + (∇ · u^{n+1}, q)
+ *   + rho ((u^n \cdot \nabla) u^{n+1}, v)
+ *   + (rho / 2) ((\nabla \cdot u^n) u^{n+1}, v)
+ *   + mu (\nablau^{n+1}, \nablav)
+ *   - (p^{n+1}, \nabla \cdot v)
+ *   + (\nabla \cdot u^{n+1}, q)
  *
  *   = (rho / dt) (u^n, v)
- *   - <p_out, v · n>_{Γ_out}
- *   + <(rho / 2) beta u^{n+1}, v>_{Γ_out},
+ *   - <p_out, v \cdot n>_{\Gamma_out}
+ *   + <(rho / 2) beta u^{n+1}, v>_{\Gamma_out},
  *
  * where:
  *   - u^n is the velocity from the previous time step,
  *   - the convective term is linearized by freezing the transport velocity at u^n,
- *   - the additional (∇·u^n) term yields the skew-symmetric Oseen form,
- *   - beta = max(-(u^n · n), 0) penalizes backflow at the outlet.
+ *   - the additional (\nabla\cdotu^n) term yields the skew-symmetric Oseen form,
+ *   - beta = max(-(u^n \cdot n), 0) penalizes backflow at the outlet.
  *
  * Boundary conditions:
  *   - inlet: prescribed pulsatile parabolic velocity profile,
@@ -200,7 +200,7 @@ int main(int argc, char** argv)
     Real t = 0.0;
 
     // Helper objects for computing the outlet volumetric flow rate:
-    //   Q_out = ∫_{Γ_out} u · n
+    //   Q_out = \int_{\Gamma_out} u \cdot n
     PETSc::Variational::GridFunction one(ph);
     one = 1.0;
     PETSc::Variational::TestFunction qFlux(ph);
@@ -229,23 +229,23 @@ int main(int argc, char** argv)
 
       // Semi-implicit Oseen / Picard linearization:
       //
-      // The nonlinear convective term (u · ∇)u is replaced by
-      //   (u_old · ∇)u
+      // The nonlinear convective term (u \cdot \nabla)u is replaced by
+      //   (u_old \cdot \nabla)u
       // at the new time step.
       //
       // In Rodin notation:
-      //   Jacobian(u) * u_old = (u_old · ∇)u.
+      //   Jacobian(u) * u_old = (u_old \cdot \nabla)u.
       const auto conv_u = Mult(Jacobian(u), u_old);
 
       // Divergence of the frozen transport velocity.
       //
       // This is used in the skew-symmetric correction
-      //   0.5 * (div u_old) * u · v
+      //   0.5 * (div u_old) * u \cdot v
       // to obtain an energy-friendlier Oseen form.
       const auto div_u_old = Div(u_old);
 
       // Backflow coefficient at the outlet:
-      //   beta = max(-(u_old · n), 0)
+      //   beta = max(-(u_old \cdot n), 0)
       //
       // When the flow tries to re-enter through the outlet, beta becomes positive
       // and activates an additional boundary damping term.
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
         - (rho / dt) * Integral(u_old, v)
 
           // Linearized convection:
-          //   rho ((u_old · ∇)u, v)
+          //   rho ((u_old \cdot \nabla)u, v)
         + rho * Integral(Dot(conv_u, v))
 
           // Skew-symmetric correction:
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
         + 0.5 * rho * Integral(div_u_old * Dot(u, v))
 
           // Viscous term:
-          //   mu (∇u, ∇v)
+          //   mu (\nablau, \nablav)
         + mu * Integral(Jacobian(u), Jacobian(v))
 
           // Pressure-velocity coupling:
@@ -280,11 +280,11 @@ int main(int argc, char** argv)
         + Integral(Div(u), q)
 
           // Outlet pressure traction:
-          //   -<p_out, v · n>_{Γ_out}
+          //   -<p_out, v \cdot n>_{\Gamma_out}
         - BoundaryIntegral(pout * Dot(v, n)).over(outlet)
 
           // Backflow damping on the outlet:
-          //   <(rho / 2) beta u, v>_{Γ_out}
+          //   <(rho / 2) beta u, v>_{\Gamma_out}
         + BoundaryIntegral(0.5 * rho * beta * Dot(u, v)).over(outlet)
 
         // Tiny pressure-block diagonal filler used to
@@ -317,7 +317,7 @@ int main(int argc, char** argv)
       p_old = p.getSolution();
 
       // Compute the outlet flow rate
-      //   Q_out = ∫_{Γ_out} u · n
+      //   Q_out = \int_{\Gamma_out} u \cdot n
       flux = BoundaryIntegral(Dot(u_old, n), qFlux).over(outlet);
       flux.assemble();
       const Real qout = flux(one);

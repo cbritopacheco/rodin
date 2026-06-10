@@ -16,7 +16,7 @@ using namespace Rodin::Variational;
 namespace Rodin::Tests::Unit
 {
   //==========================================================================
-  // Jacobi Polynomial with α = β = 0 (Legendre polynomials)
+  // Jacobi Polynomial with \alpha = \beta = 0 (Legendre polynomials)
   //==========================================================================
 
   TEST(JacobiPolynomial, P00_K0_IsLegendre)
@@ -72,7 +72,7 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, Derivative_K0)
   {
-    // d/dx P_0^{α,β}(x) = 0 for all α, β
+    // d/dx P_0^{\alpha,\beta}(x) = 0 for all \alpha, \beta
     Real P, dP;
 
     JacobiPolynomial<0>::getValue(P, dP, 0.0, 0.0, 0.5);
@@ -113,7 +113,7 @@ namespace Rodin::Tests::Unit
   }
 
   //==========================================================================
-  // Jacobi Polynomial with α = 1, β = 0 (used in Dubiner basis)
+  // Jacobi Polynomial with \alpha = 1, \beta = 0 (used in Dubiner basis)
   //==========================================================================
 
   TEST(JacobiPolynomial, P10_K0)
@@ -130,7 +130,7 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, P10_K1)
   {
-    // P_1^{1,0}(x) = (α - β + (α + β + 2)x) / 2 = (1 + 3x) / 2
+    // P_1^{1,0}(x) = (\alpha - \beta + (\alpha + \beta + 2)x) / 2 = (1 + 3x) / 2
     Real P, dP;
 
     JacobiPolynomial<1>::getValue(P, dP, 1.0, 0.0, 0.0);
@@ -144,7 +144,7 @@ namespace Rodin::Tests::Unit
   }
 
   //==========================================================================
-  // Jacobi Polynomial with higher α, β values (used in Dubiner for triangles)
+  // Jacobi Polynomial with higher \alpha, \beta values (used in Dubiner for triangles)
   //==========================================================================
 
   TEST(JacobiPolynomial, P30_K0)
@@ -158,7 +158,7 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, P30_K1)
   {
-    // P_1^{3,0}(x) = (α - β + (α + β + 2)x) / 2 = (3 + 5x) / 2
+    // P_1^{3,0}(x) = (\alpha - \beta + (\alpha + \beta + 2)x) / 2 = (3 + 5x) / 2
     Real P, dP;
 
     JacobiPolynomial<1>::getValue(P, dP, 3.0, 0.0, 0.0);
@@ -174,8 +174,8 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, EndpointValue_x1)
   {
-    // P_K^{α,β}(1) = (K + α choose K) = Γ(K + α + 1) / (Γ(K + 1) Γ(α + 1))
-    // For α = 0: P_K^{0,β}(1) = 1
+    // P_K^{\alpha,\beta}(1) = (K + \alpha choose K) = \Gamma(K + \alpha + 1) / (\Gamma(K + 1) \Gamma(\alpha + 1))
+    // For \alpha = 0: P_K^{0,\beta}(1) = 1
     Real P, dP;
 
     JacobiPolynomial<0>::getValue(P, dP, 0.0, 0.0, 1.0);
@@ -193,8 +193,8 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, EndpointValue_xm1)
   {
-    // P_K^{α,β}(-1) = (-1)^K (K + β choose K)
-    // For β = 0: P_K^{α,0}(-1) = (-1)^K
+    // P_K^{\alpha,\beta}(-1) = (-1)^K (K + \beta choose K)
+    // For \beta = 0: P_K^{\alpha,0}(-1) = (-1)^K
     Real P, dP;
 
     JacobiPolynomial<0>::getValue(P, dP, 1.0, 0.0, -1.0);
@@ -216,10 +216,10 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, DerivativeIdentity)
   {
-    // d/dx P_K^{α,β}(x) = (K + α + β + 1)/2 * P_{K-1}^{α+1,β+1}(x)
+    // d/dx P_K^{\alpha,\beta}(x) = (K + \alpha + \beta + 1)/2 * P_{K-1}^{\alpha+1,\beta+1}(x)
     Real P, dP;
 
-    // Test for K=2, α=0, β=0
+    // Test for K=2, \alpha=0, \beta=0
     // d/dx P_2^{0,0}(x) = (2 + 0 + 0 + 1)/2 * P_1^{1,1}(x) = 1.5 * P_1^{1,1}(x)
     Real x = 0.3;
     JacobiPolynomial<2>::getValue(P, dP, 0.0, 0.0, x);
@@ -354,7 +354,7 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, DerivativeIdentity_K5)
   {
-    // d/dx P_5^{α,β}(x) = (5 + α + β + 1)/2 * P_4^{α+1,β+1}(x)
+    // d/dx P_5^{\alpha,\beta}(x) = (5 + \alpha + \beta + 1)/2 * P_4^{\alpha+1,\beta+1}(x)
     Real P, dP;
     Real x = 0.3;
 
@@ -369,7 +369,7 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, DerivativeIdentity_K6)
   {
-    // d/dx P_6^{α,β}(x) = (6 + α + β + 1)/2 * P_5^{α+1,β+1}(x)
+    // d/dx P_6^{\alpha,\beta}(x) = (6 + \alpha + \beta + 1)/2 * P_5^{\alpha+1,\beta+1}(x)
     Real P, dP;
     Real x = 0.4;
 
@@ -401,7 +401,7 @@ namespace Rodin::Tests::Unit
       EXPECT_FALSE(std::isinf(dP));
     }
 
-    // P_6(0) for Legendre (α=β=0)
+    // P_6(0) for Legendre (\alpha=\beta=0)
     JacobiPolynomial<6>::getValue(P, dP, 0.0, 0.0, 0.0);
     Real expected = -5.0 / 16.0;  // Known value for P_6(0)
     EXPECT_NEAR(P, expected, tol);
@@ -491,7 +491,7 @@ namespace Rodin::Tests::Unit
 
   TEST(JacobiPolynomial, DerivativeIdentity_K15)
   {
-    // d/dx P_15^{α,β}(x) = (15 + α + β + 1)/2 * P_14^{α+1,β+1}(x)
+    // d/dx P_15^{\alpha,\beta}(x) = (15 + \alpha + \beta + 1)/2 * P_14^{\alpha+1,\beta+1}(x)
     Real P, dP;
     Real x = 0.3;
 

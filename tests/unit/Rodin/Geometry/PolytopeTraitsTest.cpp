@@ -106,6 +106,24 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isSimplex());
   }
 
+  TEST(Geometry_PolytopeTraits, PyramidDimension)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_EQ(traits.getDimension(), 3);
+  }
+
+  TEST(Geometry_PolytopeTraits, PyramidVertexCount)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_EQ(traits.getVertexCount(), 5);
+  }
+
+  TEST(Geometry_PolytopeTraits, PyramidIsNotSimplex)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_FALSE(traits.isSimplex());
+  }
+
   TEST(Geometry_PolytopeTraits, WedgeDimension)
   {
     Polytope::Traits traits(Polytope::Type::Wedge);
@@ -157,7 +175,7 @@ namespace Rodin::Tests::Unit
 
   TEST(Geometry_PolytopeTypes, ArraySize)
   {
-    EXPECT_EQ(Polytope::Types.size(), 7);
+    EXPECT_EQ(Polytope::Types.size(), 8);
   }
 
   TEST(Geometry_PolytopeTypes, ArrayContents)
@@ -167,8 +185,9 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Polytope::Types[2], Polytope::Type::Triangle);
     EXPECT_EQ(Polytope::Types[3], Polytope::Type::Quadrilateral);
     EXPECT_EQ(Polytope::Types[4], Polytope::Type::Tetrahedron);
-    EXPECT_EQ(Polytope::Types[5], Polytope::Type::Hexahedron);
-    EXPECT_EQ(Polytope::Types[6], Polytope::Type::Wedge);
+    EXPECT_EQ(Polytope::Types[5], Polytope::Type::Pyramid);
+    EXPECT_EQ(Polytope::Types[6], Polytope::Type::Hexahedron);
+    EXPECT_EQ(Polytope::Types[7], Polytope::Type::Wedge);
   }
 
   TEST(Geometry_PolytopeTypes, IterableArray)
@@ -180,6 +199,6 @@ namespace Rodin::Tests::Unit
       (void)type;  // Suppress unused variable warning
       ++count;
     }
-    EXPECT_EQ(count, 7);
+    EXPECT_EQ(count, 8);
   }
 }

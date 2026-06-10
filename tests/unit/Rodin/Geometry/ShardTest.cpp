@@ -567,6 +567,32 @@ namespace Rodin::Tests::Unit
   }
 
   // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Pyramid (3D) mesh
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Pyramid)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(shard.getDimension(), 3u);
+  }
+
+  // ---------------------------------------------------------------------------
   // Shard::Builder — Parent-based mode with Wedge (3D) mesh
   // ---------------------------------------------------------------------------
 
@@ -734,6 +760,44 @@ namespace Rodin::Tests::Unit
       EXPECT_TRUE(shard.isOwned(0, vi));
     for (Index vi = v4; vi <= v7; vi++)
       EXPECT_TRUE(shard.isGhost(0, vi));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Pyramid (3D)
+  // ---------------------------------------------------------------------------
+
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Pyramid)
+  {
+    Shard::Builder sb;
+    sb.initialize(3, 3);
+
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{1.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v4 = sb.vertex(4, Math::SpatialPoint{{0.5, 0.5, 1.0}}, Shard::State::Shared);
+
+    IndexArray vs(5);
+    vs << v0, v1, v2, v3, v4;
+    Index p0 = sb.polytope(3, 250, Polytope::Type::Pyramid, vs, Shard::State::Owned);
+    EXPECT_EQ(p0, 0u);
+
+    sb.setOwner(0, v4, 1);
+    sb.halo(0, v0, 1);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 5u);
+    EXPECT_EQ(shard.getCellCount(), 1u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+
+    EXPECT_TRUE(shard.isOwned(3, p0));
+    EXPECT_TRUE(shard.isShared(0, v4));
+    EXPECT_EQ(shard.getOwner(0).at(v4), 1u);
+
+    const auto& haloMap = shard.getHalo(0);
+    ASSERT_NE(haloMap.find(v0), haloMap.end());
+    EXPECT_TRUE(haloMap.at(v0).count(1) > 0);
   }
 
   // ---------------------------------------------------------------------------

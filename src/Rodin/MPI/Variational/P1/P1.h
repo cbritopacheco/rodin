@@ -14,6 +14,8 @@
 
 #include <mpi.h>
 #include <sys/mman.h>
+#include <type_traits>
+#include <utility>
 
 #include <boost/mpi/collectives.hpp>
 #include <boost/serialization/version.hpp>
@@ -159,6 +161,39 @@ namespace Rodin::Variational
         private:
           Geometry::Polytope m_polytope;
           std::unique_ptr<FunctionType> m_v;
+      };
+
+      /**
+       * @brief Pullback of a pointwise callable to the reference polytope.
+       */
+      template <class CallableType>
+      class CallablePullback
+        : public FiniteElementSpacePullbackBase<CallablePullback<CallableType>>
+      {
+        public:
+          template <class Callable>
+          CallablePullback(const Geometry::Polytope& polytope, Callable&& v)
+            : m_polytope(polytope), m_v(std::forward<Callable>(v))
+          {}
+
+          CallablePullback(const CallablePullback&) = default;
+
+          auto operator()(const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(p);
+          }
+
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(res, p);
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          CallableType m_v;
       };
 
       /**
@@ -731,6 +766,22 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Returns a pullback wrapper for a pointwise callable on local polytope @f$(d, i)@f$.
+       *
+       * This mirrors the local P1 callable path and is used by identification
+       * coefficient discovery when evaluating shape-function expressions at a
+       * @ref Geometry::Point outside a quadrature loop.
+       */
+      template <class CallableType>
+      auto getPullback(const std::pair<size_t, Index>& p, CallableType&& v) const
+      {
+        const auto& [d, i] = p;
+        const auto& mesh = getMesh();
+        return CallablePullback<CallableType>(
+            *mesh.getPolytope(d, i), std::forward<CallableType>(v));
+      }
+
+      /**
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        *
        * @tparam CallableType Callable defined on reference coordinates.
@@ -738,9 +789,10 @@ namespace Rodin::Variational
        * @return Pushforward wrapper mapping physical points to reference evaluation.
        */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, const CallableType& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return typename FESType::template Pushforward<CallableType>(v);
+        return typename FESType::template Pushforward<CallableType>(
+            std::forward<CallableType>(v));
       }
 
       /**
@@ -751,9 +803,10 @@ namespace Rodin::Variational
        * @return Pushforward wrapper mapping physical points to reference evaluation.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return typename FESType::Pushforward(v);
+        return typename FESType::template Pushforward<CallableType>(
+            std::forward<CallableType>(v));
       }
 
     private:

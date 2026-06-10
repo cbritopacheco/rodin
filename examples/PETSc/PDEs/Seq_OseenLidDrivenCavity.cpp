@@ -18,15 +18,15 @@
  *
  * Problem solved
  * --------------
- * Let Ω = [0,1]^2. At each time step, given the previous velocity u^n, the code
+ * Let \Omega = [0,1]^2. At each time step, given the previous velocity u^n, the code
  * solves for (u^{n+1}, p^{n+1}) such that, for all test functions (v, q),
  *
  *     (rho / dt) (u^{n+1}, v)
- *   + rho ((u^n · ∇) u^{n+1}, v)
- *   + (rho / 2) ((∇ · u^n) u^{n+1}, v)
- *   + mu (∇u^{n+1}, ∇v)
- *   - (p^{n+1}, ∇ · v)
- *   + (∇ · u^{n+1}, q)
+ *   + rho ((u^n \cdot \nabla) u^{n+1}, v)
+ *   + (rho / 2) ((\nabla \cdot u^n) u^{n+1}, v)
+ *   + mu (\nablau^{n+1}, \nablav)
+ *   - (p^{n+1}, \nabla \cdot v)
+ *   + (\nabla \cdot u^{n+1}, q)
  *   + eps_p (p^{n+1}, q)
  *
  *   = (rho / dt) (u^n, v),
@@ -36,7 +36,7 @@
  *   - mu is the viscosity,
  *   - dt is the time step,
  *   - the convective velocity is frozen at the previous time step u^n,
- *   - the additional (∇·u^n) term yields the skew-symmetric Oseen form,
+ *   - the additional (\nabla\cdotu^n) term yields the skew-symmetric Oseen form,
  *   - eps_p is a tiny pressure-block diagonal filler used only to improve
  *     robustness of sparse direct factorization for the mixed system.
  *
@@ -278,13 +278,13 @@ int main(int argc, char** argv)
 
 
       // Oseen / Picard linearization:
-      //   (u_old · ∇)u
+      //   (u_old \cdot \nabla)u
       const auto conv_u = Mult(Jacobian(u), u_old);
 
       // Divergence of the frozen transport velocity.
       //
       // Included in the skew-symmetric linearization:
-      //   ((u_old · ∇)u, v) + 0.5 ((div u_old) u, v)
+      //   ((u_old \cdot \nabla)u, v) + 0.5 ((div u_old) u, v)
       const auto div_u_old = Div(u_old);
 
       // Mixed transient Oseen problem at the current time step.
@@ -296,7 +296,7 @@ int main(int argc, char** argv)
         - (rho / dt) * Integral(u_old, v)
 
           // Linearized convection:
-          //   rho ((u_old · ∇)u, v)
+          //   rho ((u_old \cdot \nabla)u, v)
         + rho * Integral(Dot(conv_u, v))
 
           // Skew-symmetric correction:
@@ -304,7 +304,7 @@ int main(int argc, char** argv)
         + 0.5 * rho * Integral(div_u_old * Dot(u, v))
 
           // Viscous term:
-          //   mu (∇u, ∇v)
+          //   mu (\nablau, \nablav)
         + mu * Integral(Jacobian(u), Jacobian(v))
 
           // Pressure-velocity coupling:

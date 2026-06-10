@@ -74,11 +74,19 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::polytope(Polytope::Type t, const Polytope::Key& in)
   {
+    Index index;
+    return polytope(t, in, index);
+  }
+
+  Connectivity<Context::Local>&
+  Connectivity<Context::Local>::polytope(Polytope::Type t, const Polytope::Key& in, Index& index)
+  {
     assert(in.size() > 0);
     const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
     const auto [it, inserted] = m_index[d].right.insert({ in, m_count[d]});
+    index = it->second;
     if (inserted)
     {
       m_index[d].left.push_back(&it->first);
@@ -97,11 +105,19 @@ namespace Rodin::Geometry
   Connectivity<Context::Local>&
   Connectivity<Context::Local>::polytope(Polytope::Type t, Polytope::Key&& in)
   {
+    Index index;
+    return polytope(t, std::move(in), index);
+  }
+
+  Connectivity<Context::Local>&
+  Connectivity<Context::Local>::polytope(Polytope::Type t, Polytope::Key&& in, Index& index)
+  {
     assert(in.size() > 0);
     const size_t d = Polytope::Traits(t).getDimension();
     assert(d > 0);
     assert(d <= m_maximalDimension);
     const auto [it, inserted] = m_index[d].right.insert({ std::move(in), m_count[d] });
+    index = it->second;
     if (inserted)
     {
       m_index[d].left.push_back(&it->first);
@@ -621,7 +637,7 @@ namespace Rodin::Geometry
         }
         else if (dim == 2)
         {
-          // Faces oriented to match ∂[0,1,2,3] = [1,2,3] - [0,2,3] + [0,1,3] - [0,1,2]
+          // Faces oriented to match \partial[0,1,2,3] = [1,2,3] - [0,2,3] + [0,1,3] - [0,1,2]
           out.resize(4);
           out[0] = { Polytope::Type::Triangle, Polytope::Key({ p(1), p(2), p(3) }) }; // +[1,2,3]
           out[1] = { Polytope::Type::Triangle, Polytope::Key({ p(0), p(3), p(2) }) }; // -[0,2,3]
@@ -632,6 +648,54 @@ namespace Rodin::Geometry
         {
           out.resize(1);
           out[0] = { Polytope::Type::Tetrahedron, p };
+        }
+        else
+        {
+          assert(false);
+          out = {};
+        }
+        return;
+      }
+      case Polytope::Type::Pyramid:
+      {
+        assert(dim <= 3);
+        assert(p.size() == 5);
+        if (dim == 0)
+        {
+          out.resize(5);
+          out[0] = { Polytope::Type::Point, Polytope::Key({ p(0) }) };
+          out[1] = { Polytope::Type::Point, Polytope::Key({ p(1) }) };
+          out[2] = { Polytope::Type::Point, Polytope::Key({ p(2) }) };
+          out[3] = { Polytope::Type::Point, Polytope::Key({ p(3) }) };
+          out[4] = { Polytope::Type::Point, Polytope::Key({ p(4) }) };
+        }
+        else if (dim == 1)
+        {
+          // Base loop, then apex edges.
+          out.resize(8);
+          out[0] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(1) }) };
+          out[1] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(2) }) };
+          out[2] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(3) }) };
+          out[3] = { Polytope::Type::Segment, Polytope::Key({ p(3), p(0) }) };
+          out[4] = { Polytope::Type::Segment, Polytope::Key({ p(0), p(4) }) };
+          out[5] = { Polytope::Type::Segment, Polytope::Key({ p(1), p(4) }) };
+          out[6] = { Polytope::Type::Segment, Polytope::Key({ p(2), p(4) }) };
+          out[7] = { Polytope::Type::Segment, Polytope::Key({ p(3), p(4) }) };
+        }
+        else if (dim == 2)
+        {
+          // Base quadrilateral, followed by triangular side faces around it.
+          out.resize(5);
+          out[0] = { Polytope::Type::Quadrilateral, Polytope::Key({ p(0), p(1), p(2), p(3) }) };
+          out[1] = { Polytope::Type::Triangle,      Polytope::Key({ p(0), p(1), p(4) }) };
+          out[2] = { Polytope::Type::Triangle,      Polytope::Key({ p(1), p(2), p(4) }) };
+          out[3] = { Polytope::Type::Triangle,      Polytope::Key({ p(2), p(3), p(4) }) };
+          out[4] = { Polytope::Type::Triangle,      Polytope::Key({ p(3), p(0), p(4) }) };
+        }
+        else if (dim == 3)
+        {
+          out.resize(1);
+          out[0] = { Polytope::Type::Pyramid, p };
         }
         else
         {

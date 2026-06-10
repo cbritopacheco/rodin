@@ -649,6 +649,7 @@ namespace Rodin::Geometry
       case Type::Quadrilateral:
       case Type::Hexahedron:
       case Type::Wedge:
+      case Type::Pyramid:
         return false;
     }
     assert(false);
@@ -665,6 +666,7 @@ namespace Rodin::Geometry
       case Type::Hexahedron:
       case Type::Wedge:
         return true;
+      case Type::Pyramid:
       case Type::Triangle:
       case Type::Tetrahedron:
         return false;
@@ -688,6 +690,7 @@ namespace Rodin::Geometry
         return 2;
 
       case Type::Tetrahedron:
+      case Type::Pyramid:
       case Type::Hexahedron:
       case Type::Wedge:
         return 3;
@@ -710,6 +713,8 @@ namespace Rodin::Geometry
       case Type::Quadrilateral:
       case Type::Tetrahedron:
         return 4;
+      case Type::Pyramid:
+        return 5;
       case Type::Hexahedron:
         return 8;
       case Type::Wedge:
@@ -747,6 +752,11 @@ namespace Rodin::Geometry
       case Geometry::Polytope::Type::Tetrahedron:
       {
         static const Math::SpatialVector<Real> s_node{{ 0.25, 0.25, 0.25 }};
+        return s_node;
+      }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        static const Math::SpatialVector<Real> s_node{{ 0.375, 0.375, 0.25 }};
         return s_node;
       }
       case Geometry::Polytope::Type::Wedge:
@@ -811,6 +821,18 @@ namespace Rodin::Geometry
         {
           Math::SpatialPoint{{ 0, 0, 0 }},
           Math::SpatialPoint{{ 1, 0, 0 }},
+          Math::SpatialPoint{{ 0, 1, 0 }},
+          Math::SpatialPoint{{ 0, 0, 1 }}
+        };
+        return s_nodes[i];
+      }
+      case Type::Pyramid:
+      {
+        static const std::vector<Math::SpatialPoint> s_nodes =
+        {
+          Math::SpatialPoint{{ 0, 0, 0 }},
+          Math::SpatialPoint{{ 1, 0, 0 }},
+          Math::SpatialPoint{{ 1, 1, 0 }},
           Math::SpatialPoint{{ 0, 1, 0 }},
           Math::SpatialPoint{{ 0, 0, 1 }}
         };
@@ -950,6 +972,30 @@ namespace Rodin::Geometry
         };
         return s_hs;
       }
+      case Type::Pyramid:
+      {
+        static thread_local const HalfSpace s_hs =
+        {
+          // Reference pyramid:
+          //   z >= 0, y >= 0, x + z <= 1, y + z <= 1, x >= 0.
+          //
+          // Face order matches Connectivity::getSubPolytopes:
+          // local 0: base        (0,1,2,3) -> z = 0
+          // local 1: side y = 0  (0,1,4)
+          // local 2: side x+z=1  (1,2,4)
+          // local 3: side y+z=1  (2,3,4)
+          // local 4: side x = 0  (3,0,4)
+          Math::Matrix<Real>{
+            {  0,  0, -1 },
+            {  0, -1,  0 },
+            {  1 / std::sqrt(2.0),  0,  1 / std::sqrt(2.0) },
+            {  0,  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) },
+            { -1,  0,  0 }
+          },
+          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0 }}
+        };
+        return s_hs;
+      }
       case Type::Wedge:
       {
         static thread_local const HalfSpace s_hs =
@@ -1003,6 +1049,11 @@ namespace Rodin::Geometry
       case Polytope::Type::Tetrahedron:
       {
         os << "Tetrahedron";
+        break;
+      }
+      case Polytope::Type::Pyramid:
+      {
+        os << "Pyramid";
         break;
       }
       case Polytope::Type::Hexahedron:
@@ -1226,6 +1277,15 @@ namespace Rodin::Geometry
         out[0] = std::clamp(rc[0], Real(0), Real(1));
         out[1] = std::clamp(rc[1], Real(0), Real(1));
         out[2] = std::clamp(rc[2], Real(0), Real(1));
+        return;
+      }
+      case Type::Pyramid:
+      {
+        const Real z = std::clamp(rc[2], Real(0), Real(1));
+        const Real q = Real(1) - z;
+        out[0] = std::clamp(rc[0], Real(0), q);
+        out[1] = std::clamp(rc[1], Real(0), q);
+        out[2] = z;
         return;
       }
       case Type::Wedge:
@@ -1487,6 +1547,61 @@ namespace Rodin::Geometry
         out[0] = bx; out[1] = by; out[2] = bz;
         return;
       }
+      case Type::Pyramid:
+      {
+        auto sq = [](Real v) { return v * v; };
+        auto projectTri = [](Real u, Real v, Real& ou, Real& ov)
+        {
+          u = std::max(u, Real(0));
+          v = std::max(v, Real(0));
+          const Real s = u + v;
+          if (s <= Real(1))
+          {
+            ou = u;
+            ov = v;
+            return;
+          }
+          const Real t = Real(0.5) * (s - Real(1));
+          ou = std::max(u - t, Real(0));
+          ov = std::max(v - t, Real(0));
+        };
+
+        Real bestd = std::numeric_limits<Real>::infinity();
+        Real bx = 0, by = 0, bz = 0;
+
+        auto consider = [&](Real x, Real y, Real z)
+        {
+          const Real d = sq(rc[0] - x) + sq(rc[1] - y) + sq(rc[2] - z);
+          if (d < bestd)
+          {
+            bestd = d;
+            bx = x;
+            by = y;
+            bz = z;
+          }
+        };
+
+        consider(
+            std::clamp(rc[0], Real(0), Real(1)),
+            std::clamp(rc[1], Real(0), Real(1)),
+            Real(0));
+
+        Real u, v;
+        projectTri(rc[0], rc[2], u, v);
+        consider(u, Real(0), v);
+
+        projectTri(rc[1], rc[2], u, v);
+        consider(Real(1) - v, u, v);
+
+        projectTri(Real(1) - rc[0] - rc[2], rc[2], u, v);
+        consider(Real(1) - u - v, Real(1) - v, v);
+
+        projectTri(Real(1) - rc[1] - rc[2], rc[2], u, v);
+        consider(Real(0), Real(1) - u - v, v);
+
+        out[0] = bx; out[1] = by; out[2] = bz;
+        return;
+      }
       case Type::Wedge:
       {
         Real g0x = std::max(rc[0], Real(0));
@@ -1739,6 +1854,64 @@ namespace Rodin::Geometry
           default: // 5: z = 1
             out[0] = cx; out[1] = cy; out[2] = Real(1); return;
         }
+      }
+      case Type::Pyramid:
+      {
+        // 5 faces, ordered as in Connectivity:
+        // 0: base z=0        (0,1,2,3)
+        // 1: side y=0        (0,1,4)
+        // 2: side x+z=1      (1,2,4)
+        // 3: side y+z=1      (2,3,4)
+        // 4: side x=0        (3,0,4)
+        assert(local < 5);
+
+        auto projectTri = [](Real u, Real v, Real& ou, Real& ov)
+        {
+          u = std::max(u, Real(0));
+          v = std::max(v, Real(0));
+          const Real s = u + v;
+          if (s <= Real(1))
+          {
+            ou = u;
+            ov = v;
+            return;
+          }
+          const Real t = Real(0.5) * (s - Real(1));
+          ou = std::max(u - t, Real(0));
+          ov = std::max(v - t, Real(0));
+        };
+
+        if (local == 0)
+        {
+          out[0] = std::clamp(rc[0], Real(0), Real(1));
+          out[1] = std::clamp(rc[1], Real(0), Real(1));
+          out[2] = Real(0);
+          return;
+        }
+
+        Real u = 0, v = 0;
+        if (local == 1)
+        {
+          projectTri(rc[0], rc[2], u, v);
+          out[0] = u; out[1] = Real(0); out[2] = v;
+          return;
+        }
+        if (local == 2)
+        {
+          projectTri(rc[1], rc[2], u, v);
+          out[0] = Real(1) - v; out[1] = u; out[2] = v;
+          return;
+        }
+        if (local == 3)
+        {
+          projectTri(Real(1) - rc[0] - rc[2], rc[2], u, v);
+          out[0] = Real(1) - u - v; out[1] = Real(1) - v; out[2] = v;
+          return;
+        }
+
+        projectTri(Real(1) - rc[1] - rc[2], rc[2], u, v);
+        out[0] = Real(0); out[1] = Real(1) - u - v; out[2] = v;
+        return;
       }
       case Type::Wedge:
       {

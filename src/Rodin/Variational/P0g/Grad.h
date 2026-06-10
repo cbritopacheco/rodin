@@ -12,7 +12,7 @@
  * @brief Gradient operator specialization for P0g (global constant) functions.
  *
  * For P0g functions (globally constant), the gradient is identically zero:
- *   ∇u = 0.
+ *   \nablau = 0.
  *
  * This holds for all element types and at all points (cells/faces/boundary).
  */
@@ -58,7 +58,7 @@ namespace Rodin::Variational
       {}
 
       /**
-       * @brief Interpolates ∇u at point p (always zero for P0g).
+       * @brief Interpolates \nablau at point p (always zero for P0g).
        */
       void interpolate(SpatialVectorType& out, const Geometry::Point& p) const
       {

@@ -1174,8 +1174,8 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *     ((grad v) u^n).
          */
 
-        + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
-                                          m_cfg.rho)
+        // + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
+        //                                   m_cfg.rho)
 
         /*
          * VMS linear contribution subtracted from the residual:
@@ -1186,9 +1186,9 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *       ((grad v) u^n).
          */
 
-        - VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
-                                        m_up.getSolution(), m_tau.getSolution(),
-                                        m_cfg.rho, m_cfg.dt)
+        // - VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
+        //                                 m_up.getSolution(), m_tau.getSolution(),
+        //                                 m_cfg.rho, m_cfg.dt)
 
         /*
          * Inlet normal impedance.

@@ -168,20 +168,20 @@ namespace Rodin::Variational
         const auto& rc = p.getReferenceCoordinates();
         const auto& Jinv = p.getJacobianInverse();
 
-        // out = Σ_v u(v) · (J^{-T} ∇_hat φ_v)
-        // but compute as: out = Σ_v Σ_j u_j(v) * (∇_hat φ_v)^T * (Jinv)_{:,j}
+        // out = Σ_v u(v) \cdot (J^{-T} \nabla_hat φ_v)
+        // but compute as: out = Σ_v Σ_j u_j(v) * (\nabla_hat φ_v)^T * (Jinv)_{:,j}
         out = ScalarType(0);
 
         // Precompute column sums: s_j = Σ_k ghat(k) * Jinv(k,j)  (this is (J^{-T} ghat)_j)
         for (size_t v = 0; v < nv; ++v)
         {
-          // ∇_hat φ_v
+          // \nabla_hat φ_v
           Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)
             ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
 
           // phys grad components: gphys(j) = Σ_k Jinv(k,j) * ghat(k)
-          // and add u(v)·gphys
+          // and add u(v)\cdotgphys
           for (size_t j = 0; j < d; ++j)
           {
             ScalarType gphys_j = ScalarType(0);
@@ -367,6 +367,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
+        const auto* qf = ip.getQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
@@ -397,8 +398,8 @@ namespace Rodin::Variational
         typename Cache::QpKey qkey;
         if (needs_qp)
         {
-          qkey.qf = &ip.getQuadratureFormula();
-          qkey.qp = ip.getIndex();
+          qkey.qf = qf;
+          qkey.qp = qf ? ip.getIndex() : 0;
           qkey.valid = true;
         }
         else
@@ -408,7 +409,7 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !(m_cache.qpKey == qkey);
+        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
         if (cell_changed || qp_changed)
         {
           m_cache.qpKey = qkey;
@@ -416,13 +417,14 @@ namespace Rodin::Variational
           const P1Element<ScalarType> fe_scalar(geom);
           const size_t nv = fe_scalar.getCount();
 
-          const auto& qf = ip.getQuadratureFormula();
-          const size_t qp = ip.getIndex();
-          const auto& rc = qf.getPoint(qp);
+          const auto& rc =
+            qf
+              ? qf->getPoint(ip.getIndex())
+              : pt.getReferenceCoordinates();
 
           const auto& Jinv = pt.getJacobianInverse();
 
-          // For basis (v,c): div(φ_{v,c}) = (J^{-T} ∇_hat φ_v)_c
+          // For basis (v,c): div(φ_{v,c}) = (J^{-T} \nabla_hat φ_v)_c
           // because only component c is nonzero.
           for (size_t v = 0; v < nv; ++v)
           {

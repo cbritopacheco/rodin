@@ -1054,6 +1054,59 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  TEST(Rodin_Variational_RealH1Element, SanityTest_P2_3D_Reference_Pyramid)
+  {
+    RealH1Element<2> k(Polytope::Type::Pyramid);
+
+    EXPECT_EQ(k.getCount(), 14);
+    EXPECT_EQ(k.getOrder(), 4);
+  }
+
+  TEST(Rodin_Variational_RealH1Element, LagrangeProperty_P2_Pyramid)
+  {
+    RealH1Element<2> k(Polytope::Type::Pyramid);
+
+    for (size_t i = 0; i < k.getCount(); ++i)
+    {
+      for (size_t j = 0; j < k.getCount(); ++j)
+      {
+        const auto& node = k.getNode(j);
+        const Real expected = (i == j) ? 1.0 : 0.0;
+        EXPECT_NEAR(k.getBasis(i)(node), expected, 1e-8)
+          << "basis " << i << " at node " << j;
+      }
+    }
+  }
+
+  TEST(Rodin_Variational_RealH1Element, PartitionOfUnity_P2_Pyramid)
+  {
+    constexpr size_t n = 20;
+    RandomFloat gen(0.0, 1.0);
+    RealH1Element<2> k(Polytope::Type::Pyramid);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+      const Real z = gen();
+      const Real q = 1.0 - z;
+      Math::Vector<Real> p{{gen() * q, gen() * q, z}};
+
+      Real sum = 0.0;
+      Real sum_dx = 0.0, sum_dy = 0.0, sum_dz = 0.0;
+      for (size_t j = 0; j < k.getCount(); ++j)
+      {
+        sum += k.getBasis(j)(p);
+        sum_dx += k.getBasis(j).getDerivative<1>(0)(p);
+        sum_dy += k.getBasis(j).getDerivative<1>(1)(p);
+        sum_dz += k.getBasis(j).getDerivative<1>(2)(p);
+      }
+
+      EXPECT_NEAR(sum, 1.0, 1e-8);
+      EXPECT_NEAR(sum_dx, 0.0, 1e-7);
+      EXPECT_NEAR(sum_dy, 0.0, 1e-7);
+      EXPECT_NEAR(sum_dz, 0.0, 1e-7);
+    }
+  }
+
   // Test higher orders DOF count for triangle
   TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Triangle)
   {
@@ -1076,6 +1129,16 @@ namespace Rodin::Tests::Unit
     // Wedge: (k+1) * (k+1)(k+2)/2
     EXPECT_EQ(RealH1Element<4>(Polytope::Type::Wedge).getCount(), 75);  // 5 * 5*6/2 = 5 * 15 = 75
     EXPECT_EQ(RealH1Element<5>(Polytope::Type::Wedge).getCount(), 126); // 6 * 6*7/2 = 6 * 21 = 126
+  }
+
+  TEST(Rodin_Variational_RealH1Element, DOFCount_HigherOrders_Pyramid)
+  {
+    EXPECT_EQ(RealH1Element<1>(Polytope::Type::Pyramid).getCount(), 5);
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Pyramid).getCount(), 14);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Pyramid).getCount(), 30);
+    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Pyramid).getCount(), 55);
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Pyramid).getCount(), 91);
+    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Pyramid).getCount(), 140);
   }
 
   // ========================================================================
@@ -1624,6 +1687,9 @@ namespace Rodin::Tests::Unit
 
     // P5 Tetrahedron: (k+1)(k+2)(k+3)/6 = 6*7*8/6 = 56 scalar DOFs
     EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Tetrahedron, vdim).getCount(), 56 * vdim);
+
+    // P5 Pyramid: (K+1)(K+2)(2K+3)/6 = 6*7*13/6 = 91 scalar DOFs
+    EXPECT_EQ(VectorH1Element<5>(Polytope::Type::Pyramid, vdim).getCount(), 91 * vdim);
   }
 
   // Test Vector linear field reproduction
@@ -1722,6 +1788,21 @@ namespace Rodin::Tests::Unit
         for (size_t j = 0; j < elem.getCount(); j++)
           sum += elem.getBasis(j)(p);
         EXPECT_NEAR(sum, 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
+
+    // Pyramid
+    {
+      RealH1Element<2> elem(Polytope::Type::Pyramid);
+      for (size_t i = 0; i < n; i++)
+      {
+        const Real z = gen();
+        const Real q = 1.0 - z;
+        Math::Vector<Real> p{{gen() * q, gen() * q, z}};
+        Real sum = 0.0;
+        for (size_t j = 0; j < elem.getCount(); j++)
+          sum += elem.getBasis(j)(p);
+        EXPECT_NEAR(sum, 1.0, 1e-8);
       }
     }
   }
@@ -2039,6 +2120,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealP1Element(Polytope::Type::Triangle).getCount(), 3);
     EXPECT_EQ(RealP1Element(Polytope::Type::Quadrilateral).getCount(), 4);
     EXPECT_EQ(RealP1Element(Polytope::Type::Tetrahedron).getCount(), 4);
+    EXPECT_EQ(RealP1Element(Polytope::Type::Pyramid).getCount(), 5);
     EXPECT_EQ(VectorP1Element<Real>(Polytope::Type::Segment, 2).getCount(), 4);
     EXPECT_EQ(VectorP1Element<Real>(Polytope::Type::Triangle, 3).getCount(), 9);
 
@@ -2061,6 +2143,10 @@ namespace Rodin::Tests::Unit
     // Pk Elements (Tetrahedron): (K+1)(K+2)(K+3)/6
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Tetrahedron).getCount(), 10);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Tetrahedron).getCount(), 20);
+
+    // Pk Elements (Pyramid): (K+1)(K+2)(2K+3)/6
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Pyramid).getCount(), 14);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Pyramid).getCount(), 30);
 
     // Vector Pk Elements
     int count = H1Element<2, Math::SpatialVector<Real>>(Polytope::Type::Segment, 2).getCount();
@@ -2094,7 +2180,7 @@ namespace Rodin::Tests::Unit
 
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
                       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Wedge})
+                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealH1Element<1> pk(geom);
 
@@ -2114,6 +2200,9 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Tetrahedron:
           expected_dofs = 4;
           break;
+        case Polytope::Type::Pyramid:
+          expected_dofs = 5;
+          break;
         case Polytope::Type::Wedge:
           expected_dofs = 6;
           break;
@@ -2132,6 +2221,7 @@ namespace Rodin::Tests::Unit
           expected_order = 1;
           break;
         case Polytope::Type::Quadrilateral:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Wedge:
           expected_order = 2; // tensor-product degree with K=1
           break;
@@ -2152,6 +2242,7 @@ namespace Rodin::Tests::Unit
           p = Math::Vector<Real>{{0.3, 0.3}};
           break;
         case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Wedge:
           p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
           break;
@@ -2326,7 +2417,15 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(RealH1Element<5>(Polytope::Type::Tetrahedron).getCount(), 56);
     EXPECT_EQ(RealH1Element<6>(Polytope::Type::Tetrahedron).getCount(), 84);
 
-    // Wedge: (K+1)·(K+1)(K+2)/2
+    // Pyramid: (K+1)(K+2)(2K+3)/6
+    EXPECT_EQ(RealH1Element<1>(Polytope::Type::Pyramid).getCount(), 5);
+    EXPECT_EQ(RealH1Element<2>(Polytope::Type::Pyramid).getCount(), 14);
+    EXPECT_EQ(RealH1Element<3>(Polytope::Type::Pyramid).getCount(), 30);
+    EXPECT_EQ(RealH1Element<4>(Polytope::Type::Pyramid).getCount(), 55);
+    EXPECT_EQ(RealH1Element<5>(Polytope::Type::Pyramid).getCount(), 91);
+    EXPECT_EQ(RealH1Element<6>(Polytope::Type::Pyramid).getCount(), 140);
+
+    // Wedge: (K+1)\cdot(K+1)(K+2)/2
     EXPECT_EQ(RealH1Element<1>(Polytope::Type::Wedge).getCount(), 6);
     EXPECT_EQ(RealH1Element<2>(Polytope::Type::Wedge).getCount(), 18);
     EXPECT_EQ(RealH1Element<3>(Polytope::Type::Wedge).getCount(), 40);

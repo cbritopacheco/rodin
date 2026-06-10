@@ -203,6 +203,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     ::testing::Values(
       Polytope::Type::Tetrahedron,
       Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
       Polytope::Type::Wedge)
   );
 }

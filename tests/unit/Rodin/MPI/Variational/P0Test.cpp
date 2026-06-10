@@ -89,6 +89,18 @@ namespace
     }
     return sharder.gather(0);
   }
+
+  static const char* polytopeName(Polytope::Type type)
+  {
+    switch (type)
+    {
+      case Polytope::Type::Tetrahedron: return "Tetrahedron";
+      case Polytope::Type::Hexahedron:  return "Hexahedron";
+      case Polytope::Type::Pyramid:     return "Pyramid";
+      case Polytope::Type::Wedge:       return "Wedge";
+      default:                          return "Other";
+    }
+  }
 }
 
 namespace Rodin::Tests::Unit
@@ -117,21 +129,29 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief getSize() of the distributed P0 space equals the global cell count
-   * for a Tetrahedron mesh.
+   * for every supported 3D cell mesh.
    */
-  TEST(MPIP0Space, GetSize_EqualsGlobalCellCount_Tetrahedron)
+  TEST(MPIP0Space, GetSize_EqualsGlobalCellCount_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    auto mpiMesh = distributeFromRoot(ctx, Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    for (auto type :
+         { Polytope::Type::Tetrahedron,
+           Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid,
+           Polytope::Type::Wedge })
+    {
+      SCOPED_TRACE(polytopeName(type));
+      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
 
-    P0<Real, Mesh<Context::MPI>> fes(mpiMesh);
+      P0<Real, Mesh<Context::MPI>> fes(mpiMesh);
 
-    const size_t globalCells = mpiMesh.getCellCount();
-    EXPECT_EQ(fes.getSize(), globalCells);
+      const size_t globalCells = mpiMesh.getCellCount();
+      EXPECT_EQ(fes.getSize(), globalCells);
+    }
   }
 
   // =========================================================================

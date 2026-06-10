@@ -131,7 +131,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Compute lambda_exact in a way consistent with the assembled discrete system:
     // Let re0_p be the pressure-block residual with lambda=0.
     // Let g = A_pλ be the pressure-block response to the lambda DOF.
-    // Choose lambda to minimize ||re_p||_2: lambda* = -(g·re0_p)/(g·g).
+    // Choose lambda to minimize ||re_p||_2: lambda* = -(g\cdotre0_p)/(g\cdotg).
     x_exact[lambdaIndex] = 0.0;
 
     auto re0 = (A * x_exact - b).eval();
@@ -193,7 +193,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -\cos(\pi x) \sin(\pi y)
    *  \end{pmatrix}
    * @f]
-   * Note: ∇·u = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
+   * Note: \nabla\cdotu = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
    *
    * Manufactured pressure:
    * @f[
@@ -207,7 +207,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -2\pi^2 \cos(\pi x) \sin(\pi y) + \pi \cos(\pi x) \cos(\pi y)
    *  \end{pmatrix}
    * @f]
-   * Computed as f = -Δu + ∇p
+   * Computed as f = -Δu + \nablap
    *
    * Boundary conditions:
    * @f[
@@ -228,7 +228,7 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     // Manufactured velocity solution (divergence-free)
     // u = (sin(πx)cos(πy), -cos(πx)sin(πy))
-    // ∇·u = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
+    // \nabla\cdotu = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
     VectorFunction u_exact{
       sin(pi * F::x) * cos(pi * F::y),
       -cos(pi * F::x) * sin(pi * F::y)
@@ -249,7 +249,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     TestFunction  q(ph); // Pressure test function
 
     // Assemble the weak form:
-    // ∫ ∇u : ∇v - ∫ p div(v) - ∫ q div(u) = ∫ f · v
+    // \int \nablau : \nablav - \int p div(v) - \int q div(u) = \int f \cdot v
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
@@ -273,7 +273,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Volume
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -299,7 +299,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -x(1-x)
    *  \end{pmatrix}
    * @f]
-   * Note: ∇·u = 0 ✓
+   * Note: \nabla\cdotu = 0 ✓
    *
    * Manufactured pressure:
    * @f[
@@ -313,7 +313,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -1
    *  \end{pmatrix}
    * @f]
-   * Computed as f = -Δu + ∇p = (2, -2) + (1, 1) = (3, -1)
+   * Computed as f = -Δu + \nablap = (2, -2) + (1, 1) = (3, -1)
    */
   TEST_P(Manufactured_Stokes_Test_32x32, Stokes_Polynomial)
   {
@@ -327,7 +327,7 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     // Manufactured velocity solution (divergence-free)
     // Using u = (y(1-y), -x(1-x)) 
-    // ∇·u = ∂(y(1-y))/∂x + ∂(-x(1-x))/∂y = 0 + 0 = 0 ✓
+    // \nabla\cdotu = \partial(y(1-y))/\partialx + \partial(-x(1-x))/\partialy = 0 + 0 = 0 ✓
     VectorFunction u_exact{
       F::y * (1 - F::y),
       -F::x * (1 - F::x)
@@ -336,10 +336,10 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Manufactured pressure solution
     auto p_exact = F::x + F::y - 1;
 
-    // Forcing function: f = -Δu + ∇p
-    // -Δ(y(1-y)) = -∂²/∂y²[y(1-y)] = -(-2) = 2
-    // -Δ(-x(1-x)) = -∂²/∂x²[-x(1-x)] = -(-(-2)) = -2
-    // ∇p = (1, 1)
+    // Forcing function: f = -Δu + \nablap
+    // -Δ(y(1-y)) = -\partial²/\partialy²[y(1-y)] = -(-2) = 2
+    // -Δ(-x(1-x)) = -\partial²/\partialx²[-x(1-x)] = -(-(-2)) = -2
+    // \nablap = (1, 1)
     // Therefore f = (2+1, -2+1) = (3, -1)
     VectorFunction f{ 3.0, -1.0 };
 
@@ -373,7 +373,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Volume
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -474,7 +474,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Compute the L^2 error for pressure
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -509,7 +509,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *  p(x, y) = x^2 - y^2
    * @f]
    *
-   * Forcing function (computed from -Δu + ∇p):
+   * Forcing function (computed from -Δu + \nablap):
    * @f[
    *  \mathbf{f}(x, y) = -\Delta\mathbf{u} + \nabla p
    * @f]
@@ -533,17 +533,17 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     // Manufactured velocity solution (divergence-free)
     // Using stream function ψ = x²(1-x)² y²(1-y)²
-    // u₁ = ∂ψ/∂y, u₂ = -∂ψ/∂x ensures ∇·u = 0
+    // u₁ = \partialψ/\partialy, u₂ = -\partialψ/\partialx ensures \nabla\cdotu = 0
 
-    // ∂ψ/∂y = x²(1-x)² · [2y(1-y)² - 2y²(1-y)]
+    // \partialψ/\partialy = x²(1-x)² \cdot [2y(1-y)² - 2y²(1-y)]
     //       = 2x²(1-x)² y(1-y) [1-y-y]
     //       = 2x²(1-x)² y(1-y)(1-2y)
     auto u1 = 2 * pow(F::x, 2) * pow(1 - F::x, 2) * F::y * (1 - F::y) * (1 - 2 * F::y);
 
-    // ∂ψ/∂x = [2x(1-x)² - 2x²(1-x)] · y²(1-y)²
+    // \partialψ/\partialx = [2x(1-x)² - 2x²(1-x)] \cdot y²(1-y)²
     //       = 2x(1-x) y²(1-y)² [1-x-x]
     //       = 2x(1-x) y²(1-y)² (1-2x)
-    // u₂ = -∂ψ/∂x
+    // u₂ = -\partialψ/\partialx
     auto u2 = -2 * F::x * (1 - F::x) * pow(F::y, 2) * pow(1 - F::y, 2) * (1 - 2 * F::x);
 
     VectorFunction u_exact{ u1, u2 };
@@ -552,16 +552,16 @@ namespace Rodin::Tests::Manufactured::Stokes
     auto p_exact = pow(F::x, 2) - pow(F::y, 2);
 
     // Compute Laplacian components
-    // For u1 = 2x²(1-x)² y(1-y)(1-2y), compute ∂²u1/∂x² + ∂²u1/∂y²
+    // For u1 = 2x²(1-x)² y(1-y)(1-2y), compute \partial²u1/\partialx² + \partial²u1/\partialy²
     // This is quite involved, so I'll compute it symbolically:
 
-    // ∂²u1/∂x² = 2y(1-y)(1-2y) · [2(1-x)² - 8x(1-x) + 2x²]
-    //          = 2y(1-y)(1-2y) · 2[(1-x)² - 4x(1-x) + x²]
-    //          = 4y(1-y)(1-2y) · [1 - 2x + x² - 4x + 4x² + x²]
-    //          = 4y(1-y)(1-2y) · [1 - 6x + 6x²]
+    // \partial²u1/\partialx² = 2y(1-y)(1-2y) \cdot [2(1-x)² - 8x(1-x) + 2x²]
+    //          = 2y(1-y)(1-2y) \cdot 2[(1-x)² - 4x(1-x) + x²]
+    //          = 4y(1-y)(1-2y) \cdot [1 - 2x + x² - 4x + 4x² + x²]
+    //          = 4y(1-y)(1-2y) \cdot [1 - 6x + 6x²]
     auto d2u1_dx2 = 4 * F::y * (1 - F::y) * (1 - 2 * F::y) * (1 - 6 * F::x + 6 * pow(F::x, 2));
 
-    // ∂²u1/∂y² = 2x²(1-x)² · [∂²/∂y²(y(1-y)(1-2y))]
+    // \partial²u1/\partialy² = 2x²(1-x)² \cdot [\partial²/\partialy²(y(1-y)(1-2y))]
     // Let g(y) = y(1-y)(1-2y) = y(1-3y+2y²) = y - 3y² + 2y³
     // g'(y) = 1 - 6y + 6y²
     // g''(y) = -6 + 12y
@@ -583,7 +583,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     auto grad_p_x = 2 * F::x;
     auto grad_p_y = -2 * F::y;
 
-    // Forcing function: f = -Δu + ∇p
+    // Forcing function: f = -Δu + \nablap
     VectorFunction f{
       -laplace_u1 + grad_p_x,
       -laplace_u2 + grad_p_y
@@ -623,7 +623,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Volume
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -698,7 +698,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     {
       Problem ns(u, p, lambda, v, q, mu);
 
-      // Frozen convection: (w · ∇)u = J(u) * w
+      // Frozen convection: (w \cdot \nabla)u = J(u) * w
       const auto conv_u = Mult(Jacobian(u), w);
 
       ns =

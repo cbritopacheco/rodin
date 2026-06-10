@@ -189,7 +189,7 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
             const auto& p  = m_quadrature->getPoint(qp);
-            const Variational::IntegrationPoint ip(p, *m_qf, qp);
+            const Variational::IntegrationPoint ip(p, m_qf, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =
@@ -255,7 +255,7 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < m_quadrature->getSize(); ++qp)
           {
             const auto& p  = m_quadrature->getPoint(qp);
-            const Variational::IntegrationPoint ip(p, *m_qf, qp);
+            const Variational::IntegrationPoint ip(p, m_qf, qp);
             const auto& rc = m_qf->getPoint(qp);
 
             const ScalarType wdet =

@@ -10,17 +10,17 @@
  *
  * Problem solved
  * --------------
- *   -Δu + ∇p = f   in Ω
- *        div u = 0 in Ω
- *             u = u_exact on ∂Ω
+ *   -Δu + \nablap = f   in \Omega
+ *        div u = 0 in \Omega
+ *             u = u_exact on \partial\Omega
  *
  * A Lagrange multiplier λ enforces the zero-mean pressure constraint:
  *
- *        ∫Ω p = 0
+ *        \int\Omega p = 0
  *
  * The discrete system is
  *
- *   (∇u, ∇v) - (p, div v) + (div u, q) + (λ, q) + (p, μ) = (f, v)
+ *   (\nablau, \nablav) - (p, div v) + (div u, q) + (λ, q) + (p, μ) = (f, v)
  *
  * where μ is the test function associated with λ.
  *

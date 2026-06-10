@@ -232,6 +232,14 @@ namespace Rodin::QF
       void build_wedge(size_t ntri, size_t nz);
 
       /**
+       * @brief Builds Gauss-Legendre quadrature on a pyramid.
+       * @param nx Number of points in collapsed x-direction
+       * @param ny Number of points in collapsed y-direction
+       * @param nz Number of points in collapsed z-direction
+       */
+      void build_pyramid(size_t nx, size_t ny, size_t nz);
+
+      /**
        * @brief Builds Gauss-Legendre quadrature on a hexahedron (cube).
        * @param nx Number of points in x-direction
        * @param ny Number of points in y-direction

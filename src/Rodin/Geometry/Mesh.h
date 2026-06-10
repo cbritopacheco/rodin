@@ -946,15 +946,30 @@ namespace Rodin::Geometry
             return polytope(t, IndexArray({ vs }));
           }
 
+          Builder& polytope(Polytope::Type t, std::initializer_list<Index> vs, Index& index)
+          {
+            return polytope(t, IndexArray({ vs }), index);
+          }
+
           /**
            * @brief Adds polytope defined by the given vertices.
            */
           Builder& polytope(Polytope::Type t, const IndexArray& vs);
 
           /**
+           * @brief Adds polytope defined by the given vertices and returns its index.
+           */
+          Builder& polytope(Polytope::Type t, const IndexArray& vs, Index& index);
+
+          /**
            * @brief Adds polytope defined by the given vertices.
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
+
+          /**
+           * @brief Adds polytope defined by the given vertices and returns its index.
+           */
+          Builder& polytope(Polytope::Type t, IndexArray&& vs, Index& index);
 
           template <class T>
           Builder& segment(T&& vs)
@@ -978,6 +993,12 @@ namespace Rodin::Geometry
           Builder& tetrahedron(T&& vs)
           {
             return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
+          }
+
+          template <class T>
+          Builder& pyramid(T&& vs)
+          {
+            return polytope(Polytope::Type::Pyramid, std::forward<T>(vs));
           }
 
           template <class T>
