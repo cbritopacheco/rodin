@@ -21,8 +21,8 @@
  *
  * The fluid ALE displacement d_f is computed by harmonic extension:
  *
- *   -Δ d_f = 0       in Ω_f
- *      d_f = d_s     on Γ_FSI
+ *   -Δ d_f = 0       in \Omega_f
+ *      d_f = d_s     on \Gamma_FSI
  *      d_f = 0       on inlet, outlet, and wall
  *
  * Then the fluid mesh is moved by:
@@ -813,7 +813,8 @@ int main(int argc, char** argv)
         Real maxFluidFSIVelocity = 0.0;
         Real maxWallFSIVelocity = 0.0;
 
-        for (const auto& [local, target] : fsiNoSlip.getDOFs())
+        for (const auto& [local, target]
+               : std::get<IndexMap<Real>>(fsiNoSlip.getDOFs()))
         {
           const PetscInt idx = static_cast<PetscInt>(local);
           PetscScalar actual = 0.0;
@@ -856,14 +857,11 @@ int main(int argc, char** argv)
       TrialFunction du(solidVh);
       TestFunction  w(solidVh);
 
-      Solid::MaterialTangent tangent(law, du, w);
-      tangent.setDisplacement(solidDisplacement);
+      Solid::MaterialTangent tangent(law, du, w, solidDisplacement);
 
-      Solid::InternalForce internal(law, w);
-      internal.setDisplacement(solidDisplacement);
+      Solid::InternalForce internal(law, w, solidDisplacement);
 
-      Solid::InternalForce internalOld(law, w);
-      internalOld.setDisplacement(solidDisplacementOld);
+      Solid::InternalForce internalOld(law, w, solidDisplacementOld);
 
       /*
        * Transfer fluid traction to the solid interface.

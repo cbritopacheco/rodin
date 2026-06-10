@@ -91,9 +91,9 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief Optimized blending parameter α for triangular warp-blend.
+   * @brief Optimized blending parameter \alpha for triangular warp-blend.
    *
-   * Provides the blending parameter α for different polynomial degrees,
+   * Provides the blending parameter \alpha for different polynomial degrees,
    * empirically optimized to minimize the Lebesgue constant.
    * Values follow Hesthaven & Warburton, "Nodal DG Methods" (2008).
    *
@@ -139,9 +139,9 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief Optimized blending parameter α for tetrahedral warp-blend.
+   * @brief Optimized blending parameter \alpha for tetrahedral warp-blend.
    *
-   * Provides the blending parameter α for different polynomial degrees,
+   * Provides the blending parameter \alpha for different polynomial degrees,
    * empirically optimized for tetrahedra.
    *
    * @tparam K Polynomial degree.
@@ -270,7 +270,7 @@ namespace Rodin::Variational
    * The algorithm:
    * 1. Converts reference coordinates to equilateral triangle coordinates
    * 2. Computes edge-based warp contributions using 1D GLL warping
-   * 3. Blends contributions using barycentric weights with parameter α
+   * 3. Blends contributions using barycentric weights with parameter \alpha
    * 4. Converts back to reference triangle coordinates
    *
    * @tparam K Polynomial degree.

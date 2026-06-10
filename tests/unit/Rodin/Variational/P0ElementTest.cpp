@@ -288,6 +288,21 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getOrder(), 0);
   }
 
+  TEST(Rodin_Variational_RealP0Element, SanityTest_3D_Reference_Pyramid)
+  {
+    RealP0Element k(Polytope::Type::Pyramid);
+
+    EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0.25, 0.25, 0.25}}), 1, RODIN_FUZZY_CONSTANT);
+
+    const auto& node = k.getNode(0);
+    EXPECT_NEAR(node.x(), 0.375, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(node.y(), 0.375, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(node.z(), 0.25, RODIN_FUZZY_CONSTANT);
+
+    EXPECT_EQ(k.getCount(), 1);
+    EXPECT_EQ(k.getOrder(), 0);
+  }
+
   TEST(FinalTest_P0Element_Real, PartitionOfUnity_AllGeometries)
   {
     constexpr size_t n = 20;
@@ -340,6 +355,18 @@ namespace Rodin::Tests::Unit
         }
       }
     }
+
+    // Pyramid
+    {
+      RealP0Element elem(Polytope::Type::Pyramid);
+      for (size_t i = 0; i < n; i++)
+      {
+        const Real z = gen();
+        const Real q = 1.0 - z;
+        Math::Vector<Real> p{{gen() * q, gen() * q, z}};
+        EXPECT_NEAR(elem.getBasis(0)(p), 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
   }
 
   TEST(FinalTest_P0Element_Real, ConstantReproduction_AllGeometries)
@@ -388,6 +415,18 @@ namespace Rodin::Tests::Unit
     // Tetrahedron
     {
       RealP0Element elem(Polytope::Type::Tetrahedron);
+      auto deriv_x = elem.getBasis(0).getDerivative<1>(0);
+      auto deriv_y = elem.getBasis(0).getDerivative<1>(1);
+      auto deriv_z = elem.getBasis(0).getDerivative<1>(2);
+      Math::Vector<Real> p{{0.2, 0.3, 0.1}};
+      EXPECT_NEAR(deriv_x(p), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(deriv_y(p), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(deriv_z(p), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+
+    // Pyramid
+    {
+      RealP0Element elem(Polytope::Type::Pyramid);
       auto deriv_x = elem.getBasis(0).getDerivative<1>(0);
       auto deriv_y = elem.getBasis(0).getDerivative<1>(1);
       auto deriv_z = elem.getBasis(0).getDerivative<1>(2);
@@ -578,13 +617,22 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(elem.getCount(), vdim);
       }
     }
+
+    // Test vdim=1, 2, 3 on Pyramid
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Pyramid, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+      }
+    }
   }
 
   TEST(FinalTest_P0Element_Vector, PartitionOfUnity_AllVectorDimensions)
   {
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
                       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Wedge})
+                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -602,6 +650,7 @@ namespace Rodin::Tests::Unit
             p = Math::Vector<Real>{{0.3, 0.3}};
             break;
           case Polytope::Type::Tetrahedron:
+          case Polytope::Type::Pyramid:
           case Polytope::Type::Wedge:
             p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
             break;
@@ -633,7 +682,8 @@ namespace Rodin::Tests::Unit
     // Test LinearForm evaluation for P0 elements across all geometries
     for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
                       Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
+                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
+                      Polytope::Type::Wedge})
     {
       RealP0Element elem(geom);
 
@@ -654,7 +704,7 @@ namespace Rodin::Tests::Unit
   {
     // Test LinearForm for vector P0 elements with different vector dimensions
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron})
+                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -694,7 +744,7 @@ namespace Rodin::Tests::Unit
     // Test that P0 element correctly interpolates constant functions
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
                       Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Wedge})
+                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP0Element elem(geom);
 
@@ -717,6 +767,7 @@ namespace Rodin::Tests::Unit
           p = Math::Vector<Real>{{0.4, 0.3}};
           break;
         case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Wedge:
           p = Math::Vector<Real>{{0.2, 0.3, 0.4}};
           break;

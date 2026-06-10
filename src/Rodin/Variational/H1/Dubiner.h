@@ -113,10 +113,10 @@ namespace Rodin::Variational
 
         const Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
 
-        // ∂ψ/∂a
+        // \partialψ/\partiala
         dpsi_da = dPa * Pb * scale_b;
 
-        // ∂ψ/∂b
+        // \partialψ/\partialb
         Real dscale_db = 0.0;
         if constexpr (P > 0)
           dscale_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
@@ -310,17 +310,17 @@ namespace Rodin::Variational
         const Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
         const Real scale_c = Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
 
-        // ∂ψ / ∂a
+        // \partialψ / \partiala
         dpsi_da = dP_a * P_b * P_c * scale_b * scale_c;
 
-        // ∂ψ / ∂b
+        // \partialψ / \partialb
         Real dscale_b_db = 0.0;
         if constexpr (P > 0)
           dscale_b_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
 
         dpsi_db = P_a * (dP_b * scale_b + P_b * dscale_b_db) * P_c * scale_c;
 
-        // ∂ψ / ∂c
+        // \partialψ / \partialc
         Real dscale_c_dc = 0.0;
         if constexpr (P + Q > 0)
           dscale_c_dc = (P + Q) * Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q - 1>{}) * (-0.5);

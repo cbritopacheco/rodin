@@ -249,6 +249,23 @@ namespace Rodin::Tests::Unit
       roundTripMFEMScalarFixtureCaseAndCompare<K>("wedge", 1e-9);
     }
 
+    Mesh<Context::Local> makeUniform3DMeshForH1RoundTrip(Polytope::Type geometry)
+    {
+      return LocalMesh::UniformGrid(geometry, { 3, 3, 3 });
+    }
+
+    std::string geometryName(Polytope::Type geometry)
+    {
+      switch (geometry)
+      {
+        case Polytope::Type::Tetrahedron: return "Tetrahedron";
+        case Polytope::Type::Hexahedron:  return "Hexahedron";
+        case Polytope::Type::Pyramid:     return "Pyramid";
+        case Polytope::Type::Wedge:       return "Wedge";
+        default:                          return "Unknown";
+      }
+    }
+
     template <size_t K>
     void loadMFEMVectorFixtureAndCompare(
         const std::string& meshFilename,
@@ -1403,6 +1420,65 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
     }
   }
+
+  class H1Degree2RoundTrip3DGeometryCoverage
+    : public ::testing::TestWithParam<Polytope::Type>
+  {};
+
+  TEST_P(H1Degree2RoundTrip3DGeometryCoverage, SaveLoadRoundTrip)
+  {
+    const auto geometry = GetParam();
+    Mesh mesh = makeUniform3DMeshForH1RoundTrip(geometry);
+
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GT(mesh.getCellCount(), 0u);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+
+    RealFunction func([](const Geometry::Point& p)
+    {
+      return p.x() * p.x() + p.y() * p.y() + p.z() * p.z();
+    });
+    gf.project(func);
+
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, H1<2, Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P2");
+
+    ss.clear();
+    ss.seekg(0);
+
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, H1<2, Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+  }
+
+  INSTANTIATE_TEST_SUITE_P(
+    All3DPolytopes,
+    H1Degree2RoundTrip3DGeometryCoverage,
+    ::testing::Values(
+      Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid,
+      Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info)
+    {
+      return geometryName(info.param);
+    });
 
   TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree1_Triangle_Large)
   {

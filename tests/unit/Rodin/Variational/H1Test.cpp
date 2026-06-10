@@ -248,6 +248,29 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), 4);
   }
 
+  TEST(Rodin_Variational_H1_Space, Pyramid_H1_2_UniformGrid_Build)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh);
+
+    EXPECT_EQ(mesh.getVertexCount(), 9);
+    EXPECT_EQ(mesh.getConnectivity().getCount(1), 20);
+    EXPECT_EQ(mesh.getConnectivity().getCount(Polytope::Type::Quadrilateral), 6);
+    EXPECT_EQ(fes.getSize(), 35);
+
+    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+    {
+      const auto& fe = fes.getFiniteElement(3, c);
+      EXPECT_EQ(fe.getGeometry(), Polytope::Type::Pyramid);
+      EXPECT_EQ(fe.getCount(), 14);
+      EXPECT_EQ(fes.getDOFs(3, c).size(), 14u);
+    }
+  }
+
   // Test H1<2> on a simple mesh
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_2_2D_Square_Build)
   {

@@ -101,9 +101,9 @@
     RealFunction f = 1;
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))   // ∫ ∇u · ∇v dx
-            - Integral(f, v)               // ∫ f v dx
-            + DirichletBC(u, Zero());      // u = 0 on ∂Ω
+    poisson = Integral(Grad(u), Grad(v))   // \int \nablau \cdot \nablav dx
+            - Integral(f, v)               // \int f v dx
+            + DirichletBC(u, Zero());      // u = 0 on \partial\Omega
 
     Solver::CG(poisson).solve();
 
@@ -331,7 +331,7 @@
   Neumann conditions appear as boundary integrals in the weak formulation:
 
   @code{.cpp}
-  // ∂u/∂n = g on boundary with attribute 2
+  // \partialu/\partialn = g on boundary with attribute 2
   BoundaryIntegral(g, v).over(2)
   @endcode
 

@@ -19,13 +19,13 @@
  * ## Test groups
  *
  *  1. P0 FES on boundary SubMesh — constant projection, owned DOF check.
- *  2. P0 FES on boundary SubMesh — integral ∫_∂Ω 1 dΓ = |∂Ω| = 4.
+ *  2. P0 FES on boundary SubMesh — integral \int_\partial\Omega 1 d\Gamma = |\partial\Omega| = 4.
  *  3. P1 FES on boundary SubMesh — constant projection, owned DOF check.
- *  4. P1 FES on boundary SubMesh — integral ∫_∂Ω 1 dΓ = 4.
+ *  4. P1 FES on boundary SubMesh — integral \int_\partial\Omega 1 d\Gamma = 4.
  *  5. P0 FES on cell SubMesh — constant projection, owned DOF check.
- *  6. P0 FES on cell SubMesh — integral ∫_Ω c dΩ = c.
+ *  6. P0 FES on cell SubMesh — integral \int_\Omega c d\Omega = c.
  *  7. P1 FES on cell SubMesh — constant projection, owned DOF check.
- *  8. P1 FES on cell SubMesh — integral ∫_Ω c dΩ = c.
+ *  8. P1 FES on cell SubMesh — integral \int_\Omega c d\Omega = c.
  *  9. Inclusion path: parent-mesh P0/P1 GridFunction evaluated at SubMesh
  *     quadrature points via TestFunction on the cell SubMesh.
  * 10. Restriction path: SubMesh P0/P1 GridFunction evaluated at parent-mesh
@@ -257,7 +257,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
   /**
    * @brief Project constant f=1 onto P0 on the boundary SubMesh of a unit
-   *        square and verify ∫_∂Ω u_h dΓ = |∂Ω| = 4.
+   *        square and verify \int_\partial\Omega u_h d\Gamma = |\partial\Omega| = 4.
    */
   TEST(PETSc_MPI_P0_SubMesh, BoundarySubMesh_Integral_EqualsBoundaryLength_Triangle)
   {
@@ -311,12 +311,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   // ==========================================================================
-  // Group 4 — P0 on cell SubMesh: integral = c × |Ω|
+  // Group 4 — P0 on cell SubMesh: integral = c × |\Omega|
   // ==========================================================================
 
   /**
    * @brief Project constant f=c onto P0 on a cell SubMesh of a unit square
-   *        and verify ∫_Ω u_h dΩ = c × |Ω| = c.
+   *        and verify \int_\Omega u_h d\Omega = c × |\Omega| = c.
    */
   TEST(PETSc_MPI_P0_SubMesh, CellSubMesh_Integral_EqualsArea_Triangle)
   {
@@ -344,7 +344,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // ==========================================================================
 
   /**
-   * @brief P0 boundary SubMesh on Quadrilateral mesh: integral = |∂Ω| = 4.
+   * @brief P0 boundary SubMesh on Quadrilateral mesh: integral = |\partial\Omega| = 4.
    */
   TEST(PETSc_MPI_P0_SubMesh, BoundarySubMesh_Integral_EqualsBoundaryLength_Quadrilateral)
   {
@@ -366,7 +366,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief P0 cell SubMesh on Quadrilateral mesh: integral = c × |Ω| = c.
+   * @brief P0 cell SubMesh on Quadrilateral mesh: integral = c × |\Omega| = c.
    */
   TEST(PETSc_MPI_P0_SubMesh, CellSubMesh_Integral_EqualsArea_Quadrilateral)
   {
@@ -427,7 +427,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
   /**
    * @brief Project f=1 onto P1 on the boundary SubMesh of a unit square and
-   *        verify ∫_∂Ω u_h dΓ = |∂Ω| = 4.
+   *        verify \int_\partial\Omega u_h d\Gamma = |\partial\Omega| = 4.
    */
   TEST(PETSc_MPI_P1_SubMesh, BoundarySubMesh_Integral_EqualsBoundaryLength_Triangle)
   {
@@ -481,12 +481,12 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   // ==========================================================================
-  // Group 8 — P1 on cell SubMesh: integral = c × |Ω|
+  // Group 8 — P1 on cell SubMesh: integral = c × |\Omega|
   // ==========================================================================
 
   /**
    * @brief Project constant f=c onto P1 on a cell SubMesh of a unit square
-   *        and verify ∫_Ω u_h dΩ = c.
+   *        and verify \int_\Omega u_h d\Omega = c.
    */
   TEST(PETSc_MPI_P1_SubMesh, CellSubMesh_Integral_EqualsArea_Triangle)
   {
@@ -523,7 +523,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
    * which walks the SubMesh ancestor chain to find the parent polytope.
    *
    * Since the SubMesh covers the full domain and `parentGF = c`,
-   * ∑_i b_i = c × |Ω| = c for a scaled [0,1]² mesh.
+   * ∑_i b_i = c × |\Omega| = c for a scaled [0,1]² mesh.
    */
   TEST(PETSc_MPI_P0_ParentMesh, InclusionPath_CellSubMeshTestFunction_VecSum_Triangle)
   {
@@ -601,7 +601,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
    * and calls `fesMesh.restriction(parentPoint)` to map the parent polytope
    * index to the SubMesh polytope index before interpolating.
    *
-   * ∑_i b_i = c × |Ω| = c for a scaled [0,1]² mesh.
+   * ∑_i b_i = c × |\Omega| = c for a scaled [0,1]² mesh.
    */
   TEST(PETSc_MPI_P0_SubMesh, RestrictionPath_ParentMeshTestFunction_VecSum_Triangle)
   {

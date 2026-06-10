@@ -68,7 +68,9 @@ namespace Rodin::Variational
         const auto& gf  = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, i);
-        const auto& tab = fe.getTabulation(ip.getQuadratureFormula());
+        const auto* qf = ip.getQuadratureFormula();
+        assert(qf);
+        const auto& tab = fe.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(static_cast<std::uint8_t>(d));
@@ -285,8 +287,8 @@ namespace Rodin::Variational
         m_ip = &ip;
 
         const auto& p  = ip.getPoint();
-        const auto& qf = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const auto* qf = ip.getQuadratureFormula();
+        const size_t qp = qf ? ip.getIndex() : 0;
 
         const auto& poly = p.getPolytope();
         const size_t d   = poly.getDimension();
@@ -297,11 +299,11 @@ namespace Rodin::Variational
         key.geom  = geom;
         key.dim   = d;
         key.cell  = cell;
-        key.qf    = &qf;
+        key.qf    = qf;
         key.qp    = qp;
         key.valid = true;
 
-        const bool recompute = !(m_cache.key == key);
+        const bool recompute = !qf || !(m_cache.key == key);
         if (!recompute)
           return *this;
 
@@ -321,18 +323,21 @@ namespace Rodin::Variational
             g.resize(d);
         }
 
-        // Reference gradients from tabulation, mapped by J^{-T}.
-        const auto& tab = fe.getTabulation(qf);
+        // Reference gradients from tabulation when integrating, otherwise
+        // directly from the basis at the supplied point.
+        const auto* tab = qf ? &fe.getTabulation(*qf) : nullptr;
+        const auto& rc = p.getReferenceCoordinates();
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(d);
 
         for (size_t a = 0; a < ndof; ++a)
         {
-          const auto gref = tab.getGradient(qp, a); // span<const Scalar>, size d
-
           for (size_t ii = 0; ii < d; ++ii)
-            ref(ii) = gref[ii];
+            ref(ii) =
+              qf
+                ? tab->getGradient(qp, a)[ii]
+                : fe.getBasis(a).template getDerivative<1>(ii)(rc);
 
           m_cache.grad_phys[a] = JinvT * ref;
         }

@@ -246,7 +246,7 @@ namespace Rodin::Tests::Unit
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
     QF::Centroid qf(Polytope::Type::Triangle);
-    IntegrationPoint ip(p, qf, 5);
+    IntegrationPoint ip(p, &qf, 5);
 
     VectorFunction vf{
       IntegrationPointFirstComponentCallable{},
@@ -268,7 +268,7 @@ namespace Rodin::Tests::Unit
     const Math::Vector<Real> rc{{0.25, 0.25}};
     Point p(*it, rc);
     QF::Centroid qf(Polytope::Type::Triangle);
-    IntegrationPoint ip(p, qf, 6);
+    IntegrationPoint ip(p, &qf, 6);
 
     VectorFunction vf(size_t{2}, IntegrationPointVectorCallable{});
 

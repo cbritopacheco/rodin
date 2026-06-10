@@ -172,8 +172,10 @@ namespace Rodin::Variational
         it2->getTransformation().inverse(rc2, pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        const IntegrationPoint ip1(p1, ip.getQuadratureFormula(), ip.getIndex());
-        const IntegrationPoint ip2(p2, ip.getQuadratureFormula(), ip.getIndex());
+        const auto* qf = ip.getQuadratureFormula();
+        assert(qf);
+        const IntegrationPoint ip1(p1, qf, ip.getIndex());
+        const IntegrationPoint ip2(p2, qf, ip.getIndex());
         const auto v1 = getOperand().getValue(ip1);
         const auto v2 = getOperand().getValue(ip2);
         return v1 - v2;
@@ -340,8 +342,10 @@ namespace Rodin::Variational
         it2->getTransformation().inverse(rc2, pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        const IntegrationPoint ip1(p1, m_ip->getQuadratureFormula(), m_ip->getIndex());
-        const IntegrationPoint ip2(p2, m_ip->getQuadratureFormula(), m_ip->getIndex());
+        const auto* qf = m_ip->getQuadratureFormula();
+        assert(qf);
+        const IntegrationPoint ip1(p1, qf, m_ip->getIndex());
+        const IntegrationPoint ip2(p2, qf, m_ip->getIndex());
         m_operand->setIntegrationPoint(ip1);
         const auto val1 = m_operand->getBasis(local);
         m_operand->setIntegrationPoint(ip2);

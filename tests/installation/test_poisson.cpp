@@ -39,8 +39,8 @@ int main()
     RealFunction f = 1.0;
     
     // Assemble the Poisson problem:
-    // -Δu = f in Ω
-    // u = 0 on ∂Ω
+    // -Δu = f in \Omega
+    // u = 0 on \partial\Omega
     Problem poisson(u, v);
     poisson = Integral(Grad(u), Grad(v))
             - Integral(f, v)

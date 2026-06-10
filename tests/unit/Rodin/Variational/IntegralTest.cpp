@@ -118,7 +118,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Mass matrix: ∫ u v dx
+    // Mass matrix: \int u v dx
     bf = Integral(u, v);
     bf.assemble();
 
@@ -142,7 +142,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Stiffness matrix: ∫ ∇u · ∇v dx
+    // Stiffness matrix: \int \nablau \cdot \nablav dx
     bf = Integral(Grad(u), Grad(v));
     bf.assemble();
 
@@ -162,7 +162,7 @@ namespace Rodin::Tests::Unit
 
     auto integral_gf = Integral(gf);
 
-    // This integral represents ∫ 5 dx over the domain
+    // This integral represents \int 5 dx over the domain
     // The integration happens during assembly in linear/bilinear forms
     EXPECT_EQ(integral_gf.getRegion(), Region::Cells);
   }
@@ -237,7 +237,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Combine mass and stiffness: ∫ (u v + ∇u · ∇v) dx
+    // Combine mass and stiffness: \int (u v + \nablau \cdot \nablav) dx
     bf = Integral(u, v) + Integral(Grad(u), Grad(v));
     bf.assemble();
 

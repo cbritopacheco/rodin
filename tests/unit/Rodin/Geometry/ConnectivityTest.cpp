@@ -277,6 +277,42 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
   }
 
+  TEST(Rodin_Geometry_Connectivity, Pyramid_3D)
+  {
+    constexpr const size_t meshDim = 3;
+    constexpr const size_t nodes = 5;
+
+    Connectivity<Context::Local> connectivity;
+    connectivity.initialize(meshDim)
+                .nodes(nodes)
+                .polytope(Polytope::Type::Pyramid, {0, 1, 2, 3, 4});
+
+    EXPECT_EQ(connectivity.getDimension(), 3);
+
+    size_t d = 3;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 1);
+    EXPECT_EQ(connectivity.getGeometry(d, 0), Polytope::Type::Pyramid);
+    EXPECT_EQ(connectivity.getIncidence({d, 0}, 0), IndexVector({0, 1, 2, 3, 4}));
+
+    connectivity.compute(d, d - 1);
+    EXPECT_EQ(connectivity.getIncidence({d, d - 1}, 0).size(), 5);
+
+    d = 2;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 5);
+    EXPECT_EQ(connectivity.getCount(Polytope::Type::Quadrilateral), 1);
+    EXPECT_EQ(connectivity.getCount(Polytope::Type::Triangle), 4);
+
+    d = 1;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 8);
+
+    d = 0;
+    connectivity.compute(d, 0);
+    EXPECT_EQ(connectivity.getCount(d), 5);
+  }
+
   TEST(Rodin_Geometry_Connectivity, EmptyMesh)
   {
     Connectivity<Context::Local> connectivity;

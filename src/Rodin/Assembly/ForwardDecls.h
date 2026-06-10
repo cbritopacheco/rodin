@@ -8,6 +8,8 @@
 #ifndef RODIN_ASSEMBLY_FORWARDDECLS_H
 #define RODIN_ASSEMBLY_FORWARDDECLS_H
 
+#include "Rodin/Variational/ForwardDecls.h"
+
 namespace Rodin::Assembly
 {
   /**
@@ -94,6 +96,19 @@ namespace Rodin::Assembly
    */
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class DirichletBCAssemblyInput;
+
+  /**
+   * @brief Input data for identification-style Dirichlet BC assembly
+   *        (`u = A(v)`).
+   *
+   * Encapsulates the slave trial function @f$ u @f$, the right-hand-side
+   * shape-function expression @f$ A(v) @f$, and the essential boundary
+   * attributes.
+   */
+  template <class Scalar, class Sol1, class FES1,
+            class Derived2, class FES2,
+            Variational::ShapeFunctionSpaceType Sp>
+  class DirichletBCShapeFunctionAssemblyInput;
 
   /**
    * @brief Default assembly strategy selector.

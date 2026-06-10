@@ -29,10 +29,10 @@
  *
  * ## Usage Example
  * ```cpp
- * // Neumann BC: ∫_Γ g·v ds
+ * // Neumann BC: \int_\Gamma g\cdotv ds
  * auto neumann = BoundaryIntegral(g, v).on(2);  // On boundary attribute 2
  * 
- * // Robin BC: ∫_Γ (αu - β)v ds
+ * // Robin BC: \int_\Gamma (\alphau - \beta)v ds
  * auto robin = BoundaryIntegral(alpha * u - beta, v).on(3);
  * ```
  */

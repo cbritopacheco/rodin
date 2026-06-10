@@ -262,7 +262,7 @@ namespace Rodin::Variational
           }
         };
 
-        // Cached physical gradients ∇_x φ_a (one per scalar basis function)
+        // Cached physical gradients \nabla_x φ_a (one per scalar basis function)
         std::vector<SpatialVectorType> grad;
 
         CellKey cellKey;
@@ -328,6 +328,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
+        const auto* qf = ip.getQuadratureFormula();
 
         // ---- cell key: allocate/size once per cell
         typename Cache::CellKey ckey;
@@ -364,8 +365,8 @@ namespace Rodin::Variational
         typename Cache::QpKey qkey;
         if (needs_qp)
         {
-          qkey.qf = &ip.getQuadratureFormula();
-          qkey.qp = ip.getIndex();
+          qkey.qf = qf;
+          qkey.qp = qf ? ip.getIndex() : 0;
           qkey.valid = true;
         }
         else
@@ -376,7 +377,7 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !(m_cache.qpKey == qkey);
+        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
         if (cell_changed || qp_changed)
         {
           m_cache.qpKey = qkey;
@@ -384,14 +385,15 @@ namespace Rodin::Variational
           const P1Element<ScalarType> fe(geom);
           const size_t nv = fe.getCount();
 
-          const auto& qf = ip.getQuadratureFormula();
-          const size_t qp = ip.getIndex();
-          const auto& rc = qf.getPoint(qp);
+          const auto& rc =
+            qf
+              ? qf->getPoint(ip.getIndex())
+              : pt.getReferenceCoordinates();
 
           // J^{-T} at this integration point (constant for affine maps)
           const auto JinvT = pt.getJacobianInverse().transpose();
 
-          // Compute physical gradients: ∇_x φ_a = J^{-T} ∇_hat φ_a
+          // Compute physical gradients: \nabla_x φ_a = J^{-T} \nabla_hat φ_a
           for (size_t a = 0; a < nv; ++a)
           {
             // Reference gradient (size d). Build without using GradientFunction()

@@ -302,7 +302,7 @@ int main(int, char**)
   DirichletBC dbc(uBC, zero);
   dbc.on(leftBC);
   dbc.assemble();
-  const IndexMap<Real> dbcMap = dbc.getDOFs();
+  const IndexMap<Real> dbcMap = std::get<IndexMap<Real>>(dbc.getDOFs());
 
   // ---- output -------------------------------------------------------------
   IO::XDMF xdmf("CantileverBeam");
@@ -342,11 +342,9 @@ int main(int, char**)
     u = uPred;
 
     // ---- nonlinear solid operators ----------------------------------------
-    Solid::MaterialTangent tangent(law, du, w);
-    tangent.setDisplacement(u);
+    Solid::MaterialTangent tangent(law, du, w, u);
 
-    Solid::InternalForce internal(law, w);
-    internal.setDisplacement(u);
+    Solid::InternalForce internal(law, w, u);
 
     // Effective nonlinear problem:
     //

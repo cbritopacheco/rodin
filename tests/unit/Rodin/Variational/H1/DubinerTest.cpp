@@ -101,7 +101,7 @@ namespace Rodin::Tests::Unit
 
   TEST(DubinerTriangle, Gradient_P0Q0)
   {
-    // ψ_{0,0} = 1, so ∇ψ = (0, 0)
+    // ψ_{0,0} = 1, so \nablaψ = (0, 0)
     Real dpsi_dr, dpsi_ds;
     DubinerTriangle<2>::getGradient<0, 0>(dpsi_dr, dpsi_ds, 0.0, 0.0);
     EXPECT_NEAR(dpsi_dr, 0.0, 1e-14);
@@ -271,7 +271,7 @@ namespace Rodin::Tests::Unit
 
   TEST(DubinerTetrahedron, Gradient_P0Q0R0)
   {
-    // ψ_{0,0,0} = 1, so ∇ψ = (0, 0, 0)
+    // ψ_{0,0,0} = 1, so \nablaψ = (0, 0, 0)
     Real dpsi_da, dpsi_db, dpsi_dc;
     DubinerTetrahedron<2>::getGradient<0, 0, 0>(dpsi_da, dpsi_db, dpsi_dc, 0.0, 0.0, 0.0);
     EXPECT_NEAR(dpsi_da, 0.0, 1e-14);

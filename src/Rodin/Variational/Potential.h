@@ -39,7 +39,7 @@
  *   Real r = (x - y).norm();
  *   return 1.0 / (4 * M_PI * r);  // Coulomb kernel
  * };
- * auto phi = Potential(kernel, rho);  // φ(x) = ∫ K(x,y)ρ(y) dy
+ * auto phi = Potential(kernel, rho);  // φ(x) = \int K(x,y)ρ(y) dy
  * ```
  */
 #ifndef RODIN_VARIATIONAL_POTENTIAL_H
@@ -236,7 +236,7 @@ namespace Rodin::Variational
             for (size_t i = 0; i < quadrature.getSize(); i++)
             {
               const auto& y = quadrature.getPoint(i);
-              const IntegrationPoint ip(y, qf, i);
+              const IntegrationPoint ip(y, &qf, i);
               res += qf.getWeight(i) * y.getDistortion() * kernel(p, y) * operand.getValue(ip);
             }
           }
