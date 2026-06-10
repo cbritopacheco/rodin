@@ -5,6 +5,7 @@
 #include <array>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -509,6 +510,20 @@ namespace Rodin::Examples::Heart
 
         Real inletTangentialDamping = 1e3;
         Real inletVelocityDamping = 0.0;
+
+        /// @brief If set, overrides the inlet pressure with this constant
+        /// instead of the 0D arterial pressure par. For diagnostics.
+        std::optional<Real> inletPressureOverride;
+        /// @brief If set, overrides every outlet pressure with this constant
+        /// instead of the RCR pout. For diagnostics.
+        std::optional<Real> outletPressureOverride;
+
+        /// @brief Ramp time for the luminal pressure load (seconds).
+        /// @details The inlet and outlet pressures are scaled by
+        /// min(t / pressureRampTime, 1), easing the wall load on smoothly to
+        /// avoid the impulsive startup shock. Set to 0 to disable (full load
+        /// from t = 0).
+        Real pressureRampTime = 0.0;
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI &context);

@@ -77,6 +77,7 @@
 #include <cctype>
 #include <exception>
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include <boost/mpi/communicator.hpp>
@@ -286,6 +287,22 @@ int main(int argc, char** argv)
                          cfg.solidRayleighAlpha);
       getNonNegativeReal("-coronary_solid_rayleigh_beta",
                          cfg.solidRayleighBeta);
+
+      auto getOptionalReal = [&](const char *name, std::optional<Real> &target)
+      {
+        PetscReal value = 0.0;
+        PetscBool set = PETSC_FALSE;
+        PetscErrorCode e = PetscOptionsGetReal(
+            PETSC_NULLPTR, PETSC_NULLPTR, name, &value, &set);
+        assert(e == PETSC_SUCCESS);
+        (void)e;
+        if (set)
+          target = value;
+      };
+
+      getOptionalReal("-coronary_inlet_pressure", cfg.inletPressureOverride);
+      getOptionalReal("-coronary_outlet_pressure", cfg.outletPressureOverride);
+      getNonNegativeReal("-coronary_pressure_ramp_time", cfg.pressureRampTime);
 
       Rodin::Examples::Heart::CoupledLV0DCoronary3D simulation(context, cfg);
       status = simulation.initialize().run();

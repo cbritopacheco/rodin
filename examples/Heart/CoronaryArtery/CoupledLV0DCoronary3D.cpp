@@ -981,7 +981,19 @@ namespace Rodin::Examples::Heart
     const auto setup3DStart = CoronaryClock::now();
 
     const auto &s = m_model.getState();
-    const Real pin = s.par;
+
+    // Inlet/outlet pressures: use the 0D par / RCR pout unless a constant
+    // diagnostic override is configured. A pressure ramp eases the whole
+    // luminal load on smoothly to avoid the impulsive startup shock.
+    const Real rampFactor =
+        (m_cfg.pressureRampTime > 0.0)
+            ? std::min(s.t / m_cfg.pressureRampTime, Real(1.0))
+            : Real(1.0);
+    const Real pin = rampFactor * m_cfg.inletPressureOverride.value_or(s.par);
+    auto outletPressure = [&](const Attribute tag) -> Real
+    {
+      return rampFactor * m_cfg.outletPressureOverride.value_or(m_wk.at(tag).pout);
+    };
 
     const auto normal = BoundaryNormal(m_mesh);
     const Attribute outlet0 = m_cfg.outlets[0];
@@ -1492,12 +1504,12 @@ namespace Rodin::Examples::Heart
           /*
            * Explicit outlet pressures.
            */
-          + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
-          + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
-          + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
-          + BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3)
-          + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
-          + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
+          + BoundaryIntegral(outletPressure(outlet0) * Dot(m_v, normal)).over(outlet0)
+          + BoundaryIntegral(outletPressure(outlet1) * Dot(m_v, normal)).over(outlet1)
+          + BoundaryIntegral(outletPressure(outlet2) * Dot(m_v, normal)).over(outlet2)
+          + BoundaryIntegral(outletPressure(outlet3) * Dot(m_v, normal)).over(outlet3)
+          + BoundaryIntegral(outletPressure(outlet4) * Dot(m_v, normal)).over(outlet4)
+          + BoundaryIntegral(outletPressure(outlet5) * Dot(m_v, normal)).over(outlet5)
 
           // SOLID BLOCK ---------------------------------------------------
           /*
