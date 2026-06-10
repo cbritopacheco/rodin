@@ -144,6 +144,7 @@ namespace Rodin::Examples::Heart
       m_uOld(m_uh),
       m_pOld(m_ph),
       m_dOld(m_dh),
+      m_dOldOld(m_dh),
 
       m_one(m_ph),
       m_qFlux(m_ph),
@@ -739,22 +740,28 @@ namespace Rodin::Examples::Heart
       Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..."
                     << Alert::Raise;
 
-    m_xdmf.setMesh(m_mesh);
+    // The ALE mesh moves every step, so the geometry must be re-exported at
+    // every snapshot.
+    m_xdmf.setMesh(m_mesh, IO::XDMF::MeshPolicy::Transient);
+
+    // Capture the undeformed configuration used as the ALE reference.
+    saveReferenceVertices();
 
     int rank = m_mesh.getContext().getCommunicator().rank();
     m_mesh.save("CoronaryArtery." + std::to_string(rank) + ".medit.mesh", IO::FileFormat::MEDIT);
 
-    m_u.setName("u");
-    m_p.setName("p");
-    m_d.setName("d");
-    m_mu.setName("viscosity");
-    m_up.setName("projected_convection");
-    m_sub.setName("subscale");
-    m_tau.setName("tau");
+    m_u.setName("FluidVelocity");
+    m_p.setName("FluidPressure");
+    m_d.setName("Displacement");
+    m_mu.setName("BloodViscosity");
+    m_up.setName("ProjectedConvection");
+    m_sub.setName("SubgridVelocity");
+    m_tau.setName("StabilizationTau");
 
     m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_pOld = 0.0;
     m_dOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_dOldOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
     m_u.getSolution() = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_p.getSolution() = 0.0;
@@ -765,12 +772,12 @@ namespace Rodin::Examples::Heart
     m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
     m_tauOld = 0.0;
 
-    m_xdmf.add("velocity", m_u.getSolution());
-    m_xdmf.add("pressure", m_p.getSolution());
-    m_xdmf.add("displacement", m_d.getSolution());
-    m_xdmf.add("viscosity", m_mu.getSolution());
-    m_xdmf.add("subscale", m_sub.getSolution());
-    m_xdmf.add("tau", m_tau.getSolution());
+    m_xdmf.add("FluidVelocity", m_u.getSolution());
+    m_xdmf.add("FluidPressure", m_p.getSolution());
+    m_xdmf.add("Displacement", m_d.getSolution());
+    m_xdmf.add("BloodViscosity", m_mu.getSolution());
+    m_xdmf.add("SubgridVelocity", m_sub.getSolution());
+    m_xdmf.add("StabilizationTau", m_tau.getSolution());
 
     m_wk.clear();
     for (const Attribute tag : m_cfg.outlets)
@@ -788,6 +795,38 @@ namespace Rodin::Examples::Heart
               m_p.getSolution().setData(x, pOffset);
               m_d.getSolution().setData(x, dOffset);
             });
+  }
+
+  void CoupledLV0DCoronary3D::saveReferenceVertices()
+  {
+    m_referenceVertices.resize(m_mesh.getVertexCount());
+
+    for (auto it = m_mesh.getVertex(); it; ++it)
+      m_referenceVertices[it->getIndex()] =
+          m_mesh.getVertexCoordinates(it->getIndex());
+  }
+
+  void CoupledLV0DCoronary3D::moveMeshToDisplacement(
+      const DisplacementGridFunctionType &d)
+  {
+    assert(m_mesh.getVertexCount() == m_referenceVertices.size());
+
+    const size_t dim = m_mesh.getSpaceDimension();
+
+    // Absolute ALE positioning: x = x_reference + d. Reapplying the same
+    // displacement is idempotent, so this is safe to call repeatedly.
+    for (auto it = m_mesh.getVertex(); it; ++it)
+    {
+      const Index vertex = it->getIndex();
+      auto x = m_referenceVertices[vertex];
+
+      for (Index c = 0; c < static_cast<Index>(dim); ++c)
+        x(c) += d[m_dh.getGlobalIndex({0, vertex}, c)];
+
+      m_mesh.setVertexCoordinates(vertex, x);
+    }
+
+    m_mesh.flush();
   }
 
   void CoupledLV0DCoronary3D::setupDiagnostics()
@@ -952,12 +991,22 @@ namespace Rodin::Examples::Heart
     const Attribute outlet4 = m_cfg.outlets[4];
     const Attribute outlet5 = m_cfg.outlets[5];
 
-    // ---- SOLID PARAMETERS (for weak coupling and FSI penalty terms)
-    const Real solidMass = m_cfg.dummySolidMass;
-    const Real solidStiffness = m_cfg.dummySolidStiffness;
+    // ---- SOLID PARAMETERS (linear elasticity + weak FSI coupling)
+    //
+    // Hooke / linear isotropic elasticity:
+    //   sigma_s(d) = lambdaS (div d) I + 2 muS eps(d).
+    const Real solidRho = m_cfg.solidRho;
+    const Real solidNu = m_cfg.solidNu;
+    const Real solidE = m_cfg.solidE;
+    const Real lambdaS =
+        solidE * solidNu / ((1.0 + solidNu) * (1.0 - 2.0 * solidNu));
+    const Real muS = solidE / (2.0 * (1.0 + solidNu));
+
     const Real solidClampPenalty = m_cfg.solidClampPenalty;
-    const Real fsiPenalty = m_cfg.fsiPenalty;
     const Real inactivePenalty = m_cfg.inactivePenalty;
+
+    // Weak FSI kinematic penalty:  gammaTilde (u - (d - dOld)/dt) on Gamma_fsi.
+    const Real gammaTilde = m_cfg.fsiPenalty / m_cfg.dt;
     // ------------------------------------------
 
     const auto &uState = m_u.getSolution();
@@ -971,11 +1020,35 @@ namespace Rodin::Examples::Heart
     const auto newtonConvection = Mult(gradDU, uState) + Mult(gradU, m_u);
 
     const auto stateConvection = Mult(gradU, uState);
-    const auto oseenConvectionJacobian = Mult(gradDU, uLag);
+
+    /*
+     * ALE transport velocity for the Oseen fluid block.
+     *
+     * The fluid is advected on a moving mesh. The mesh velocity is the lagged
+     * rate of the displacement field on the fluid nodes,
+     *
+     *   w_mesh = (d^n - d^{n-1}) / dt,
+     *
+     * and the convective transport uses the relative velocity
+     *
+     *   c = u^n - w_mesh.
+     *
+     * With c lagged, the convection (c . grad) u^{n+1} stays Oseen-linear.
+     */
+    const auto meshVelocity = (1.0 / m_cfg.dt) * (m_dOld - m_dOldOld);
+    const auto aleTransport = uLag - meshVelocity;
+    const auto oseenConvectionJacobian = Mult(gradDU, aleTransport);
 
     const auto divDU = Div(m_u);
     const auto divU = Div(uState);
-    const auto divLag = Div(uLag);
+
+    /*
+     * Div does not deduce on a Sum expression, so write div(c) algebraically:
+     *   div(c) = div(u^n) - (1/dt) (div d^n - div d^{n-1}).
+     */
+    const auto divTransport = Div(uLag) -
+                              (1.0 / m_cfg.dt) * Div(m_dOld) +
+                              (1.0 / m_cfg.dt) * Div(m_dOldOld);
 
     const auto temamJacobian1 = Dot(divDU * uState, m_v);
 
@@ -983,7 +1056,7 @@ namespace Rodin::Examples::Heart
 
     const auto temamResidual = divU * Dot(uState, m_v);
 
-    const auto oseenTemamJacobian = divLag * Dot(m_u, m_v);
+    const auto oseenTemamJacobian = divTransport * Dot(m_u, m_v);
 
     const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
     const auto inletBeta = Max(Dot(m_uOld, normal), 0.0);
@@ -994,6 +1067,10 @@ namespace Rodin::Examples::Heart
     const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
     const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+
+    // Symmetric gradients of the solid displacement trial / test functions.
+    const auto symD = 0.5 * (Jacobian(m_d) + Transpose(Jacobian(m_d)));
+    const auto symW = 0.5 * (Jacobian(m_w) + Transpose(Jacobian(m_w)));
 
     const auto symU = 0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
 
@@ -1048,7 +1125,10 @@ namespace Rodin::Examples::Heart
      *   int proj_conv_h · v = int u^n · grad u^n  · v.
      */
 
-    m_l2ConvU = Integral(m_up, m_vp) - Integral(convectionTarget, m_vp);
+    // Fluid-only L2 projection; zero in the solid (solid mass term, no RHS).
+    m_l2ConvU = Integral(m_up, m_vp).over(m_cfg.fluidVolume) -
+                Integral(convectionTarget, m_vp).over(m_cfg.fluidVolume) +
+                Integral(m_up, m_vp).over(m_cfg.solidVolume);
     m_l2ConvU.assemble();
     m_l2ConvUSolver.solve();
 
@@ -1067,7 +1147,10 @@ namespace Rodin::Examples::Heart
       return 1. / (m_cfg.rho / m_cfg.dt + m_cfg.rho / Tau);
     };
 
-    m_tauProjection = Integral(m_tau, m_t) - Integral(tau, m_t);
+    // Fluid-only projection; zero in the solid (solid mass term, no RHS).
+    m_tauProjection = Integral(m_tau, m_t).over(m_cfg.fluidVolume) -
+                      Integral(tau, m_t).over(m_cfg.fluidVolume) +
+                      Integral(m_tau, m_t).over(m_cfg.solidVolume);
     m_tauProjection.assemble();
     m_tauProjectionSolver.solve();
 
@@ -1096,7 +1179,10 @@ namespace Rodin::Examples::Heart
      *   int sub_h · v = int subUpdate · v.
      */
 
-    m_subProjection = Integral(m_sub, m_vp) - Integral(subUpdate, m_vp);
+    // Fluid-only projection; zero in the solid (solid mass term, no RHS).
+    m_subProjection = Integral(m_sub, m_vp).over(m_cfg.fluidVolume) -
+                      Integral(subUpdate, m_vp).over(m_cfg.fluidVolume) +
+                      Integral(m_sub, m_vp).over(m_cfg.solidVolume);
     m_subProjection.assemble();
     m_subProjectionSolver.solve();
 
@@ -1410,19 +1496,29 @@ namespace Rodin::Examples::Heart
 
           // SOLID BLOCK ---------------------------------------------------
           /*
-           * Dummy solid displacement block.
+           * Linear elastodynamics (Hooke) over the solid volume.
            *
-           * This is not physical solid mechanics. It only gives the displacement
-           * unknown a well-defined algebraic block on the solid volume.
+           *   rho_s/dt^2 (d^{n+1} - 2 d^n + d^{n-1}, w)
+           *   + lambda_s (div d, div w) + 2 mu_s (eps(d), eps(w)) = 0.
+           *
+           * Second-order inertia uses the two previous displacements
+           * d^n = m_dOld and d^{n-1} = m_dOldOld.
            */
-          + solidMass / (m_cfg.dt * m_cfg.dt) * Integral(m_d, m_w).over(m_cfg.solidVolume)
+          + (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(m_d, m_w).over(m_cfg.solidVolume)
 
-          + solidStiffness * Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.solidVolume)
+          + lambdaS * Integral(Div(m_d), Div(m_w)).over(m_cfg.solidVolume)
 
-          - solidMass / (m_cfg.dt * m_cfg.dt) * Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+          + 2.0 * muS * Integral(symD, symW).over(m_cfg.solidVolume)
+
+          - 2.0 * (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+
+          + (solidRho / (m_cfg.dt * m_cfg.dt)) *
+                Integral(m_dOldOld, m_w).over(m_cfg.solidVolume)
 
           /*
-           * Weak clamp of the dummy solid rings.
+           * Weak clamp of the solid rings (Dirichlet-by-penalty).
            */
           + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[0])
 
@@ -1437,39 +1533,68 @@ namespace Rodin::Examples::Heart
           + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[5])
 
           /*
-           * Dummy weak FSI interface freeze.
+           * Weak FSI interface coupling on Gamma_fsi (no DirichletBC).
            *
-           * First smoke test: freeze velocity and displacement weakly on the FSI/wall
-           * interface. Later replace this by u - d_t.
+           * Penalized kinematic constraint with action-reaction, which also
+           * transfers the interface traction between the two subproblems:
+           *
+           *   t_Gamma = gammaTilde (u^{n+1} - (d^{n+1} - d^n)/dt),
+           *   + int_Gamma t_Gamma . v     (fluid sees +t_Gamma)
+           *   - int_Gamma t_Gamma . w     (solid sees the reaction -t_Gamma).
+           *
+           * gammaTilde = fsiPenalty / dt. As fsiPenalty -> infinity this
+           * enforces u = d_t on Gamma. The (d^n, .) terms are the lagged loads.
            */
-          // + fsiPenalty
-          //     * BoundaryIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
+          // NOTE: Gamma_fsi is an INTERIOR interface (fluid tets / solid
+          // wedges share these facets), so the coupling must use
+          // InterfaceIntegral. BoundaryIntegral only sees exterior faces and
+          // would integrate over nothing here.
 
-          // + fsiPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
+          // Fluid momentum: + gammaTilde (u, v) - (gammaTilde/dt) (d, v)
+          + gammaTilde * InterfaceIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
+
+          - (gammaTilde / m_cfg.dt) *
+                InterfaceIntegral(Dot(m_d, m_v)).over(m_cfg.fsi)
+
+          + (gammaTilde / m_cfg.dt) *
+                InterfaceIntegral(Dot(m_dOld, m_v)).over(m_cfg.fsi)
+
+          // Solid reaction: - gammaTilde (u, w) + (gammaTilde/dt) (d, w)
+          - gammaTilde * InterfaceIntegral(Dot(m_u, m_w)).over(m_cfg.fsi)
+
+          + (gammaTilde / m_cfg.dt) *
+                InterfaceIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
+
+          - (gammaTilde / m_cfg.dt) *
+                InterfaceIntegral(Dot(m_dOld, m_w)).over(m_cfg.fsi)
 
           /*
-           * Inactive-domain algebraic regularization.
+           * ALE harmonic extension of the displacement into the fluid.
            *
-           * Since u, p, d all live on the full mesh, this prevents dead rows where
-           * a field has no physical operator.
+           * On the fluid, d is the mesh-motion field: a vector-Laplacian
+           * extends the interface motion smoothly through the fluid, and the
+           * fixed fluid end caps (inlet, outlets) are weakly anchored to d = 0
+           * so the mesh does not slide there.
+           */
+          + m_cfg.aleStiffness *
+                Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.fluidVolume)
+
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.inlet)
+
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet0)
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet1)
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet2)
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet3)
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet4)
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(outlet5)
+
+          /*
+           * Inactive-domain algebraic regularization for the globally-defined
+           * fluid fields where they carry no physical operator.
            */
           + inactivePenalty * Integral(m_u, m_v).over(m_cfg.solidVolume)
 
-          + inactivePenalty * Integral(m_p, m_q).over(m_cfg.solidVolume)
-
-          + inactivePenalty * Integral(m_d, m_w).over(m_cfg.fluidVolume)
-
-          + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.fsi)
-
-          // ==========================================================/
-
-          /*
-           * Wall no-slip condition.
-           *
-           * Since Oseen unknown is the new velocity itself, impose:
-           *   u = 0.
-           */
-          + DirichletBC(m_d, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
+          + inactivePenalty * Integral(m_p, m_q).over(m_cfg.solidVolume);
     }
 
     m_stepTiming.setup3DForm = secondsSince(setup3DStart);
@@ -1570,10 +1695,42 @@ namespace Rodin::Examples::Heart
     m_stepData.t = s.t;
   }
 
+  void CoupledLV0DCoronary3D::printFSIDiagnostics(int step)
+  {
+    auto maxAbs = [](const auto &gf) -> Real
+    {
+      PetscReal v = 0.0;
+      PetscErrorCode ierr = VecNorm(gf.getData(), NORM_INFINITY, &v);
+      assert(ierr == PETSC_SUCCESS);
+      (void)ierr;
+      return v;
+    };
+
+    const Real maxU = maxAbs(m_u.getSolution());
+    const Real maxP = maxAbs(m_p.getSolution());
+    const Real maxD = maxAbs(m_d.getSolution());
+
+    // Interface area:  int_fsi 1. Gamma_fsi is an interior interface, so this
+    // MUST use InterfaceIntegral (BoundaryIntegral returns 0 here). A non-zero
+    // value confirms the coupling actually sees the interface facets.
+    m_flux = InterfaceIntegral(m_one, m_qFlux).over(m_cfg.fsi);
+    m_flux.assemble();
+    const Real areaFsi = m_flux(m_one);
+
+    if (isRoot())
+    {
+      Alert::Info() << "[FSI diag] step " << step
+                    << "  area(fsi) = " << areaFsi << "  max|u| = " << maxU
+                    << "  max|p| = " << maxP << "  max|d| = " << maxD
+                    << Alert::Raise;
+    }
+  }
+
   void CoupledLV0DCoronary3D::updateHistory()
   {
     m_uOld.setData(m_u.getSolution().getData());
     m_pOld.setData(m_p.getSolution().getData());
+    m_dOldOld.setData(m_dOld.getData());
     m_dOld.setData(m_d.getSolution().getData());
 
     m_subOld.setData(m_sub.getSolution().getData());
@@ -1591,7 +1748,10 @@ namespace Rodin::Examples::Heart
     const auto mu = cy.muInf + (cy.mu0 - cy.muInf) *
                                    Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
 
-    m_viscosityProjection = Integral(m_mu, m_r) - Integral(mu, m_r);
+    // Fluid-only projection; zero in the solid (solid mass term, no RHS).
+    m_viscosityProjection = Integral(m_mu, m_r).over(m_cfg.fluidVolume) -
+                            Integral(mu, m_r).over(m_cfg.fluidVolume) +
+                            Integral(m_mu, m_r).over(m_cfg.solidVolume);
     m_viscosityProjection.solve(m_viscosityProjectionKSP);
 
     m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
@@ -1859,6 +2019,10 @@ namespace Rodin::Examples::Heart
 
       bool accepted = false;
 
+      // ALE: freeze the geometry for this step at the previous converged
+      // displacement. The linear Oseen system is assembled on this mesh.
+      moveMeshToDisplacement(m_dOld);
+
       while (!accepted)
       {
         m_cfg.dt = solverDt;
@@ -1896,9 +2060,15 @@ namespace Rodin::Examples::Heart
           continue;
         }
 
+        // ALE: advance the mesh to the newly computed displacement so that
+        // fluxes and output use the deformed configuration.
+        moveMeshToDisplacement(m_d.getSolution());
+
         const auto fluxesStart = CoronaryClock::now();
         computeFluxes();
         m_stepTiming.fluxes = secondsSince(fluxesStart);
+
+        printFSIDiagnostics(acceptedStep + 1);
 
         const auto outletRCRStart = CoronaryClock::now();
         m_cfg.dt = physicalDt;

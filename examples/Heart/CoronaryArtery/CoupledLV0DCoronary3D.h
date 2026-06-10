@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <vector>
 
 #include "Rodin/Heart/CCMLC2014.h"
 #include <Rodin/Geometry.h>
@@ -442,11 +443,22 @@ namespace Rodin::Examples::Heart
         /// @brief Boundary attributes where the dummy solid is weakly clamped.
         std::array<Attribute, 6> solidRings{{17, 20, 21, 22, 18, 19}};
 
-        Real dummySolidMass = 1.0;
-        Real dummySolidStiffness = 1.0;
+        /// @brief Solid density.
+        Real solidRho = 1060.0;
+        /// @brief Solid Young's modulus.
+        Real solidE = 5.0e5;
+        /// @brief Solid Poisson ratio.
+        Real solidNu = 0.3;
+        /// @brief Penalty weight for the weak solid-ring clamp.
         Real solidClampPenalty = 1.0e12;
+        /// @brief Penalty weight for the weak FSI interface coupling.
+        /// @details Effective interface stiffness is fsiPenalty / dt.
         Real fsiPenalty = 1.0e10;
+        /// @brief Inactive-subdomain algebraic regularization weight.
         Real inactivePenalty = 1.0e-12;
+        /// @brief Stiffness of the ALE harmonic mesh-motion extension in the
+        /// fluid.
+        Real aleStiffness = 1.0;
 
         /// @brief Mesh coordinate scale applied after partitioning.
         Real meshScale = 1.0e-4;
@@ -555,6 +567,11 @@ namespace Rodin::Examples::Heart
       void setupModel();
       void setupMeshAndSpaces();
       void setupDiagnostics();
+
+      /// @brief Stores the reference (undeformed) vertex coordinates for ALE.
+      void saveReferenceVertices();
+      /// @brief Moves the mesh to reference + d using the displacement field.
+      void moveMeshToDisplacement(const DisplacementGridFunctionType &d);
       void printInitialState() const;
       bool isRoot() const;
 
@@ -568,6 +585,9 @@ namespace Rodin::Examples::Heart
       void writeCSVRow();
       StepData collectStepData() const;
       void printStepTiming(int step) const;
+      /// @brief Prints FSI sanity metrics (interface area, wall-normal flux,
+      /// max field magnitudes) for the current step.
+      void printFSIDiagnostics(int step);
 
       Config m_cfg;
       Model::Input m_input;
@@ -596,6 +616,7 @@ namespace Rodin::Examples::Heart
       VelocityGridFunctionType m_uOld;
       PressureGridFunctionType m_pOld;
       DisplacementGridFunctionType m_dOld;
+      DisplacementGridFunctionType m_dOldOld;
 
       PressureGridFunctionType m_one;
       PressureTestFunctionType m_qFlux;
@@ -624,6 +645,9 @@ namespace Rodin::Examples::Heart
       Rodin::Solver::KSP m_tauProjectionSolver;
 
       std::map<Attribute, RCR> m_wk;
+
+      /// @brief Reference (undeformed) vertex coordinates, for ALE mesh motion.
+      std::vector<Rodin::Math::SpatialPoint> m_referenceVertices;
 
       mutable StepData m_stepData;
       std::ofstream m_csv;
