@@ -449,7 +449,7 @@ namespace Rodin::Examples::Heart
         Real inactivePenalty = 1.0e-12;
 
         /// @brief Mesh coordinate scale applied after partitioning.
-        Real meshScale = 1.0e-3;
+        Real meshScale = 1.0e-4;
         /// @brief Pressure stabilization parameter.
         Real eps = 1.0e-12;
         /// @brief 3D blood density.
