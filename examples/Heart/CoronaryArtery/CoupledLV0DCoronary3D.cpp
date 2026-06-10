@@ -1116,11 +1116,19 @@ namespace Rodin::Examples::Heart
 
     const auto &cy = m_cfg.viscosity;
     const Real gammaReg = cy.gammaRegularization;
-    const Real mu0 = cy.mu0;
-    const Real muInf = cy.muInf;
     const Real lambda = cy.lambda;
     const Real nCY = cy.n;
     const Real yasuda = cy.yasuda;
+
+    // Constant-viscosity override collapses Carreau-Yasuda to a Newtonian
+    // fluid: mu0 = muInf makes deltaMu = 0, so mu = muLag = const and dmu = 0.
+    Real mu0 = cy.mu0;
+    Real muInf = cy.muInf;
+    if (m_cfg.constantViscosity)
+    {
+      mu0 = *m_cfg.constantViscosity;
+      muInf = *m_cfg.constantViscosity;
+    }
     const Real deltaMu = mu0 - muInf;
 
     const auto gamma = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));

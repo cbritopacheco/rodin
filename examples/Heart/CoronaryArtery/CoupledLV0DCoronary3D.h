@@ -518,6 +518,11 @@ namespace Rodin::Examples::Heart
         /// instead of the RCR pout. For diagnostics.
         std::optional<Real> outletPressureOverride;
 
+        /// @brief If set, uses a constant Newtonian 3D viscosity of this value
+        /// (Pa s) instead of the Carreau-Yasuda law. For diagnostics: removes
+        /// the shear-thinning nonlinearity from the Newton solve.
+        std::optional<Real> constantViscosity;
+
         /// @brief Ramp time for the luminal pressure load (seconds).
         /// @details The inlet and outlet pressures are scaled by
         /// min(t / pressureRampTime, 1), easing the wall load on smoothly to

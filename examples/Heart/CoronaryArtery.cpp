@@ -302,6 +302,7 @@ int main(int argc, char** argv)
 
       getOptionalReal("-coronary_inlet_pressure", cfg.inletPressureOverride);
       getOptionalReal("-coronary_outlet_pressure", cfg.outletPressureOverride);
+      getOptionalReal("-coronary_constant_viscosity", cfg.constantViscosity);
       getNonNegativeReal("-coronary_pressure_ramp_time", cfg.pressureRampTime);
 
       Rodin::Examples::Heart::CoupledLV0DCoronary3D simulation(context, cfg);
