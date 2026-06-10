@@ -230,6 +230,7 @@ namespace Rodin::Examples::Heart
       mesh.getConnectivity().compute(D - 1, 0);
       mesh.getConnectivity().compute(D - 1, 1);
       mesh.getConnectivity().compute(1, 0);
+      mesh.save("CoronaryArtery.medit.mesh", IO::FileFormat::MEDIT);
 
       Alert::Info() << "Partitioning coronary mesh over " << comm.size()
                     << " MPI ranks ..." << Alert::Raise;
@@ -739,6 +740,9 @@ namespace Rodin::Examples::Heart
                     << Alert::Raise;
 
     m_xdmf.setMesh(m_mesh);
+
+    int rank = m_mesh.getContext().getCommunicator().rank();
+    m_mesh.save("CoronaryArtery." + std::to_string(rank) + ".medit.mesh", IO::FileFormat::MEDIT);
 
     m_u.setName("u");
     m_p.setName("p");
@@ -1300,28 +1304,29 @@ namespace Rodin::Examples::Heart
            * There is no separate nonlinear residual/tangent split here.
            */
 
-          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v)
+          (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v).over(m_cfg.fluidVolume)
 
           /*
            * Oseen convection with lagged convecting velocity uLag = m_uOld.
            */
-          + m_cfg.rho * Integral(Dot(oseenConvectionJacobian, m_v))
+          + m_cfg.rho * Integral(Dot(oseenConvectionJacobian, m_v)).over(m_cfg.fluidVolume)
 
           /*
            * Lagged Temam correction.
            */
-          + 0.5 * m_cfg.rho * Integral(oseenTemamJacobian)
+          + 0.5 * m_cfg.rho * Integral(oseenTemamJacobian).over(m_cfg.fluidVolume)
 
           /*
            * Lagged viscosity.
            */
-          + 2.0 * Integral(muLag * symDU, symV)
+          + 2.0 * Integral(muLag * symDU, symV).over(m_cfg.fluidVolume)
 
           /*
            * Stokes pressure/divergence block.
            */
-          - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) +
-          m_cfg.eps * Integral(m_p, m_q)
+          - Integral(m_p, Div(m_v)).over(m_cfg.fluidVolume)
+          + Integral(Div(m_u), m_q).over(m_cfg.fluidVolume)
+          + m_cfg.eps * Integral(m_p, m_q).over(m_cfg.fluidVolume)
 
           /*
            * VMS bilinear contribution:
@@ -1366,16 +1371,14 @@ namespace Rodin::Examples::Heart
            *
            * Keep only one inlet term.
            */
-          +
-          BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+          + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
 
-          +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
+          + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0)
+          + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1)
+          + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2)
+          + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3)
+          + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4)
+          + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
 
           /*
            * =========================
@@ -1388,7 +1391,7 @@ namespace Rodin::Examples::Heart
            *   A u^{n+1} - rho/dt u^n + boundary loads = 0
            */
 
-          - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v)
+          - (m_cfg.rho / m_cfg.dt) * Integral(m_uOld, m_v).over(m_cfg.fluidVolume)
 
           /*
            * Inlet pressure source.
@@ -1398,17 +1401,12 @@ namespace Rodin::Examples::Heart
           /*
            * Explicit outlet pressures.
            */
-          + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal))
-                .over(outlet0) +
-          BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal))
-              .over(outlet1) +
-          BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal))
-              .over(outlet2) +
-          BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal))
-              .over(outlet3) +
-          BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal))
-              .over(outlet4) +
-          BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
+          + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0)
+          + BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1)
+          + BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2)
+          + BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3)
+          + BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4)
+          + BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
           // SOLID BLOCK ---------------------------------------------------
           /*
@@ -1417,35 +1415,26 @@ namespace Rodin::Examples::Heart
            * This is not physical solid mechanics. It only gives the displacement
            * unknown a well-defined algebraic block on the solid volume.
            */
-          + solidMass / (m_cfg.dt * m_cfg.dt)
-              * Integral(m_d, m_w).over(m_cfg.solidVolume)
+          + solidMass / (m_cfg.dt * m_cfg.dt) * Integral(m_d, m_w).over(m_cfg.solidVolume)
 
-          + solidStiffness
-              * Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.solidVolume)
+          + solidStiffness * Integral(Jacobian(m_d), Jacobian(m_w)).over(m_cfg.solidVolume)
 
-          - solidMass / (m_cfg.dt * m_cfg.dt)
-              * Integral(m_dOld, m_w).over(m_cfg.solidVolume)
+          - solidMass / (m_cfg.dt * m_cfg.dt) * Integral(m_dOld, m_w).over(m_cfg.solidVolume)
 
           /*
            * Weak clamp of the dummy solid rings.
            */
-          + solidClampPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[0])
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[0])
 
-          + solidClampPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[1])
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[1])
 
-          + solidClampPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[2])
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[2])
 
-          + solidClampPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[3])
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[3])
 
-          + solidClampPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[4])
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[4])
 
-          + solidClampPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[5])
+          + solidClampPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.solidRings[5])
 
           /*
            * Dummy weak FSI interface freeze.
@@ -1456,8 +1445,7 @@ namespace Rodin::Examples::Heart
           + fsiPenalty
               * BoundaryIntegral(Dot(m_u, m_v)).over(m_cfg.fsi)
 
-          + fsiPenalty
-              * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
+          + fsiPenalty * BoundaryIntegral(Dot(m_d, m_w)).over(m_cfg.fsi)
 
           /*
            * Inactive-domain algebraic regularization.
@@ -1465,14 +1453,11 @@ namespace Rodin::Examples::Heart
            * Since u, p, d all live on the full mesh, this prevents dead rows where
            * a field has no physical operator.
            */
-          + inactivePenalty
-              * Integral(m_u, m_v).over(m_cfg.solidVolume)
+          + inactivePenalty * Integral(m_u, m_v).over(m_cfg.solidVolume)
 
-          + inactivePenalty
-              * Integral(m_p, m_q).over(m_cfg.solidVolume)
+          + inactivePenalty * Integral(m_p, m_q).over(m_cfg.solidVolume)
 
-          + inactivePenalty
-              * Integral(m_d, m_w).over(m_cfg.fluidVolume)
+          + inactivePenalty * Integral(m_d, m_w).over(m_cfg.fluidVolume)
 
           // ==========================================================/
 

@@ -22,12 +22,11 @@ int main(int, char**)
 {
   Mesh mesh;
   mesh.load("malla_merge.mesh", IO::FileFormat::MEDIT);
+  mesh.save("malla_merge_reloaded.mesh", IO::FileFormat::MEDIT);
   // mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
   mesh.getConnectivity().compute(2, 3); // Compute boundary
-  mesh.getConnectivity().compute(2, 1); // Compute boundary
-  mesh.getConnectivity().compute(1, 0); // Compute boundary
 
-  H1 vh(std::integral_constant<size_t, 2>{}, mesh);
+  P1 vh(mesh);
 
   TrialFunction u(vh);
   TestFunction  v(vh);
@@ -37,8 +36,8 @@ int main(int, char**)
   // Apply Dirichlet conditions on the entire boundary.
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
-          // - Integral(f, v)
-          + DirichletBC(u, f).on(17);
+          - Integral(f, v)
+          + DirichletBC(u, f);
   CG(poisson).solve();
 
   mesh.save("Poisson.mesh", IO::FileFormat::MEDIT);

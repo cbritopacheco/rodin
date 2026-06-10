@@ -415,14 +415,14 @@ namespace Rodin::Examples::Heart
       struct Config
       {
         /// @brief Input coronary fluid mesh path.
-        std::string meshPath = "malla_merge.mesh";
+        std::string meshPath = "../resources/examples/Heart/CoronaryArtery_FSI.medit.mesh";
         /// @brief Basename for XDMF and related output files.
         std::string xdmfBasename = "CoronaryArtery";
         /// @brief CSV diagnostics output path.
         std::string csvPath = "CoronaryArtery.csv";
 
         /// @brief No-slip / fluid wall boundary attribute.
-        Attribute wall = 2;
+        Attribute wall = 102;
 
         /// @brief Inlet boundary attribute.
         Attribute inlet = 4;
@@ -585,18 +585,18 @@ namespace Rodin::Examples::Heart
 
       VelocityTrialFunctionType m_u;
       PressureTrialFunctionType m_p;
-      PressureTrialFunctionType m_mu;
       DisplacementTrialFunctionType m_d;
+      PressureTrialFunctionType m_mu;
 
       VelocityTestFunctionType m_v;
       PressureTestFunctionType m_q;
-      PressureTestFunctionType m_r;
-
       DisplacementTestFunctionType m_w;
-      DisplacementGridFunctionType m_dOld;
+      PressureTestFunctionType m_r;
 
       VelocityGridFunctionType m_uOld;
       PressureGridFunctionType m_pOld;
+      DisplacementGridFunctionType m_dOld;
+
       PressureGridFunctionType m_one;
       PressureTestFunctionType m_qFlux;
 
