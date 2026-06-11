@@ -361,6 +361,13 @@ namespace Rodin::Assembly
 
           ierr = MatSetUp(A);
           assert(ierr == PETSC_SUCCESS);
+
+          // Keep the nonzero structure stable across re-assemblies so the
+          // DirichletBC row/column zeroing below does not remove entries and
+          // change the pattern. This preserves PETSc's nonzero-state, hence the
+          // symbolic factorization of direct solvers (e.g. MUMPS).
+          ierr = MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+          assert(ierr == PETSC_SUCCESS);
         }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
@@ -943,6 +950,13 @@ namespace Rodin::Assembly
           assert(ierr == PETSC_SUCCESS);
 
           ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
+
+          // Keep the nonzero structure stable across re-assemblies so the
+          // DirichletBC row/column zeroing below does not remove entries and
+          // change the pattern. This preserves PETSc's nonzero-state, hence the
+          // symbolic factorization of direct solvers (e.g. MUMPS).
+          ierr = MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
           assert(ierr == PETSC_SUCCESS);
         }
         ierr = MatZeroEntries(A);
