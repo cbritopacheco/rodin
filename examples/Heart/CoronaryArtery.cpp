@@ -39,6 +39,10 @@
  * - `-coronary_time_adaptivity_max_levels <count>`
  *   Sets the maximum number of reductions attempted for one accepted time
  *   step. The default is `8`.
+ * - `-coronary_continue_on_3d_failure`
+ *   Accepts the current 3D iterate and advances the time step if PETSc KSP/SNES
+ *   reports nonconvergence. This disables the local retry for that failure and
+ *   is intended for residual-floor diagnostics. The default is `false`.
  *
  * Unless the user overrides them on the command line, the executable installs
  * the following PETSc defaults:
@@ -269,6 +273,19 @@ int main(int argc, char** argv)
         }
         cfg.timeAdaptivityMaxLevels = maxAdaptivityLevels;
       }
+
+      PetscBool continueOn3DFailure =
+          cfg.continueOn3DFailure ? PETSC_TRUE : PETSC_FALSE;
+      PetscBool continueOn3DFailureSet = PETSC_FALSE;
+      ierr = PetscOptionsGetBool(
+          PETSC_NULLPTR,
+          PETSC_NULLPTR,
+          "-coronary_continue_on_3d_failure",
+          &continueOn3DFailure,
+          &continueOn3DFailureSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (continueOn3DFailureSet)
+        cfg.continueOn3DFailure = (continueOn3DFailure == PETSC_TRUE);
 
       // ---- Solid / FSI tuning knobs ------------------------------------
       using Real = Rodin::Real;

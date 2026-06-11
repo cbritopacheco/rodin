@@ -499,6 +499,9 @@ namespace Rodin::Examples::Heart
         Real timeAdaptivityReductionFactor = 0.5;
         /// @brief Maximum number of successive dt reductions per accepted step.
         int timeAdaptivityMaxLevels = 8;
+        /// @brief Accept and advance a step even if the 3D KSP/SNES reports
+        /// nonconvergence. Intended for residual-floor diagnostics.
+        bool continueOn3DFailure = false;
 
         /// @brief 3D coronary flow linearization mode. Defaults to Oseen/Picard.
         FlowMode flowMode = FlowMode::Oseen;

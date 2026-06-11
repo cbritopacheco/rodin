@@ -2186,37 +2186,55 @@ namespace Rodin::Examples::Heart
       {
         m_cfg.dt = solverDt;
 
-        if (!solve3D())
+        const bool solved3D = solve3D();
+        if (!solved3D)
         {
-          m_model.restore(advancedState, advancedHistory, advancedUnknowns,
-                          advancedReport);
-          m_wk = savedRCR;
-          m_stepData = savedStepData;
-          savedU.restore(m_u.getSolution().getData());
-          savedP.restore(m_p.getSolution().getData());
-          savedD.restore(m_d.getSolution().getData());
-
-          if (level >= maxLevels)
+          if (m_cfg.continueOn3DFailure)
           {
-            Alert::Exception() << "3D flow solver failed to converge at step "
-                               << (acceptedStep + 1) << " after " << (level + 1)
-                               << " attempt(s). Minimum solver dt = " << solverDt
-                               << " s." << Alert::Raise;
-            return 1;
+            m_cfg.dt = physicalDt;
+            if (isRoot())
+            {
+              Alert::Warning()
+                  << "[3D] Continuing after nonconverged solve at step "
+                  << (acceptedStep + 1) << "  solver dt = " << solverDt
+                  << " s  (adapt level = " << level << " / " << maxLevels
+                  << ")" << Alert::Raise;
+            }
           }
-
-          solverDt *= factor;
-          ++level;
-
-          if (isRoot())
+          else
           {
-            Alert::Info() << "[3D] Retrying step " << (acceptedStep + 1)
-                          << " with reduced solver dt = " << solverDt
-                          << " s  (adapt level = " << level << " / " << maxLevels
-                          << ")" << Alert::Raise;
-          }
+            m_model.restore(advancedState, advancedHistory, advancedUnknowns,
+                            advancedReport);
+            m_wk = savedRCR;
+            m_stepData = savedStepData;
+            savedU.restore(m_u.getSolution().getData());
+            savedP.restore(m_p.getSolution().getData());
+            savedD.restore(m_d.getSolution().getData());
 
-          continue;
+            if (level >= maxLevels)
+            {
+              Alert::Exception() << "3D flow solver failed to converge at step "
+                                 << (acceptedStep + 1) << " after "
+                                 << (level + 1)
+                                 << " attempt(s). Minimum solver dt = "
+                                 << solverDt << " s." << Alert::Raise;
+              return 1;
+            }
+
+            solverDt *= factor;
+            ++level;
+
+            if (isRoot())
+            {
+              Alert::Info()
+                  << "[3D] Retrying step " << (acceptedStep + 1)
+                  << " with reduced solver dt = " << solverDt
+                  << " s  (adapt level = " << level << " / " << maxLevels
+                  << ")" << Alert::Raise;
+            }
+
+            continue;
+          }
         }
 
         // ALE: advance the mesh to the newly computed displacement so that
