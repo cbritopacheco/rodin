@@ -54,6 +54,7 @@
 #include "Solid/Integrators/MaterialTangent.h"
 #include "Solid/Integrators/BodyForce.h"
 #include "Solid/Integrators/TractionForce.h"
+#include "Solid/Integrators/FollowerPressure.h"
 
 // Fields
 #include "Solid/Fields/GreenLagrangeStrain.h"

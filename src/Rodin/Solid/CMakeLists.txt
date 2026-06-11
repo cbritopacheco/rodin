@@ -23,6 +23,7 @@ set(RodinSolid_HEADERS
   Integrators/MaterialTangent.h
   Integrators/BodyForce.h
   Integrators/TractionForce.h
+  Integrators/FollowerPressure.h
   Constitutive/Hooke.h
   Fields/GreenLagrangeStrain.h
   Fields/FirstPiolaKirchhoffStress.h
