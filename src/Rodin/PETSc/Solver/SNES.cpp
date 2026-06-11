@@ -1,4 +1,6 @@
 #include <cassert>
+#include <cstring>
+#include <string>
 #include <petscmat.h>
 #include <petscvec.h>
 #include <utility>
@@ -217,6 +219,38 @@ namespace Rodin::Solver
 
     ierr = SNESSetFromOptions(m_snes);
     assert(ierr == PETSC_SUCCESS);
+
+    // Wire the stored field-split index sets into the inner KSP's PC when the
+    // runtime PC is fieldsplit. This mirrors KSP::solve so block/Schur
+    // preconditioners (e.g. -pc_type fieldsplit ...) work in the Newton path
+    // too. With any other PC type the splits are simply ignored.
+    {
+      ::KSP innerKSP = PETSC_NULLPTR;
+      ierr = SNESGetKSP(m_snes, &innerKSP);
+      assert(ierr == PETSC_SUCCESS);
+
+      ::PC pc = PETSC_NULLPTR;
+      ierr = KSPGetPC(innerKSP, &pc);
+      assert(ierr == PETSC_SUCCESS);
+
+      const char* pctype = nullptr;
+      ierr = PCGetType(pc, &pctype);
+      assert(ierr == PETSC_SUCCESS);
+
+      if (pctype && std::strcmp(pctype, PCFIELDSPLIT) == 0)
+      {
+        const auto& splits = this->getProblem().getLinearSystem().getFieldSplits();
+        for (size_t k = 0; k < splits.size(); ++k)
+        {
+          const auto& s = splits[k];
+          assert(s.is);
+          const std::string name =
+            !s.name.empty() ? s.name : std::to_string(k);
+          ierr = PCFieldSplitSetIS(pc, name.c_str(), s.is);
+          assert(ierr == PETSC_SUCCESS);
+        }
+      }
+    }
 
     ierr = SNESSolve(m_snes, PETSC_NULLPTR, x);
     assert(ierr == PETSC_SUCCESS);
