@@ -13,16 +13,22 @@
  *   Selects the 3D Navier-Stokes linearization strategy. The default is
  *   `oseen`, which assembles one lagged linear Oseen/Picard system per time
  *   step and solves it directly with PETSc KSP, without SNES nonlinear
- *   iterations. `newton` assembles the full Newton Jacobian for the convective
- *   term and Carreau-Yasuda viscosity and solves it with PETSc SNES.
+ *   iterations. `newton` assembles the full Newton Jacobian for the ALE
+ *   convective, Temam, backflow, and Carreau-Yasuda viscosity terms and solves
+ *   it with PETSc SNES.
  * - `-coronary_outlet_backflow_stabilization <value>`
- *   Multiplies the outlet backflow damping term
- *   `<0.5 rho max(-(u_old.n), 0) u, v>`. The default is `1`; use `0` to
- *   disable this stabilization for diagnostics.
+ *   Multiplies the outlet backflow damping term. Oseen uses lagged
+ *   `max(-(u_old.n), 0)`, while Newton uses a smooth current-state positive
+ *   part and its matched tangent. The default is `1`; use `0` to disable this
+ *   stabilization for diagnostics.
  * - `-coronary_inlet_backflow_stabilization <value>`
- *   Multiplies the inlet reversed-flow damping term
- *   `<0.5 rho max(u_old.n, 0) u, v>`. The default is `1`; the intended
- *   pressure-driven inflow has `u_old.n < 0` and is not damped by this term.
+ *   Multiplies the inlet reversed-flow damping term. Oseen uses lagged
+ *   `max(u_old.n, 0)`, while Newton uses the same smooth current-state
+ *   positive part as the outlet. The default is `1`; the intended
+ *   pressure-driven inflow has `u.n < 0` and is not damped by this term.
+ * - `-coronary_backflow_regularization <value>`
+ *   Sets the smooth positive-part regularization used only by the Newton
+ *   backflow residual/tangent. The default is `1e-8`.
  * - `-coronary_dt <seconds>`
  *   Sets the nominal physical time step. The default is `1e-3`.
  * - `-coronary_nsteps <count>`
@@ -182,6 +188,25 @@ int main(int argc, char** argv)
       assert(ierr == PETSC_SUCCESS);
       if (inletBackflowStabilizationSet)
         cfg.inletBackflowStabilization = inletBackflowStabilization;
+
+      PetscReal backflowRegularization = cfg.backflowRegularization;
+      PetscBool backflowRegularizationSet = PETSC_FALSE;
+      ierr = PetscOptionsGetReal(
+          PETSC_NULLPTR,
+          PETSC_NULLPTR,
+          "-coronary_backflow_regularization",
+          &backflowRegularization,
+          &backflowRegularizationSet);
+      assert(ierr == PETSC_SUCCESS);
+      if (backflowRegularizationSet)
+      {
+        if (backflowRegularization <= 0)
+        {
+          throw std::runtime_error(
+              "-coronary_backflow_regularization must be positive.");
+        }
+        cfg.backflowRegularization = backflowRegularization;
+      }
 
       PetscReal dt = cfg.dt;
       PetscBool dtSet = PETSC_FALSE;

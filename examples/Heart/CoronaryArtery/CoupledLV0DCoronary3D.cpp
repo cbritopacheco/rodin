@@ -717,6 +717,14 @@ namespace Rodin::Examples::Heart
 
   CoupledLV0DCoronary3D &CoupledLV0DCoronary3D::initialize()
   {
+    if (m_cfg.backflowRegularization <= 0.0)
+    {
+      Alert::Exception()
+          << "Invalid backflow regularization: "
+          << m_cfg.backflowRegularization
+          << ". Expected a positive value." << Alert::Raise;
+    }
+
     setupModel();
     setupMeshAndSpaces();
     setupDiagnostics();
@@ -1041,15 +1049,12 @@ namespace Rodin::Examples::Heart
 
     const auto &uState = m_u.getSolution();
     const auto &pState = m_p.getSolution();
+    const auto &dState = m_d.getSolution();
     const auto &uLag = m_uOld;
 
     const auto gradDU = Jacobian(m_u);
     const auto gradU = Jacobian(uState);
     const auto gradLag = Jacobian(uLag);
-
-    const auto newtonConvection = Mult(gradDU, uState) + Mult(gradU, m_u);
-
-    const auto stateConvection = Mult(gradU, uState);
 
     /*
      * ALE transport velocity for the Oseen fluid block.
@@ -1080,24 +1085,23 @@ namespace Rodin::Examples::Heart
                               (1.0 / m_cfg.dt) * Div(m_dOld) +
                               (1.0 / m_cfg.dt) * Div(m_dOldOld);
 
-    const auto temamJacobian1 = Dot(divDU * uState, m_v);
-
-    const auto temamJacobian2 = divU * Dot(m_u, m_v);
-
-    const auto temamResidual = divU * Dot(uState, m_v);
-
     const auto oseenTemamJacobian = divTransport * Dot(m_u, m_v);
 
-    // ALE transport for the Newton fluid block: c = uState - w_mesh, with the
-    // lagged mesh velocity (mirroring the Oseen branch). Convection is then
-    // linearized fully with respect to the velocity correction m_u.
-    const auto transportState = uState - meshVelocity;
-    const auto newtonConvectionALE =
+    // ALE transport for the Newton fluid block:
+    //   c(u, d) = u - (d - dOld) / dt.
+    // Its variation couples the velocity tangent to the displacement tangent.
+    const auto meshVelocityState = (1.0 / m_cfg.dt) * (dState - m_dOld);
+    const auto transportState = uState - meshVelocityState;
+    const auto newtonConvectionVelocityALE =
         Mult(gradDU, transportState) + Mult(gradU, m_u);
+    const auto newtonConvectionDisplacementALE = Mult(gradU, m_d);
     const auto stateConvectionALE = Mult(gradU, transportState);
     const auto divTransportState = divU -
-                                   (1.0 / m_cfg.dt) * Div(m_dOld) +
-                                   (1.0 / m_cfg.dt) * Div(m_dOldOld);
+                                   (1.0 / m_cfg.dt) * Div(dState) +
+                                   (1.0 / m_cfg.dt) * Div(m_dOld);
+    const auto temamJacobianVelocityALE = Dot(divDU * uState, m_v);
+    const auto temamJacobianDisplacementALE =
+        Dot(Div(m_d) * uState, m_v);
     const auto temamJacobian2ALE = divTransportState * Dot(m_u, m_v);
     const auto temamResidualALE = divTransportState * Dot(uState, m_v);
 
@@ -1107,6 +1111,38 @@ namespace Rodin::Examples::Heart
         0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
     const auto inletBackflowDamping =
         0.5 * m_cfg.inletBackflowStabilization * m_cfg.rho * inletBeta;
+    const Real backflowReg = m_cfg.backflowRegularization;
+    const auto outletNormalVelocityState = -Dot(uState, normal);
+    const auto outletNormalVelocityVariation = -Dot(m_u, normal);
+    const auto outletBetaRoot =
+        Sqrt(outletNormalVelocityState * outletNormalVelocityState +
+             backflowReg * backflowReg);
+    const auto outletBetaState =
+        0.5 * (outletNormalVelocityState + outletBetaRoot);
+    const auto outletBetaStateGate =
+        0.5 * (1.0 + outletNormalVelocityState / outletBetaRoot);
+    const auto inletNormalVelocityState = Dot(uState, normal);
+    const auto inletNormalVelocityVariation = Dot(m_u, normal);
+    const auto inletBetaRoot =
+        Sqrt(inletNormalVelocityState * inletNormalVelocityState +
+             backflowReg * backflowReg);
+    const auto inletBetaState = 0.5 * (inletNormalVelocityState + inletBetaRoot);
+    const auto inletBetaStateGate =
+        0.5 * (1.0 + inletNormalVelocityState / inletBetaRoot);
+    const auto outletBackflowDampingState =
+        0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBetaState;
+    const auto inletBackflowDampingState =
+        0.5 * m_cfg.inletBackflowStabilization * m_cfg.rho * inletBetaState;
+    const auto outletBackflowDampingGate =
+        0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho *
+        outletBetaStateGate;
+    const auto inletBackflowDampingGate =
+        0.5 * m_cfg.inletBackflowStabilization * m_cfg.rho *
+        inletBetaStateGate;
+    const auto outletBackflowDampingVariation =
+        outletNormalVelocityVariation * uState;
+    const auto inletBackflowDampingVariation =
+        inletNormalVelocityVariation * uState;
     const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
     const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
@@ -1240,7 +1276,6 @@ namespace Rodin::Examples::Heart
     {
       // Solid state and nonlinear NeoHookean operators, evaluated at the
       // current displacement iterate dState.
-      const auto &dState = m_d.getSolution();
       const auto symDState =
           0.5 * (Jacobian(dState) + Transpose(Jacobian(dState)));
 
@@ -1257,13 +1292,21 @@ namespace Rodin::Examples::Heart
            */
           (m_cfg.rho / m_cfg.dt) * Integral(m_u, m_v).over(m_cfg.fluidVolume)
 
-          // ALE convection: rho ((c . grad) du + (du . grad) uState, v).
+          // ALE convection: rho ((c . grad) du + ((du - dd/dt) . grad) uState, v).
           + m_cfg.rho *
-                Integral(Dot(newtonConvectionALE, m_v)).over(m_cfg.fluidVolume)
+                Integral(Dot(newtonConvectionVelocityALE, m_v))
+                    .over(m_cfg.fluidVolume)
+          - (m_cfg.rho / m_cfg.dt) *
+                Integral(Dot(newtonConvectionDisplacementALE, m_v))
+                    .over(m_cfg.fluidVolume)
 
           // Temam/skew correction tangent.
-          + 0.5 * m_cfg.rho * Integral(temamJacobian1).over(m_cfg.fluidVolume) +
-          0.5 * m_cfg.rho * Integral(temamJacobian2ALE).over(m_cfg.fluidVolume)
+          + 0.5 * m_cfg.rho *
+                Integral(temamJacobianVelocityALE).over(m_cfg.fluidVolume)
+          - (0.5 * m_cfg.rho / m_cfg.dt) *
+                Integral(temamJacobianDisplacementALE).over(m_cfg.fluidVolume)
+          + 0.5 * m_cfg.rho *
+                Integral(temamJacobian2ALE).over(m_cfg.fluidVolume)
 
           // Nonlinear Carreau-Yasuda viscous tangent.
           + 2.0 * Integral(mu * symDU, symV).over(m_cfg.fluidVolume) +
@@ -1280,15 +1323,41 @@ namespace Rodin::Examples::Heart
                     .over(m_cfg.inlet)
           + m_cfg.inletTangentialDamping *
                 BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
-          +
-          BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
-          +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet4) +
-          BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet5)
+          + BoundaryIntegral(inletBackflowDampingState * Dot(m_u, m_v))
+                .over(m_cfg.inlet)
+          + BoundaryIntegral(inletBackflowDampingGate *
+                             Dot(inletBackflowDampingVariation, m_v))
+                .over(m_cfg.inlet)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(m_u, m_v))
+                .over(outlet0)
+          + BoundaryIntegral(outletBackflowDampingGate *
+                             Dot(outletBackflowDampingVariation, m_v))
+                .over(outlet0)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(m_u, m_v))
+                .over(outlet1)
+          + BoundaryIntegral(outletBackflowDampingGate *
+                             Dot(outletBackflowDampingVariation, m_v))
+                .over(outlet1)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(m_u, m_v))
+                .over(outlet2)
+          + BoundaryIntegral(outletBackflowDampingGate *
+                             Dot(outletBackflowDampingVariation, m_v))
+                .over(outlet2)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(m_u, m_v))
+                .over(outlet3)
+          + BoundaryIntegral(outletBackflowDampingGate *
+                             Dot(outletBackflowDampingVariation, m_v))
+                .over(outlet3)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(m_u, m_v))
+                .over(outlet4)
+          + BoundaryIntegral(outletBackflowDampingGate *
+                             Dot(outletBackflowDampingVariation, m_v))
+                .over(outlet4)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(m_u, m_v))
+                .over(outlet5)
+          + BoundaryIntegral(outletBackflowDampingGate *
+                             Dot(outletBackflowDampingVariation, m_v))
+                .over(outlet5)
 
           /*
            * =========================
@@ -1323,13 +1392,20 @@ namespace Rodin::Examples::Heart
           BoundaryIntegral(outletPressure(outlet4) * Dot(m_v, normal)).over(outlet4) +
           BoundaryIntegral(outletPressure(outlet5) * Dot(m_v, normal)).over(outlet5)
 
-          + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v)).over(m_cfg.inlet)
-          + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet0) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet1) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet2) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet3) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet4) +
-          BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet5)
+          + BoundaryIntegral(inletBackflowDampingState * Dot(uState, m_v))
+                .over(m_cfg.inlet)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(uState, m_v))
+                .over(outlet0)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(uState, m_v))
+                .over(outlet1)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(uState, m_v))
+                .over(outlet2)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(uState, m_v))
+                .over(outlet3)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(uState, m_v))
+                .over(outlet4)
+          + BoundaryIntegral(outletBackflowDampingState * Dot(uState, m_v))
+                .over(outlet5)
 
           /*
            * =========================
@@ -2102,7 +2178,8 @@ namespace Rodin::Examples::Heart
       bool accepted = false;
 
       // ALE: freeze the geometry for this step at the previous converged
-      // displacement. The linear Oseen system is assembled on this mesh.
+      // displacement. The 3D system is assembled on this mesh; Newton still
+      // sees displacement through the ALE velocity and extension equations.
       moveMeshToDisplacement(m_dOld);
 
       while (!accepted)

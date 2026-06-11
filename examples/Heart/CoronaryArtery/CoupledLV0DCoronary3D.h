@@ -488,6 +488,8 @@ namespace Rodin::Examples::Heart
         Real inletImpedance = 1.e3;
         /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
         Real outletBackflowStabilization = 1.0;
+        /// @brief Smooth positive-part regularization for Newton backflow.
+        Real backflowRegularization = 1.0e-8;
 
         /// @brief Time-step size.
         Real dt = 1.0e-3;
