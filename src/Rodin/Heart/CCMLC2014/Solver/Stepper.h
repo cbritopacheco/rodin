@@ -104,6 +104,14 @@ namespace Rodin::Heart::CCMLC2014::Solver
             return *this;
           }
 
+          Problem& assemble(Variational::AssemblyTarget) override
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Targeted assembly is not implemented for this problem."
+              << Alert::Raise;
+            return *this;
+          }
+
           void solve(
               ::Rodin::Solver::LinearSolverBase<DenseLinearSystem>& solver) override
           {

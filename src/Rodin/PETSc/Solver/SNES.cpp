@@ -134,11 +134,15 @@ namespace Rodin::Solver
     if (self->m_update)
       self->m_update(x);
     self->m_updated = state;
-    self->m_assembled.reset();
+    self->m_lhsAssembled.reset();
+    self->m_rhsAssembled.reset();
     return PETSC_SUCCESS;
   }
 
-  PetscErrorCode SNES::Assemble(::Vec x, void* ctx)
+  PetscErrorCode SNES::Assemble(
+      ::Vec x,
+      void* ctx,
+      Variational::AssemblyTarget target)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
@@ -149,11 +153,17 @@ namespace Rodin::Solver
     ierr = VecGetState(x, &state);
     if (ierr)
       return ierr;
-    if (self->m_assembled && *self->m_assembled == state)
+
+    auto& assembled =
+      target == Variational::AssemblyTarget::LHS
+        ? self->m_lhsAssembled
+        : self->m_rhsAssembled;
+    if (assembled && *assembled == state)
       return PETSC_SUCCESS;
+
     auto& problem = self->getProblem();
-    problem.assemble();
-    self->m_assembled = state;
+    problem.assemble(target);
+    assembled = state;
     return PETSC_SUCCESS;
   }
 
@@ -161,7 +171,7 @@ namespace Rodin::Solver
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
-    PetscErrorCode ierr = Assemble(x, ctx);
+    PetscErrorCode ierr = Assemble(x, ctx, Variational::AssemblyTarget::RHS);
     if (ierr)
       return ierr;
     auto& problem = self->getProblem();
@@ -179,7 +189,7 @@ namespace Rodin::Solver
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
 
-    PetscErrorCode ierr = Assemble(x, ctx);
+    PetscErrorCode ierr = Assemble(x, ctx, Variational::AssemblyTarget::LHS);
     if (ierr)
       return ierr;
 
@@ -209,7 +219,8 @@ namespace Rodin::Solver
     PetscErrorCode ierr;
 
     m_updated.reset();
-    m_assembled.reset();
+    m_lhsAssembled.reset();
+    m_rhsAssembled.reset();
 
     ierr = SNESSetType(m_snes, m_type);
     assert(ierr == PETSC_SUCCESS);
@@ -259,7 +270,8 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
 
     // State is synchronized, but no assembled system should be trusted after solve.
-    m_assembled.reset();
+    m_lhsAssembled.reset();
+    m_rhsAssembled.reset();
   }
 
   ::SNES& SNES::getHandle() noexcept
