@@ -28,6 +28,7 @@
 #include "Rodin/PETSc/Math/Matrix.h"
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
+#include "Rodin/PETSc/Assembly/MatrixPreparation.h"
 
 namespace Rodin::Assembly
 {
@@ -186,15 +187,24 @@ namespace Rodin::Assembly
         const size_t globalCols = trialFES.getSize();
 
         PetscErrorCode ierr;
-        ierr = MatSetSizes(res, localRows, localCols, globalRows, globalCols);
+        // Re-use the existing sparsity structure across assemblies (see
+        // contract in MatrixPreparation.h) so symbolic factorizations persist.
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            res, static_cast<PetscInt>(globalRows),
+            static_cast<PetscInt>(globalCols), needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(res, localRows, localCols, globalRows, globalCols);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(res);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetFromOptions(res);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(res);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(res);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -328,23 +338,30 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (MPIAIJ)
+        // Allocate / reset A (MPIAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(
-            A,
-            static_cast<PetscInt>(localRows),
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(globalRows),
-            static_cast<PetscInt>(globalCols));
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            A, static_cast<PetscInt>(globalRows),
+            static_cast<PetscInt>(globalCols), needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(
+              A,
+              static_cast<PetscInt>(localRows),
+              static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(globalRows),
+              static_cast<PetscInt>(globalCols));
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(A);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetFromOptions(A);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
@@ -904,23 +921,30 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (MPIAIJ)
+        // Allocate / reset A (MPIAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(
-            A,
-            static_cast<PetscInt>(localRows),
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols));
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            A, static_cast<PetscInt>(nrows), static_cast<PetscInt>(ncols),
+            needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(
+              A,
+              static_cast<PetscInt>(localRows),
+              static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(nrows),
+              static_cast<PetscInt>(ncols));
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(A);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetFromOptions(A);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 

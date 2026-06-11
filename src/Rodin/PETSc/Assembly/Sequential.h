@@ -18,6 +18,8 @@
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
 
+#include "Rodin/PETSc/Assembly/MatrixPreparation.h"
+
 #include "Rodin/PETSc/Math/Vector.h"
 #include "Rodin/PETSc/Math/Matrix.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -150,15 +152,23 @@ namespace Rodin::Assembly
         const size_t n = input.getTrialFES().getSize();
 
         PetscErrorCode ierr;
-        ierr = MatSetSizes(res, m, n, m, n);
+        // Re-use the existing sparsity structure across assemblies (see
+        // contract in MatrixPreparation.h) so symbolic factorizations persist.
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            res, static_cast<PetscInt>(m), static_cast<PetscInt>(n), needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(res, m, n, m, n);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(res);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetFromOptions(res);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(res);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(res);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -308,17 +318,24 @@ namespace Rodin::Assembly
 
         PetscErrorCode ierr;
 
-        // Matrix setup
+        // Matrix setup; re-use structure across assemblies.
         assert(A);
-        ierr = MatSetSizes(A, rows, cols, rows, cols);
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            A, static_cast<PetscInt>(rows), static_cast<PetscInt>(cols),
+            needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(A, rows, cols, rows, cols);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetType(A, MATSEQAIJ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
@@ -767,19 +784,26 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ)
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            A, static_cast<PetscInt>(nrows), static_cast<PetscInt>(ncols),
+            needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
+          assert(ierr == PETSC_SUCCESS);
 
-        // Keep it explicitly AIJ (sequential) for now
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
+          // Keep it explicitly AIJ (sequential) for now
+          ierr = MatSetType(A, MATSEQAIJ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
