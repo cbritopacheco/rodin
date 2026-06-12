@@ -33,20 +33,27 @@
  * @f]
  *
  * The dynamic subscale @f$u_h^{\prime,n+1}@f$ is not computed inside this
- * header. It is computed in the driver and passed as @c OldSubScale:
+ * header. It is computed in the driver and passed as @c OldSubScale.  The
+ * subscale is the (dissipative) response to the unresolved convective
+ * residual, @f$u' = -\tau_K R@f$, so the projection-minus-residual term enters
+ * with @c Pi MINUS the raw convective acceleration (NOT the other way round):
  *
  * @f[
  *   u_h^{\prime,n+1}
  *   =
  *   \tau_K \rho
  *   \left(
- *     (\nabla u_h^n)u_h^n
- *     -
  *     \Pi_h[(\nabla u_h^n)u_h^n]
+ *     -
+ *     (\nabla u_h^n)u_h^n
  *   \right)
  *   +
  *   \tau_K \frac{\rho}{\Delta t} u_h^{\prime,n}.
  * @f]
+ *
+ * Equivalently, as written in the driver:
+ * @f$ u' = \tau_K \rho\,(\tfrac{1}{\Delta t} u_h^{\prime,n}
+ *          - ((\nabla u_h^n)u_h^n - \Pi_h[(\nabla u_h^n)u_h^n])) @f$.
  *
  * The stabilization parameter is:
  *
@@ -414,6 +421,424 @@ namespace Rodin::Examples::Heart
         Eigen::Dynamic,
         Eigen::Dynamic,
         Eigen::RowMajor> m_mat;
+  };
+
+  /**
+   * @brief Cell integrator for the grad-div (continuity) stabilization.
+   *
+   * Assembles the symmetric positive-semidefinite term
+   *
+   * @f[
+   *   C_K(u_h, v_h)
+   *   =
+   *   \int_K \tau_C\,(\nabla\cdot u_h)(\nabla\cdot v_h)\, dx ,
+   * @f]
+   *
+   * with a projected, element-local parameter @f$\tau_C@f$ (units of dynamic
+   * viscosity, e.g. @f$\tau_C = \gamma\,\rho\,|u_h^n|\,h_K@f$).
+   *
+   * This is the consistent VMS continuity / "div-u" stabilization for an
+   * inf-sup STABLE velocity-pressure pair (Taylor-Hood @f$P_2/P_1@f$): it
+   * vanishes identically for divergence-free solutions, so it only improves
+   * mass conservation and damps the spurious pressure component, without
+   * changing the consistent solution.  For @f$\tau_C \ge 0@f$,
+   * @f$C_K(u_h,u_h) = \int_K \tau_C (\nabla\cdot u_h)^2 \ge 0@f$.
+   *
+   * IMPORTANT: this is NOT a pressure-gradient (PSPG / "grad-p") term.  It is
+   * NOT an inf-sup remedy and must not be used to stabilize equal-order
+   * (e.g. @f$P_1/P_1@f$) pairs.  For Taylor-Hood it is exactly the right
+   * additional stabilization; for equal-order one would instead need a PSPG
+   * term @f$\int \tau_M \nabla q\cdot R_M@f$, which is unnecessary here.
+   *
+   * The local entry for vector basis functions @f$\Phi_a, \Psi_b@f$ is
+   *
+   * @f[
+   *   C_{ba}
+   *   =
+   *   \int_K \tau_C\,(\nabla\cdot\Phi_a)(\nabla\cdot\Psi_b)\, dx ,
+   * @f]
+   *
+   * with @f$\nabla\cdot\Phi = \sum_c (\hat\nabla\Phi\,J^{-1})_{cc}@f$.
+   *
+   * @tparam TrialFunction Trial velocity field type.
+   * @tparam TestFunction Test velocity field type.
+   * @tparam ProjectedTauC Projected grad-div parameter field type.
+   */
+  template <class TrialFunction, class TestFunction, class ProjectedTauC>
+  class VMSGradDivBilinearIntegrator final
+    : public Variational::LocalBilinearFormIntegratorBase<
+        typename TrialFunction::ScalarType>
+  {
+    public:
+      using ScalarType = typename TrialFunction::ScalarType;
+      using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+
+      /**
+       * @brief Constructor.
+       *
+       * @param[in] u Trial velocity @f$u_h@f$.
+       * @param[in] v Test velocity @f$v_h@f$.
+       * @param[in] tauC Projected grad-div parameter @f$\tau_C@f$.
+       */
+      VMSGradDivBilinearIntegrator(
+          const TrialFunction& u,
+          const TestFunction& v,
+          const ProjectedTauC& tauC)
+        : Parent(u.getLeaf(), v.getLeaf()),
+          m_u(u),
+          m_v(v),
+          m_tauC(tauC),
+          m_polytope(nullptr)
+      {}
+
+      VMSGradDivBilinearIntegrator(
+          const VMSGradDivBilinearIntegrator&) = default;
+
+      VMSGradDivBilinearIntegrator(
+          VMSGradDivBilinearIntegrator&&) = default;
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      VMSGradDivBilinearIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = &polytope;
+
+        const size_t d = polytope.getDimension();
+        const auto geometry = polytope.getGeometry();
+        const auto idx = polytope.getIndex();
+
+        const auto& trialFES = m_u.getFiniteElementSpace();
+        const auto& testFES  = m_v.getFiniteElementSpace();
+
+        const auto& trialFE = trialFES.getFiniteElement(d, idx);
+        const auto& testFE  = testFES .getFiniteElement(d, idx);
+
+        const size_t ntr = m_u.getDOFs(polytope);
+        const size_t nte = m_v.getDOFs(polytope);
+        const size_t vdim = trialFES.getVectorDimension();
+
+        if (vdim == 0 || vdim != testFES.getVectorDimension())
+          throw std::runtime_error("VMSGradDivBilinearIntegrator expects matching vector-valued spaces.");
+
+        if (vdim != d)
+          throw std::runtime_error("VMSGradDivBilinearIntegrator expects vector dimension to match the cell dimension.");
+
+        if (ntr != trialFE.getCount() || nte != testFE.getCount())
+          throw std::runtime_error("VMSGradDivBilinearIntegrator expects element-local DOFs to match finite-element basis count.");
+
+        const size_t tauOrder =
+          getFunctionOrder(m_tauC, polytope, size_t(0));
+        const size_t qOrder =
+          tauOrder
+          + derivativeOrder(trialFE.getOrder())
+          + derivativeOrder(testFE.getOrder());
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+
+        const auto& q = polytope.getQuadrature(qf);
+
+        m_mat.resize(
+          static_cast<Eigen::Index>(nte),
+          static_cast<Eigen::Index>(ntr));
+
+        m_mat.setZero();
+
+        ScalarType* A = m_mat.data();
+
+        std::vector<ScalarType> trDiv(ntr);
+        std::vector<ScalarType> teDiv(nte);
+
+        for (size_t qp = 0; qp < q.getSize(); ++qp)
+        {
+          const auto& p = q.getPoint(qp);
+          const Variational::IntegrationPoint ip(p, &qf, qp);
+
+          const ScalarType wdet =
+            static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
+
+          const auto Jinv = p.getJacobianInverse();
+          const auto& rc = p.getReferenceCoordinates();
+
+          const ScalarType tauC = m_tauC.getValue(ip);
+
+          for (size_t a = 0; a < ntr; ++a)
+            trDiv[a] = divergence(trialFE.getBasis(a), rc, Jinv, vdim, d);
+
+          for (size_t b = 0; b < nte; ++b)
+            teDiv[b] = divergence(testFE.getBasis(b), rc, Jinv, vdim, d);
+
+          for (size_t b = 0; b < nte; ++b)
+          {
+            for (size_t a = 0; a < ntr; ++a)
+            {
+              A[b * ntr + a] += wdet * tauC * trDiv[a] * teDiv[b];
+            }
+          }
+        }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t trial, size_t test) final override
+      {
+        return m_mat(
+          static_cast<Eigen::Index>(test),
+          static_cast<Eigen::Index>(trial));
+      }
+
+      Geometry::Region getRegion() const final override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      VMSGradDivBilinearIntegrator* copy() const noexcept final override
+      {
+        return new VMSGradDivBilinearIntegrator(*this);
+      }
+
+    private:
+      /**
+       * @brief Computes @f$\nabla\cdot\Phi = \sum_c (\hat\nabla\Phi\,J^{-1})_{cc}@f$.
+       */
+      template <class Basis, class JInv>
+      static ScalarType divergence(
+          const Basis& basis,
+          const Math::SpatialVector<Real>& rc,
+          const JInv& Jinv,
+          size_t vdim,
+          size_t d)
+      {
+        const auto Jref = basis.getJacobian()(rc);
+        ScalarType div = 0;
+        for (size_t c = 0; c < vdim; ++c)
+        {
+          for (size_t r = 0; r < d; ++r)
+          {
+            div +=
+              Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
+              * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
+          }
+        }
+        return div;
+      }
+
+      static size_t derivativeOrder(size_t order) noexcept
+      {
+        return order == 0 ? 0 : order - 1;
+      }
+
+      template <class Function>
+      static size_t getFunctionOrder(
+          const Function& f,
+          const Geometry::Polytope& polytope,
+          size_t fallback)
+      {
+        if constexpr (requires { f.getOrder(polytope); })
+        {
+          const auto order = f.getOrder(polytope);
+          if (order.has_value())
+            return *order;
+        }
+        return fallback;
+      }
+
+      const TrialFunction& m_u;
+      const TestFunction& m_v;
+      const ProjectedTauC& m_tauC;
+
+      const Geometry::Polytope* m_polytope;
+
+      Eigen::Matrix<
+        ScalarType,
+        Eigen::Dynamic,
+        Eigen::Dynamic,
+        Eigen::RowMajor> m_mat;
+  };
+
+  /**
+   * @brief Linear (projection-subtraction) part of the orthogonal grad-div /
+   *        pressure-subscale stabilization.
+   *
+   * Pairs with VMSGradDivBilinearIntegrator to realize the ORTHOGONAL
+   * (Codina OSS) div-u stabilization
+   *
+   * @f[
+   *   \int_K \tau_C\,\bigl(P_h^\perp(\nabla\cdot u_h)\bigr)(\nabla\cdot v_h)
+   *   =
+   *   \underbrace{\int_K \tau_C(\nabla\cdot u_h)(\nabla\cdot v_h)}_{\text{bilinear}}
+   *   -
+   *   \underbrace{\int_K \tau_C\,\xi\,(\nabla\cdot v_h)}_{\text{this term}},
+   * @f]
+   *
+   * where @f$\xi = \Pi_h(\nabla\cdot u_h)@f$ is the (lagged) finite-element
+   * projection of the velocity divergence onto the pressure space, supplied as
+   * @c ProjectedDiv.  Here @f$\tau_C = \rho\,\tau_2@f$ with the continuity
+   * parameter @f$\tau_2 = (h/k^2)^2/(c_1\tau_1)@f$.  The pressure subscale is
+   * @f$\tilde p = -\tau_C\,P_h^\perp(\nabla\cdot u_h)@f$.
+   *
+   * In the global residual this term appears with a MINUS sign:
+   * @code - VMSGradDivLinearIntegrator(...) @endcode
+   *
+   * @tparam TestFunction Test velocity field type.
+   * @tparam ProjectedDiv Projected divergence field type (scalar).
+   * @tparam ProjectedTauC Projected grad-div parameter field type (scalar).
+   */
+  template <class TestFunction, class ProjectedDiv, class ProjectedTauC>
+  class VMSGradDivLinearIntegrator final
+    : public Variational::LinearFormIntegratorBase<
+        typename TestFunction::ScalarType>
+  {
+    public:
+      using ScalarType = typename TestFunction::ScalarType;
+      using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
+      VMSGradDivLinearIntegrator(
+          const TestFunction& v,
+          const ProjectedDiv& xi,
+          const ProjectedTauC& tauC)
+        : Parent(v.getLeaf()),
+          m_v(v),
+          m_xi(xi),
+          m_tauC(tauC),
+          m_polytope(nullptr)
+      {}
+
+      VMSGradDivLinearIntegrator(const VMSGradDivLinearIntegrator&) = default;
+      VMSGradDivLinearIntegrator(VMSGradDivLinearIntegrator&&) = default;
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      VMSGradDivLinearIntegrator& setPolytope(
+          const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = &polytope;
+
+        const size_t d = polytope.getDimension();
+        const auto geometry = polytope.getGeometry();
+        const auto idx = polytope.getIndex();
+
+        const auto& fes = m_v.getFiniteElementSpace();
+        const auto& fe = fes.getFiniteElement(d, idx);
+
+        const size_t nte = m_v.getDOFs(polytope);
+        const size_t vdim = fes.getVectorDimension();
+
+        if (vdim == 0)
+          throw std::runtime_error("VMSGradDivLinearIntegrator expects a vector-valued test space.");
+        if (vdim != d)
+          throw std::runtime_error("VMSGradDivLinearIntegrator expects vector dimension to match the cell dimension.");
+        if (nte != fe.getCount())
+          throw std::runtime_error("VMSGradDivLinearIntegrator expects element-local DOFs to match finite-element basis count.");
+
+        const size_t tauOrder = getFunctionOrder(m_tauC, polytope, size_t(0));
+        const size_t xiOrder  = getFunctionOrder(m_xi, polytope, size_t(0));
+        const size_t qOrder =
+          tauOrder + xiOrder + derivativeOrder(fe.getOrder());
+
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+
+        const auto& q = polytope.getQuadrature(qf);
+
+        m_vec.resize(static_cast<Eigen::Index>(nte));
+        m_vec.setZero();
+
+        for (size_t qp = 0; qp < q.getSize(); ++qp)
+        {
+          const auto& p = q.getPoint(qp);
+          const Variational::IntegrationPoint ip(p, &qf, qp);
+
+          const ScalarType wdet =
+            static_cast<ScalarType>(qf.getWeight(qp) * p.getDistortion());
+
+          const auto Jinv = p.getJacobianInverse();
+          const auto& rc = p.getReferenceCoordinates();
+
+          const ScalarType tauC = m_tauC.getValue(ip);
+          const ScalarType xi   = m_xi.getValue(ip);
+          const ScalarType c    = tauC * xi;
+
+          for (size_t b = 0; b < nte; ++b)
+          {
+            const ScalarType divPsi = divergence(fe.getBasis(b), rc, Jinv, vdim, d);
+            m_vec(static_cast<Eigen::Index>(b)) += wdet * c * divPsi;
+          }
+        }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t local) final override
+      {
+        return m_vec(static_cast<Eigen::Index>(local));
+      }
+
+      Geometry::Region getRegion() const final override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      VMSGradDivLinearIntegrator* copy() const noexcept final override
+      {
+        return new VMSGradDivLinearIntegrator(*this);
+      }
+
+    private:
+      template <class Basis, class JInv>
+      static ScalarType divergence(
+          const Basis& basis,
+          const Math::SpatialVector<Real>& rc,
+          const JInv& Jinv,
+          size_t vdim,
+          size_t d)
+      {
+        const auto Jref = basis.getJacobian()(rc);
+        ScalarType div = 0;
+        for (size_t c = 0; c < vdim; ++c)
+          for (size_t r = 0; r < d; ++r)
+            div +=
+              Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
+              * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(c));
+        return div;
+      }
+
+      static size_t derivativeOrder(size_t order) noexcept
+      {
+        return order == 0 ? 0 : order - 1;
+      }
+
+      template <class Function>
+      static size_t getFunctionOrder(
+          const Function& f,
+          const Geometry::Polytope& polytope,
+          size_t fallback)
+      {
+        if constexpr (requires { f.getOrder(polytope); })
+        {
+          const auto order = f.getOrder(polytope);
+          if (order.has_value())
+            return *order;
+        }
+        return fallback;
+      }
+
+      const TestFunction& m_v;
+      const ProjectedDiv& m_xi;
+      const ProjectedTauC& m_tauC;
+
+      const Geometry::Polytope* m_polytope;
+
+      Math::Vector<ScalarType> m_vec;
   };
 
   /**

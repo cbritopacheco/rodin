@@ -32,6 +32,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -60,6 +61,9 @@
 
 #include "Rodin/Heart/CCMLC2014.h"
 
+// Projected-VMS convective stabilization (lagged Oseen), shared with the
+// working CoupledLV0DCoronary3D fluid solver.
+#include "CoronaryArtery/VMSConvectionIntegrator.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -87,11 +91,17 @@ struct BoundarySolid {
 };
 
 struct RCR {
-  Real Rp = 5.0e9;
-  Real C = 1.0e-12;
-  Real Rd = 5.0e10;
-  Real pd = 500.0;
-  Real pc = 10600.0;
+  // RCR windkessel parameters matched to the WORKING CoupledLV0DCoronary3D
+  // setup (Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000).
+  // The previous (C = 1e-12, Rd = 5e10) gave a windkessel with ~no capacitive
+  // damping (cap = C/dt ~ 0, so pc jumps instantly with every flux ripple)
+  // and a 50x too-large distal resistance: that combination is what makes the
+  // explicit 0D-3D outlet coupling oscillate and blow up.
+  Real Rp = 5.0e8;
+  Real C = 5.0e-11;
+  Real Rd = 1.0e9;
+  Real pd = 400.0;
+  Real pc = 10500.0;
   Real pout = 11000.0;
   Real qd = 0.0;
 };
@@ -163,20 +173,29 @@ struct OutletFlowLaw {
 };
 
 struct Config {
-  std::string xdmfBasename = "CoronaryArtery_FSI_Explicit";
-  std::string csvPath = "CoronaryArtery_FSI_Explicit.csv";
+  // All outputs go under resultsDir so the P2/P1 and P1/P1 runs can execute
+  // concurrently (different cores) without clobbering each other's files.
+  std::string resultsDir = "results_p2p1";
+  std::string xdmfBasename = "results_p2p1/CoronaryArtery_FSI_Explicit_P2P1";
+  std::string csvPath = "results_p2p1/CoronaryArtery_FSI_Explicit_P2P1.csv";
   Real meshScale = 1.0e-3;
 
   Real dt = 1.0e-3;
   size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
+  // Fraction of the RCR drop imposed at the 3D outlet faces:
+  //   p_out_3D = par - pressureDropScale * (par - p_out_RCR).
+  // The RCR capacitor pressure drains toward the venous/myocardial level
+  // (pim ~ alpha*pv ~ a few hundred Pa), so imposing the FULL RCR pressure
+  // (pressureDropScale = 1) pins the 3D outlets near venous, ~9 kPa BELOW the
+  // inlet par -- the entire pressure drop then falls across the epicardial
+  // artery, which is wrong (epicardial arteries are low-resistance conduits;
+  // the big drop is DOWNSTREAM in the microcirculation, i.e. inside the 0D).
+  // A small value references the 3D outlets to par minus a small epicardial
+  // drop (~500-1000 Pa), so the artery stays near-isobaric at ~par and the
+  // velocities (hence the divergence) drop too.  Tune with
+  // -coronary_pressure_drop_scale; 1 = full RCR coupling at the face.
   Real pressureDropScale = 1.0;
-
-  // Startup pressure ramp, USED ONLY when prestressSteps == 0 (the prestress
-  // already hands the loop an equilibrated state).  Without it the full
-  // physiological pressure is imposed on the unloaded wall in a single dt and
-  // the solid diverges immediately.  0 disables.
-  Real pressureRampTime = 0.05;
 
   Real fluidDensity = 1060.0;
   Real pressurePenalty = 1.0e-9;
@@ -189,19 +208,51 @@ struct Config {
 
   Real inletImpedance = 1.e3;
   Real inletTangentialDamping = 1.e3;
-  // Implicit resistive outlet coupling (Robin), mirroring inletImpedance.
-  // The outlets impose the SMOOTH capacitor pressure pc and absorb the
-  // proximal resistance through this local impedance term, instead of
-  // imposing the noisy lagged pout = pc + Rp*Q directly as a Neumann
-  // traction (which injects ~Rp*Q ~ thousands of Pa of step-to-step swing
-  // into the cap pressure -> the sharp inlet/outlet pressure layers).
-  // ~ Rp * A_outlet for the per-outlet windkessel resistance Rp.
-  Real outletImpedance = 1.5e3;
+
+  // Implicit (semi-implicit) outlet resistance scale.  The explicit RCR
+  // imposes p_out = p_c + R*Q with the LAGGED flux Q; for the high-resistance
+  // small branches (R ~ mu L / r^4 is huge) p_out is hypersensitive to flux
+  // ripple and oscillates.  We add a consistency-preserving IMPLICIT local
+  // resistance in delta form,
+  //    + Z_out int_outlet (u.n)(v.n)  -  Z_out int_outlet (u^n.n)(v.n),
+  // with Z_out = outletResistanceScale * 8 mu0 L_p / R_p^2  (the local proximal
+  // impedance, per outlet, units Pa s/m -- same as inletImpedance).  Because
+  // it is the difference (u - u^n), it VANISHES at steady state, so it does NOT
+  // change the converged RCR pressure (the full non-Newtonian p_out stays
+  // explicit) -- it only damps the step-to-step flux oscillation implicitly.
+  // 0 disables it.
+  Real outletResistanceScale = 1.0;
 
   // Static follower-pressure prestress: ramp 0 -> par(0) in this many
   // increments (0 = disabled); the dynamic loop then starts from the
   // pressurized equilibrium with an exactly balanced first residual.
-  size_t prestressSteps = 100;
+  size_t prestressSteps = 80;
+
+  // No-prestress startup ramp ("rampage"): when prestressSteps == 0 there is
+  // no pressurized equilibrium to hand off, so applying full par on step 1
+  // slams the whole system from rest and diverges.  Instead the imposed loads
+  // (inlet pin, outlet pout, wall-follower LEVEL) are scaled by a factor that
+  // climbs linearly 0 -> 1 over the first rampSteps steps.  Ignored (factor
+  // == 1 from step 1) whenever prestressSteps > 0, so the residual-free
+  // prestress handoff is never perturbed.  Set to 0 to disable the ramp.
+  // Inflating a compliant vessel from rest is a violent transient, so ramp
+  // SLOWLY (a few hundred steps).  Prefer the prestress when possible.
+  size_t rampSteps = 0;
+
+  // Projected-VMS convective stabilization scale (lagged Oseen, ported from
+  // the working CoupledLV0DCoronary3D fluid).  0 disables the VMS terms and
+  // recovers the plain Temam-stabilized fluid; 1 is the nominal scaling.
+  Real vmsScale = 1.0;
+
+  // Grad-div (continuity / "div-u") stabilization scale.  Adds the consistent
+  // term  int tau_C (div u)(div v)  with tau_C = gradDivScale * rho |u| h_K,
+  // which improves mass conservation and damps the spurious pressure
+  // component / open-boundary pressure layers on the inf-sup-stable P2/P1
+  // pair.  Vanishes for divergence-free solutions, so it is consistency-safe.
+  // This is NOT a pressure-gradient (PSPG/grad-p) term and is not needed for
+  // inf-sup stability (P2/P1 already is stable).  0 disables it.
+  // tau_C = gradDivScale * rho * tau_2,  tau_2 = (h/k^2)^2 / (c1 tau_1).
+  Real gradDivScale = 1.0;
 
   Real solidDensity = 1060.0;
   Real solidYoungModulus = 2.0e6;
@@ -211,11 +262,6 @@ struct Config {
   // startup transient (prestress handoff mismatch absorbed in the first
   // steps) so the acceleration spike cannot blow up the predictor.
   // Classic non-dissipative trapezoidal pair: beta = 0.25, gamma = 0.5.
-  // NOTE: keep the dissipative pair while starting from the static
-  // prestress with loose (1-iteration) coupling: with gamma = 0.5 there
-  // is no damping anywhere and the handoff seed grows via added mass.
-  // Revert to (0.25, 0.5) only with >= 2 coupling iterations or once
-  // accuracy studies require it.
   // Mildly dissipative Newmark (gamma = 0.6, beta = (gamma + 1/2)^2 / 4).
   // With the level/remainder load split the handoff residual is zero by
   // construction, so only a LIGHT touch of dissipation is kept as a safety
@@ -224,13 +270,17 @@ struct Config {
   Real newmarkBeta = 0.25;
   Real newmarkGamma = 0.5;
 
-  size_t couplingIterations = 3;   // max sub-iterations (Aitken-accelerated)
-  Real couplingRelaxation = 0.5;   // INITIAL Aitken omega (adapted at runtime)
+  size_t couplingIterations = 1;   // loose Robin-Robin (no Aitken)
+  Real couplingRelaxation = 0.5;   // (unused: Aitken removed)
   Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
   // Robin transmission parameter (both sides of Gamma_FSI).  Optimal
   // scaling alpha = gamma*sqrt(rho_s E) (Burman et al. 2025, Sec. 4.1).
   //   robinAlpha <= 0 -> auto from robinGamma; > 0 -> explicit override.
   Real robinAlpha = 0.0;
+  // Robin scaling gamma in alpha = gamma sqrt(rho_s E_eq).  Kept at 1
+  // (gamma = 2 was tried to lift the Aitken omega off its 0.05 floor but did
+  // NOT help -- a stiffer Robin can destabilize the loose scheme).  Tune via
+  // -coronary_robin_gamma / -coronary_robin_alpha instead.
   Real robinGamma = 1.0;
 };
 
@@ -755,13 +805,42 @@ static void readOptions(Config &cfg) {
     cfg.prestressSteps =
         static_cast<size_t>(std::max<PetscInt>(0, prestressSteps));
 
-  PetscReal pressureRampTime = cfg.pressureRampTime;
-  PetscBool pressureRampTimeSet = PETSC_FALSE;
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_pressure_ramp_time",
-                      &pressureRampTime, &pressureRampTimeSet);
-  if (pressureRampTimeSet)
-    cfg.pressureRampTime = pressureRampTime;
+  PetscInt rampSteps = static_cast<PetscInt>(cfg.rampSteps);
+  PetscBool rampStepsSet = PETSC_FALSE;
+  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_ramp_steps",
+                     &rampSteps, &rampStepsSet);
+  if (rampStepsSet)
+    cfg.rampSteps = static_cast<size_t>(std::max<PetscInt>(0, rampSteps));
 
+  PetscReal vmsScale = cfg.vmsScale;
+  PetscBool vmsScaleSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_vms_scale",
+                      &vmsScale, &vmsScaleSet);
+  if (vmsScaleSet)
+    cfg.vmsScale = std::max<Real>(0.0, vmsScale);
+
+  PetscReal gradDivScale = cfg.gradDivScale;
+  PetscBool gradDivScaleSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_graddiv_scale",
+                      &gradDivScale, &gradDivScaleSet);
+  if (gradDivScaleSet)
+    cfg.gradDivScale = std::max<Real>(0.0, gradDivScale);
+
+  PetscReal outletResistanceScale = cfg.outletResistanceScale;
+  PetscBool outletResistanceScaleSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+                      "-coronary_outlet_resistance_scale",
+                      &outletResistanceScale, &outletResistanceScaleSet);
+  if (outletResistanceScaleSet)
+    cfg.outletResistanceScale = std::max<Real>(0.0, outletResistanceScale);
+
+  PetscReal pressureDropScale = cfg.pressureDropScale;
+  PetscBool pressureDropScaleSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+                      "-coronary_pressure_drop_scale", &pressureDropScale,
+                      &pressureDropScaleSet);
+  if (pressureDropScaleSet)
+    cfg.pressureDropScale = std::max<Real>(0.0, pressureDropScale);
 
   PetscReal robinAlpha = cfg.robinAlpha;
   PetscBool robinAlphaSet = PETSC_FALSE;
@@ -1028,6 +1107,16 @@ int main(int argc, char **argv) {
     Config cfg;
     readOptions(cfg);
 
+    // Create the per-case results directory (idempotent) so XDMF/CSV writes
+    // land in their own folder.
+    if (!cfg.resultsDir.empty()) {
+      std::error_code ec;
+      std::filesystem::create_directories(cfg.resultsDir, ec);
+      if (ec && isRoot)
+        std::cerr << "Warning: could not create results directory '"
+                  << cfg.resultsDir << "': " << ec.message() << '\n';
+    }
+
     Model::Input modelInput = makeModelInput();
     Model model(modelInput);
     initializeModel(model, modelInput);
@@ -1112,9 +1201,7 @@ int main(int argc, char **argv) {
         dh); // total solid displacement (current)
     PETSc::Variational::GridFunction dOld(
         dh); // total solid displacement (previous step)
-    PETSc::Variational::GridFunction dIter(dh); // relaxed coupling iterate
-    PETSc::Variational::GridFunction aitkenResPrev(
-        dh); // previous interface residual r_{k-1} (Aitken)
+    PETSc::Variational::GridFunction dIter(dh); // coupling iterate (= dState)
     PETSc::Variational::GridFunction etaState(
         dh); // solid displacement increment (SNES state)
     PETSc::Variational::GridFunction dPred(
@@ -1145,7 +1232,6 @@ int main(int argc, char **argv) {
     dState = zero;
     dOld = zero;
     dIter = zero;
-    aitkenResPrev = zero;
     etaState = zero;
     dPred = zero;
     vPred = zero;
@@ -1189,7 +1275,7 @@ int main(int argc, char **argv) {
       csv << "t,lv_y,lv_v,lv_pv,lv_par,lv_pd,q_in,q_out_total";
       for (const Attribute outlet : BoundaryFluid::Outlets)
         csv << ",q_out_" << outlet << ",p_out_" << outlet;
-      csv << '\n';
+      csv << ",e_interface,coupling_rel\n";
     }
 
     std::map<Attribute, RCR> wk;
@@ -1236,12 +1322,32 @@ int main(int argc, char **argv) {
     const Real solidMass = cfg.solidDensity / (betaN * dt * dt);
     const Real solidVelocityCoeff = gammaN / (betaN * dt);
 
-    // alpha = gamma * sqrt(rho_s * E) unless explicitly overridden (>0).
-    const Real robinAlpha = 20000.;
+    const Real yeohC1 = 70000.0;
+    const Real yeohC2 = 200000.0;
+    const Real yeohC3 = 19000000.0;
+    const Real yeohKappa = 1400000.0;
+
+    // Equivalent small-strain isotropic moduli of the Yeoh law:
+    //   shear  mu_eq = 2 c1,
+    //   Young  E_eq  = 9 kappa mu_eq / (3 kappa + mu_eq).
+    // E_eq is the representative stiffness used by the optimal Robin scaling
+    // alpha = gamma sqrt(rho_s E)  (Burman, Durst, Fernandez, Guzman & Ruz
+    // 2025, Sec. 4.1).  For (c1, kappa) = (7e4, 1.4e6): mu_eq = 1.4e5,
+    // E_eq ~ 4.06e5 Pa, so alpha ~ gamma sqrt(1060 * 4.06e5) ~ 2.08e4.
+    const Real solidShearEquiv = 2.0 * yeohC1;
+    const Real solidYoungEquiv =
+        9.0 * yeohKappa * solidShearEquiv / (3.0 * yeohKappa + solidShearEquiv);
+
+    // alpha = gamma * sqrt(rho_s * E_eq) unless explicitly overridden (>0).
+    const Real robinAlpha =
+        (cfg.robinAlpha > 0.0)
+            ? cfg.robinAlpha
+            : cfg.robinGamma *
+                  std::sqrt(cfg.solidDensity * solidYoungEquiv);
     if (isRoot)
       Alert::Info() << "Robin parameter alpha = " << robinAlpha
-                    << "  (gamma * sqrt(rho_s E), gamma = " << cfg.robinGamma
-                    << ")" << Alert::Raise;
+                    << "  (gamma * sqrt(rho_s E_eq), gamma = " << cfg.robinGamma
+                    << ", E_eq = " << solidYoungEquiv << " Pa)" << Alert::Raise;
     const Real robinVelocityCoeff = robinAlpha * solidVelocityCoeff;
 
 
@@ -1251,7 +1357,7 @@ int main(int argc, char **argv) {
 
     const auto normalFluid = BoundaryNormal(meshFluid);
 
-    Solid::Yeoh law(70000., 200000., 19000000., 1400000.);
+    Solid::Yeoh law(yeohC1, yeohC2, yeohC3, yeohKappa);
     Solid::MaterialTangent solidTangent(law, d, w, dState);
     Solid::InternalForce solidInternal(law, w, dState);
 
@@ -1283,16 +1389,11 @@ int main(int argc, char **argv) {
         (1.0 * muFsi) * Mult(strainRateFsi, normalFluid);
 
 
-    // Pressure LEVEL / REMAINDER split of the wall load:
-    //   load = FollowerPressure(level)  +  J_a * Pi_1[tractionFSI - level n].
-    // The level part reuses the prestress operator, so the first dynamic
-    // residual after the prestress vanishes identically (no startup kick);
-    // the projected remainder only carries small deviations + viscous part.
-    Real wallPressureLevel = 0.0;
-    auto wallLevelFn =
-        RealFunction([&](const Point &) { return wallPressureLevel; });
-    const auto tractionRemainder =
-        tractionFSI - wallLevelFn * normalFluid;
+    // Wall load = the FULL fluid traction transferred across the interface,
+    // nothing else.  The solid feels only sigma_f n_f from the fluid (pressure
+    // + viscous); there is NO separately-imposed follower-pressure level.  The
+    // traction is projected onto the FSI faces (tractionTransfer) and pulled
+    // back to the reference solid surface by J_a in fluidStress below.
 
     // Areal stretch J_a = A_t/A_0 at the CURRENT iterate dIter: pulls
     // per-current-area interface data back to the reference solid surface.
@@ -1410,24 +1511,178 @@ int main(int argc, char **argv) {
         cy.muInf + deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda),
                                  (cy.n - 1.0) / cy.yasuda);
 
-    // Fluid-side lagged Robin traction, FROZEN at the committed previous
-    // step (uOld/pOld) -- the lambda^n of Burman et al. (2025).  Built from
-    // uCur/pCur it would jump at every sub-iteration, closing a traction
-    // feedback loop that the Aitken displacement relaxation does not
-    // control (added-mass sawtooth -> negative cap pressures).  Identical
-    // to tractionFSI at the first iterate of each step.
-    const auto strainRateLag =
-        Jacobian(uOld) + Transpose(Jacobian(uOld));
-    const auto tractionLagged =
-        (1.0 * pOld) * normalFluid -
-        (1.0 * muLag) * Mult(strainRateLag, normalFluid);
-
     const auto outletBeta = Max(-Dot(transportLag, normalFluid), 0.0);
     const auto inletBeta = Max(Dot(transportLag, normalFluid), 0.0);
     const auto outletBackflow =
         0.5 * cfg.outletBackflowStabilization * cfg.fluidDensity * outletBeta;
     const auto inletBackflow =
         0.5 * cfg.inletBackflowStabilization * cfg.fluidDensity * inletBeta;
+
+    // ----------------------------------------------------------------------
+    // Projected-VMS convective stabilization (lagged Oseen), ported from the
+    // working CoupledLV0DCoronary3D fluid.  Adds streamline-oriented
+    // dissipation along the ALE transport velocity uConv = u^n - w without
+    // isotropic viscosity:
+    //
+    //   + int_K tau rho^2 ((grad u) uConv) . ((grad v) uConv)
+    //   - int_K rho (tau rho Pi[(grad uConv) uConv] + u'/dt) . ((grad v) uConv)
+    //
+    // with the dynamic subscale
+    //   u' = tau rho (1/dt u'^n - ((grad uConv)uConv - Pi[(grad uConv)uConv])).
+    //
+    // tau folds cfg.vmsScale, so vmsScale == 0 zeroes tau and the whole VMS
+    // contribution (the cheap projection solves still run, harmlessly).  The
+    // frozen velocity is the SAME ALE transport velocity used by the Oseen
+    // convection term above, so the stabilization is consistent on the moving
+    // mesh.
+    // ----------------------------------------------------------------------
+    using namespace Rodin::Examples::Heart;
+
+    // ALE convecting velocity u^n - w as a grid function (refreshed each
+    // coupling iterate, since the mesh velocity w changes with the iterate).
+    PETSc::Variational::GridFunction uConv(uh);
+    uConv = uOld;
+
+    // P1 scalar tau and P2 vector projection/subscale fields (P2 = velocity
+    // space uh, matching CoupledLV0DCoronary3D's VMSFES).
+    PressureFES tauFes(std::integral_constant<size_t, 1>{}, meshFluid);
+    PETSc::Variational::TrialFunction vmsTau(tauFes);
+    PETSc::Variational::TestFunction vmsTauTest(tauFes);
+
+    // Grad-div (continuity) parameter tau_C = rho*tau2, projected onto P1.
+    PETSc::Variational::TrialFunction vmsTauC(tauFes);
+    PETSc::Variational::TestFunction vmsTauCTest(tauFes);
+
+    PETSc::Variational::TrialFunction vmsUp(uh);    // Pi[(grad uConv) uConv]
+    PETSc::Variational::TestFunction vmsVp(uh);
+    PETSc::Variational::TrialFunction vmsSub(uh);    // dynamic subscale u'^{n+1}
+    PETSc::Variational::GridFunction vmsSubOld(uh);  // subscale history u'^n
+    vmsSubOld = zero;
+
+    // Orthogonal grad-div (p~) IMEX fields (Codina/Principe stable split):
+    //   tauC      = tau_C^{n+1} = rho tau2          (P1; bilinear coeff, LHS)
+    //   sqrtTauC  = sqrt(tau_C^{n+1})               (P1; linear coeff, LHS tau)
+    //   sqrtTauCOld = sqrt(tau_C^n)                 (P1; lagged, for pi~)
+    //   piTilde   = Pi( sqrt(tau_C^n) div u^n )     (P1; standard L2, RHS)
+    // The stabilization assembled is
+    //   + int tau_C^{n+1} (div u^{n+1})(div v)
+    //   - int sqrt(tau_C^{n+1}) piTilde (div v),
+    // i.e. tau^{n+1} implicit (LHS), the projection lagged to time n (RHS),
+    // with the symmetric sqrt(tau) weighting that gives the telescopic energy
+    // bound (temporal stability).  tau is a coefficient, never an unknown.
+    PETSc::Variational::TrialFunction vmsSqrtTauC(tauFes);
+    PETSc::Variational::GridFunction vmsSqrtTauCOld(tauFes);
+    vmsSqrtTauCOld = 0.0;
+    PETSc::Variational::TrialFunction vmsPiTilde(tauFes);
+
+    // Frozen convective acceleration (grad uConv) uConv.
+    const auto vmsConvectionTarget = Mult(Jacobian(uConv), uConv);
+
+    // Shared stabilization parameter tau1 (Codina), with c1 = 4, c2 = 2,
+    // k = 2 (P2), h_K = |K|^{1/d}, nu = mu0/rho:
+    //   tau1 = ( c1 k^4 nu / h^2 + c2 k |u| / h )^-1.
+    // A representative low-shear viscosity mu0 is used (conservative).
+    auto tau1At = [&](const Point &pp) -> Real {
+      const auto uc = uConv.getValue(pp);
+      const Real nu = cy.mu0 / cfg.fluidDensity;
+      const Real hK = std::pow(pp.getPolytope().getMeasure(),
+                               1.0 / pp.getPolytope().getDimension());
+      const Real k = 2.0;
+      const Real speed = std::sqrt(Math::dot(uc, uc));
+      return 1.0 / (4.0 * std::pow(k, 4.0) * nu / (hK * hK) +
+                    2.0 * k * speed / hK);
+    };
+
+    // Convective subscale parameter tau_K = vmsScale/(rho/dt + rho/tau1)
+    //   = vmsScale (1/rho)(1/dt + 1/tau1)^-1.
+    RealFunction vmsTauFn = [&, tau1At](const Point &pp) -> Real {
+      const Real tau1 = tau1At(pp);
+      return cfg.vmsScale *
+             (1.0 / (cfg.fluidDensity / dt + cfg.fluidDensity / tau1));
+    };
+
+    // Dynamic subscale update (L2-projected into vmsSub).
+    auto vmsSubUpdate = VectorFunction(
+        dim, [&](const Point &pp) -> Math::SpatialVector<Real> {
+      const auto conv = vmsConvectionTarget.getValue(pp);
+      const auto proj = vmsUp.getSolution().getValue(pp);
+      const auto old = vmsSubOld.getValue(pp);
+      const Real tau = vmsTau.getSolution().getValue(pp);
+
+      Math::SpatialVector<Real> out(dim);
+      for (Index c = 0; c < static_cast<Index>(dim); ++c)
+        out(c) = tau * cfg.fluidDensity *
+                 (1.0 / dt * old(c) - (conv(c) - proj(c)));
+      return out;
+    });
+
+    // L2 projections (mass matrices reassembled each iterate as uConv moves).
+    Problem vmsL2Conv(vmsUp, vmsVp);
+    vmsL2Conv =
+        Integral(vmsUp, vmsVp) - Integral(vmsConvectionTarget, vmsVp);
+
+    Problem vmsTauProj(vmsTau, vmsTauTest);
+    vmsTauProj = Integral(vmsTau, vmsTauTest) - Integral(vmsTauFn, vmsTauTest);
+
+    Problem vmsSubProj(vmsSub, vmsVp);
+    vmsSubProj = Integral(vmsSub, vmsVp) - Integral(vmsSubUpdate, vmsVp);
+
+    // Grad-div / pressure-subscale parameter tau_C = gradDivScale * rho * tau2,
+    //   tau2 = (h/k^2)^2 / (c1 tau1),  c1 = 4, k = 2.
+    // The pressure subscale is p~ = -tau_C P^perp(div u).  gradDivScale folds
+    // into tau_C, so gradDivScale == 0 zeroes the div-u stabilization.
+    // Plain helper (callable lambda) so both the tau_C and sqrt(tau_C)
+    // RealFunctions evaluate the SAME expression without invoking a
+    // RealFunction as a callable.
+    auto rhoTau2At = [&, tau1At](const Point &pp) -> Real {
+      const Real tau1 = tau1At(pp);
+      const Real hK = std::pow(pp.getPolytope().getMeasure(),
+                               1.0 / pp.getPolytope().getDimension());
+      const Real k = 2.0, c1 = 4.0;
+      const Real lref = hK / (k * k); // h / k^2
+      const Real tau2 = (lref * lref) / (c1 * tau1);
+      return cfg.gradDivScale * cfg.fluidDensity * tau2;
+    };
+    // sqrt(tau_C) = sqrt(gradDivScale rho tau2) >= 0 is the ONLY tau field we
+    // project.  The bilinear coefficient tau_C^{n+1} is then formed as the
+    // POINTWISE SQUARE of this projected sqrt-field (vmsTauC = vmsSqrtTauC.^2,
+    // computed in the loop via VecPointwiseMult).  This guarantees the
+    // discrete identity tau_C = (sqrt(tau_C))^2, so the implicit bilinear
+    //   int (sqrt tau)^2 (div u)(div v)
+    // and the lagged linear  int (sqrt tau) pi~ (div v)  use a CONSISTENT
+    // sqrt(tau) -- which is exactly what the IMEX telescopic energy bound
+    // requires (projecting tau and sqrt(tau) separately would NOT satisfy
+    // tau = (sqrt tau)^2 and would break the bound).
+    RealFunction sqrtRhoTau2Fn = [rhoTau2At](const Point &pp) -> Real {
+      return std::sqrt(std::max<Real>(0.0, rhoTau2At(pp)));
+    };
+
+    // sqrt(tau_C^{n+1}) (current).
+    Problem vmsSqrtTauCProj(vmsSqrtTauC, vmsTauCTest);
+    vmsSqrtTauCProj = Integral(vmsSqrtTauC, vmsTauCTest) -
+                      Integral(sqrtRhoTau2Fn, vmsTauCTest);
+
+    // pi~^n = Pi( sqrt(tau_C^n) div u^n ): STANDARD L2 projection of the
+    // sqrt(tau)-weighted divergence of the PREVIOUS-step velocity (uOld) with
+    // the PREVIOUS-step sqrt(tau) (vmsSqrtTauCOld).  Fully lagged (time n).
+    Problem vmsPiTildeProj(vmsPiTilde, vmsTauCTest);
+    vmsPiTildeProj =
+        Integral(vmsPiTilde, vmsTauCTest) -
+        Integral(vmsSqrtTauCOld * Div(uOld), vmsTauCTest);
+
+    // Per-outlet implicit local resistance coefficient
+    //   Z_out = outletResistanceScale * 8 mu0 L_p / R_p^2   [Pa s/m],
+    // the local proximal impedance (R_p, L_p = proximal surrogate radius and
+    // length per outlet; mu0 = low-shear viscosity -> the LARGEST, hence the
+    // most conservatively-damping, Newtonian estimate).  Used in delta form so
+    // the non-Newtonian RCR pressure is untouched at convergence.
+    std::array<Real, 6> outletZ{};
+    for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i) {
+      const auto &g =
+          cfg.outletFlowLaw.geometricParam.at(BoundaryFluid::Outlets[i]);
+      outletZ[i] = cfg.outletResistanceScale * 8.0 * cfg.viscosity.mu0 * g.Lp /
+                   (g.Rp * g.Rp);
+    }
 
     // BDF1 mass split: (rho/dt)[(u,v)_{n+1} - (u^n,v)_n]; the implicit part
     // lives in 'flow', the explicit u^n part is 'massOld', assembled on the
@@ -1437,6 +1692,21 @@ int main(int argc, char **argv) {
         (cfg.fluidDensity / dt) * Integral(u, v) +
         cfg.fluidDensity * Integral(Dot(convU, v)) +
         0.5 * cfg.fluidDensity * Integral(divGeomTemam * Dot(u, v)) +
+        // Projected-VMS convective stabilization (bilinear + subtracted
+        // linear); tau folds cfg.vmsScale so both vanish when vmsScale == 0.
+        VMSConvectionBilinearIntegrator(u, v, uConv, vmsTau.getSolution(),
+                                        cfg.fluidDensity) -
+        VMSConvectionLinearIntegrator(v, vmsSub.getSolution(), uConv,
+                                      vmsUp.getSolution(), vmsTau.getSolution(),
+                                      cfg.fluidDensity, dt) +
+        // Orthogonal grad-div / pressure subscale p~, STABLE IMEX split:
+        //   + int tau_C^{n+1} (div u^{n+1})(div v)          [implicit, LHS]
+        //   - int sqrt(tau_C^{n+1}) pi~^n (div v)           [lagged, RHS]
+        // with pi~^n = Pi( sqrt(tau_C^n) div u^n ).  tau_C folds
+        // cfg.gradDivScale so both vanish when gradDivScale == 0.
+        VMSGradDivBilinearIntegrator(u, v, vmsTauC.getSolution()) -
+        VMSGradDivLinearIntegrator(v, vmsPiTilde.getSolution(),
+                                   vmsSqrtTauC.getSolution()) +
         2.0 * Integral(muLag * symU, symV) - Integral(p, Div(v)) +
         Integral(Div(u), q) + cfg.pressurePenalty * Integral(p, q) +
         BoundaryIntegral(inletBackflow * Dot(u, v)).over(BoundaryFluid::Inlet) +
@@ -1457,28 +1727,37 @@ int main(int argc, char **argv) {
             .over(BoundaryFluid::Outlets[4]) +
         BoundaryIntegral(pout5 * Dot(v, normalFluid))
             .over(BoundaryFluid::Outlets[5])
+        // Implicit local outlet resistance (delta form, per outlet):
+        //   + Z_out (u.n)(v.n)  -  Z_out (u^n.n)(v.n).
+        // The implicit (u) part damps a step-to-step flux change; the lagged
+        // (u^n) part cancels it at steady state (u = u^n), so the converged
+        // RCR outlet pressure is unchanged -- only the oscillation is killed.
+        + outletZ[0] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[0])
+        - outletZ[0] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[0])
+        + outletZ[1] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[1])
+        - outletZ[1] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[1])
+        + outletZ[2] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[2])
+        - outletZ[2] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[2])
+        + outletZ[3] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[3])
+        - outletZ[3] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[3])
+        + outletZ[4] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[4])
+        - outletZ[4] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[4])
+        + outletZ[5] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[5])
+        - outletZ[5] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[5])
         + cfg.inletImpedance *
               BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
                   .over(BoundaryFluid::Inlet)
-        // Implicit resistive outlet coupling (see Config::outletImpedance):
-        // the proximal windkessel resistance as a Robin term, so the cap
-        // pressure self-adjusts smoothly instead of being driven by the
-        // lagged Rp*Q.
-        + cfg.outletImpedance *
-              BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
-                  .over(BoundaryFluid::Outlets[0], BoundaryFluid::Outlets[1],
-                        BoundaryFluid::Outlets[2], BoundaryFluid::Outlets[3],
-                        BoundaryFluid::Outlets[4], BoundaryFluid::Outlets[5])
         + cfg.inletTangentialDamping *
               BoundaryIntegral(Dot(duTangential, v)).over(BoundaryFluid::Inlet)
-        // Robin-Robin transmission (fluid side):
-        //   sigma_f^{n+1} n + alpha u^{n+1} = alpha u_s + sigma_f^{n} n.
-        // The lagged traction is per TIME STEP (tractionLagged, frozen during
-        // sub-iterations, cf. lambda^n in the paper); it enters with PLUS (a
-        // minus sign would impose a traction-free wall and diverge).
+        // Robin-Robin transmission (fluid side), Burman et al. (2025):
+        //   sigma_f n + alpha u = alpha d_dot_s + lambda^{k-1},
+        // with lambda^{k-1} = tractionFSI at the PREVIOUS correction (= the
+        // previous time step at the first correction, i.e. lambda^{n-1} in
+        // the loose kappa = 0 scheme).  Enters with PLUS (a minus sign would
+        // impose a traction-free wall and diverge).
         + robinAlpha * BoundaryIntegral(u,v).over(BoundaryFluid::FSI)
         - robinAlpha * BoundaryIntegral(interfaceSolidVelocity,v).over(BoundaryFluid::FSI)
-        + BoundaryIntegral(tractionLagged,v).over(BoundaryFluid::FSI)
+        + BoundaryIntegral(tractionFSI,v).over(BoundaryFluid::FSI)
         // Interface convective stabilization (Burman et al. 2025, eq. 13):
         // -(rho/2) (transportLag.n)(u.v) on Sigma; controls the convective
         // energy on the moving wall (omitting it -> added-mass growth).
@@ -1581,21 +1860,11 @@ int main(int argc, char **argv) {
     // Solid Newmark / NeoHookean problem (nonlinear: SNES on the increment
     // etaState, with dState = dOld + etaState).
     // ----------------------------------------------------------------------
-    // Pressure-LEVEL part of the wall load: the same follower operator the
-    // prestress equilibrated (exact deformed-surface pressure + consistent
-    // load stiffness in the Jacobian).  See the level/remainder split above.
-    Solid::FollowerPressureForce wallLevelLoad(wallPressureLevel, w, dState);
-    wallLevelLoad.over(BoundarySolid::FSI);
-    Solid::FollowerPressureTangent wallLevelLoadK(wallPressureLevel, d, w,
-                                                  dState);
-    wallLevelLoadK.over(BoundarySolid::FSI);
-
     Problem solid(d, w);
     solid =
         solidMass * Integral(d, w) + solidTangent +
         solidMass * Integral(dState, w) - solidMass * Integral(dPred, w)
         + solidInternal
-        + wallLevelLoadK + wallLevelLoad
         + DirichletBC(d, zero).on(BoundarySolid::Inlet, BoundarySolid::Outlets[0], BoundarySolid::Outlets[1], BoundarySolid::Outlets[2], BoundarySolid::Outlets[3], BoundarySolid::Outlets[4], BoundarySolid::Outlets[5])
         + DirichletBC(d, zero).on(BoundarySolid::FSIRing)
         // Robin-Robin transmission (solid side), per current area (J_a):
@@ -1629,6 +1898,12 @@ int main(int argc, char **argv) {
     //   -int t.w = + int p (n_s . w).
     // ----------------------------------------------------------------------
     if (cfg.prestressSteps > 0) {
+      // Prestress to the FULL initial arterial pressure so the static wall
+      // equilibrium is (approximately) balanced by the transferred fluid
+      // traction at the dynamic start (pCur = par), giving a small first
+      // residual.  (The previous 0.9 factor left a 0.1*par deficit that kicked
+      // the wall on step 1 -> ALE mesh-velocity spike -> the "awful" fluid
+      // velocity field reported at the static->dynamic handoff.)
       const Real p0 = model.getState().par;
       Real prestressPressure = 0.0;
 
@@ -1693,13 +1968,12 @@ int main(int argc, char **argv) {
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
                                      aleDisp);
 
-      // Pressurized fluid start; the wall-load LEVEL is handed to the
-      // dynamic follower operator, so the transfer remainder starts at 0.
+      // Pressurized fluid start: seed the fluid pressure at par so the
+      // transferred wall traction starts in (approximate) balance with the
+      // prestressed wall equilibrium (no follower level any more).
       pOld = model.getState().par;
       pCur = model.getState().par;
-      wallPressureLevel = model.getState().par;
-      tractionTransfer.project(Region::Faces, tractionRemainder,
-                               BoundaryFluid::FSI);
+      tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
     }
 
     // Interface flux functional q_flux = \int_Gamma (u . n) for the RCR/0D
@@ -1721,9 +1995,6 @@ int main(int argc, char **argv) {
     //   couplingIterations == 1 is loosely coupled; > 1 is strong coupling
     //   (needed when the added-mass effect destabilizes the loose scheme).
     // ======================================================================
-    // Aitken relaxation factor, carried across time steps (Kuettler & Wall).
-    Real aitkenOmega =
-        std::min(Real(1.0), std::max(Real(0.05), cfg.couplingRelaxation));
 
     for (size_t step = 1; step <= cfg.nsteps; ++step) {
       const auto rep = model.step(dt);
@@ -1734,26 +2005,44 @@ int main(int argc, char **argv) {
       }
 
       const auto &s = model.getState();
-      // Startup ramp ONLY without prestress (prestress already equilibrates
-      // the start); a smooth cosine 0->1 over pressureRampTime eases the
-      // physiological load onto the unloaded wall.
-      Real ramp = 1.0;
-      if (cfg.prestressSteps == 0 && cfg.pressureRampTime > 0.0) {
-        constexpr Real kPi = 3.14159265358979323846;
-        ramp = 0.5 * (1.0 - std::cos(kPi * std::min(s.t / cfg.pressureRampTime,
-                                                    1.0)));
+
+      // Startup load ramp ("rampage").  With the prestress the wall is already
+      // in pressurized equilibrium, so the loads are imposed at full strength
+      // from step 1 (loadRamp == 1).  WITHOUT the prestress (prestressSteps ==
+      // 0) the lumen is inflated from the unloaded reference state by climbing
+      // the imposed inlet/outlet pressures 0 -> 1 over rampSteps steps.
+      //
+      // A SMOOTHSTEP profile (C^1, zero slope at both ends) is used instead of
+      // a linear ramp: it keeps d/dt of the load small, so the compliant wall
+      // inflates quasi-statically and the fluid never builds the large inflow
+      // velocity (-> Bernoulli suction / negative interior pressure) that a
+      // fast ramp produces.  Inflating a compliant vessel from rest is an
+      // intrinsically violent transient; ramp SLOWLY (rampSteps large) or,
+      // better, use the prestress, which inflates the wall quasi-statically
+      // BEFORE the dynamics so this transient never happens.
+      Real loadRamp = 1.0;
+      if (cfg.prestressSteps == 0 && cfg.rampSteps > 0) {
+        const Real sRamp =
+            std::min(Real(1.0),
+                     static_cast<Real>(step) / static_cast<Real>(cfg.rampSteps));
+        loadRamp = sRamp * sRamp * (3.0 - 2.0 * sRamp); // smoothstep
       }
-      pinValue = ramp * s.par;
+
+      // Physiological pressures (ramped on a no-prestress start).
+      pinValue = loadRamp * s.par;
       for (const auto &[tag, bc] : wk) {
-        // Impose the SMOOTH capacitor pressure pc (the proximal resistance is
-        // applied implicitly by the outlet impedance term in 'flow'), ramped.
-        const Real pcRamped = ramp * bc.pc;
+        // Full windkessel pressure pout = pc + Rp*Q (lagged), imposed as a
+        // Neumann traction -- identical to CoupledLV0DCoronary3D, the proven
+        // 0D-3D outlet treatment.  Stability requires a PHYSIOLOGICAL Rp (see
+        // RCR::Rp); an over-stiff Rp makes pout hypersensitive to Q and the
+        // outlet oscillates.  The same loadRamp scales the outlet level so the
+        // inlet-to-outlet pressure gradient inflates consistently.
         outletPressureValue[tag] =
-            pinValue - cfg.pressureDropScale * (pinValue - pcRamped);
+            loadRamp * (s.par - cfg.pressureDropScale * (s.par - bc.pout));
       }
-      // Dynamic wall-load level follows the same ramp (level + projected
-      // remainder = full transferred traction).
-      wallPressureLevel = ramp * s.par;
+      // No direct wall load: the wall is driven purely by the fluid traction,
+      // which itself follows the ramped inlet/outlet pressures, so the wall
+      // still inflates gradually on a no-prestress start.
 
       // Newmark predictors.
       dPred = dOld;
@@ -1785,6 +2074,8 @@ int main(int argc, char **argv) {
       Real qOutSum = 0.0;
       Real qIn = 0.0;
       bool stepFailed = false;
+      Real lastRel = 0.0;     // final relative interface change (coupling)
+      size_t couplesDone = 0; // coupling iterates actually performed
 
       // Omega^n and u^n are fixed within the step: assemble massOld once.
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
@@ -1804,39 +2095,25 @@ int main(int argc, char **argv) {
             break;
           }
 
-          // Under-relaxed interface displacement update + convergence test.
-          // Aitken dynamic relaxation: residual r_k = dState_k - dIter_{k-1};
-          //   omega_k = -omega_{k-1} <r_{k-1}, r_k - r_{k-1}> / |r_k - r_{k-1}|^2
-          // (k >= 2; at k = 1 the omega carried from the previous step is
-          // used).  Clamped to [0.05, 1].
+          // Full (un-relaxed) interface update: dIter <- dState.  NO Aitken
+          // relaxation -- loose Robin-Robin coupling (couplingIterations == 1
+          // by default; for > 1 this is a plain Picard fixed point).  rel is
+          // kept purely as a per-step diagnostic.
           auto delta = dState;
           delta -= dIter;
           PetscReal deltaNorm = 0.0;
           PetscReal stateNorm = 0.0;
           VecNorm(delta.getData(), NORM_2, &deltaNorm);
-          if (couple > 1) {
-            auto rdiff = delta;
-            rdiff -= aitkenResPrev;
-            PetscReal num = 0.0, den = 0.0;
-            VecDot(aitkenResPrev.getData(), rdiff.getData(), &num);
-            VecDot(rdiff.getData(), rdiff.getData(), &den);
-            if (den > 0.0)
-              aitkenOmega = std::min(
-                  Real(1.0),
-                  std::max(Real(0.05), -aitkenOmega * static_cast<Real>(num) /
-                                           static_cast<Real>(den)));
-          }
-          aitkenResPrev.setData(delta.getData());
-          delta *= aitkenOmega;
-          dIter += delta;
           VecNorm(dState.getData(), NORM_2, &stateNorm);
           const Real rel = (stateNorm > 0.0)
                                ? (static_cast<Real>(deltaNorm) /
                                   static_cast<Real>(stateNorm))
                                : static_cast<Real>(deltaNorm);
+          lastRel = rel;
+          couplesDone = couple;
+          dIter = dState;
 
-          // Newmark kinematics from the RELAXED iterate dIter (the same
-          // displacement the ALE/mesh sees).
+          // Newmark kinematics from the updated iterate dIter (= dState).
           solidAcceleration = dIter;
           solidAcceleration -= dPred;
           solidAcceleration *= 1.0 / (betaN * dt * dt);
@@ -1849,8 +2126,7 @@ int main(int argc, char **argv) {
             Alert::Info() << "  coupling iterate " << couple << " / "
                           << cfg.couplingIterations
                           << "  relative interface change = " << rel
-                          << "  |d - dPrev| = " << deltaNorm
-                          << "  omega = " << aitkenOmega << Alert::Raise;
+                          << "  |d - dPrev| = " << deltaNorm << Alert::Raise;
           }
 
 
@@ -1875,6 +2151,31 @@ int main(int argc, char **argv) {
           moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
                                          aleDisp);
 
+          // Refresh the ALE convecting velocity uConv = u^n - w and re-project
+          // the VMS fields (projected convection, tau, dynamic subscale) on the
+          // just-moved mesh, so the stabilization is consistent with the Oseen
+          // convection assembled below.  Order matters: up -> tau -> subscale
+          // (the subscale update reads both up and tau).
+          uConv = uOld;
+          uConv -= meshVelocity;
+          vmsL2Conv.assemble();
+          Solver::KSP(vmsL2Conv).solve();
+          vmsTauProj.assemble();
+          Solver::KSP(vmsTauProj).solve();
+          vmsSubProj.assemble();
+          Solver::KSP(vmsSubProj).solve();
+          // Orthogonal grad-div IMEX projections.  Project sqrt(tau_C^{n+1})
+          // and form the bilinear coefficient as its EXACT pointwise square
+          // tau_C = (sqrt tau_C)^2 (so the two are consistent).  Then the
+          // lagged pi~^n = Pi( sqrt(tau_C^n) div u^n ) (depends only on time-n
+          // data: uOld, vmsSqrtTauCOld; re-projected on the moved mesh).
+          vmsSqrtTauCProj.assemble();
+          Solver::KSP(vmsSqrtTauCProj).solve();
+          VecPointwiseMult(vmsTauC.getSolution().getData(),
+                           vmsSqrtTauC.getSolution().getData(),
+                           vmsSqrtTauC.getSolution().getData());
+          vmsPiTildeProj.assemble();
+          Solver::KSP(vmsPiTildeProj).solve();
 
           flow.assemble().setFieldSplits();
 
@@ -1903,8 +2204,9 @@ int main(int argc, char **argv) {
 
           fluidTraction.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
           // Native projections consumed by the NEXT solid solve (lagged
-          // Robin-Robin data): scaled transfer traction + wall velocity.
-          tractionTransfer.project(Region::Faces, tractionRemainder,
+          // Robin-Robin data): the FULL transferred fluid traction + wall
+          // velocity.
+          tractionTransfer.project(Region::Faces, tractionFSI,
                                    BoundaryFluid::FSI);
           uWall.project(Region::Faces, uCur, BoundaryFluid::FSI);
 
@@ -1937,6 +2239,49 @@ int main(int argc, char **argv) {
         qOutSum += qo;
       }
 
+      // ---- Interface power (Robin-Robin energy consistency) -------------
+      // E_Gamma = int_FSI (sigma_f . n_f) . (u_f - d_dot_s) dGamma, the rate
+      // of work the fluid does against the kinematic mismatch on Gamma_FSI.
+      // For an exactly energy-conserving (and conservatively-coupled) FSI this
+      // is 0; with the loose Robin-Robin scheme AND the NON-conservative
+      // cross-mesh NODAL transfer it is nonzero.  Comparing it between the
+      // P2/P1 and P1/P1 cases isolates how much of that energy comes from the
+      // interpolation.  sigma_f . n_f = -tractionFSI = muFsi(grad u+grad u^T)n
+      // - p n.  Computed as two integrals to avoid GridFunction-Function
+      // arithmetic inside the expression.
+      const auto sigmaFn =
+          muFsi * Mult(strainRateFsi, normalFluid) - pCur * normalFluid;
+      flux =
+          BoundaryIntegral(Dot(sigmaFn, uCur), qFlux).over(BoundaryFluid::FSI);
+      flux.assemble();
+      const Real ePowerFluid = flux(one);
+      flux = BoundaryIntegral(Dot(sigmaFn, interfaceSolidVelocity), qFlux)
+                 .over(BoundaryFluid::FSI);
+      flux.assemble();
+      const Real ePowerSolid = flux(one);
+      const Real eInterface = ePowerFluid - ePowerSolid;
+
+      // ---- Startup/stability diagnostics --------------------------------
+      // p range: a strongly NEGATIVE interior pressure means the wall is
+      // inflating faster than the inflow can fill -> Bernoulli/inertial
+      // suction (ramp too fast, or use the prestress).
+      // mass = qIn + qOutSum = -d|lumen|/dt (no-slip wall): < 0 while the wall
+      // inflates, -> 0 once the lumen reaches equilibrium.  If |mass| does NOT
+      // decay toward 0 as loadRamp -> 1, suspect a GCL / mass-conservation
+      // problem rather than a physical transient.
+      {
+        PetscReal pMin = 0.0, pMax = 0.0;
+        VecMin(pCur.getData(), PETSC_NULLPTR, &pMin);
+        VecMax(pCur.getData(), PETSC_NULLPTR, &pMax);
+        if (isRoot)
+          Alert::Info() << "  [diag] p in [" << pMin << ", " << pMax << "] Pa"
+                        << "  mass(qIn+qOut) = " << (qIn + qOutSum)
+                        << "  E_iface = " << eInterface << " W"
+                        << "  | coupling: iters = " << couplesDone << "/"
+                        << cfg.couplingIterations
+                        << "  interface change = " << lastRel << Alert::Raise;
+      }
+
       // RCR / Windkessel update from the converged interface flux.
       for (const Attribute outlet : BoundaryFluid::Outlets)
         updateRCRNonNew(cfg, outlet, model, wk[outlet], qOut[outlet], dt);
@@ -1947,6 +2292,10 @@ int main(int argc, char **argv) {
       dOld.setData(dState.getData());
       solidVelocityOld.setData(solidVelocity.getData());
       solidAccelerationOld.setData(solidAcceleration.getData());
+      // Carry the dynamic VMS subscale u'^{n+1} -> u'^n for the next step.
+      vmsSubOld.setData(vmsSub.getSolution().getData());
+      // Carry sqrt(tau_C^{n+1}) -> sqrt(tau_C^n) for the lagged pi~ projection.
+      vmsSqrtTauCOld.setData(vmsSqrtTauC.getSolution().getData());
 
 
       aleDispOld.setData(aleDisp.getData());
@@ -1960,7 +2309,7 @@ int main(int argc, char **argv) {
             << ',' << s.pd << ',' << qIn << ',' << qOutSum;
         for (const Attribute outlet : BoundaryFluid::Outlets)
           csv << ',' << qOut[outlet] << ',' << wk[outlet].pout;
-        csv << '\n';
+        csv << ',' << eInterface << ',' << lastRel << '\n';
         csv.flush();
       }
     }

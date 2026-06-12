@@ -73,6 +73,19 @@ if (RODIN_USE_PETSC)
     Rodin::Solver
     Rodin::Geometry
     Rodin::Assembly)
+
+  # Equal-order P1/P1 variant (separate results_p1p1/ output folder), so it
+  # can run concurrently with the P2/P1 case on different cores.
+  add_executable(CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq.cpp)
+  target_link_libraries(CoronaryArtery_FSI_Explicit_P1P1_PETSc_Seq
+    PUBLIC
+    Rodin::Heart
+    Rodin::Variational
+    Rodin::PETSc
+    Rodin::Alert
+    Rodin::Solver
+    Rodin::Geometry
+    Rodin::Assembly)
 endif()
 
 if (RODIN_USE_PETSC AND RODIN_USE_MPI)

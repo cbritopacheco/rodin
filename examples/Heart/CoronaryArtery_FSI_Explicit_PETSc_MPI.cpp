@@ -107,11 +107,17 @@ struct BoundarySolid {
 };
 
 struct RCR {
-  Real Rp = 5.0e9;
-  Real C = 1.0e-12;
-  Real Rd = 5.0e10;
-  Real pd = 500.0;
-  Real pc = 10600.0;
+  // RCR windkessel parameters matched to the WORKING CoupledLV0DCoronary3D
+  // setup (Rp, C, Rd, pd0, pc0, pout0) = (5e8, 5e-11, 1e9, 400, 10500, 11000).
+  // The previous (C = 1e-12, Rd = 5e10) gave a windkessel with ~no capacitive
+  // damping (cap = C/dt ~ 0, so pc jumps instantly with every flux ripple)
+  // and a 50x too-large distal resistance: that combination is what makes the
+  // explicit 0D-3D outlet coupling oscillate and blow up.
+  Real Rp = 5.0e8;
+  Real C = 5.0e-11;
+  Real Rd = 1.0e9;
+  Real pd = 400.0;
+  Real pc = 10500.0;
   Real pout = 11000.0;
   Real qd = 0.0;
 };
@@ -197,9 +203,6 @@ struct Config {
   // Pa).  1.0 leaves the gradient untouched.
   Real pressureDropScale = 0.5;
 
-  // Startup pressure ramp, USED ONLY when prestressSteps == 0.  0 disables.
-  Real pressureRampTime = 0.05;
-
   Real fluidDensity = 1060.0;
   Real pressurePenalty = 1.0e-12;
   Real inletBackflowStabilization = 1.0;
@@ -211,19 +214,11 @@ struct Config {
 
   Real inletImpedance = 1.e3;
   Real inletTangentialDamping = 1.e3;
-  // Implicit resistive outlet coupling (Robin), mirroring inletImpedance.
-  // The outlets impose the SMOOTH capacitor pressure pc and absorb the
-  // proximal resistance through this local impedance term, instead of
-  // imposing the noisy lagged pout = pc + Rp*Q directly as a Neumann
-  // traction (which injects ~Rp*Q ~ thousands of Pa of step-to-step swing
-  // into the cap pressure -> the sharp inlet/outlet pressure layers).
-  // ~ Rp * A_outlet for the per-outlet windkessel resistance Rp.
-  Real outletImpedance = 1.5e3;
 
   // Static follower-pressure prestress: ramp 0 -> par(0) in this many
   // increments (0 = disabled); the dynamic loop then starts from the
   // pressurized equilibrium with an exactly balanced first residual.
-  size_t prestressSteps = 50;
+  size_t prestressSteps = 0;
 
   Real solidDensity = 1060.0;
   Real solidYoungModulus = 2.0e6;
@@ -587,30 +582,7 @@ static std::size_t tagFSIRingBand(MeshType &mesh, Attribute fsi, Attribute ring,
 // Match each fluid FSI face to its geometric twin on the solid FSI surface by
 // centroid proximity.  The two meshes are assumed CONFORMING on the interface
 // (coincident faces); a tolerance absorbs floating-point / ASCII round-off.
-//
-// IMPORTANT (MPI): each mesh is partitioned INDEPENDENTLY, so a fluid FSI face
-// and its solid twin are not guaranteed to live on the same rank.  This builder
-// only sees LOCAL faces, so with more than one rank some fluid faces may have no
-// local solid twin.  For a true parallel coupling the interface must be
-// co-partitioned (or matched globally); until then, run on a single MPI rank.
-//
-// TODO(mpi): make the interface coupling distributed.  Three steps:
-//   1. Global match.  Each rank Allgathers the centroids (+ global ids) of its
-//      LOCAL fluid and solid FSI faces so every rank can build the full
-//      fluid-face -> solid-face pairing, recording for each pair which rank owns
-//      the fluid face and which owns the solid twin.  Replaces the local-only
-//      centroid scan below.
-//   2. Per-iteration value exchange.  Once per coupling iteration, Allgather a
-//      compact (centroid -> interface value) buffer for the quantities the
-//      coupling consumes -- solid velocity, fluid velocity, solid displacement,
-//      and the projected interface traction.  Rewrite the interface
-//      VectorFunctions (interfaceSolidVelocity, robinInterfaceData,
-//      interfaceSolidDisplacement) and the traction projection to read from this
-//      replicated buffer instead of doing a cross-mesh getValue() on a twin face
-//      that may be off-rank.
-//   3. Collective-ordering discipline.  Every rank must reach the Allgathers in
-//      the same order every iteration (no rank skipping a collective because it
-//      happens to own no FSI faces) or the run deadlocks.
+
 static InterfaceMap buildInterfaceMap(const MeshType &fluidReferenceMesh,
                                       const MeshType &solidReferenceMesh) {
   InterfaceMap map;
@@ -820,12 +792,6 @@ static void readOptions(Config &cfg) {
     cfg.prestressSteps =
         static_cast<size_t>(std::max<PetscInt>(0, prestressSteps));
 
-  PetscReal pressureRampTime = cfg.pressureRampTime;
-  PetscBool pressureRampTimeSet = PETSC_FALSE;
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_pressure_ramp_time",
-                      &pressureRampTime, &pressureRampTimeSet);
-  if (pressureRampTimeSet)
-    cfg.pressureRampTime = pressureRampTime;
 
 
   PetscReal robinAlpha = cfg.robinAlpha;
@@ -1509,18 +1475,6 @@ int main(int argc, char **argv) {
         cy.muInf + deltaMu * Pow(1.0 + Pow(cy.lambda * shearLag, cy.yasuda),
                                  (cy.n - 1.0) / cy.yasuda);
 
-    // Fluid-side lagged Robin traction, FROZEN at the committed previous
-    // step (uOld/pOld) -- the lambda^n of Burman et al. (2025).  Built from
-    // uCur/pCur it would jump at every sub-iteration, closing a traction
-    // feedback loop that the Aitken displacement relaxation does not
-    // control (added-mass sawtooth -> negative cap pressures).  Identical
-    // to tractionFSI at the first iterate of each step.
-    const auto strainRateLag =
-        Jacobian(uOld) + Transpose(Jacobian(uOld));
-    const auto tractionLagged =
-        (1.0 * pOld) * normalFluid -
-        (1.0 * muLag) * Mult(strainRateLag, normalFluid);
-
     const auto outletBeta = Max(-Dot(transportLag, normalFluid), 0.0);
     const auto inletBeta = Max(Dot(transportLag, normalFluid), 0.0);
     const auto outletBackflow =
@@ -1559,25 +1513,17 @@ int main(int argc, char **argv) {
         + cfg.inletImpedance *
               BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
                   .over(BoundaryFluid::Inlet)
-        // Implicit resistive outlet coupling (see Config::outletImpedance):
-        // the proximal windkessel resistance as a Robin term, so the cap
-        // pressure self-adjusts smoothly instead of being driven by the
-        // lagged Rp*Q.
-        + cfg.outletImpedance *
-              BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
-                  .over(BoundaryFluid::Outlets[0], BoundaryFluid::Outlets[1],
-                        BoundaryFluid::Outlets[2], BoundaryFluid::Outlets[3],
-                        BoundaryFluid::Outlets[4], BoundaryFluid::Outlets[5])
         + cfg.inletTangentialDamping *
               BoundaryIntegral(Dot(duTangential, v)).over(BoundaryFluid::Inlet)
-        // Robin-Robin transmission (fluid side):
-        //   sigma_f^{n+1} n + alpha u^{n+1} = alpha u_s + sigma_f^{n} n.
-        // The lagged traction is per TIME STEP (tractionLagged, frozen during
-        // sub-iterations, cf. lambda^n in the paper); it enters with PLUS (a
-        // minus sign would impose a traction-free wall and diverge).
+        // Robin-Robin transmission (fluid side), Burman et al. (2025):
+        //   sigma_f n + alpha u = alpha d_dot_s + lambda^{k-1},
+        // with lambda^{k-1} = tractionFSI at the PREVIOUS correction (= the
+        // previous time step at the first correction, i.e. lambda^{n-1} in
+        // the loose kappa = 0 scheme).  Enters with PLUS (a minus sign would
+        // impose a traction-free wall and diverge).
         + robinAlpha * BoundaryIntegral(u,v).over(BoundaryFluid::FSI)
         - robinAlpha * BoundaryIntegral(interfaceSolidVelocity,v).over(BoundaryFluid::FSI)
-        + BoundaryIntegral(tractionLagged,v).over(BoundaryFluid::FSI)
+        + BoundaryIntegral(tractionFSI,v).over(BoundaryFluid::FSI)
         // Interface convective stabilization (Burman et al. 2025, eq. 13):
         // -(rho/2) (transportLag.n)(u.v) on Sigma; controls the convective
         // energy on the moving wall (omitting it -> added-mass growth).
@@ -1843,22 +1789,21 @@ int main(int argc, char **argv) {
       }
 
       const auto &s = model.getState();
-      // Startup ramp ONLY without prestress (smooth cosine 0->1).
-      Real ramp = 1.0;
-      if (cfg.prestressSteps == 0 && cfg.pressureRampTime > 0.0) {
-        constexpr Real kPi = 3.14159265358979323846;
-        ramp = 0.5 * (1.0 - std::cos(kPi * std::min(s.t / cfg.pressureRampTime,
-                                                    1.0)));
-      }
-      pinValue = ramp * s.par;
+      // Physiological pressures from step 1 (start from the prestressed
+      // equilibrium; without prestress this case is NOT eased in).
+      pinValue = s.par;
       for (const auto &[tag, bc] : wk) {
-        // Impose the SMOOTH capacitor pressure pc (proximal resistance applied
-        // implicitly by the outlet impedance term in 'flow'), ramped.
-        const Real pcRamped = ramp * bc.pc;
+        // Full windkessel pressure pout = pc + Rp*Q (lagged), imposed as a
+        // Neumann traction -- identical to CoupledLV0DCoronary3D, the proven
+        // 0D-3D outlet treatment.  Stability requires a PHYSIOLOGICAL Rp (see
+        // RCR::Rp); an over-stiff Rp makes pout hypersensitive to Q and the
+        // outlet oscillates.
         outletPressureValue[tag] =
-            pinValue - cfg.pressureDropScale * (pinValue - pcRamped);
+            pinValue - cfg.pressureDropScale * (pinValue - bc.pout);
       }
-      wallPressureLevel = ramp * s.par;
+      // Follower wall-load LEVEL tracks par(t); the projected remainder
+      // carries the rest of the transferred traction.
+      wallPressureLevel = s.par;
 
       // Newmark predictors.
       dPred = dOld;
@@ -1910,10 +1855,14 @@ int main(int argc, char **argv) {
           }
 
           // Under-relaxed interface displacement update + convergence test.
-          // Aitken dynamic relaxation: residual r_k = dState_k - dIter_{k-1};
+          // Aitken relaxation of the INTERFACE-DISPLACEMENT fixed point of
+          // the kappa-correction Robin-Robin scheme (Burman et al. 2025).
+          // Both Robin transmissions and their lagged data (lambda^{k-1},
+          // u^{k-1}) are untouched -- this only accelerates the iterates:
+          //   r_k = dState_k - dIter_{k-1},
           //   omega_k = -omega_{k-1} <r_{k-1}, r_k - r_{k-1}> / |r_k - r_{k-1}|^2
-          // (k >= 2; at k = 1 the omega carried from the previous step is
-          // used).  Clamped to [0.05, 1].
+          // (k >= 2; at k = 1 omega carries over from the previous step),
+          // clamped to [0.05, 1].
           auto delta = dState;
           delta -= dIter;
           PetscReal deltaNorm = 0.0;
