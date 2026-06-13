@@ -391,6 +391,17 @@ struct Config {
   // so those surfaces follow the beating heart.  k = heartDisplacementPenalty;
   // 0 disables it.  Tune with -coronary_heart_disp_penalty.
   Real heartDisplacementPenalty = 1.0e6;
+
+  // Scale on the imposed 0D-heart radial displacement (disp0D = scale*(s.y -
+  // offset)).  The 0D LV radial displacement s.y reaches ~6 mm at systole --
+  // that is the LEFT-VENTRICLE scale (R0 ~ 23.6 mm), NOT the coronary scale.
+  // Imposing a 6 mm NORMAL displacement on a sub-mm/few-mm vessel wall balloons
+  // or collapses the lumen by several radii, which TANGLES the ALE fluid mesh
+  // -> degenerate elements -> a SEGV at contraction onset.  Use this to dial
+  // the imposed wall motion down to a physically sensible coronary amplitude
+  // (start small, e.g. 0.05-0.2, and increase while watching mesh quality).
+  // 1.0 = full s.y.  Tunable via -coronary_heart_disp_scale.
+  Real heartDisplacementScale = 1.0;
 };
 
 static Real periodic_activation(Real t) {
@@ -967,6 +978,15 @@ static void readOptions(Config &cfg) {
   if (heartDisplacementPenaltySet)
     cfg.heartDisplacementPenalty =
         std::max<Real>(0.0, heartDisplacementPenalty);
+
+  // Scale on the imposed 0D-heart radial displacement (s.y ~ 6 mm is the LV
+  // scale, far too large to impose as a normal wall displacement on a coronary).
+  PetscReal heartDisplacementScale = cfg.heartDisplacementScale;
+  PetscBool heartDisplacementScaleSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_heart_disp_scale",
+                      &heartDisplacementScale, &heartDisplacementScaleSet);
+  if (heartDisplacementScaleSet)
+    cfg.heartDisplacementScale = heartDisplacementScale;
 
   // Mesh-consistent (BDF1) interface velocity for the fluid no-slip / Robin.
   PetscBool meshConsistentVel =
@@ -2380,9 +2400,9 @@ int main(int argc, char **argv) {
       if (cfg.subtractHeartHandoffOffset) {
         if (step == 1)
           disp0DOffset = s.y;
-        disp0D = s.y - disp0DOffset;
+        disp0D = cfg.heartDisplacementScale * (s.y - disp0DOffset);
       } else {
-        disp0D = s.y;
+        disp0D = cfg.heartDisplacementScale * s.y;
       }
 
       // Startup load ramp ("rampage").  With the prestress the wall is already
@@ -2490,7 +2510,16 @@ int main(int argc, char **argv) {
 
       {
         for (size_t couple = 1; couple <= cfg.couplingIterations; ++couple) {
-          // Solid Newmark / NeoHookean solve on the reference mesh.
+          // Solid Newmark / NeoHookean solve on the reference mesh.  For a
+          // genuine Picard FSI sub-iteration (couplingIterations > 1) the solid
+          // must be RE-ASSEMBLED so the lagged interface data (fluidStress and
+          // robinInterfaceData, which read the previous iterate's fluid solve)
+          // are refreshed -- assemble() bakes the linear-form RHS, snes.solve()
+          // alone does NOT re-read it (same reason the ALE/flow are re-assembled
+          // below).  Iterate 1 uses the pre-loop assembly, so the default loose
+          // single-pass scheme (couplingIterations == 1) is unchanged.
+          if (couple > 1)
+            solid.assemble();
           snes.solve();
           if (!snes.converged()) {
             if (isRoot)
@@ -2548,6 +2577,26 @@ int main(int argc, char **argv) {
           Solver::KSP(ale).solve();
           aleDisp.setData(dMove.getSolution().getData());
 
+          // Guard: if the ALE lift is non-finite (mesh about to tangle from too
+          // large an interface displacement, e.g. an over-large imposed heart
+          // motion at contraction onset), STOP the step cleanly instead of
+          // moving the mesh with NaN/Inf vertices -> which would segfault in the
+          // next assembly / cross-mesh sample.  This converts the SEGV into a
+          // diagnosable failure.
+          {
+            PetscReal aleNorm = 0.0;
+            VecNorm(aleDisp.getData(), NORM_INFINITY, &aleNorm);
+            if (!std::isfinite(static_cast<Real>(aleNorm))) {
+              if (isRoot)
+                std::cerr << "ALE lift non-finite at step " << step
+                          << " (coupling iterate " << couple
+                          << "): the fluid mesh is tangling -- reduce the "
+                          << "imposed interface displacement (e.g. "
+                          << "-coronary_heart_disp_scale) or the time step.\n";
+              stepFailed = true;
+              break;
+            }
+          }
 
           // ALE mesh velocity.
           meshVelocity = aleDisp;
