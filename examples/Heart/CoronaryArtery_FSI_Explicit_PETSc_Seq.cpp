@@ -88,6 +88,7 @@ struct BoundarySolid {
   static constexpr Attribute Inlet = 17;
   static constexpr std::array<Attribute, 6> Outlets{{18, 19, 20, 21, 22, 31}};
   static constexpr Attribute FSIRing = 99;
+  static constexpr std::array<Attribute, 11> Contact{{110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120}};
 };
 
 struct RCR {
@@ -133,12 +134,17 @@ struct OutletFlowLaw {
   Real distalLength = 0.0025;
   /// @brief Array with radius and large for each branch
   std::unordered_map<Attribute, GeoArtery> geometricParam{
-      {7,  {6.e-4,  0.0125, 3e-4, 0.0025}},
-      {8,  {4.e-4,  0.01,  2e-4, 0.0025 }},
-      {9,  {4.e-4,  0.01,  2e-4, 0.0025 }},
-      {10, {4.e-4,  0.01,  2e-4, 0.0025 }},
-      {14, {6.e-4,  0.0125, 3e-4, 0.0025}},
-      {15, {6.e-4,  0.0125, 3e-4, 0.0025}},
+      // {Rp, Lp, Rd, Ld}.  Proximal length Lp cut to 0.002 to lower the
+      // proximal resistance R_p ~ L_p/r_p^4: this shrinks the face overshoot
+      // p_out = p_c + R_p*Q so p_out stays at/below p_c <= par (forward
+      // gradient at the inlet, no reverse-flow instability).  Distal (Rd,Ld)
+      // unchanged so the steady flow split / drop is essentially preserved.
+      {7,  {6.e-4,  0.002, 3e-4, 0.0025}},
+      {8,  {4.e-4,  0.002,  2e-4, 0.0025 }},
+      {9,  {4.e-4,  0.002,  2e-4, 0.0025 }},
+      {10, {4.e-4,  0.002,  2e-4, 0.0025 }},
+      {14, {6.e-4,  0.002, 3e-4, 0.0025}},
+      {15, {6.e-4,  0.002, 3e-4, 0.0025}},
   };
   /// @brief Pressure-drop threshold for the Poiseuille fallback.
   Real pressureDropTolerance = 1.0e-12;
@@ -197,6 +203,30 @@ struct Config {
   // -coronary_pressure_drop_scale; 1 = full RCR coupling at the face.
   Real pressureDropScale = 1.0;
 
+  // Fixed epicardial forward pressure drop [Pa] subtracted from EVERY outlet:
+  //   p_out_3D = par - pressureDropScale*(par - p_out_RCR) - epicardialDrop.
+  // The RCR capacitor starts at ~par, so inlet and outlets sit at the same
+  // level and any ripple makes p_out > p_in -> reverse flow -> instability.
+  // This GUARANTEES a forward gradient (p_in - p_out >= epicardialDrop > 0)
+  // from the very first step, which is also the physiological driver of
+  // coronary flow.  Tune with -coronary_epicardial_drop (try 500-1500 Pa).
+  // Default OFF (0): the proximal-resistance recalibration below keeps
+  // p_out < par physically; re-enable this as a guaranteed fallback if the
+  // outlet ever creeps above the inlet again.
+  Real epicardialDrop = 0.0;
+
+  // Automatic Murray-law outlet calibration.  When true, at startup each
+  // outlet's RCR resistance is set from its ACTUAL area (Q ~ r^3, so larger
+  // branches carry proportionally more flow regardless of the mesh attribute
+  // numbering), the proximal:distal split is held at ~5:95, the total tree
+  // flow is set to lcaTargetFlow, and each outlet gets its own compliance
+  // C_i = rcrTau / R_d,i so the RCR time constant is UNIFORM across the tree.
+  // This overrides the manual geometricParam radii.  Disable to use them.
+  bool autoCalibrateOutlets = true;
+  Real lcaTargetFlow = 3.0e-6;     // m^3/s  (~180 mL/min; LCA ~150-250)
+  Real rcrTau = 0.2;               // s  (coronary RCR time constant)
+  Real proximalResistanceFraction = 0.05; // R_p / (R_p + R_d)
+
   Real fluidDensity = 1060.0;
   Real pressurePenalty = 1.0e-9;
   Real inletBackflowStabilization = 1.0;
@@ -239,6 +269,18 @@ struct Config {
   // SLOWLY (a few hundred steps).  Prefer the prestress when possible.
   size_t rampSteps = 0;
 
+  // Hybrid prestress + small dynamic ramp.  Prestress the wall STATICALLY only
+  // up to prestressFraction*par (e.g. 0.8 -> 80% of the arterial pressure), so
+  // the bulk of the inflation is done in equilibrium with no transient.  The
+  // dynamic loop then ramps the remaining (1 - prestressFraction) of the loads
+  // (inlet pin, outlet pout) smoothly from prestressFraction -> 1 over the
+  // first prestressRampSteps steps, easing the wall the last bit of the way
+  // instead of slamming the full par on the handoff.  Set prestressFraction =
+  // 1.0 to recover the previous full-prestress / no-dynamic-ramp behaviour.
+  // Only active when prestressSteps > 0.
+  Real   prestressFraction  = 0.8;
+  size_t prestressRampSteps = 60;
+
   // Projected-VMS convective stabilization scale (lagged Oseen, ported from
   // the working CoupledLV0DCoronary3D fluid).  0 disables the VMS terms and
   // recovers the plain Temam-stabilized fluid; 1 is the nominal scaling.
@@ -254,21 +296,80 @@ struct Config {
   // tau_C = gradDivScale * rho * tau_2,  tau_2 = (h/k^2)^2 / (c1 tau_1).
   Real gradDivScale = 1.0;
 
+  // ALE mesh-motion (harmonic extension) stiffening.  The lift is
+  //   int  w(x) grad d : grad v ,   w(x) = (aleRefSize / h_K)^aleStiffPower ,
+  // i.e. Jacobian/element-size stiffening (Stein-Tezduyar-Benney): SMALL
+  // elements (typically the boundary-layer band next to the moving wall) get a
+  // LARGER weight and therefore move more RIGIDLY, while the distortion is
+  // pushed out into the large far-field elements.  This protects the thin
+  // near-wall layer from tangling/oscillating as the wall moves.  NOTE: with
+  // pure Dirichlet data a CONSTANT weight changes nothing (the harmonic lift is
+  // scale-invariant) -- only the SPATIAL VARIATION matters, which is why a
+  // power of the local size is used.  aleStiffPower = 0 recovers the plain
+  // harmonic extension.  "A bit" of stiffening ~ 0.5.  aleRefSize is only a
+  // conditioning normalization (a representative element size, mesh units); it
+  // does NOT change the computed mesh motion.  Tunable via
+  // -coronary_ale_stiff_power / -coronary_ale_ref_size.
+  Real aleStiffPower = 0.5;
+  Real aleRefSize    = 1.0e-3;
+
+  // Kinematic interface velocity for the fluid no-slip / Robin data.  By the
+  // geometric conservation law the ALE mesh boundary moves at the BDF1 rate
+  //   w|FSI = (d^{n+1} - d^n)/dt = meshVelocity ,
+  // so the FLUID at the wall must move with exactly that.  The STRUCTURAL
+  // Newmark velocity  v = vPred + (gamma/(beta dt))(d - dPred)  is a DIFFERENT
+  // discrete derivative: from rest it equals (gamma/beta) ~ 2 times the BDF1
+  // rate.  Feeding the Newmark velocity therefore drives the fluid ~2x faster
+  // than the mesh actually moves -> the reported fluid-mesh and solid
+  // velocities "don't match", and the excess is injected as spurious fluid
+  // velocity.  true (recommended): impose u_f = meshVelocity at the wall
+  // (mesh-consistent, same fluid mesh, no cross-interpolation).  false: the
+  // old cross-mesh Newmark sample.
+  bool meshConsistentInterfaceVelocity = true;
+
+  // The static prestress equilibrium does NOT include the 0D-heart band motion,
+  // so if s.y != 0 at the handoff the band would be yanked to s.y in a SINGLE
+  // step -- which Newmark turns into a  ~ (gamma/(beta dt)) * s.y  velocity
+  // SPIKE (the "big solid velocity").  With this on, the displacement present
+  // at the first dynamic step is taken as the band's reference (offset) and
+  // only the 0D-motion INCREMENTS are imposed thereafter, so the band eases out
+  // of the prestressed configuration smoothly.  (No effect if s.y(handoff)~0.)
+  bool subtractHeartHandoffOffset = true;
+
   Real solidDensity = 1060.0;
   Real solidYoungModulus = 2.0e6;
   Real solidPoissonRatio = 0.4;
+
+  // Solid viscous (Kelvin-Voigt strain-rate) damping, INDEPENDENT of Newmark:
+  // adds the term  int  eta_s  grad(d_dot) : grad(w)  to the momentum balance,
+  // i.e. a stress proportional to the STRAIN RATE (sigma_visc ~ eta_s grad d_dot).
+  // It is dissipative (power = int eta_s |grad d_dot|^2 >= 0) and damps the
+  // HIGH-frequency structural ringing (the loose-coupling oscillation) WITHOUT
+  // changing gamma/beta -- it is a physical material contribution, assembled
+  // with the same residual/Jacobian split as the mass term (uses the Newmark
+  // d_dot, so it stays fully implicit and unconditionally stable).  Units Pa.s.
+  // 0 disables it (no contribution).  A "small" value ~ beta_K * E with
+  // beta_K ~ 1e-3..1e-2 s, i.e. eta_s ~ 1e3..1e4 here, is a good start; raise
+  // until the ringing is gone, back off if the wall feels over-damped/sluggish.
+  // Tunable via -coronary_solid_viscosity.
+  Real solidViscosity = 0.0;
   // Dissipative Newmark (gamma > 1/2, beta = (gamma + 1/2)^2 / 4):
   // unconditionally stable and damps the high-frequency content of the
   // startup transient (prestress handoff mismatch absorbed in the first
   // steps) so the acceleration spike cannot blow up the predictor.
-  // Classic non-dissipative trapezoidal pair: beta = 0.25, gamma = 0.5.
-  // Mildly dissipative Newmark (gamma = 0.6, beta = (gamma + 1/2)^2 / 4).
-  // With the level/remainder load split the handoff residual is zero by
-  // construction, so only a LIGHT touch of dissipation is kept as a safety
-  // margin for the loose coupling; (0.25, 0.5) is worth trying once a clean
-  // start is confirmed, or with >= 2 coupling iterations.
-  Real newmarkBeta = 0.25;
-  Real newmarkGamma = 0.5;
+  // Classic non-dissipative trapezoidal pair: beta = 0.25, gamma = 0.5 -- but
+  // that conserves energy EXACTLY (no numerical damping), so any perturbation
+  // injected by the loose (lagged-traction) coupling RINGS forever and the
+  // structure oscillates.  Default is therefore the mildly DISSIPATIVE Newmark
+  //   gamma = 0.6 > 1/2  (adds high-frequency numerical damping),
+  //   beta  = (gamma + 1/2)^2 / 4 = 0.3025  (unconditionally stable),
+  // which damps the spurious structural ringing while barely touching the
+  // resolved low-frequency motion.  Increase gamma toward 0.8-1.0 for MORE
+  // damping if it still oscillates; drop back to (0.25, 0.5) only with a clean
+  // handoff and >= 2 coupling iterations.  Tunable via -coronary_newmark_gamma
+  // / -coronary_newmark_beta.
+  Real newmarkBeta = 0.3025;
+  Real newmarkGamma = 0.6;
 
   size_t couplingIterations = 1;   // loose Robin-Robin (no Aitken)
   Real couplingRelaxation = 0.5;   // (unused: Aitken removed)
@@ -282,6 +383,14 @@ struct Config {
   // NOT help -- a stiffer Robin can destabilize the loose scheme).  Tune via
   // -coronary_robin_gamma / -coronary_robin_alpha instead.
   Real robinGamma = 1.0;
+
+  // 0D heart-motion penalty (as in CoronarySolid): the 0D LV model's radial
+  // displacement s.y is imposed weakly as a NORMAL displacement on the basal /
+  // myocardial-attachment surfaces (attributes 110..120) via
+  //   k ( d.n - disp_0D )( w.n )  on Gamma_heart,
+  // so those surfaces follow the beating heart.  k = heartDisplacementPenalty;
+  // 0 disables it.  Tune with -coronary_heart_disp_penalty.
+  Real heartDisplacementPenalty = 1.0e6;
 };
 
 static Real periodic_activation(Real t) {
@@ -812,6 +921,26 @@ static void readOptions(Config &cfg) {
   if (rampStepsSet)
     cfg.rampSteps = static_cast<size_t>(std::max<PetscInt>(0, rampSteps));
 
+  // Hybrid prestress: STATIC prestress fraction of par, then a small dynamic
+  // ramp of the remaining over prestressRampSteps.
+  PetscReal prestressFraction = cfg.prestressFraction;
+  PetscBool prestressFractionSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+                      "-coronary_prestress_fraction", &prestressFraction,
+                      &prestressFractionSet);
+  if (prestressFractionSet)
+    cfg.prestressFraction =
+        std::min<Real>(1.0, std::max<Real>(0.0, prestressFraction));
+
+  PetscInt prestressRampSteps = static_cast<PetscInt>(cfg.prestressRampSteps);
+  PetscBool prestressRampStepsSet = PETSC_FALSE;
+  PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR,
+                     "-coronary_prestress_ramp_steps", &prestressRampSteps,
+                     &prestressRampStepsSet);
+  if (prestressRampStepsSet)
+    cfg.prestressRampSteps =
+        static_cast<size_t>(std::max<PetscInt>(0, prestressRampSteps));
+
   PetscReal vmsScale = cfg.vmsScale;
   PetscBool vmsScaleSet = PETSC_FALSE;
   PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_vms_scale",
@@ -819,12 +948,95 @@ static void readOptions(Config &cfg) {
   if (vmsScaleSet)
     cfg.vmsScale = std::max<Real>(0.0, vmsScale);
 
+  // Inlet normal impedance Z in  +Z (u.n)(v.n)  on the inlet.  This makes the
+  // inlet a Robin BC: p_inlet ~ pin - Z|u.n|, so a large Z artificially LOWERS
+  // the inlet pressure below the imposed pin.  Lower it (-> 0) to recover a
+  // pure pressure inlet p_inlet = pin = par.
+  PetscReal inletImpedance = cfg.inletImpedance;
+  PetscBool inletImpedanceSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_inlet_impedance",
+                      &inletImpedance, &inletImpedanceSet);
+  if (inletImpedanceSet)
+    cfg.inletImpedance = std::max<Real>(0.0, inletImpedance);
+
+  PetscReal heartDisplacementPenalty = cfg.heartDisplacementPenalty;
+  PetscBool heartDisplacementPenaltySet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+                      "-coronary_heart_disp_penalty",
+                      &heartDisplacementPenalty, &heartDisplacementPenaltySet);
+  if (heartDisplacementPenaltySet)
+    cfg.heartDisplacementPenalty =
+        std::max<Real>(0.0, heartDisplacementPenalty);
+
+  // Mesh-consistent (BDF1) interface velocity for the fluid no-slip / Robin.
+  PetscBool meshConsistentVel =
+      cfg.meshConsistentInterfaceVelocity ? PETSC_TRUE : PETSC_FALSE;
+  PetscBool meshConsistentVelSet = PETSC_FALSE;
+  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+                      "-coronary_mesh_consistent_interface_vel",
+                      &meshConsistentVel, &meshConsistentVelSet);
+  if (meshConsistentVelSet)
+    cfg.meshConsistentInterfaceVelocity = (meshConsistentVel == PETSC_TRUE);
+
+  // Subtract the 0D-heart displacement present at the dynamic handoff.
+  PetscBool subHeartOffset =
+      cfg.subtractHeartHandoffOffset ? PETSC_TRUE : PETSC_FALSE;
+  PetscBool subHeartOffsetSet = PETSC_FALSE;
+  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+                      "-coronary_subtract_heart_offset", &subHeartOffset,
+                      &subHeartOffsetSet);
+  if (subHeartOffsetSet)
+    cfg.subtractHeartHandoffOffset = (subHeartOffset == PETSC_TRUE);
+
+  // Newmark gamma (>= 0.5; > 0.5 adds numerical damping to kill structural
+  // ringing).  beta is auto-set to the unconditionally-stable (gamma+1/2)^2/4
+  // unless -coronary_newmark_beta is given explicitly.
+  PetscReal newmarkGamma = cfg.newmarkGamma;
+  PetscBool newmarkGammaSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_newmark_gamma",
+                      &newmarkGamma, &newmarkGammaSet);
+  if (newmarkGammaSet) {
+    cfg.newmarkGamma = std::max<Real>(0.5, newmarkGamma);
+    const Real g = cfg.newmarkGamma + 0.5;
+    cfg.newmarkBeta = 0.25 * g * g; // unconditional stability default
+  }
+
+  PetscReal newmarkBeta = cfg.newmarkBeta;
+  PetscBool newmarkBetaSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_newmark_beta",
+                      &newmarkBeta, &newmarkBetaSet);
+  if (newmarkBetaSet)
+    cfg.newmarkBeta = std::max<Real>(1.0e-6, newmarkBeta);
+
+  // Solid Kelvin-Voigt viscous (strain-rate) damping, Pa.s.
+  PetscReal solidViscosity = cfg.solidViscosity;
+  PetscBool solidViscositySet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_solid_viscosity",
+                      &solidViscosity, &solidViscositySet);
+  if (solidViscositySet)
+    cfg.solidViscosity = std::max<Real>(0.0, solidViscosity);
+
   PetscReal gradDivScale = cfg.gradDivScale;
   PetscBool gradDivScaleSet = PETSC_FALSE;
   PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_graddiv_scale",
                       &gradDivScale, &gradDivScaleSet);
   if (gradDivScaleSet)
     cfg.gradDivScale = std::max<Real>(0.0, gradDivScale);
+
+  // ALE mesh-motion stiffening (Jacobian/element-size weighting).
+  PetscReal aleStiffPower = cfg.aleStiffPower;
+  PetscBool aleStiffPowerSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_ale_stiff_power",
+                      &aleStiffPower, &aleStiffPowerSet);
+  if (aleStiffPowerSet)
+    cfg.aleStiffPower = std::max<Real>(0.0, aleStiffPower);
+
+  PetscReal aleRefSize = cfg.aleRefSize;
+  PetscBool aleRefSizeSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_ale_ref_size",
+                      &aleRefSize, &aleRefSizeSet);
+  if (aleRefSizeSet)
+    cfg.aleRefSize = std::max<Real>(1.0e-30, aleRefSize);
 
   PetscReal outletResistanceScale = cfg.outletResistanceScale;
   PetscBool outletResistanceScaleSet = PETSC_FALSE;
@@ -841,6 +1053,34 @@ static void readOptions(Config &cfg) {
                       &pressureDropScaleSet);
   if (pressureDropScaleSet)
     cfg.pressureDropScale = std::max<Real>(0.0, pressureDropScale);
+
+  PetscReal epicardialDrop = cfg.epicardialDrop;
+  PetscBool epicardialDropSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_epicardial_drop",
+                      &epicardialDrop, &epicardialDropSet);
+  if (epicardialDropSet)
+    cfg.epicardialDrop = std::max<Real>(0.0, epicardialDrop);
+
+  PetscBool autoCalib = cfg.autoCalibrateOutlets ? PETSC_TRUE : PETSC_FALSE;
+  PetscBool autoCalibSet = PETSC_FALSE;
+  PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_auto_calibrate",
+                      &autoCalib, &autoCalibSet);
+  if (autoCalibSet)
+    cfg.autoCalibrateOutlets = (autoCalib == PETSC_TRUE);
+
+  PetscReal lcaTargetFlow = cfg.lcaTargetFlow;
+  PetscBool lcaTargetFlowSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_lca_flow",
+                      &lcaTargetFlow, &lcaTargetFlowSet);
+  if (lcaTargetFlowSet)
+    cfg.lcaTargetFlow = std::max<Real>(1e-12, lcaTargetFlow);
+
+  PetscReal rcrTau = cfg.rcrTau;
+  PetscBool rcrTauSet = PETSC_FALSE;
+  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_rcr_tau", &rcrTau,
+                      &rcrTauSet);
+  if (rcrTauSet)
+    cfg.rcrTau = std::max<Real>(1e-6, rcrTau);
 
   PetscReal robinAlpha = cfg.robinAlpha;
   PetscBool robinAlphaSet = PETSC_FALSE;
@@ -1282,6 +1522,53 @@ int main(int argc, char **argv) {
     for (const Attribute outlet : BoundaryFluid::Outlets)
       wk.emplace(outlet, RCR{});
 
+    // ---- Automatic Murray-law outlet calibration ------------------------
+    // Set each outlet's RCR from its ACTUAL area: Q_i ~ r_i^3 (Murray), the
+    // tree flow sums to lcaTargetFlow, R_p:R_d = proximalResistanceFraction,
+    // and C_i = rcrTau / R_d,i (uniform RCR time constant).  This makes the
+    // flow split follow the real branch sizes (so flow stops over-favouring
+    // the small branches) independently of the geometricParam radii.
+    if (cfg.autoCalibrateOutlets) {
+      const Real mu0 = cfg.viscosity.mu0;
+      const Real pim = 0.7 * model.getState().pv; // alpha * pv (distal level)
+      const Real par0 = model.getState().par;
+      const Real dP = std::max<Real>(par0 - pim, 1.0);
+      const Real PI = std::numbers::pi_v<Real>;
+
+      PETSc::Variational::TestFunction qCal(ph);
+      LinearForm<PressureFES, ::Vec> calForm(qCal);
+
+      std::map<Attribute, Real> rEq;
+      Real sumR3 = 0.0;
+      for (const Attribute tag : BoundaryFluid::Outlets) {
+        calForm = BoundaryIntegral(one, qCal).over(tag);
+        calForm.assemble();
+        const Real area = std::max<Real>(calForm(one), 1e-12);
+        rEq[tag] = std::sqrt(area / PI);
+        sumR3 += rEq[tag] * rEq[tag] * rEq[tag];
+      }
+
+      const Real fp = std::clamp(cfg.proximalResistanceFraction, 0.0, 0.5);
+      for (const Attribute tag : BoundaryFluid::Outlets) {
+        const Real w = (rEq[tag] * rEq[tag] * rEq[tag]) / std::max(sumR3, 1e-30);
+        const Real Qi = std::max<Real>(cfg.lcaTargetFlow * w, 1e-12);
+        const Real Ri = dP / Qi;             // total branch resistance
+        const Real Rd = (1.0 - fp) * Ri;     // distal (peripheral)
+        const Real Rp = fp * Ri;             // proximal (characteristic)
+        // Back out the surrogate radii (keep Lp, Ld): r = (8 mu0 L/(pi R))^1/4.
+        auto &g = cfg.outletFlowLaw.geometricParam.at(tag);
+        g.Rd = std::pow(8.0 * mu0 * g.Ld / (PI * Rd), 0.25);
+        g.Rp = std::pow(8.0 * mu0 * g.Lp / (PI * Rp), 0.25);
+        wk[tag].C = cfg.rcrTau / Rd;         // uniform tau = Rd*C
+        if (isRoot)
+          Alert::Info() << "  [calib] outlet " << tag
+                        << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
+                        << "  Q=" << (Qi * 6.0e7) << " mL/min"
+                        << "  Rd=" << Rd << "  C=" << wk[tag].C
+                        << "  tau=" << (Rd * wk[tag].C) << " s" << Alert::Raise;
+      }
+    }
+
     Real pinValue = model.getState().par;
     std::map<Attribute, Real> outletPressureValue;
     for (const Attribute outlet : BoundaryFluid::Outlets)
@@ -1463,27 +1750,38 @@ int main(int argc, char **argv) {
     // ----------------------------------------------------------------------
     // Fluid Oseen / BDF1-ALE problem
     // ----------------------------------------------------------------------
-    // Solid interface velocity u_s evaluated at a FLUID interface point: this
-    // is the fluid Robin data alpha*u_s.  Solid is solved first in the
-    // staggered order, so we map the fluid point to its matching solid face and
-    // sample the just-computed solid interface velocity 'solidVelocity' there
-    // (cross-mesh).
+    // Interface velocity entering the fluid Robin data alpha*u_s.  Two choices:
+    //   meshConsistentInterfaceVelocity == true  (recommended):
+    //     u_s = meshVelocity(xf) -- the ALE mesh velocity at the wall, i.e. the
+    //     BDF1 rate (d^{n+1}-d^n)/dt that the fluid domain boundary ACTUALLY
+    //     moves with (GCL).  Same fluid mesh, NO cross-interpolation, and it
+    //     guarantees the fluid no-slip velocity equals the mesh velocity so the
+    //     two "match".  meshVelocity is refreshed (ALE solve) before this fluid
+    //     solve in every coupling iterate.
+    //   false (legacy):
+    //     u_s = solidVelocity sampled cross-mesh -- the structural NEWMARK
+    //     velocity, which differs from the mesh (BDF1) velocity by ~gamma/beta.
     auto interfaceSolidVelocity = VectorFunction(dim, [&](const Point &xf) {
-      const Point xs = forwardFluidPointToSolid(xf, meshSolid, interfaceMap);
-
       Math::SpatialVector<Real> value(dim);
       value.setZero();
 
-      const auto us = solidVelocity(xs);
-      for (Index i = 0; i < static_cast<Index>(dim); ++i)
-        value(i) = us(i);
+      if (cfg.meshConsistentInterfaceVelocity) {
+        const auto w = meshVelocity(xf);
+        for (Index i = 0; i < static_cast<Index>(dim); ++i)
+          value(i) = w(i);
+      } else {
+        const Point xs = forwardFluidPointToSolid(xf, meshSolid, interfaceMap);
+        const auto us = solidVelocity(xs);
+        for (Index i = 0; i < static_cast<Index>(dim); ++i)
+          value(i) = us(i);
+      }
 
       if (!isFiniteVec(value)) {
         static bool reported = false;
         if (!reported) {
           reported = true;
           Alert::Warning()
-              << "interfaceSolidVelocity: non-finite cross-mesh sample; "
+              << "interfaceSolidVelocity: non-finite interface velocity sample; "
               << "using zero there (warned once)." << Alert::Raise;
         }
         value.setZero();
@@ -1670,19 +1968,38 @@ int main(int argc, char **argv) {
         Integral(vmsPiTilde, vmsTauCTest) -
         Integral(vmsSqrtTauCOld * Div(uOld), vmsTauCTest);
 
-    // Per-outlet implicit local resistance coefficient
-    //   Z_out = outletResistanceScale * 8 mu0 L_p / R_p^2   [Pa s/m],
-    // the local proximal impedance (R_p, L_p = proximal surrogate radius and
-    // length per outlet; mu0 = low-shear viscosity -> the LARGEST, hence the
-    // most conservatively-damping, Newtonian estimate).  Used in delta form so
-    // the non-Newtonian RCR pressure is untouched at convergence.
+    // Per-outlet implicit local resistance Z = scale * R_lag * A, where
+    //   R_lag = LAGGED RCR proximal resistance slope (dp_out/dQ at the previous
+    //           flux Q^n, from the RCR update below) -- so the implicit damping
+    //           AUTOMATICALLY matches the actual (non-Newtonian) outlet
+    //           resistance; no hand-tuned Z.
+    //   A     = real outlet area.
+    // It is re-evaluated each step (see the RCR update) and read by the flow
+    // through the zFn* RealFunctions, so the lagged value is picked up on every
+    // re-assembly.  outletResistanceScale (default 1) is an optional safety
+    // multiplier.  Initialised with the Poiseuille slope 8 mu0 Lp/(pi r^4).
+    std::array<Real, 6> outletArea{};
     std::array<Real, 6> outletZ{};
-    for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i) {
-      const auto &g =
-          cfg.outletFlowLaw.geometricParam.at(BoundaryFluid::Outlets[i]);
-      outletZ[i] = cfg.outletResistanceScale * 8.0 * cfg.viscosity.mu0 * g.Lp /
-                   (g.Rp * g.Rp);
+    {
+      PETSc::Variational::TestFunction qZ(ph);
+      LinearForm<PressureFES, ::Vec> zArea(qZ);
+      for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i) {
+        zArea = BoundaryIntegral(one, qZ).over(BoundaryFluid::Outlets[i]);
+        zArea.assemble();
+        outletArea[i] = std::max<Real>(zArea(one), 1e-12);
+        const auto &g =
+            cfg.outletFlowLaw.geometricParam.at(BoundaryFluid::Outlets[i]);
+        const Real Rpois = 8.0 * cfg.viscosity.mu0 * g.Lp /
+                           (std::numbers::pi_v<Real> * std::pow(g.Rp, 4.0));
+        outletZ[i] = cfg.outletResistanceScale * Rpois * outletArea[i];
+      }
     }
+    auto zFn0 = RealFunction([&](const Point &) { return outletZ[0]; });
+    auto zFn1 = RealFunction([&](const Point &) { return outletZ[1]; });
+    auto zFn2 = RealFunction([&](const Point &) { return outletZ[2]; });
+    auto zFn3 = RealFunction([&](const Point &) { return outletZ[3]; });
+    auto zFn4 = RealFunction([&](const Point &) { return outletZ[4]; });
+    auto zFn5 = RealFunction([&](const Point &) { return outletZ[5]; });
 
     // BDF1 mass split: (rho/dt)[(u,v)_{n+1} - (u^n,v)_n]; the implicit part
     // lives in 'flow', the explicit u^n part is 'massOld', assembled on the
@@ -1732,18 +2049,18 @@ int main(int argc, char **argv) {
         // The implicit (u) part damps a step-to-step flux change; the lagged
         // (u^n) part cancels it at steady state (u = u^n), so the converged
         // RCR outlet pressure is unchanged -- only the oscillation is killed.
-        + outletZ[0] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[0])
-        - outletZ[0] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[0])
-        + outletZ[1] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[1])
-        - outletZ[1] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[1])
-        + outletZ[2] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[2])
-        - outletZ[2] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[2])
-        + outletZ[3] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[3])
-        - outletZ[3] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[3])
-        + outletZ[4] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[4])
-        - outletZ[4] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[4])
-        + outletZ[5] * BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[5])
-        - outletZ[5] * BoundaryIntegral(Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[5])
+        + BoundaryIntegral(zFn0 * Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[0])
+        - BoundaryIntegral(zFn0 * Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[0])
+        + BoundaryIntegral(zFn1 * Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[1])
+        - BoundaryIntegral(zFn1 * Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[1])
+        + BoundaryIntegral(zFn2 * Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[2])
+        - BoundaryIntegral(zFn2 * Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[2])
+        + BoundaryIntegral(zFn3 * Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[3])
+        - BoundaryIntegral(zFn3 * Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[3])
+        + BoundaryIntegral(zFn4 * Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[4])
+        - BoundaryIntegral(zFn4 * Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[4])
+        + BoundaryIntegral(zFn5 * Dot(Dot(u, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[5])
+        - BoundaryIntegral(zFn5 * Dot(Dot(uOld, normalFluid) * normalFluid, v)).over(BoundaryFluid::Outlets[5])
         + cfg.inletImpedance *
               BoundaryIntegral(Dot(Dot(u, normalFluid) * normalFluid, v))
                   .over(BoundaryFluid::Inlet)
@@ -1807,8 +2124,21 @@ int main(int argc, char **argv) {
       PETSc::Variational::TrialFunction dMove(uh);
       PETSc::Variational::TestFunction vMove(uh);
 
+      // Jacobian/element-size stiffening weight w(x) = (aleRefSize/h_K)^power:
+      // small near-wall elements get a larger weight -> move more rigidly, so
+      // the distortion is pushed into the large far-field elements (power == 0
+      // recovers the plain harmonic extension).
+      RealFunction aleStiffFn = [&](const Point &pp) -> Real {
+        if (cfg.aleStiffPower <= 0.0)
+          return 1.0;
+        const Real hK = std::pow(pp.getPolytope().getMeasure(),
+                                 1.0 / pp.getPolytope().getDimension());
+        return std::pow(cfg.aleRefSize / std::max(hK, 1.0e-30),
+                        cfg.aleStiffPower);
+      };
+
       Problem ale(dMove, vMove);
-      ale = Integral(Jacobian(dMove), Jacobian(vMove)) +
+      ale = Integral(aleStiffFn * Jacobian(dMove), Jacobian(vMove)) +
             DirichletBC(dMove, interfaceSolidDisplacement).on(BoundaryFluid::FSI) +
             DirichletBC(dMove, zero)
                 .on(BoundaryFluid::Inlet, BoundaryFluid::Outlets[0],
@@ -1860,13 +2190,45 @@ int main(int argc, char **argv) {
     // Solid Newmark / NeoHookean problem (nonlinear: SNES on the increment
     // etaState, with dState = dOld + etaState).
     // ----------------------------------------------------------------------
+    // 0D heart-motion penalty (CoronarySolid style): drive the NORMAL
+    // displacement on the basal/myocardial-attachment surfaces (110..120)
+    // toward the 0D LV radial displacement disp0D = s.y, so those faces follow
+    // the beating heart.  disp0D is refreshed from the 0D model each step.
+    const auto normalSolid = BoundaryNormal(meshSolid);
+    Real disp0D = 0.0;
+    Real disp0DOffset = 0.0;  // 0D displacement at the dynamic handoff (step 1)
+    auto disp0DFn = RealFunction([&](const Point &) { return disp0D; });
+    const Real heartK = cfg.heartDisplacementPenalty;
+
+    // Kelvin-Voigt viscous damping force  int eta_s grad(d_dot):grad(w), with
+    // the Newmark velocity  d_dot = vPred + solidVelocityCoeff (dState - dPred).
+    // Same residual/Jacobian split as the mass term: the trial-d part is the
+    // Jacobian, the GridFunction (dState, dPred, vPred) parts are the residual.
+    // eta_s == 0 contributes nothing.
+    const Real solidViscImpl = cfg.solidViscosity * solidVelocityCoeff;
+
     Problem solid(d, w);
     solid =
         solidMass * Integral(d, w) + solidTangent +
         solidMass * Integral(dState, w) - solidMass * Integral(dPred, w)
         + solidInternal
+        // viscous (strain-rate) damping, Newmark-consistent:
+        + solidViscImpl * Integral(Jacobian(d), Jacobian(w))
+        + solidViscImpl * Integral(Jacobian(dState), Jacobian(w))
+        - solidViscImpl * Integral(Jacobian(dPred), Jacobian(w))
+        + cfg.solidViscosity * Integral(Jacobian(vPred), Jacobian(w))
         + DirichletBC(d, zero).on(BoundarySolid::Inlet, BoundarySolid::Outlets[0], BoundarySolid::Outlets[1], BoundarySolid::Outlets[2], BoundarySolid::Outlets[3], BoundarySolid::Outlets[4], BoundarySolid::Outlets[5])
         + DirichletBC(d, zero).on(BoundarySolid::FSIRing)
+        // 0D heart motion: weakly impose d.n = disp_0D on attributes 110..120
+        // (k (d.n)(w.n) [tangent] + k (dState.n)(w.n) - k disp_0D (w.n)
+        //  [residual] = k (dState.n - disp_0D)(w.n)).
+        + heartK * BoundaryIntegral(Dot(d, normalSolid), Dot(w, normalSolid))
+                       .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1], BoundarySolid::Contact[2], BoundarySolid::Contact[3], BoundarySolid::Contact[4], BoundarySolid::Contact[5], BoundarySolid::Contact[6], BoundarySolid::Contact[7], BoundarySolid::Contact[8], BoundarySolid::Contact[9], BoundarySolid::Contact[10])
+        + heartK * BoundaryIntegral(Dot(dState, normalSolid), Dot(w, normalSolid))
+                       .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1], BoundarySolid::Contact[2], BoundarySolid::Contact[3], BoundarySolid::Contact[4], BoundarySolid::Contact[5], BoundarySolid::Contact[6], BoundarySolid::Contact[7], BoundarySolid::Contact[8], BoundarySolid::Contact[9], BoundarySolid::Contact[10])
+        - heartK * BoundaryIntegral(disp0DFn, Dot(w, normalSolid))
+                       .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1], BoundarySolid::Contact[2], BoundarySolid::Contact[3], BoundarySolid::Contact[4], BoundarySolid::Contact[5], BoundarySolid::Contact[6], BoundarySolid::Contact[7], BoundarySolid::Contact[8], BoundarySolid::Contact[9], BoundarySolid::Contact[10])
+
         // Robin-Robin transmission (solid side), per current area (J_a):
         //   sigma_s n_s + alpha d_dot = alpha u_f^{lag} + t_f^{lag},
         //   d_dot = vPred + solidVelocityCoeff (dState - dPred)  (Newmark).
@@ -1898,13 +2260,16 @@ int main(int argc, char **argv) {
     //   -int t.w = + int p (n_s . w).
     // ----------------------------------------------------------------------
     if (cfg.prestressSteps > 0) {
-      // Prestress to the FULL initial arterial pressure so the static wall
-      // equilibrium is (approximately) balanced by the transferred fluid
-      // traction at the dynamic start (pCur = par), giving a small first
-      // residual.  (The previous 0.9 factor left a 0.1*par deficit that kicked
-      // the wall on step 1 -> ALE mesh-velocity spike -> the "awful" fluid
-      // velocity field reported at the static->dynamic handoff.)
-      const Real p0 = model.getState().par;
+      // Prestress STATICALLY only to prestressFraction*par (e.g. 0.8*par): the
+      // bulk of the inflation is done in equilibrium, and the dynamic loop then
+      // ramps the remaining (1 - prestressFraction) of the loads gently over
+      // prestressRampSteps (see loadRamp below).  The fluid is seeded at this
+      // SAME partial level (pOld = pCur = prestressFraction*par) so the
+      // transferred wall traction is in (approximate) balance with the partial
+      // prestressed wall equilibrium at the handoff -> small first residual,
+      // and the last 20% is eased in instead of slammed on step 1.  Set
+      // prestressFraction = 1.0 for the previous full-prestress behaviour.
+      const Real p0 = cfg.prestressFraction * model.getState().par;
       Real prestressPressure = 0.0;
 
       PETSc::Variational::TrialFunction dPre(dh);
@@ -1968,11 +2333,13 @@ int main(int argc, char **argv) {
       moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
                                      aleDisp);
 
-      // Pressurized fluid start: seed the fluid pressure at par so the
-      // transferred wall traction starts in (approximate) balance with the
-      // prestressed wall equilibrium (no follower level any more).
-      pOld = model.getState().par;
-      pCur = model.getState().par;
+      // Pressurized fluid start: seed the fluid pressure at the SAME partial
+      // prestress level (prestressFraction*par) so the transferred wall
+      // traction starts in (approximate) balance with the partial prestressed
+      // wall equilibrium (no follower level any more).  The dynamic loadRamp
+      // takes it from here up to the full par.
+      pOld = p0;
+      pCur = p0;
       tractionTransfer.project(Region::Faces, tractionFSI, BoundaryFluid::FSI);
     }
 
@@ -2006,6 +2373,18 @@ int main(int argc, char **argv) {
 
       const auto &s = model.getState();
 
+      // 0D heart radial displacement imposed (weakly) on attributes 110..120.
+      // Optionally referenced to the handoff value so the band eases out of the
+      // prestressed configuration instead of lurching to s.y in one step (which
+      // Newmark amplifies into a velocity spike); see subtractHeartHandoffOffset.
+      if (cfg.subtractHeartHandoffOffset) {
+        if (step == 1)
+          disp0DOffset = s.y;
+        disp0D = s.y - disp0DOffset;
+      } else {
+        disp0D = s.y;
+      }
+
       // Startup load ramp ("rampage").  With the prestress the wall is already
       // in pressurized equilibrium, so the loads are imposed at full strength
       // from step 1 (loadRamp == 1).  WITHOUT the prestress (prestressSteps ==
@@ -2025,7 +2404,22 @@ int main(int argc, char **argv) {
         const Real sRamp =
             std::min(Real(1.0),
                      static_cast<Real>(step) / static_cast<Real>(cfg.rampSteps));
-        loadRamp = sRamp * sRamp * (3.0 - 2.0 * sRamp); // smoothstep
+        loadRamp = sRamp * sRamp * (3.0 - 2.0 * sRamp); // smoothstep 0 -> 1
+      } else if (cfg.prestressSteps > 0 && cfg.prestressFraction < 1.0 &&
+                 cfg.prestressRampSteps > 0) {
+        // Hybrid handoff: the wall was prestressed STATICALLY only to
+        // prestressFraction*par and the fluid seeded at that same level, so on
+        // step 1 the loads start at prestressFraction (matched, ~zero residual)
+        // and smoothstep up to the full par over prestressRampSteps, easing the
+        // remaining (1 - prestressFraction) of the inflation in dynamically.
+        // step is 1-based; offset by one so step 1 lands EXACTLY on
+        // prestressFraction (matched seed -> ~zero handoff residual).
+        const Real sRamp = std::min(
+            Real(1.0), static_cast<Real>(step - 1) /
+                           static_cast<Real>(cfg.prestressRampSteps));
+        const Real ss = sRamp * sRamp * (3.0 - 2.0 * sRamp); // smoothstep 0 -> 1
+        loadRamp = cfg.prestressFraction +
+                   (1.0 - cfg.prestressFraction) * ss; // frac -> 1
       }
 
       // Physiological pressures (ramped on a no-prestress start).
@@ -2038,7 +2432,8 @@ int main(int argc, char **argv) {
         // outlet oscillates.  The same loadRamp scales the outlet level so the
         // inlet-to-outlet pressure gradient inflates consistently.
         outletPressureValue[tag] =
-            loadRamp * (s.par - cfg.pressureDropScale * (s.par - bc.pout));
+            loadRamp * (s.par - cfg.pressureDropScale * (s.par - bc.pout) -
+                        cfg.epicardialDrop);
       }
       // No direct wall load: the wall is driven purely by the fluid traction,
       // which itself follows the ramped inlet/outlet pressures, so the wall
@@ -2066,6 +2461,17 @@ int main(int argc, char **argv) {
                       << cfg.nsteps
                       << "  (coupling iterations: " << cfg.couplingIterations
                       << ")" << Alert::Raise;
+        // 0D heart-motion diagnostic: the radial displacement s.y from the 0D
+        // LV model that is imposed (weakly, penalty heartK) as the normal
+        // displacement on the basal/contact band (attributes 110..120).  If
+        // this is ~0 the 0D model is not contracting, so NO penalty value will
+        // move the band; if it is non-zero (~mm) but the band does not follow,
+        // the penalty heartK is too weak relative to inertia/stiffness -- raise
+        // -coronary_heart_disp_penalty.
+        Alert::Info() << "  [0D-heart] s.y = " << s.y << " m"
+                      << "   imposed disp0D = " << disp0D << " m"
+                      << "   (radial vel s.v = " << s.v << " m/s,"
+                      << "  penalty k = " << heartK << ")" << Alert::Raise;
       }
 
       std::map<Attribute, Real> qOut;
@@ -2285,6 +2691,22 @@ int main(int argc, char **argv) {
       // RCR / Windkessel update from the converged interface flux.
       for (const Attribute outlet : BoundaryFluid::Outlets)
         updateRCRNonNew(cfg, outlet, model, wk[outlet], qOut[outlet], dt);
+
+      // Lagged implicit-resistance update: Z_i = scale * R_lag * A_i, with the
+      // RCR proximal resistance evaluated at THIS step's flux (secant
+      // dp_out/Q, Poiseuille fallback near zero flux).  Read by the flow's
+      // zFn* on the next assembly -> automatic, non-Newtonian-consistent Z.
+      for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i) {
+        const Attribute tag = BoundaryFluid::Outlets[i];
+        const Real Qi = qOut[tag];
+        const Real dpP = wk[tag].pout - wk[tag].pc; // proximal drop
+        const auto &g = cfg.outletFlowLaw.geometricParam.at(tag);
+        const Real Rpois = 8.0 * cfg.viscosity.mu0 * g.Lp /
+                           (std::numbers::pi_v<Real> * std::pow(g.Rp, 4.0));
+        const Real R =
+            (std::abs(Qi) > 1e-10) ? std::abs(dpP / Qi) : Rpois;
+        outletZ[i] = cfg.outletResistanceScale * R * outletArea[i];
+      }
 
       // Commit the step-(n+1) state.
       uOld.setData(uCur.getData());
