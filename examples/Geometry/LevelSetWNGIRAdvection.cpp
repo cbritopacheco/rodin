@@ -5,9 +5,9 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 //
-// ADVECTED wavy-circle sweep test for the LSR push pipeline.
+// ADVECTED wavy-circle sweep test for the WNGIR pipeline.
 //
-// Same orbit + lobed-circle geometry as `LevelSetLSRWavyCircleSweep`, but
+// Same orbit + lobed-circle geometry as `LevelSetWNGIRSweep`, but
 // the data level set phi is NOT supplied analytically per frame. Instead:
 //
 //   Frame 0:  phi_h is built from the analytic wavy circle. Runtime options
@@ -17,11 +17,8 @@
 //   Frame k > 0:  phi_h is advected by ONE semi-Lagrangian step with a
 //                 prescribed velocity v(x) using `Advection::Lagrangian`.
 //
-// The LSR push solve at every frame consumes phi_h (discrete P1) and
-// Grad(phi_h) (discrete piecewise-constant) -- NO analytic phi enters the
-// Newton tangent or residual. The shape barrier, the alpha-predictor,
-// the line-search, and the H^1 Hilbert initial guess are unchanged from
-// the analytic sweep.
+// The WNGIR solve at every frame consumes phi_h through moved-point
+// evaluation and uses the smoothed gradient field in the skeleton force.
 //
 // Diagnostic only: the analytic level set is still reconstructed each
 // frame to compute a reference fit metric
@@ -30,18 +27,12 @@
 //   ||phi_h(X + u_h(X))||_RMS         on the classified skeleton.
 // The gap between the two reflects accumulated advection error in phi_h.
 //
-// Goal of this example: assess how the LSR fit degrades when phi_h drifts
+// Goal of this example: assess how the WNGIR fit degrades when phi_h drifts
 // from its analytic reference under repeated advection -- i.e. whether
-// the push + psi-reconstruction + alpha-predictor + line-search pipeline is
+// the skeleton-force lift + admissibility line-search pipeline is
 // stable when phi loses its SDF-like property and its zero level set stops
 // matching the ground-truth geometry exactly. Runtime options include
-//   --psi=screened|fmm|projected-phi-h1
 //   --phi-redistance=off|screened-moved|fmm-moved|projected-phi-h1-moved
-//
-// Tangent. The discrete phi has no recoverable Hess; the LSR solve
-// defaults to Gauss-Newton (--tangent=gn). A zero Hess function is
-// passed as a placeholder so the existing `solve` overload still
-// resolves; the Newton tangent path is not exercised here.
 //
 #include <Rodin/Adaptation.h>
 #include <Rodin/Advection/Lagrangian.h>
@@ -53,6 +44,8 @@
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
+
+#include "WNGIR.h"
 
 #include <algorithm>
 #include <array>
@@ -100,7 +93,7 @@ namespace
       moved.setVertexCoordinates(vertex, vec2(x(0) + ux, x(1) + uy));
     }
 
-#ifdef RODIN_LSR_P2_DISPLACEMENT
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
     Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
     Math::SpatialPoint X;
     const std::size_t D = mesh.getDimension();
@@ -135,7 +128,7 @@ namespace
   //
   // phi is smooth away from the centre. Like the plain circle SDF, it is
   // NOT a strict signed distance (the radial perturbation makes the
-  // gradient norm differ from 1) but the LSR pipeline only requires a
+  // gradient norm differ from 1) but the registration pipeline only requires a
   // sufficiently smooth implicit function — phi, grad phi at quadrature
   // points — to operate.
   // -------------------------------------------------------------------------
@@ -272,7 +265,7 @@ namespace
       const auto& vertices = cellPolytope.getVertices();
       if (vertices.size() != 3)
         throw std::runtime_error(
-            "LevelSetLSRWavyCircleSweep expects triangular cells.");
+            "LevelSetWNGIRAdvection expects triangular cells.");
 
       CellMomentInfo info;
       info.index = cellPolytope.getIndex();
@@ -360,43 +353,6 @@ namespace
     return fallback;
   }
 
-  LSRHilbertMetric parseHilbertMetric(
-      int argc, char** argv, const std::string& name)
-  {
-    const std::string value = parseStringOption(argc, argv, name, "harmonic");
-    if (value == "harmonic") return LSRHilbertMetric::Harmonic;
-    if (value == "elasticity") return LSRHilbertMetric::Elasticity;
-    if (value == "shape-hessian") return LSRHilbertMetric::ShapeHessian;
-    throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected harmonic, elasticity, or shape-hessian).");
-  }
-
-  LSRInitialGuessScaling parseInitialGuessScaling(
-      int argc, char** argv, const std::string& name)
-  {
-    const std::string value =
-      parseStringOption(argc, argv, name, "unnormalized");
-    if (value == "unnormalized") return LSRInitialGuessScaling::Unnormalized;
-    if (value == "energy") return LSRInitialGuessScaling::EnergyNormalized;
-    if (value == "band") return LSRInitialGuessScaling::BandNormalized;
-    throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected unnormalized, energy, or band).");
-  }
-
-  LSRTangent parseTangentMode(
-      int argc, char** argv, const std::string& name)
-  {
-    const std::string value = parseStringOption(argc, argv, name, "psd");
-    if (value == "psd") return LSRTangent::PSDProjectedNewton;
-    if (value == "newton") return LSRTangent::Newton;
-    if (value == "gn") return LSRTangent::GaussNewton;
-    throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected psd, newton, or gn).");
-  }
-
   // Prescribed velocity field driving the per-frame semi-Lagrangian
   // advection of phi_h.
   //
@@ -420,22 +376,6 @@ namespace
         + " (expected rotation or none).");
   }
 
-  enum class LevelSetRepresentative { Screened, Fmm, ProjectedPhiH1 };
-
-  LevelSetRepresentative parseLevelSetRepresentative(
-      int argc, char** argv, const std::string& name,
-      const std::string& fallback)
-  {
-    const std::string value = parseStringOption(argc, argv, name, fallback);
-    if (value == "screened") return LevelSetRepresentative::Screened;
-    if (value == "fmm")      return LevelSetRepresentative::Fmm;
-    if (value == "projected-phi-h1" || value == "projection-h1")
-      return LevelSetRepresentative::ProjectedPhiH1;
-    throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected screened, fmm, or projected-phi-h1).");
-  }
-
   enum class PhiInitialRepresentative { Analytic, Screened, Fmm };
 
   PhiInitialRepresentative parsePhiInitialRepresentative(
@@ -455,7 +395,7 @@ namespace
   PhiRedistance parsePhiRedistance(
       int argc, char** argv, const std::string& name)
   {
-    const std::string value = parseStringOption(argc, argv, name, "off");
+    const std::string value = parseStringOption(argc, argv, name, "fmm-moved");
     if (value == "off") return PhiRedistance::Off;
     if (value == "screened-moved") return PhiRedistance::ScreenedMoved;
     if (value == "fmm-moved") return PhiRedistance::FmmMoved;
@@ -464,23 +404,6 @@ namespace
     throw std::runtime_error(
         "Unknown --" + name + "=" + value
         + " (expected off, screened-moved, fmm-moved, or projected-phi-h1-moved).");
-  }
-
-  // Cold    : u0 = 0 every frame.
-  // Warm    : u0 = previous frame's converged u (zero on frame 0).
-  // Hilbert : u0 = Riesz lift of -delta E_LSR(0) in H^1_0.
-  enum class InitialGuessStrategy { Cold, Warm, Hilbert };
-
-  InitialGuessStrategy parseInitialGuessStrategy(
-      int argc, char** argv, const std::string& name)
-  {
-    const std::string value = parseStringOption(argc, argv, name, "hilbert");
-    if (value == "cold") return InitialGuessStrategy::Cold;
-    if (value == "warm") return InitialGuessStrategy::Warm;
-    if (value == "hilbert") return InitialGuessStrategy::Hilbert;
-    throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected cold, warm, or hilbert).");
   }
 
   bool hasFlag(int argc, char** argv, const std::string& name)
@@ -504,11 +427,14 @@ int main(int argc, char** argv)
     parseSizeTOption(argc, argv, "n", 50);          ///< n x n nodes.
   const std::size_t nFrames =
     parseSizeTOption(argc, argv, "frames", 200);    ///< orbit snapshots.
-  constexpr Real        orbitR = 0.10; ///< Radius of the centre's orbit.
+  const Real orbitR =
+    parseRealOption(argc, argv, "orbitR", Real(0.10));
   const Real            amp =
     parseRealOption(argc, argv, "amp", Real(0.05)); ///< radial amplitude.
-  constexpr Real        R0     = 0.20; ///< Wavy-circle nominal radius.
-  constexpr Real        kLobes = 6;    ///< Number of azimuthal lobes.
+  const Real R0 =
+    parseRealOption(argc, argv, "R0", Real(0.20));
+  const Real kLobes =
+    parseRealOption(argc, argv, "lobes", Real(6));
 
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
@@ -516,62 +442,12 @@ int main(int argc, char** argv)
   const Real delta   = 1.75 * h;
   const Real deltaW  = 1.5 * delta;
 
-  const Real   kLineSearchAlphaInit = Real(1);
-  const Real   kLineSearchReduction = Real(0.5);
-  const Real   kLineSearchAlphaMin  = Real(1e-6);
-  // Safety margin above jSafeRatio used as the line-search admissibility
-  // floor. The threshold is dimensionless because it is applied to
-  // j_K^u = sigma_K det(A_K^u) / J_K_scale, never to raw det(A_K^u).
-  // Accept only steps with
-  //   min_K j_K^u > max(jMinRatio, margin * jSafeRatio).
-  // The previous default (j_min = 10^-8) only protected against
-  // catastrophic flips, allowing iterates to enter the floor-barrier
-  // active region (j in (j_min, j_safe)) where the barrier Hessian is
-  // very stiff and subsequent Newton directions become explosively
-  // compressive. Keeping the iterate safely above j_safe avoids this.
-  const Real   kLineSearchSafetyMargin = Real(10);
-  // Relative-distortion cap for the line search (identity-neutral):
-  //   Q_rel(F) = ||F||^2 / (d * det(F)^(2/d)),  F = I + grad u_h.
-  // Default 10 leaves the historical effective behaviour untouched.
-  const Real   kQRelMax =
-    parseRealOption(argc, argv, "qrel-max", Real(10));
-  const std::size_t kLSRQuadratureOrder =
-    parseSizeTOption(argc, argv, "lsr-quad-order", 0);
-  const Real kH1RegularizationWeight =
-    parseRealOption(argc, argv, "h1-reg", Real(0));
-  // BEST-QUALITY profile default: γ_shape = √h (dimensionless;
-  // multiplied by normalizer · h_ref² inside LSR.h).
-  const Real kShapeWeight =
-    parseRealOption(argc, argv, "gamma", std::sqrt(h));
-
-  // ----- Initial guess strategy --------------------------------------------
-  //   Cold    : u₀ = 0
-  //   Warm    : u₀ = previous frame's converged u
-  //   Hilbert : u₀ = Riesz lift of −δE_LSR(0) in the H¹₀ inner product
-  //             (a(u₀, v) = −⟨δE_LSR(0), v⟩  on V₀)
-  // Selected at runtime via --init=cold|warm|hilbert (default: hilbert).
-  const InitialGuessStrategy kInitialGuessStrategy =
-      parseInitialGuessStrategy(argc, argv, "init");
-  const LSRHilbertMetric initialGuessMetric =
-    parseHilbertMetric(argc, argv, "hilbert-metric");
-  const LSRInitialGuessScaling initialGuessScaling =
-    parseInitialGuessScaling(argc, argv, "hilbert-scaling");
-  const Real initialGuessElasticityLambda =
-    parseRealOption(argc, argv, "hilbert-lambda", Real(0));
-  const Real initialGuessElasticityMu =
-    parseRealOption(argc, argv, "hilbert-mu", Real(0.5));
-  const LSRTangent tangentMode =
-    parseTangentMode(argc, argv, "tangent");
-  const LevelSetRepresentative psiRepresentative =
-    // ψ default = FMM for robustness; survives the discrete-φ
-    // dissipation noise per frame without depending on φ-regularity.
-    parseLevelSetRepresentative(argc, argv, "psi", "fmm");
   const PhiInitialRepresentative phiInitialRepresentative =
     parsePhiInitialRepresentative(argc, argv, "phi-init");
 
   // -----  phi_h initial reconstruction (screened-Poisson)  ---------------
   // Source magnitude and screening length identical to
-  // LevelSetLSRReconstruction (psi path): psiEll = ellMult * h,
+  // LevelSetWNGIRReconstruction: phiEll = ellMult * h,
   // M = magMult * psiEll. Calibration rescales |grad phi_h| -> |grad
   // phi_analytic| in the band.
   const Real kPsiEllMult =
@@ -597,7 +473,7 @@ int main(int argc, char** argv)
   constexpr ConvergenceMode kConvergenceMode = ConvergenceMode::Either;
   // Knobs are CLI-overridable so convergence settings can be swept without
   // rebuilding.
-#ifdef RODIN_LSR_P2_DISPLACEMENT
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
   constexpr Real kDefaultFitTolMult = Real(5.0);
 #else
   constexpr Real kDefaultFitTolMult = Real(4.0);
@@ -634,7 +510,7 @@ int main(int argc, char** argv)
   // FE spaces and persistent grid functions used across frames.
   // -------------------------------------------------------------------------
   using ScalarP1 = P1<Real, LocalMesh>;
-#ifdef RODIN_LSR_P2_DISPLACEMENT
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
   using VectorFES = H1<2, Math::SpatialVector<Real>, LocalMesh>;
 #else
   using VectorFES = P1<Math::SpatialVector<Real>, LocalMesh>;
@@ -647,7 +523,7 @@ int main(int argc, char** argv)
   VectorP1Phi gradPhiFes(mesh, /*vdim=*/2);
   GridFunction gradPhiSmoothed(gradPhiFes);
   gradPhiSmoothed.getData().setZero();
-#ifdef RODIN_LSR_P2_DISPLACEMENT
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
   VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 2);
 #else
   VectorFES vectorFes(mesh, 2);
@@ -659,10 +535,9 @@ int main(int argc, char** argv)
   auto cellGeomBg = precomputeCellGeometry(mesh);
   auto& cellCacheBg = cellGeomBg.first;
 
-  GridFunction psi(p1Fes);            psi.setName("psi");
   // phiGf: analytic phi sampled at original X (diagnostic only).
   GridFunction phiGf(p1Fes);          phiGf.setName("phi_analytic");
-  // phiH: ADVECTED P1 grid function used by the LSR push solve. Built
+  // phiH: ADVECTED P1 grid function used by the WNGIR solve. Built
   // from screened Poisson at frame 0, advected one step per subsequent
   // frame. NO analytic dependency once initialised.
   GridFunction phiH(p1Fes);           phiH.setName("phi");
@@ -685,40 +560,39 @@ int main(int argc, char** argv)
   ScalarP0 p0FesMoved(moved);
 
   GridFunction cellLabelPhi(p0FesMoved); cellLabelPhi.setName("cell_label");
-  // phi_redist : FMM signed distance computed on the LSR-displaced
+  // phi_redist : FMM signed distance computed on the WNGIR-displaced
   // (moved) mesh using the classifier interior/skeleton attributes.
-  // This IS the LSR-reconstructed-domain SDF; it becomes phi_h for the
+  // This IS the WNGIR-reconstructed-domain SDF; it becomes phi_h for the
   // next frame's advection.
   GridFunction phiRedist(p1FesMoved);    phiRedist.setName("phi_redist");
   // Background copy of phiRedist for side-by-side visualisation on
-  // psiGrid (background mesh) next to phi_analytic and phi_drifted.
+  // the background mesh next to phi_analytic and phi_drifted.
   GridFunction phiRedistBg(p1Fes);       phiRedistBg.setName("phi_redist");
   GridFunction jKgf(p0FesMoved);        jKgf.setName("j");
   // q_abs = Q_abs(A_K^u): absolute intrinsic shape quality of the moved
   //                       cell (similarity of REFERENCE cell at value 1).
   // q_rel = Q_rel(F),  F = A_K^u (A_K)^{-1} = I + grad u:
   //                       relative-distortion measure minimised by the
-  //                       LSR shape barrier; equals 1 at u = 0 for every
+  //                       admissibility barrier; equals 1 at u = 0 for every
   //                       cell regardless of background shape.
   GridFunction qAbs(p0FesMoved);        qAbs.setName("q_abs");
   GridFunction qRel(p0FesMoved);        qRel.setName("q_rel");
   GridFunction phiMoved(p1FesMoved);    phiMoved.setName("phi_moved");
 
   // -------------------------------------------------------------------------
-  // XDMF writer in transient mode (two grids: psi and phi).
+  // XDMF writer in transient mode (background and moved grids).
   // -------------------------------------------------------------------------
-  IO::XDMF xdmf("LevelSetLSRWavyCircleAdvectedSweep");
-  auto psiGrid = xdmf.grid("psi");
-  psiGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
-  psiGrid.add(cellLabel,   IO::XDMF::Center::Cell);
-  psiGrid.add(phaseMoment, IO::XDMF::Center::Cell);
-  psiGrid.add(sigmaKgf,    IO::XDMF::Center::Cell);
-  psiGrid.add(phiGf,        IO::XDMF::Center::Node);  // phi_analytic
-  psiGrid.add(phiH,         IO::XDMF::Center::Node);  // phi (drifted advected, pre-redistance, what LSR consumed)
-  psiGrid.add(phiHError,    IO::XDMF::Center::Node);  // phi - phi_analytic
-  psiGrid.add(phiRedistBg,  IO::XDMF::Center::Node);  // phi_redist (FMM of LSR-moved domain), copied to background DOFs
-  psiGrid.add(psi,          IO::XDMF::Center::Node);
-  psiGrid.add(u,            IO::XDMF::Center::Node);
+  IO::XDMF xdmf("LevelSetWNGIRAdvection");
+  auto backgroundGrid = xdmf.grid("background");
+  backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
+  backgroundGrid.add(cellLabel,   IO::XDMF::Center::Cell);
+  backgroundGrid.add(phaseMoment, IO::XDMF::Center::Cell);
+  backgroundGrid.add(sigmaKgf,    IO::XDMF::Center::Cell);
+  backgroundGrid.add(phiGf,        IO::XDMF::Center::Node);  // phi_analytic
+  backgroundGrid.add(phiH,         IO::XDMF::Center::Node);  // phi consumed by WNGIR
+  backgroundGrid.add(phiHError,    IO::XDMF::Center::Node);  // phi - phi_analytic
+  backgroundGrid.add(phiRedistBg,  IO::XDMF::Center::Node);  // phi_redist copied to background DOFs
+  backgroundGrid.add(u,            IO::XDMF::Center::Node);
 
   auto phiGrid = xdmf.grid("phi");
   phiGrid.setMesh(moved, IO::XDMF::MeshPolicy::Transient);
@@ -732,20 +606,11 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // Frame loop.
   // -------------------------------------------------------------------------
-  std::cout << "Wavy-circle LSR sweep on " << n << "x" << n
+  std::cout << "Wavy-circle WNGIR advected sweep on " << n << "x" << n
             << " unit-square mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
             << "  orbit R=" << orbitR << '\n';
-  std::cout << "  tangent="
-            << (tangentMode == LSRTangent::GaussNewton ? "gn"
-                : tangentMode == LSRTangent::Newton ? "newton" : "psd")
-            << "  psi="
-            << (psiRepresentative == LevelSetRepresentative::Fmm
-                  ? "fmm"
-                  : psiRepresentative == LevelSetRepresentative::ProjectedPhiH1
-                      ? "projected-phi-h1"
-                      : "screened")
-            << "  phi-init="
+  std::cout << "  phi-init="
             << (phiInitialRepresentative == PhiInitialRepresentative::Analytic
                   ? "analytic"
                   : phiInitialRepresentative == PhiInitialRepresentative::Fmm
@@ -791,6 +656,15 @@ int main(int argc, char** argv)
       mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
                         boundaryAttribute);
 
+    auto stageClock = std::chrono::steady_clock::now();
+    auto stageLap = [&stageClock](const char* name)
+    {
+      const auto now = std::chrono::steady_clock::now();
+      const double s = std::chrono::duration<double>(now - stageClock).count();
+      stageClock = now;
+      std::cout << "      stage " << name << "=" << s << "s\n";
+      return s;
+    };
     // ---- Stage 0: semi-Lagrangian advection of phi_h (frame > 0) ----
     if (frame > 0)
     {
@@ -819,6 +693,7 @@ int main(int argc, char** argv)
       phiH.getData() = advect.getSolution().getData();
     }
 
+    stageLap("advect");
     // ---- Stage 1: phase moments + classification ----
     //
     // Source of phi values for the moments:
@@ -826,8 +701,8 @@ int main(int argc, char** argv)
     //   Frame k : the ADVECTED phi_h grid function -- we test the working
     //             pipeline on the field we actually carry forward.
     //
-    // The interface skeleton produced here is consumed by both the
-    // screened-Poisson Dirichlet (frame 0 only) and the FMM psi.
+    // The interface skeleton produced here is consumed directly by WNGIR
+    // and, when requested, by phi_h initialization/redistance.
     const bool useAnalyticForMoments = (frame == 0);
     const auto cellMoments =
       useAnalyticForMoments
@@ -933,16 +808,8 @@ int main(int argc, char** argv)
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
 
-#if 0
-    // (Disabled) Re-screened-Poisson phi_h block.
-    //
-    // Conceptually attractive but collapses the LSR objective when both
-    // phi_h and psi_h are screened-Poisson lifts of the same classifier
-    // skeleton: phi_h ~= psi_h up to a calibration scalar, residual ~ 0
-    // at u = 0, Newton trivially "converges" without doing any
-    // registration. Replaced below by a no-op for the input phi (use
-    // analytic at frame 0, advected discrete phi_h at frame > 0) and an
-    // FMM redistance from the classifier AFTER the LSR solve.
+    if (frame == 0
+        && phiInitialRepresentative == PhiInitialRepresentative::Screened)
     {
       TrialFunction phiTrial(p1Fes);
       TestFunction  phiTest(p1Fes);
@@ -963,277 +830,16 @@ int main(int argc, char** argv)
             .on(interfaceAttribute);
       Solver::SparseLU(phiProblem).solve();
       phiH.getData() = phiTrial.getSolution().getData();
-
-      // Band-averaged |grad phi_h_raw| using the raw field itself as
-      // the band-weight argument (W = exp(-phi_h^2 / 2 deltaW^2)).
-      Real gradAcc = 0, weightAcc = 0;
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-      {
-        const auto& cell = *cellIt;
-        const auto& vertices = cell.getVertices();
-        if (vertices.size() != 3) continue;
-        std::array<Vec2, 3> x;
-        std::array<Real, 3> phiNode;
-        for (std::size_t a = 0; a < 3; ++a)
-        {
-          x[a] = mesh.getVertexCoordinates(vertices[a]);
-          Math::SpatialPoint rc(2);
-          rc.setZero();
-          if (a == 1) rc(0) = 1;
-          if (a == 2) rc(1) = 1;
-          phiNode[a] = phiH.getValue(Geometry::Point(cell, rc));
-        }
-        Math::SpatialMatrix<Real> M(2, 2);
-        M(0, 0) = x[1](0) - x[0](0);
-        M(0, 1) = x[2](0) - x[0](0);
-        M(1, 0) = x[1](1) - x[0](1);
-        M(1, 1) = x[2](1) - x[0](1);
-        const Real detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
-        Vec2 rhs = vec2(phiNode[1] - phiNode[0], phiNode[2] - phiNode[0]);
-        Vec2 gradPhiCell(2);
-        gradPhiCell(0) = ( M(1, 1) * rhs(0) - M(0, 1) * rhs(1)) / detM;
-        gradPhiCell(1) = (-M(1, 0) * rhs(0) + M(0, 0) * rhs(1)) / detM;
-        const Real gradNorm = gradPhiCell.norm();
-        const Vec2 e1 = x[1] - x[0];
-        const Vec2 e2 = x[2] - x[0];
-        const Real triangleArea =
-          Real(0.5) * std::abs(e1(0) * e2(1) - e1(1) * e2(0));
-        for (const auto& bary : TriangleBarycentricQuadrature)
-        {
-          const Real phiq =
-            bary[0] * phiNode[0] + bary[1] * phiNode[1]
-          + bary[2] * phiNode[2];
-          const Real wBand =
-            std::exp(-phiq * phiq / (Real(2) * deltaW * deltaW));
-          const Real qw =
-            triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
-          gradAcc   += wBand * gradNorm * qw;
-          weightAcc += wBand * qw;
-        }
-      }
-      const Real meanGrad = weightAcc > 0 ? gradAcc / weightAcc : Real(1);
-      const Real phiScale = meanGrad > Real(1e-30) ? Real(1) / meanGrad : Real(1);
-      phiH.getData() *= phiScale;
-      std::cout << "    phi_h SP-rebuild: ell=" << kPsiEll
-                << ", scale=" << phiScale
-                << ", mean|grad_raw|=" << meanGrad << '\n';
-    }
-
-    // ---- Stage 2: screened-Poisson psi_h ----
-    //
-    // Same construction as phi_h above, calibrated to unit gradient.
-    // psi enters the LSR ONLY through the band weight W(psi(X)) and the
-    // push residual r = phi(X+u) - psi(X); both want psi and phi to
-    // share scale, which the unit-gradient calibration guarantees.
-    {
-      TrialFunction psiTrial(p1Fes);
-      TestFunction  psiTest(p1Fes);
-      RealFunction psiSource(
-          [&](const Geometry::Point& p) -> Real
-          {
-            const auto attr = p.getPolytope().getAttribute();
-            if (attr && *attr == interiorAttribute)
-              return -kPsiSourceMagnitude;
-            return kPsiSourceMagnitude;
-          });
-      Problem psiProblem(psiTrial, psiTest);
-      psiProblem =
-          Integral((kPsiEll * kPsiEll) * Grad(psiTrial), Grad(psiTest))
-        + Integral(psiTrial, psiTest)
-        - Integral(psiSource, psiTest)
-        + DirichletBC(psiTrial, RealFunction(Real(0)))
-            .on(interfaceAttribute);
-      Solver::SparseLU(psiProblem).solve();
-      psi.getData() = psiTrial.getSolution().getData();
-
-      Real gradAcc = 0, weightAcc = 0;
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-      {
-        const auto& cell = *cellIt;
-        const auto& vertices = cell.getVertices();
-        if (vertices.size() != 3) continue;
-        std::array<Vec2, 3> x;
-        std::array<Real, 3> psiNode;
-        for (std::size_t a = 0; a < 3; ++a)
-        {
-          x[a] = mesh.getVertexCoordinates(vertices[a]);
-          Math::SpatialPoint rc(2);
-          rc.setZero();
-          if (a == 1) rc(0) = 1;
-          if (a == 2) rc(1) = 1;
-          psiNode[a] = psi.getValue(Geometry::Point(cell, rc));
-        }
-        Math::SpatialMatrix<Real> M(2, 2);
-        M(0, 0) = x[1](0) - x[0](0);
-        M(0, 1) = x[2](0) - x[0](0);
-        M(1, 0) = x[1](1) - x[0](1);
-        M(1, 1) = x[2](1) - x[0](1);
-        const Real detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
-        Vec2 rhs = vec2(psiNode[1] - psiNode[0], psiNode[2] - psiNode[0]);
-        Vec2 gradCell(2);
-        gradCell(0) = ( M(1, 1) * rhs(0) - M(0, 1) * rhs(1)) / detM;
-        gradCell(1) = (-M(1, 0) * rhs(0) + M(0, 0) * rhs(1)) / detM;
-        const Real gradNorm = gradCell.norm();
-        const Vec2 e1 = x[1] - x[0];
-        const Vec2 e2 = x[2] - x[0];
-        const Real triangleArea =
-          Real(0.5) * std::abs(e1(0) * e2(1) - e1(1) * e2(0));
-        for (const auto& bary : TriangleBarycentricQuadrature)
-        {
-          const Real psiq =
-            bary[0] * psiNode[0] + bary[1] * psiNode[1]
-          + bary[2] * psiNode[2];
-          const Real wBand =
-            std::exp(-psiq * psiq / (Real(2) * deltaW * deltaW));
-          const Real qw =
-            triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
-          gradAcc   += wBand * gradNorm * qw;
-          weightAcc += wBand * qw;
-        }
-      }
-      const Real meanGrad = weightAcc > 0 ? gradAcc / weightAcc : Real(1);
-      const Real psiScale = meanGrad > Real(1e-30) ? Real(1) / meanGrad : Real(1);
-      psi.getData() *= psiScale;
-    }
-#endif
-
-    // ---- Stage 2: screened-Poisson psi_h on background mesh ----
-    //
-    //   (I - ell^2 Delta) psi_raw = +- M_src,  psi_raw = 0 on Gamma_psi,h.
-    // Calibrated to band-averaged |grad psi| = 1. Smoother than FMM
-    // (no kinks at the medial axis), which interacts better with the
-    // semi-Lagrangian + L2-projection advection step that consumes the
-    // post-frame redistanced phi_h on the next iteration.
-    {
-      TrialFunction psiTrial(p1Fes);
-      TestFunction  psiTest(p1Fes);
-      RealFunction psiSource(
-          [&](const Geometry::Point& p) -> Real
-          {
-            const auto attr = p.getPolytope().getAttribute();
-            if (attr && *attr == interiorAttribute)
-              return -kPsiSourceMagnitude;
-            return kPsiSourceMagnitude;
-          });
-      Problem psiProblem(psiTrial, psiTest);
-      psiProblem =
-          Integral((kPsiEll * kPsiEll) * Grad(psiTrial), Grad(psiTest))
-        + Integral(psiTrial, psiTest)
-        - Integral(psiSource, psiTest)
-        + DirichletBC(psiTrial, RealFunction(Real(0)))
-            .on(interfaceAttribute);
-      Solver::SparseLU(psiProblem).solve();
-      psi.getData() = psiTrial.getSolution().getData();
-
-      Real gradAcc = 0, weightAcc = 0;
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-      {
-        const auto& cell = *cellIt;
-        const auto& vertices = cell.getVertices();
-        if (vertices.size() != 3) continue;
-        std::array<Vec2, 3> x;
-        std::array<Real, 3> psiNode;
-        for (std::size_t a = 0; a < 3; ++a)
-        {
-          x[a] = mesh.getVertexCoordinates(vertices[a]);
-          Math::SpatialPoint rc(2);
-          rc.setZero();
-          if (a == 1) rc(0) = 1;
-          if (a == 2) rc(1) = 1;
-          psiNode[a] = psi.getValue(Geometry::Point(cell, rc));
-        }
-        Math::SpatialMatrix<Real> M(2, 2);
-        M(0, 0) = x[1](0) - x[0](0);
-        M(0, 1) = x[2](0) - x[0](0);
-        M(1, 0) = x[1](1) - x[0](1);
-        M(1, 1) = x[2](1) - x[0](1);
-        const Real detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
-        Vec2 rhs = vec2(psiNode[1] - psiNode[0], psiNode[2] - psiNode[0]);
-        Vec2 gradCell(2);
-        gradCell(0) = ( M(1, 1) * rhs(0) - M(0, 1) * rhs(1)) / detM;
-        gradCell(1) = (-M(1, 0) * rhs(0) + M(0, 0) * rhs(1)) / detM;
-        const Real gradNorm = gradCell.norm();
-        const Vec2 e1 = x[1] - x[0];
-        const Vec2 e2 = x[2] - x[0];
-        const Real triangleArea =
-          Real(0.5) * std::abs(e1(0) * e2(1) - e1(1) * e2(0));
-        for (const auto& bary : TriangleBarycentricQuadrature)
-        {
-          const Real psiq =
-            bary[0] * psiNode[0] + bary[1] * psiNode[1]
-          + bary[2] * psiNode[2];
-          const Real wBand =
-            std::exp(-psiq * psiq / (Real(2) * deltaW * deltaW));
-          const Real qw =
-            triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
-          gradAcc   += wBand * gradNorm * qw;
-          weightAcc += wBand * qw;
-        }
-      }
-      const Real meanGrad = weightAcc > 0 ? gradAcc / weightAcc : Real(1);
-      const Real psiScale = meanGrad > Real(1e-30) ? Real(1) / meanGrad : Real(1);
-      psi.getData() *= psiScale;
     }
     if (frame == 0
-        && phiInitialRepresentative == PhiInitialRepresentative::Screened)
+        && phiInitialRepresentative == PhiInitialRepresentative::Fmm)
     {
-      phiH.getData() = psi.getData();
-    }
-    if (psiRepresentative == LevelSetRepresentative::ProjectedPhiH1)
-    {
-      TrialFunction psiTrial(p1Fes);
-      TestFunction  psiTest(p1Fes);
-      RealFunction phiData(
-          [&](const Geometry::Point& p) -> Real
-          {
-            if (frame == 0)
-            {
-              const auto& X = p.getCoordinates();
-              return levelSet.phi(vec2(X(0), X(1)));
-            }
-            return phiH.getValue(p);
-          });
-      auto gradPhiHData = Grad(phiH);
-      AnalyticVectorFunction gradPhiData(
-          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
-          {
-            if (frame == 0)
-            {
-              const auto& X = p.getCoordinates();
-              return levelSet.grad(vec2(X(0), X(1)));
-            }
-            return gradPhiHData.getValue(p);
-          },
-          /*dimension=*/2);
-
-      Problem psiProblem(psiTrial, psiTest);
-      RealFunction<Real> ell2(kPsiEll * kPsiEll);
-      psiProblem =
-          Integral(psiTrial, psiTest)
-        + Integral(ell2 * Grad(psiTrial), Grad(psiTest))
-        - Integral(phiData, psiTest)
-        - Integral(ell2 * gradPhiData, Grad(psiTest))
-        + DirichletBC(psiTrial, RealFunction(Real(0)))
-            .on(interfaceAttribute);
-      Solver::SparseLU(psiProblem).solve();
-      psi.getData() = psiTrial.getSolution().getData();
-    }
-    if (psiRepresentative == LevelSetRepresentative::Fmm
-        || (frame == 0
-            && phiInitialRepresentative == PhiInitialRepresentative::Fmm))
-    {
-      GridFunction psiFmm(p1Fes);
-      psiFmm = Real(0);
-      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(psiFmm)
+      phiH = Real(0);
+      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiH)
         .setInterface(interfaceAttribute)
         .setInterior(interiorAttribute)
         .solve()
         .sign();
-      if (psiRepresentative == LevelSetRepresentative::Fmm)
-        psi.getData() = psiFmm.getData();
-      if (frame == 0
-          && phiInitialRepresentative == PhiInitialRepresentative::Fmm)
-        phiH.getData() = psiFmm.getData();
     }
 
     // ---- Diagnostic: classifier interior centroid vs analytic centre ---
@@ -1265,34 +871,8 @@ int main(int argc, char** argv)
                 << lag << '\n';
     }
 
-    // ---- Stage 3: smooth-band measure for the LSR normalisation ----
-    Real domainMeasure = 0;
-    Real weightedBandMeasure = 0;
-    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-    {
-      const auto& cell = *cellIt;
-      for (const auto& bary : TriangleBarycentricQuadrature)
-      {
-        Math::SpatialPoint rc(2);
-        rc(0) = bary[1];
-        rc(1) = bary[2];
-        const Geometry::Point pt(cell, rc);
-        Math::SpatialMatrix<Real> J;
-        cell.getTransformation().jacobian(J, rc);
-        const Real triangleArea = Real(0.5) * std::abs(J.determinant());
-        const Real w =
-          triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
-        domainMeasure += w;
-        const Real s = psi.getValue(pt);
-        const Real W = std::exp(-s * s / (2 * deltaW * deltaW));
-        weightedBandMeasure += W * w;
-      }
-    }
-    if (weightedBandMeasure <= 0)
-      throw std::runtime_error("Empty smooth band: M_w = 0 at frame "
-                               + std::to_string(frame));
-
-    // ---- Stage 4a: LSR solve (strategy-selected initial guess) ----
+    stageLap("phi-init");
+    // ---- Stage 3: WNGIR solve ----
 
     auto& cellCache = cellCacheBg;
 
@@ -1337,40 +917,6 @@ int main(int argc, char** argv)
         /*rows=*/2, /*cols=*/2);
 
     const bool kVerbose = hasFlag(argc, argv, "verbose");
-
-    LSRParameters baseParams;
-    baseParams.rhoS = 1;
-    baseParams.deltaW = deltaW;
-    baseParams.hRef = h;
-    baseParams.normalizer = Real(1) / (weightedBandMeasure * h * h);
-    baseParams.quadratureOrder = kLSRQuadratureOrder;
-    baseParams.h1RegularizationWeight = kH1RegularizationWeight;
-    baseParams.shapeWeight = kShapeWeight;
-    // BEST-QUALITY profile safety nets.
-    baseParams.jBarrierWeight = parseRealOption(
-        argc, argv, "j-barrier-weight", Real(1.0));
-    baseParams.jBarrierSafeRatio = parseRealOption(
-        argc, argv, "j-barrier-safe", Real(0.5));
-    baseParams.jVolumeTetherWeight = parseRealOption(
-        argc, argv, "volume-tether-weight", Real(0.01));
-    baseParams.jMinRatio = Real(1e-8);
-    baseParams.jSafeRatio = Real(1e-3);
-    baseParams.lineSearchSafetyMargin = kLineSearchSafetyMargin;
-    baseParams.qRelMax = kQRelMax;
-    baseParams.alphaInit = kLineSearchAlphaInit;
-    baseParams.alphaReduction = kLineSearchReduction;
-    baseParams.alphaMin = kLineSearchAlphaMin;
-    baseParams.absoluteTolerance = kResidualAbsTol;
-    baseParams.relativeTolerance = kResidualRelTol;
-    baseParams.maxNewtonIterations = 80;
-    // Let the sweep-level geometry criterion decide when to stop; residual
-    // stall alone is not a failure for this registration objective.
-    baseParams.stallPatience = kStallPatience;
-    baseParams.initialGuessMetric = initialGuessMetric;
-    baseParams.initialGuessScaling = initialGuessScaling;
-    baseParams.initialGuessElasticityLambda = initialGuessElasticityLambda;
-    baseParams.initialGuessElasticityMu = initialGuessElasticityMu;
-    baseParams.tangent = tangentMode;
 
     // Evaluate phi_h at a moved physical point (a + ua) by walking the
     // mesh and using its inverse polytope map. Simple O(N_cells) fallback
@@ -1429,50 +975,118 @@ int main(int argc, char** argv)
     };
 
     Real residualBest = std::numeric_limits<Real>::infinity();
-    Real        r0      = -1;
     std::size_t itCount = 0;
     Real        interfaceFit = 0;
     bool        convergedFlag    = false;
     const char* convergedReason  = "no";
 
-    LSRParameters params = baseParams;
-    switch (kInitialGuessStrategy)
     {
-      case InitialGuessStrategy::Cold:
-        params.initialGuess = LSRInitialGuess::Zero;
-        break;
-      case InitialGuessStrategy::Warm:
-        params.initialGuess =
-          frame == 0 ? LSRInitialGuess::Zero : LSRInitialGuess::Current;
-        break;
-      case InitialGuessStrategy::Hilbert:
-        params.initialGuess = LSRInitialGuess::Hilbert;
-        break;
-    }
-    // Convergence is judged on the DISCRETE fit (what the solver is
-    // actually optimising against). The analytic fit is reported
-    // alongside as ground-truth quality.
-    params.acceptedStateConvergenceTest =
-      [&](const LSRReport&) -> bool
+      // Robust WNGIR (WNGIR.h). The
+      // advected phi_h is DISCRETE, so moved-point evaluation needs a
+      // point locator. Uniform-grid bin accelerator: bin each cell by
+      // its bounding box once per frame, locate y by bin + neighbour
+      // search with the inverse polytope map.
+      const int nbins = static_cast<int>(n);
+      std::vector<std::vector<Index>> bins(
+          static_cast<std::size_t>(nbins) * nbins);
+      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
       {
-        interfaceFit = computeInterfaceFit(/*discrete=*/true);
-        return interfaceFit < kInterfaceFitTol;
+        const auto& cvs = cellIt->getVertices();
+        Real xmin = 1e30, xmax = -1e30, ymin = 1e30, ymax = -1e30;
+        for (int t = 0; t < 3; ++t)
+        {
+          const Vec2 P = mesh.getVertexCoordinates(cvs[t]);
+          xmin = std::min(xmin, P(0)); xmax = std::max(xmax, P(0));
+          ymin = std::min(ymin, P(1)); ymax = std::max(ymax, P(1));
+        }
+        const int i0 = std::clamp(int(xmin * nbins), 0, nbins - 1);
+        const int i1 = std::clamp(int(xmax * nbins), 0, nbins - 1);
+        const int j0 = std::clamp(int(ymin * nbins), 0, nbins - 1);
+        const int j1 = std::clamp(int(ymax * nbins), 0, nbins - 1);
+        for (int i = i0; i <= i1; ++i)
+          for (int j = j0; j <= j1; ++j)
+            bins[static_cast<std::size_t>(i) * nbins + j]
+              .push_back(cellIt->getIndex());
+      }
+      auto locateCell =
+        [&](const Vec2& y, Math::SpatialPoint& rcOut) -> Index
+      {
+        const int bi = std::clamp(int(y(0) * nbins), 0, nbins - 1);
+        const int bj = std::clamp(int(y(1) * nbins), 0, nbins - 1);
+        constexpr Real tol = Real(1e-9);
+        for (int di = -1; di <= 1; ++di)
+          for (int dj = -1; dj <= 1; ++dj)
+          {
+            const int ii = bi + di, jj = bj + dj;
+            if (ii < 0 || jj < 0 || ii >= nbins || jj >= nbins)
+              continue;
+            for (const Index ci :
+                 bins[static_cast<std::size_t>(ii) * nbins + jj])
+            {
+              const auto cIt = mesh.getCell(ci);
+              Math::SpatialPoint Y(2);
+              Y(0) = y(0); Y(1) = y(1);
+              cIt->getTransformation().inverse(rcOut, Y);
+              if (rcOut(0) >= -tol && rcOut(1) >= -tol
+                  && rcOut(0) + rcOut(1) <= Real(1) + tol)
+                return ci;
+            }
+          }
+        return std::numeric_limits<Index>::max();
+      };
+      auto phiAtY = [&](const Vec2& y) -> Real
+      {
+        Math::SpatialPoint rc(2);
+        const Index ci = locateCell(y, rc);
+        if (ci == std::numeric_limits<Index>::max())
+          return Real(1);  // outside the mesh: exterior sign.
+        const auto cIt = mesh.getCell(ci);
+        Math::SpatialPoint Y(2);
+        Y(0) = y(0); Y(1) = y(1);
+        return phiH.getValue(Geometry::Point(*cIt, rc, Y));
+      };
+      auto gradAtY = [&](const Vec2& y) -> Vec2
+      {
+        Math::SpatialPoint rc(2);
+        const Index ci = locateCell(y, rc);
+        if (ci == std::numeric_limits<Index>::max())
+          return vec2(Real(1), Real(0));
+        const auto cIt = mesh.getCell(ci);
+        Math::SpatialPoint Y(2);
+        Y(0) = y(0); Y(1) = y(1);
+        const auto g =
+          gradPhiSmoothed.getValue(Geometry::Point(*cIt, rc, Y));
+        return vec2(g(0), g(1));
       };
 
-    LSR lsr(u);
-    const LSRReport lsrReport =
-      lsr.setParameters(params).solve(psi, phi, gradPhi, hessPhi);
+      u.getData().setZero();
+      Rodin::Examples::WNGIRParameters wngir;
+      wngir.h = h;
+      wngir.maxIterations =
+        parseSizeTOption(argc, argv, "wngir-max-iters", 200);
+      wngir.quadratureOrder = 2;
+      wngir.trace = hasFlag(argc, argv, "wngir-trace");
+      const auto wngirRep = Rodin::Examples::solveWNGIR(
+          mesh, u, interfaceFacets, phiAtY, gradAtY, wngir);
+      std::cout << "    wngir timing: it=" << wngirRep.iterations
+                << std::scientific << std::setprecision(2)
+                << "  force=" << wngirRep.tForce
+                << "  barrier=" << wngirRep.tBarrier
+                << "  factor=" << wngirRep.tFactor
+                << "  solve=" << wngirRep.tSolve
+                << "  ls=" << wngirRep.tLineSearch
+                << "  exit=" << wngirRep.exitReason << '\n';
+      itCount = wngirRep.iterations;
+      residualBest = wngirRep.activeRMS;
+      interfaceFit = computeInterfaceFit(/*discrete=*/true);
+    }
 
-    r0 = lsrReport.initialResidual;
-    itCount = lsrReport.iterations;
-    residualBest = lsrReport.finalResidual;
     if (interfaceFit == Real(0))
       interfaceFit = computeInterfaceFit(/*discrete=*/true);
     const Real interfaceFitAnalytic = computeInterfaceFit(/*discrete=*/false);
 
     const bool residualOK =
-         residualBest < kResidualAbsTol
-      || (r0 > 0 && residualBest < kResidualRelTol * r0);
+         residualBest < kResidualAbsTol;
     const bool geometryOK = interfaceFit < kInterfaceFitTol;
     switch (kConvergenceMode)
     {
@@ -1495,18 +1109,11 @@ int main(int argc, char** argv)
     }
 
     if (kVerbose)
-    {
-      std::cout << "      LSR:"
-                << " it=" << lsrReport.iterations
-                << "  ||R||=" << std::scientific << std::setprecision(3)
-                << lsrReport.finalResidual
-                << "  alpha=" << lsrReport.lastAcceptedAlpha
-                << "  backtracks=" << lsrReport.totalBacktracks
-                << "  j_ls=" << lsrReport.jLineSearchRatio
-                << "  min_j=" << lsrReport.minJRatio
-                << (lsrReport.lineSearchFailed ? "  [line-search failed]" : "")
+      std::cout << "      WNGIR:"
+                << " it=" << itCount
+                << "  activeRMS=" << std::scientific << std::setprecision(3)
+                << residualBest
                 << '\n';
-    }
     finalFitPerFrame.push_back(interfaceFit);
 
     struct AggregateReport
@@ -1522,7 +1129,8 @@ int main(int argc, char** argv)
       convergedFlag
     };
 
-    // ---- Stage 5a: psi-side cell-P0 fields + nodal phi ----
+    stageLap("solve");
+    // ---- Stage 5a: background cell-P0 fields + nodal phi ----
     {
       const std::size_t d = mesh.getDimension();
       for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
@@ -1558,7 +1166,7 @@ int main(int argc, char** argv)
     // by u. For P2 displacement this includes P2 cell transformations.
     // Region attributes (interior /
     // exterior / interface / boundary) carry over so the phi grid carries
-    // the same classification ParaView sees on psi.
+    // the same classification ParaView sees on the background grid.
     {
       updateMovedMeshFromDisplacement(mesh, moved, u);
       const std::size_t D = mesh.getDimension();
@@ -1615,29 +1223,25 @@ int main(int argc, char** argv)
       return levelSet.phi(vec2(X(0), X(1)));
     };
 
-    const char* strategyName =
-        kInitialGuessStrategy == InitialGuessStrategy::Cold    ? "cold"
-      : kInitialGuessStrategy == InitialGuessStrategy::Warm    ? "warm"
-      :                                                          "hilbert";
-    std::cout << "    Newton it=" << report.iterations
-              << "  ||R||=" << std::scientific << std::setprecision(3)
+    std::cout << "    WNGIR it=" << report.iterations
+              << "  activeRMS=" << std::scientific << std::setprecision(3)
               << report.final_residual
               << "  fit_h=" << std::setprecision(3) << interfaceFit
               << "  fit_an=" << std::setprecision(3) << interfaceFitAnalytic
-              << "  init=" << strategyName
+              << "  init=cold"
               << "  converged=" << convergedReason << '\n';
     if (report.converged)
       ++framesConverged;
 
 #if 1
-    // ---- Stage 5c: screened-Poisson redistance of the LSR-reconstructed
+    // ---- Stage 5c: screened-Poisson redistance of the WNGIR-reconstructed
     //                domain (on the MOVED mesh).
     //
     // The classifier interior labels live on cells; their physical
     // positions are on the MOVED mesh (X + u(X)). Solving
     //   (I - ell^2 Delta) phi_redist = +- M_src,
     //   phi_redist = 0 on Gamma_psi,h
-    // on the moved mesh therefore lifts the LSR-fit interface to a
+    // on the moved mesh therefore lifts the WNGIR-fit interface to a
     // smooth band-shaped scalar, calibrated to unit gradient. Compared
     // with FMM-redistancing the same domain, the screened-Poisson lift
     // has no medial-axis kinks and a wider, smoother band -- both
@@ -1716,7 +1320,7 @@ int main(int argc, char** argv)
       const Real phiScale = meanGrad > Real(1e-30) ? Real(1) / meanGrad : Real(1);
       phiRedist.getData() *= phiScale;
     }
-    // Background-grid copy for psiGrid visualisation; same DOF layout.
+    // Background-grid copy for visualisation; same DOF layout.
     if (phiRedistance == PhiRedistance::ScreenedMoved)
     {
       phiRedistBg.getData() = phiRedist.getData();
@@ -1798,12 +1402,15 @@ int main(int argc, char** argv)
       phiRedistBg = Real(0);
     }
 
+    stageLap("post");
     // ---- Stage 6: append XDMF snapshot ----
     // XDMF write captures `phi` (the high-fidelity advected field). No
     // post-write reassignment: phi_h stays as the advected result so
     // the next frame's advection extends the high-fidelity transport
     // history rather than restarting from a reconstructed surrogate.
     xdmf.write(t).flush();
+    stageLap("xdmf");
+
   }
 
   xdmf.close();
