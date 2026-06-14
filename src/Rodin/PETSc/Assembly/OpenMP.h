@@ -19,6 +19,7 @@
 
 #include "Rodin/Assembly/OpenMP.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
+#include "Rodin/PETSc/Assembly/MatrixPreparation.h"
 
 namespace Rodin::Assembly
 {
@@ -239,15 +240,22 @@ namespace Rodin::Assembly
         const PetscInt m = input.getTestFES().getSize();
         const PetscInt n = input.getTrialFES().getSize();
 
-        ierr = MatSetSizes(res, m, n, m, n);
+        // Re-use the existing sparsity structure across assemblies (see
+        // contract in MatrixPreparation.h) so symbolic factorizations persist.
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(res, m, n, needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(res, m, n, m, n);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetFromOptions(res);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetFromOptions(res);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(res);
-        assert(ierr == PETSC_SUCCESS);
-
+          ierr = MatSetUp(res);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(res);
         assert(ierr == PETSC_SUCCESS);
 
@@ -411,18 +419,31 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ)
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            A, static_cast<PetscInt>(nrows), static_cast<PetscInt>(ncols),
+            needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetType(A, MATSEQAIJ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
 
+          // Keep the nonzero structure stable across re-assemblies so the
+          // DirichletBC row/column zeroing below does not change the pattern,
+          // preserving the symbolic factorization for direct solvers (MUMPS).
+          ierr = MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
@@ -1071,22 +1092,35 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ)
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A,
-                           nrows,
-                           ncols,
-                           nrows,
-                           ncols);
+        bool needsSetup = true;
+        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
+            A, static_cast<PetscInt>(nrows), static_cast<PetscInt>(ncols),
+            needsSetup);
         assert(ierr == PETSC_SUCCESS);
+        if (needsSetup)
+        {
+          ierr = MatSetSizes(A,
+                             nrows,
+                             ncols,
+                             nrows,
+                             ncols);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetType(A, MATSEQAIJ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = MatSetUp(A);
+          assert(ierr == PETSC_SUCCESS);
 
+          // Keep the nonzero structure stable across re-assemblies so the
+          // DirichletBC row/column zeroing below does not change the pattern,
+          // preserving the symbolic factorization for direct solvers (MUMPS).
+          ierr = MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+          assert(ierr == PETSC_SUCCESS);
+        }
         ierr = MatZeroEntries(A);
         assert(ierr == PETSC_SUCCESS);
 
