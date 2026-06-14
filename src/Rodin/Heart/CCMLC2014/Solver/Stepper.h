@@ -110,6 +110,14 @@ namespace Rodin::Heart::CCMLC2014::Solver
             solver.solve(m_system);
           }
 
+          Problem& assemble(Variational::AssemblyTarget) override
+          {
+            Alert::MemberFunctionException(*this, __func__)
+              << "Targeted assembly is not implemented for this problem."
+              << Alert::Raise;
+            return *this;
+          }
+
           DenseLinearSystem& getLinearSystem() override { return m_system; }
           const DenseLinearSystem& getLinearSystem() const override
           {
