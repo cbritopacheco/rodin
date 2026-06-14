@@ -84,6 +84,7 @@
               Reference
               <ul>
                 <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
@@ -99,6 +100,18 @@
             <dd>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> assembly strategy (sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, or OpenMP) based on the mesh context type.</dd>
           </dl>
         </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0ebf3f4a71c31952e1e074cac133f3c5" class="m-doc">matrixNeedsStructuralSetup</a>(</span><span class="m-doc-wrap">::Mat A,
+              PetscInt globalRows,
+              PetscInt globalCols,
+              bool&amp; needsSetup) -&gt; PetscErrorCode</span>
+            </dt>
+            <dd>Decides whether a matrix needs its structure (sizes/type/layout) set up before assembly, or whether the existing structure can be re-used.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="a74786fd0d020e752e1f4126fc8a12670"><div>
@@ -110,6 +123,48 @@
               using Rodin::<wbr />PETSc::<wbr />Assembly::<wbr /><a href="#a74786fd0d020e752e1f4126fc8a12670" class="m-doc-self">Default</a> = <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>&lt;Ts...&gt;
             </h3>
             <p>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> assembly strategy (sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, or OpenMP) based on the mesh context type.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0ebf3f4a71c31952e1e074cac133f3c5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">PetscErrorCode Rodin::<wbr />PETSc::<wbr />Assembly::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ebf3f4a71c31952e1e074cac133f3c5" class="m-doc-self">matrixNeedsStructuralSetup</a>(</span><span class="m-doc-wrap">::Mat A,
+              PetscInt globalRows,
+              PetscInt globalCols,
+              bool&amp; needsSetup)</span></span>
+            </h3>
+            <p>Decides whether a matrix needs its structure (sizes/type/layout) set up before assembly, or whether the existing structure can be re-used.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">A&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Matrix to inspect.</td>
+                </tr>
+                <tr>
+                  <td>globalRows&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Expected global number of rows.</td>
+                </tr>
+                <tr>
+                  <td>globalCols&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Expected global number of columns.</td>
+                </tr>
+                <tr>
+                  <td>needsSetup&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Set to <code>true</code> when the structural setup must be performed (first assembly or dimensions changed), <code>false</code> when the existing structure can be re-used.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The first non-zero <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> error code encountered, else <code>PETSC_SUCCESS</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<h5 id="autotoc_md178">Contract</h5><p>The caller guarantees that, between successive assemblies of the <em>same</em> matrix object, the sparsity pattern is unchanged. Concretely this means the trial and test finite element spaces and the mesh connectivity are fixed. Vertex coordinates may move (as in an ALE formulation) because that changes geometry, not the connectivity graph, hence not the pattern. If the contract is ever violated (adaptive remeshing, a changed constraint set that alters the eliminated structure, a resized problem) the global dimensions must differ, and this function then reports that a full setup is needed.</p><h5 id="autotoc_md179">Why this matters</h5><p>The structural calls <code>MatSetSizes</code> / <code>MatSetType</code> / <code>MatSetFromOptions</code> / <code>MatSetUp</code> re-establish the matrix internals and bump <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a>&#x27;s nonzero-state counter. Preconditioners compare that counter (<code>pc-&gt;matnonzerostate</code> != Amat-&gt;nonzerostate) to decide whether to redo the symbolic factorization. Running the structural calls on every assembly forces external direct solvers (e.g. MUMPS) to recompute their ordering/analysis each time — which, inside a SNES/Newton loop, repeats the expensive symbolic factorization on every residual/Jacobian evaluation.</p><p>When this function reports that no setup is needed, the caller should skip the structural calls and only <code>MatZeroEntries</code> + refill. That preserves the nonzero state, so <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> reports <code>SAME_NONZERO_PATTERN</code> and the symbolic factorization is computed once and reused across assemblies.</p>
           </div></section>
         </section>
       </div>

@@ -126,11 +126,11 @@ $ u = A(v) + d $
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md312">Mathematical model</a></li>
-            <li><a href="#autotoc_md313">Concrete examples</a></li>
-            <li><a href="#autotoc_md314">Assembly: how @f$ C_{sj} @f$ is computed exactly</a></li>
-            <li><a href="#autotoc_md315">Exactness, by construction</a></li>
-            <li><a href="#autotoc_md316">Linear-system effect</a></li>
+            <li><a href="#autotoc_md314">Mathematical model</a></li>
+            <li><a href="#autotoc_md315">Concrete examples</a></li>
+            <li><a href="#autotoc_md316">Assembly: how @f$ C_{sj} @f$ is computed exactly</a></li>
+            <li><a href="#autotoc_md317">Exactness, by construction</a></li>
+            <li><a href="#autotoc_md318">Linear-system effect</a></li>
             <li>
               Reference
               <ul>
@@ -361,7 +361,7 @@ $ A(v)=R\,v $
 <use x='39.714527' y='0' xlink:href='#eq13-g0-82'/>
 <use x='50.71554' y='0' xlink:href='#eq13-g0-118'/>
 </g>
-</svg>, sums of these, …).</p><section id="autotoc_md312"><h2><a href="#autotoc_md312">Mathematical model</a></h2><p>Let <svg class="m-math" style="width: 4.087em; height: 1.581em; vertical-align: -0.482em;" viewBox="0 -10.560374 39.235873 15.173933">
+</svg>, sums of these, …).</p><section id="autotoc_md314"><h2><a href="#autotoc_md314">Mathematical model</a></h2><p>Let <svg class="m-math" style="width: 4.087em; height: 1.581em; vertical-align: -0.482em;" viewBox="0 -10.560374 39.235873 15.173933">
 <title>
 $ \{\varphi_j^v\}_{j=1}^{N_v} $
 </title>
@@ -797,7 +797,7 @@ $ d_s $
 <use x='0' y='0' xlink:href='#eq32-g1-100'/>
 <use x='6.082693' y='1.793263' xlink:href='#eq32-g0-115'/>
 </g>
-</svg> are stored separately in <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">DirichletBCBase::<wbr />IdentificationValues</a>.</p></section><section id="autotoc_md313"><h2><a href="#autotoc_md313">Concrete examples</a></h2><ul><li><strong>Identity, same FES (Lagrange).</strong> <svg class="m-math" style="width: 3.570em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 34.276641 8.302191">
+</svg> are stored separately in <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c_base.html#a4860c8b2c9fa43bf5d5c57a3fb5aeebf" class="m-doc">DirichletBCBase::<wbr />IdentificationValues</a>.</p></section><section id="autotoc_md315"><h2><a href="#autotoc_md315">Concrete examples</a></h2><ul><li><strong>Identity, same FES (Lagrange).</strong> <svg class="m-math" style="width: 3.570em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 34.276641 8.302191">
 <title>
 $ A=\mathrm{id} $
 </title>
@@ -1257,7 +1257,7 @@ $ 1 $
 <g id='eq57-page1'>
 <use x='0' y='0' xlink:href='#eq57-g0-49'/>
 </g>
-</svg>.</li></ul></section><section id="autotoc_md314"><h2><a href="#autotoc_md314">Assembly: how @f$ C_{sj} @f$ is computed exactly</a></h2><p>The identification assembler computes <svg class="m-math" style="width: 8.572em; height: 1.403em; vertical-align: -0.471em;" viewBox="0 -8.966376 82.293234 13.471637">
+</svg>.</li></ul></section><section id="autotoc_md316"><h2><a href="#autotoc_md316">Assembly: how @f$ C_{sj} @f$ is computed exactly</a></h2><p>The identification assembler computes <svg class="m-math" style="width: 8.572em; height: 1.403em; vertical-align: -0.471em;" viewBox="0 -8.966376 82.293234 13.471637">
 <title>
 $ C_{sj}=\ell_s^u(A(\varphi_j^v)) $
 </title>
@@ -1362,7 +1362,7 @@ $ A(v) $
 <use x='13.327672' y='0' xlink:href='#eq61-g0-118'/>
 <use x='19.415891' y='0' xlink:href='#eq61-g1-41'/>
 </g>
-</svg>, and queries <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#ac10ed89d40af768f3a1bb4be01f67a3f" class="m-doc">ShapeFunctionBase::<wbr />getBasis</a> for the selected master basis. That pointwise integration point carries a null quadrature-formula pointer, so no synthetic single-point quadrature rule is needed. During quadrature integration, callers should continue to use <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a6d5956759cd2c1a262ef25d3927ac3d2" class="m-doc">ShapeFunctionBase::<wbr />setIntegrationPoint</a> with the active quadrature formula and quadrature index so quadrature metadata remains available.</p><p>The slave FE decides where to sample the callable — point evaluation for Lagrange, an integral over the face for moment-based FEs, directional samples for RT/Nedelec — and the assembler does not branch on the FE type. This is what makes the implementation <strong>FES-generic</strong>: the only contracts used are <code>fes.getDOFs(face)</code>, <code>fes.getFiniteElement(face)</code>, <code>fe.getLinearForm(s)</code>, and <code>fes.getPullback(face, callable)</code>.</p></section><section id="autotoc_md315"><h2><a href="#autotoc_md315">Exactness, by construction</a></h2><p>Slave/master DOFs are paired by index on shared faces: <code>fes_u.getDOFs(faceDim, fi)</code> and <code>fes_v.getDOFs(faceDim, fi)</code> on the <em>same</em> face polytope. There is no geometric search, no tolerance, no <svg class="m-math" style="width: 0.571em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.478023 5.147373">
+</svg>, and queries <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#ac10ed89d40af768f3a1bb4be01f67a3f" class="m-doc">ShapeFunctionBase::<wbr />getBasis</a> for the selected master basis. That pointwise integration point carries a null quadrature-formula pointer, so no synthetic single-point quadrature rule is needed. During quadrature integration, callers should continue to use <a href="class_rodin_1_1_variational_1_1_shape_function_base.html#a6d5956759cd2c1a262ef25d3927ac3d2" class="m-doc">ShapeFunctionBase::<wbr />setIntegrationPoint</a> with the active quadrature formula and quadrature index so quadrature metadata remains available.</p><p>The slave FE decides where to sample the callable — point evaluation for Lagrange, an integral over the face for moment-based FEs, directional samples for RT/Nedelec — and the assembler does not branch on the FE type. This is what makes the implementation <strong>FES-generic</strong>: the only contracts used are <code>fes.getDOFs(face)</code>, <code>fes.getFiniteElement(face)</code>, <code>fe.getLinearForm(s)</code>, and <code>fes.getPullback(face, callable)</code>.</p></section><section id="autotoc_md317"><h2><a href="#autotoc_md317">Exactness, by construction</a></h2><p>Slave/master DOFs are paired by index on shared faces: <code>fes_u.getDOFs(faceDim, fi)</code> and <code>fes_v.getDOFs(faceDim, fi)</code> on the <em>same</em> face polytope. There is no geometric search, no tolerance, no <svg class="m-math" style="width: 0.571em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 5.478023 5.147373">
 <title>
 $ \varepsilon $
 </title>
@@ -1372,7 +1372,7 @@ $ \varepsilon $
 <g id='eq62-page1'>
 <use x='0' y='0' xlink:href='#eq62-g0-34'/>
 </g>
-</svg> anywhere. Coefficient pruning uses strict <code>&quot;c != 0&quot;</code> so that exact zeros from Lagrange duality (or from component projections) are eliminated bit-for-bit. For a cross-face periodic relation use <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">Rodin::<wbr />Variational::<wbr />PeriodicBC</a>, which takes an explicit DOF adjacency map.</p></section><section id="autotoc_md316"><h2><a href="#autotoc_md316">Linear-system effect</a></h2><p>For each slave global index <svg class="m-math" style="width: 0.992em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 9.521226 7.47198">
+</svg> anywhere. Coefficient pruning uses strict <code>&quot;c != 0&quot;</code> so that exact zeros from Lagrange duality (or from component projections) are eliminated bit-for-bit. For a cross-face periodic relation use <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">Rodin::<wbr />Variational::<wbr />PeriodicBC</a>, which takes an explicit DOF adjacency map.</p></section><section id="autotoc_md318"><h2><a href="#autotoc_md318">Linear-system effect</a></h2><p>For each slave global index <svg class="m-math" style="width: 0.992em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 9.521226 7.47198">
 <title>
 $ g_s $
 </title>

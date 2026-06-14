@@ -82,8 +82,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md414">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md415">Usage Example</a></li>
+            <li><a href="#autotoc_md416">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md417">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -147,7 +147,7 @@ $ u^- $
 <use x='0' y='0' xlink:href='#eq3-g1-117'/>
 <use x='6.66244' y='-4.338437' xlink:href='#eq3-g0-0'/>
 </g>
-</svg> denote the values from the two sides of the interface (with a chosen orientation).</p><section id="autotoc_md414"><h3><a href="#autotoc_md414">Mathematical Foundation</a></h3><p>In Discontinuous Galerkin (DG) methods, functions are allowed to be discontinuous across element interfaces. The jump operator captures this discontinuity and is used in:</p><ul><li><strong>Interior Penalty terms</strong>: <svg class="m-math" style="width: 7.217em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 69.285604 15.18763">
+</svg> denote the values from the two sides of the interface (with a chosen orientation).</p><section id="autotoc_md416"><h3><a href="#autotoc_md416">Mathematical Foundation</a></h3><p>In Discontinuous Galerkin (DG) methods, functions are allowed to be discontinuous across element interfaces. The jump operator captures this discontinuity and is used in:</p><ul><li><strong>Interior Penalty terms</strong>: <svg class="m-math" style="width: 7.217em; height: 1.582em; vertical-align: -0.581em;" viewBox="0 -9.630618 69.285604 15.18763">
 <title>
 $ \int_{\Gamma_h} [\![u]\!] \cdot [\![v]\!] \, ds $
 </title>
@@ -269,7 +269,7 @@ $ \Gamma_h $
 <use x='0' y='0' xlink:href='#eq7-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq7-g0-104'/>
 </g>
-</svg> denotes the set of interior faces.</p></section><section id="autotoc_md415"><h3><a href="#autotoc_md415">Usage Example</a></h3><pre class="m-code"><span class="c1">// Evaluate jump of a function on an interface</span>
+</svg> denotes the set of interior faces.</p></section><section id="autotoc_md417"><h3><a href="#autotoc_md417">Usage Example</a></h3><pre class="m-code"><span class="c1">// Evaluate jump of a function on an interface</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">jump_u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jump</span><span class="p">(</span><span class="n">u</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a></p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
