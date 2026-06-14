@@ -210,7 +210,8 @@ namespace Rodin::Solver
 
     private:
       static PetscErrorCode Update(::Vec x, void* ctx);
-      static PetscErrorCode Assemble(::Vec x, void* ctx);
+      static PetscErrorCode Assemble(
+          ::Vec x, void* ctx, Variational::AssemblyTarget target);
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
@@ -223,7 +224,8 @@ namespace Rodin::Solver
       ::PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
                  m_maxF;     ///< Maximum function evaluations.
       StateUpdate m_update; ///< Optional state synchronization callback.
-      Optional<::PetscObjectState> m_assembled;
+      Optional<::PetscObjectState> m_lhsAssembled;
+      Optional<::PetscObjectState> m_rhsAssembled;
       Optional<::PetscObjectState> m_updated;
   };
 }

@@ -1,4 +1,6 @@
 #include <cassert>
+#include <cstring>
+#include <string>
 #include <petscmat.h>
 #include <petscvec.h>
 #include <utility>
@@ -133,17 +135,20 @@ namespace Rodin::Solver
     if (self->m_update)
       self->m_update(x);
     self->m_updated = state;
-    self->m_assembled.reset();
 #else
     if (self->m_update)
       self->m_update(x);
     self->m_updated.reset();
-    self->m_assembled.reset();
 #endif
+    self->m_lhsAssembled.reset();
+    self->m_rhsAssembled.reset();
     return PETSC_SUCCESS;
   }
 
-  PetscErrorCode SNES::Assemble(::Vec x, void* ctx)
+  PetscErrorCode SNES::Assemble(
+      ::Vec x,
+      void* ctx,
+      Variational::AssemblyTarget target)
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
@@ -155,13 +160,18 @@ namespace Rodin::Solver
     ierr = VecGetState(x, &state);
     if (ierr)
       return ierr;
-    if (self->m_assembled && *self->m_assembled == state)
+
+    auto& assembled =
+      target == Variational::AssemblyTarget::LHS
+        ? self->m_lhsAssembled
+        : self->m_rhsAssembled;
+    if (assembled && *assembled == state)
       return PETSC_SUCCESS;
 #endif
     auto& problem = self->getProblem();
-    problem.assemble();
+    problem.assemble(target);
 #if PETSC_VERSION_GE(3, 20, 0)
-    self->m_assembled = state;
+    assembled = state;
 #endif
     return PETSC_SUCCESS;
   }
@@ -170,7 +180,7 @@ namespace Rodin::Solver
   {
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
-    PetscErrorCode ierr = Assemble(x, ctx);
+    PetscErrorCode ierr = Assemble(x, ctx, Variational::AssemblyTarget::RHS);
     if (ierr)
       return ierr;
     auto& problem = self->getProblem();
@@ -188,7 +198,7 @@ namespace Rodin::Solver
     auto* self = static_cast<SNES*>(ctx);
     assert(self);
 
-    PetscErrorCode ierr = Assemble(x, ctx);
+    PetscErrorCode ierr = Assemble(x, ctx, Variational::AssemblyTarget::LHS);
     if (ierr)
       return ierr;
 
@@ -218,7 +228,8 @@ namespace Rodin::Solver
     PetscErrorCode ierr;
 
     m_updated.reset();
-    m_assembled.reset();
+    m_lhsAssembled.reset();
+    m_rhsAssembled.reset();
 
     ierr = SNESSetType(m_snes, m_type);
     assert(ierr == PETSC_SUCCESS);
@@ -229,6 +240,38 @@ namespace Rodin::Solver
     ierr = SNESSetFromOptions(m_snes);
     assert(ierr == PETSC_SUCCESS);
 
+    // Wire the stored field-split index sets into the inner KSP's PC when the
+    // runtime PC is fieldsplit. This mirrors KSP::solve so block/Schur
+    // preconditioners (e.g. -pc_type fieldsplit ...) work in the Newton path
+    // too. With any other PC type the splits are simply ignored.
+    {
+      ::KSP innerKSP = PETSC_NULLPTR;
+      ierr = SNESGetKSP(m_snes, &innerKSP);
+      assert(ierr == PETSC_SUCCESS);
+
+      ::PC pc = PETSC_NULLPTR;
+      ierr = KSPGetPC(innerKSP, &pc);
+      assert(ierr == PETSC_SUCCESS);
+
+      const char* pctype = nullptr;
+      ierr = PCGetType(pc, &pctype);
+      assert(ierr == PETSC_SUCCESS);
+
+      if (pctype && std::strcmp(pctype, PCFIELDSPLIT) == 0)
+      {
+        const auto& splits = this->getProblem().getLinearSystem().getFieldSplits();
+        for (size_t k = 0; k < splits.size(); ++k)
+        {
+          const auto& s = splits[k];
+          assert(s.is);
+          const std::string name =
+            !s.name.empty() ? s.name : std::to_string(k);
+          ierr = PCFieldSplitSetIS(pc, name.c_str(), s.is);
+          assert(ierr == PETSC_SUCCESS);
+        }
+      }
+    }
+
     ierr = SNESSolve(m_snes, PETSC_NULLPTR, x);
     assert(ierr == PETSC_SUCCESS);
 
@@ -236,7 +279,8 @@ namespace Rodin::Solver
     assert(ierr == PETSC_SUCCESS);
 
     // State is synchronized, but no assembled system should be trusted after solve.
-    m_assembled.reset();
+    m_lhsAssembled.reset();
+    m_rhsAssembled.reset();
   }
 
   ::SNES& SNES::getHandle() noexcept

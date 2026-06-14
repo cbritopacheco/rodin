@@ -44,6 +44,19 @@ namespace Rodin::Variational
   };
 
   /**
+   * @brief Target for partial problem assembly.
+   *
+   * The default zero-argument Problem::assemble() assembles the full linear
+   * system. This target selects one side of the system for backends that can
+   * assemble the operator and vector independently.
+   */
+  enum class AssemblyTarget
+  {
+    LHS, ///< Assemble the left-hand-side operator only.
+    RHS  ///< Assemble the right-hand-side vector only.
+  };
+
+  /**
    * @brief Shorthand variable for ShapeFunctionSpaceType::Trial.
    */
   static constexpr const ShapeFunctionSpaceType TrialSpace = ShapeFunctionSpaceType::Trial;
