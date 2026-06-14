@@ -45,7 +45,6 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
-#include "WNGIR.h"
 
 #include <algorithm>
 #include <array>
@@ -981,99 +980,39 @@ int main(int argc, char** argv)
     const char* convergedReason  = "no";
 
     {
-      // Robust WNGIR (WNGIR.h). The
-      // advected phi_h is DISCRETE, so moved-point evaluation needs a
-      // point locator. Uniform-grid bin accelerator: bin each cell by
-      // its bounding box once per frame, locate y by bin + neighbour
-      // search with the inverse polytope map.
-      const int nbins = static_cast<int>(n);
-      std::vector<std::vector<Index>> bins(
-          static_cast<std::size_t>(nbins) * nbins);
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-      {
-        const auto& cvs = cellIt->getVertices();
-        Real xmin = 1e30, xmax = -1e30, ymin = 1e30, ymax = -1e30;
-        for (int t = 0; t < 3; ++t)
-        {
-          const Vec2 P = mesh.getVertexCoordinates(cvs[t]);
-          xmin = std::min(xmin, P(0)); xmax = std::max(xmax, P(0));
-          ymin = std::min(ymin, P(1)); ymax = std::max(ymax, P(1));
-        }
-        const int i0 = std::clamp(int(xmin * nbins), 0, nbins - 1);
-        const int i1 = std::clamp(int(xmax * nbins), 0, nbins - 1);
-        const int j0 = std::clamp(int(ymin * nbins), 0, nbins - 1);
-        const int j1 = std::clamp(int(ymax * nbins), 0, nbins - 1);
-        for (int i = i0; i <= i1; ++i)
-          for (int j = j0; j <= j1; ++j)
-            bins[static_cast<std::size_t>(i) * nbins + j]
-              .push_back(cellIt->getIndex());
-      }
-      auto locateCell =
-        [&](const Vec2& y, Math::SpatialPoint& rcOut) -> Index
-      {
-        const int bi = std::clamp(int(y(0) * nbins), 0, nbins - 1);
-        const int bj = std::clamp(int(y(1) * nbins), 0, nbins - 1);
-        constexpr Real tol = Real(1e-9);
-        for (int di = -1; di <= 1; ++di)
-          for (int dj = -1; dj <= 1; ++dj)
-          {
-            const int ii = bi + di, jj = bj + dj;
-            if (ii < 0 || jj < 0 || ii >= nbins || jj >= nbins)
-              continue;
-            for (const Index ci :
-                 bins[static_cast<std::size_t>(ii) * nbins + jj])
-            {
-              const auto cIt = mesh.getCell(ci);
-              Math::SpatialPoint Y(2);
-              Y(0) = y(0); Y(1) = y(1);
-              cIt->getTransformation().inverse(rcOut, Y);
-              if (rcOut(0) >= -tol && rcOut(1) >= -tol
-                  && rcOut(0) + rcOut(1) <= Real(1) + tol)
-                return ci;
-            }
-          }
-        return std::numeric_limits<Index>::max();
-      };
-      auto phiAtY = [&](const Vec2& y) -> Real
-      {
-        Math::SpatialPoint rc(2);
-        const Index ci = locateCell(y, rc);
-        if (ci == std::numeric_limits<Index>::max())
-          return Real(1);  // outside the mesh: exterior sign.
-        const auto cIt = mesh.getCell(ci);
-        Math::SpatialPoint Y(2);
-        Y(0) = y(0); Y(1) = y(1);
-        return phiH.getValue(Geometry::Point(*cIt, rc, Y));
-      };
-      auto gradAtY = [&](const Vec2& y) -> Vec2
-      {
-        Math::SpatialPoint rc(2);
-        const Index ci = locateCell(y, rc);
-        if (ci == std::numeric_limits<Index>::max())
-          return vec2(Real(1), Real(0));
-        const auto cIt = mesh.getCell(ci);
-        Math::SpatialPoint Y(2);
-        Y(0) = y(0); Y(1) = y(1);
-        const auto g =
-          gradPhiSmoothed.getValue(Geometry::Point(*cIt, rc, Y));
-        return vec2(g(0), g(1));
-      };
+      // Robust WNGIR (Rodin/Adaptation/WNGIR.h). The
+      // advected phi_h is DISCRETE. WNGIR owns moved-point location and
+      // evaluates these Rodin function objects at Geometry::Point values.
 
       u.getData().setZero();
-      Rodin::Examples::WNGIRParameters wngir;
+      Rodin::Adaptation::WNGIRParameters wngir;
       wngir.h = h;
       wngir.maxIterations =
         parseSizeTOption(argc, argv, "wngir-max-iters", 200);
-      wngir.quadratureOrder = 2;
+      wngir.quadratureOrder =
+        parseSizeTOption(argc, argv, "quad-order", 4);
+      wngir.andersonMemory =
+        parseSizeTOption(argc, argv, "wngir-aa-memory", wngir.andersonMemory);
+      wngir.andersonStart =
+        parseSizeTOption(argc, argv, "wngir-aa-start", wngir.andersonStart);
+      wngir.andersonDamping =
+        parseRealOption(argc, argv, "wngir-aa-damping", wngir.andersonDamping);
+      wngir.andersonMinDamping =
+        parseRealOption(argc, argv, "wngir-aa-min-damping", wngir.andersonMinDamping);
+      wngir.hasInterfaceAttribute = true;
+      wngir.interfaceAttribute = interfaceAttribute;
       wngir.trace = hasFlag(argc, argv, "wngir-trace");
-      const auto wngirRep = Rodin::Examples::solveWNGIR(
-          mesh, u, interfaceFacets, phiAtY, gradAtY, wngir);
+      Rodin::Adaptation::WNGIR wngirSolver(u);
+      wngirSolver.setParameters(wngir);
+      const auto wngirRep =
+        wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations
                 << std::scientific << std::setprecision(2)
-                << "  force=" << wngirRep.tForce
-                << "  barrier=" << wngirRep.tBarrier
-                << "  factor=" << wngirRep.tFactor
+                << "  assembly=" << wngirRep.tAssembly
+                << "  setup=" << wngirRep.tFactor
                 << "  solve=" << wngirRep.tSolve
+                << "  cgIt=" << wngirRep.linearIterations
+                << "  cgErr=" << wngirRep.linearError
                 << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       itCount = wngirRep.iterations;

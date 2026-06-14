@@ -27,6 +27,7 @@
 #include "Adaptation/LSRRegistration.h"
 #include "Adaptation/LSRReport.h"
 #include "Adaptation/LevelSetRegistration.h"
+#include "Adaptation/WNGIR.h"
 #include "Adaptation/JacobianAdmissibilityBarrier.h"
 #include "Adaptation/JacobianAdmissibilityBarrierSampled.h"
 

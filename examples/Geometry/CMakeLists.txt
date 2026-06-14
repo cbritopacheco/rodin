@@ -31,6 +31,13 @@ target_link_libraries(LevelSetWNGIRReconstructionP2
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetWNGIRReconstruction3D LevelSetWNGIRReconstruction3D.cpp)
+target_link_libraries(LevelSetWNGIRReconstruction3D
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(LevelSetWNGIRSweep LevelSetWNGIRSweep.cpp)
 target_link_libraries(LevelSetWNGIRSweep
   PUBLIC

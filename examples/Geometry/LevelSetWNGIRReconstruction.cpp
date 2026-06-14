@@ -25,7 +25,6 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
 
-#include "WNGIR.h"
 
 #include <algorithm>
 #include <array>
@@ -85,8 +84,7 @@ namespace
   void updateMovedMeshFromDisplacement(
       const LocalMesh& mesh,
       LocalMesh& moved,
-      const Displacement& u,
-      Real p2GeometryHighOrderScale = Real(1))
+      const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
     const auto& uData = u.getData();
@@ -107,15 +105,7 @@ namespace
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
-      const auto& vertices = cell.getVertices();
       Geometry::PointCloud pm(2, geomFe.getCount());
-      std::array<Vec2, 3> yVertex;
-      for (std::size_t v = 0; v < 3; ++v)
-      {
-        const Vec2 x = mesh.getVertexCoordinates(vertices[v]);
-        const auto& dofs = uFes.getDOFs(0, vertices[v]);
-        yVertex[v] = vec2(x(0) + uData(dofs[0]), x(1) + uData(dofs[1]));
-      }
       for (std::size_t a = 0; a < geomFe.getCount(); ++a)
       {
         const auto& rc = geomFe.getNode(a);
@@ -124,16 +114,8 @@ namespace
           uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
         const Real uy =
           uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
-        const Vec2 yFull = vec2(X(0) + ux, X(1) + uy);
-        const Real lambda0 = Real(1) - rc(0) - rc(1);
-        const Real lambda1 = rc(0);
-        const Real lambda2 = rc(1);
-        const Vec2 yLinear =
-          lambda0 * yVertex[0] + lambda1 * yVertex[1] + lambda2 * yVertex[2];
-        const Vec2 y =
-          yLinear + p2GeometryHighOrderScale * (yFull - yLinear);
-        pm(0, a) = y(0);
-        pm(1, a) = y(1);
+        pm(0, a) = X(0) + ux;
+        pm(1, a) = X(1) + uy;
       }
       moved.setPolytopeTransformation(
           {D, cell.getIndex()},
@@ -396,7 +378,7 @@ int main(int argc, char** argv)
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.008));
   const std::size_t maxIterations =
-    parseSizeTOption(argc, argv, "wngir-steps", 25);
+    parseSizeTOption(argc, argv, "wngir-steps", 120);
   const Real fitTol =
     parseRealOption(argc, argv, "fit-tol", Real(4) * h * h);
   const Real stepTol =
@@ -429,12 +411,9 @@ int main(int argc, char** argv)
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
   const Real kWNGIRBetaMax =
     parseRealOption(argc, argv, "wngir-beta-max", Real(10));
-  const Real kP2GeometryHighOrderScale =
-    parseRealOption(argc, argv, "p2-geometry-high-order-scale", Real(0.25));
 #else
   const Real kWNGIRBetaMax =
     parseRealOption(argc, argv, "wngir-beta-max", Real(50));
-  const Real kP2GeometryHighOrderScale = Real(0);
 #endif
   const Real kWNGIRGammaJ =
     parseRealOption(argc, argv, "wngir-gamma-j", Real(1));
@@ -448,6 +427,15 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "wngir-s0j", Real(0.25));
   const Real kWNGIRS0Q =
     parseRealOption(argc, argv, "wngir-s0q", Real(2));
+  // Hinge quality regularizer: penalize Q_rel above a good threshold.
+  const Real kWNGIRGammaQual =
+    parseRealOption(argc, argv, "wngir-gamma-qual", Real(0));
+  const Real kWNGIRQStar =
+    parseRealOption(argc, argv, "wngir-qstar", Real(2));
+  const Real kWNGIRGammaSize =
+    parseRealOption(argc, argv, "wngir-gamma-size", Real(0));
+  const Real kWNGIRJStar =
+    parseRealOption(argc, argv, "wngir-jstar", Real(0.2));
   const Real kWNGIROmegaMin =
     parseRealOption(argc, argv, "wngir-omega-min", Real(0.1));
   const Real kWNGIRAlphaMin =
@@ -462,7 +450,7 @@ int main(int argc, char** argv)
   const Real jSafeRatio = parseRealOption(argc, argv, "j-safe", Real(1e-3));
   const Real jLineSearchRatio =
     parseRealOption(argc, argv, "j-ls", std::max(jMinRatio, Real(10) * jSafeRatio));
-  const std::size_t qOrder = parseSizeTOption(argc, argv, "quad-order", 2);
+  const std::size_t qOrder = parseSizeTOption(argc, argv, "quad-order", 4);
   const bool verbose = hasFlag(argc, argv, "verbose");
   const bool trace = hasFlag(argc, argv, "trace");
 
@@ -559,11 +547,7 @@ int main(int argc, char** argv)
             << "  center=(" << cx << ", " << cy << ")"
             << "  phase=" << phase
             << "  wngirEll=" << kWNGIREllM
-            << "  betaMax=" << kWNGIRBetaMax
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-            << "  p2GeomScale=" << kP2GeometryHighOrderScale
-#endif
-            << '\n';
+            << "  betaMax=" << kWNGIRBetaMax << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -739,7 +723,7 @@ int main(int argc, char** argv)
 
     const char* exitReason = "iter-budget";
     {
-      Rodin::Examples::WNGIRParameters wngir;
+      Rodin::Adaptation::WNGIRParameters wngir;
       wngir.h = h;
       wngir.gammaM = kWNGIRGammaM;
       wngir.gammaH = kWNGIRGammaH;
@@ -750,6 +734,10 @@ int main(int argc, char** argv)
       wngir.gammaQ = kWNGIRGammaQ;
       wngir.jSafe = kWNGIRJSafe;
       wngir.qMax = kWNGIRQMax;
+      wngir.gammaQual = kWNGIRGammaQual;
+      wngir.qStar = kWNGIRQStar;
+      wngir.gammaSize = kWNGIRGammaSize;
+      wngir.jStar = kWNGIRJStar;
       wngir.s0J = kWNGIRS0J;
       wngir.s0Q = kWNGIRS0Q;
       wngir.omegaMin = kWNGIROmegaMin;
@@ -763,18 +751,28 @@ int main(int argc, char** argv)
       wngir.stepTol = stepTol;
       wngir.maxIterations = maxIterations;
       wngir.quadratureOrder = qOrder;
+      wngir.andersonMemory =
+        parseSizeTOption(argc, argv, "wngir-aa-memory", wngir.andersonMemory);
+      wngir.andersonStart =
+        parseSizeTOption(argc, argv, "wngir-aa-start", wngir.andersonStart);
+      wngir.andersonDamping =
+        parseRealOption(argc, argv, "wngir-aa-damping", wngir.andersonDamping);
+      wngir.andersonMinDamping =
+        parseRealOption(argc, argv, "wngir-aa-min-damping", wngir.andersonMinDamping);
+      wngir.hasInterfaceAttribute = true;
+      wngir.interfaceAttribute = interfaceAttribute;
       wngir.trace = trace;
-      const auto wngirRep = Rodin::Examples::solveWNGIR(
-          mesh, u, interfaceFacets,
-          [&](const Vec2& y) { return levelSet.phi(y); },
-          [&](const Vec2& y) { return levelSet.grad(y); },
-          wngir);
+      Rodin::Adaptation::WNGIR wngirSolver(u);
+      wngirSolver.setParameters(wngir);
+      const auto wngirRep = wngirSolver.solve(
+          mesh, interfaceFacets, phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations
                 << std::scientific << std::setprecision(2)
-                << "  force=" << wngirRep.tForce
-                << "  barrier=" << wngirRep.tBarrier
-                << "  factor=" << wngirRep.tFactor
+                << "  assembly=" << wngirRep.tAssembly
+                << "  setup=" << wngirRep.tFactor
                 << "  solve=" << wngirRep.tSolve
+                << "  cgIt=" << wngirRep.linearIterations
+                << "  cgErr=" << wngirRep.linearError
                 << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       iterations = wngirRep.iterations;
@@ -818,8 +816,7 @@ int main(int argc, char** argv)
       phaseMoment.getData()(dof) = cellMoments[local].moment;
     }
 
-    updateMovedMeshFromDisplacement(
-        mesh, moved, u, kP2GeometryHighOrderScale);
+    updateMovedMeshFromDisplacement(mesh, moved, u);
     for (Index i = 0; i < static_cast<Index>(mesh.getCellCount()); ++i)
     {
       if (const auto a = mesh.getAttribute(D, i))

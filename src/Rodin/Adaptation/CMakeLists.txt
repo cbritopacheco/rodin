@@ -15,6 +15,7 @@ set(RodinAdaptation_HEADERS
   LSRRegistration.h
   LSRReport.h
   LevelSetRegistration.h
+  WNGIR.h
   JacobianAdmissibilityBarrier.h
 )
 

@@ -22,7 +22,6 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
 
-#include "WNGIR.h"
 
 #include <algorithm>
 #include <array>
@@ -325,7 +324,7 @@ int main(int argc, char** argv)
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.008));
   const std::size_t maxIterations =
-    parseSizeTOption(argc, argv, "wngir-steps", 25);
+    parseSizeTOption(argc, argv, "wngir-steps", 120);
   const Real fitTol =
     parseRealOption(argc, argv, "fit-tol", Real(4) * h * h);
   const Real stepTol =
@@ -379,7 +378,7 @@ int main(int argc, char** argv)
   const Real jSafeRatio = parseRealOption(argc, argv, "j-safe", Real(1e-3));
   const Real jLineSearchRatio =
     parseRealOption(argc, argv, "j-ls", std::max(jMinRatio, Real(10) * jSafeRatio));
-  const std::size_t qOrder = parseSizeTOption(argc, argv, "quad-order", 2);
+  const std::size_t qOrder = parseSizeTOption(argc, argv, "quad-order", 4);
   const bool verbose = hasFlag(argc, argv, "verbose");
   const bool trace = hasFlag(argc, argv, "trace");
 
@@ -635,7 +634,7 @@ int main(int argc, char** argv)
 
     const char* exitReason = "iter-budget";
     {
-      Rodin::Examples::WNGIRParameters wngir;
+      Rodin::Adaptation::WNGIRParameters wngir;
       wngir.h = h;
       wngir.gammaM = kWNGIRGammaM;
       wngir.gammaH = kWNGIRGammaH;
@@ -657,18 +656,28 @@ int main(int argc, char** argv)
       wngir.stepTol = stepTol;
       wngir.maxIterations = maxIterations;
       wngir.quadratureOrder = qOrder;
+      wngir.andersonMemory =
+        parseSizeTOption(argc, argv, "wngir-aa-memory", wngir.andersonMemory);
+      wngir.andersonStart =
+        parseSizeTOption(argc, argv, "wngir-aa-start", wngir.andersonStart);
+      wngir.andersonDamping =
+        parseRealOption(argc, argv, "wngir-aa-damping", wngir.andersonDamping);
+      wngir.andersonMinDamping =
+        parseRealOption(argc, argv, "wngir-aa-min-damping", wngir.andersonMinDamping);
+      wngir.hasInterfaceAttribute = true;
+      wngir.interfaceAttribute = interfaceAttribute;
       wngir.trace = trace;
-      const auto wngirRep = Rodin::Examples::solveWNGIR(
-          mesh, u, interfaceFacets,
-          [&](const Vec2& y) { return levelSet.phi(y); },
-          [&](const Vec2& y) { return levelSet.grad(y); },
-          wngir);
+      Rodin::Adaptation::WNGIR wngirSolver(u);
+      wngirSolver.setParameters(wngir);
+      const auto wngirRep = wngirSolver.solve(
+          mesh, interfaceFacets, phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations
                 << std::scientific << std::setprecision(2)
-                << "  force=" << wngirRep.tForce
-                << "  barrier=" << wngirRep.tBarrier
-                << "  factor=" << wngirRep.tFactor
+                << "  assembly=" << wngirRep.tAssembly
+                << "  setup=" << wngirRep.tFactor
                 << "  solve=" << wngirRep.tSolve
+                << "  cgIt=" << wngirRep.linearIterations
+                << "  cgErr=" << wngirRep.linearError
                 << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       iterations = wngirRep.iterations;
