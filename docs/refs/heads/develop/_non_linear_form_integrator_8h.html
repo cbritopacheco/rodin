@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solid::TractionForce class | Rodin</title>
+  <title>Rodin/Variational/NonLinearFormIntegrator.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,77 +74,40 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>TractionForce <span class="m-thin">class</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_traction_force_8h.html">&lt;Rodin/Solid/Integrators/TractionForce.h&gt;</a></div>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>NonLinearFormIntegrator.h <span class="m-thin">file</span>
         </h1>
-        <p>Describes a traction (surface force) boundary condition.</p>
+        <p>CRTP mixin providing the nonlinear form integrator interface.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>In a <a href="namespace_rodin.html" class="m-doc">Rodin</a> variational formulation:</p><pre class="m-code"><span class="n">VectorFunction</span><span class="w"> </span><span class="n">t</span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
-<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span>
-<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">BoundaryIntegral</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">);</span></pre><p>The <a href="class_rodin_1_1_solid_1_1_traction_force.html" class="m-doc">TractionForce</a> class provides semantic clarity:</p><pre class="m-code"><span class="n">TractionForce</span><span class="w"> </span><span class="nf">traction</span><span class="p">({</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">});</span>
-<span class="c1">// traction.getValue() returns the traction vector</span></pre>
-        <section id="typeless-methods">
-          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+<p>Any class that models a nonlinear weak form contribution should inherit from this mixin and implement:</p><ul><li><code>Residual(v)</code> — returns a LinearFormIntegrator</li><li><code>Tangent(u, v)</code> — returns a BilinearFormIntegrator</li></ul><p>The mixin then provides <code>operator()(u, v)</code> for free, which returns a ProblemBody containing both contributions — suitable for direct use in a Problem assignment expression.</p>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
+            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+          </dl>
+        </section>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a54534bed6d2f77742fdc8ea0a64ae835" class="m-doc">TractionForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; traction)</span>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_non_linear_form_integrator.html" class="m-doc">Rodin::Variational::NonLinearFormIntegrator</a>
             </dt>
-            <dd>Constructs a traction force from a constant vector.</dd>
+            <dd>CRTP mixin for nonlinear form integrators.</dd>
           </dl>
-        </section>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
-          <dl class="m-doc">
-            <dt id="ae2e9fe2e49a87c423981263bfa47e15d">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae2e9fe2e49a87c423981263bfa47e15d" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;</span>
-            </dt>
-            <dd>Gets the traction vector.</dd>
-            <dt id="adeb1e756428e0833ca851f83b3afd90f">
-              <span class="m-doc-wrap-bumper">auto <a href="#adeb1e756428e0833ca851f83b3afd90f" class="m-doc-self">setValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; traction) -&gt; <a href="class_rodin_1_1_solid_1_1_traction_force.html" class="m-doc">TractionForce</a>&amp;</span>
-            </dt>
-            <dd>Sets the traction vector.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a54534bed6d2f77742fdc8ea0a64ae835"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />TractionForce::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54534bed6d2f77742fdc8ea0a64ae835" class="m-doc-self">TractionForce</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; traction)</span></span>
-            </h3>
-            <p>Constructs a traction force from a constant vector.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">traction</td>
-                  <td>Traction vector <svg class="m-math" style="width: 0.545em; height: 0.791em; vertical-align: -0.000em;" viewBox="0 -7.590588 5.230386 7.590588">
-<title>
-$ \mathbf{t} $
-</title>
-<defs>
-<path id='eq1-g0-116' d='M2.52254-4.794022H4.244085V-5.308095H2.52254V-7.591532H2.020423C2.008468-6.40797 1.43462-5.224408 .251059-5.188543V-4.794022H1.219427V-1.470486C1.219427-.203238 2.199751 .071731 3.060523 .071731C3.945205 .071731 4.471233-.597758 4.471233-1.482441V-2.116065H3.969116V-1.494396C3.969116-.705355 3.610461-.358655 3.239851-.358655C2.52254-.358655 2.52254-1.159651 2.52254-1.43462V-4.794022Z'/>
-</defs>
-<g id='eq1-page1'>
-<use x='0' y='0' xlink:href='#eq1-g0-116'/>
-</g>
-</svg></td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
         </section>
       </div>
     </div>

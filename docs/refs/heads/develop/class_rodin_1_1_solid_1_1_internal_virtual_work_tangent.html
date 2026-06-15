@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Solid::MaterialTangent class | Rodin</title>
+  <title>Rodin::Solid::InternalVirtualWorkTangent class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,11 +74,11 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_material_tangent_8h.html">&lt;Rodin/Solid/Integrators/MaterialTangent.h&gt;</a></div>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
           <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>MaterialTangent <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>InternalVirtualWorkTangent <span class="m-thin">class</span>
         </h1>
-        <p>Local bilinear form integrator for the material tangent stiffness in hyperelastic problems.</p>
+        <p>Local bilinear form integrator for the internal virtual work tangent in hyperelastic problems.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -114,20 +114,21 @@
             </li>
           </ul>
         </nav>
-<p>Computes the element-level tangent stiffness matrix:</p><div class="m-math"><svg style="width: 15.178em; height: 2.819em;" viewBox="121.415587 -27.065451 145.711836 27.065451">
+<p>Computes the element-level tangent stiffness matrix:</p><div class="m-math"><svg style="width: 16.164em; height: 2.819em;" viewBox="116.683272 -27.065451 155.176465 27.065451">
 <title>
 \[
-  K^e_{ij} = \int_{K} D\mathbf{P}[\nabla \phi_j] : \nabla \phi_i \, dX
+  K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
 \]
 </title>
 <defs>
+<path id='eq1-g5-48' d='M3.897385-2.542466C3.897385-3.395268 3.809714-3.913325 3.5467-4.423412C3.196015-5.124782 2.550436-5.300125 2.11208-5.300125C1.107846-5.300125 .74122-4.550934 .629639-4.327771C.342715-3.745953 .326775-2.956912 .326775-2.542466C.326775-2.016438 .350685-1.211457 .73325-.573848C1.099875 .01594 1.689664 .167372 2.11208 .167372C2.494645 .167372 3.180075 .047821 3.57858-.74122C3.873474-1.315068 3.897385-2.024408 3.897385-2.542466ZM2.11208-.055791C1.841096-.055791 1.291158-.183313 1.123786-1.020174C1.036115-1.474471 1.036115-2.223661 1.036115-2.638107C1.036115-3.188045 1.036115-3.745953 1.123786-4.184309C1.291158-4.99726 1.912827-5.076961 2.11208-5.076961C2.383064-5.076961 2.933001-4.941469 3.092403-4.216189C3.188045-3.777833 3.188045-3.180075 3.188045-2.638107C3.188045-2.16787 3.188045-1.45056 3.092403-1.004234C2.925031-.167372 2.375093-.055791 2.11208-.055791Z'/>
 <path id='eq1-g2-114' d='M9.325031-7.902366C9.348941-7.938232 9.384807-8.021918 9.384807-8.069738C9.384807-8.153425 9.372852-8.16538 9.097883-8.16538H.848817C.573848-8.16538 .561893-8.153425 .561893-8.069738C.561893-8.021918 .597758-7.938232 .621669-7.902366L4.65056 .167372C4.734247 .32279 4.770112 .394521 4.97335 .394521S5.212453 .32279 5.296139 .167372L9.325031-7.902366ZM2.044334-7.304608H8.607721L5.332005-.729265L2.044334-7.304608Z'/>
 <path id='eq1-g0-80' d='M3.299626-3.646326H5.332005C7.328518-3.646326 8.440349-4.662516 8.440349-5.893898C8.440349-7.185056 7.304608-8.201245 5.332005-8.201245H.454296V-7.687173H1.721544V-.514072H.454296V0C.800996-.02391 2.080199-.02391 2.510585-.02391S4.220174-.02391 4.566874 0V-.514072H3.299626V-3.646326ZM4.901619-7.687173C6.75467-7.687173 6.75467-6.706849 6.75467-5.893898C6.75467-5.104857 6.75467-4.100623 4.901619-4.100623H3.239851V-7.687173H4.901619Z'/>
 <path id='eq1-g1-90' d='M1.243337 26.026401C1.625903 26.002491 1.829141 25.739477 1.829141 25.440598C1.829141 25.046077 1.530262 24.854795 1.255293 24.854795C.968369 24.854795 .669489 25.034122 .669489 25.452553C.669489 26.062267 1.267248 26.564384 1.996513 26.564384C3.813699 26.564384 4.495143 23.766874 5.34396 20.299875C6.264508 16.522042 7.041594 12.708344 7.687173 8.870735C8.129514 6.324284 8.571856 3.93325 8.978331 2.391034C9.121793 1.80523 9.528269 .263014 9.994521 .263014C10.365131 .263014 10.66401 .490162 10.711831 .537983C10.31731 .561893 10.114072 .824907 10.114072 1.123786C10.114072 1.518306 10.412951 1.709589 10.68792 1.709589C10.974844 1.709589 11.273724 1.530262 11.273724 1.111831C11.273724 .466252 10.628144 0 9.97061 0C9.062017 0 8.392528 1.303113 7.734994 3.741968C7.699128 3.873474 6.073225 9.874969 4.758157 17.693649C4.447323 19.52279 4.100623 21.519303 3.706102 23.181071C3.490909 24.053798 2.940971 26.30137 1.972603 26.30137C1.542217 26.30137 1.255293 26.026401 1.243337 26.026401Z'/>
-<path id='eq1-g5-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
-<path id='eq1-g5-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
-<path id='eq1-g5-91' d='M2.988792 2.988792V2.546451H1.829141V-8.524035H2.988792V-8.966376H1.3868V2.988792H2.988792Z'/>
-<path id='eq1-g5-93' d='M1.853051-8.966376H.251059V-8.524035H1.41071V2.546451H.251059V2.988792H1.853051V-8.966376Z'/>
+<path id='eq1-g6-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
+<path id='eq1-g6-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g6-91' d='M2.988792 2.988792V2.546451H1.829141V-8.524035H2.988792V-8.966376H1.3868V2.988792H2.988792Z'/>
+<path id='eq1-g6-93' d='M1.853051-8.966376H.251059V-8.524035H1.41071V2.546451H.251059V2.988792H1.853051V-8.966376Z'/>
 <path id='eq1-g3-75' d='M4.27995-3.203985C4.27198-3.219925 4.23213-3.299626 4.23213-3.307597C4.23213-3.323537 4.367621-3.419178 4.447323-3.474969C5.076961-3.937235 5.937733-4.558904 6.200747-4.726276C6.607223-4.98132 6.902117-5.148692 7.260772-5.180573C7.324533-5.188543 7.436115-5.196513 7.436115-5.339975C7.428144-5.395766 7.380324-5.443587 7.324533-5.443587C7.316563-5.443587 7.0934-5.419676 7.037609-5.419676H6.718804C6.583313-5.419676 6.38406-5.419676 6.312329-5.427646C6.256538-5.427646 5.945704-5.443587 5.889913-5.443587S5.72254-5.443587 5.72254-5.292154C5.72254-5.284184 5.730511-5.188543 5.850062-5.180573C5.913823-5.172603 6.041345-5.156663 6.041345-5.061021C6.041345-4.933499 5.881943-4.798007 5.866002-4.790037L5.802242-4.734247C5.778331-4.710336 5.746451-4.678456 5.7066-4.654545L2.454795-2.295392L3.084433-4.821918C3.156164-5.108842 3.172105-5.180573 3.753923-5.180573C3.913325-5.180573 4.008966-5.180573 4.008966-5.332005C4.008966-5.339975 4.000996-5.443587 3.873474-5.443587C3.722042-5.443587 3.53076-5.427646 3.379328-5.419676H2.87721C2.11208-5.419676 1.904857-5.443587 1.849066-5.443587C1.809215-5.443587 1.689664-5.443587 1.689664-5.292154C1.689664-5.180573 1.785305-5.180573 1.920797-5.180573C2.183811-5.180573 2.414944-5.180573 2.414944-5.053051C2.414944-5.021171 2.406974-5.0132 2.383064-4.909589L1.315068-.629639C1.243337-.326775 1.227397-.263014 .637609-.263014C.486177-.263014 .390535-.263014 .390535-.111582C.390535-.079701 .414446 0 .518057 0C.669489 0 .860772-.01594 1.012204-.02391H2.040349C2.16787-.01594 2.430884 0 2.550436 0C2.590286 0 2.709838 0 2.709838-.143462C2.709838-.263014 2.614197-.263014 2.478705-.263014C2.422914-.263014 2.311333-.263014 2.175841-.278954C2.008468-.294894 1.984558-.310834 1.984558-.390535C1.984558-.438356 2.040349-.637609 2.064259-.765131L2.367123-1.968618L3.650311-2.893151L4.606725-.924533C4.638605-.860772 4.726276-.68543 4.758157-.613699C4.805978-.533998 4.805978-.518057 4.805978-.486177C4.805978-.270984 4.511083-.263014 4.423412-.263014C4.343711-.263014 4.23213-.263014 4.23213-.111582C4.23213-.103611 4.2401 0 4.367621 0C4.447323 0 4.750187-.01594 4.821918-.02391H5.284184C6.017435-.02391 5.993524 0 6.097136 0C6.129016 0 6.248568 0 6.248568-.151432C6.248568-.263014 6.136986-.263014 6.089166-.263014C5.778331-.270984 5.67472-.326775 5.547198-.597758L4.27995-3.203985Z'/>
 <path id='eq1-g3-101' d='M1.601993-1.817186C1.777335-1.817186 2.375093-1.825156 2.797509-1.976588C3.490909-2.215691 3.514819-2.693898 3.514819-2.81345C3.514819-3.259776 3.092403-3.514819 2.574346-3.514819C1.673724-3.514819 .390535-2.805479 .390535-1.39477C.390535-.581818 .884682 .079701 1.761395 .079701C3.004732 .079701 3.674222-.71731 3.674222-.828892C3.674222-.900623 3.594521-.956413 3.5467-.956413S3.474969-.932503 3.435118-.884682C2.805479-.143462 1.912827-.143462 1.777335-.143462C1.195517-.143462 1.020174-.637609 1.020174-1.083935C1.020174-1.323039 1.091905-1.681694 1.123786-1.817186H1.601993ZM1.187547-2.040349C1.44259-3.012702 2.16787-3.291656 2.574346-3.291656C2.893151-3.291656 3.196015-3.132254 3.196015-2.81345C3.196015-2.040349 1.888917-2.040349 1.554172-2.040349H1.187547Z'/>
 <path id='eq1-g3-105' d='M2.375093-4.97335C2.375093-5.148692 2.247572-5.276214 2.064259-5.276214C1.857036-5.276214 1.625903-5.084932 1.625903-4.845828C1.625903-4.670486 1.753425-4.542964 1.936737-4.542964C2.14396-4.542964 2.375093-4.734247 2.375093-4.97335ZM1.211457-2.048319L.781071-.948443C.74122-.828892 .70137-.73325 .70137-.597758C.70137-.207223 1.004234 .079701 1.42665 .079701C2.199751 .079701 2.526526-1.036115 2.526526-1.139726C2.526526-1.219427 2.462765-1.243337 2.406974-1.243337C2.311333-1.243337 2.295392-1.187547 2.271482-1.107846C2.088169-.470237 1.761395-.143462 1.44259-.143462C1.346949-.143462 1.251308-.183313 1.251308-.398506C1.251308-.589788 1.307098-.73325 1.41071-.980324C1.490411-1.195517 1.570112-1.41071 1.657783-1.625903L1.904857-2.271482C1.976588-2.454795 2.072229-2.701868 2.072229-2.83736C2.072229-3.235866 1.753425-3.514819 1.346949-3.514819C.573848-3.514819 .239103-2.399004 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.239601 .494147-2.319303C.71731-3.076463 1.083935-3.291656 1.323039-3.291656C1.43462-3.291656 1.514321-3.251806 1.514321-3.028643C1.514321-2.948941 1.506351-2.83736 1.42665-2.598257L1.211457-2.048319Z'/>
@@ -139,57 +140,75 @@
 <path id='eq1-g4-100' d='M6.01345-7.998007C6.025405-8.045828 6.049315-8.117559 6.049315-8.177335C6.049315-8.296887 5.929763-8.296887 5.905853-8.296887C5.893898-8.296887 5.308095-8.249066 5.248319-8.237111C5.045081-8.225156 4.865753-8.201245 4.65056-8.18929C4.351681-8.16538 4.267995-8.153425 4.267995-7.938232C4.267995-7.81868 4.363636-7.81868 4.531009-7.81868C5.116812-7.81868 5.128767-7.711083 5.128767-7.591532C5.128767-7.519801 5.104857-7.424159 5.092902-7.388294L4.363636-4.483188C4.23213-4.794022 3.90934-5.272229 3.287671-5.272229C1.936737-5.272229 .478207-3.526775 .478207-1.75741C.478207-.573848 1.171606 .119552 1.984558 .119552C2.642092 .119552 3.203985-.394521 3.53873-.789041C3.658281-.083686 4.220174 .119552 4.578829 .119552S5.224408-.095641 5.439601-.526027C5.630884-.932503 5.798257-1.661768 5.798257-1.709589C5.798257-1.769365 5.750436-1.817186 5.678705-1.817186C5.571108-1.817186 5.559153-1.75741 5.511333-1.578082C5.332005-.872727 5.104857-.119552 4.614695-.119552C4.267995-.119552 4.244085-.430386 4.244085-.669489C4.244085-.71731 4.244085-.968369 4.327771-1.303113L6.01345-7.998007ZM3.598506-1.422665C3.53873-1.219427 3.53873-1.195517 3.371357-.968369C3.108344-.633624 2.582316-.119552 2.020423-.119552C1.530262-.119552 1.255293-.561893 1.255293-1.267248C1.255293-1.924782 1.625903-3.263761 1.853051-3.765878C2.259527-4.60274 2.82142-5.033126 3.287671-5.033126C4.076712-5.033126 4.23213-4.052802 4.23213-3.957161C4.23213-3.945205 4.196264-3.789788 4.184309-3.765878L3.598506-1.422665Z'/>
 </defs>
 <g id='eq1-page1'>
-<use x='121.415587' y='-10.793007' xlink:href='#eq1-g4-75'/>
-<use x='132.233266' y='-15.729193' xlink:href='#eq1-g3-101'/>
-<use x='131.3747' y='-7.837492' xlink:href='#eq1-g3-105'/>
-<use x='134.25784' y='-7.837492' xlink:href='#eq1-g3-106'/>
-<use x='141.960826' y='-10.793007' xlink:href='#eq1-g5-61'/>
-<use x='154.386307' y='-27.065451' xlink:href='#eq1-g1-90'/>
-<use x='161.028087' y='0' xlink:href='#eq1-g3-75'/>
-<use x='171.223254' y='-10.793007' xlink:href='#eq1-g4-68'/>
-<use x='181.267729' y='-10.793007' xlink:href='#eq1-g0-80'/>
-<use x='190.455508' y='-10.793007' xlink:href='#eq1-g5-91'/>
-<use x='193.707169' y='-10.793007' xlink:href='#eq1-g2-114'/>
+<use x='116.683272' y='-10.793007' xlink:href='#eq1-g4-75'/>
+<use x='127.500952' y='-15.729193' xlink:href='#eq1-g3-101'/>
+<use x='126.642385' y='-7.837492' xlink:href='#eq1-g3-105'/>
+<use x='129.525525' y='-7.837492' xlink:href='#eq1-g3-106'/>
+<use x='137.228511' y='-10.793007' xlink:href='#eq1-g6-61'/>
+<use x='149.653992' y='-27.065451' xlink:href='#eq1-g1-90'/>
+<use x='156.295773' y='0' xlink:href='#eq1-g3-75'/>
+<use x='166.490939' y='-10.793007' xlink:href='#eq1-g4-68'/>
+<use x='176.535414' y='-10.793007' xlink:href='#eq1-g0-80'/>
+<use x='185.723193' y='-10.793007' xlink:href='#eq1-g6-91'/>
+<use x='188.974854' y='-10.793007' xlink:href='#eq1-g2-114'/>
+<use x='198.937525' y='-8.999744' xlink:href='#eq1-g5-48'/>
 <use x='203.669839' y='-10.793007' xlink:href='#eq1-g4-30'/>
 <use x='210.597942' y='-8.999744' xlink:href='#eq1-g3-106'/>
-<use x='214.980099' y='-10.793007' xlink:href='#eq1-g5-93'/>
-<use x='221.552589' y='-10.793007' xlink:href='#eq1-g5-58'/>
+<use x='214.980099' y='-10.793007' xlink:href='#eq1-g6-93'/>
+<use x='221.552589' y='-10.793007' xlink:href='#eq1-g6-58'/>
 <use x='228.12508' y='-10.793007' xlink:href='#eq1-g2-114'/>
-<use x='238.08775' y='-10.793007' xlink:href='#eq1-g4-30'/>
-<use x='245.015852' y='-8.999744' xlink:href='#eq1-g3-105'/>
-<use x='250.389622' y='-10.793007' xlink:href='#eq1-g4-100'/>
-<use x='256.472315' y='-10.793007' xlink:href='#eq1-g4-88'/>
+<use x='238.08775' y='-8.999744' xlink:href='#eq1-g5-48'/>
+<use x='242.820065' y='-10.793007' xlink:href='#eq1-g4-30'/>
+<use x='249.748167' y='-8.999744' xlink:href='#eq1-g3-105'/>
+<use x='255.121937' y='-10.793007' xlink:href='#eq1-g4-100'/>
+<use x='261.20463' y='-10.793007' xlink:href='#eq1-g4-88'/>
 </g>
-</svg></div><p>The trial function, test function, and current displacement state are kept as their concrete <a href="namespace_rodin.html" class="m-doc">Rodin</a> types. Gradients are evaluated through <code>Variational::Jacobian(...)</code>, so <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> or other storage backends work as long as they provide the usual <a href="namespace_rodin.html" class="m-doc">Rodin</a> traits and Jacobian specialization. An optional <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a> can inject auxiliary data (fiber directions, activation, etc.) into the <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> at each quadrature point.</p>
+</svg></div><p>The material tangent action <svg class="m-math" style="width: 3.556em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 34.137054 8.302191">
+<title>
+$ \mathbf{A} : \delta\mathbf{F} $
+</title>
+<defs>
+<path id='eq2-g1-14' d='M3.108344-5.212453C1.578082-4.841843 .478207-3.251806 .478207-1.853051C.478207-.573848 1.338979 .143462 2.295392 .143462C3.706102 .143462 4.662516-1.793275 4.662516-3.383313C4.662516-4.459278 4.160399-5.116812 3.861519-5.511333C3.419178-6.073225 2.701868-6.993773 2.701868-7.567621C2.701868-7.770859 2.857285-8.129514 3.383313-8.129514C3.753923-8.129514 3.981071-7.998007 4.339726-7.79477C4.447323-7.723039 4.722291-7.567621 4.877709-7.567621C5.128767-7.567621 5.308095-7.81868 5.308095-8.009963C5.308095-8.237111 5.128767-8.272976 4.710336-8.368618C4.148443-8.488169 3.981071-8.488169 3.777833-8.488169S2.402989-8.488169 2.402989-7.268742C2.402989-6.682939 2.701868-6.001494 3.108344-5.212453ZM3.239851-4.985305C3.694147-4.040847 3.873474-3.682192 3.873474-2.905106C3.873474-1.972603 3.371357-.095641 2.307347-.095641C1.841096-.095641 1.171606-.406476 1.171606-1.518306C1.171606-2.295392 1.613948-4.554919 3.239851-4.985305Z'/>
+<path id='eq2-g2-58' d='M2.199751-4.578829C2.199751-4.901619 1.924782-5.152677 1.625903-5.152677C1.279203-5.152677 1.0401-4.877709 1.0401-4.578829C1.0401-4.220174 1.338979-3.993026 1.613948-3.993026C1.936737-3.993026 2.199751-4.244085 2.199751-4.578829ZM2.199751-.585803C2.199751-.908593 1.924782-1.159651 1.625903-1.159651C1.279203-1.159651 1.0401-.884682 1.0401-.585803C1.0401-.227148 1.338979 0 1.613948 0C1.936737 0 2.199751-.251059 2.199751-.585803Z'/>
+<path id='eq2-g0-65' d='M5.475467-8.093649C5.391781-8.308842 5.36787-8.368618 5.080946-8.368618C4.782067-8.368618 4.758157-8.308842 4.674471-8.093649L1.709589-.800996C1.625903-.609714 1.625903-.585803 1.291158-.549938C.992279-.514072 .944458-.514072 .681445-.514072H.466252V0C.777086-.02391 1.494396-.02391 1.841096-.02391C2.163885-.02391 3.036613-.02391 3.311582 0V-.514072C3.048568-.514072 2.594271-.514072 2.259527-.645579C2.295392-.753176 2.295392-.777086 2.319303-.824907L2.952927-2.379078H6.156912L6.910087-.514072H5.786301V0C6.168867-.02391 7.328518-.02391 7.782814-.02391C8.16538-.02391 9.384807-.02391 9.683686 0V-.514072H8.547945L5.475467-8.093649ZM4.554919-6.336239L5.941719-2.893151H3.156164L4.554919-6.336239Z'/>
+<path id='eq2-g0-70' d='M7.531756-8.141469H.454296V-7.627397H1.721544V-.514072H.454296V0C.800996-.02391 2.163885-.02391 2.606227-.02391C3.239851-.02391 4.303861-.02391 4.889664 0V-.514072H3.299626V-3.813699H3.957161C5.104857-3.813699 5.200498-3.287671 5.200498-2.414944H5.702615V-5.726526H5.200498C5.200498-4.853798 5.104857-4.327771 3.957161-4.327771H3.299626V-7.627397H5.009215C6.910087-7.627397 7.208966-6.75467 7.376339-5.308095H7.878456L7.531756-8.141469Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-65'/>
+<use x='13.477197' y='0' xlink:href='#eq2-g2-58'/>
+<use x='20.049688' y='0' xlink:href='#eq2-g1-14'/>
+<use x='25.682644' y='0' xlink:href='#eq2-g0-70'/>
+</g>
+</svg> encodes both material and geometric stiffness (no separate geometric-stiffness integrator is needed when using the first Piola-Kirchhoff formulation).</p><p>Typically constructed via <code>InternalVirtualWork::Tangent(u, v)</code> rather than directly.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aef1e5136471bfb35c9e95b4bad3cbcdd" class="m-doc">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              <span class="m-doc-wrap-bumper"><a href="#aa85571937211060679825814880585e6" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
               const TrialType&amp; u,
               const TestType&amp; v,
               const StateType&amp; displacement)</span>
             </dt>
-            <dd>Constructs the material tangent integrator.</dd>
+            <dd>Constructs the internal virtual work tangent integrator.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5f7c09e91fd8549d76f547a9775dd213" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
             <dd>Rebinds the linearization point.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a36c54ea24381a539db635a18f1808b70" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f9c764a5658c99ea5d1e110892bc8de" class="m-doc">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
             <dd>Sets the quadrature order.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8417bbf2705ea9aa3da96aa83be0467d" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e81f0ae3148f3e6a75f48fbe344f2c6" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
             <dd>Sets an input for auxiliary constitutive data.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acade83d9230dd5afd7774b9034ca3b17" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae989d9ab5ca9091f843e636bf86a68ab" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a copy of this integrator.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
@@ -200,17 +219,17 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aef1e5136471bfb35c9e95b4bad3cbcdd"><div>
+          <section class="m-doc-details" id="aa85571937211060679825814880585e6"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />MaterialTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef1e5136471bfb35c9e95b4bad3cbcdd" class="m-doc-self">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa85571937211060679825814880585e6" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
               const TrialType&amp; u,
               const TestType&amp; v,
               const StateType&amp; displacement)</span></span>
             </h3>
-            <p>Constructs the material tangent integrator.</p>
+            <p>Constructs the internal virtual work tangent integrator.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -235,12 +254,12 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a5f7c09e91fd8549d76f547a9775dd213"><div>
+          <section class="m-doc-details" id="afdfc5472d56db4fe41f02702afd8eedb"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&amp; Rodin::<wbr />Solid::<wbr />MaterialTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f7c09e91fd8549d76f547a9775dd213" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf)</span></span>
             </h3>
             <p>Rebinds the linearization point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -261,12 +280,12 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a36c54ea24381a539db635a18f1808b70"><div>
+          <section class="m-doc-details" id="a6f9c764a5658c99ea5d1e110892bc8de"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&amp; Rodin::<wbr />Solid::<wbr />MaterialTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36c54ea24381a539db635a18f1808b70" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f9c764a5658c99ea5d1e110892bc8de" class="m-doc-self">setQuadratureOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
             </h3>
             <p>Sets the quadrature order.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -288,12 +307,12 @@
             </table>
 <p>When set to 0 (the default), the quadrature order is determined automatically from the finite element approximation order as <code>2</code> * fe.getOrder().</p>
           </div></section>
-          <section class="m-doc-details" id="a8417bbf2705ea9aa3da96aa83be0467d"><div>
+          <section class="m-doc-details" id="a4e81f0ae3148f3e6a75f48fbe344f2c6"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&amp; Rodin::<wbr />Solid::<wbr />MaterialTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8417bbf2705ea9aa3da96aa83be0467d" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e81f0ae3148f3e6a75f48fbe344f2c6" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
             </h3>
             <p>Sets an input for auxiliary constitutive data.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -315,12 +334,12 @@
             </table>
 <p>The input is called at each quadrature point after the <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> has been constructed with geometric context and kinematics, allowing injection of fiber directions, activation parameters, region-wise material properties, etc.</p>
           </div></section>
-          <section class="m-doc-details" id="acade83d9230dd5afd7774b9034ca3b17"><div>
+          <section class="m-doc-details" id="ae989d9ab5ca9091f843e636bf86a68ab"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>* Rodin::<wbr />Solid::<wbr />MaterialTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acade83d9230dd5afd7774b9034ca3b17" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>* Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae989d9ab5ca9091f843e636bf86a68ab" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Creates a copy of this integrator.</p>
             <table class="m-table m-fullwidth m-flat">

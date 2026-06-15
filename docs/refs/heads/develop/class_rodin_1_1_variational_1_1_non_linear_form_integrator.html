@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::PETSc::Assembly namespace | Rodin</title>
+  <title>Rodin::Variational::NonLinearFormIntegrator class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,52 +74,52 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc.html">PETSc</a>::<wbr/></span>Assembly <span class="m-thin">namespace</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_non_linear_form_integrator_8h.html">&lt;Rodin/Variational/NonLinearFormIntegrator.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>NonLinearFormIntegrator <span class="m-thin">class</span>
         </h1>
-        <p>PETSc-specific assembly strategies.</p>
+        <p>CRTP mixin for nonlinear form integrators.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Provides sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, and OpenMP assembly kernels that populate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vectors (<code>::Vec</code>) and matrices (<code>::Mat</code>) from <a href="namespace_rodin.html" class="m-doc">Rodin</a> variational forms.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Sequential</a>, Rodin::Assembly::MPI</p></aside>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+<p>Derived classes must implement:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Test</span><span class="o">&gt;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">Residual</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">   </span><span class="c1">// LinearFormIntegrator</span>
+
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Test</span><span class="o">&gt;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">Tangent</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// BilinearFormIntegrator</span></pre><p>This mixin then provides:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Test</span><span class="o">&gt;</span>
+<span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// ProblemBody</span></pre><p>so that <code>obj(u, v)</code> can be used directly in a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> assignment, registering both the residual and tangent contributions at once.</p>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_p_e_t_sc_1_1_assembly_1_1_matrix_setup.html" class="m-doc">MatrixSetup</a>
+              <div class="m-doc-template">template&lt;class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
+              const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const -&gt; auto</span>
             </dt>
-            <dd>Sets up a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix for assembly while reusing compatible existing structure.</dd>
-          </dl>
-        </section>
-        <section id="typedef-members">
-          <h2><a href="#typedef-members">Typedefs</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
-              using <a href="#a74786fd0d020e752e1f4126fc8a12670" class="m-doc">Default</a> = <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>&lt;Ts...&gt;
-            </dt>
-            <dd>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> assembly strategy (sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, or OpenMP) based on the mesh context type.</dd>
+            <dd>Returns both residual and tangent contributions as a <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>.</dd>
           </dl>
         </section>
         <section>
-          <h2>Typedef documentation</h2>
-          <section class="m-doc-details" id="a74786fd0d020e752e1f4126fc8a12670"><div>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a817680d8bb9b91737c5dbe931dd90ac4"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_default_8h.html">&lt;Rodin/PETSc/Assembly/Default.h&gt;</a></div>
               <div class="m-doc-template">
-                template&lt;class ... Ts&gt;
+                template&lt;class Derived&gt;
+                template&lt;class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;
               </div>
-              using Rodin::<wbr />PETSc::<wbr />Assembly::<wbr /><a href="#a74786fd0d020e752e1f4126fc8a12670" class="m-doc-self">Default</a> = <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>&lt;Ts...&gt;
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />NonLinearFormIntegrator&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
+              const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const</span></span>
             </h3>
-            <p>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> assembly strategy (sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, or OpenMP) based on the mesh context type.</p>
+            <p>Returns both residual and tangent contributions as a <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>.</p>
+<p>Equivalent to <code>Tangent(u, v) + Residual(v)</code>.</p>
           </div></section>
         </section>
       </div>

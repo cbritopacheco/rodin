@@ -773,7 +773,7 @@ $ \nu $
 <use x='275.478674' y='-2.988792' xlink:href='#eq33-g1-23'/>
 <use x='282.016607' y='-2.988792' xlink:href='#eq33-g2-41'/>
 </g>
-</svg></div></section><section id="autotoc_md546"><h3><a href="#autotoc_md546">Integrators</a></h3><p>Both integrators use <code>setDisplacement()</code> to set the linearization point and <code>setInput()</code> for auxiliary data injection. Quadrature order is auto-selected (2× FE order) unless overridden with <code>setQuadratureOrder()</code>.</p><table class="m-table"><thead><tr><th>Integrator</th><th>Form type</th><th>Assembles</th><th>Mathematical expression</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>&lt;Law, FES&gt;</code></td><td>Linear (residual)</td><td>Internal force vector</td><td><svg class="m-math" style="width: 10.456em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 100.373295 13.781784">
+</svg></div></section><section id="autotoc_md546"><h3><a href="#autotoc_md546">Integrators</a></h3><p>Both integrators use <code>setDisplacement()</code> to set the linearization point and <code>setInput()</code> for auxiliary data injection. Quadrature order is auto-selected (2× FE order) unless overridden with <code>setQuadratureOrder()</code>.</p><table class="m-table"><thead><tr><th>Integrator</th><th>Form type</th><th>Assembles</th><th>Mathematical expression</th></tr></thead><tbody><tr><td><code>InternalForce&lt;Law, FES&gt;</code></td><td>Linear (residual)</td><td>Internal force vector</td><td><svg class="m-math" style="width: 10.456em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 100.373295 13.781784">
 <title>
 $ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX $
 </title>
@@ -804,7 +804,7 @@ $ R_i = \int_\Omega \mathbf{P} : \nabla\phi_i \, dX $
 <use x='83.635494' y='0' xlink:href='#eq34-g4-100'/>
 <use x='89.718187' y='0' xlink:href='#eq34-g4-88'/>
 </g>
-</svg></td></tr><tr><td><code><a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>&lt;Law, Solution, FES&gt;</code></td><td>Bilinear (tangent)</td><td>Tangent stiffness matrix</td><td><svg class="m-math" style="width: 14.909em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 143.127061 13.781784">
+</svg></td></tr><tr><td><code>MaterialTangent&lt;Law, Solution, FES&gt;</code></td><td>Bilinear (tangent)</td><td>Tangent stiffness matrix</td><td><svg class="m-math" style="width: 14.909em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 143.127061 13.781784">
 <title>
 $ K_{ij} = \int_\Omega D\mathbf{P}[\nabla\phi_j] : \nabla\phi_i \, dX $
 </title>
@@ -967,10 +967,6 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
             </dt>
             <dd>Local active fiber contraction law.</dd>
             <dt>
-              class <a href="class_rodin_1_1_solid_1_1_body_force.html" class="m-doc">BodyForce</a>
-            </dt>
-            <dd>Describes a body force per unit reference volume.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;class LawDerived&gt;</div>
               class <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>
             </dt>
@@ -1015,10 +1011,20 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
             </dt>
             <dd>CRTP base class for inputs.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
-              class <a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>
+              <div class="m-doc-template">template&lt;class Law, class State&gt;</div>
+              class <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>
             </dt>
-            <dd>Linear form integrator for the internal force vector in hyperelastic problems.</dd>
+            <dd>Façade for the internal virtual work nonlinear form.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
+              class <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>
+            </dt>
+            <dd>Linear form integrator for the internal virtual work residual in hyperelastic problems.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
+              class <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>
+            </dt>
+            <dd>Local bilinear form integrator for the internal virtual work tangent in hyperelastic problems.</dd>
             <dt>
               class <a href="class_rodin_1_1_solid_1_1_isotropic_invariants.html" class="m-doc">IsotropicInvariants</a>
             </dt>
@@ -1027,11 +1033,6 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
               class <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>
             </dt>
             <dd>Kinematic state for finite-strain continuum mechanics.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-              class <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>
-            </dt>
-            <dd>Local bilinear form integrator for the material tangent stiffness in hyperelastic problems.</dd>
             <dt>
               class <a href="class_rodin_1_1_solid_1_1_mooney_rivlin.html" class="m-doc">MooneyRivlin</a>
             </dt>
@@ -1044,10 +1045,6 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
               class <a href="class_rodin_1_1_solid_1_1_saint_venant_kirchhoff.html" class="m-doc">SaintVenantKirchhoff</a>
             </dt>
             <dd>Saint-Venant-Kirchhoff hyperelastic law.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_solid_1_1_traction_force.html" class="m-doc">TractionForce</a>
-            </dt>
-            <dd>Describes a traction (surface force) boundary condition.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -1063,20 +1060,26 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#aebc6a3814be2364a980341bf57aac308" class="m-doc">InternalForce</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
-              const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalForce&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              <div class="m-doc-template">template&lt;class Law, class State&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a8083a685a3eb3b0424434b77c344c18d" class="m-doc">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp;,
+              const State&amp;) -&gt; InternalVirtualWork&lt; std::decay_t&lt; Law &gt;, std::decay_t&lt; State &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>.</dd>
+            <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#aed0ae81f0b28537ca4505aff46b6ce02" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              const TestFunctionType&amp;,
+              const DisplacementType&amp;) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+            </dt>
+            <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;</div>
-              <span class="m-doc-wrap-bumper"><a href="#a20595a29ddc3e001e30e4d25d90c49d3" class="m-doc">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              <span class="m-doc-wrap-bumper"><a href="#a0d5a4150d2684d8fd4c59b0cc7029d66" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
               const TrialFunctionType&amp;,
               const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; MaterialTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
+              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span>
             </dt>
-            <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>.</dd>
+            <dd>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>.</dd>
           </dl>
         </section>
         <section>
@@ -1091,30 +1094,41 @@ $ \mathbf{E} = \frac{1}{2}(\mathbf{C} - \mathbf{I}) $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aebc6a3814be2364a980341bf57aac308"><div>
+          <section class="m-doc-details" id="a8083a685a3eb3b0424434b77c344c18d"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_force_8h.html">&lt;Rodin/Solid/Integrators/InternalForce.h&gt;</a></div>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWork.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Law, class State&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8083a685a3eb3b0424434b77c344c18d" class="m-doc-self">InternalVirtualWork</a>(</span><span class="m-doc-wrap">const Law&amp;,
+              const State&amp;) -&gt; InternalVirtualWork&lt; std::decay_t&lt; Law &gt;, std::decay_t&lt; State &gt; &gt;</span></span>
+            </h3>
+            <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="aed0ae81f0b28537ca4505aff46b6ce02"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_residual_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkResidual.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebc6a3814be2364a980341bf57aac308" class="m-doc-self">InternalForce</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed0ae81f0b28537ca4505aff46b6ce02" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
               const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; InternalForce&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              const DisplacementType&amp;) -&gt; InternalVirtualWorkResidual&lt; LawDerived, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_force.html" class="m-doc">InternalForce</a>.</p>
+            <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>.</p>
           </div></section>
-          <section class="m-doc-details" id="a20595a29ddc3e001e30e4d25d90c49d3"><div>
+          <section class="m-doc-details" id="a0d5a4150d2684d8fd4c59b0cc7029d66"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_material_tangent_8h.html">&lt;Rodin/Solid/Integrators/MaterialTangent.h&gt;</a></div>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_internal_virtual_work_tangent_8h.html">&lt;Rodin/Solid/Integrators/InternalVirtualWorkTangent.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a20595a29ddc3e001e30e4d25d90c49d3" class="m-doc-self">MaterialTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d5a4150d2684d8fd4c59b0cc7029d66" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp;,
               const TrialFunctionType&amp;,
               const TestFunctionType&amp;,
-              const DisplacementType&amp;) -&gt; MaterialTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
+              const DisplacementType&amp;) -&gt; InternalVirtualWorkTangent&lt; LawDerived, std::decay_t&lt; TrialFunctionType &gt;, std::decay_t&lt; TestFunctionType &gt;, std::decay_t&lt; DisplacementType &gt; &gt;</span></span>
             </h3>
-            <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_material_tangent.html" class="m-doc">MaterialTangent</a>.</p>
+            <p>CTAD deduction guide for <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>.</p>
           </div></section>
         </section>
       </div>
