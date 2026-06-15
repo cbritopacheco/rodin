@@ -342,7 +342,9 @@ int main(int, char**)
     u = uPred;
 
     // ---- nonlinear solid operators ----------------------------------------
-    auto ivw = Solid::InternalVirtualWork(law, u);
+    Solid::MaterialTangent tangent(law, du, w, u);
+
+    Solid::InternalForce internal(law, w, u);
 
     // Effective nonlinear problem:
     //
@@ -360,9 +362,10 @@ int main(int, char**)
     //
     Problem newton(du, w);
     newton =
-          ivw(du, w)
+          tangent
            + aMass * Integral(du, w)
            + aDamp * Integral(du, w)
+           + internal
            + aMass * Integral(u, w)
            + aDamp * Integral(u, w)
            - BoundaryIntegral(traction, w).over(rightBC)

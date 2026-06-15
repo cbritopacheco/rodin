@@ -5,23 +5,26 @@
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
 /**
- * @file InternalVirtualWorkResidual.h
- * @brief Residual integrator for the internal virtual work in hyperelastic formulations.
+ * @file MaterialTangent.h
+ * @brief Material tangent stiffness integrator for Newton-Raphson linearization.
  *
- * Assembles the nonlinear residual contribution:
+ * Evaluates the bilinear form arising from the linearization of the
+ * internal virtual work:
  * @f[
- *   \delta W^{\text{int}}(\mathbf{v}) = \int_{\Omega_0} \mathbf{P}(\mathbf{u}) : \nabla_0 \mathbf{v} \, dX
+ *   a(\delta\mathbf{u}, \mathbf{v})
+ *     = \int_\Omega D\mathbf{P}[\nabla \delta\mathbf{u}]
+ *       : \nabla \mathbf{v} \, dX
  * @f]
- * where @f$ \mathbf{P} @f$ is the first Piola-Kirchhoff stress and
- * @f$ \mathbf{v} @f$ is the test function (virtual displacement).
+ * where @f$ D\mathbf{P}[\cdot] @f$ denotes the directional derivative
+ * of the first Piola-Kirchhoff stress.
  *
  * The integrator is generic: it obtains the finite element basis from the
  * FE space (not hardcoded to P1), supports arbitrary quadrature rules, and
  * builds a ConstitutivePoint (composed over Geometry::Point) at each
  * quadrature point for constitutive evaluation.
  */
-#ifndef RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORKRESIDUAL_H
-#define RODIN_SOLID_INTEGRATORS_INTERNALVIRTUALWORKRESIDUAL_H
+#ifndef RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
+#define RODIN_SOLID_INTEGRATORS_MATERIALTANGENT_H
 
 #include <algorithm>
 #include <cassert>
@@ -35,9 +38,10 @@
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/Vector.h"
 #include "Rodin/Variational/GridFunction.h"
+#include "Rodin/Variational/BilinearFormIntegrator.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/IntegrationPoint.h"
-#include "Rodin/Variational/LinearFormIntegrator.h"
+#include "Rodin/Variational/TrialFunction.h"
 #include "Rodin/Variational/TestFunction.h"
 #include "Rodin/QF/PolytopeQuadratureFormula.h"
 #include "Rodin/Geometry/Point.h"
@@ -50,60 +54,66 @@
 namespace Rodin::Solid
 {
   /**
-   * @brief Linear form integrator for the internal virtual work residual in
-   * hyperelastic problems.
+   * @brief Local bilinear form integrator for the material tangent stiffness
+   * in hyperelastic problems.
    *
-   * Computes the element-level contribution:
+   * Computes the element-level tangent stiffness matrix:
    * @f[
-   *   (\delta W^{\text{int}})^e_i = \int_{K} \mathbf{P} : \nabla_0 \phi_i \, dX
+   *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla \phi_j] : \nabla \phi_i \, dX
    * @f]
    *
-   * The test function and current displacement state are kept as their
-   * concrete Rodin types. The displacement gradient and test-basis gradients
-   * are evaluated through @c Variational::Jacobian(...), so PETSc or other
-   * storage backends work as long as they provide the usual Rodin traits and
-   * Jacobian specialization. An optional Input can inject auxiliary data
-   * (fiber directions, activation, etc.) into the ConstitutivePoint at each
-   * quadrature point.
-   *
-   * Typically constructed via @c InternalVirtualWork::Residual(v) rather
-   * than directly.
+   * The trial function, test function, and current displacement state are kept
+   * as their concrete Rodin types. Gradients are evaluated through
+   * @c Variational::Jacobian(...), so PETSc or other storage backends work as
+   * long as they provide the usual Rodin traits and Jacobian specialization.
+   * An optional Input can inject auxiliary data (fiber directions, activation,
+   * etc.) into the ConstitutivePoint at each quadrature point.
    *
    * @tparam LawDerived The hyperelastic constitutive law type
+   * @tparam TrialFunctionType The trial function type (backend-generic)
    * @tparam TestFunctionType The test function type (backend-generic)
    * @tparam DisplacementType The current displacement grid-function type
    */
-  template <class LawDerived, class TestFunctionType, class DisplacementType>
-  class InternalVirtualWorkResidual final
-    : public Variational::LinearFormIntegratorBase<Real>
+  template <class LawDerived, class TrialFunctionType,
+            class TestFunctionType, class DisplacementType>
+  class MaterialTangent final
+    : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
       using ScalarType = Real;
-      using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+      using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
       using LawType = LawDerived;
+      using TrialType = TrialFunctionType;
       using TestType = TestFunctionType;
       using StateType = DisplacementType;
 
+      using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
+      static_assert(Variational::IsTrialFunction<TrialType>::Value,
+        "Solid::MaterialTangent expects a Rodin trial function.");
       static_assert(Variational::IsTestFunction<TestType>::Value,
-        "Solid::InternalVirtualWorkResidual expects a Rodin test function.");
+        "Solid::MaterialTangent expects a Rodin test function.");
 
       /**
-       * @brief Constructs the internal virtual work residual integrator.
+       * @brief Constructs the material tangent integrator.
        * @param law The constitutive law (stored by value)
+       * @param u The trial function
        * @param v The test function
        * @param displacement Current displacement grid function
        */
-      InternalVirtualWorkResidual(
+      MaterialTangent(
           const LawDerived& law,
+          const TrialType& u,
           const TestType& v,
           const StateType& displacement)
-        : Parent(v),
+        : Parent(u, v),
           m_law(law),
+          m_trial(u),
           m_test(v),
           m_displacement(displacement),
+          m_trialfes(u.getFiniteElementSpace()),
           m_testfes(v.getFiniteElementSpace()),
           m_statefes(displacement.getFiniteElementSpace()),
           m_quadOrder(0)
@@ -111,22 +121,25 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
-      InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
+      MaterialTangent(const MaterialTangent& other)
         : Parent(other),
           m_law(other.m_law),
+          m_trial(other.m_trial),
           m_test(other.m_test),
           m_displacement(other.m_displacement),
+          m_trialfes(other.m_trialfes),
           m_testfes(other.m_testfes),
           m_statefes(other.m_statefes),
           m_quadOrder(other.m_quadOrder),
-          m_input(other.m_input)      {}
+          m_input(other.m_input)
+      {}
 
       /**
-       * @brief Rebinds the current displacement state.
+       * @brief Rebinds the linearization point.
        * @param gf Displacement grid function with the same concrete state type
        * @returns Reference to this object for chaining
        */
-      InternalVirtualWorkResidual& setDisplacement(const StateType& gf)
+      MaterialTangent& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
         m_displacement = std::cref(gf);
@@ -144,7 +157,7 @@ namespace Rodin::Solid
        * @param order Polynomial order for exact integration (0 = auto)
        * @returns Reference to this object for chaining
        */
-      InternalVirtualWorkResidual& setQuadratureOrder(size_t order)
+      MaterialTangent& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
         return *this;
@@ -161,39 +174,45 @@ namespace Rodin::Solid
        * @param input A callable with signature void(ConstitutivePoint&)
        * @returns Reference to this object for chaining
        */
-      InternalVirtualWorkResidual& setInput(InputFunction input)
+      MaterialTangent& setInput(InputFunction input)
       {
         m_input = std::move(input);
         return *this;
       }
 
-      InternalVirtualWorkResidual& setPolytope(const Geometry::Polytope& polytope) final override
+      MaterialTangent& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
         const size_t d = polytope.getDimension();
         const Index idx = polytope.getIndex();
+        const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
         const auto& stateFES = m_statefes.get();
         const size_t vdim = testFES.getVectorDimension();
 
+        const auto& trialFE = trialFES.getFiniteElement(d, idx);
         const auto& testFE = testFES.getFiniteElement(d, idx);
         const auto& stateFE = stateFES.getFiniteElement(d, idx);
+        const size_t trialDofs = trialFE.getCount();
         const size_t testDofs = testFE.getCount();
 
         // Determine effective quadrature order
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
-          : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
+          : 2 * std::max({ trialFE.getOrder(),
+                           testFE.getOrder(),
+                           stateFE.getOrder() });
         const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
-        // Zero element vector
-        m_elemVec.resize(testDofs);
-        m_elemVec.setZero();
+        // Zero element stiffness matrix
+        m_matrix.resize(testDofs, trialDofs);
+        m_matrix.setZero();
 
         auto stateGradient = Variational::Jacobian(m_displacement.get());
+        auto trialGradient = Variational::Jacobian(m_trial.get());
         auto testGradient = Variational::Jacobian(m_test.get());
 
         // Loop over quadrature points
@@ -205,6 +224,7 @@ namespace Rodin::Solid
 
           const ScalarType distortion = pt.getDistortion();
 
+          trialGradient.setIntegrationPoint(ip);
           testGradient.setIntegrationPoint(ip);
           const auto H = stateGradient.getValue(ip);
 
@@ -223,27 +243,36 @@ namespace Rodin::Solid
           typename LawType::Cache cache;
           m_law.setCache(cache, cp);
 
-          Math::SpatialMatrix<ScalarType> P;
-          m_law.getFirstPiolaKirchhoffStress(P, cache, cp);
-
-          // Accumulate into element vector: R_te = P : grad psi_te
-          for (size_t te = 0; te < testDofs; ++te)
+          // Build element stiffness at this quadrature point.
+          // For trial DOF tr, the deformation gradient perturbation dF equals
+          // the physical Jacobian of the trial basis function.
+          for (size_t tr = 0; tr < trialDofs; ++tr)
           {
-            const auto gradTest = testGradient.getBasis(te);
-            ScalarType val = 0;
-            for (size_t c = 0; c < vdim; ++c)
-              for (size_t k = 0; k < d; ++k)
-                val += P(c, k) * gradTest(c, k);
-            m_elemVec(te) += wq * distortion * val;
+            const auto dF = trialGradient.getBasis(tr);
+
+            // Compute material tangent action dP = DP[dF]
+            Math::SpatialMatrix<ScalarType> dP;
+            m_law.getMaterialTangent(dP, cache, cp, dF);
+
+            // K_{te,tr} += wq * distortion * (dP : grad psi_te)
+            for (size_t te = 0; te < testDofs; ++te)
+            {
+              const auto gradTest = testGradient.getBasis(te);
+              ScalarType val = 0;
+              for (size_t c = 0; c < vdim; ++c)
+                for (size_t k = 0; k < d; ++k)
+                  val += dP(c, k) * gradTest(c, k);
+              m_matrix(te, tr) += wq * distortion * val;
+            }
           }
         }
 
         return *this;
       }
 
-      ScalarType integrate(size_t te) final override
+      ScalarType integrate(size_t tr, size_t te) final override
       {
-        return m_elemVec(te);
+        return m_matrix(te, tr);
       }
 
       const Geometry::Polytope& getPolytope() const final override
@@ -257,9 +286,9 @@ namespace Rodin::Solid
         return Geometry::Region::Cells;
       }
 
-      InternalVirtualWorkResidual* copy() const noexcept final override
+      MaterialTangent* copy() const noexcept final override
       {
-        return new InternalVirtualWorkResidual(*this);
+        return new MaterialTangent(*this);
       }
 
       /// @brief Gets the constitutive law.
@@ -268,34 +297,43 @@ namespace Rodin::Solid
     private:
       void checkCompatibility(const StateType& displacement) const
       {
+        const auto& trialFES = m_trialfes.get();
         const auto& testFES = m_testfes.get();
         const auto& stateFES = displacement.getFiniteElementSpace();
 
+        assert(&trialFES.getMesh() == &testFES.getMesh());
         assert(&stateFES.getMesh() == &testFES.getMesh());
+        assert(trialFES.getVectorDimension() == testFES.getVectorDimension());
         assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
+        (void) trialFES;
         (void) testFES;
         (void) stateFES;
       }
 
       LawType m_law;
+      std::reference_wrapper<const TrialType> m_trial;
       std::reference_wrapper<const TestType> m_test;
       std::reference_wrapper<const StateType> m_displacement;
+      std::reference_wrapper<const TrialFESType> m_trialfes;
       std::reference_wrapper<const TestFESType> m_testfes;
       std::reference_wrapper<const StateFESType> m_statefes;
       size_t m_quadOrder;
       InputFunction m_input;
 
       Optional<std::reference_wrapper<const Geometry::Polytope>> m_polytope;
-      Math::Vector<ScalarType> m_elemVec;
+      Math::Matrix<ScalarType> m_matrix;
   };
 
-  /// CTAD deduction guide for InternalVirtualWorkResidual
-  template <class LawDerived, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkResidual(const LawDerived&,
-                               const TestFunctionType&,
-                               const DisplacementType&)
-    -> InternalVirtualWorkResidual<
+  /// CTAD deduction guide for MaterialTangent
+  template <class LawDerived, class TrialFunctionType,
+            class TestFunctionType, class DisplacementType>
+  MaterialTangent(const LawDerived&,
+                  const TrialFunctionType&,
+                  const TestFunctionType&,
+                  const DisplacementType&)
+    -> MaterialTangent<
          LawDerived,
+         std::decay_t<TrialFunctionType>,
          std::decay_t<TestFunctionType>,
          std::decay_t<DisplacementType>>;
 }

@@ -857,8 +857,11 @@ int main(int argc, char** argv)
       TrialFunction du(solidVh);
       TestFunction  w(solidVh);
 
-      auto ivw    = Solid::InternalVirtualWork(law, solidDisplacement);
-      auto ivwOld = Solid::InternalVirtualWork(law, solidDisplacementOld);
+      Solid::MaterialTangent tangent(law, du, w, solidDisplacement);
+
+      Solid::InternalForce internal(law, w, solidDisplacement);
+
+      Solid::InternalForce internalOld(law, w, solidDisplacementOld);
 
       /*
        * Transfer fluid traction to the solid interface.
@@ -939,16 +942,16 @@ int main(int argc, char** argv)
       Problem solid(du, w);
 
       solid =
-          ivw.Tangent(du, w)
+          tangent
         + solidMassCoeff * Integral(du, w)
-        + (solidRayleighBeta / dt) * ivw.Tangent(du, w)
+        + (solidRayleighBeta / dt) * tangent
 
-        + ivw.Residual(w)
+        + internal
         + solidMassCoeff * Integral(solidDisplacement, w)
         - solidMassCoeff * Integral(solidDisplacementOld, w)
         - (rhoS / dt) * Integral(solidVelocityOld, w)
-        + (solidRayleighBeta / dt) * ivw.Residual(w)
-        - (solidRayleighBeta / dt) * ivwOld.Residual(w)
+        + (solidRayleighBeta / dt) * internal
+        - (solidRayleighBeta / dt) * internalOld
         - BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
 
         + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft)
