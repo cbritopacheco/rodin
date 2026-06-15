@@ -18,10 +18,9 @@ set(RodinSolid_HEADERS
   Constitutive/HolzapfelOgden.h
   Constitutive/ActiveFiberLaw.h
   Constitutive/ActiveContraction.h
-  Integrators/InternalForce.h
-  Integrators/MaterialTangent.h
-  Integrators/BodyForce.h
-  Integrators/TractionForce.h
+  Integrators/InternalVirtualWorkResidual.h
+  Integrators/InternalVirtualWorkTangent.h
+  Integrators/InternalVirtualWork.h
   Constitutive/Hooke.h
   Fields/GreenLagrangeStrain.h
   Fields/FirstPiolaKirchhoffStress.h

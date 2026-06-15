@@ -27,7 +27,7 @@
  *   }
  * };
  *
- * Solid::InternalForce force(law, v, displacement);
+ * Solid::InternalVirtualWorkResidual force(law, v, displacement);
  * force.setInput(MyInput{});
  * @endcode
  *
