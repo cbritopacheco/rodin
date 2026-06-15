@@ -278,8 +278,8 @@ struct Config {
   // instead of slamming the full par on the handoff.  Set prestressFraction =
   // 1.0 to recover the previous full-prestress / no-dynamic-ramp behaviour.
   // Only active when prestressSteps > 0.
-  Real   prestressFraction  = 0.8;
-  size_t prestressRampSteps = 60;
+  Real   prestressFraction  = 0.975;
+  size_t prestressRampSteps = 10;
 
   // Projected-VMS convective stabilization scale (lagged Oseen, ported from
   // the working CoupledLV0DCoronary3D fluid).  0 disables the VMS terms and

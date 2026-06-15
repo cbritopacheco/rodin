@@ -119,7 +119,7 @@ struct RCR {
   Real Rd = 1.0e9;
   Real pd = 500.0;
   Real pc = 10000.0;
-  Real pout = 11000.0;
+  Real pout = 10000.0;
   Real qd = 0.0;
 };
 
@@ -206,9 +206,9 @@ struct OutletFlowLaw {
 struct Config {
   // All outputs go under resultsDir so the P2/P1 and P1/P1 runs can execute
   // concurrently (different cores) without clobbering each other's files.
-  std::string resultsDir = "results_p1p1";
-  std::string xdmfBasename = "results_p1p1/CoronaryArtery_FSI_Explicit_P1P1";
-  std::string csvPath = "results_p1p1/CoronaryArtery_FSI_Explicit_P1P1.csv";
+  std::string resultsDir = "results_p1p1_laplacian";
+  std::string xdmfBasename = "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1";
+  std::string csvPath = "results_p1p1_laplacian/CoronaryArtery_FSI_Explicit_P1P1.csv";
   Real meshScale = 1.0e-2;
 
   Real dt = 1.0e-3;
@@ -249,8 +249,8 @@ struct Config {
   // law used by updateRCRNonNew (per-outlet proximal/distal surrogate vessels).
   OutletFlowLaw outletFlowLaw;
 
-  Real inletImpedance = 1e3;
-  Real inletTangentialDamping = 1e3;
+  Real inletImpedance = 1e2;
+  Real inletTangentialDamping = 1e2;
 
   // Implicit (semi-implicit) outlet resistance scale.  The explicit RCR
   // imposes p_out = p_c + R*Q with the LAGGED flux Q; for the high-resistance
@@ -295,18 +295,7 @@ struct Config {
 
   // ALE mesh-motion (harmonic extension) stiffening.  The lift is
   //   int  w(x) grad d : grad v ,   w(x) = (aleRefSize / h_K)^aleStiffPower ,
-  // i.e. Jacobian/element-size stiffening (Stein-Tezduyar-Benney): SMALL
-  // elements (typically the boundary-layer band next to the moving wall) get a
-  // LARGER weight and therefore move more RIGIDLY, while the distortion is
-  // pushed out into the large far-field elements.  This protects the thin
-  // near-wall layer from tangling/oscillating as the wall moves.  NOTE: with
-  // pure Dirichlet data a CONSTANT weight changes nothing (the harmonic lift is
-  // scale-invariant) -- only the SPATIAL VARIATION matters, which is why a
-  // power of the local size is used.  aleStiffPower = 0 recovers the plain
-  // harmonic extension.  "A bit" of stiffening ~ 0.5.  aleRefSize is only a
-  // conditioning normalization (a representative element size, mesh units); it
-  // does NOT change the computed mesh motion.  Tunable via
-  // -coronary_ale_stiff_power / -coronary_ale_ref_size.
+  // i.e. Jacobian/element-size stiffening (Stein-Tezduyar-Benney)
   Real aleStiffPower = 0.5;
   Real aleRefSize    = 5.0e-4;
 
@@ -333,16 +322,13 @@ struct Config {
   Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
 
   Real robinAlpha = 0.0;
-  // Robin scaling gamma in alpha = gamma sqrt(rho_s E_eq).  Kept at 1; tune via
-  // -coronary_robin_gamma / -coronary_robin_alpha.
-  Real robinGamma = 1.;
+  Real robinGamma = 1.0;
 
-  Real heartDisplacementPenalty = 2.5e7;
+  Real heartDisplacementPenalty = 1.5e7;
   Real heartDisplacementScale = 1.0;
 
-  Real aViscCondition = 1.0e3;
-  Real bViscCondition = 1.0e2;
-
+  Real aViscCondition = 5.0e2;
+  Real bViscCondition = 1.0e1;
 };
 
 static Real periodic_activation(Real t) {
@@ -435,9 +421,9 @@ static Model::Input makeModelInput() {
   in.sigma0 = 1.25e5;
 
   in.Rp = 8.0e6;
-  in.Cp = 1.e-8;
+  in.Cp = 2.e-8;
   in.Rd = 1.0e8;
-  in.Cd = 1.0e-9;
+  in.Cd = 2.0e-9;
 
   in.mu_0 = 0.0186058;
   in.mu_Inf = 0.0042963;
@@ -449,16 +435,16 @@ static Model::Input makeModelInput() {
   in.k_0 = 3.5678;
   in.gamma_c = 10.2754;
   in.k_Inf = 1.5352;
-  in.proximalRadius = 0.015;
+  in.proximalRadius = 0.0125;
   in.proximalLength = 0.4;
-  in.distalRadius = 0.001;
-  in.distalLength = 0.004;
+  in.distalRadius = 0.005;
+  in.distalLength = 0.2;
   in.windkesselRheology =
       Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
 
   in.Kat = 2.0e-6;
   in.Kp = 5.0e-10;
-  in.Kar = 2e-7;
+  in.Kar = 2.0e-7;
   in.cavityCapacity = 5.0e-12;
 
   in.localTolerance = 1.0e-12;
@@ -515,7 +501,6 @@ static void initializeModel(Model &model, const Model::Input &in) {
 
 
 // Load the coronary FSI mesh directly into a local (single-process) mesh.
-// No partitioner / sharder: this is the sequential build.
 static MeshType makeMesh(const Config &cfg, const std::string &meshPath) {
   MeshType mesh;
   mesh.load(meshPath, IO::FileFormat::MEDIT);
@@ -602,13 +587,6 @@ static Math::SpatialPoint centroid(const MeshType &mesh,
   return c;
 }
 
-// Relabel the one-element-wide band of FSI faces that touch an inlet/outlet cap
-// to a distinct "ring" attribute.  Rodin's DirichletBC is codimension-one: it
-// constrains whole faces, never a bare edge, so to strongly pin a field to zero
-// exactly on the cap rings (the curves where the FSI surface meets the caps) we
-// promote the row of FSI faces adjacent to each cap into their own attribute.
-// The caller then clamps that attribute and keeps the Robin transmission over
-// the remaining (bulk) FSI faces.
 static std::size_t tagFSIRingBand(MeshType &mesh, Attribute fsi, Attribute ring,
                                   Attribute inlet,
                                   const std::array<Attribute, 6> &outlets) {
@@ -841,14 +819,6 @@ static void readOptions(Config &cfg) {
   if (couplingIterationsSet)
     cfg.couplingIterations =
         static_cast<size_t>(std::max<PetscInt>(1, couplingIterations));
-
-  PetscReal couplingRelaxation = cfg.couplingRelaxation;
-  PetscBool couplingRelaxationSet = PETSC_FALSE;
-  PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
-                      "-coronary_coupling_relaxation", &couplingRelaxation,
-                      &couplingRelaxationSet);
-  if (couplingRelaxationSet)
-    cfg.couplingRelaxation = couplingRelaxation;
 
   PetscReal couplingTolerance = cfg.couplingTolerance;
   PetscBool couplingToleranceSet = PETSC_FALSE;
@@ -1350,10 +1320,13 @@ int main(int argc, char **argv) {
     // Fluid problem -- EQUAL-ORDER P1/P1 (velocity AND pressure are P1).
     using VelocityFES = H1<1, Math::SpatialVector<Real>, MeshType>;
     using PressureFES = H1<1, Real, MeshType>;
-    using DisplacementFES = H1<1, Math::SpatialVector<Real>, MeshType>;
+    using DisplacementFluidFES = H1<1, Math::SpatialVector<Real>, MeshType>;
 
     // Solid problem
-    using DisplacementFluidFES = H1<1, Math::SpatialVector<Real>, MeshType>;
+    using DisplacementFES = H1<1, Math::SpatialVector<Real>, MeshType>;
+
+    // Laplacian
+    using LaplacianFES = H1<1, Real, MeshType>;
 
     VelocityFES uh(std::integral_constant<size_t, 1>{}, meshFluid, dimFluid);
     PressureFES ph(std::integral_constant<size_t, 1>{}, meshFluid);
@@ -1363,15 +1336,14 @@ int main(int argc, char **argv) {
     DisplacementFES dh(std::integral_constant<size_t, 1>{}, meshSolid,
                        dimSolid);
 
+    LaplacianFES lh(std::integral_constant<size_t, 1>{}, meshSolid);
+
     // Fluid trial/test (velocity-pressure).
     PETSc::Variational::TrialFunction u(uh);
     PETSc::Variational::TrialFunction p(ph);
     PETSc::Variational::TestFunction v(uh);
     PETSc::Variational::TestFunction q(ph);
 
-
-    // Harmonic ALE trial/test functions are created fresh inside
-    // solveHarmonicALE() on each call (see below), mirroring the reference.
 
     // Solid (displacement increment) trial/test.
     PETSc::Variational::TrialFunction d(dh);
@@ -1412,12 +1384,12 @@ int main(int argc, char **argv) {
     PETSc::Variational::GridFunction solidAccelerationOld(dh);
 
     PETSc::Variational::GridFunction fluidTraction(dfh);
-    // Interface transfer fields: projected natively on the fluid FSI
-    // faces after each fluid solve; the solid samples only P1 VALUES
-    // cross-mesh (gradient evaluation at hand-built face Points is
-    // unreliable on the Local mesh).
     PETSc::Variational::GridFunction tractionTransfer(dfh);
     PETSc::Variational::GridFunction uWall(dfh);
+
+    // Laplacian  trial/test.
+    PETSc::Variational::TrialFunction l(lh);
+    PETSc::Variational::TestFunction t(lh);
 
     auto zero = VectorFunction(dim, [&](const Point &) {
       Math::SpatialVector<Real> value(dim);
@@ -1470,6 +1442,10 @@ int main(int argc, char **argv) {
     xdmf_solid.add("Displacement", dState);
     xdmf_solid.add("SolidVelocity", solidVelocity);
     xdmf_solid.write(0.0).flush();
+
+    IO::XDMF xdmf_laplacian(cfg.xdmfBasename + "laplacian");
+    xdmf_laplacian.setMesh(meshSolid);
+    xdmf_laplacian.add("laplacian", l.getSolution());
 
     std::ofstream csv;
     if (isRoot) {
@@ -1607,7 +1583,6 @@ int main(int argc, char **argv) {
 
     // Fluid Cauchy traction on Gamma_FSI (current config):
     //   tractionFSI = p n - mu(grad u + grad u^T) n = -sigma_f n_f,
-    // i.e. the traction the fluid exerts on the wall (p>0 pushes outward).
     const auto gradUfsi = Jacobian(uCur);
     const auto strainRateFsi = gradUfsi + Transpose(gradUfsi);
     const auto symUfsi = 0.5 * strainRateFsi;
@@ -1618,10 +1593,7 @@ int main(int argc, char **argv) {
                                  (cy.n - 1.0) / cy.yasuda);
 
     // PHYSICAL (unscaled) fluid traction t_f = -sigma_f n_f: the fluid's OWN
-    // lagged Robin datum sigma_f^{lag} n and the traction output field.  The
-    // traction-scale knobs must NOT appear here: scaling the fluid-side datum
-    // moves the fluid fixed point to (1 - scale) sigma_f n = alpha (u_s - u),
-    // i.e. it violates kinematic continuity whenever scale != 1.
+    // lagged Robin datum sigma_f^{lag} n and the traction output field.
     const auto tractionFSI =
         (1.0 * pCur) * normalFluid -
         (1.0 * muFsi) * Mult(strainRateFsi, normalFluid);
@@ -1757,18 +1729,6 @@ int main(int argc, char **argv) {
     const auto inletBackflow =
         0.5 * cfg.inletBackflowStabilization * cfg.fluidDensity * inletBeta;
 
-    // ----------------------------------------------------------------------
-    // Projected-VMS convective stabilization (lagged Oseen), ported from the
-    // working CoupledLV0DCoronary3D fluid.  Adds streamline-oriented
-    // dissipation along the ALE transport velocity uConv = u^n - w without
-    // isotropic viscosity:
-    //
-    //   + int_K tau rho^2 ((grad u) uConv) . ((grad v) uConv)
-    //   - int_K rho (tau rho Pi[(grad uConv) uConv] + u'/dt) . ((grad v) uConv)
-    //
-    // with the dynamic subscale
-    //   u' = tau rho (1/dt u'^n - ((grad uConv)uConv - Pi[(grad uConv)uConv])).
-    // ----------------------------------------------------------------------
     using namespace Rodin::Examples::Heart;
 
     // ALE convecting velocity u^n - w as a grid function (refreshed each
@@ -1792,17 +1752,6 @@ int main(int argc, char **argv) {
     PETSc::Variational::GridFunction vmsSubOld(uh);  // subscale history u'^n
     vmsSubOld = zero;
 
-    // Orthogonal grad-div (p~) IMEX fields (Codina/Principe stable split):
-    //   tauC      = tau_C^{n+1} = rho tau2          (P1; bilinear coeff, LHS)
-    //   sqrtTauC  = sqrt(tau_C^{n+1})               (P1; linear coeff, LHS tau)
-    //   sqrtTauCOld = sqrt(tau_C^n)                 (P1; lagged, for pi~)
-    //   piTilde   = Pi( sqrt(tau_C^n) div u^n )     (P1; standard L2, RHS)
-    // The stabilization assembled is
-    //   + int tau_C^{n+1} (div u^{n+1})(div v)
-    //   - int sqrt(tau_C^{n+1}) piTilde (div v),
-    // i.e. tau^{n+1} implicit (LHS), the projection lagged to time n (RHS),
-    // with the symmetric sqrt(tau) weighting that gives the telescopic energy
-    // bound (temporal stability).  tau is a coefficient, never an unknown.
     PETSc::Variational::TrialFunction vmsSqrtTauC(tauFes);
     PETSc::Variational::GridFunction vmsSqrtTauCOld(tauFes);
     vmsSqrtTauCOld = 0.0;
@@ -1819,7 +1768,6 @@ int main(int argc, char **argv) {
     // Shared stabilization parameter tau1 (Codina), with c1 = 4, c2 = 2,
     // k = 1 (P1), h_K = |K|^{1/d}, nu = mu0/rho:
     //   tau1 = ( c1 k^4 nu / h^2 + c2 k |u| / h )^-1.
-    // A representative low-shear viscosity mu0 is used (conservative).
     auto tau1At = [&](const Point &pp) -> Real {
       const auto uc = uConv.getValue(pp);
       const Real nu = cy.mu0 / cfg.fluidDensity;
@@ -2165,7 +2113,7 @@ int main(int argc, char **argv) {
                        .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1], BoundarySolid::Contact[2], BoundarySolid::Contact[3], BoundarySolid::Contact[4], BoundarySolid::Contact[5], BoundarySolid::Contact[6], BoundarySolid::Contact[7], BoundarySolid::Contact[8], BoundarySolid::Contact[9], BoundarySolid::Contact[10])
         + heartK * BoundaryIntegral(Dot(dState, normalSolid), Dot(w, normalSolid))
                        .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1], BoundarySolid::Contact[2], BoundarySolid::Contact[3], BoundarySolid::Contact[4], BoundarySolid::Contact[5], BoundarySolid::Contact[6], BoundarySolid::Contact[7], BoundarySolid::Contact[8], BoundarySolid::Contact[9], BoundarySolid::Contact[10])
-        - heartK * BoundaryIntegral(disp0DFn, Dot(w, normalSolid))
+        - heartK * BoundaryIntegral(disp0DFn * l.getSolution(), Dot(w, normalSolid))
                        .over(BoundarySolid::Contact[0], BoundarySolid::Contact[1], BoundarySolid::Contact[2], BoundarySolid::Contact[3], BoundarySolid::Contact[4], BoundarySolid::Contact[5], BoundarySolid::Contact[6], BoundarySolid::Contact[7], BoundarySolid::Contact[8], BoundarySolid::Contact[9], BoundarySolid::Contact[10])
         // Robin-Robin transmission (solid side), per current area (J_a):
         //   sigma_s n_s + alpha d_dot = alpha u_f^{lag} + t_f^{lag},
@@ -2189,11 +2137,23 @@ int main(int argc, char **argv) {
       dState += etaState;
     });
 
+    Problem laplacian(l,t);
+    laplacian = Integral(Grad(l), Grad(t))
+            + DirichletBC(l, RealFunction(0.0)).on(BoundarySolid::Inlet)
+            + DirichletBC(l, RealFunction(0.95)).on(BoundarySolid::Outlets[3])
+            + DirichletBC(l, RealFunction(0.85)).on(BoundarySolid::Outlets[4])
+            + DirichletBC(l, RealFunction(0.75)).on(BoundarySolid::Outlets[0], BoundarySolid::Outlets[1], BoundarySolid::Outlets[2])
+            + DirichletBC(l, RealFunction(0.45)).on(BoundarySolid::Outlets[5]);
+
+    laplacian.assemble();
+    Solver::KSP(laplacian).solve();
+    xdmf_laplacian.write().flush();
+    xdmf_laplacian.close();
+
     // ----------------------------------------------------------------------
-    // Quasi-static wall prestress (cfg.prestressSteps > 0): ramp a uniform
-    // static NeoHookean increments.  Lumen pressure pushes the wall OUTWARD:
-    // on the inner (FSI) surface the solid outward normal n_s points INTO the
-    // lumen, so the traction is t = -p n_s, entering the residual as
+    //   Lumen pressure pushes the wall OUTWARD:
+    // on the inner (FSI) surface the solid outward normal n_s points
+    //  the traction is t = -p n_s, entering the residual as
     //   -int t.w = + int p (n_s . w).
     // ----------------------------------------------------------------------
     if (cfg.prestressSteps > 0) {
@@ -2329,7 +2289,8 @@ int main(int argc, char **argv) {
 
       // Physiological pressures.  The windkessel outlet pressure pout = pc + Rp*Q
       // is the proven 0D-3D outlet treatment; a PHYSIOLOGICAL Rp is required for
-      // stability.
+      // stability.  pout is initialized 1000 Pa below par (see RCR::pout), so
+      // par - pout > 0 gives the inlet->outlet perfusion gradient.
       pinValue = loadRamp * s.par;
       for (const auto &[tag, bc] : wk)
         outletPressureValue[tag] =
