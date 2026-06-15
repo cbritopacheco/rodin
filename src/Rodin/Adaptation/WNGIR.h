@@ -109,8 +109,13 @@ namespace Rodin::Adaptation
     /// neighbours (which offer no resistance), so strain redistributes
     /// implicitly. The barrier (metric + line search) remains the hard
     /// validity wall underneath. gammaQual ≤ 0 disables.
-    Real gammaQual = 0;
-    Real qStar = 2;
+    ///
+    /// Default preset (on): gammaQual=1 is an O(1) trade-off weight
+    /// against the data term; qStar=1.75 is a dimensionless distortion
+    /// threshold (Q_rel=1 is ideal, ≪ qMax=10 the hard wall) and is
+    /// h-independent — refining the mesh does not rescale it.
+    Real gammaQual = 1;
+    Real qStar = Real(1.75);
     /// Size hinge (energy, on the RHS). Companion to the shape hinge:
     /// penalizes cells whose Jacobian drops below a *good* level jStar
     /// (chosen ≫ jSafe):
@@ -124,8 +129,12 @@ namespace Rodin::Adaptation
     /// a strong restoring force that pulls inverted elements back to
     /// validity. The metric barrier + line search remain the hard wall.
     /// gammaSize ≤ 0 disables.
-    Real gammaSize = 0;
-    Real jStar = 0.2;
+    ///
+    /// Default preset (on): gammaSize=1 (O(1) trade-off weight);
+    /// jStar=0.3 is a dimensionless volume-ratio threshold (j=1 at
+    /// identity, ≫ jSafe=1e-2) and is h-independent.
+    Real gammaSize = 1;
+    Real jStar = Real(0.3);
     Real omegaMin = 0.1;        ///< active-set threshold on ω.
     Real alphaMin = 1e-4;       ///< line-search floor.
     bool energyLineSearch = true;
