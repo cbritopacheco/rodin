@@ -245,11 +245,7 @@ namespace Rodin::Solver
 
         ResidualNormIsNotFinite,
 
-        StepNormIsNotFinite,
-
-        StepRejected,
-
-        UserCriterion
+        StepNormIsNotFinite
       };
 
       /**
@@ -324,16 +320,6 @@ namespace Rodin::Solver
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
 
-      struct StepResult
-      {
-        bool accepted = true;
-        bool converged = false;
-        Real step_norm = 0.0;
-      };
-
-      using StepPolicy =
-        std::function<StepResult(SolutionType&, LinearSystemType&, Report&)>;
-
       using Parent::solve;
 
       /**
@@ -359,8 +345,7 @@ namespace Rodin::Solver
           m_rtol(1e-8),
           m_stol(0.0),
           m_alpha(1.0),
-          m_monitor(std::nullopt),
-          m_stepPolicy(std::nullopt)
+          m_monitor(std::nullopt)
       {}
 
       ~NewtonSolver() override = default;
@@ -559,17 +544,6 @@ namespace Rodin::Solver
         return m_monitor;
       }
 
-      NewtonSolver& setStepPolicy(Optional<StepPolicy> policy)
-      {
-        m_stepPolicy = std::move(policy);
-        return *this;
-      }
-
-      const Optional<StepPolicy>& getStepPolicy() const noexcept
-      {
-        return m_stepPolicy;
-      }
-
       /**
        * @brief Gets the report of the most recent solve.
        *
@@ -667,39 +641,6 @@ namespace Rodin::Solver
 
           this->getLinearSolver().solve();
 
-          if (m_stepPolicy)
-          {
-            const StepResult step =
-              (*m_stepPolicy)(x, linearSystem, m_report);
-            if (!std::isfinite(step.step_norm))
-            {
-              m_report.reason = ConvergedReason::StepNormIsNotFinite;
-              m_report.converged = false;
-              notify();
-              return;
-            }
-
-            m_report.final_step_norm = step.step_norm;
-            if (!step.accepted)
-            {
-              m_report.reason = ConvergedReason::StepRejected;
-              m_report.converged = false;
-              notify();
-              return;
-            }
-
-            if (step.converged)
-            {
-              m_report.reason = ConvergedReason::UserCriterion;
-              m_report.converged = true;
-              notify();
-              return;
-            }
-
-            notify();
-            continue;
-          }
-
           const Real dxNorm = m_alpha * linearSystem.getSolution().norm();
           if (!std::isfinite(dxNorm))
           {
@@ -781,8 +722,6 @@ namespace Rodin::Solver
        * Default value: none.
        */
       Optional<Monitor> m_monitor;
-
-      Optional<StepPolicy> m_stepPolicy;
 
       /**
        * @brief Diagnostic report of the most recent solve.

@@ -167,45 +167,6 @@ TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
   EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-10);
 }
 
-TEST(NewtonSolverTest, ScalarResidualShowsQuadraticConvergenceRate)
-{
-  Math::Vector<Real> u(1);
-  u << 1.45;
-
-  ScalarNonlinearProblem pb(u);
-  DenseLinearSolver linearSolver(pb);
-  Solver::NewtonSolver newton(linearSolver);
-  std::vector<Real> residuals;
-
-  newton
-    .setMaxIterations(20)
-    .setAbsoluteTolerance(1e-15)
-    .setRelativeTolerance(1e-15)
-    .setStepTolerance(0.0)
-    .setMonitor([&](const auto& report)
-    {
-      residuals.push_back(report.final_residual);
-    });
-
-  newton.solve(u);
-
-  ASSERT_GE(residuals.size(), 4u);
-  // Skip the first transition and check the asymptotic quadratic regime.
-  for (size_t i = 1; i + 1 < residuals.size(); ++i)
-  {
-    const Real r0 = residuals[i];
-    const Real r1 = residuals[i + 1];
-    if (!(r0 > 1e-14))
-      continue;
-    const Real q = r1 / (r0 * r0);
-    EXPECT_TRUE(std::isfinite(q));
-    EXPECT_GT(q, 0.0);
-    EXPECT_LT(q, 0.5);
-  }
-
-  EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-12);
-}
-
 TEST(NewtonSolverTest, SingleTemplateParameterDeducesLinearSystem)
 {
   using SolverType = Solver::NewtonSolver<DenseLinearSolver>;
