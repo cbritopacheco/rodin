@@ -227,6 +227,35 @@ namespace
       mesh.setAttribute({D - 1, it->getIndex()}, Attribute{0});
   }
 
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  // Promote every tetrahedron to a quadratic (P2) isoparametric cell by
+  // installing a degree-2 parametric transformation seeded from the affine
+  // node positions. The WNGIR solve then integrates over curved geometry.
+  void installP2CellTransformations(LocalMesh& mesh)
+  {
+    Variational::RealH1Element<2> geomFe(Polytope::Type::Tetrahedron);
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      Geometry::PointCloud pm(3, geomFe.getCount());
+      for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+      {
+        const auto& rc = geomFe.getNode(a);
+        cell.getTransformation().transform(X, rc);
+        pm(0, a) = X(0);
+        pm(1, a) = X(1);
+        pm(2, a) = X(2);
+      }
+      mesh.setPolytopeTransformation(
+          {D, cell.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+    }
+  }
+#endif
+
   template <class Displacement>
   void updateMovedMeshFromDisplacement(
       const LocalMesh& mesh,
@@ -246,6 +275,37 @@ namespace
                x(1) + uData(dofs[1]),
                x(2) + uData(dofs[2])));
     }
+
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    // Carry the full P2 displacement (corner + mid-edge nodes) onto the moved
+    // mesh as a curved parametric transformation.
+    Variational::RealH1Element<2> geomFe(Polytope::Type::Tetrahedron);
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      Geometry::PointCloud pm(3, geomFe.getCount());
+      for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+      {
+        const auto& rc = geomFe.getNode(a);
+        cell.getTransformation().transform(X, rc);
+        const Real ux =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3));
+        const Real uy =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3 + 1));
+        const Real uz =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3 + 2));
+        pm(0, a) = X(0) + ux;
+        pm(1, a) = X(1) + uy;
+        pm(2, a) = X(2) + uz;
+      }
+      moved.setPolytopeTransformation(
+          {D, cell.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+    }
+#endif
   }
 
   std::size_t parseSizeTOption(
@@ -315,8 +375,13 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "wngir-ell", Real(3) * h);
   const Real kWNGIRGammaObs =
     parseRealOption(argc, argv, "wngir-gamma-obs", Real(1));
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  const Real kWNGIRBetaMax =
+    parseRealOption(argc, argv, "wngir-beta-max", Real(10));
+#else
   const Real kWNGIRBetaMax =
     parseRealOption(argc, argv, "wngir-beta-max", Real(100));
+#endif
   const Real kWNGIRGammaJ =
     parseRealOption(argc, argv, "wngir-gamma-j", Real(1));
   const Real kWNGIRGammaQ =
@@ -367,18 +432,38 @@ int main(int argc, char** argv)
   mesh.getConnectivity().compute(3, 2);
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(0, 0);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  // P2 needs edge entities (dim 1) for the mid-edge degrees of freedom.
+  mesh.getConnectivity().compute(1, 0);
+  mesh.getConnectivity().compute(3, 1);
+  mesh.getConnectivity().compute(2, 1);
+  installP2CellTransformations(mesh);
+#endif
 
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
     mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
                       boundaryAttribute);
 
-  using ScalarP1 = P1<Real, LocalMesh>;
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  using ScalarFES = H1<2, Real, LocalMesh>;
+  using VectorFES = H1<2, Math::SpatialVector<Real>, LocalMesh>;
+#else
+  using ScalarFES = P1<Real, LocalMesh>;
+  using VectorFES = P1<Math::SpatialVector<Real>, LocalMesh>;
+#endif
   using ScalarP0 = P0<Real, LocalMesh>;
-  using VectorP1 = P1<Math::SpatialVector<Real>, LocalMesh>;
 
-  ScalarP1 scalarFes(mesh);
+  ScalarFES scalarFes(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      std::integral_constant<std::size_t, 2>{},
+#endif
+      mesh);
   ScalarP0 p0Fes(mesh);
-  VectorP1 vectorFes(mesh, 3);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 3);
+#else
+  VectorFES vectorFes(mesh, 3);
+#endif
 
   GridFunction phiGf(scalarFes);
   phiGf.setName("phi");
@@ -391,7 +476,11 @@ int main(int argc, char** argv)
 
   LocalMesh moved(mesh);
   ScalarP0 p0FesMoved(moved);
-  ScalarP1 scalarFesMoved(moved);
+  ScalarFES scalarFesMoved(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      std::integral_constant<std::size_t, 2>{},
+#endif
+      moved);
   GridFunction movedLabel(p0FesMoved);
   movedLabel.setName("cell_label");
   GridFunction phiMoved(scalarFesMoved);

@@ -52,6 +52,34 @@ namespace
     return out;
   }
 
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  // Promote every triangle to a quadratic (P2) isoparametric cell by installing
+  // a degree-2 parametric transformation seeded from the affine node positions.
+  // The WNGIR solve then integrates over genuinely curved geometry.
+  void installP2CellTransformations(LocalMesh& mesh)
+  {
+    Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      Geometry::PointCloud pm(2, geomFe.getCount());
+      for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+      {
+        const auto& rc = geomFe.getNode(a);
+        cell.getTransformation().transform(X, rc);
+        pm(0, a) = X(0);
+        pm(1, a) = X(1);
+      }
+      mesh.setPolytopeTransformation(
+          {D, cell.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+    }
+  }
+#endif
+
   template <class Displacement>
   void updateMovedMeshFromDisplacement(
       const LocalMesh& mesh,
@@ -69,6 +97,35 @@ namespace
           vertex,
           vec2(x(0) + uData(dofs[0]), x(1) + uData(dofs[1])));
     }
+
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    // Carry the full P2 displacement (corner + mid-edge nodes) onto the moved
+    // mesh as a curved parametric transformation, so the displaced geometry is
+    // genuinely quadratic rather than its affine corner approximation.
+    Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+    {
+      const auto& cell = *cellIt;
+      Geometry::PointCloud pm(2, geomFe.getCount());
+      for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+      {
+        const auto& rc = geomFe.getNode(a);
+        cell.getTransformation().transform(X, rc);
+        const Real ux =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2));
+        const Real uy =
+          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 2 + 1));
+        pm(0, a) = X(0) + ux;
+        pm(1, a) = X(1) + uy;
+      }
+      moved.setPolytopeTransformation(
+          {D, cell.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
+    }
+#endif
   }
 
   struct AdmissibilityDistribution
@@ -393,6 +450,9 @@ int main(int argc, char** argv)
   mesh.getConnectivity().compute(1, 2);
   mesh.getConnectivity().compute(2, 2);
   mesh.getConnectivity().compute(0, 0);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  installP2CellTransformations(mesh);
+#endif
 
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
     mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},

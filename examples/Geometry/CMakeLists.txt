@@ -72,6 +72,16 @@ target_link_libraries(LevelSetWNGIRSweep3D
   Rodin::Solver
   Rodin::Variational)
 
+add_executable(LevelSetWNGIRSweep3DP2 LevelSetWNGIRSweep3D.cpp)
+target_compile_definitions(LevelSetWNGIRSweep3DP2
+  PRIVATE
+  RODIN_WNGIR_P2_DISPLACEMENT=1)
+target_link_libraries(LevelSetWNGIRSweep3DP2
+  PUBLIC
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational)
+
 add_executable(LevelSetWNGIRAdvection LevelSetWNGIRAdvection.cpp)
 target_link_libraries(LevelSetWNGIRAdvection
   PUBLIC
