@@ -1005,10 +1005,10 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
-  // InternalForce tests
+  // InternalVirtualWorkResidual tests
   // ========================================================================
 
-  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce)
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1026,7 +1026,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(Vh);
     gf.getData().setZero();
 
-    Solid::InternalForce force(law, v, gf);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1036,7 +1036,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
-  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce_SVK)
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce_SVK)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1052,7 +1052,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
 
     Solid::SaintVenantKirchhoff law(2.0, 1.0);
-    Solid::InternalForce force(law, v, gf);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1062,7 +1062,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
-  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce_MooneyRivlin)
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce_MooneyRivlin)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1078,7 +1078,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
 
     Solid::MooneyRivlin law(0.5, 0.2, 5.0);
-    Solid::InternalForce force(law, v, gf);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1088,7 +1088,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-12);
   }
 
-  TEST(Rodin_Solid_InternalForce, NonZeroDisplacementNonZeroForce)
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, NonZeroDisplacementNonZeroForce)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1107,7 +1107,7 @@ namespace Rodin::Tests::Unit
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
 
     Solid::NeoHookean law(2.0, 1.0);
-    Solid::InternalForce force(law, v, gf);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -1120,7 +1120,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(norm, 1e-14);
   }
 
-  TEST(Rodin_Solid_InternalForce, WithInputFunction)
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, WithInputFunction)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1136,7 +1136,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
 
     Solid::NeoHookean law(2.0, 1.0);
-    Solid::InternalForce force(law, v, gf);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
     bool inputCalled = false;
     force.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
@@ -1153,10 +1153,10 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
-  // MaterialTangent tests
+  // InternalVirtualWorkTangent tests
   // ========================================================================
 
-  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry)
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1175,7 +1175,7 @@ namespace Rodin::Tests::Unit
     GridFunction gf(Vh);
     gf.getData().setZero();
 
-    Solid::MaterialTangent tangent(law, u, v, gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1186,7 +1186,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry_SVK)
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry_SVK)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1203,7 +1203,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
 
     Solid::SaintVenantKirchhoff law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v, gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1214,7 +1214,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry_MooneyRivlin)
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry_MooneyRivlin)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1231,7 +1231,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
 
     Solid::MooneyRivlin law(0.5, 0.2, 5.0);
-    Solid::MaterialTangent tangent(law, u, v, gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1242,7 +1242,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, NonZeroDisplacementSymmetry)
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, NonZeroDisplacementSymmetry)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1262,7 +1262,7 @@ namespace Rodin::Tests::Unit
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
 
     Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v, gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1273,7 +1273,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-10);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, NonZeroDisplacementNonTrivial)
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, NonZeroDisplacementNonTrivial)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1292,7 +1292,7 @@ namespace Rodin::Tests::Unit
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
 
     Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v, gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -1306,7 +1306,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(norm, 1e-14);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, WithInputFunction)
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, WithInputFunction)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -1323,7 +1323,7 @@ namespace Rodin::Tests::Unit
     gf.getData().setZero();
 
     Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v, gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
     bool inputCalled = false;
     tangent.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;

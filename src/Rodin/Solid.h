@@ -49,10 +49,9 @@
 #include "Solid/Constitutive/ActiveContraction.h"
 
 // Integrators
-#include "Solid/Integrators/InternalForce.h"
-#include "Solid/Integrators/MaterialTangent.h"
-#include "Solid/Integrators/BodyForce.h"
-#include "Solid/Integrators/TractionForce.h"
+#include "Solid/Integrators/InternalVirtualWorkResidual.h"
+#include "Solid/Integrators/InternalVirtualWorkTangent.h"
+#include "Solid/Integrators/InternalVirtualWork.h"
 
 // Fields
 #include "Solid/Fields/GreenLagrangeStrain.h"

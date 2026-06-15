@@ -491,9 +491,7 @@ int main(int argc, char** argv)
 
   Solid::NeoHookean law(solidLambda, solidMu);
 
-  Solid::MaterialTangent solidTangent(law, deta, z, dState);
-
-  Solid::InternalForce solidInternal(law, z, dState);
+  auto ivw = Solid::InternalVirtualWork(law, dState);
 
   auto n = BoundaryNormal(mesh);
 
@@ -573,11 +571,11 @@ int main(int argc, char** argv)
       /* Solid BDF1/Newmark-like displacement increment equation. */
       + (rhoS / (dt * dt)) * Integral(deta, z).over(Volume::Solid)
       + (solidRayleighAlpha * rhoS / dt) * Integral(deta, z).over(Volume::Solid)
-      + solidTangent.over(Volume::Solid)
+      + ivw.Tangent(deta, z).over(Volume::Solid)
 
       + (rhoS / (dt * dt)) * Integral(etaState - etaOld, z).over(Volume::Solid)
       + (solidRayleighAlpha * rhoS / dt) * Integral(etaState, z).over(Volume::Solid)
-      + solidInternal.over(Volume::Solid)
+      + ivw.Residual(z).over(Volume::Solid)
 
       /* Temporary inactive-region regularization for globally-defined fluid
        * variables.  Replace by subdomain-restricted spaces when available.

@@ -30,7 +30,7 @@
 #include "Rodin/PETSc/Math/Matrix.h"
 
 #include "Rodin/PETSc/Math/LinearSystem.h"
-#include "Rodin/PETSc/Assembly/MatrixPreparation.h"
+#include "Rodin/PETSc/Assembly/MatrixSetup.h"
 
 namespace Rodin::Assembly
 {
@@ -189,25 +189,15 @@ namespace Rodin::Assembly
         const size_t globalCols = trialFES.getSize();
 
         PetscErrorCode ierr;
-        // Re-use the existing sparsity structure across assemblies (see
-        // contract in MatrixPreparation.h) so symbolic factorizations persist.
-        bool needsSetup = true;
-        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
-            res, static_cast<PetscInt>(globalRows),
-            static_cast<PetscInt>(globalCols), needsSetup);
-        assert(ierr == PETSC_SUCCESS);
-        if (needsSetup)
-        {
-          ierr = MatSetSizes(res, localRows, localCols, globalRows, globalCols);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = MatSetFromOptions(res);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = MatSetUp(res);
-          assert(ierr == PETSC_SUCCESS);
-        }
-        ierr = MatZeroEntries(res);
+        ierr = PETSc::Assembly::MatrixSetup(res).prepare({
+          static_cast<PetscInt>(localRows),
+          static_cast<PetscInt>(localCols),
+          static_cast<PetscInt>(globalRows),
+          static_cast<PetscInt>(globalCols),
+          nullptr,
+          true,
+          false
+        });
         assert(ierr == PETSC_SUCCESS);
 
         for (auto& bfi : input.getLocalBFIs())
@@ -343,35 +333,15 @@ namespace Rodin::Assembly
         // Allocate / reset A (MPIAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        bool needsSetup = true;
-        ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
-            A, static_cast<PetscInt>(globalRows),
-            static_cast<PetscInt>(globalCols), needsSetup);
-        assert(ierr == PETSC_SUCCESS);
-        if (needsSetup)
-        {
-          ierr = MatSetSizes(
-              A,
-              static_cast<PetscInt>(localRows),
-              static_cast<PetscInt>(localCols),
-              static_cast<PetscInt>(globalRows),
-              static_cast<PetscInt>(globalCols));
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = MatSetFromOptions(A);
-          assert(ierr == PETSC_SUCCESS);
-
-          ierr = MatSetUp(A);
-          assert(ierr == PETSC_SUCCESS);
-
-          // Keep the nonzero structure stable across re-assemblies so the
-          // DirichletBC row/column zeroing below does not remove entries and
-          // change the pattern. This preserves PETSc's nonzero-state, hence the
-          // symbolic factorization of direct solvers (e.g. MUMPS).
-          ierr = MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
-          assert(ierr == PETSC_SUCCESS);
-        }
-        ierr = MatZeroEntries(A);
+        ierr = PETSc::Assembly::MatrixSetup(A).prepare({
+          static_cast<PetscInt>(localRows),
+          static_cast<PetscInt>(localCols),
+          static_cast<PetscInt>(globalRows),
+          static_cast<PetscInt>(globalCols),
+          nullptr,
+          true,
+          true
+        });
         assert(ierr == PETSC_SUCCESS);
 
         // ------------------------
@@ -967,37 +937,17 @@ namespace Rodin::Assembly
         // Allocate / reset A (MPIAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        bool needsSetup = true;
         if (doMatrix)
         {
-          ierr = PETSc::Assembly::matrixNeedsStructuralSetup(
-              A, static_cast<PetscInt>(nrows), static_cast<PetscInt>(ncols),
-              needsSetup);
-          assert(ierr == PETSC_SUCCESS);
-          if (needsSetup)
-          {
-            ierr = MatSetSizes(
-                A,
-                static_cast<PetscInt>(localRows),
-                static_cast<PetscInt>(localCols),
-                static_cast<PetscInt>(nrows),
-                static_cast<PetscInt>(ncols));
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = MatSetFromOptions(A);
-            assert(ierr == PETSC_SUCCESS);
-
-            ierr = MatSetUp(A);
-            assert(ierr == PETSC_SUCCESS);
-
-            // Keep the nonzero structure stable across re-assemblies so the
-            // DirichletBC row/column zeroing below does not remove entries and
-            // change the pattern. This preserves PETSc's nonzero-state, hence the
-            // symbolic factorization of direct solvers (e.g. MUMPS).
-            ierr = MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
-            assert(ierr == PETSC_SUCCESS);
-          }
-          ierr = MatZeroEntries(A);
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({
+            static_cast<PetscInt>(localRows),
+            static_cast<PetscInt>(localCols),
+            static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols),
+            nullptr,
+            true,
+            true
+          });
           assert(ierr == PETSC_SUCCESS);
         }
 
