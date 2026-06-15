@@ -96,9 +96,26 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
       SparseLU linearSolver(newtonProblem);
       NewtonSolver newton(linearSolver);
-      newton.setMaxIterations(12)
-        .setAbsoluteTolerance(1e-12)
-        .setRelativeTolerance(1e-10);
+      if (residualSign == ResidualSign::Correct)
+      {
+        newton.setMaxIterations(12)
+          .setAbsoluteTolerance(1e-12)
+          .setRelativeTolerance(1e-10);
+      }
+      else
+      {
+        // A wrong residual sign turns Newton's descent direction into an
+        // ascent direction for the residual norm, so the residual grows
+        // instead of shrinking. Take a couple of small damped steps so every
+        // assembled iterate stays physical (det F > 0, see
+        // KinematicState::setDisplacementGradient) while the regression is
+        // still clearly observable. Running undamped to divergence would drive
+        // an element through inversion and trip the det F > 0 invariant.
+        newton.setMaxIterations(2)
+          .setDampingFactor(0.25)
+          .setAbsoluteTolerance(1e-12)
+          .setRelativeTolerance(1e-10);
+      }
       newton.solve(uCurrent);
 
       P1 scalar(mesh);
@@ -125,6 +142,8 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   {
     const auto result = solveAffineHyperElasticity(ResidualSign::Wrong);
     EXPECT_FALSE(result.converged);
+    // The wrong sign makes the residual grow rather than decay.
+    EXPECT_GT(result.finalResidual, result.initialResidual);
     EXPECT_GT(result.l2ErrorSquared, 1e-6);
   }
 }
