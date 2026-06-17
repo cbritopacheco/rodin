@@ -169,14 +169,15 @@ namespace Rodin::Solver
       return PETSC_SUCCESS;
 #endif
     auto& problem = self->getProblem();
-    // Targeted (RHS-only / LHS-only) assembly is not implemented for the PETSc
-    // Problem specializations, so assemble the FULL system (A and b together).
-    // A full assembly makes BOTH targets current, so mark both to skip the
-    // redundant second assembly in the paired residual/Jacobian evaluation.
-    problem.assemble();
+    // Targeted assembly: assemble ONLY the requested side (A for LHS, b for
+    // RHS) so the paired residual/Jacobian evaluation does not redo the whole
+    // system on every Newton step. Mark only the side we just made current.
+    problem.assemble(target);
 #if PETSC_VERSION_GE(3, 20, 0)
-    self->m_lhsAssembled = state;
-    self->m_rhsAssembled = state;
+    if (target == Variational::AssemblyTarget::LHS)
+      self->m_lhsAssembled = state;
+    else
+      self->m_rhsAssembled = state;
 #endif
     return PETSC_SUCCESS;
   }
