@@ -18,6 +18,8 @@
 #include "Rodin/Variational/LinearForm.h"
 #include "Rodin/Variational/BilinearForm.h"
 
+#include "Rodin/PETSc/Assembly/MatrixSetup.h"
+
 #include "Rodin/PETSc/Math/Vector.h"
 #include "Rodin/PETSc/Math/Matrix.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -150,16 +152,15 @@ namespace Rodin::Assembly
         const size_t n = input.getTrialFES().getSize();
 
         PetscErrorCode ierr;
-        ierr = MatSetSizes(res, m, n, m, n);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetFromOptions(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(res);
+        ierr = PETSc::Assembly::MatrixSetup(res).prepare({
+          static_cast<PetscInt>(m),
+          static_cast<PetscInt>(n),
+          static_cast<PetscInt>(m),
+          static_cast<PetscInt>(n),
+          nullptr,
+          true,
+          false
+        });
         assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getTrialFES().getMesh();
@@ -308,18 +309,16 @@ namespace Rodin::Assembly
 
         PetscErrorCode ierr;
 
-        // Matrix setup
         assert(A);
-        ierr = MatSetSizes(A, rows, cols, rows, cols);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(A);
+        ierr = PETSc::Assembly::MatrixSetup(A).prepare({
+          static_cast<PetscInt>(rows),
+          static_cast<PetscInt>(cols),
+          static_cast<PetscInt>(rows),
+          static_cast<PetscInt>(cols),
+          MATSEQAIJ,
+          false,
+          true
+        });
         assert(ierr == PETSC_SUCCESS);
 
         // Vector setup
@@ -767,20 +766,18 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ)
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
-        assert(ierr == PETSC_SUCCESS);
-
-        // Keep it explicitly AIJ (sequential) for now
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(A);
+        ierr = PETSc::Assembly::MatrixSetup(A).prepare({
+          static_cast<PetscInt>(nrows),
+          static_cast<PetscInt>(ncols),
+          static_cast<PetscInt>(nrows),
+          static_cast<PetscInt>(ncols),
+          MATSEQAIJ,
+          false,
+          true
+        });
         assert(ierr == PETSC_SUCCESS);
 
         MatSetOption(A, MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);

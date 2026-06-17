@@ -35,6 +35,9 @@
 #include "Rodin/Assembly/Input.h"
 #include "Rodin/Assembly/Sequential.h"
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
+
 #include "Rodin/Solver/LinearSolver.h"
 
 #include "Rodin/FormLanguage/Base.h"
@@ -171,6 +174,14 @@ namespace Rodin::Variational
        * discrete linear system @f$ Au = b @f$.
        */
       virtual ProblemBase& assemble() = 0;
+
+      virtual ProblemBase& assemble(AssemblyTarget)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Targeted assembly is not implemented for this problem."
+          << Alert::Raise;
+        return *this;
+      }
 
       /**
        * @brief Gets the assembled linear system.
@@ -429,6 +440,14 @@ namespace Rodin::Variational
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
         m_assembled = true;
+        return *this;
+      }
+
+      Problem& assemble(AssemblyTarget) override
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Targeted assembly is not implemented for this problem."
+          << Alert::Raise;
         return *this;
       }
 
@@ -791,6 +810,14 @@ namespace Rodin::Variational
 
         m_assembled = true;
 
+        return *this;
+      }
+
+      virtual ProblemUsBase& assemble(AssemblyTarget) override
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Targeted assembly is not implemented for this problem."
+          << Alert::Raise;
         return *this;
       }
 

@@ -231,6 +231,14 @@ namespace Rodin::Variational
         return *this;
       }
 
+      Problem& assemble(AssemblyTarget) override
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Targeted assembly is not implemented for PETSc two-field problems."
+          << Alert::Raise;
+        return *this;
+      }
+
       /**
        * @brief Assembles if stale, solves the linear system, and writes the
        *        result to the trial function solution.
@@ -593,6 +601,33 @@ namespace Rodin::Variational
 
         m_assembled = true;
         return *this;
+      }
+
+      Problem& assemble(AssemblyTarget target) override
+      {
+        if constexpr (std::is_same_v<U1FESMeshContextType, Context::MPI>)
+        {
+          computeOffsets();
+
+          AssemblyInput in{
+            m_pb, m_us, m_vs,
+            m_trialOffsets, m_testOffsets,
+            m_trialUUIDMap, m_testUUIDMap,
+            m_totalTrial, m_totalTest
+          };
+
+          m_assembly.execute(m_axb, in, target);
+
+          m_assembled = true;
+          return *this;
+        }
+        else
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Targeted assembly is not implemented for this PETSc problem."
+            << Alert::Raise;
+          return *this;
+        }
       }
 
       /**

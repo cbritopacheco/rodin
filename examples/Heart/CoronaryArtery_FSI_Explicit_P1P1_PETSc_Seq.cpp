@@ -212,7 +212,7 @@ struct Config {
   Real meshScale = 1.0e-2;
 
   Real dt = 1.0e-3;
-  size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+  size_t nsteps = 4 * static_cast<int>(0.85 / 1.0e-3);
 
   Real pressureDropScale = 1.0;
 
@@ -236,9 +236,9 @@ struct Config {
   // C_i = rcrTau / R_d,i so the RCR time constant is UNIFORM across the tree.
   // This overrides the manual geometricParam radii.  Disable to use them.
   bool autoCalibrateOutlets = true;
-  Real lcaTargetFlow = 3.0e-6;     // m^3/s  (~180 mL/min; LCA ~150-250)
-  Real rcrTau = 0.25;               // s  (coronary RCR time constant)
-  Real proximalResistanceFraction = 0.05; // R_p / (R_p + R_d)
+  Real lcaTargetFlow = 1.0e-6;     // m^3/s  (~180 mL/min; LCA ~150-250)
+  Real rcrTau = 0.2;               // s  (coronary RCR time constant)
+  Real proximalResistanceFraction = 0.075; // R_p / (R_p + R_d)
 
   Real fluidDensity = 1060.0;
   Real pressurePenalty = 0.0;
@@ -249,8 +249,8 @@ struct Config {
   // law used by updateRCRNonNew (per-outlet proximal/distal surrogate vessels).
   OutletFlowLaw outletFlowLaw;
 
-  Real inletImpedance = 1e2;
-  Real inletTangentialDamping = 1e2;
+  Real inletImpedance = 1e3;
+  Real inletTangentialDamping = 1e3;
 
   // Implicit (semi-implicit) outlet resistance scale.  The explicit RCR
   // imposes p_out = p_c + R*Q with the LAGGED flux Q; for the high-resistance
@@ -313,21 +313,21 @@ struct Config {
   Real solidYoungModulus = 2.0e6;
   Real solidPoissonRatio = 0.4;
 
-  Real solidViscosity = 5e3;
+  Real solidViscosity = 4.e3;
 
   Real newmarkBeta = 0.25;
   Real newmarkGamma = 0.5;
 
-  size_t couplingIterations = 1;   // loose Robin-Robin (no Aitken)
+  size_t couplingIterations = 1;   // 1 = loose single pass (reliable); >1 = Picard
   Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
 
   Real robinAlpha = 0.0;
   Real robinGamma = 1.0;
 
-  Real heartDisplacementPenalty = 1.5e7;
+  Real heartDisplacementPenalty = 4.e7;
   Real heartDisplacementScale = 1.0;
 
-  Real aViscCondition = 5.0e2;
+  Real aViscCondition = 1.0e2;
   Real bViscCondition = 1.0e1;
 };
 
@@ -418,12 +418,12 @@ static Model::Input makeModelInput() {
   in.alpha = 1.5;
   in.alphaR = 0.12;
   in.k0 = 1.0e5;
-  in.sigma0 = 1.25e5;
+  in.sigma0 = 1.5e5;
 
   in.Rp = 8.0e6;
-  in.Cp = 2.e-8;
+  in.Cp = 8.e-9;
   in.Rd = 1.0e8;
-  in.Cd = 2.0e-9;
+  in.Cd = 5.0e-10;
 
   in.mu_0 = 0.0186058;
   in.mu_Inf = 0.0042963;
@@ -437,7 +437,7 @@ static Model::Input makeModelInput() {
   in.k_Inf = 1.5352;
   in.proximalRadius = 0.0125;
   in.proximalLength = 0.4;
-  in.distalRadius = 0.005;
+  in.distalRadius = 0.00175;
   in.distalLength = 0.2;
   in.windkesselRheology =
       Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
@@ -1197,7 +1197,7 @@ static void updateRCRNonNew(const Config &cfg, const Attribute &tag,
     return sgn * (*root);
   };
 
-  const Real alpha = 0.6;
+  const Real alpha = 0.45;
   const Real dPim = alpha * (s.pv - h.nm1.pv) / dt;
   const Real Qim = bc.C * dPim;
 
@@ -1464,7 +1464,7 @@ int main(int argc, char **argv) {
     // Set each outlet's RCR from its ACTUAL area: Q_i ~ r_i^3 (Murray)
     if (cfg.autoCalibrateOutlets) {
       const Real mu0 = cfg.viscosity.mu0;
-      const Real pim = 0.6 * model.getState().pv; // alpha * pv (distal level)
+      const Real pim = 0.45 * model.getState().pv; // alpha * pv (distal level)
       const Real par0 = model.getState().par;
       const Real dP = std::max<Real>(par0 - pim, 1.0);
       const Real PI = std::numbers::pi_v<Real>;
@@ -1546,7 +1546,7 @@ int main(int argc, char **argv) {
     const Real yeohC1 = 80000.0;
     const Real yeohC2 = 400000.0;
     const Real yeohC3 = 5000000.0;
-    const Real yeohKappa = 12500000.0;
+    const Real yeohKappa = 12000000.0;
 
     const Real solidShearEquiv = 2.0 * yeohC1;
     const Real solidYoungEquiv =
@@ -2127,15 +2127,15 @@ int main(int argc, char **argv) {
         - BoundaryIntegral(fluidStress, w)
             .over(BoundarySolid::FSI);
 
-    solid.assemble();
-    Solver::KSP kspSolid(solid);
-    Solver::SNES snes(kspSolid);
-    snes.setTolerances(1.0e-10, 1.0e-8, 1.0e-10, 50, 10000);
-    snes.setStateUpdate([&](const PETSc::Math::Vector &state) {
+    // The solid Problem is (re)assembled and solved INSIDE the coupling loop:
+    // on each Picard pass a FRESH KSP/SNES must wrap the freshly assembled
+    // system.  Reusing a single SNES across a re-assembly dereferences a stale
+    // PETSc matrix -> SEGV.  The Newmark state update is shared by all passes.
+    const auto solidStateUpdate = [&](const PETSc::Math::Vector &state) {
       etaState.setData(state, 0);
       dState = dOld;
       dState += etaState;
-    });
+    };
 
     Problem laplacian(l,t);
     laplacian = Integral(Grad(l), Grad(t))
@@ -2342,8 +2342,26 @@ int main(int argc, char **argv) {
       {
         for (size_t couple = 1; couple <= cfg.couplingIterations; ++couple) {
 
+          // (Re)assemble the solid with the latest lagged interface data
+          // (fluidStress / robinInterfaceData from the previous pass's fluid
+          // solve), then build a FRESH solver wrapping THIS assembled system.
+          // Pass 1 uses the previous step's lagged traction; passes > 1 the
+          // just-updated one -> a proper Picard sub-iteration.
+          //
+          // The cross-mesh interface samples are evaluated at the time-n fluid
+          // configuration Omega^n = aleDispOld (where the single-pass scheme
+          // always assembles the solid).  Pass 1 already has the mesh there;
+          // pass > 1 must restore it, since the previous pass's ALE moved the
+          // fluid mesh to Omega^{n+1} = aleDisp.
           if (couple > 1)
-            solid.assemble();
+            moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
+                                           aleDispOld);
+          solid.assemble();
+          Solver::KSP kspSolid(solid);
+          Solver::SNES snes(kspSolid);
+          snes.setTolerances(1.0e-10, 1.0e-8, 1.0e-10, 50, 10000);
+          snes.setStateUpdate(solidStateUpdate);
+
           snes.solve();
           if (!snes.converged()) {
             if (isRoot)
@@ -2499,14 +2517,21 @@ int main(int argc, char **argv) {
             ::Vec bvec = wssLoad.getVector();
             ::Vec mvec = wssArea.getVector();
             ::Vec svec = shearWall.getData();
-            PetscInt lo = 0, hi = 0;
-            VecGetOwnershipRange(svec, &lo, &hi);
+            // Bound the loop by the MINIMUM local size of the three vectors so
+            // a mismatch can never overrun an array (silent heap corruption ->
+            // a SEGV many steps later).  All three are on uh and should match;
+            // the min is just a hard safety bound.
+            PetscInt nb = 0, nm = 0, ns = 0;
+            VecGetLocalSize(bvec, &nb);
+            VecGetLocalSize(mvec, &nm);
+            VecGetLocalSize(svec, &ns);
+            const PetscInt n = std::min(ns, std::min(nb, nm));
             const PetscScalar *barr = nullptr, *marr = nullptr;
             PetscScalar *sarr = nullptr;
             VecGetArrayRead(bvec, &barr);
             VecGetArrayRead(mvec, &marr);
             VecGetArray(svec, &sarr);
-            for (PetscInt i = 0; i < hi - lo; ++i)
+            for (PetscInt i = 0; i < n; ++i)
               sarr[i] = (std::abs(marr[i]) > 1.0e-30)
                             ? (barr[i] / marr[i])
                             : PetscScalar(0);
