@@ -26,6 +26,7 @@
  * for sufficiently small eps, until roundoff dominates.
  */
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/Solid/Integrators/InternalVirtualWorkTangent.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include <array>
 #include <cmath>
@@ -394,9 +395,9 @@ int main(int, char **) {
     u = uPred;
 
     // ---- nonlinear solid operators ----------------------------------------
-    Solid::MaterialTangent tangent(law, du, w, u);
+    Solid::InternalVirtualWorkTangent tangent(law, du, w, u);
 
-    Solid::InternalForce internal(law, w, u);
+    Solid::InternalVirtualWorkResidual internal(law, w, u);
 
     // Effective nonlinear problem:
     //

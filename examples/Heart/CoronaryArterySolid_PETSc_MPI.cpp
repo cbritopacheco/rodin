@@ -35,6 +35,7 @@
  *     -ksp_type preonly -pc_type lu -pc_factor_mat_solver_type mumps
  */
 #include "Rodin/IO/ForwardDecls.h"
+#include "Rodin/Solid/Integrators/InternalVirtualWorkTangent.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include <array>
 #include <cmath>
@@ -407,8 +408,8 @@ int main(int argc, char** argv) {
   Real disp0DValue = 0.0;
   auto disp_0D = RealFunction([&](const Geometry::Point&) { return disp0DValue; });
 
-  Solid::MaterialTangent tangent(law, du, w, u);
-  Solid::InternalForce   internal(law, w, u);
+  Solid::InternalVirtualWorkTangent tangent(law, du, w, u);
+  Solid::InternalVirtualWorkResidual   internal(law, w, u);
 
   Problem newton(du, w);
   newton = tangent + aMass * Integral(du, w) + internal

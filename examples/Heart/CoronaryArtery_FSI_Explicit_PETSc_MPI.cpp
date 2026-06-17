@@ -29,6 +29,7 @@
  * Attributes: 2 = FSI wall, inlet/outlet caps, 99 = clamped FSI ring band.
  */
 
+#include "Rodin/Solid/Integrators/InternalVirtualWorkTangent.h"
 #include "Rodin/Variational/BoundaryIntegral.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include <algorithm>
@@ -1316,8 +1317,8 @@ int main(int argc, char **argv) {
     const auto normalFluid = BoundaryNormal(meshFluid);
 
     Solid::NeoHookean law(solidLambda, solidMu);
-    Solid::MaterialTangent solidTangent(law, d, w, dState);
-    Solid::InternalForce solidInternal(law, w, dState);
+    Solid::InternalVirtualWorkTangent solidTangent(law, d, w, dState);
+    Solid::InternalVirtualWorkResidual solidInternal(law, w, dState);
 
     // Current fluid solution (read back after each Oseen solve).
     PETSc::Variational::GridFunction uCur(uh);
@@ -1689,8 +1690,8 @@ int main(int argc, char **argv) {
 
       PETSc::Variational::TrialFunction dPre(dh);
       PETSc::Variational::TestFunction wPre(dh);
-      Solid::MaterialTangent preTangent(law, dPre, wPre, dState);
-      Solid::InternalForce preInternal(law, wPre, dState);
+      Solid::InternalVirtualWorkTangent preTangent(law, dPre, wPre, dState);
+      Solid::InternalVirtualWorkResidual preInternal(law, wPre, dState);
 
       // Follower pressure (exact deformed-surface load + consistent
       // tangent): full quadratic Newton up to total pressure.

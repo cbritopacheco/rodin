@@ -100,6 +100,7 @@
  * the first linear solve on two MPI ranks.
  */
 
+#include "Rodin/Solid/Integrators/InternalVirtualWorkTangent.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -598,9 +599,9 @@ int main(int argc, char** argv)
 
   Solid::NeoHookean law(solidLambda, solidMu);
 
-  Solid::MaterialTangent solidTangent(law, deta, z, dState);
+  Solid::InternalVirtualWorkTangent solidTangent(law, deta, z, dState);
 
-  Solid::InternalForce solidInternal(law, z, dState);
+  Solid::InternalVirtualWorkResidual solidInternal(law, z, dState);
 
   auto n = BoundaryNormal(mesh);
 

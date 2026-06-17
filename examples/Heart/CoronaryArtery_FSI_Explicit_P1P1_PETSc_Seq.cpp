@@ -33,6 +33,8 @@
  * Attributes: 2 = FSI wall, inlet/outlet caps, 99 = clamped FSI ring band.
  */
 
+#include "Rodin/Solid/Integrators/InternalVirtualWorkResidual.h"
+#include "Rodin/Solid/Integrators/InternalVirtualWorkTangent.h"
 #include "Rodin/Variational/BoundaryIntegral.h"
 #include "Rodin/Variational/ForwardDecls.h"
 #include <algorithm>
@@ -318,7 +320,7 @@ struct Config {
   Real newmarkBeta = 0.25;
   Real newmarkGamma = 0.5;
 
-  size_t couplingIterations = 1;   // 1 = loose single pass (reliable); >1 = Picard
+  size_t couplingIterations = 2;   // Picard passes; snes.solve() re-evaluates each pass
   Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
 
   Real robinAlpha = 0.0;
@@ -1572,8 +1574,8 @@ int main(int argc, char **argv) {
     const auto normalFluid = BoundaryNormal(meshFluid);
 
     Solid::Yeoh law(yeohC1, yeohC2, yeohC3, yeohKappa);
-    Solid::MaterialTangent solidTangent(law, d, w, dState);
-    Solid::InternalForce solidInternal(law, w, dState);
+    Solid::InternalVirtualWorkTangent solidTangent(law, d, w, dState);
+    Solid::InternalVirtualWorkResidual solidInternal(law, w, dState);
 
     // Current fluid solution (read back after each Oseen solve).
     PETSc::Variational::GridFunction uCur(uh);
@@ -2127,15 +2129,21 @@ int main(int argc, char **argv) {
         - BoundaryIntegral(fluidStress, w)
             .over(BoundarySolid::FSI);
 
-    // The solid Problem is (re)assembled and solved INSIDE the coupling loop:
-    // on each Picard pass a FRESH KSP/SNES must wrap the freshly assembled
-    // system.  Reusing a single SNES across a re-assembly dereferences a stale
-    // PETSc matrix -> SEGV.  The Newmark state update is shared by all passes.
-    const auto solidStateUpdate = [&](const PETSc::Math::Vector &state) {
+    // Assemble the solid ONCE and build the SNES around it; snes.solve()
+    // re-evaluates the residual/Jacobian (including the lagged fluidStress /
+    // robinInterfaceData) on every call, so each coupling pass and each time
+    // step automatically sees the updated interface data WITHOUT an explicit
+    // re-assembly.  (Calling solid.assemble() a second time hits the
+    // unimplemented "targeted assembly" path for this PETSc problem.)
+    solid.assemble();
+    Solver::KSP kspSolid(solid);
+    Solver::SNES snes(kspSolid);
+    snes.setTolerances(1.0e-10, 1.0e-8, 1.0e-10, 50, 10000);
+    snes.setStateUpdate([&](const PETSc::Math::Vector &state) {
       etaState.setData(state, 0);
       dState = dOld;
       dState += etaState;
-    };
+    });
 
     Problem laplacian(l,t);
     laplacian = Integral(Grad(l), Grad(t))
@@ -2164,8 +2172,8 @@ int main(int argc, char **argv) {
 
       PETSc::Variational::TrialFunction dPre(dh);
       PETSc::Variational::TestFunction wPre(dh);
-      Solid::MaterialTangent preTangent(law, dPre, wPre, dState);
-      Solid::InternalForce preInternal(law, wPre, dState);
+      Solid::InternalVirtualWorkTangent preTangent(law, dPre, wPre, dState);
+      Solid::InternalVirtualWorkResidual preInternal(law, wPre, dState);
 
       // Follower pressure (exact deformed-surface load + consistent
       // tangent): full quadratic Newton up to total pressure.
@@ -2342,26 +2350,10 @@ int main(int argc, char **argv) {
       {
         for (size_t couple = 1; couple <= cfg.couplingIterations; ++couple) {
 
-          // (Re)assemble the solid with the latest lagged interface data
-          // (fluidStress / robinInterfaceData from the previous pass's fluid
-          // solve), then build a FRESH solver wrapping THIS assembled system.
-          // Pass 1 uses the previous step's lagged traction; passes > 1 the
-          // just-updated one -> a proper Picard sub-iteration.
-          //
-          // The cross-mesh interface samples are evaluated at the time-n fluid
-          // configuration Omega^n = aleDispOld (where the single-pass scheme
-          // always assembles the solid).  Pass 1 already has the mesh there;
-          // pass > 1 must restore it, since the previous pass's ALE moved the
-          // fluid mesh to Omega^{n+1} = aleDisp.
-          if (couple > 1)
-            moveMeshWithVertexDisplacement(meshFluid, referenceVertices, uh,
-                                           aleDispOld);
-          solid.assemble();
-          Solver::KSP kspSolid(solid);
-          Solver::SNES snes(kspSolid);
-          snes.setTolerances(1.0e-10, 1.0e-8, 1.0e-10, 50, 10000);
-          snes.setStateUpdate(solidStateUpdate);
-
+          // Solve the solid.  snes.solve() re-evaluates the residual/Jacobian
+          // (incl. the lagged fluidStress / robinInterfaceData updated by the
+          // previous pass's fluid solve), so pass > 1 is a proper Picard
+          // sub-iteration with NO re-assembly needed.
           snes.solve();
           if (!snes.converged()) {
             if (isRoot)

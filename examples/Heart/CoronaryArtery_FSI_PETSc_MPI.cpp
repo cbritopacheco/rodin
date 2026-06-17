@@ -58,6 +58,7 @@
  * always nonlinear.
  */
 
+#include "Rodin/Solid/Integrators/InternalVirtualWorkTangent.h"
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -790,8 +791,8 @@ int main(int argc, char** argv)
     const Real solidMu =
       cfg.solidYoungModulus / (2.0 * (1.0 + cfg.solidPoissonRatio));
     Solid::NeoHookean law(solidLambda, solidMu);
-    Solid::MaterialTangent solidTangent(law, deta, z, dState);
-    Solid::InternalForce solidInternal(law, z, dState);
+    Solid::InternalVirtualWorkTangent solidTangent(law, deta, z, dState);
+    Solid::InternalVirtualWorkResidual solidInternal(law, z, dState);
 
     const Real dt = cfg.dt;
     const Real betaN = cfg.newmarkBeta;
