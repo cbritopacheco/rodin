@@ -231,11 +231,10 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Problem& assemble(AssemblyTarget) override
+      Problem& assemble(AssemblyTarget target) override
       {
-        Alert::MemberFunctionException(*this, __func__)
-          << "Targeted assembly is not implemented for PETSc two-field problems."
-          << Alert::Raise;
+        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+        m_assembled = true;
         return *this;
       }
 
