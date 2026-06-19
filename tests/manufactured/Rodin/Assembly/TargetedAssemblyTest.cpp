@@ -17,11 +17,16 @@
  * The manufactured systems are deliberately free of Dirichlet boundary
  * conditions so that the targeted/full equivalence is exact to roundoff.
  */
+#include <array>
+
+#include <boost/bimap.hpp>
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Configure.h"
 #include "Rodin/Geometry.h"
+#include "Rodin/Tuple.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;
@@ -115,12 +120,99 @@ namespace Rodin::Tests::Manufactured::Assembly
 #endif
 
   // -------------------------------------------------------------------------
-  // Two-field (block) targeted assembly through the high-level Problem API.
-  // The Problem routes to the Default backend (Sequential or OpenMP depending
-  // on the build), exercising the block backend + Problem::assemble(target)
-  // wiring end-to-end. BC-free so the targeted/full equivalence is exact.
+  // Two-field (block) targeted assembly, driving a specific block backend
+  // directly (so both Sequential and OpenMP block paths are exercised locally,
+  // regardless of which backend Assembly::Default resolves to). The block
+  // ProblemAssemblyInput is built the same way the high-level Problem builds
+  // it. BC-free so targeted/full equivalence is exact.
   // -------------------------------------------------------------------------
-  TEST(Eigen_TargetedAssembly, BlockProblemLHSAndRHS)
+  template <template <class, class> class Assembler>
+  LinearSystemType assembleBlock(
+      Variational::AssemblyTarget target, bool targeted)
+  {
+    auto mesh =
+      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 vh(mesh);
+    P0 ph(mesh);
+    TrialFunction u(vh);
+    TestFunction  v(vh);
+    TrialFunction p(ph);
+    TestFunction  q(ph);
+
+    using ProblemType =
+      Problem<LinearSystemType, decltype(u), decltype(v), decltype(p), decltype(q)>;
+    typename ProblemType::ProblemBodyType body =
+      Integral(Grad(u), Grad(v)) + Integral(u, v)
+        - Integral(p, v) - Integral(u, q) + Integral(p, q)
+        - Integral(RealFunction(1.0), v) - Integral(RealFunction(2.0), q);
+
+    // Trial blocks: [u, p]; test blocks: [v, q].
+    auto us = Tuple{ std::ref(u), std::ref(p) };
+    auto vs = Tuple{ std::ref(v), std::ref(q) };
+
+    const size_t uSize = static_cast<size_t>(vh.getSize());
+    const size_t pSize = static_cast<size_t>(ph.getSize());
+
+    std::array<size_t, 2> trialOffsets{ 0, uSize };
+    std::array<size_t, 2> testOffsets{ 0, uSize };
+
+    boost::bimap<Rodin::FormLanguage::Base::UUID, size_t> trialUUIDMap;
+    boost::bimap<Rodin::FormLanguage::Base::UUID, size_t> testUUIDMap;
+    trialUUIDMap.right.insert({ 0, u.getUUID() });
+    trialUUIDMap.right.insert({ 1, p.getUUID() });
+    testUUIDMap.right.insert({ 0, v.getUUID() });
+    testUUIDMap.right.insert({ 1, q.getUUID() });
+
+    const size_t totalTrial = uSize + pSize;
+    const size_t totalTest  = uSize + pSize;
+
+    ::Rodin::Assembly::ProblemAssemblyInput<
+      typename ProblemType::ProblemBodyType,
+      decltype(u), decltype(v), decltype(p), decltype(q)>
+      input(
+        body, us, vs, trialOffsets, testOffsets,
+        trialUUIDMap, testUUIDMap, totalTrial, totalTest);
+
+    LinearSystemType ls;
+    Assembler<LinearSystemType, ProblemType> assembler;
+    if (targeted)
+      assembler.execute(ls, input, target);
+    else
+      assembler.execute(ls, input);
+    return ls;
+  }
+
+  template <template <class, class> class Assembler>
+  void checkBlockTargeted()
+  {
+    const auto full =
+      assembleBlock<Assembler>(Variational::AssemblyTarget::LHS, false);
+    const auto lhs =
+      assembleBlock<Assembler>(Variational::AssemblyTarget::LHS, true);
+    const auto rhs =
+      assembleBlock<Assembler>(Variational::AssemblyTarget::RHS, true);
+
+    expectSameMatrix(full.getOperator(), lhs.getOperator());
+    expectSameVector(full.getVector(), rhs.getVector());
+  }
+
+  TEST(Eigen_TargetedAssembly, SequentialBlockLHSAndRHS)
+  {
+    checkBlockTargeted<::Rodin::Assembly::Sequential>();
+  }
+
+#ifdef RODIN_USE_OPENMP
+  TEST(Eigen_TargetedAssembly, OpenMPBlockLHSAndRHS)
+  {
+    checkBlockTargeted<::Rodin::Assembly::OpenMP>();
+  }
+#endif
+
+  // Block targeted assembly through the high-level Problem API (Default
+  // backend), covering the Problem::assemble(target) wiring end-to-end.
+  TEST(Eigen_TargetedAssembly, BlockProblemAPILHSAndRHS)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
