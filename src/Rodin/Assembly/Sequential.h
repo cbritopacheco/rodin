@@ -26,6 +26,9 @@
 #include "Rodin/Variational/ForwardDecls.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
+
 #include "Rodin/Assembly/AssemblyBase.h"
 #include "Rodin/Assembly/ConstraintMap.h"
 
@@ -1239,6 +1242,41 @@ namespace Rodin::Assembly
 
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
+        execute(axb, input, AssemblyMode::Full);
+      }
+
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          Rodin::Variational::AssemblyTarget target) const
+      {
+        switch (target)
+        {
+          case Rodin::Variational::AssemblyTarget::LHS:
+            execute(axb, input, AssemblyMode::LHS);
+            break;
+          case Rodin::Variational::AssemblyTarget::RHS:
+            execute(axb, input, AssemblyMode::RHS);
+            break;
+        }
+      }
+
+    private:
+      enum class AssemblyMode
+      {
+        Full,
+        LHS,
+        RHS
+      };
+
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          AssemblyMode mode) const
+      {
+        const bool doMatrix = mode != AssemblyMode::RHS;
+        const bool doVector = mode != AssemblyMode::LHS;
+
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
 
@@ -1253,8 +1291,11 @@ namespace Rodin::Assembly
         const size_t cols = static_cast<size_t>(trialFES.getSize());
         const size_t rows = static_cast<size_t>(testFES.getSize());
 
-        b.resize(rows);
-        b.setZero();
+        if (doVector)
+        {
+          b.resize(rows);
+          b.setZero();
+        }
 
         constexpr bool IsSparse =
           std::is_base_of_v<Eigen::SparseMatrixBase<OperatorType>, OperatorType>;
@@ -1316,14 +1357,24 @@ namespace Rodin::Assembly
           }, dbc.getDOFs());
         }
 
+        if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Targeted assembly is not implemented for identification DirichletBCs."
+            << Alert::Raise;
+        }
+
         // ------------------------------------------------------------
         // Matrix init
         // ------------------------------------------------------------
         std::vector<Eigen::Triplet<ScalarType>> triplets;
-        if constexpr (!IsSparse)
+        if (doMatrix)
         {
-          A.resize(rows, cols);
-          A.setZero();
+          if constexpr (!IsSparse)
+          {
+            A.resize(rows, cols);
+            A.setZero();
+          }
         }
 
         // ------------------------------------------------------------
@@ -1375,6 +1426,8 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------
         // Local BFIs
         // ------------------------------------------------------------
+        if (doMatrix)
+        {
         for (auto& bfi : pb.getLocalBFIs())
         {
           const auto& attrs = bfi.getAttributes();
@@ -1478,10 +1531,13 @@ namespace Rodin::Assembly
               }
           }
         }
+        } // doMatrix
 
         // ------------------------------------------------------------
         // Linear forms (unchanged)
         // ------------------------------------------------------------
+        if (doVector)
+        {
         for (auto& lfi : pb.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -1508,10 +1564,13 @@ namespace Rodin::Assembly
           for (Eigen::Index i = 0; i < vec.size(); ++i)
             vector_entry(static_cast<Index>(i), static_cast<ScalarType>(vec.coeff(i)));
         }
+        } // doVector
 
         // ------------------------------------------------------------
-        // Finalize: Sparse build; Dense eliminate afterwards
+        // Finalize (Full): Sparse build; Dense eliminate afterwards
         // ------------------------------------------------------------
+        if (mode == AssemblyMode::Full)
+        {
         if constexpr (IsSparse)
         {
           for (const Index gs : constraints.getIdentifiedRows())
@@ -1593,8 +1652,49 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(idx)) = value;
           }
         }
+        } // mode == Full
+        else if (doMatrix)
+        {
+          // LHS-only: assemble the operator; fixed rows -> identity (rows only,
+          // columns kept), mirroring the PETSc MatZeroRows targeted path.
+          if constexpr (IsSparse)
+          {
+            std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
+            filteredTriplets.reserve(triplets.size() + rows);
+            for (const auto& t : triplets)
+            {
+              if (constraints.isFixed(static_cast<Index>(t.row())))
+                continue;
+              filteredTriplets.push_back(t);
+            }
+            for (Index i = 0; i < static_cast<Index>(rows); ++i)
+              if (constraints.isFixed(i))
+                filteredTriplets.emplace_back(i, i, ScalarType(1));
+            A.resize(rows, cols);
+            A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+          }
+          else
+          {
+            for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
+            {
+              if (!constraints.isFixed(idx))
+                continue;
+              for (size_t c = 0; c < cols; ++c)
+                A(idx, c) = ScalarType(0);
+              A(idx, idx) = ScalarType(1);
+            }
+          }
+        }
+        else
+        {
+          // RHS-only: assemble the vector; fixed entries -> prescribed value.
+          for (Index idx = 0; idx < static_cast<Index>(rows); ++idx)
+            if (constraints.isFixed(idx))
+              b.coeffRef(static_cast<size_t>(idx)) = constraints.getFixedValue(idx);
+        }
       }
 
+    public:
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
