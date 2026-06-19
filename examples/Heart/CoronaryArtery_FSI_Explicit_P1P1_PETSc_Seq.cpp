@@ -298,7 +298,7 @@ struct Config {
   // ALE mesh-motion (harmonic extension) stiffening.  The lift is
   //   int  w(x) grad d : grad v ,   w(x) = (aleRefSize / h_K)^aleStiffPower ,
   // i.e. Jacobian/element-size stiffening (Stein-Tezduyar-Benney)
-  Real aleStiffPower = 0.5;
+  Real aleStiffPower = 0.75;
   Real aleRefSize    = 5.0e-4;
 
   // Kinematic interface velocity for the fluid no-slip / Robin data.  By the
@@ -320,16 +320,17 @@ struct Config {
   Real newmarkBeta = 0.25;
   Real newmarkGamma = 0.5;
 
-  size_t couplingIterations = 2;   // Picard passes; snes.solve() re-evaluates each pass
+  size_t couplingIterations = 1;   // Picard passes; snes.solve() re-evaluates each pass
   Real couplingTolerance = 1.0e-6; // relative interface-displacement tolerance
 
   Real robinAlpha = 0.0;
-  Real robinGamma = 1.0;
+  Real robinGamma = 1.0;   // scales the Robin alpha = gamma*sqrt(rho_s E); raise
+                           // to enforce no-slip harder (smaller interface slip)
 
-  Real heartDisplacementPenalty = 4.e7;
+  Real heartDisplacementPenalty = 5.e7;
   Real heartDisplacementScale = 1.0;
 
-  Real aViscCondition = 1.0e2;
+  Real aViscCondition = 5.0e1;
   Real bViscCondition = 1.0e1;
 };
 
@@ -1360,6 +1361,15 @@ int main(int argc, char **argv) {
     PETSc::Variational::GridFunction pOld(ph);
     PETSc::Variational::GridFunction one(ph);
     PETSc::Variational::GridFunction shearWall(uh);
+    // WSS gradient recovery: Grad(u) on a BOUNDARY FACE returns only the surface
+    // (tangential) gradient (Rodin uses the face element), dropping du/dn -> the
+    // WSS comes out ~0.  Recover each ROW of grad(u) (gradRecI = recovered grad
+    // of velocity component I) as a CONTINUOUS field over the VOLUME (correct
+    // per-cell gradient); its boundary trace KEEPS du/dn, so the WSS built from
+    // it is physical.  vdim = dim each (one velocity component's gradient).
+    PETSc::Variational::GridFunction gradRec0(uh);
+    PETSc::Variational::GridFunction gradRec1(uh);
+    PETSc::Variational::GridFunction gradRec2(uh);
 
     // ALE problem
     PETSc::Variational::GridFunction aleDisp(
@@ -1401,6 +1411,9 @@ int main(int argc, char **argv) {
 
     uOld = zero;
     shearWall = zero;
+    gradRec0 = zero;
+    gradRec1 = zero;
+    gradRec2 = zero;
     pOld = 0.0;
     one = 1.0;
     dState = zero;
@@ -1601,6 +1614,50 @@ int main(int argc, char **argv) {
         (1.0 * muFsi) * Mult(strainRateFsi, normalFluid);
 
     const auto wallStress = tractionFSI - Dot(tractionFSI, normalFluid) * normalFluid;
+
+    // ------------------------------------------------------------------
+    // Volume-recovered wall shear stress (fixes the surface-gradient bug).
+    // ------------------------------------------------------------------
+    // Each row of grad(u) is L2-recovered over the VOLUME and stored in
+    // gradRec0/1/2 (refreshed each step in the loop).  The WSS is then built
+    // from these continuous fields evaluated on the FSI faces, where they
+    // retain du/dn (unlike Jacobian(uCur) sampled on the face).  3D only.
+    PETSc::Variational::TrialFunction gradRecTrial(uh);
+    PETSc::Variational::TestFunction gradRecTest(uh);
+    const auto jacRow0 = VectorFunction(Component(Jacobian(uCur), 0, 0),
+                                        Component(Jacobian(uCur), 0, 1),
+                                        Component(Jacobian(uCur), 0, 2));
+    const auto jacRow1 = VectorFunction(Component(Jacobian(uCur), 1, 0),
+                                        Component(Jacobian(uCur), 1, 1),
+                                        Component(Jacobian(uCur), 1, 2));
+    const auto jacRow2 = VectorFunction(Component(Jacobian(uCur), 2, 0),
+                                        Component(Jacobian(uCur), 2, 1),
+                                        Component(Jacobian(uCur), 2, 2));
+    Problem gradRecProj0(gradRecTrial, gradRecTest);
+    gradRecProj0 =
+        Integral(gradRecTrial, gradRecTest) - Integral(jacRow0, gradRecTest);
+    Problem gradRecProj1(gradRecTrial, gradRecTest);
+    gradRecProj1 =
+        Integral(gradRecTrial, gradRecTest) - Integral(jacRow1, gradRecTest);
+    Problem gradRecProj2(gradRecTrial, gradRecTest);
+    gradRecProj2 =
+        Integral(gradRecTrial, gradRecTest) - Integral(jacRow2, gradRecTest);
+
+    // Build the WSS from the recovered gradient rows using only vector ops
+    // (Component scalars don't compose under +).  (grad u . n)_i = gradRec_i . n
+    // is the wall-NORMAL directional derivative of u; at a no-slip wall the
+    // transpose part (grad u^T . n) vanishes (u_n ~ 0 -> d u_n/dn ~ 0), so this
+    // equals the full strain-rate traction in the TANGENTIAL direction.  A
+    // constant high-shear wall viscosity muInf is used (the wall is high-shear,
+    // where the Carreau-Yasuda mu -> muInf), avoiding the shear-rate tensor
+    // contraction.  wallStressRec = tangential part of mu (grad u . n).
+    const auto gradUn0 = Dot(gradRec0, normalFluid);
+    const auto gradUn1 = Dot(gradRec1, normalFluid);
+    const auto gradUn2 = Dot(gradRec2, normalFluid);
+    const auto tracRec = VectorFunction(cy.muInf * gradUn0, cy.muInf * gradUn1,
+                                        cy.muInf * gradUn2);
+    const auto wallStressRec =
+        tracRec - Dot(tracRec, normalFluid) * normalFluid;
 
 
     // Areal stretch J_a = A_t/A_0 at the CURRENT iterate dIter: pulls
@@ -2490,6 +2547,18 @@ int main(int argc, char **argv) {
           uWall.project(Region::Faces, uCur, BoundaryFluid::FSI);
 
           {
+            // Recover the three rows of grad(u) over the VOLUME (so du/dn is
+            // retained on the wall), then build the WSS from them.
+            gradRecProj0.assemble();
+            Solver::KSP(gradRecProj0).solve();
+            gradRec0.setData(gradRecTrial.getSolution().getData());
+            gradRecProj1.assemble();
+            Solver::KSP(gradRecProj1).solve();
+            gradRec1.setData(gradRecTrial.getSolution().getData());
+            gradRecProj2.assemble();
+            Solver::KSP(gradRecProj2).solve();
+            gradRec2.setData(gradRecTrial.getSolution().getData());
+
             PETSc::Variational::TestFunction wssTest(uh);
             const auto onesVec = VectorFunction(dim, [&](const Point &) {
               Math::SpatialVector<Real> o(dim);
@@ -2498,7 +2567,7 @@ int main(int argc, char **argv) {
               return o;
             });
             LinearForm<VelocityFES, ::Vec> wssLoad(wssTest);
-            wssLoad = BoundaryIntegral(wallStress, wssTest)
+            wssLoad = BoundaryIntegral(wallStressRec, wssTest)
                           .over(BoundaryFluid::FSI);
             wssLoad.assemble();
             LinearForm<VelocityFES, ::Vec> wssArea(wssTest);
@@ -2576,6 +2645,28 @@ int main(int argc, char **argv) {
       const Real ePowerSolid = flux(one);
       const Real eInterface = ePowerFluid - ePowerSolid;
 
+      // ---- Interface slip diagnostic ------------------------------------
+      // RMS of |u_f - u_s| on the FSI wall.  The no-slip / kinematic interface
+      // condition is u_f = u_s (= wall velocity), so this should be ~0; a large
+      // value means the loose coupling has NOT enforced no-slip (the fluid is
+      // slipping at the wall), which flattens the near-wall profile and kills
+      // the WSS.  Watch it DROP across coupling passes / as robinGamma grows.
+      Real slipRms = 0.0;
+      {
+        const auto slipVec = uCur - interfaceSolidVelocity;
+        flux = BoundaryIntegral(Dot(slipVec, slipVec), qFlux)
+                   .over(BoundaryFluid::FSI);
+        flux.assemble();
+        const Real slipSq = flux(one);
+        flux = BoundaryIntegral(RealFunction(1.0), qFlux)
+                   .over(BoundaryFluid::FSI);
+        flux.assemble();
+        const Real fsiArea = flux(one);
+        slipRms = (fsiArea > 0.0)
+                      ? std::sqrt(std::max(Real(0.0), slipSq / fsiArea))
+                      : 0.0;
+      }
+
       // ---- Startup/stability diagnostics --------------------------------
       {
         PetscReal pMin = 0.0, pMax = 0.0;
@@ -2585,6 +2676,7 @@ int main(int argc, char **argv) {
           Alert::Info() << "  [diag] p in [" << pMin << ", " << pMax << "] Pa"
                         << "  mass(qIn+qOut) = " << (qIn + qOutSum)
                         << "  E_iface = " << eInterface << " W"
+                        << "  slip(RMS|u_f-u_s|) = " << slipRms << " m/s"
                         << "  | coupling: iters = " << couplesDone << "/"
                         << cfg.couplingIterations
                         << "  interface change = " << lastRel << Alert::Raise;
