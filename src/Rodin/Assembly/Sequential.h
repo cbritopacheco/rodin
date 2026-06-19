@@ -1195,6 +1195,23 @@ namespace Rodin::Assembly
         }
       }
 
+      // Targeted (LHS-only / RHS-only) assembly for the block Eigen backend:
+      // assemble the full system into a scratch object and expose only the
+      // requested side, leaving the other operand untouched (the targeted
+      // contract). Keeps the block BC-elimination logic in one code path.
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          Rodin::Variational::AssemblyTarget target) const
+      {
+        LinearSystemType scratch;
+        execute(scratch, input);
+        if (target == Rodin::Variational::AssemblyTarget::LHS)
+          axb.getOperator() = std::move(scratch.getOperator());
+        else
+          axb.getVector() = std::move(scratch.getVector());
+      }
+
       Sequential* copy() const noexcept override
         {
           return new Sequential(*this);

@@ -1484,6 +1484,24 @@ namespace Rodin::Assembly
         }
       }
 
+      // Targeted (LHS-only / RHS-only) assembly. The parallel Eigen backend
+      // assembles the full system into a scratch object and exposes only the
+      // requested side, leaving the other operand untouched (the targeted
+      // contract). This keeps the intricate parallel BC-elimination logic in a
+      // single code path instead of duplicating a gated variant.
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          Rodin::Variational::AssemblyTarget target) const
+      {
+        LinearSystemType scratch;
+        execute(scratch, input);
+        if (target == Rodin::Variational::AssemblyTarget::LHS)
+          axb.getOperator() = std::move(scratch.getOperator());
+        else
+          axb.getVector() = std::move(scratch.getVector());
+      }
+
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 
     private:
@@ -2164,6 +2182,22 @@ namespace Rodin::Assembly
         }
       }
 
+      // Targeted (LHS-only / RHS-only) assembly for the parallel block Eigen
+      // backend: assemble the full system into a scratch object and expose only
+      // the requested side, leaving the other operand untouched (the targeted
+      // contract). Keeps the parallel block BC-elimination logic in one path.
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          Rodin::Variational::AssemblyTarget target) const
+      {
+        LinearSystemType scratch;
+        execute(scratch, input);
+        if (target == Rodin::Variational::AssemblyTarget::LHS)
+          axb.getOperator() = std::move(scratch.getOperator());
+        else
+          axb.getVector() = std::move(scratch.getVector());
+      }
 
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 

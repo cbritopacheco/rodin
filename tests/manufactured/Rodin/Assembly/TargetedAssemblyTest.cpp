@@ -107,10 +107,48 @@ namespace Rodin::Tests::Manufactured::Assembly
     checkSingleFieldTargeted<::Rodin::Assembly::Sequential>();
   }
 
-#if defined(RODIN_USE_OPENMP) && defined(RODIN_TARGETED_OPENMP_READY)
+#ifdef RODIN_USE_OPENMP
   TEST(Eigen_TargetedAssembly, OpenMPSingleFieldLHSAndRHS)
   {
     checkSingleFieldTargeted<::Rodin::Assembly::OpenMP>();
   }
 #endif
+
+  // -------------------------------------------------------------------------
+  // Two-field (block) targeted assembly through the high-level Problem API.
+  // The Problem routes to the Default backend (Sequential or OpenMP depending
+  // on the build), exercising the block backend + Problem::assemble(target)
+  // wiring end-to-end. BC-free so the targeted/full equivalence is exact.
+  // -------------------------------------------------------------------------
+  TEST(Eigen_TargetedAssembly, BlockProblemLHSAndRHS)
+  {
+    auto mesh =
+      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 vh(mesh);
+    P0 ph(mesh);
+    TrialFunction u(vh);
+    TrialFunction p(ph);
+    TestFunction  v(vh);
+    TestFunction  q(ph);
+
+    Problem prob(u, v, p, q);
+    prob = Integral(Grad(u), Grad(v)) + Integral(u, v)
+         - Integral(p, v) - Integral(u, q) + Integral(p, q)
+         - Integral(RealFunction(1.0), v) - Integral(RealFunction(2.0), q);
+
+    prob.assemble();
+    const Math::SparseMatrix<Real> Afull = prob.getLinearSystem().getOperator();
+    const Math::Vector<Real>       bfull = prob.getLinearSystem().getVector();
+
+    prob.assemble(Variational::AssemblyTarget::LHS);
+    const Math::SparseMatrix<Real> Alhs = prob.getLinearSystem().getOperator();
+
+    prob.assemble(Variational::AssemblyTarget::RHS);
+    const Math::Vector<Real>       brhs = prob.getLinearSystem().getVector();
+
+    expectSameMatrix(Afull, Alhs);
+    expectSameVector(bfull, brhs);
+  }
 }
