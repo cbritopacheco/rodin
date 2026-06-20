@@ -443,11 +443,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Problem& assemble(AssemblyTarget) override
+      Problem& assemble(AssemblyTarget target) override
       {
-        Alert::MemberFunctionException(*this, __func__)
-          << "Targeted assembly is not implemented for this problem."
-          << Alert::Raise;
+        m_assembly.execute(
+            m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+        m_assembled = true;
         return *this;
       }
 
@@ -813,11 +813,57 @@ namespace Rodin::Variational
         return *this;
       }
 
-      virtual ProblemUsBase& assemble(AssemblyTarget) override
+      virtual ProblemUsBase& assemble(AssemblyTarget target) override
       {
-        Alert::MemberFunctionException(*this, __func__)
-          << "Targeted assembly is not implemented for this problem."
-          << Alert::Raise;
+        auto& axb = getLinearSystem();
+
+        // Compute trial offsets
+        {
+          std::array<size_t, TrialFunctionTuple::Size> sz;
+          m_us.map(
+                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+              .iapply(
+                [&](const Index i, size_t s) { sz[i] = s; });
+          m_trialOffsets[0] = 0;
+          for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
+            m_trialOffsets[i + 1] = sz[i] + m_trialOffsets[i];
+        }
+
+        // Compute test offsets
+        {
+          std::array<size_t, TestFunctionTuple::Size> sz;
+          m_vs.map(
+                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+              .iapply(
+                [&](const Index i, size_t s) { sz[i] = s; });
+          m_testOffsets[0] = 0;
+          for (size_t i = 0; i < TestFunctionTuple::Size - 1; i++)
+            m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
+        }
+
+        size_t rows =
+          m_vs
+            .map([](const auto& v)
+            {
+              return static_cast<size_t>(v.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
+
+        size_t cols =
+          m_us
+            .map([](const auto& u)
+            {
+              return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
+
+        AssemblyInput input(
+            m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
+            m_trialUUIDMap, m_testUUIDMap, cols, rows);
+        m_assembly.execute(axb, input, target);
+
+        m_assembled = true;
+
         return *this;
       }
 
