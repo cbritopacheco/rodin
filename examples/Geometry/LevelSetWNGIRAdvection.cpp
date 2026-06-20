@@ -1162,6 +1162,25 @@ int main(int argc, char** argv)
       return levelSet.phi(vec2(X(0), X(1)));
     };
 
+    // Diagnostic: how far did the mesh actually move? (max nodal |u| / h).
+    // This is the *displacement* magnitude, distinct from the post-fit
+    // residual fit_h. It is what determines whether the moved mesh is
+    // visibly deformed.
+    {
+      const auto& uFes = u.getFiniteElementSpace();
+      const auto& uData = u.getData();
+      Real maxUoverH = 0;
+      for (Index vtx = 0; vtx < mesh.getVertexCount(); ++vtx)
+      {
+        const auto& dofs = uFes.getDOFs(0, vtx);
+        const Real ux = uData(dofs[0]);
+        const Real uy = uData(dofs[1]);
+        maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
+      }
+      std::cout << "    max|u|/h=" << std::scientific << std::setprecision(3)
+                << maxUoverH << '\n';
+    }
+
     std::cout << "    WNGIR it=" << report.iterations
               << "  activeRMS=" << std::scientific << std::setprecision(3)
               << report.final_residual
@@ -1326,6 +1345,12 @@ int main(int argc, char** argv)
     }
     if (phiRedistance == PhiRedistance::FmmMoved)
     {
+      // FMM signed distance on the moved mesh, carried to the background grid
+      // by nodal copy (the stable pullback). NOTE: replacing this with a
+      // closest-point/IR transfer to the FITTED interface is more accurate per
+      // frame but DESTABILIZES the advection feedback loop (the carried phi
+      // amplifies the transfer error every frame -> blow-up). IR is therefore
+      // used in the cantilever optimizer, not here. See --ir-experimental.
       phiRedist = Real(0);
       Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiRedist)
         .setInterface(interfaceAttribute)

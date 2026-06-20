@@ -25,6 +25,15 @@ target_link_libraries(LevelSetCantilever3D
   Rodin::MMG
   )
 
+add_executable(LevelSetWNGIRCantilever2D LevelSetWNGIRCantilever2D.cpp)
+target_link_libraries(LevelSetWNGIRCantilever2D
+  PUBLIC
+  Rodin::Advection
+  Rodin::Geometry
+  Rodin::Solver
+  Rodin::Variational
+  )
+
 # add_executable(LevelSetMast2D LevelSetMast2D.cpp)
 # target_link_libraries(LevelSetMast2D
 #   PUBLIC
