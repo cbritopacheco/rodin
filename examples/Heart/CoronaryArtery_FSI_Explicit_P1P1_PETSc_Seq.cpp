@@ -152,11 +152,6 @@ struct OutletFlowLaw {
   Real distalLength = 0.0025;
   /// @brief Array with radius and large for each branch
   std::unordered_map<Attribute, GeoArtery> geometricParam{
-      // {Rp, Lp, Rd, Ld}.  Proximal length Lp cut 0.0125 -> 0.002 to lower the
-      // proximal resistance R_p ~ L_p/r_p^4: this shrinks the face overshoot
-      // p_out = p_c + R_p*Q so p_out stays at/below p_c <= par (forward
-      // gradient at the inlet, no reverse-flow instability).  Distal (Rd,Ld)
-      // unchanged so the steady flow split / drop is essentially preserved.
       {26,  {6.e-4,  0.002, 3e-4, 0.0025}},
       {28,  {5.e-4,  0.002,  2e-4, 0.004 }},
       {25,  {5.5e-4,  0.002, 2e-4, 0.004}},
@@ -220,23 +215,12 @@ struct Config {
 
   // Fixed epicardial forward pressure drop [Pa] subtracted from EVERY outlet:
   //   p_out_3D = par - pressureDropScale*(par - p_out_RCR) - epicardialDrop.
-  // The RCR capacitor starts at ~par, so inlet and outlets sit at the same
-  // level and any ripple makes p_out > p_in -> reverse flow -> instability.
-  // This GUARANTEES a forward gradient (p_in - p_out >= epicardialDrop > 0)
-  // from the very first step, which is also the physiological driver of
-  // coronary flow.  Tune with -coronary_epicardial_drop (try 500-1500 Pa).
-  // Default OFF (0): the proximal-resistance recalibration below keeps
-  // p_out < par physically; re-enable this as a guaranteed fallback if the
-  // outlet ever creeps above the inlet again.
   Real epicardialDrop = 0.0;
 
   // Automatic Murray-law outlet calibration.  When true, at startup each
   // outlet's RCR resistance is set from its ACTUAL area (Q ~ r^3, so larger
   // branches carry proportionally more flow regardless of the mesh attribute
-  // numbering), the proximal:distal split is held at ~5:95, the total tree
-  // flow is set to lcaTargetFlow, and each outlet gets its own compliance
-  // C_i = rcrTau / R_d,i so the RCR time constant is UNIFORM across the tree.
-  // This overrides the manual geometricParam radii.  Disable to use them.
+  // numbering)
   bool autoCalibrateOutlets = true;
   Real lcaTargetFlow = 1.0e-6;     // m^3/s  (~180 mL/min; LCA ~150-250)
   Real rcrTau = 0.2;               // s  (coronary RCR time constant)
@@ -247,36 +231,22 @@ struct Config {
   Real inletBackflowStabilization = 1.0;
   Real outletBackflowStabilization = 1.0;
   CarreauYasuda viscosity;
-  // Geometry + nonlinear-solve parameters for the non-Newtonian outlet flow
-  // law used by updateRCRNonNew (per-outlet proximal/distal surrogate vessels).
+
   OutletFlowLaw outletFlowLaw;
 
   Real inletImpedance = 1e3;
   Real inletTangentialDamping = 1e3;
 
-  // Implicit (semi-implicit) outlet resistance scale.  The explicit RCR
-  // imposes p_out = p_c + R*Q with the LAGGED flux Q; for the high-resistance
-  // small branches (R ~ mu L / r^4 is huge) p_out is hypersensitive to flux
-  // ripple and oscillates.  We add a consistency-preserving IMPLICIT local
-  // resistance in delta form,
-  //    + Z_out int_outlet (u.n)(v.n)  -  Z_out int_outlet (u^n.n)(v.n),
-  // with Z_out = outletResistanceScale * 8 mu0 L_p / R_p^2  (the local proximal
-  // impedance, per outlet, units Pa s/m -- same as inletImpedance).  Because
-  // it is the difference (u - u^n), it VANISHES at steady state, so it does NOT
-  // change the converged RCR pressure (the full non-Newtonian p_out stays
-  // explicit) -- it only damps the step-to-step flux oscillation implicitly.
-  // 0 disables it.
+
   Real outletResistanceScale = 1.0;
 
   // Static follower-pressure prestress: ramp 0 -> par(0) in this many
-  // increments (0 = disabled); the dynamic loop then starts from the
-  // pressurized equilibrium with an exactly balanced first residual.
+  // increments (0 = disabled)
   size_t prestressSteps = 50;
 
   // Prestress STATICALLY to prestressFraction*par, then ramp the remaining
   // (1 - prestressFraction) of the loads smoothly from prestressFraction -> 1
-  // over the first prestressRampSteps dynamic steps.  prestressFraction = 1
-  // recovers full prestress with no dynamic ramp.
+
   Real   prestressFraction  = 0.975;
   size_t prestressRampSteps = 10;
 
@@ -285,14 +255,7 @@ struct Config {
   // recovers the plain Temam-stabilized fluid; 1 is the nominal scaling.
   Real vmsScale = 1.0;
 
-  // Grad-div (continuity / "div-u") stabilization scale.  Adds the consistent
-  // term  int tau_C (div u)(div v)  with tau_C = gradDivScale * rho |u| h_K,
-  // which improves mass conservation and damps the spurious pressure
-  // component / open-boundary pressure layers on the inf-sup-stable P2/P1
-  // pair.  Vanishes for divergence-free solutions, so it is consistency-safe.
-  // This is NOT a pressure-gradient (PSPG/grad-p) term and is not needed for
-  // inf-sup stability (P2/P1 already is stable).  0 disables it.
-  // tau_C = gradDivScale * rho * tau_2,  tau_2 = (h/k^2)^2 / (c1 tau_1).
+  // Grad-div (continuity / "div-u") stabilization scale.
   Real gradDivScale = 1.0;
 
   // ALE mesh-motion (harmonic extension) stiffening.  The lift is
@@ -635,7 +598,7 @@ static std::size_t tagFSIRingBand(MeshType &mesh, Attribute fsi, Attribute ring,
 
 // Match each fluid FSI face to its geometric twin on the solid FSI surface by
 // centroid proximity.  The two meshes are assumed CONFORMING on the interface
-// (coincident faces); a tolerance absorbs floating-point / ASCII round-off.
+// (coincident faces
 static InterfaceMap buildInterfaceMap(const MeshType &fluidReferenceMesh,
                                       const MeshType &solidReferenceMesh) {
   InterfaceMap map;
@@ -775,9 +738,7 @@ static Point forwardSolidPointToFluid(const Point &p, const MeshType &fluidMesh,
   return Point(*fluidFace, rc, pc);
 }
 
-// True iff every component is finite.  Cross-mesh interface samples on the
-// Local mesh can return non-finite values at edge-case quadrature points
-// (cell inverse-mapping near face boundaries);
+// True iff every component is finite.
 static bool isFiniteVec(const Math::SpatialVector<Real> &x) {
   for (Index i = 0; i < x.size(); ++i)
     if (!std::isfinite(x(i)))
@@ -914,8 +875,7 @@ static void readOptions(Config &cfg) {
     cfg.subtractHeartHandoffOffset = (subHeartOffset == PETSC_TRUE);
 
   // Newmark gamma (>= 0.5; > 0.5 adds numerical damping to kill structural
-  // ringing).  beta is auto-set to the unconditionally-stable (gamma+1/2)^2/4
-  // unless -coronary_newmark_beta is given explicitly.
+  // ringing).
   PetscReal newmarkGamma = cfg.newmarkGamma;
   PetscBool newmarkGammaSet = PETSC_FALSE;
   PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_newmark_gamma",
@@ -1361,12 +1321,6 @@ int main(int argc, char **argv) {
     PETSc::Variational::GridFunction pOld(ph);
     PETSc::Variational::GridFunction one(ph);
     PETSc::Variational::GridFunction shearWall(uh);
-    // WSS gradient recovery: Grad(u) on a BOUNDARY FACE returns only the surface
-    // (tangential) gradient (Rodin uses the face element), dropping du/dn -> the
-    // WSS comes out ~0.  Recover each ROW of grad(u) (gradRecI = recovered grad
-    // of velocity component I) as a CONTINUOUS field over the VOLUME (correct
-    // per-cell gradient); its boundary trace KEEPS du/dn, so the WSS built from
-    // it is physical.  vdim = dim each (one velocity component's gradient).
     PETSc::Variational::GridFunction gradRec0(uh);
     PETSc::Variational::GridFunction gradRec1(uh);
     PETSc::Variational::GridFunction gradRec2(uh);
@@ -1476,7 +1430,6 @@ int main(int argc, char **argv) {
       wk.emplace(outlet, RCR{});
 
     // ---- Automatic Murray-law outlet calibration ------------------------
-    // Set each outlet's RCR from its ACTUAL area: Q_i ~ r_i^3 (Murray)
     if (cfg.autoCalibrateOutlets) {
       const Real mu0 = cfg.viscosity.mu0;
       const Real pim = 0.45 * model.getState().pv; // alpha * pv (distal level)
@@ -1618,10 +1571,7 @@ int main(int argc, char **argv) {
     // ------------------------------------------------------------------
     // Volume-recovered wall shear stress (fixes the surface-gradient bug).
     // ------------------------------------------------------------------
-    // Each row of grad(u) is L2-recovered over the VOLUME and stored in
-    // gradRec0/1/2 (refreshed each step in the loop).  The WSS is then built
-    // from these continuous fields evaluated on the FSI faces, where they
-    // retain du/dn (unlike Jacobian(uCur) sampled on the face).  3D only.
+
     PETSc::Variational::TrialFunction gradRecTrial(uh);
     PETSc::Variational::TestFunction gradRecTest(uh);
     const auto jacRow0 = VectorFunction(Component(Jacobian(uCur), 0, 0),
@@ -1816,9 +1766,7 @@ int main(int argc, char **argv) {
     vmsSqrtTauCOld = 0.0;
     PETSc::Variational::TrialFunction vmsPiTilde(tauFes);
 
-    // Pressure-gradient (PSPG / grad-p) parameter tau_p = pgpScale * tau1/rho,
-    // projected onto P1 (the equal-order pressure stabilization, REQUIRED for
-    // P1/P1).  tau is a coefficient (lagged velocity), never an unknown.
+    // Pressure-gradient (PSPG / grad-p) parameter tau_p
     PETSc::Variational::TrialFunction vmsTauP(tauFes);
 
     // Frozen convective acceleration (grad uConv) uConv.
@@ -1884,11 +1832,7 @@ int main(int argc, char **argv) {
       return cfg.gradDivScale * cfg.fluidDensity * tau2;
     };
     // sqrt(tau_C) = sqrt(gradDivScale rho tau2) >= 0 is the ONLY tau field we
-    // project.  The bilinear coefficient tau_C^{n+1} is then formed as the
-    // POINTWISE SQUARE of this projected sqrt-field (vmsTauC = vmsSqrtTauC.^2,
-    // computed in the loop via VecPointwiseMult), guaranteeing the discrete
-    // identity tau_C = (sqrt(tau_C))^2 -- which is what the IMEX telescopic
-    // energy bound requires.
+    // project.
     RealFunction sqrtRhoTau2Fn = [rhoTau2At](const Point &pp) -> Real {
       return std::sqrt(std::max<Real>(0.0, rhoTau2At(pp)));
     };
@@ -1898,9 +1842,7 @@ int main(int argc, char **argv) {
     vmsSqrtTauCProj = Integral(vmsSqrtTauC, vmsTauCTest) -
                       Integral(sqrtRhoTau2Fn, vmsTauCTest);
 
-    // pi~^n = Pi( sqrt(tau_C^n) div u^n ): STANDARD L2 projection of the
-    // sqrt(tau)-weighted divergence of the PREVIOUS-step velocity (uOld) with
-    // the PREVIOUS-step sqrt(tau) (vmsSqrtTauCOld).  Fully lagged (time n).
+    // pi~^n = Pi( sqrt(tau_C^n) div u^n )
     Problem vmsPiTildeProj(vmsPiTilde, vmsTauCTest);
     vmsPiTildeProj =
         Integral(vmsPiTilde, vmsTauCTest) -
@@ -1959,17 +1901,13 @@ int main(int argc, char **argv) {
         //   + int tau_C^{n+1} (div u^{n+1})(div v)          [implicit, LHS]
         //   - int sqrt(tau_C^{n+1}) pi~^n (div v)           [lagged, RHS]
         // with pi~^n = Pi( sqrt(tau_C^n) div u^n ).  tau_C folds
-        // cfg.gradDivScale so both vanish when gradDivScale == 0.
         VMSGradDivBilinearIntegrator(u, v, vmsTauC.getSolution()) -
         VMSGradDivLinearIntegrator(v, vmsPiTilde.getSolution(),
                                    vmsSqrtTauC.getSolution()) +
         2.0 * Integral(muLag * symU, symV) - Integral(p, Div(v)) +
         Integral(Div(u), q) + cfg.pressurePenalty * Integral(p, q) +
         // Pressure-gradient (PSPG / grad-p) stabilization, REQUIRED for the
-        // equal-order P1/P1 pair:  + int tau_p (grad p . grad q).  Same
-        // orientation as the +eps(p,q) penalty (coercive in p).  tau_p folds
-        // cfg.pgpScale so it vanishes when pgpScale == 0.  (Plain consistent
-        // PSPG, not the orthogonal-projected OSS variant -- see notes.)
+        // equal-order P1/P1 pair
         Integral(vmsTauP.getSolution() * Grad(p), Grad(q)) +
         BoundaryIntegral(inletBackflow * Dot(u, v)).over(BoundaryFluid::Inlet) +
         BoundaryIntegral(outletBackflow * Dot(u, v))
@@ -2015,14 +1953,12 @@ int main(int argc, char **argv) {
         //   sigma_f n + alpha u = alpha d_dot_s + lambda^{k-1},
         // with lambda^{k-1} = tractionFSI at the PREVIOUS correction (= the
         // previous time step at the first correction, i.e. lambda^{n-1} in
-        // the loose kappa = 0 scheme).  Enters with PLUS (a minus sign would
-        // impose a traction-free wall and diverge).
+        // the loose kappa = 0 scheme).
         + robinAlpha * BoundaryIntegral(u,v).over(BoundaryFluid::FSI)
         - robinAlpha * BoundaryIntegral(interfaceSolidVelocity,v).over(BoundaryFluid::FSI)
         + BoundaryIntegral(tractionFSI,v).over(BoundaryFluid::FSI)
         // Interface convective stabilization (Burman et al. 2025, eq. 13):
-        // -(rho/2) (transportLag.n)(u.v) on Sigma; controls the convective
-        // energy on the moving wall (omitting it -> added-mass growth).
+        // -(rho/2) (transportLag.n)(u.v) on Sigma
         - 0.5 * cfg.fluidDensity *
               BoundaryIntegral(Dot(transportLag, normalFluid) * Dot(u, v))
                   .over(BoundaryFluid::FSI)
@@ -2063,16 +1999,11 @@ int main(int argc, char **argv) {
       return value;
     });
 
-    // Harmonic ALE lift (reference config).  Must be RE-ASSEMBLED on every
-    // coupling iterate: assemble() bakes the FSI Dirichlet values (dIter)
-    // into the system; KSP::solve() alone does not re-evaluate BCs.
+    // Harmonic ALE lift (reference config).
       PETSc::Variational::TrialFunction dMove(uh);
       PETSc::Variational::TestFunction vMove(uh);
 
       // Jacobian/element-size stiffening weight w(x) = (aleRefSize/h_K)^power:
-      // small near-wall elements get a larger weight -> move more rigidly, so
-      // the distortion is pushed into the large far-field elements (power == 0
-      // recovers the plain harmonic extension).
       RealFunction aleStiffFn = [&](const Point &pp) -> Real {
         if (cfg.aleStiffPower <= 0.0)
           return 1.0;
@@ -2186,12 +2117,6 @@ int main(int argc, char **argv) {
         - BoundaryIntegral(fluidStress, w)
             .over(BoundarySolid::FSI);
 
-    // Assemble the solid ONCE and build the SNES around it; snes.solve()
-    // re-evaluates the residual/Jacobian (including the lagged fluidStress /
-    // robinInterfaceData) on every call, so each coupling pass and each time
-    // step automatically sees the updated interface data WITHOUT an explicit
-    // re-assembly.  (Calling solid.assemble() a second time hits the
-    // unimplemented "targeted assembly" path for this PETSc problem.)
     solid.assemble();
     Solver::KSP kspSolid(solid);
     Solver::SNES snes(kspSolid);
@@ -2210,17 +2135,33 @@ int main(int argc, char **argv) {
             + DirichletBC(l, RealFunction(0.75)).on(BoundarySolid::Outlets[0], BoundarySolid::Outlets[1], BoundarySolid::Outlets[2])
             + DirichletBC(l, RealFunction(0.45)).on(BoundarySolid::Outlets[5]);
 
+    if (isRoot) {
+      PETSc::Variational::GridFunction oneSolid(lh);
+      oneSolid = 1.0;
+      LinearForm<LaplacianFES, ::Vec> solidArea(t);
+      auto faceArea = [&](Attribute tag) -> Real {
+        solidArea = BoundaryIntegral(oneSolid, t).over(tag);
+        solidArea.assemble();
+        return solidArea(oneSolid);
+      };
+      Alert::Info() << "  [solid-bdr] Inlet(" << BoundarySolid::Inlet
+                    << ") area=" << faceArea(BoundarySolid::Inlet)
+                    << "  FSI(" << BoundarySolid::FSI
+                    << ") area=" << faceArea(BoundarySolid::FSI)
+                    << "  FSIRing(" << BoundarySolid::FSIRing
+                    << ") area=" << faceArea(BoundarySolid::FSIRing)
+                    << Alert::Raise;
+      for (size_t i = 0; i < BoundarySolid::Outlets.size(); ++i)
+        Alert::Info() << "  [solid-bdr] Outlet(" << BoundarySolid::Outlets[i]
+                      << ") area=" << faceArea(BoundarySolid::Outlets[i])
+                      << Alert::Raise;
+    }
+
     laplacian.assemble();
     Solver::KSP(laplacian).solve();
     xdmf_laplacian.write().flush();
     xdmf_laplacian.close();
 
-    // ----------------------------------------------------------------------
-    //   Lumen pressure pushes the wall OUTWARD:
-    // on the inner (FSI) surface the solid outward normal n_s points
-    //  the traction is t = -p n_s, entering the residual as
-    //   -int t.w = + int p (n_s . w).
-    // ----------------------------------------------------------------------
     if (cfg.prestressSteps > 0) {
       // Prestress statically to prestressFraction*par; the dynamic loop ramps
       // the remaining (1 - prestressFraction) over prestressRampSteps.
@@ -2313,7 +2254,6 @@ int main(int argc, char **argv) {
     //   Commit state, compute the interface flux, update the RCR, write output.
     //
     //   couplingIterations == 1 is loosely coupled; > 1 is strong coupling
-    //   (needed when the added-mass effect destabilizes the loose scheme).
     // ======================================================================
 
     for (size_t step = 1; step <= cfg.nsteps; ++step) {
@@ -2326,10 +2266,6 @@ int main(int argc, char **argv) {
 
       const auto &s = model.getState();
 
-      // 0D heart radial displacement imposed (weakly) on attributes 110..120.
-      // Optionally referenced to the handoff value so the band eases out of the
-      // prestressed configuration instead of lurching to s.y in one step (which
-      // Newmark amplifies into a velocity spike); see subtractHeartHandoffOffset.
       if (cfg.subtractHeartHandoffOffset) {
         if (step == 1)
           disp0DOffset = s.y;
@@ -2338,11 +2274,7 @@ int main(int argc, char **argv) {
         disp0D = cfg.heartDisplacementScale * s.y;
       }
 
-      // Prestress-handoff ramp: the wall was prestressed to prestressFraction*par
-      // and the fluid seeded there, so the loads start at prestressFraction
-      // (step 1, matched -> ~zero residual) and smoothstep up to full par over
-      // prestressRampSteps.  prestressFraction = 1 (or 0 ramp steps) -> full
-      // loads from step 1.
+      // Prestress-handoff ramp
       Real loadRamp = 1.0;
       if (cfg.prestressFraction < 1.0 && cfg.prestressRampSteps > 0) {
         const Real sRamp = std::min(
@@ -2352,10 +2284,6 @@ int main(int argc, char **argv) {
         loadRamp = cfg.prestressFraction + (1.0 - cfg.prestressFraction) * ss;
       }
 
-      // Physiological pressures.  The windkessel outlet pressure pout = pc + Rp*Q
-      // is the proven 0D-3D outlet treatment; a PHYSIOLOGICAL Rp is required for
-      // stability.  pout is initialized 1000 Pa below par (see RCR::pout), so
-      // par - pout > 0 gives the inlet->outlet perfusion gradient.
       pinValue = loadRamp * s.par;
       for (const auto &[tag, bc] : wk)
         outletPressureValue[tag] =
@@ -2421,10 +2349,7 @@ int main(int argc, char **argv) {
             break;
           }
 
-          // Full (un-relaxed) interface update: dIter <- dState.  NO Aitken
-          // relaxation -- loose Robin-Robin coupling (couplingIterations == 1
-          // by default; for > 1 this is a plain Picard fixed point).  rel is
-          // kept purely as a per-step diagnostic.
+          // Full (un-relaxed) interface update: dIter <- dState.
           auto delta = dState;
           delta -= dIter;
           PetscReal deltaNorm = 0.0;
@@ -2646,11 +2571,7 @@ int main(int argc, char **argv) {
       const Real eInterface = ePowerFluid - ePowerSolid;
 
       // ---- Interface slip diagnostic ------------------------------------
-      // RMS of |u_f - u_s| on the FSI wall.  The no-slip / kinematic interface
-      // condition is u_f = u_s (= wall velocity), so this should be ~0; a large
-      // value means the loose coupling has NOT enforced no-slip (the fluid is
-      // slipping at the wall), which flattens the near-wall profile and kills
-      // the WSS.  Watch it DROP across coupling passes / as robinGamma grows.
+      // RMS of |u_f - u_s| on the FSI wall.
       Real slipRms = 0.0;
       {
         const auto slipVec = uCur - interfaceSolidVelocity;
@@ -2686,10 +2607,7 @@ int main(int argc, char **argv) {
       for (const Attribute outlet : BoundaryFluid::Outlets)
         updateRCRNonNew(cfg, outlet, model, wk[outlet], qOut[outlet], dt);
 
-      // Lagged implicit-resistance update: Z_i = scale * R_lag * A_i, with the
-      // RCR proximal resistance evaluated at THIS step's flux (secant
-      // dp_out/Q, Poiseuille fallback near zero flux).  Read by the flow's
-      // zFn* on the next assembly -> automatic, non-Newtonian-consistent Z.
+      // Lagged implicit-resistance update
       for (size_t i = 0; i < BoundaryFluid::Outlets.size(); ++i) {
         const Attribute tag = BoundaryFluid::Outlets[i];
         const Real Qi = qOut[tag];
