@@ -584,11 +584,15 @@ namespace Rodin::Assembly
           // Without identification constraints the operators share A's
           // row/column layout and introduce no right-hand-side coupling, so
           // they are merged directly with MatAXPY once A is assembled.
-          // Identification constraints couple eliminated columns into b and
-          // therefore require the generic per-entry expansion path below.
+          // Identification constraints couple eliminated columns into b, and
+          // fixed (value Dirichlet) constraints are eliminated afterwards with
+          // MatZeroRowsColumns, which requires the per-entry matrix state to
+          // hold the diagonal entries it overwrites; both therefore require the
+          // generic per-entry expansion path below.
           if (!pb.getBFs().empty())
           {
-            bool merge = constraints.getIdentifiedRows().empty();
+            bool merge =
+              constraints.getIdentifiedRows().empty() && !constraints.hasFixed();
             if (merge)
             {
               for (auto& bf : pb.getBFs())

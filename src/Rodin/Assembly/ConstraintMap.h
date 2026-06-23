@@ -85,6 +85,16 @@ namespace Rodin::Assembly
             && m_isIdentified[static_cast<size_t>(i)];
       }
 
+      /// @brief Returns true if any DOF carries a fixed (value Dirichlet)
+      /// constraint.
+      bool hasFixed() const
+      {
+        for (const auto& f : m_fixed)
+          if (f.has_value())
+            return true;
+        return false;
+      }
+
       Scalar getFixedValue(Index i) const
       {
         assert(isFixed(i));
