@@ -12,6 +12,35 @@
 namespace Rodin::PETSc::Assembly
 {
   /**
+   * @brief Tests whether a preassembled operator can be merged into the system
+   *        matrix with a single @c MatAXPY.
+   *
+   * @c MatAXPY(A, 1, op) requires @c op and @c A to share both their global
+   * dimensions and, in the distributed case, their local row ownership range.
+   * When that holds the preassembled operator can be added in one collective
+   * call instead of being scattered entry by entry. Multi-variable (block
+   * offset) assembly places @c op as a sub-block of @c A, so the dimensions
+   * differ and this returns @c false, selecting the generic per-entry path.
+   *
+   * The check is conservative: any failure or mismatch yields @c false, which
+   * is always safe because the per-entry fallback handles every case.
+   */
+  inline bool canMergeOperator(::Mat A, ::Mat op)
+  {
+    PetscInt aLo = 0, aHi = 0, oLo = 0, oHi = 0;
+    PetscInt aRows = 0, aCols = 0, oRows = 0, oCols = 0;
+    if (MatGetOwnershipRange(A, &aLo, &aHi) != PETSC_SUCCESS)
+      return false;
+    if (MatGetOwnershipRange(op, &oLo, &oHi) != PETSC_SUCCESS)
+      return false;
+    if (MatGetSize(A, &aRows, &aCols) != PETSC_SUCCESS)
+      return false;
+    if (MatGetSize(op, &oRows, &oCols) != PETSC_SUCCESS)
+      return false;
+    return aLo == oLo && aHi == oHi && aRows == oRows && aCols == oCols;
+  }
+
+  /**
    * @brief Sets up a PETSc matrix for assembly while reusing compatible
    *        existing structure.
    *

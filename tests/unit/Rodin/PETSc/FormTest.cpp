@@ -450,6 +450,107 @@ namespace
     }
   }
 
+  // Exercises the preassembled-operator fast path. A single-variable problem
+  // with no identification constraints merges its preassembled operator into
+  // the system matrix with a single MatAXPY (see canMergeOperator). The
+  // assembled matrix must equal the operator entry for entry and, with a zero
+  // load, the right-hand side must vanish. This complements the identification
+  // tests, which exercise the generic per-entry fallback path.
+  template <template <class, class> class Assembler>
+  void checkPETScPreassembledOperatorMerge()
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+
+    const PetscInt n = static_cast<PetscInt>(fes.getSize());
+    ASSERT_GE(n, 2);
+
+    BilinearForm uu(u, v);
+    auto& op = uu.getOperator();
+    PetscErrorCode ierr = MatSetSizes(op, n, n, n, n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetFromOptions(op);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetUp(op);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    for (PetscInt i = 0; i < n; ++i)
+    {
+      ierr = MatSetValue(op, i, i, static_cast<PetscScalar>(i + 1), INSERT_VALUES);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    }
+    ierr = MatSetValue(op, 0, 1, 3.0, INSERT_VALUES);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetValue(op, 1, 0, 5.0, INSERT_VALUES);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatAssemblyBegin(op, MAT_FINAL_ASSEMBLY);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatAssemblyEnd(op, MAT_FINAL_ASSEMBLY);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    LinearForm zero(v);
+    auto& zeroVec = zero.getVector();
+    ierr = VecSetSizes(zeroVec, n, n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecSetFromOptions(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecSetUp(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecZeroEntries(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAssemblyBegin(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAssemblyEnd(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    // A single preassembled operator with no identification constraints and a
+    // zero load. The zero-integrand linear form turns the BilinearForm into a
+    // ProblemBody, and the preassembled zero vector introduces the vector type
+    // (matching the identification helpers). The merge path must reproduce op
+    // exactly and leave b at zero.
+    auto body = uu - Integral(RealFunction(0.0), v) - zero;
+
+    using LinearSystemType = PETSc::Math::LinearSystem;
+    using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
+
+    Assembly::ProblemAssemblyInput<
+      std::decay_t<decltype(body)>, decltype(u), decltype(v)> input(body, u, v);
+
+    LinearSystemType ls(PETSC_COMM_SELF);
+    Assembler<LinearSystemType, ProblemType> assembler;
+    assembler.execute(ls, input);
+
+    auto& A = ls.getOperator();
+    auto& b = ls.getVector();
+
+    for (PetscInt i = 0; i < n; ++i)
+    {
+      PetscScalar value = 0;
+      ierr = VecGetValues(b, 1, &i, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, 0.0, 1e-14) << "rhs row " << i;
+
+      for (PetscInt j = 0; j < n; ++j)
+      {
+        PetscScalar expected = 0.0;
+        if (i == j)
+          expected = static_cast<PetscScalar>(i + 1);
+        if (i == 0 && j == 1)
+          expected = 3.0;
+        if (i == 1 && j == 0)
+          expected = 5.0;
+
+        ierr = MatGetValues(A, 1, &i, 1, &j, &value);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        EXPECT_NEAR(value, expected, 1e-14)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
   TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -633,6 +734,11 @@ namespace
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
   }
 
+  TEST(PETSc_Form, SequentialPreassembledOperatorMerge)
+  {
+    checkPETScPreassembledOperatorMerge<PETSc::Assembly::Sequential>();
+  }
+
 #ifdef RODIN_USE_OPENMP
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
@@ -647,6 +753,11 @@ namespace
   TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
   {
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_Form, OpenMPPreassembledOperatorMerge)
+  {
+    checkPETScPreassembledOperatorMerge<PETSc::Assembly::OpenMP>();
   }
 #endif
 }

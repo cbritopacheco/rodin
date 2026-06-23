@@ -788,50 +788,86 @@ namespace Rodin::Assembly
             } // omp parallel
           }
 
-          // Preassembled bilinear forms (serial)
-          for (auto& bf : pb.getBFs())
+          // Preassembled bilinear forms (serial).
+          //
+          // Without identification constraints the operators share A's
+          // row/column layout and introduce no right-hand-side coupling, so
+          // they are merged directly with MatAXPY once A is assembled.
+          // Identification constraints couple eliminated columns into b and
+          // therefore require the generic per-entry expansion path below.
+          if (!pb.getBFs().empty())
           {
-            const auto& op = bf.getOperator();
-            PetscInt rStart, rEnd;
-            ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
-            assert(ierr == PETSC_SUCCESS);
-            for (PetscInt i = rStart; i < rEnd; ++i)
+            bool merge = constraints.getIdentifiedRows().empty();
+            if (merge)
             {
-              PetscInt nc;
-              const PetscInt* cols;
-              const PetscScalar* vals;
-              ierr = MatGetRow(op, i, &nc, &cols, &vals);
+              for (auto& bf : pb.getBFs())
+                if (!PETSc::Assembly::canMergeOperator(A, bf.getOperator()))
+                { merge = false; break; }
+            }
+
+            if (merge)
+            {
+              ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
               assert(ierr == PETSC_SUCCESS);
-              for (PetscInt j = 0; j < nc; ++j)
+              ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+              assert(ierr == PETSC_SUCCESS);
+              for (auto& bf : pb.getBFs())
               {
-                std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-                std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
-                add_matrix_entries(
-                    local,
-                    localRhs,
-                    static_cast<Index>(i),
-                    static_cast<Index>(cols[j]),
-                    vals[j]);
-                for (const auto& [I, J, val] : local)
+                ierr = MatAXPY(
+                    A, PetscScalar(1), bf.getOperator(), DIFFERENT_NONZERO_PATTERN);
+                assert(ierr == PETSC_SUCCESS);
+              }
+            }
+            else
+            {
+              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+              local.reserve(16);
+              std::vector<PetscScalar> localRhs(
+                  static_cast<size_t>(nrows), PetscScalar(0));
+              for (auto& bf : pb.getBFs())
+              {
+                const auto& op = bf.getOperator();
+                PetscInt rStart, rEnd;
+                ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
+                assert(ierr == PETSC_SUCCESS);
+                for (PetscInt i = rStart; i < rEnd; ++i)
                 {
-                  ierr = MatSetValue(A, I, J, val, ADD_VALUES);
+                  PetscInt nc;
+                  const PetscInt* cols;
+                  const PetscScalar* vals;
+                  ierr = MatGetRow(op, i, &nc, &cols, &vals);
                   assert(ierr == PETSC_SUCCESS);
-                }
-                if (doVector)
-                {
-                  for (PetscInt r = 0; r < nrows; ++r)
+                  for (PetscInt j = 0; j < nc; ++j)
                   {
-                    const PetscScalar val = localRhs[static_cast<size_t>(r)];
-                    if (val != PetscScalar(0))
+                    local.clear();
+                    add_matrix_entries(
+                        local,
+                        localRhs,
+                        static_cast<Index>(i),
+                        static_cast<Index>(cols[j]),
+                        vals[j]);
+                    for (const auto& [I, J, val] : local)
                     {
-                      ierr = VecSetValue(b, r, val, ADD_VALUES);
+                      ierr = MatSetValue(A, I, J, val, ADD_VALUES);
                       assert(ierr == PETSC_SUCCESS);
                     }
                   }
+                  ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+                  assert(ierr == PETSC_SUCCESS);
                 }
               }
-              ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
-              assert(ierr == PETSC_SUCCESS);
+              if (doVector)
+              {
+                for (PetscInt r = 0; r < nrows; ++r)
+                {
+                  const PetscScalar val = localRhs[static_cast<size_t>(r)];
+                  if (val != PetscScalar(0))
+                  {
+                    ierr = VecSetValue(b, r, val, ADD_VALUES);
+                    assert(ierr == PETSC_SUCCESS);
+                  }
+                }
+              }
             }
           }
         }
@@ -913,31 +949,34 @@ namespace Rodin::Assembly
           }
 
           // Preassembled linear forms (serial) : b += LF
-          for (auto& lf : pb.getLFs())
+          // The accumulation buffer is allocated once and reused; nonzero
+          // contributions are scattered into b after each operator.
           {
-            const auto& vec = lf.getVector();
-            PetscInt vecSize;
-            ierr = VecGetSize(vec, &vecSize);
-            assert(ierr == PETSC_SUCCESS);
-            const PetscScalar* arr;
-            ierr = VecGetArrayRead(vec, &arr);
-            assert(ierr == PETSC_SUCCESS);
-            for (PetscInt i = 0; i < vecSize; ++i)
+            std::vector<PetscScalar> local(
+                static_cast<size_t>(nrows), PetscScalar(0));
+            for (auto& lf : pb.getLFs())
             {
-              std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
-              add_vector_entries(local, static_cast<Index>(i), arr[i]);
-              for (PetscInt r = 0; r < nrows; ++r)
+              const auto& vec = lf.getVector();
+              PetscInt vecSize;
+              ierr = VecGetSize(vec, &vecSize);
+              assert(ierr == PETSC_SUCCESS);
+              const PetscScalar* arr;
+              ierr = VecGetArrayRead(vec, &arr);
+              assert(ierr == PETSC_SUCCESS);
+              for (PetscInt i = 0; i < vecSize; ++i)
+                add_vector_entries(local, static_cast<Index>(i), arr[i]);
+              ierr = VecRestoreArrayRead(vec, &arr);
+              assert(ierr == PETSC_SUCCESS);
+            }
+            for (PetscInt r = 0; r < nrows; ++r)
+            {
+              const PetscScalar val = local[static_cast<size_t>(r)];
+              if (val != PetscScalar(0))
               {
-                const PetscScalar val = local[static_cast<size_t>(r)];
-                if (val != PetscScalar(0))
-                {
-                  ierr = VecSetValue(b, r, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                }
+                ierr = VecSetValue(b, r, val, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
               }
             }
-            ierr = VecRestoreArrayRead(vec, &arr);
-            assert(ierr == PETSC_SUCCESS);
           }
         }
 
@@ -1640,57 +1679,68 @@ namespace Rodin::Assembly
           } // omp parallel
         }
 
-        // Preassembled bilinear forms (serial, with block offsets)
-        for (auto& bf : pb.getBFs())
+        // Preassembled bilinear forms (serial, with block offsets).
+        //
+        // The operator is placed as a sub-block of A at (vOff, uOff), so it
+        // does not share A's dimensions and cannot be merged with MatAXPY; the
+        // generic per-entry expansion path is used. Buffers are allocated once
+        // and reused across rows, and right-hand-side contributions (only
+        // nonzero under identification constraints) are scattered once.
         {
-          const auto uUUID = bf.getTrialFunction().getUUID();
-          const auto vUUID = bf.getTestFunction().getUUID();
-
-          const size_t uBlock = findTrialBlock(uUUID);
-          const size_t vBlock = findTestBlock(vUUID);
-
-          const size_t uOff = trialOffsets[uBlock];
-          const size_t vOff = testOffsets[vBlock];
-
-          const auto& op = bf.getOperator();
-          PetscInt opRows, opCols;
-          ierr = MatGetSize(op, &opRows, &opCols);
-          assert(ierr == PETSC_SUCCESS);
-
-          for (PetscInt i = 0; i < opRows; ++i)
+          std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+          local.reserve(16);
+          std::vector<PetscScalar> localRhs(
+              static_cast<size_t>(nrows), PetscScalar(0));
+          for (auto& bf : pb.getBFs())
           {
-            PetscInt nc;
-            const PetscInt* cols;
-            const PetscScalar* vals;
-            ierr = MatGetRow(op, i, &nc, &cols, &vals);
+            const auto uUUID = bf.getTrialFunction().getUUID();
+            const auto vUUID = bf.getTestFunction().getUUID();
+
+            const size_t uBlock = findTrialBlock(uUUID);
+            const size_t vBlock = findTestBlock(vUUID);
+
+            const size_t uOff = trialOffsets[uBlock];
+            const size_t vOff = testOffsets[vBlock];
+
+            const auto& op = bf.getOperator();
+            PetscInt opRows, opCols;
+            ierr = MatGetSize(op, &opRows, &opCols);
             assert(ierr == PETSC_SUCCESS);
-            for (PetscInt j = 0; j < nc; ++j)
+
+            for (PetscInt i = 0; i < opRows; ++i)
             {
-              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
-              add_matrix_entries(
-                  local,
-                  localRhs,
-                  static_cast<Index>(vOff) + static_cast<Index>(i),
-                  static_cast<Index>(uOff) + static_cast<Index>(cols[j]),
-                  vals[j]);
-              for (const auto& [I, J, val] : local)
+              PetscInt nc;
+              const PetscInt* cols;
+              const PetscScalar* vals;
+              ierr = MatGetRow(op, i, &nc, &cols, &vals);
+              assert(ierr == PETSC_SUCCESS);
+              for (PetscInt j = 0; j < nc; ++j)
               {
-                ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
-              }
-              for (PetscInt r = 0; r < nrows; ++r)
-              {
-                const PetscScalar val = localRhs[static_cast<size_t>(r)];
-                if (val != PetscScalar(0))
+                local.clear();
+                add_matrix_entries(
+                    local,
+                    localRhs,
+                    static_cast<Index>(vOff) + static_cast<Index>(i),
+                    static_cast<Index>(uOff) + static_cast<Index>(cols[j]),
+                    vals[j]);
+                for (const auto& [I, J, val] : local)
                 {
-                  ierr = VecSetValue(b, r, val, ADD_VALUES);
+                  ierr = MatSetValue(A, I, J, val, ADD_VALUES);
                   assert(ierr == PETSC_SUCCESS);
                 }
               }
+              ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+              assert(ierr == PETSC_SUCCESS);
             }
-            ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
-            assert(ierr == PETSC_SUCCESS);
+          }
+          for (PetscInt r = 0; r < nrows; ++r)
+          {
+            const PetscScalar val = localRhs[static_cast<size_t>(r)];
+            if (val != PetscScalar(0))
+            {
+              ierr = VecSetValue(b, r, val, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+            }
           }
         }
 
@@ -1775,43 +1825,43 @@ namespace Rodin::Assembly
           } // omp parallel
         }
 
-        // Preassembled linear forms (serial, with block offsets)
-        for (auto& lf : pb.getLFs())
+        // Preassembled linear forms (serial, with block offsets).
+        // The accumulation buffer is allocated once and reused across
+        // operators; nonzero contributions are scattered into b at the end.
         {
-          const auto vUUID = lf.getTestFunction().getUUID();
-          const size_t vBlock = findTestBlock(vUUID);
-          const size_t vOff   = testOffsets[vBlock];
-
-          const auto& vec = lf.getVector();
-          PetscInt vecSize;
-          ierr = VecGetSize(vec, &vecSize);
-          assert(ierr == PETSC_SUCCESS);
-
-          const PetscScalar* arr;
-          ierr = VecGetArrayRead(vec, &arr);
-          assert(ierr == PETSC_SUCCESS);
-          for (PetscInt i = 0; i < vecSize; ++i)
+          std::vector<PetscScalar> local(
+              static_cast<size_t>(nrows), PetscScalar(0));
+          for (auto& lf : pb.getLFs())
           {
-            if (arr[i] != PetscScalar(0))
-            {
-              std::vector<PetscScalar> local(nrows, PetscScalar(0));
+            const auto vUUID = lf.getTestFunction().getUUID();
+            const size_t vBlock = findTestBlock(vUUID);
+            const size_t vOff   = testOffsets[vBlock];
+
+            const auto& vec = lf.getVector();
+            PetscInt vecSize;
+            ierr = VecGetSize(vec, &vecSize);
+            assert(ierr == PETSC_SUCCESS);
+
+            const PetscScalar* arr;
+            ierr = VecGetArrayRead(vec, &arr);
+            assert(ierr == PETSC_SUCCESS);
+            for (PetscInt i = 0; i < vecSize; ++i)
               add_vector_entries(
                   local,
                   static_cast<Index>(vOff) + static_cast<Index>(i),
                   arr[i]);
-              for (PetscInt r = 0; r < static_cast<PetscInt>(nrows); r++)
-              {
-                const PetscScalar val = local[static_cast<size_t>(r)];
-                if (val != PetscScalar(0))
-                {
-                  ierr = VecSetValue(b, r, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                }
-              }
+            ierr = VecRestoreArrayRead(vec, &arr);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          for (PetscInt r = 0; r < static_cast<PetscInt>(nrows); r++)
+          {
+            const PetscScalar val = local[static_cast<size_t>(r)];
+            if (val != PetscScalar(0))
+            {
+              ierr = VecSetValue(b, r, val, ADD_VALUES);
+              assert(ierr == PETSC_SUCCESS);
             }
           }
-          ierr = VecRestoreArrayRead(vec, &arr);
-          assert(ierr == PETSC_SUCCESS);
         }
 
         // Assemble b

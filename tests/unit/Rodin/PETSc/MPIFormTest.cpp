@@ -464,6 +464,83 @@ namespace
     (void) masterBegin;
     (void) masterEnd;
   }
+
+  // Distributed counterpart of the single-variable preassembled-operator merge.
+  // With no identification constraints the MPI backend merges the preassembled
+  // operator into the system matrix with MatAXPY (canMergeOperator holds, as op
+  // shares the FES row layout). Each rank checks its owned diagonal entries and
+  // a zero right-hand side.
+  TEST(PETSc_MPI_Form, DistributedPreassembledOperatorMerge)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+
+    const PetscInt n = static_cast<PetscInt>(fes.getSize());
+    size_t begin = 0;
+    size_t end = 0;
+    fes.getOwnershipRange(begin, end);
+    const PetscInt localSize = static_cast<PetscInt>(end - begin);
+
+    BilinearForm uu(u, v);
+    auto& op = uu.getOperator();
+    PetscErrorCode ierr = MatSetSizes(op, localSize, localSize, n, n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetFromOptions(op);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatSetUp(op);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    for (PetscInt i = static_cast<PetscInt>(begin);
+         i < static_cast<PetscInt>(end); ++i)
+    {
+      ierr = MatSetValue(op, i, i, static_cast<PetscScalar>(i + 1), INSERT_VALUES);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+    }
+    ierr = MatAssemblyBegin(op, MAT_FINAL_ASSEMBLY);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatAssemblyEnd(op, MAT_FINAL_ASSEMBLY);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    LinearForm zero(v);
+    auto& zeroVec = zero.getVector();
+    ierr = VecSetSizes(zeroVec, localSize, n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecSetFromOptions(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecSetUp(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecZeroEntries(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAssemblyBegin(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecAssemblyEnd(zeroVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    Problem problem(u, v);
+    problem = uu - Integral(RealFunction(0.0), v) - zero;
+    problem.assemble();
+
+    auto& A = problem.getLinearSystem().getOperator();
+    auto& b = problem.getLinearSystem().getVector();
+
+    for (PetscInt i = static_cast<PetscInt>(begin);
+         i < static_cast<PetscInt>(end); ++i)
+    {
+      PetscInt col = i;
+      PetscScalar value = 0;
+      ierr = MatGetValues(A, 1, &i, 1, &col, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, static_cast<PetscScalar>(i + 1), 1e-14)
+        << "diagonal row " << i;
+
+      ierr = VecGetValues(b, 1, &i, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(value, 0.0, 1e-14) << "rhs row " << i;
+    }
+  }
 }
 
 int main(int argc, char** argv)

@@ -579,24 +579,57 @@ namespace Rodin::Assembly
             }
           }
 
-          // Preassembled bilinear forms
-          for (auto& bf : pb.getBFs())
+          // Preassembled bilinear forms.
+          //
+          // Without identification constraints the operators share A's
+          // row/column layout and introduce no right-hand-side coupling, so
+          // they are merged directly with MatAXPY once A is assembled.
+          // Identification constraints couple eliminated columns into b and
+          // therefore require the generic per-entry expansion path below.
+          if (!pb.getBFs().empty())
           {
-            const auto& op = bf.getOperator();
-            PetscInt rStart, rEnd;
-            ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
-            assert(ierr == PETSC_SUCCESS);
-            for (PetscInt i = rStart; i < rEnd; ++i)
+            bool merge = constraints.getIdentifiedRows().empty();
+            if (merge)
             {
-              PetscInt nc;
-              const PetscInt* cols;
-              const PetscScalar* vals;
-              ierr = MatGetRow(op, i, &nc, &cols, &vals);
+              for (auto& bf : pb.getBFs())
+                if (!PETSc::Assembly::canMergeOperator(A, bf.getOperator()))
+                { merge = false; break; }
+            }
+
+            if (merge)
+            {
+              ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
               assert(ierr == PETSC_SUCCESS);
-              for (PetscInt j = 0; j < nc; ++j)
-                matrix_entry(static_cast<Index>(i), static_cast<Index>(cols[j]), vals[j]);
-              ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+              ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
               assert(ierr == PETSC_SUCCESS);
+              for (auto& bf : pb.getBFs())
+              {
+                ierr = MatAXPY(
+                    A, PetscScalar(1), bf.getOperator(), DIFFERENT_NONZERO_PATTERN);
+                assert(ierr == PETSC_SUCCESS);
+              }
+            }
+            else
+            {
+              for (auto& bf : pb.getBFs())
+              {
+                const auto& op = bf.getOperator();
+                PetscInt rStart, rEnd;
+                ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
+                assert(ierr == PETSC_SUCCESS);
+                for (PetscInt i = rStart; i < rEnd; ++i)
+                {
+                  PetscInt nc;
+                  const PetscInt* cols;
+                  const PetscScalar* vals;
+                  ierr = MatGetRow(op, i, &nc, &cols, &vals);
+                  assert(ierr == PETSC_SUCCESS);
+                  for (PetscInt j = 0; j < nc; ++j)
+                    matrix_entry(static_cast<Index>(i), static_cast<Index>(cols[j]), vals[j]);
+                  ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+                  assert(ierr == PETSC_SUCCESS);
+                }
+              }
             }
           }
         }
