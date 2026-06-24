@@ -18,6 +18,7 @@
 #include <petscsnes.h>
 
 #include <functional>
+#include <petscsystypes.h>
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
@@ -55,14 +56,6 @@ namespace Rodin::Solver
    *
    * Supports both programmatic configuration (`setType`, `setTolerances`)
    * and PETSc command-line overrides (`-snes_type`, `-snes_rtol`, …).
-   *
-   * @note Rodin variational Newton problems assemble linear systems in the
-   * convention @f$ J(x)\,\delta x = -F(x) @f$: the assembled vector is the
-   * Newton right-hand side @f$ -F(x) @f$, while the assembled operator is the
-   * tangent @f$ J(x) @f$.  The PETSc callback therefore negates the assembled
-   * vector when exposing a SNES residual.  PETSc's finite-difference Jacobian
-   * checker differentiates that exposed residual, so its raw matrix-difference
-   * report is not a direct check of the Rodin tangent sign convention.
    *
    * @see Rodin::Solver::KSP,
    *      Rodin::Solver::NewtonSolverBase,
@@ -216,18 +209,24 @@ namespace Rodin::Solver
       }
 
     private:
+      static PetscErrorCode Update(::Vec x, void* ctx);
+      static PetscErrorCode Assemble(
+          ::Vec x, void* ctx, Variational::AssemblyTarget target);
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
-      PetscReal m_abstol,  ///< Absolute convergence tolerance.
-                m_rtol,    ///< Relative convergence tolerance.
-                m_stol;    ///< Step norm convergence tolerance.
-      PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
-               m_maxF;     ///< Maximum function evaluations.
-      StateUpdate m_stateUpdate; ///< Optional state synchronization callback.
+      ::PetscReal m_abstol,  ///< Absolute convergence tolerance.
+                  m_rtol,    ///< Relative convergence tolerance.
+                  m_stol;    ///< Step norm convergence tolerance.
+      ::PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
+                 m_maxF;     ///< Maximum function evaluations.
+      StateUpdate m_update; ///< Optional state synchronization callback.
+      Optional<::PetscObjectState> m_lhsAssembled;
+      Optional<::PetscObjectState> m_rhsAssembled;
+      Optional<::PetscObjectState> m_updated;
   };
 }
 

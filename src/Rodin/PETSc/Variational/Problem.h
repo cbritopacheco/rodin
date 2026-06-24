@@ -231,6 +231,13 @@ namespace Rodin::Variational
         return *this;
       }
 
+      Problem& assemble(AssemblyTarget target) override
+      {
+        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+        m_assembled = true;
+        return *this;
+      }
+
       /**
        * @brief Assembles if stale, solves the linear system, and writes the
        *        result to the trial function solution.
@@ -590,6 +597,23 @@ namespace Rodin::Variational
         };
 
         m_assembly.execute(m_axb, in);
+
+        m_assembled = true;
+        return *this;
+      }
+
+      Problem& assemble(AssemblyTarget target) override
+      {
+        computeOffsets();
+
+        AssemblyInput in{
+          m_pb, m_us, m_vs,
+          m_trialOffsets, m_testOffsets,
+          m_trialUUIDMap, m_testUUIDMap,
+          m_totalTrial, m_totalTest
+        };
+
+        m_assembly.execute(m_axb, in, target);
 
         m_assembled = true;
         return *this;

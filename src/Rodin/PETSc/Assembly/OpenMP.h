@@ -19,6 +19,7 @@
 
 #include "Rodin/Assembly/OpenMP.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
+#include "Rodin/PETSc/Assembly/MatrixSetup.h"
 
 namespace Rodin::Assembly
 {
@@ -239,16 +240,15 @@ namespace Rodin::Assembly
         const PetscInt m = input.getTestFES().getSize();
         const PetscInt n = input.getTrialFES().getSize();
 
-        ierr = MatSetSizes(res, m, n, m, n);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetFromOptions(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(res);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(res);
+        ierr = PETSc::Assembly::MatrixSetup(res).prepare({
+          static_cast<PetscInt>(m),
+          static_cast<PetscInt>(n),
+          static_cast<PetscInt>(m),
+          static_cast<PetscInt>(n),
+          nullptr,
+          true,
+          false
+        });
         assert(ierr == PETSC_SUCCESS);
 
         const auto& mesh = input.getTestFES().getMesh();
@@ -391,8 +391,43 @@ namespace Rodin::Assembly
 
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
+        execute(axb, input, AssemblyMode::Full);
+      }
+
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          Rodin::Variational::AssemblyTarget target) const
+      {
+        switch (target)
+        {
+          case Rodin::Variational::AssemblyTarget::LHS:
+            execute(axb, input, AssemblyMode::LHS);
+            break;
+          case Rodin::Variational::AssemblyTarget::RHS:
+            execute(axb, input, AssemblyMode::RHS);
+            break;
+        }
+      }
+
+    private:
+      enum class AssemblyMode
+      {
+        Full,
+        LHS,
+        RHS
+      };
+
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          AssemblyMode mode) const
+      {
         static_assert(std::is_same_v<TrialMeshContextType, Rodin::Context::Local>,
           "PETSc OpenMP assembly (sequential objects) supports only Local mesh context.");
+
+        const bool doMatrix = mode != AssemblyMode::RHS;
+        const bool doVector = mode != AssemblyMode::LHS;
 
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -411,36 +446,41 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ)
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A, nrows, ncols, nrows, ncols);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(A);
-        assert(ierr == PETSC_SUCCESS);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({
+            static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols),
+            static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols),
+            MATSEQAIJ,
+            false,
+            true
+          });
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Allocate / reset b (Seq Vec)
         // ------------------------
         assert(b);
-        ierr = VecSetSizes(b, nrows, nrows);
-        assert(ierr == PETSC_SUCCESS);
+        if (doVector)
+        {
+          ierr = VecSetSizes(b, nrows, nrows);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecSetType(b, VECSEQ);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetType(b, VECSEQ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecSetFromOptions(b);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(b);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecZeroEntries(b);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(b);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         auto& x = axb.getSolution();
         assert(x);
@@ -509,6 +549,13 @@ namespace Rodin::Assembly
           }, dbc.getDOFs());
         }
 
+        if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Targeted assembly is not implemented for identification DirichletBCs."
+            << Alert::Raise;
+        }
+
         auto add_matrix_entries =
           [&](std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>& local,
               std::vector<PetscScalar>& localRhs,
@@ -525,11 +572,14 @@ namespace Rodin::Assembly
             if (colValue != PetscScalar(0))
               localRhs[static_cast<size_t>(r.index)] -=
                 r.coefficient * val * colValue;
-            for (const auto& c : constraints.expand(col))
-              local.emplace_back(
-                  static_cast<PetscInt>(r.index),
-                  static_cast<PetscInt>(c.index),
-                  r.coefficient * val * c.coefficient);
+            if (doMatrix)
+            {
+              for (const auto& c : constraints.expand(col))
+                local.emplace_back(
+                    static_cast<PetscInt>(r.index),
+                    static_cast<PetscInt>(c.index),
+                    r.coefficient * val * c.coefficient);
+            }
           }
         };
 
@@ -547,146 +597,47 @@ namespace Rodin::Assembly
         // ------------------------
         // Local BFIs (parallel)
         // ------------------------
-        for (auto& bfi : pb.getLocalBFIs())
+        if (doMatrix)
         {
-          const auto& attrs = bfi.getAttributes();
-          OpenMPIteration seq(mesh, bfi.getRegion());
+          for (auto& bfi : pb.getLocalBFIs())
+          {
+            const auto& attrs = bfi.getAttributes();
+            OpenMPIteration seq(mesh, bfi.getRegion());
 
-          const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
-          const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
+            const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
+            const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
 
-          std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
-          std::vector<std::vector<PetscScalar>> rhsChunks(
-              static_cast<size_t>(tc),
-              std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
+            std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
+            std::vector<std::vector<PetscScalar>> rhsChunks(
+                static_cast<size_t>(tc),
+                std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
 
 #pragma omp parallel num_threads(tc)
-          {
-            const int tid = omp_get_thread_num();
+            {
+              const int tid = omp_get_thread_num();
 
-            auto integrator =
-              std::unique_ptr<LocalBilinearIntegratorBase>(static_cast<LocalBilinearIntegratorBase*>(bfi.copy()));
+              auto integrator =
+                std::unique_ptr<LocalBilinearIntegratorBase>(static_cast<LocalBilinearIntegratorBase*>(bfi.copy()));
 
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-            local.reserve(static_cast<size_t>(cnt));
-            std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+              local.reserve(static_cast<size_t>(cnt));
+              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
 
 #pragma omp for
-            for (PetscInt k = 0; k < cnt; ++k)
-            {
-              if (!seq.filter(k)) continue;
-              if (!attrs.empty())
+              for (PetscInt k = 0; k < cnt; ++k)
               {
-                const auto a = mesh.getAttribute(dim, k);
-                if (!a || !attrs.count(*a)) continue;
-              }
-
-              auto it = seq.getIterator(k);
-              integrator->setPolytope(*it);
-
-              const auto& rowsDOF = testFES.getDOFs(dim, k);
-              const auto& colsDOF = trialFES.getDOFs(dim, k);
-
-              for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
-              {
-                for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
+                if (!seq.filter(k)) continue;
+                if (!attrs.empty())
                 {
-                  const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                  if (val != PetscScalar(0))
-                    add_matrix_entries(local, localRhs, rowsDOF[i], colsDOF[j], val);
-                }
-              }
-            }
-
-            chunks[static_cast<size_t>(tid)] = std::move(local);
-            rhsChunks[static_cast<size_t>(tid)] = std::move(localRhs);
-
-#pragma omp barrier
-#pragma omp single
-            {
-              for (auto& buf : chunks)
-              {
-                for (auto& [I,J,val] : buf)
-                {
-                  PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
-                }
-              }
-              for (const auto& vecLocal : rhsChunks)
-              {
-                for (PetscInt i = 0; i < nrows; ++i)
-                {
-                  const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                  if (val != PetscScalar(0))
-                  {
-                    PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                  }
-                }
-              }
-            }
-          } // omp parallel
-        }
-
-        // ------------------------
-        // Global BFIs (parallel over test entities; inner trial loop serial per test entity)
-        // ------------------------
-        for (auto& bfi : pb.getGlobalBFIs())
-        {
-          const auto& trialAttrs = bfi.getTrialAttributes();
-          const auto& testAttrs  = bfi.getTestAttributes();
-
-          OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
-          OpenMPIteration testseq(mesh,  bfi.getTestRegion());
-
-          const PetscInt tdim = static_cast<PetscInt>(testseq.getDimension());
-          const PetscInt tcnt = static_cast<PetscInt>(testseq.getCount());
-
-          const PetscInt rdim = static_cast<PetscInt>(trialseq.getDimension());
-          const PetscInt rcnt = static_cast<PetscInt>(trialseq.getCount());
-
-          std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
-          std::vector<std::vector<PetscScalar>> rhsChunks(
-              static_cast<size_t>(tc),
-              std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
-
-#pragma omp parallel num_threads(tc)
-          {
-            const int tid = omp_get_thread_num();
-
-            auto integrator =
-              std::unique_ptr<GlobalBilinearIntegratorBase>(static_cast<GlobalBilinearIntegratorBase*>(bfi.copy()));
-
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-            local.reserve(static_cast<size_t>(tcnt));
-            std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
-
-#pragma omp for
-            for (PetscInt te = 0; te < tcnt; ++te)
-            {
-              if (!testseq.filter(te)) continue;
-              if (!testAttrs.empty())
-              {
-                const auto a = mesh.getAttribute(tdim, te);
-                if (!a || !testAttrs.count(*a)) continue;
-              }
-
-              auto teIt = testseq.getIterator(te);
-              const auto& rowsDOF = testFES.getDOFs(tdim, te);
-
-              for (PetscInt tr = 0; tr < rcnt; ++tr)
-              {
-                if (!trialseq.filter(tr)) continue;
-                if (!trialAttrs.empty())
-                {
-                  const auto a = mesh.getAttribute(rdim, tr);
-                  if (!a || !trialAttrs.count(*a)) continue;
+                  const auto a = mesh.getAttribute(dim, k);
+                  if (!a || !attrs.count(*a)) continue;
                 }
 
-                auto trIt = trialseq.getIterator(tr);
-                const auto& colsDOF = trialFES.getDOFs(rdim, tr);
+                auto it = seq.getIterator(k);
+                integrator->setPolytope(*it);
 
-                integrator->setPolytope(*trIt, *teIt);
+                const auto& rowsDOF = testFES.getDOFs(dim, k);
+                const auto& colsDOF = trialFES.getDOFs(dim, k);
 
                 for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
                 {
@@ -698,70 +649,286 @@ namespace Rodin::Assembly
                   }
                 }
               }
-            }
 
-            chunks[static_cast<size_t>(tid)] = std::move(local);
-            rhsChunks[static_cast<size_t>(tid)] = std::move(localRhs);
+              chunks[static_cast<size_t>(tid)] = std::move(local);
+              rhsChunks[static_cast<size_t>(tid)] = std::move(localRhs);
 
 #pragma omp barrier
 #pragma omp single
-            {
-              for (auto& buf : chunks)
               {
-                for (auto& [I,J,val] : buf)
+                for (auto& buf : chunks)
                 {
-                  PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
-                }
-              }
-              for (const auto& vecLocal : rhsChunks)
-              {
-                for (PetscInt i = 0; i < nrows; ++i)
-                {
-                  const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                  if (val != PetscScalar(0))
+                  for (auto& [I,J,val] : buf)
                   {
-                    PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
+                    PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
                     assert(e == PETSC_SUCCESS);
                   }
                 }
+                if (doVector)
+                {
+                  for (const auto& vecLocal : rhsChunks)
+                  {
+                    for (PetscInt i = 0; i < nrows; ++i)
+                    {
+                      const PetscScalar val = vecLocal[static_cast<size_t>(i)];
+                      if (val != PetscScalar(0))
+                      {
+                        PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
+                        assert(e == PETSC_SUCCESS);
+                      }
+                    }
+                  }
+                }
               }
+            } // omp parallel
+          }
+
+          // ------------------------
+          // Global BFIs (parallel over test entities; inner trial loop serial per test entity)
+          // ------------------------
+          for (auto& bfi : pb.getGlobalBFIs())
+          {
+            const auto& trialAttrs = bfi.getTrialAttributes();
+            const auto& testAttrs  = bfi.getTestAttributes();
+
+            OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
+            OpenMPIteration testseq(mesh,  bfi.getTestRegion());
+
+            const PetscInt tdim = static_cast<PetscInt>(testseq.getDimension());
+            const PetscInt tcnt = static_cast<PetscInt>(testseq.getCount());
+
+            const PetscInt rdim = static_cast<PetscInt>(trialseq.getDimension());
+            const PetscInt rcnt = static_cast<PetscInt>(trialseq.getCount());
+
+            std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
+            std::vector<std::vector<PetscScalar>> rhsChunks(
+                static_cast<size_t>(tc),
+                std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
+
+#pragma omp parallel num_threads(tc)
+            {
+              const int tid = omp_get_thread_num();
+
+              auto integrator =
+                std::unique_ptr<GlobalBilinearIntegratorBase>(static_cast<GlobalBilinearIntegratorBase*>(bfi.copy()));
+
+              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+              local.reserve(static_cast<size_t>(tcnt));
+              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+
+#pragma omp for
+              for (PetscInt te = 0; te < tcnt; ++te)
+              {
+                if (!testseq.filter(te)) continue;
+                if (!testAttrs.empty())
+                {
+                  const auto a = mesh.getAttribute(tdim, te);
+                  if (!a || !testAttrs.count(*a)) continue;
+                }
+
+                auto teIt = testseq.getIterator(te);
+                const auto& rowsDOF = testFES.getDOFs(tdim, te);
+
+                for (PetscInt tr = 0; tr < rcnt; ++tr)
+                {
+                  if (!trialseq.filter(tr)) continue;
+                  if (!trialAttrs.empty())
+                  {
+                    const auto a = mesh.getAttribute(rdim, tr);
+                    if (!a || !trialAttrs.count(*a)) continue;
+                  }
+
+                  auto trIt = trialseq.getIterator(tr);
+                  const auto& colsDOF = trialFES.getDOFs(rdim, tr);
+
+                  integrator->setPolytope(*trIt, *teIt);
+
+                  for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
+                  {
+                    for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
+                    {
+                      const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
+                      if (val != PetscScalar(0))
+                        add_matrix_entries(local, localRhs, rowsDOF[i], colsDOF[j], val);
+                    }
+                  }
+                }
+              }
+
+              chunks[static_cast<size_t>(tid)] = std::move(local);
+              rhsChunks[static_cast<size_t>(tid)] = std::move(localRhs);
+
+#pragma omp barrier
+#pragma omp single
+              {
+                for (auto& buf : chunks)
+                {
+                  for (auto& [I,J,val] : buf)
+                  {
+                    PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                  }
+                }
+                if (doVector)
+                {
+                  for (const auto& vecLocal : rhsChunks)
+                  {
+                    for (PetscInt i = 0; i < nrows; ++i)
+                    {
+                      const PetscScalar val = vecLocal[static_cast<size_t>(i)];
+                      if (val != PetscScalar(0))
+                      {
+                        PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
+                        assert(e == PETSC_SUCCESS);
+                      }
+                    }
+                  }
+                }
+              }
+            } // omp parallel
+          }
+
+          // Preassembled bilinear forms (serial)
+          for (auto& bf : pb.getBFs())
+          {
+            const auto& op = bf.getOperator();
+            PetscInt rStart, rEnd;
+            ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
+            assert(ierr == PETSC_SUCCESS);
+            for (PetscInt i = rStart; i < rEnd; ++i)
+            {
+              PetscInt nc;
+              const PetscInt* cols;
+              const PetscScalar* vals;
+              ierr = MatGetRow(op, i, &nc, &cols, &vals);
+              assert(ierr == PETSC_SUCCESS);
+              for (PetscInt j = 0; j < nc; ++j)
+              {
+                std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+                std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+                add_matrix_entries(
+                    local,
+                    localRhs,
+                    static_cast<Index>(i),
+                    static_cast<Index>(cols[j]),
+                    vals[j]);
+                for (const auto& [I, J, val] : local)
+                {
+                  ierr = MatSetValue(A, I, J, val, ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
+                if (doVector)
+                {
+                  for (PetscInt r = 0; r < nrows; ++r)
+                  {
+                    const PetscScalar val = localRhs[static_cast<size_t>(r)];
+                    if (val != PetscScalar(0))
+                    {
+                      ierr = VecSetValue(b, r, val, ADD_VALUES);
+                      assert(ierr == PETSC_SUCCESS);
+                    }
+                  }
+                }
+              }
+              ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+              assert(ierr == PETSC_SUCCESS);
             }
-          } // omp parallel
+          }
         }
 
-        // Preassembled bilinear forms (serial)
-        for (auto& bf : pb.getBFs())
+        // Assemble A
+        if (doMatrix)
         {
-          const auto& op = bf.getOperator();
-          PetscInt rStart, rEnd;
-          ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
+          ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          for (PetscInt i = rStart; i < rEnd; ++i)
+          ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+          assert(ierr == PETSC_SUCCESS);
+        }
+
+        // ------------------------
+        // Linear forms (parallel)
+        // Note: matches your sequential single-variable sign convention: b += -LF
+        // ------------------------
+        if (doVector)
+        {
+          for (auto& lfi : pb.getLFIs())
           {
-            PetscInt nc;
-            const PetscInt* cols;
-            const PetscScalar* vals;
-            ierr = MatGetRow(op, i, &nc, &cols, &vals);
-            assert(ierr == PETSC_SUCCESS);
-            for (PetscInt j = 0; j < nc; ++j)
+            const auto& attrs = lfi.getAttributes();
+            OpenMPIteration seq(mesh, lfi.getRegion());
+
+            const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
+            const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
+
+            std::vector<std::vector<PetscScalar>> chunks(static_cast<size_t>(tc));
+
+#pragma omp parallel num_threads(tc)
             {
-              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
-              add_matrix_entries(
-                  local,
-                  localRhs,
-                  static_cast<Index>(i),
-                  static_cast<Index>(cols[j]),
-                  vals[j]);
-              for (const auto& [I, J, val] : local)
+              const int tid = omp_get_thread_num();
+
+              auto integrator =
+                std::unique_ptr<LinearIntegratorBase>(static_cast<LinearIntegratorBase*>(lfi.copy()));
+
+              std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
+
+#pragma omp for
+              for (PetscInt k = 0; k < cnt; ++k)
               {
-                ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
+                if (!seq.filter(k)) continue;
+                if (!attrs.empty())
+                {
+                  const auto a = mesh.getAttribute(dim, k);
+                  if (!a || !attrs.count(*a)) continue;
+                }
+
+                auto it = seq.getIterator(k);
+                integrator->setPolytope(*it);
+
+                const auto& dofs = testFES.getDOFs(dim, k);
+                for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
+                {
+                  const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
+                  add_vector_entries(local, dofs[l], -val);
+                }
               }
+
+              chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
+              {
+                for (auto& vecLocal : chunks)
+                {
+                  for (PetscInt i = 0; i < nrows; ++i)
+                  {
+                    const PetscScalar val = vecLocal[static_cast<size_t>(i)];
+                    if (val != PetscScalar(0))
+                    {
+                      PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                    }
+                  }
+                }
+              }
+            } // omp parallel
+          }
+
+          // Preassembled linear forms (serial) : b += LF
+          for (auto& lf : pb.getLFs())
+          {
+            const auto& vec = lf.getVector();
+            PetscInt vecSize;
+            ierr = VecGetSize(vec, &vecSize);
+            assert(ierr == PETSC_SUCCESS);
+            const PetscScalar* arr;
+            ierr = VecGetArrayRead(vec, &arr);
+            assert(ierr == PETSC_SUCCESS);
+            for (PetscInt i = 0; i < vecSize; ++i)
+            {
+              std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
+              add_vector_entries(local, static_cast<Index>(i), arr[i]);
               for (PetscInt r = 0; r < nrows; ++r)
               {
-                const PetscScalar val = localRhs[static_cast<size_t>(r)];
+                const PetscScalar val = local[static_cast<size_t>(r)];
                 if (val != PetscScalar(0))
                 {
                   ierr = VecSetValue(b, r, val, ADD_VALUES);
@@ -769,115 +936,19 @@ namespace Rodin::Assembly
                 }
               }
             }
-            ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
+            ierr = VecRestoreArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
           }
         }
 
-        // Assemble A
-        ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-        assert(ierr == PETSC_SUCCESS);
-
-        // ------------------------
-        // Linear forms (parallel)
-        // Note: matches your sequential single-variable sign convention: b += -LF
-        // ------------------------
-        for (auto& lfi : pb.getLFIs())
-        {
-          const auto& attrs = lfi.getAttributes();
-          OpenMPIteration seq(mesh, lfi.getRegion());
-
-          const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
-          const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
-
-          std::vector<std::vector<PetscScalar>> chunks(static_cast<size_t>(tc));
-
-#pragma omp parallel num_threads(tc)
-          {
-            const int tid = omp_get_thread_num();
-
-            auto integrator =
-              std::unique_ptr<LinearIntegratorBase>(static_cast<LinearIntegratorBase*>(lfi.copy()));
-
-            std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
-
-#pragma omp for
-            for (PetscInt k = 0; k < cnt; ++k)
-            {
-              if (!seq.filter(k)) continue;
-              if (!attrs.empty())
-              {
-                const auto a = mesh.getAttribute(dim, k);
-                if (!a || !attrs.count(*a)) continue;
-              }
-
-              auto it = seq.getIterator(k);
-              integrator->setPolytope(*it);
-
-              const auto& dofs = testFES.getDOFs(dim, k);
-              for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
-              {
-                const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(l));
-                add_vector_entries(local, dofs[l], -val);
-              }
-            }
-
-            chunks[static_cast<size_t>(tid)] = std::move(local);
-
-#pragma omp barrier
-#pragma omp single
-            {
-              for (auto& vecLocal : chunks)
-              {
-                for (PetscInt i = 0; i < nrows; ++i)
-                {
-                  const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                  if (val != PetscScalar(0))
-                  {
-                    PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                  }
-                }
-              }
-            }
-          } // omp parallel
-        }
-
-        // Preassembled linear forms (serial) : b += LF
-        for (auto& lf : pb.getLFs())
-        {
-          const auto& vec = lf.getVector();
-          PetscInt vecSize;
-          ierr = VecGetSize(vec, &vecSize);
-          assert(ierr == PETSC_SUCCESS);
-          const PetscScalar* arr;
-          ierr = VecGetArrayRead(vec, &arr);
-          assert(ierr == PETSC_SUCCESS);
-          for (PetscInt i = 0; i < vecSize; ++i)
-          {
-            std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
-            add_vector_entries(local, static_cast<Index>(i), arr[i]);
-            for (PetscInt r = 0; r < nrows; ++r)
-            {
-              const PetscScalar val = local[static_cast<size_t>(r)];
-              if (val != PetscScalar(0))
-              {
-                ierr = VecSetValue(b, r, val, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
-              }
-            }
-          }
-          ierr = VecRestoreArrayRead(vec, &arr);
-          assert(ierr == PETSC_SUCCESS);
-        }
-
         // Assemble b
-        ierr = VecAssemblyBegin(b);
-        assert(ierr == PETSC_SUCCESS);
-        ierr = VecAssemblyEnd(b);
-        assert(ierr == PETSC_SUCCESS);
+        if (doVector)
+        {
+          ierr = VecAssemblyBegin(b);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecAssemblyEnd(b);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         if (!constraints.getIdentifiedRows().empty())
         {
@@ -914,18 +985,24 @@ namespace Rodin::Assembly
                 assert(ierr == PETSC_SUCCESS);
               }
               const PetscScalar rhs = constraints.getIdentificationValue(gs);
-              ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
-              assert(ierr == PETSC_SUCCESS);
+              if (doVector)
+              {
+                ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
             }
 
             ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
             assert(ierr == PETSC_SUCCESS);
             ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
             assert(ierr == PETSC_SUCCESS);
-            ierr = VecAssemblyBegin(b);
-            assert(ierr == PETSC_SUCCESS);
-            ierr = VecAssemblyEnd(b);
-            assert(ierr == PETSC_SUCCESS);
+            if (doVector)
+            {
+              ierr = VecAssemblyBegin(b);
+              assert(ierr == PETSC_SUCCESS);
+              ierr = VecAssemblyEnd(b);
+              assert(ierr == PETSC_SUCCESS);
+            }
           }
         }
 
@@ -942,40 +1019,69 @@ namespace Rodin::Assembly
 
         if (!bcIdx.empty())
         {
-          Vec bcVec;
-          ierr = VecDuplicate(b, &bcVec);
-          assert(ierr == PETSC_SUCCESS);
+          if (mode == AssemblyMode::Full)
+          {
+            Vec bcVec;
+            ierr = VecDuplicate(b, &bcVec);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecZeroEntries(bcVec);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecZeroEntries(bcVec);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecSetValues(
-              bcVec,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              bcVals.data(),
-              INSERT_VALUES);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecSetValues(
+                bcVec,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                bcVals.data(),
+                INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecAssemblyBegin(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecAssemblyEnd(bcVec);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyBegin(bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyEnd(bcVec);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = MatZeroRowsColumns(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              1.0,
-              bcVec,
-              b);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = MatZeroRowsColumns(
+                A,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                1.0,
+                bcVec,
+                b);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecDestroy(&bcVec);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecDestroy(&bcVec);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else if (mode == AssemblyMode::LHS)
+          {
+            ierr = MatZeroRows(
+                A,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                1.0,
+                nullptr,
+                nullptr);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else
+          {
+            ierr = VecSetValues(
+                b,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                bcVals.data(),
+                INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyBegin(b);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyEnd(b);
+            assert(ierr == PETSC_SUCCESS);
+          }
         }
       }
 
+    public:
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -1045,6 +1151,41 @@ namespace Rodin::Assembly
 
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
+        execute(axb, input, AssemblyMode::Full);
+      }
+
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          Rodin::Variational::AssemblyTarget target) const
+      {
+        switch (target)
+        {
+          case Rodin::Variational::AssemblyTarget::LHS:
+            execute(axb, input, AssemblyMode::LHS);
+            break;
+          case Rodin::Variational::AssemblyTarget::RHS:
+            execute(axb, input, AssemblyMode::RHS);
+            break;
+        }
+      }
+
+    private:
+      enum class AssemblyMode
+      {
+        Full,
+        LHS,
+        RHS
+      };
+
+      void execute(
+          LinearSystemType& axb,
+          const InputType& input,
+          AssemblyMode mode) const
+      {
+        const bool doMatrix = mode != AssemblyMode::RHS;
+        const bool doVector = mode != AssemblyMode::LHS;
+
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
 
@@ -1071,40 +1212,41 @@ namespace Rodin::Assembly
         PetscErrorCode ierr;
 
         // ------------------------
-        // Allocate / reset A (SeqAIJ)
+        // Allocate / reset A (SeqAIJ); re-use structure across assemblies.
         // ------------------------
         assert(A);
-        ierr = MatSetSizes(A,
-                           nrows,
-                           ncols,
-                           nrows,
-                           ncols);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetType(A, MATSEQAIJ);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatSetUp(A);
-        assert(ierr == PETSC_SUCCESS);
-
-        ierr = MatZeroEntries(A);
-        assert(ierr == PETSC_SUCCESS);
+        if (doMatrix)
+        {
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare({
+            static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols),
+            static_cast<PetscInt>(nrows),
+            static_cast<PetscInt>(ncols),
+            MATSEQAIJ,
+            false,
+            true
+          });
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         // ------------------------
         // Allocate / reset b (Seq Vec)
         // ------------------------
         assert(b);
-        ierr = VecSetSizes(b, nrows, nrows);
-        assert(ierr == PETSC_SUCCESS);
+        if (doVector)
+        {
+          ierr = VecSetSizes(b, nrows, nrows);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecSetType(b, VECSEQ);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetType(b, VECSEQ);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecSetFromOptions(b);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecSetFromOptions(b);
+          assert(ierr == PETSC_SUCCESS);
 
-        ierr = VecZeroEntries(b);
-        assert(ierr == PETSC_SUCCESS);
+          ierr = VecZeroEntries(b);
+          assert(ierr == PETSC_SUCCESS);
+        }
 
         auto& x = axb.getSolution();
         assert(x);
@@ -1239,6 +1381,13 @@ namespace Rodin::Assembly
           }, dbc.getDOFs());
         }
 
+        if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
+        {
+          Alert::MemberFunctionException(*this, __func__)
+            << "Targeted assembly is not implemented for identification DirichletBCs."
+            << Alert::Raise;
+        }
+
         auto add_matrix_entries =
           [&](std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>& local,
               std::vector<PetscScalar>& localRhs,
@@ -1277,6 +1426,8 @@ namespace Rodin::Assembly
         // ------------------------
         // Assemble bilinear terms into A (parallel)
         // ------------------------
+        if (doMatrix)
+        {
           for (auto& bfi : pb.getLocalBFIs())
           {
             const auto uUUID = bfi.getTrialFunction().getUUID();
@@ -1548,11 +1699,14 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
+        } // doMatrix
 
         // ------------------------
         // Assemble linear terms into b (parallel)
         // Convention: negate each LFI value, consistent with all other assembly paths.
         // ------------------------
+        if (doVector)
+        {
         for (auto& lfi : pb.getLFIs())
         {
           const auto vUUID = lfi.getTestFunction().getUUID();
@@ -1665,6 +1819,7 @@ namespace Rodin::Assembly
         assert(ierr == PETSC_SUCCESS);
         ierr = VecAssemblyEnd(b);
         assert(ierr == PETSC_SUCCESS);
+        } // doVector
 
         if (!constraints.getIdentifiedRows().empty())
         {
@@ -1728,40 +1883,69 @@ namespace Rodin::Assembly
 
         if (!bcIdx.empty())
         {
-          Vec bcVec;
-          ierr = VecDuplicate(b, &bcVec);
-          assert(ierr == PETSC_SUCCESS);
+          if (mode == AssemblyMode::Full)
+          {
+            Vec bcVec;
+            ierr = VecDuplicate(b, &bcVec);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecZeroEntries(bcVec);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecZeroEntries(bcVec);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecSetValues(
-              bcVec,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              bcVals.data(),
-              INSERT_VALUES);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecSetValues(
+                bcVec,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                bcVals.data(),
+                INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecAssemblyBegin(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          ierr = VecAssemblyEnd(bcVec);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyBegin(bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyEnd(bcVec);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = MatZeroRowsColumns(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.data(),
-              1.0,
-              bcVec,
-              b);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = MatZeroRowsColumns(
+                A,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                1.0,
+                bcVec,
+                b);
+            assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecDestroy(&bcVec);
-          assert(ierr == PETSC_SUCCESS);
+            ierr = VecDestroy(&bcVec);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else if (mode == AssemblyMode::LHS)
+          {
+            ierr = MatZeroRows(
+                A,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                1.0,
+                nullptr,
+                nullptr);
+            assert(ierr == PETSC_SUCCESS);
+          }
+          else
+          {
+            ierr = VecSetValues(
+                b,
+                static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.data(),
+                bcVals.data(),
+                INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyBegin(b);
+            assert(ierr == PETSC_SUCCESS);
+            ierr = VecAssemblyEnd(b);
+            assert(ierr == PETSC_SUCCESS);
+          }
         }
       }
 
+    public:
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);

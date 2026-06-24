@@ -35,6 +35,9 @@
 #include "Rodin/Assembly/Input.h"
 #include "Rodin/Assembly/Sequential.h"
 
+#include "Rodin/Alert/MemberFunctionException.h"
+#include "Rodin/Alert/Raise.h"
+
 #include "Rodin/Solver/LinearSolver.h"
 
 #include "Rodin/FormLanguage/Base.h"
@@ -171,6 +174,14 @@ namespace Rodin::Variational
        * discrete linear system @f$ Au = b @f$.
        */
       virtual ProblemBase& assemble() = 0;
+
+      virtual ProblemBase& assemble(AssemblyTarget)
+      {
+        Alert::MemberFunctionException(*this, __func__)
+          << "Targeted assembly is not implemented for this problem."
+          << Alert::Raise;
+        return *this;
+      }
 
       /**
        * @brief Gets the assembled linear system.
@@ -428,6 +439,14 @@ namespace Rodin::Variational
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+        m_assembled = true;
+        return *this;
+      }
+
+      Problem& assemble(AssemblyTarget target) override
+      {
+        m_assembly.execute(
+            m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
         m_assembled = true;
         return *this;
       }
@@ -788,6 +807,60 @@ namespace Rodin::Variational
             m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
             m_trialUUIDMap, m_testUUIDMap, cols, rows);
         m_assembly.execute(axb, input);
+
+        m_assembled = true;
+
+        return *this;
+      }
+
+      virtual ProblemUsBase& assemble(AssemblyTarget target) override
+      {
+        auto& axb = getLinearSystem();
+
+        // Compute trial offsets
+        {
+          std::array<size_t, TrialFunctionTuple::Size> sz;
+          m_us.map(
+                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+              .iapply(
+                [&](const Index i, size_t s) { sz[i] = s; });
+          m_trialOffsets[0] = 0;
+          for (size_t i = 0; i < TrialFunctionTuple::Size - 1; i++)
+            m_trialOffsets[i + 1] = sz[i] + m_trialOffsets[i];
+        }
+
+        // Compute test offsets
+        {
+          std::array<size_t, TestFunctionTuple::Size> sz;
+          m_vs.map(
+                [](const auto& u) { return u.get().getFiniteElementSpace().getSize(); })
+              .iapply(
+                [&](const Index i, size_t s) { sz[i] = s; });
+          m_testOffsets[0] = 0;
+          for (size_t i = 0; i < TestFunctionTuple::Size - 1; i++)
+            m_testOffsets[i + 1] = sz[i] + m_testOffsets[i];
+        }
+
+        size_t rows =
+          m_vs
+            .map([](const auto& v)
+            {
+              return static_cast<size_t>(v.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
+
+        size_t cols =
+          m_us
+            .map([](const auto& u)
+            {
+              return static_cast<size_t>(u.get().getFiniteElementSpace().getSize());
+            })
+            .reduce([](size_t a, size_t b) { return a + b; });
+
+        AssemblyInput input(
+            m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets,
+            m_trialUUIDMap, m_testUUIDMap, cols, rows);
+        m_assembly.execute(axb, input, target);
 
         m_assembled = true;
 

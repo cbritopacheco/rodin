@@ -384,5 +384,6 @@ jobs:
           flags: ${{ matrix.build_type }},mt-${{ matrix.multithreaded }}
           name: cov-${{ matrix.build_type }}-mt${{ matrix.multithreaded }}
           root_dir: ${{ github.workspace }}
+          use_pypi: true
           verbose: true
           fail_ci_if_error: true

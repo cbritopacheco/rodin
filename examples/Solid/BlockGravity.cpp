@@ -104,14 +104,11 @@ int main(int, char**)
 
     auto bodyForce = VectorFunction{ Zero(), RealFunction(gy) };
 
-    Solid::MaterialTangent tangent(law, du, v, u);
-
-    Solid::InternalForce residual(law, v, u);
+    auto ivw = Solid::InternalVirtualWork(law, u);
 
     // Newton linearization:  K δu = -F_int(u) + F_body
     Problem newton(du, v);
-    newton = tangent
-           + residual
+    newton = ivw(du, v)
            - Integral(bodyForce, v)
            + DirichletBC(du, zero).on(bottomBC);
 

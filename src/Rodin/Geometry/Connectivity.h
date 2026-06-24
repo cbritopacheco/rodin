@@ -445,12 +445,27 @@ namespace Rodin::Geometry
       }
 
       Connectivity& polytope(
+          Geometry::Polytope::Type t, std::initializer_list<Index> p, Index& index)
+      {
+        return this->polytope(t, Polytope::Key(p), index);
+      }
+
+      Connectivity& polytope(
           Geometry::Polytope::Type t, const IndexArray& polytope)
       {
         assert(polytope.size() <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
         Polytope::Key key(polytope.size());
         std::copy(polytope.begin(), polytope.end(), key.begin());
         return this->polytope(t, std::move(key));
+      }
+
+      Connectivity& polytope(
+          Geometry::Polytope::Type t, const IndexArray& polytope, Index& index)
+      {
+        assert(polytope.size() <= RODIN_MAXIMUM_POLYTOPE_VERTICES);
+        Polytope::Key key(polytope.size());
+        std::copy(polytope.begin(), polytope.end(), key.begin());
+        return this->polytope(t, std::move(key), index);
       }
 
       /**
@@ -464,6 +479,12 @@ namespace Rodin::Geometry
 
       Connectivity& polytope(
           Geometry::Polytope::Type t, Polytope::Key&& polytope);
+
+      Connectivity& polytope(
+          Geometry::Polytope::Type t, const Polytope::Key& polytope, Index& index);
+
+      Connectivity& polytope(
+          Geometry::Polytope::Type t, Polytope::Key&& polytope, Index& index);
 
       /**
        * @brief Computes the entities of dimension @f$ d @f$ of each cell and
