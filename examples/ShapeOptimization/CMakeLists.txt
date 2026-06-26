@@ -34,6 +34,16 @@ target_link_libraries(LevelSetWNGIRCantilever2D
   Rodin::Variational
   )
 
+add_executable(LevelSetWNGIRCantilever3D LevelSetWNGIRCantilever3D.cpp)
+target_link_libraries(LevelSetWNGIRCantilever3D
+  PUBLIC
+  Rodin::Advection
+  Rodin::Geometry
+  Rodin::PETSc
+  Rodin::Solver
+  Rodin::Variational
+  )
+
 # add_executable(LevelSetMast2D LevelSetMast2D.cpp)
 # target_link_libraries(LevelSetMast2D
 #   PUBLIC

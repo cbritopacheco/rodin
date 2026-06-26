@@ -1014,13 +1014,12 @@ namespace Rodin::Adaptation
     };
   }
 
-  /// Reusable-scratch overload. The trial/test functions and the two
-  /// `Variational::Problem` objects (step + bulk) are owned by the
-  /// caller (`class WNGIR`) and threaded in by reference so they are
-  /// constructed once and reused across iterations and frames. Only
-  /// their bodies are reassigned/reassembled per iteration.
+  /// Backend-neutral reusable-scratch overload. The backend-native
+  /// trial/test functions, preassembled bulk form, step Problem, and linear
+  /// solver are caller-owned and persist across iterations and frames.
   template <class Mesh, class Displacement, class PhiDerived, class GradDerived,
-            class TrialT, class TestT, class ProblemT>
+            class TrialT, class TestT, class BilinearFormT, class ProblemT,
+            class LinearSolverT>
   WNGIRReport solveWNGIR(
       const Mesh& mesh,
       Displacement& u,
@@ -1030,10 +1029,10 @@ namespace Rodin::Adaptation
       const WNGIRParameters& p,
       TrialT& duStep,
       TestT& vStep,
-      TrialT& duBulk,
-      TestT& vBulk,
+      BilinearFormT& bulkForm,
       ProblemT& stepProblem,
-      ProblemT& bulkProblem)
+      LinearSolverT& linearSolver,
+      bool& bulkFormAssembled)
   {
     using Vec = Math::SpatialVector<Real>;
     using Mat = Math::SpatialMatrix<Real>;
@@ -1378,23 +1377,16 @@ namespace Rodin::Adaptation
     // form carry the same homogeneous Dirichlet elimination, so each
     // constrained boundary row is identity in both; the operator sum is
     // ≤ 2·I there, harmless since the boundary RHS is 0 ⇒ u_bd = 0.
-    auto zeroForcing = Variational::VectorFunction(
-        meshDim,
-        [&](const Geometry::Point&)
-        {
-          return zeroVec(meshDim);
-        });
-    // duBulk/vBulk/bulkProblem are caller-owned scratch (reused).
-    bulkProblem =
-        Variational::Integral(gammaM * duBulk, vBulk)
-      + Variational::Integral(
-          gammaH * ellM * ellM * Variational::Jacobian(duBulk),
-          Variational::Jacobian(vBulk))
-      + Variational::Integral(zeroForcing, vBulk)
-      + Variational::DirichletBC(duBulk, zeroForcing);
-    bulkProblem.assemble();
-    const Math::SparseMatrix<Real> bulkOperator =
-        bulkProblem.getLinearSystem().getOperator();
+    if (!bulkFormAssembled)
+    {
+      bulkForm =
+          Variational::Integral(gammaM * duStep, vStep)
+        + Variational::Integral(
+            gammaH * ellM * ellM * Variational::Jacobian(duStep),
+            Variational::Jacobian(vStep));
+      bulkForm.assemble();
+      bulkFormAssembled = true;
+    }
 
     // =================================================================
     // Nonlinear iteration.
@@ -1433,63 +1425,34 @@ namespace Rodin::Adaptation
         || p.gammaSize > Real(0);
       if (useGradientForce)
       {
-        stepProblem =
-            obsMetric
-          + admMetric
-          - surfaceForce
-          - admGradient
-          + Variational::DirichletBC(duStep, zeroBoundary);
+        typename ProblemT::ProblemBodyType body(bulkForm);
+        body = body + obsMetric + admMetric - surfaceForce - admGradient
+             + Variational::DirichletBC(duStep, zeroBoundary);
+        stepProblem = body;
       }
       else
       {
-        stepProblem =
-            obsMetric
-          + admMetric
-          - surfaceForce
-          + Variational::DirichletBC(duStep, zeroBoundary);
+        typename ProblemT::ProblemBodyType body(bulkForm);
+        body = body + obsMetric + admMetric - surfaceForce
+             + Variational::DirichletBC(duStep, zeroBoundary);
+        stepProblem = body;
       }
       stepProblem.assemble();
       rep.tAssembly += secondsSince(tic);
 
-      // ---- Solve assembled WNGIR step problem ----
-      // Operator = (M_obs + K_adm + boundary identity) + M_bulk.
+      // ---- Solve the single backend-native assembled Problem ----
       tic = Clock::now();
-      const auto& stepSystem = stepProblem.getLinearSystem();
-      Math::SparseMatrix<Real> stepOperator = stepSystem.getOperator();
-      stepOperator += bulkOperator;
-      using CGSolver = Eigen::ConjugateGradient<
-        Eigen::SparseMatrix<Real>,
-        Eigen::Lower | Eigen::Upper,
-        Eigen::DiagonalPreconditioner<Real>>;
-      CGSolver cg;
-      const Eigen::Index ndofs = stepOperator.rows();
-      const std::size_t cgMaxIterations = p.cgMaxIterations > 0
-        ? p.cgMaxIterations
-        : std::min<std::size_t>(
-            2000,
-            std::max<std::size_t>(
-              100,
-              2 * static_cast<std::size_t>(std::max<Eigen::Index>(ndofs, 1))));
-      cg.setMaxIterations(static_cast<int>(cgMaxIterations));
-      cg.setTolerance(p.cgRelativeTolerance > Real(0)
-          ? p.cgRelativeTolerance : Real(1e-6));
-      cg.compute(stepOperator);
-      if (cg.info() != Eigen::Success)
+      Math::Vector<Real> vK;
+      std::size_t linearIterations = 0;
+      Real linearError = std::numeric_limits<Real>::infinity();
+      if (!linearSolver.solve(
+            stepProblem, vK, linearIterations, linearError, p))
       {
-        rep.exitReason = "solve-cg-setup-failed";
+        rep.exitReason = "solve-linear-failed";
         break;
       }
-      rep.tFactor += secondsSince(tic);
-      tic = Clock::now();
-      Math::Vector<Real> vK = cg.solve(stepSystem.getVector());
-      rep.linearIterations += static_cast<std::size_t>(
-          std::max<int>(cg.iterations(), 0));
-      rep.linearError = cg.error();
-      if (cg.info() != Eigen::Success)
-      {
-        rep.exitReason = "solve-cg-failed";
-        break;
-      }
+      rep.linearIterations += linearIterations;
+      rep.linearError = linearError;
       if (!vK.allFinite())
       {
         rep.exitReason = "solve-nonfinite";
@@ -1674,8 +1637,8 @@ namespace Rodin::Adaptation
                   << "  aa=" << (aaAccepted ? 1 : 0)
                   << "  aaTry=" << (aaTried ? 1 : 0)
                   << "  aaθ=" << aaTheta
-                  << "  cgIt=" << rep.linearIterations
-                  << "  cgErr=" << rep.linearError
+                  << "  linIt=" << rep.linearIterations
+                  << "  linErr=" << rep.linearError
                   << "  α=" << alpha
                   << "  bt=" << backtracks
                   << "  min_j=" << rep.minJ
@@ -1707,6 +1670,44 @@ namespace Rodin::Adaptation
     return rep;
   }
 
+  template <class ProblemT>
+  class WNGIREigenLinearSolver
+  {
+    public:
+      bool solve(
+          ProblemT& problem,
+          Math::Vector<Real>& solution,
+          std::size_t& iterations,
+          Real& error,
+          const WNGIRParameters& parameters)
+      {
+        const auto& system = problem.getLinearSystem();
+        using CGSolver = Eigen::ConjugateGradient<
+          Eigen::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper,
+          Eigen::DiagonalPreconditioner<Real>>;
+        CGSolver cg;
+        const Eigen::Index ndofs = system.getOperator().rows();
+        const std::size_t maxIterations = parameters.cgMaxIterations > 0
+          ? parameters.cgMaxIterations
+          : std::min<std::size_t>(
+              2000,
+              std::max<std::size_t>(100,
+                2 * static_cast<std::size_t>(
+                  std::max<Eigen::Index>(ndofs, 1))));
+        cg.setMaxIterations(static_cast<int>(maxIterations));
+        cg.setTolerance(parameters.cgRelativeTolerance > Real(0)
+            ? parameters.cgRelativeTolerance : Real(1e-6));
+        cg.compute(system.getOperator());
+        if (cg.info() != Eigen::Success)
+          return false;
+        solution = cg.solve(system.getVector());
+        iterations = static_cast<std::size_t>(
+            std::max<Eigen::Index>(cg.iterations(), 0));
+        error = cg.error();
+        return cg.info() == Eigen::Success && solution.allFinite();
+      }
+  };
+
   template <class Displacement>
   class WNGIR
   {
@@ -1718,21 +1719,23 @@ namespace Rodin::Adaptation
         decltype(Variational::TestFunction(std::declval<const FESType&>()))>;
       using ProblemType = std::decay_t<decltype(Variational::Problem(
           std::declval<TrialType&>(), std::declval<TestType&>()))>;
+      using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
+          std::declval<TrialType&>(), std::declval<TestType&>()))>;
+      using LinearSolverType = WNGIREigenLinearSolver<ProblemType>;
 
     public:
       explicit WNGIR(Displacement& u)
         : m_u(&u),
           m_duStep(u.getFiniteElementSpace()),
           m_vStep(u.getFiniteElementSpace()),
-          m_duBulk(u.getFiniteElementSpace()),
-          m_vBulk(u.getFiniteElementSpace()),
           m_stepProblem(m_duStep, m_vStep),
-          m_bulkProblem(m_duBulk, m_vBulk)
+          m_bulkForm(m_duStep, m_vStep)
       {}
 
       void setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
+        m_bulkFormAssembled = false;
       }
 
       const WNGIRParameters& getParameters() const
@@ -1754,8 +1757,8 @@ namespace Rodin::Adaptation
       {
         m_report = solveWNGIR(
             mesh, *m_u, interfaceFacets, phi, grad, m_parameters,
-            m_duStep, m_vStep, m_duBulk, m_vBulk,
-            m_stepProblem, m_bulkProblem);
+            m_duStep, m_vStep, m_bulkForm, m_stepProblem,
+            m_linearSolver, m_bulkFormAssembled);
         return m_report;
       }
 
@@ -1763,10 +1766,10 @@ namespace Rodin::Adaptation
       Displacement* m_u;
       TrialType m_duStep;
       TestType m_vStep;
-      TrialType m_duBulk;
-      TestType m_vBulk;
       ProblemType m_stepProblem;
-      ProblemType m_bulkProblem;
+      BilinearFormType m_bulkForm;
+      LinearSolverType m_linearSolver;
+      bool m_bulkFormAssembled = false;
       WNGIRParameters m_parameters;
       WNGIRReport m_report;
   };

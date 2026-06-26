@@ -915,6 +915,15 @@ namespace Rodin::Assembly
           MatSetOption(A, MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
         }
 
+        // A is reused across re-assemblies (e.g. WNGIR iterations) with its
+        // structure kept. Because MAT_IGNORE_ZERO_ENTRIES leaves numerically
+        // zero couplings unallocated, an entry that was zero on a previous
+        // assembly can become nonzero on a later one (the mesh deforms, the
+        // admissibility/active set changes), introducing a new nonzero
+        // location. Allow that growth instead of aborting; the solver detects
+        // the changed nonzero state and invalidates symbolic factor reuse.
+        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+
         // ------------------------
         // Allocate / reset b (Seq Vec)
         // ------------------------

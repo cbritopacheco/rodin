@@ -7,6 +7,8 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinPETSc_HEADERS
   ForwardDecls.h
+  Adaptation.h
+  Adaptation/WNGIR.h
   Object.h
   IO/GridFunctionPrinter.h
   IO/HDF5.h
@@ -61,6 +63,7 @@ target_link_libraries(RodinPETSc
     Rodin::Math
     Rodin::Variational
     Rodin::Assembly
+    Rodin::Adaptation
     Rodin::FormLanguage
     PETSc::PETSc
 )

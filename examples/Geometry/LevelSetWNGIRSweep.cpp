@@ -760,9 +760,9 @@ int main(int argc, char** argv)
 
     u.getData() = bestU;
     interfaceFit = bestFit;
-    const auto bestAdm = evaluateLSRAdmissibilitySampled(
+    const auto bestAdm = evaluateWNGIRAdmissibilitySampled(
         u, u.getData(), jMinRatio, qOrder);
-    minJ = bestAdm.minJRatio;
+    minJ = bestAdm.minJ;
     maxQRel = bestAdm.maxQRel;
 
     const bool converged = interfaceFit <= fitTol;

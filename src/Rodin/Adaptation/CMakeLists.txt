@@ -8,15 +8,8 @@ Distributed under the Boost Software License, Version 1.0.
 set(RodinAdaptation_HEADERS
   AnalyticFunctionAdapters.h
   CellGeomCache.h
-  LSR.h
-  LSRAdmissibility.h
-  LSRIntegrators.h
-  LSRParameters.h
-  LSRRegistration.h
-  LSRReport.h
-  LevelSetRegistration.h
   WNGIR.h
-  JacobianAdmissibilityBarrier.h
+  WNGIRAdmissibility.h
 )
 
 # Header-only / interface library
