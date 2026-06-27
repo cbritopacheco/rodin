@@ -1,0 +1,174 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_ADAPTATION_WNGIRADMISSIBILITYGRADIENT_H
+#define RODIN_ADAPTATION_WNGIRADMISSIBILITYGRADIENT_H
+
+#include "WNGIRDetail.h"
+#include "WNGIRParameters.h"
+
+namespace Rodin::Adaptation::Detail
+{
+    template <class TestFunction, class Displacement>
+    class WNGIRAdmissibilityGradient final
+      : public Variational::LinearFormIntegratorBase<
+          typename TestFunction::ScalarType>
+    {
+      public:
+        using ScalarType = typename TestFunction::ScalarType;
+        using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+
+        WNGIRAdmissibilityGradient(
+            const TestFunction& v,
+            const Displacement& current,
+            const WNGIRParameters& parameters)
+          : Parent(v.getLeaf()),
+            m_v(v),
+            m_current(current),
+            m_parameters(parameters)
+        {}
+
+        WNGIRAdmissibilityGradient(
+            const WNGIRAdmissibilityGradient&) = default;
+
+        const Geometry::Polytope& getPolytope() const final override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        WNGIRAdmissibilityGradient& setPolytope(
+            const Geometry::Polytope& polytope) final override
+        {
+          m_polytope = &polytope;
+
+          const std::size_t dim = polytope.getDimension();
+          const Real d = static_cast<Real>(dim);
+          const auto geometry = polytope.getGeometry();
+          const auto idx = polytope.getIndex();
+
+          const auto& testFES = m_v.getFiniteElementSpace();
+          const auto& testFE = testFES.getFiniteElement(dim, idx);
+          const std::size_t qOrder = m_parameters.get().quadratureOrder > 0
+            ? m_parameters.get().quadratureOrder
+            : std::max<std::size_t>(2, 2 * testFE.getOrder());
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(qOrder, geometry);
+          const auto& quad = polytope.getQuadrature(qf);
+
+          const std::size_t nte = testFE.getCount();
+          m_vector.resize(static_cast<Eigen::Index>(nte));
+          m_vector.setZero();
+
+          for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
+          {
+            const auto& pt = quad.getPoint(qp);
+            const Variational::IntegrationPoint ip(pt, &qf, qp);
+            const Real w = qf.getWeight(qp) * pt.getDistortion();
+            const auto F =
+              deformationGradient(m_current.get(), polytope, ip, dim);
+            const Real jK = F.determinant();
+            if (std::abs(jK) < Real(1e-14))
+              continue;
+            const auto& params = m_parameters.get();
+            // Shape force needs j > 0; size force runs for ALL j.
+            const bool shapeOK = jK > Real(0);
+            Real frob2 = 0, qK = 0, sJ0 = 0, sQ0 = 0;
+            bool jActive = false, qActive = false, qualActive = false;
+            if (shapeOK)
+            {
+              frob2 = F.squaredNorm();
+              qK = frob2 / (d * std::pow(jK, Real(2) / d));
+              sJ0 = jK - params.jSafe;
+              sQ0 = params.qMax - qK;
+              jActive = params.includeAdmissibilityGradient
+                && params.gammaJ > Real(0)
+                && sJ0 > Real(0) && sJ0 < params.s0J;
+              qActive = params.includeAdmissibilityGradient
+                && params.gammaQ > Real(0)
+                && sQ0 > Real(0) && sQ0 < params.s0Q;
+              qualActive = params.gammaQual > Real(0) && qK > params.qStar;
+            }
+            const bool sizeActive =
+              params.gammaSize > Real(0) && jK < params.jStar;
+            if (!jActive && !qActive && !qualActive && !sizeActive)
+              continue;
+
+            const auto Jinv = pt.getJacobianInverse();
+            const auto& rc = pt.getReferenceCoordinates();
+            const auto FinvT = F.inverse().transpose();
+            const auto dQdF = shapeOK
+              ? Math::SpatialMatrix<Real>(
+                  (Real(2) / d) * std::pow(jK, -Real(2) / d)
+                  * (F - (frob2 / d) * FinvT))
+              : makeZeroMatrix(dim);
+
+            for (std::size_t te = 0; te < nte; ++te)
+            {
+              const auto jp = physicalJacobian(testFE, te, rc, Jinv, dim);
+              Real aJ = 0;
+              Real aQ = 0;
+              for (std::size_t r = 0; r < dim; ++r)
+                for (std::size_t c = 0; c < dim; ++c)
+                {
+                  const auto rr = static_cast<Eigen::Index>(r);
+                  const auto cc = static_cast<Eigen::Index>(c);
+                  aJ += jK * FinvT(rr, cc) * jp(rr, cc);
+                  aQ += dQdF(rr, cc) * jp(rr, cc);
+                }
+
+              Real val = 0;
+              if (jActive)
+              {
+                const Real bp = -Real(1) / sJ0 + Real(1) / params.s0J;
+                val += -params.gammaJ * bp * aJ;
+              }
+              if (qActive)
+              {
+                const Real bp = -Real(1) / sQ0 + Real(1) / params.s0Q;
+                val += params.gammaQ * bp * aQ;
+              }
+              if (qualActive)
+              {
+                // −DE_q density: ρ'(Q)=max(0,Q−qStar), dQ-direction aQ.
+                val += -params.gammaQual * (qK - params.qStar) * aQ;
+              }
+              if (sizeActive)
+              {
+                // −DE_s density: +γ_s·max(0,jStar−j)·a_j pushes j up.
+                val += params.gammaSize * (params.jStar - jK) * aJ;
+              }
+              m_vector(static_cast<Eigen::Index>(te)) += w * val;
+            }
+          }
+          return *this;
+        }
+
+        ScalarType integrate(std::size_t local) final override
+        {
+          return m_vector(static_cast<Eigen::Index>(local));
+        }
+
+        Geometry::Region getRegion() const final override
+        {
+          return Geometry::Region::Cells;
+        }
+
+        WNGIRAdmissibilityGradient* copy() const noexcept final override
+        {
+          return new WNGIRAdmissibilityGradient(*this);
+        }
+
+      private:
+        TestFunction m_v;
+        std::reference_wrapper<const Displacement> m_current;
+        std::reference_wrapper<const WNGIRParameters> m_parameters;
+        const Geometry::Polytope* m_polytope = nullptr;
+        Math::Vector<Real> m_vector;
+    };
+}
+
+#endif

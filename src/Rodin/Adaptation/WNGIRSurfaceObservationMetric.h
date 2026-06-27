@@ -1,0 +1,162 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_ADAPTATION_WNGIRSURFACEOBSERVATIONMETRIC_H
+#define RODIN_ADAPTATION_WNGIRSURFACEOBSERVATIONMETRIC_H
+
+#include "WNGIRDetail.h"
+#include "WNGIRParameters.h"
+
+namespace Rodin::Adaptation::Detail
+{
+    template <class PhiDerived, class GradDerived,
+              class TrialFunction, class TestFunction, class Displacement>
+    class WNGIRSurfaceObservationMetric final
+      : public Variational::LocalBilinearFormIntegratorBase<
+          typename TrialFunction::ScalarType>
+    {
+      public:
+        using ScalarType = typename TrialFunction::ScalarType;
+        using Parent =
+          Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+        using PhiType = Variational::RealFunctionBase<PhiDerived>;
+        using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
+
+        WNGIRSurfaceObservationMetric(
+            const PhiType& phi,
+            const GradType& grad,
+            const TrialFunction& du,
+            const TestFunction& v,
+            const Displacement& current,
+            const WNGIRParameters& parameters,
+            Real sigma2)
+          : Parent(du.getLeaf(), v.getLeaf()),
+            m_phi(phi.copy()),
+            m_grad(grad.copy()),
+            m_du(du),
+            m_v(v),
+            m_current(current),
+            m_parameters(parameters),
+            m_sigma2(sigma2)
+        {}
+
+        WNGIRSurfaceObservationMetric(
+            const WNGIRSurfaceObservationMetric& other)
+          : Parent(other),
+            m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
+            m_grad(other.m_grad ? other.m_grad->copy() : nullptr),
+            m_du(other.m_du),
+            m_v(other.m_v),
+            m_current(other.m_current),
+            m_parameters(other.m_parameters),
+            m_sigma2(other.m_sigma2),
+            m_polytope(other.m_polytope)
+        {}
+
+        const Geometry::Polytope& getPolytope() const final override
+        {
+          assert(m_polytope);
+          return *m_polytope;
+        }
+
+        WNGIRSurfaceObservationMetric& setPolytope(
+            const Geometry::Polytope& polytope) final override
+        {
+          m_polytope = &polytope;
+
+          const std::size_t faceDim = polytope.getDimension();
+          const Index faceIdx = polytope.getIndex();
+          const auto& trialFES = m_du.getFiniteElementSpace();
+          const auto& testFES = m_v.getFiniteElementSpace();
+          const auto& trialFE = trialFES.getFiniteElement(faceDim, faceIdx);
+          const auto& testFE = testFES.getFiniteElement(faceDim, faceIdx);
+          const auto& params = m_parameters.get();
+          const std::size_t qOrder = params.quadratureOrder > 0
+            ? params.quadratureOrder
+            : std::max<std::size_t>(
+                2, 2 * std::max(trialFE.getOrder(), testFE.getOrder()));
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(qOrder, polytope.getGeometry());
+          const auto& quad = polytope.getQuadrature(qf);
+
+          const std::size_t ntr = trialFE.getCount();
+          const std::size_t nte = testFE.getCount();
+          m_matrix.resize(
+              static_cast<Eigen::Index>(nte),
+              static_cast<Eigen::Index>(ntr));
+          m_matrix.setZero();
+
+          constexpr Real epsG = Real(1e-12);
+          for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
+          {
+            const auto& pt = quad.getPoint(qp);
+            const Variational::IntegrationPoint ip(pt, &qf, qp);
+            const Real w = qf.getWeight(qp) * pt.getDistortion();
+            const auto uq = m_current.get().getValue(ip);
+            Math::SpatialVector<Real> displacement(polytope.getMesh().getDimension());
+            displacement.setZero();
+            for (std::size_t r = 0; r < static_cast<std::size_t>(displacement.size()); ++r)
+              displacement(static_cast<Eigen::Index>(r)) = uq(r);
+
+            const auto moved =
+              makeTranslatedPoint(pt, pt.getPhysicalCoordinates() + displacement,
+                                  params.pointLocationTolerance);
+            const Real r = m_phi->getValue(moved);
+            const auto g = m_grad->getValue(moved);
+            const Real obsWeight =
+                g.dot(g) + epsG
+              + (params.residualStabilizedObservationMetric
+                  ? (r * r) / m_sigma2 : Real(0));
+
+            const auto& rc = pt.getReferenceCoordinates();
+            for (std::size_t te = 0; te < nte; ++te)
+            {
+              const auto testValue = testFE.getBasis(te)(rc);
+              for (std::size_t tr = 0; tr < ntr; ++tr)
+              {
+                const auto trialValue = trialFE.getBasis(tr)(rc);
+                m_matrix(
+                    static_cast<Eigen::Index>(te),
+                    static_cast<Eigen::Index>(tr))
+                  += w * params.gammaObs * obsWeight
+                   * trialValue.dot(testValue);
+              }
+            }
+          }
+          return *this;
+        }
+
+        ScalarType integrate(std::size_t tr, std::size_t te) final override
+        {
+          return m_matrix(
+              static_cast<Eigen::Index>(te),
+              static_cast<Eigen::Index>(tr));
+        }
+
+        Geometry::Region getRegion() const final override
+        {
+          return Geometry::Region::Faces;
+        }
+
+        WNGIRSurfaceObservationMetric* copy() const noexcept final override
+        {
+          return new WNGIRSurfaceObservationMetric(*this);
+        }
+
+      private:
+        std::unique_ptr<PhiType> m_phi;
+        std::unique_ptr<GradType> m_grad;
+        TrialFunction m_du;
+        TestFunction m_v;
+        std::reference_wrapper<const Displacement> m_current;
+        std::reference_wrapper<const WNGIRParameters> m_parameters;
+        Real m_sigma2;
+        const Geometry::Polytope* m_polytope = nullptr;
+        Math::Matrix<Real> m_matrix;
+    };
+}
+
+#endif

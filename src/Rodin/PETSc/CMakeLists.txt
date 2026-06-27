@@ -9,6 +9,8 @@ set(RodinPETSc_HEADERS
   ForwardDecls.h
   Adaptation.h
   Adaptation/WNGIR.h
+  Adaptation/WNGIRLinearSolver.h
+  Adaptation/WNGIRSolver.h
   Object.h
   IO/GridFunctionPrinter.h
   IO/HDF5.h
