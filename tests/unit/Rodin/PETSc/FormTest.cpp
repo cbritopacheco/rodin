@@ -21,6 +21,113 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  class ToggleLocalBilinearIntegrator final
+    : public LocalBilinearFormIntegratorBase<PetscScalar>
+  {
+    public:
+      using Parent = LocalBilinearFormIntegratorBase<PetscScalar>;
+
+      template <class TrialFunctionType, class TestFunctionType>
+      ToggleLocalBilinearIntegrator(
+          const TrialFunctionType& u,
+          const TestFunctionType& v,
+          const PetscScalar* offdiag)
+        : Parent(u, v),
+          m_offdiag(offdiag)
+      {}
+
+      ToggleLocalBilinearIntegrator(const ToggleLocalBilinearIntegrator& other)
+        : Parent(other),
+          m_polytope(other.m_polytope),
+          m_offdiag(other.m_offdiag)
+      {}
+
+      const Polytope& getPolytope() const override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      ToggleLocalBilinearIntegrator& setPolytope(const Polytope& polytope) override
+      {
+        m_polytope = &polytope;
+        return *this;
+      }
+
+      PetscScalar integrate(size_t tr, size_t te) override
+      {
+        return tr == te ? PetscScalar(1) : *m_offdiag;
+      }
+
+      Region getRegion() const override
+      {
+        return Region::Cells;
+      }
+
+      ToggleLocalBilinearIntegrator* copy() const noexcept override
+      {
+        return new ToggleLocalBilinearIntegrator(*this);
+      }
+
+    private:
+      const Polytope* m_polytope = nullptr;
+      const PetscScalar* m_offdiag = nullptr;
+  };
+
+  template <template <class, class> class Assembler>
+  void checkPETScReassemblyKeepsExplicitZeroStructuralEntries()
+  {
+    auto mesh = Mesh<Context::Local>::Builder()
+      .initialize(1)
+      .nodes(2)
+      .vertex({0.0})
+      .vertex({1.0})
+      .polytope(Polytope::Type::Segment, {0, 1})
+      .finalize();
+
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+
+    PetscScalar offdiag = 0;
+    using LinearSystemType = PETSc::Math::LinearSystem;
+    using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
+    using ProblemBodyType = typename ProblemType::ProblemBodyType;
+
+    ToggleLocalBilinearIntegrator integrator(u, v, &offdiag);
+    ProblemBodyType body(integrator);
+
+    Assembly::ProblemAssemblyInput<
+      ProblemBodyType,
+      decltype(u), decltype(v)> input(body, u, v);
+
+    LinearSystemType ls(PETSC_COMM_SELF);
+    Assembler<LinearSystemType, ProblemType> assembler;
+    assembler.execute(ls, input);
+
+    auto& A = ls.getOperator();
+    PetscErrorCode ierr =
+      MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    offdiag = 2;
+    assembler.execute(ls, input);
+
+    PetscInt row = 0;
+    PetscInt col = 1;
+    PetscScalar value = 0;
+    ierr = MatGetValues(A, 1, &row, 1, &col, &value);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_NEAR(value, offdiag, 1e-14);
+
+    row = 1;
+    col = 0;
+    value = 0;
+    ierr = MatGetValues(A, 1, &row, 1, &col, &value);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_NEAR(value, offdiag, 1e-14);
+  }
+
   template <template <class, class> class Assembler>
   void checkPETScAffineIdentificationDefect()
   {
@@ -633,6 +740,11 @@ namespace
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
   }
 
+  TEST(PETSc_Form, SequentialReassemblyKeepsExplicitZeroStructuralEntries)
+  {
+    checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::Sequential>();
+  }
+
 #ifdef RODIN_USE_OPENMP
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
@@ -647,6 +759,11 @@ namespace
   TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
   {
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_Form, OpenMPReassemblyKeepsExplicitZeroStructuralEntries)
+  {
+    checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::OpenMP>();
   }
 #endif
 }
