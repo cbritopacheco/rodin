@@ -30,24 +30,24 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
-  Mesh<Context::Local> makeShardableMesh()
+  Mesh<Context::Local> makeShardableMesh(size_t n = 5)
   {
     auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
+      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D, D);
     mesh.getConnectivity().compute(D, 0);
     return mesh;
   }
 
-  Mesh<Context::MPI> distributeFromRoot(const Context::MPI& ctx)
+  Mesh<Context::MPI> distributeFromRoot(const Context::MPI& ctx, size_t n = 5)
   {
     const auto& comm = ctx.getCommunicator();
     Sharder<Context::MPI> sharder(ctx);
 
     if (comm.rank() == 0)
     {
-      auto localMesh = makeShardableMesh();
+      auto localMesh = makeShardableMesh(n);
       BalancedCompactPartitioner partitioner(localMesh);
       partitioner.partition(static_cast<size_t>(comm.size()));
       sharder.shard(partitioner);
@@ -55,6 +55,44 @@ namespace
     }
 
     return sharder.gather(0);
+  }
+
+  // Per-rank stored nonzeros (size of this rank's slice of the pattern). With
+  // MAT_IGNORE_ZERO_ENTRIES = PETSC_FALSE (set by MatrixSetup) explicit zeros
+  // are kept, so this counts every allocated slot.
+  PetscInt matrixLocalNonzeros(Mat A)
+  {
+    MatInfo info;
+    PetscErrorCode ierr = MatGetInfo(A, MAT_LOCAL, &info);
+    EXPECT_EQ(ierr, PETSC_SUCCESS);
+    return static_cast<PetscInt>(info.nz_used);
+  }
+
+  // Per-rank cumulative mallocs during MatSetValues. A reused pattern triggers
+  // no additional mallocs.
+  PetscReal matrixLocalMallocs(Mat A)
+  {
+    MatInfo info;
+    PetscErrorCode ierr = MatGetInfo(A, MAT_LOCAL, &info);
+    EXPECT_EQ(ierr, PETSC_SUCCESS);
+    return info.mallocs;
+  }
+
+  // Total stored nonzeros across all ranks (collective).
+  PetscInt matrixGlobalNonzeros(Mat A)
+  {
+    MatInfo info;
+    PetscErrorCode ierr = MatGetInfo(A, MAT_GLOBAL_SUM, &info);
+    EXPECT_EQ(ierr, PETSC_SUCCESS);
+    return static_cast<PetscInt>(info.nz_used);
+  }
+
+  PetscReal matrixMaxAbs(Mat A)
+  {
+    PetscReal norm = 0;
+    PetscErrorCode ierr = MatNorm(A, NORM_INFINITY, &norm);
+    EXPECT_EQ(ierr, PETSC_SUCCESS);
+    return norm;
   }
 
   void expectSameOwnedVector(Vec expected, Vec actual)
@@ -167,6 +205,128 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     expectSameOwnedVector(
         full.getLinearSystem().getVector(),
         rhs.getLinearSystem().getVector());
+  }
+
+  // Re-assembling the identical problem into the same distributed matrix must
+  // reuse the nonzero pattern on every rank: identical dimensions, identical
+  // per-rank nonzero count and no extra mallocs (SAME_NONZERO_PATTERN).
+  TEST(PETSc_MPI_TargetedAssembly, ReassemblyKeepsNonzeroPattern)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+
+    P1<Real, Mesh<Context::MPI>> fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+    RealFunction gamma(1.0);
+    Problem p(u, v);
+    p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
+
+    p.assemble();
+    Mat A = p.getLinearSystem().getOperator();
+    PetscInt rows1 = 0;
+    PetscInt cols1 = 0;
+    ASSERT_EQ(MatGetSize(A, &rows1, &cols1), PETSC_SUCCESS);
+    const PetscInt nz1 = matrixLocalNonzeros(A);
+    const PetscReal mallocs1 = matrixLocalMallocs(A);
+
+    p.assemble();
+    A = p.getLinearSystem().getOperator();
+    PetscInt rows2 = 0;
+    PetscInt cols2 = 0;
+    ASSERT_EQ(MatGetSize(A, &rows2, &cols2), PETSC_SUCCESS);
+
+    EXPECT_EQ(rows1, rows2);
+    EXPECT_EQ(cols1, cols2);
+    EXPECT_EQ(nz1, matrixLocalNonzeros(A));
+    EXPECT_EQ(mallocs1, matrixLocalMallocs(A));
+  }
+
+  // Scaling the form by zero makes every visited entry numerically zero. The
+  // slots must still be allocated on every rank, so the per-rank nonzero count
+  // matches the full stiffness matrix while the matrix is numerically zero.
+  TEST(PETSc_MPI_TargetedAssembly, StructuralZerosStayInPattern)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+
+    P1<Real, Mesh<Context::MPI>> refFES(mesh);
+    PETSc::Variational::TrialFunction uRef(refFES);
+    PETSc::Variational::TestFunction  vRef(refFES);
+    RealFunction one(1.0);
+    Problem reference(uRef, vRef);
+    reference = Integral(one * Grad(uRef), Grad(vRef))
+              - Integral(RealFunction(1.0), vRef);
+    reference.assemble();
+    const PetscInt referenceNz =
+      matrixLocalNonzeros(reference.getLinearSystem().getOperator());
+
+    P1<Real, Mesh<Context::MPI>> zeroFES(mesh);
+    PETSc::Variational::TrialFunction uZero(zeroFES);
+    PETSc::Variational::TestFunction  vZero(zeroFES);
+    RealFunction zero(0.0);
+    Problem zeroed(uZero, vZero);
+    zeroed = Integral(zero * Grad(uZero), Grad(vZero))
+           - Integral(RealFunction(1.0), vZero);
+    zeroed.assemble();
+
+    EXPECT_EQ(referenceNz,
+        matrixLocalNonzeros(zeroed.getLinearSystem().getOperator()));
+    EXPECT_LE(matrixMaxAbs(zeroed.getLinearSystem().getOperator()), 1e-14);
+  }
+
+  // A problem with different global dimensions must produce a different nonzero
+  // pattern. Each distinct-size problem uses its own distributed mesh and
+  // matrix (the production path for a different mesh); the two patterns must
+  // differ in both global dimension and total stored nonzero count.
+  TEST(PETSc_MPI_TargetedAssembly, ReassemblyChangesNonzeroPattern)
+  {
+    const auto& world = *g_world;
+    if (world.size() > 4)
+      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
+
+    Context::MPI ctx(*g_env, world);
+
+    auto coarseMesh = distributeFromRoot(ctx, 4);
+    P1<Real, Mesh<Context::MPI>> coarseFES(coarseMesh);
+    PETSc::Variational::TrialFunction uC(coarseFES);
+    PETSc::Variational::TestFunction  vC(coarseFES);
+    RealFunction gammaC(1.0);
+    Problem coarse(uC, vC);
+    coarse = Integral(gammaC * Grad(uC), Grad(vC))
+           - Integral(RealFunction(1.0), vC);
+    coarse.assemble();
+    Mat coarseA = coarse.getLinearSystem().getOperator();
+    PetscInt rows1 = 0;
+    PetscInt cols1 = 0;
+    ASSERT_EQ(MatGetSize(coarseA, &rows1, &cols1), PETSC_SUCCESS);
+    const PetscInt nz1 = matrixGlobalNonzeros(coarseA);
+
+    auto fineMesh = distributeFromRoot(ctx, 6);
+    P1<Real, Mesh<Context::MPI>> fineFES(fineMesh);
+    PETSc::Variational::TrialFunction uF(fineFES);
+    PETSc::Variational::TestFunction  vF(fineFES);
+    RealFunction gammaF(1.0);
+    Problem fine(uF, vF);
+    fine = Integral(gammaF * Grad(uF), Grad(vF))
+         - Integral(RealFunction(1.0), vF);
+    fine.assemble();
+    Mat fineA = fine.getLinearSystem().getOperator();
+    PetscInt rows2 = 0;
+    PetscInt cols2 = 0;
+    ASSERT_EQ(MatGetSize(fineA, &rows2, &cols2), PETSC_SUCCESS);
+
+    EXPECT_NE(rows1, rows2);
+    EXPECT_NE(cols1, cols2);
+    EXPECT_NE(nz1, matrixGlobalNonzeros(fineA));
   }
 }
 

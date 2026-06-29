@@ -122,6 +122,11 @@ namespace Rodin::Variational
           m_value(std::move(other.m_value))
       {}
 
+      QuadratureRule* copy() const noexcept override
+      {
+        return new QuadratureRule(*this);
+      }
+
       /**
        * @brief Gets the currently bound polytope.
        * @returns Bound polytope

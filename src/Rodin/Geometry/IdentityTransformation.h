@@ -28,7 +28,7 @@ namespace Rodin::Geometry
    * This is typically used when the reference element and physical element
    * coincide, or when no geometric transformation is needed.
    *
-   * @see PolytopeTransformation, IsoparametricTransformation
+   * @see PolytopeTransformation, ParametricTransformation
    */
   class IdentityTransformation final : public PolytopeTransformation
   {
