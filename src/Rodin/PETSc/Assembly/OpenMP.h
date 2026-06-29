@@ -292,8 +292,7 @@ namespace Rodin::Assembly
                 for (size_t c = 0; c < cols.size(); ++c)
                 {
                   const PetscScalar v = Math::conj(integrator->integrate(c, r));
-                  if (v != PetscScalar(0))
-                    local.emplace_back(rows[r], cols[c], v);
+                  local.emplace_back(rows[r], cols[c], v);
                 }
             }
 
@@ -561,8 +560,6 @@ namespace Rodin::Assembly
               std::vector<PetscScalar>& localRhs,
               Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
@@ -1393,8 +1390,6 @@ namespace Rodin::Assembly
               std::vector<PetscScalar>& localRhs,
               Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)

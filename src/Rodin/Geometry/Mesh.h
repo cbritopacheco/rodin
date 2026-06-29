@@ -149,7 +149,7 @@ namespace Rodin::Geometry
    *
    * ## Geometric Transformations
    * - Reference-to-physical element mappings
-   * - Isoparametric transformations
+   * - Parametric transformations
    * - Jacobian computations
    *
    * ## Mesh Generation
@@ -1647,7 +1647,7 @@ namespace Rodin::Geometry
        * @param[in] i Index of the polytope
        * @returns Heap-allocated transformation (caller takes ownership)
        *
-       * Constructs the isoparametric transformation based on the current vertex
+       * Constructs the parametric transformation based on the current vertex
        * coordinates and polytope geometry type. This is used internally by
        * getPolytopeTransformation() when no cached transformation exists.
        */

@@ -1,6 +1,10 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <cmath>
+
 #include <Rodin/Geometry.h>
+#include <Rodin/Variational/H1.h>
 #include <Rodin/Variational/P1.h>
 #include <Rodin/Test/Random/RandomPointOnTriangle.h>
 
@@ -10,7 +14,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
-  TEST(Rodin_Geometry_IsoparametricTransformation, SanityTest_ReferenceTriangle)
+  TEST(Rodin_Geometry_ParametricTransformation, SanityTest_ReferenceTriangle)
   {
     constexpr const size_t sdim = 2;
     constexpr const size_t n = 3;
@@ -20,7 +24,7 @@ namespace Rodin::Tests::Unit
     pm(1,0) = 0; pm(1,1) = 0; pm(1,2) = 1;
 
     Variational::RealP1Element fe(Polytope::Type::Triangle);
-    IsoparametricTransformation trans(pm, fe);
+    ParametricTransformation trans(pm, fe);
 
     Math::SpatialPoint res;
     Math::SpatialPoint inv;
@@ -34,7 +38,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Rodin_Geometry_IsoparametricTransformation, SanityTest_Triangle_1)
+  TEST(Rodin_Geometry_ParametricTransformation, SanityTest_Triangle_1)
   {
     constexpr const size_t rdim = 2;
     constexpr const size_t sdim = 2;
@@ -45,7 +49,7 @@ namespace Rodin::Tests::Unit
     pm(1,0) = -1; pm(1,1) = 1; pm(1,2) = 1;
 
     Variational::RealP1Element fe(Polytope::Type::Triangle);
-    IsoparametricTransformation trans(pm, fe);
+    ParametricTransformation trans(pm, fe);
 
     Math::SpatialPoint rc(rdim);
     Math::SpatialPoint res;
@@ -141,6 +145,82 @@ namespace Rodin::Tests::Unit
 
       trans.inverse(inv, res);
       EXPECT_NEAR((inv - rc).norm(), 0.0, RODIN_FUZZY_CONSTANT);
+    }
+  }
+
+  template <size_t K>
+  static PointCloud makeQuarterCircleTrianglePointCloud()
+  {
+    constexpr Real Pi = 3.14159265358979323846;
+    Variational::RealH1Element<K> fe(Polytope::Type::Triangle);
+    PointCloud pm(2, fe.getCount());
+    const Math::SpatialPoint v0{1, 0};
+    const Math::SpatialPoint v1{0, 1};
+    const Math::SpatialPoint v2{0, 0};
+    for (size_t i = 0; i < fe.getCount(); ++i)
+    {
+      const auto& rc = fe.getNode(i);
+      Math::SpatialPoint x =
+        (Real(1) - rc[0] - rc[1]) * v0 + rc[0] * v1 + rc[1] * v2;
+      if (std::abs(rc[1]) <= Real(1e-12))
+      {
+        const Real theta = (Pi / Real(2)) * rc[0];
+        x = Math::SpatialPoint{std::cos(theta), std::sin(theta)};
+      }
+      pm(0, i) = x[0];
+      pm(1, i) = x[1];
+    }
+    return pm;
+  }
+
+  TEST(Rodin_Geometry_ParametricTransformation, P2CurvesInterfaceEdge)
+  {
+    Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
+    ParametricTransformation trans(
+        makeQuarterCircleTrianglePointCloud<2>(), fe);
+
+    Math::SpatialPoint x;
+    trans.transform(x, Math::SpatialPoint{Real(0.5), Real(0)});
+    EXPECT_NEAR(x.norm(), Real(1), Real(1e-12));
+
+    const Math::SpatialPoint linearMidpoint{Real(0.5), Real(0.5)};
+    EXPECT_GT(std::abs(linearMidpoint.norm() - Real(1)),
+              std::abs(x.norm() - Real(1)));
+  }
+
+  TEST(Rodin_Geometry_ParametricTransformation, P3CurvedEdgeImprovesFit)
+  {
+    Variational::RealH1Element<3> fe(Polytope::Type::Triangle);
+    ParametricTransformation trans(
+        makeQuarterCircleTrianglePointCloud<3>(), fe);
+
+    Real maxError = 0;
+    for (Real s : {Real(0.25), Real(0.5), Real(0.75)})
+    {
+      Math::SpatialPoint x;
+      trans.transform(x, Math::SpatialPoint{s, Real(0)});
+      maxError = std::max(maxError, std::abs(x.norm() - Real(1)));
+    }
+
+    const Math::SpatialPoint linearMidpoint{Real(0.5), Real(0.5)};
+    EXPECT_LT(maxError, std::abs(linearMidpoint.norm() - Real(1)));
+  }
+
+  TEST(Rodin_Geometry_ParametricTransformation, CurvedTriangleJacobianStaysPositive)
+  {
+    Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
+    ParametricTransformation trans(
+        makeQuarterCircleTrianglePointCloud<2>(), fe);
+
+    for (const Math::SpatialPoint& rc : {
+          Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)},
+          Math::SpatialPoint{Real(0.25), Real(0.25)},
+          Math::SpatialPoint{Real(0.5), Real(0.25)},
+          Math::SpatialPoint{Real(0.25), Real(0.5)}})
+    {
+      Math::SpatialMatrix<Real> J;
+      trans.jacobian(J, rc);
+      EXPECT_GT(J.determinant(), Real(0));
     }
   }
 }

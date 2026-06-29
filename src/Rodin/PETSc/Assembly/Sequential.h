@@ -451,8 +451,6 @@ namespace Rodin::Assembly
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
@@ -911,9 +909,15 @@ namespace Rodin::Assembly
             true
           });
           assert(ierr == PETSC_SUCCESS);
-
-          MatSetOption(A, MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
         }
+
+        // A is reused across re-assemblies with its
+        // structure kept. Zero-valued matrix entries are submitted to PETSc so
+        // they can seed the structural pattern; whether PETSc ignores zeros is
+        // controlled by matrix options rather than backend-side pruning. Allow
+        // pattern growth in case a caller or option still ignores structural
+        // zeros.
+        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
         // ------------------------
         // Allocate / reset b (Seq Vec)
@@ -1076,8 +1080,6 @@ namespace Rodin::Assembly
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)

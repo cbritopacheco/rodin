@@ -474,8 +474,6 @@ namespace Rodin::Assembly
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
@@ -1168,8 +1166,6 @@ namespace Rodin::Assembly
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
