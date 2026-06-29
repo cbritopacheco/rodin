@@ -25,6 +25,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
 
+#include "../WNGIRExampleParameters.h"
 
 #include <algorithm>
 #include <array>
@@ -377,87 +378,27 @@ int main(int argc, char** argv)
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.008));
-  const std::size_t maxIterations =
-    parseSizeTOption(argc, argv, "wngir-steps", 120);
-  const Real fitTol =
-    parseRealOption(argc, argv, "fit-tol", Real(4) * h * h);
-  const Real stepTol =
-    parseRealOption(argc, argv, "step-tol", Real(1e-4) * h);
-
-  // WNGIR displacement model (full spec).
-  //   Cold start u=0, fixed σ = max(3h, q90(|φ| on Γ_ψ,h)).
-  //   Per iteration: skeleton force ℓΓ(v) = ∫_Γ dΓ·trace(v) dS with
-  //     dΓ_q = -ω_q r_q g_q / (|g_q|² + ε_g),  ω_q = exp(-r_q²/σ²),
-  //     r_q = φ(X_q + u(X_q)),  g_q = ∇φ(X_q + u(X_q)).
-  //   Bulk metric M = γ_M (v,z)_L² + γ_H ℓ_M² (∇v,∇z)_L².
-  //   Linearised admissibility (one SPD barrier approximation):
-  //     active log barrier B(s) = -log(s/s0) + s/s0 - 1 on (0,s0),
-  //     margins s_j = j - j_safe + a_j(v), s_Q = Q_max - Q - a_Q(v),
-  //     a_j(v) = j F^{-T}:∇v, a_Q(v) = dQdF:∇v at validation points.
-  //   Solve (M + Kadm) v = FΓ − Gadm, then nonlinear line search on
-  //   TRUE admissibility (j > j_ls, Q < Q_max_ls) + Welsch energy
-  //   decrease. The residual is φ(X+u) on Γ_ψ,h — ψ never enters.
-  //   Welsch handles partial matching / topology mismatch: the active
-  //   subset (ω ≥ ω_min) has geometric control via the level-set
-  //   residual; the inactive subset is topological-outlier skeleton.
-  const Real kWNGIRGammaM =
-    parseRealOption(argc, argv, "wngir-gamma-m", Real(1) / h);
-  const Real kWNGIRGammaH =
-    parseRealOption(argc, argv, "wngir-gamma-h", Real(1) / h);
-  const Real kWNGIREllM =
-    parseRealOption(argc, argv, "wngir-ell", Real(3) * h);
-  const Real kWNGIRGammaObs =
-    parseRealOption(argc, argv, "wngir-gamma-obs", Real(1));
+  Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
+  wngirDefaults.maxIterations = 120;
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  const Real kWNGIRBetaMax =
-    parseRealOption(argc, argv, "wngir-beta-max", Real(10));
+  wngirDefaults.betaMax = 10;
 #else
-  const Real kWNGIRBetaMax =
-    parseRealOption(argc, argv, "wngir-beta-max", Real(50));
+  wngirDefaults.betaMax = 50;
 #endif
-  const Real kWNGIRGammaJ =
-    parseRealOption(argc, argv, "wngir-gamma-j", Real(1));
-  const Real kWNGIRGammaQ =
-    parseRealOption(argc, argv, "wngir-gamma-q", Real(1));
-  const Real kWNGIRJSafe =
-    parseRealOption(argc, argv, "wngir-jsafe", Real(1e-2));
-  const Real kWNGIRQMax =
-    parseRealOption(argc, argv, "wngir-qmax", Real(10));
-  const Real kWNGIRS0J =
-    parseRealOption(argc, argv, "wngir-s0j", Real(0.25));
-  const Real kWNGIRS0Q =
-    parseRealOption(argc, argv, "wngir-s0q", Real(2));
-  // Hinge quality regularizer: penalize Q_rel above a good threshold.
-  const Real kWNGIRGammaQual =
-    parseRealOption(argc, argv, "wngir-gamma-qual", Real(1));
-  const Real kWNGIRQStar =
-    parseRealOption(argc, argv, "wngir-qstar", Real(1.75));
-  const Real kWNGIRGammaSize =
-    parseRealOption(argc, argv, "wngir-gamma-size", Real(1));
-  const Real kWNGIRJStar =
-    parseRealOption(argc, argv, "wngir-jstar", Real(0.3));
-  const Real kWNGIROmegaMin =
-    parseRealOption(argc, argv, "wngir-omega-min", Real(0.1));
-  const Real kWNGIRAlphaMin =
-    parseRealOption(argc, argv, "wngir-alpha-min", Real(1e-4));
-  const bool kWNGIREnergyLS = !hasFlag(argc, argv, "wngir-no-energy-ls");
-  const Real kWNGIRSupTol =
-    parseRealOption(argc, argv, "wngir-sup-tol", Real(10) * h * h);
-  const Real kWNGIREnergyStagTol =
-    parseRealOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
-
-  const Real jMinRatio = parseRealOption(argc, argv, "j-min", Real(1e-8));
-  const Real jSafeRatio = parseRealOption(argc, argv, "j-safe", Real(1e-3));
-  const Real jLineSearchRatio =
-    parseRealOption(argc, argv, "j-ls", std::max(jMinRatio, Real(10) * jSafeRatio));
-  const std::size_t qOrder = parseSizeTOption(argc, argv, "quad-order", 4);
   const bool verbose = hasFlag(argc, argv, "verbose");
-  const bool trace = hasFlag(argc, argv, "trace");
 
   constexpr Attribute interiorAttribute = 1;
   constexpr Attribute exteriorAttribute = 2;
   constexpr Attribute interfaceAttribute = 10;
   constexpr Attribute boundaryAttribute = 20;
+
+  const auto wngirParams =
+    Rodin::Examples::makeWNGIRParameters(
+        argc, argv, h, interfaceAttribute, wngirDefaults);
+  const Real fitTol =
+    parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const std::size_t qOrder = wngirParams.quadratureOrder;
+  const bool trace = wngirParams.trace;
 
   LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
   mesh.scale(h);
@@ -546,8 +487,8 @@ int main(int argc, char** argv)
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  k=" << kLobes
             << "  center=(" << cx << ", " << cy << ")"
             << "  phase=" << phase
-            << "  wngirEll=" << kWNGIREllM
-            << "  betaMax=" << kWNGIRBetaMax << '\n';
+            << "  wngirEll=" << wngirParams.ellM
+            << "  betaMax=" << wngirParams.betaMax << '\n';
 
   std::size_t framesConverged = 0;
   std::vector<Real> finalFitPerFrame;
@@ -723,45 +664,8 @@ int main(int argc, char** argv)
 
     const char* exitReason = "iter-budget";
     {
-      Rodin::Adaptation::WNGIRParameters wngir;
-      wngir.h = h;
-      wngir.gammaM = kWNGIRGammaM;
-      wngir.gammaH = kWNGIRGammaH;
-      wngir.ellM = kWNGIREllM;
-      wngir.gammaObs = kWNGIRGammaObs;
-      wngir.betaMax = kWNGIRBetaMax;
-      wngir.gammaJ = kWNGIRGammaJ;
-      wngir.gammaQ = kWNGIRGammaQ;
-      wngir.jSafe = kWNGIRJSafe;
-      wngir.qMax = kWNGIRQMax;
-      wngir.gammaQual = kWNGIRGammaQual;
-      wngir.qStar = kWNGIRQStar;
-      wngir.gammaSize = kWNGIRGammaSize;
-      wngir.jStar = kWNGIRJStar;
-      wngir.s0J = kWNGIRS0J;
-      wngir.s0Q = kWNGIRS0Q;
-      wngir.omegaMin = kWNGIROmegaMin;
-      wngir.alphaMin = kWNGIRAlphaMin;
-      wngir.energyLineSearch = kWNGIREnergyLS;
-      wngir.jMinRatio = jMinRatio;
-      wngir.jLineSearchRatio = jLineSearchRatio;
+      auto wngir = wngirParams;
       wngir.activeRMSTol = fitTol;
-      wngir.activeSupTol = kWNGIRSupTol;
-      wngir.energyStagTol = kWNGIREnergyStagTol;
-      wngir.stepTol = stepTol;
-      wngir.maxIterations = maxIterations;
-      wngir.quadratureOrder = qOrder;
-      wngir.andersonMemory =
-        parseSizeTOption(argc, argv, "wngir-aa-memory", wngir.andersonMemory);
-      wngir.andersonStart =
-        parseSizeTOption(argc, argv, "wngir-aa-start", wngir.andersonStart);
-      wngir.andersonDamping =
-        parseRealOption(argc, argv, "wngir-aa-damping", wngir.andersonDamping);
-      wngir.andersonMinDamping =
-        parseRealOption(argc, argv, "wngir-aa-min-damping", wngir.andersonMinDamping);
-      wngir.hasInterfaceAttribute = true;
-      wngir.interfaceAttribute = interfaceAttribute;
-      wngir.trace = trace;
       Rodin::Adaptation::WNGIR wngirSolver(u);
       wngirSolver.setParameters(wngir);
       const auto wngirRep = wngirSolver.solve(
@@ -796,7 +700,7 @@ int main(int argc, char** argv)
     u.getData() = bestU;
     interfaceFit = bestFit;
     const auto bestAdm = evaluateWNGIRAdmissibilitySampled(
-        u, u.getData(), jMinRatio, qOrder);
+        u, u.getData(), wngirParams.jMinRatio, qOrder);
     minJ = bestAdm.minJ;
     maxQRel = bestAdm.maxQRel;
 

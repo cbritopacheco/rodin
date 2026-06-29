@@ -45,6 +45,7 @@
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Variational.h>
 
+#include "../WNGIRExampleParameters.h"
 
 #include <algorithm>
 #include <array>
@@ -985,23 +986,12 @@ int main(int argc, char** argv)
       // evaluates these Rodin function objects at Geometry::Point values.
 
       u.getData().setZero();
-      Rodin::Adaptation::WNGIRParameters wngir;
-      wngir.h = h;
-      wngir.maxIterations =
-        parseSizeTOption(argc, argv, "wngir-max-iters", 200);
-      wngir.quadratureOrder =
-        parseSizeTOption(argc, argv, "quad-order", 4);
-      wngir.andersonMemory =
-        parseSizeTOption(argc, argv, "wngir-aa-memory", wngir.andersonMemory);
-      wngir.andersonStart =
-        parseSizeTOption(argc, argv, "wngir-aa-start", wngir.andersonStart);
-      wngir.andersonDamping =
-        parseRealOption(argc, argv, "wngir-aa-damping", wngir.andersonDamping);
-      wngir.andersonMinDamping =
-        parseRealOption(argc, argv, "wngir-aa-min-damping", wngir.andersonMinDamping);
-      wngir.hasInterfaceAttribute = true;
-      wngir.interfaceAttribute = interfaceAttribute;
-      wngir.trace = hasFlag(argc, argv, "wngir-trace");
+      Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
+      wngirDefaults.maxIterations = 200;
+      wngirDefaults.parseLegacyMaxIterations = true;
+      const auto wngir =
+        Rodin::Examples::makeWNGIRParameters(
+            argc, argv, h, interfaceAttribute, wngirDefaults);
       Rodin::Adaptation::WNGIR wngirSolver(u);
       wngirSolver.setParameters(wngir);
       const auto wngirRep =

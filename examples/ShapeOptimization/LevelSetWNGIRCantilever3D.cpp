@@ -17,10 +17,13 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Math.h>
+#include <Rodin/MMG.h>
 #include <Rodin/PETSc.h>
 #include <Rodin/Solver/CG.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
+
+#include "../WNGIRExampleParameters.h"
 
 #include <Eigen/IterativeLinearSolvers>
 
@@ -45,7 +48,7 @@ namespace
 {
   using Vec3 = Math::SpatialVector<Real>;
   using Mat3 = Math::SpatialMatrix<Real>;
-  using LocalMesh = Geometry::Mesh<Context::Local>;
+  using WNGIRMesh = Geometry::Mesh<Context::Local>;
 
   constexpr Attribute Interior = 1;
   constexpr Attribute Exterior = 2;
@@ -113,7 +116,7 @@ namespace
     return A;
   }
 
-  Real triangleArea(const LocalMesh& mesh, Index facet)
+  Real triangleArea(const WNGIRMesh& mesh, Index facet)
   {
     const auto& v = mesh.getFace(facet)->getVertices();
     const Vec3 a = mesh.getVertexCoordinates(v[0]);
@@ -176,7 +179,7 @@ namespace
 
   template <class Phi>
   std::vector<CellMomentInfo> collectCellMoments(
-      const LocalMesh& mesh, const Phi& phi, Real epsilon)
+      const WNGIRMesh& mesh, const Phi& phi, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -206,7 +209,7 @@ namespace
 
   template <class Displacement>
   void updateMovedMesh(
-      const LocalMesh& mesh, LocalMesh& moved, const Displacement& u)
+      const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
   {
     const auto& fes = u.getFiniteElementSpace();
     for (Index v = 0; v < mesh.getVertexCount(); ++v)
@@ -274,6 +277,14 @@ int run(int argc, char** argv)
   const std::size_t n = sizeOption(argc, argv, "n", 20);
   const std::size_t maxIt = sizeOption(argc, argv, "iters", 200);
   const Real h = H / static_cast<Real>(n);
+  const Real hmin = realOption(argc, argv, "hmin", Real(0.1) * h);
+  const bool initialMMG = sizeOption(argc, argv, "initial-mmg", 0) != 0;
+  const Real initialMMGHMin =
+    realOption(argc, argv, "initial-mmg-hmin", hmin);
+  const Real initialMMGHMax =
+    realOption(argc, argv, "initial-mmg-hmax", h);
+  const Real initialMMGHausd =
+    realOption(argc, argv, "initial-mmg-hausd", Real(0));
   const Real ell = realOption(argc, argv, "ell", Real(0.5));
   const Real alphaReg = realOption(argc, argv, "alpha", Real(2) * h);
   const Real epsilon = realOption(argc, argv, "classifier-eps", Real(1.25) * h);
@@ -295,17 +306,16 @@ int run(int argc, char** argv)
   const std::size_t nx = static_cast<std::size_t>(std::lround(L / h)) + 1;
   const std::size_t ny = n + 1;
   const std::size_t nz = static_cast<std::size_t>(std::lround(W / h)) + 1;
-  LocalMesh mesh = LocalMesh::UniformGrid(
+  WNGIRMesh mesh = WNGIRMesh::UniformGrid(
       Polytope::Type::Tetrahedron, { nx, ny, nz });
   mesh.scale(h);
-  auto& conn = mesh.getConnectivity();
-  conn.compute(2, 3);
-  conn.compute(3, 2);
-  conn.compute(3, 3);
-  conn.compute(0, 0);
+  mesh.getConnectivity().compute(2, 3);
+  mesh.getConnectivity().compute(3, 2);
+  mesh.getConnectivity().compute(3, 3);
+  mesh.getConnectivity().compute(0, 0);
   const std::size_t D = mesh.getDimension();
 
-  auto tagBoundary = [&](LocalMesh& m)
+  auto tagBoundary = [&](WNGIRMesh& m)
   {
     for (auto it = m.getBoundary(); it; ++it)
     {
@@ -325,9 +335,32 @@ int run(int argc, char** argv)
   };
   tagBoundary(mesh);
 
-  using ScalarP1 = P1<Real, LocalMesh>;
-  using ScalarP0 = P0<Real, LocalMesh>;
-  using VectorP1 = P1<Math::SpatialVector<Real>, LocalMesh>;
+  if (initialMMG)
+  {
+    std::cout << "  initial MMG remesh:"
+              << " hmin=" << initialMMGHMin
+              << " hmax=" << initialMMGHMax
+              << " hausd=" << initialMMGHausd << "\n";
+    MMG::Mesh mmgMesh(std::move(mesh));
+    MMG::Optimizer optimizer;
+    optimizer.setHMin(initialMMGHMin)
+             .setHMax(initialMMGHMax)
+             .setAngleDetection(false);
+    if (initialMMGHausd > 0)
+      optimizer.setHausdorff(initialMMGHausd);
+    optimizer.optimize(mmgMesh);
+    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+    mesh.getConnectivity().compute(2, 3);
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(3, 3);
+    mesh.getConnectivity().compute(0, 0);
+    tagBoundary(mesh);
+  }
+  auto& conn = mesh.getConnectivity();
+
+  using ScalarP1 = P1<Real, WNGIRMesh>;
+  using ScalarP0 = P0<Real, WNGIRMesh>;
+  using VectorP1 = P1<Math::SpatialVector<Real>, WNGIRMesh>;
   ScalarP1 sh(mesh);
   ScalarP0 p0(mesh);
   VectorP1 vh(mesh, 3);
@@ -383,22 +416,17 @@ int run(int argc, char** argv)
   TrialFunction adv(sh);
   TestFunction advTest(sh);
 
-  WNGIRParameters wp;
-  wp.h = h;
-  wp.gammaM = realOption(argc, argv, "wngir-gamma-m", Real(1)) / h;
-  wp.gammaH = realOption(argc, argv, "wngir-gamma-h", Real(1)) / h;
-  wp.ellM = realOption(argc, argv, "wngir-ell", Real(3)) * h;
-  wp.maxIterations = sizeOption(argc, argv, "wngir-steps", 60);
-  wp.quadratureOrder = sizeOption(argc, argv, "quad-order", 4);
-  wp.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", Real(4) * h * h);
-  wp.activeSupTol = realOption(argc, argv, "wngir-sup-tol", Real(10) * h * h);
-  wp.hasInterfaceAttribute = true;
-  wp.interfaceAttribute = Gamma;
+  Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
+  wngirDefaults.maxIterations = 60;
+  wngirDefaults.activeRMSOverHTol = Real(0.2);
+  WNGIRParameters wp =
+    Rodin::Examples::makeWNGIRParameters(
+        argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
   PETSc::Adaptation::WNGIR wngir(u);
   wngir.setParameters(wp);
 
-  LocalMesh moved(mesh);
+  WNGIRMesh moved(mesh);
   VectorP1 vhMoved(moved, 3);
   PETSc::Variational::TrialFunction g(vhMoved);
   PETSc::Variational::TestFunction w(vhMoved);
@@ -419,10 +447,18 @@ int run(int argc, char** argv)
             << "\n  h=" << h << " ell=" << ell << " alpha=" << alphaReg
             << " dt=" << dt << " reinit=" << reinitMode << "/" << reinitEvery
             << " redistance=" << redistanceMode << "/" << redistanceEvery
-            << " repair=" << repairEvery << '\n';
+            << " repair=" << repairEvery
+            << "\n  WNGIR metric: gammaM=" << wp.gammaM
+            << " gammaDev=" << wp.gammaH
+            << " gammaDiv=" << wp.gammaDiv
+            << " ellM=" << wp.ellM << '\n';
 
-  for (std::size_t itn = 0; itn < maxIt; ++itn)
+  std::size_t shapeAttempts = 0;
+  std::size_t acceptedShapeIterations = 0;
+  while (acceptedShapeIterations < maxIt)
   {
+    const std::size_t itn = acceptedShapeIterations;
+    ++shapeAttempts;
     std::cout << "\n--- Iteration " << itn << " ---\n";
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
       mesh.setAttribute({D, c}, Attribute{0});
@@ -517,7 +553,10 @@ int run(int argc, char** argv)
     const auto report = wngir.solve(mesh, interfaceFacets, phiFn, gradFn);
     std::cout << "  WNGIR: it=" << report.iterations
               << " exit=" << report.exitReason
-              << " activeRMS=" << std::scientific << report.activeRMS << '\n';
+              << " activeRMS=" << std::scientific << report.activeRMS
+              << " activeRMS/h=" << (h > Real(0) ? report.activeRMS / h : Real(0))
+              << " activeSup/h=" << (h > Real(0) ? report.activeSup / h : Real(0))
+              << '\n';
 
     updateMovedMesh(mesh, moved, u);
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
@@ -583,7 +622,6 @@ int run(int argc, char** argv)
     hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(stress, strain) - ell, Dot(normal, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{0, 0, 0}).on(Gamma0)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD)
             + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     Solver::KSP hilbertSolver(hilbert);
@@ -595,6 +633,19 @@ int run(int argc, char** argv)
       std::cout << "  PETSc hilbert: it="
                 << kspIterations(hilbertSolver.getHandle()) << '\n';
     copyPETScToEigen(g.getSolution().getData(), dJ.getData());
+
+    // Write before redistance/advection mutates phiH into the next trial
+    // carrier. Thus every frame corresponds to a passed shape objective step.
+    if ((outputEvery > 0 && itn % outputEvery == 0) || itn + 1 == maxIt)
+    {
+      domainGrid.clear();
+      domainGrid.add("phi", phiH, IO::XDMF::Center::Node);
+      domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
+      stateGrid.clear();
+      stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
+      stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
+      xdmf.write(static_cast<Real>(itn)).flush();
+    }
 
     std::string activeMode = reinitMode;
     bool doRedistance = reinitMode != "none" && reinitEvery > 0
@@ -677,21 +728,14 @@ int run(int argc, char** argv)
       phiH.getData() = repairCG.solve(rhs);
     }
 
-    if ((outputEvery > 0 && itn % outputEvery == 0) || itn + 1 == maxIt)
-    {
-      domainGrid.clear();
-      domainGrid.add("phi", phiH, IO::XDMF::Center::Node);
-      domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
-      stateGrid.clear();
-      stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
-      stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
-      xdmf.write(static_cast<Real>(itn)).flush();
-    }
+    ++acceptedShapeIterations;
   }
 
   xdmf.close();
-  std::cout << "\nDone. Objective history in "
-            << "LevelSetWNGIRCantilever3D.obj.txt\n";
+  std::cout << "\nDone. Accepted shape iterations: "
+            << acceptedShapeIterations << " / " << maxIt
+            << "  attempts=" << shapeAttempts
+            << ". Objective history in LevelSetWNGIRCantilever3D.obj.txt\n";
   return 0;
 }
 

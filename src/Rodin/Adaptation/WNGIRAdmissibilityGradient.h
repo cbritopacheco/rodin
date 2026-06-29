@@ -74,27 +74,37 @@ namespace Rodin::Adaptation::Detail
             if (std::abs(jK) < Real(1e-14))
               continue;
             const auto& params = m_parameters.get();
-            // Shape force needs j > 0; size force runs for ALL j.
+            // Shape/Q terms need j > 0; size terms run for ALL j.
             const bool shapeOK = jK > Real(0);
             Real frob2 = 0, qK = 0, sJ0 = 0, sQ0 = 0;
-            bool jActive = false, qActive = false, qualActive = false;
+            bool jBarrierActive = false, qBarrierActive = false;
+            bool qualHingeActive = false;
             if (shapeOK)
             {
               frob2 = F.squaredNorm();
               qK = frob2 / (d * std::pow(jK, Real(2) / d));
               sJ0 = jK - params.jSafe;
               sQ0 = params.qMax - qK;
-              jActive = params.includeAdmissibilityGradient
+              jBarrierActive =
+                (params.includeAdmissibilityGradient
+                 || params.includeQualityGradient
+                 || params.splitQualityDirection)
                 && params.gammaJ > Real(0)
                 && sJ0 > Real(0) && sJ0 < params.s0J;
-              qActive = params.includeAdmissibilityGradient
+              qBarrierActive = params.includeAdmissibilityGradient
                 && params.gammaQ > Real(0)
                 && sQ0 > Real(0) && sQ0 < params.s0Q;
-              qualActive = params.gammaQual > Real(0) && qK > params.qStar;
+              qualHingeActive =
+                (params.includeQualityGradient
+                 || params.splitQualityDirection)
+                && params.gammaQual > Real(0) && qK > params.qStar;
             }
-            const bool sizeActive =
-              params.gammaSize > Real(0) && jK < params.jStar;
-            if (!jActive && !qActive && !qualActive && !sizeActive)
+            const bool sizeHingeActive =
+              (params.includeQualityGradient
+               || params.splitQualityDirection)
+              && params.gammaSize > Real(0) && jK < params.jStar;
+            if (!jBarrierActive && !qBarrierActive
+                && !qualHingeActive && !sizeHingeActive)
               continue;
 
             const auto Jinv = pt.getJacobianInverse();
@@ -121,25 +131,25 @@ namespace Rodin::Adaptation::Detail
                 }
 
               Real val = 0;
-              if (jActive)
+              if (jBarrierActive)
               {
                 const Real bp = -Real(1) / sJ0 + Real(1) / params.s0J;
                 val += -params.gammaJ * bp * aJ;
               }
-              if (qActive)
+              if (qBarrierActive)
               {
                 const Real bp = -Real(1) / sQ0 + Real(1) / params.s0Q;
                 val += params.gammaQ * bp * aQ;
               }
-              if (qualActive)
+              if (qualHingeActive)
               {
-                // −DE_q density: ρ'(Q)=max(0,Q−qStar), dQ-direction aQ.
-                val += -params.gammaQual * (qK - params.qStar) * aQ;
+                const Real excess = qK - params.qStar;
+                val += -params.gammaQual * excess * aQ;
               }
-              if (sizeActive)
+              if (sizeHingeActive)
               {
-                // −DE_s density: +γ_s·max(0,jStar−j)·a_j pushes j up.
-                val += params.gammaSize * (params.jStar - jK) * aJ;
+                const Real deficit = params.jStar - jK;
+                val += params.gammaSize * deficit * aJ;
               }
               m_vector(static_cast<Eigen::Index>(te)) += w * val;
             }

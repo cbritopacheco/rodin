@@ -79,6 +79,42 @@ namespace Rodin::PETSc::Adaptation
         return reason > 0 && solution.allFinite();
       }
 
+      Real metricDot(
+          ProblemT& problem,
+          const Rodin::Math::Vector<Real>& x,
+          const Rodin::Math::Vector<Real>& y) const
+      {
+        auto& system = problem.getLinearSystem();
+        const ::Mat A = system.getOperator();
+        ::Vec vx = nullptr;
+        ::Vec vy = nullptr;
+        ::Vec tmp = nullptr;
+        MatCreateVecs(A, &vy, &vx);
+        VecDuplicate(vx, &tmp);
+        PetscInt lo = 0, hi = 0;
+        VecGetOwnershipRange(vx, &lo, &hi);
+        for (PetscInt i = lo; i < hi; ++i)
+        {
+          const PetscScalar xi = static_cast<PetscScalar>(x(i));
+          VecSetValues(vx, 1, &i, &xi, INSERT_VALUES);
+        }
+        VecGetOwnershipRange(vy, &lo, &hi);
+        for (PetscInt i = lo; i < hi; ++i)
+        {
+          const PetscScalar yi = static_cast<PetscScalar>(y(i));
+          VecSetValues(vy, 1, &i, &yi, INSERT_VALUES);
+        }
+        VecAssemblyBegin(vx); VecAssemblyEnd(vx);
+        VecAssemblyBegin(vy); VecAssemblyEnd(vy);
+        MatMult(A, vy, tmp);
+        PetscScalar dot = 0;
+        VecDot(vx, tmp, &dot);
+        VecDestroy(&tmp);
+        VecDestroy(&vy);
+        VecDestroy(&vx);
+        return PetscRealPart(dot);
+      }
+
       Rodin::Solver::KSP& getKSP() noexcept
       {
         return m_ksp;

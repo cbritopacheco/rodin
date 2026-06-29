@@ -30,6 +30,7 @@ target_link_libraries(LevelSetWNGIRCantilever2D
   PUBLIC
   Rodin::Advection
   Rodin::Geometry
+  Rodin::MMG
   Rodin::Solver
   Rodin::Variational
   )
@@ -40,6 +41,7 @@ if (RODIN_USE_PETSC)
     PUBLIC
     Rodin::Advection
     Rodin::Geometry
+    Rodin::MMG
     Rodin::PETSc
     Rodin::Solver
     Rodin::Variational

@@ -27,11 +27,14 @@
 #include <Rodin/Geometry/Region.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Math.h>
+#include <Rodin/MMG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 #include <Rodin/Solver/CG.h>
 #include <Rodin/Solver/SparseLU.h>
 #include <Rodin/Solid.h>
 #include <Rodin/Variational.h>
+
+#include "../WNGIRExampleParameters.h"
 
 #include <Eigen/IterativeLinearSolvers>
 
@@ -40,6 +43,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -51,7 +55,7 @@ using namespace Rodin::Adaptation;
 namespace
 {
   using Vec2 = Math::SpatialVector<Real>;
-  using LocalMesh = Geometry::Mesh<Context::Local>;
+  using WNGIRMesh = Geometry::Mesh<Context::Local>;
 
   // Cell / boundary attributes.
   // Numbering matches resources/.../LevelSetCantilever2D.mfem.mesh.
@@ -85,7 +89,7 @@ namespace
     {{ Real(1) / 6, Real(1) / 6, Real(2) / 3 }}
   }};
 
-  Real facetLength(const LocalMesh& mesh, Index facet)
+  Real facetLength(const WNGIRMesh& mesh, Index facet)
   {
     const auto face = mesh.getFace(facet);
     const auto& v = face->getVertices();
@@ -182,7 +186,7 @@ namespace
   // Phase moments of the carried discrete level set phiH (P1) per cell.
   template <class PhiGf>
   std::vector<CellMomentInfo> collectCellMomentInfo(
-      const LocalMesh& mesh, const PhiGf& phiH, Real epsilon)
+      const WNGIRMesh& mesh, const PhiGf& phiH, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -217,7 +221,7 @@ namespace
 
   template <class Displacement>
   void updateMovedMeshFromDisplacement(
-      const LocalMesh& mesh, LocalMesh& moved, const Displacement& u)
+      const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
     const auto& uData = u.getData();
@@ -285,6 +289,14 @@ int main(int argc, char** argv)
   const Real ell = parseRealOption(argc, argv, "ell", Real(0.4));
   const Real h = H / static_cast<Real>(n);   // uniform cell size = metric h
   const Real hmin = parseRealOption(argc, argv, "hmin", Real(0.1) * h);
+  const bool initialMMG =
+    parseSizeTOption(argc, argv, "initial-mmg", 0) != 0;
+  const Real initialMMGHMin =
+    parseRealOption(argc, argv, "initial-mmg-hmin", hmin);
+  const Real initialMMGHMax =
+    parseRealOption(argc, argv, "initial-mmg-hmax", h);
+  const Real initialMMGHausd =
+    parseRealOption(argc, argv, "initial-mmg-hausd", Real(0.5) * hmin);
   // Design-smoothness knobs (sensitive — raise gently):
   //   alpha  : Hilbertian shape-gradient length. alpha~2h smooths the boundary
   //            while keeping members; alpha>~4h washes features out (holes fill).
@@ -301,18 +313,6 @@ int main(int argc, char** argv)
     parseSizeTOption(argc, argv, "objective-linesearch", 1) != 0;
   const Real objectiveDecreaseTol =
     parseRealOption(argc, argv, "objective-decrease-tol", Real(1e-10));
-  const std::size_t wngirSteps = parseSizeTOption(argc, argv, "wngir-steps", 60);
-  const Real wngirGammaMFactor =
-    parseRealOption(argc, argv, "wngir-gamma-m", Real(1));
-  const Real wngirGammaHFactor =
-    parseRealOption(argc, argv, "wngir-gamma-h", Real(1));
-  const Real wngirEllFactor =
-    parseRealOption(argc, argv, "wngir-ell", Real(3));
-  const Real wngirRMSTol =
-    parseRealOption(argc, argv, "wngir-rms-tol", Real(4) * h * h);
-  const Real wngirSupTol =
-    parseRealOption(argc, argv, "wngir-sup-tol", Real(10) * h * h);
-  const std::size_t qOrder = parseSizeTOption(argc, argv, "quad-order", 4);
   // Empty (default) => uniform grid; pass --mesh=<file> to load instead.
   const std::string meshFile = parseStringOption(argc, argv, "mesh", "");
   // Stage-6 redistance:
@@ -360,14 +360,15 @@ int main(int argc, char** argv)
   const bool repairCalibrate =
     parseSizeTOption(argc, argv, "repair-calibrate", 0) != 0;
   const bool printTiming = parseSizeTOption(argc, argv, "timing", 0) != 0;
+  const bool trace = parseSizeTOption(argc, argv, "trace", 0) != 0;
 
   // ---- Background grid: uniform by default, finer = more detail -----------
-  LocalMesh mesh;
+  WNGIRMesh mesh;
   if (meshFile.empty())
   {
     const std::size_t nx = static_cast<std::size_t>(std::lround(L / h)) + 1;
     const std::size_t ny = n + 1;
-    mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { nx, ny });
+    mesh = WNGIRMesh::UniformGrid(Polytope::Type::Triangle, { nx, ny });
     mesh.scale(h);
   }
   else
@@ -382,7 +383,7 @@ int main(int argc, char** argv)
 
   // Tag outer boundary: left edge clamped (GammaD), small right-edge segment
   // loaded (GammaN), the rest free (Gamma0).
-  auto tagBoundary = [&](LocalMesh& m)
+  auto tagBoundary = [&](WNGIRMesh& m)
   {
     const std::size_t D = m.getDimension();
     for (auto it = m.getBoundary(); it; ++it)
@@ -404,9 +405,31 @@ int main(int argc, char** argv)
   };
   tagBoundary(mesh);
 
-  using ScalarP1 = P1<Real, LocalMesh>;
-  using ScalarP0 = P0<Real, LocalMesh>;
-  using VectorP1 = P1<Math::SpatialVector<Real>, LocalMesh>;
+  if (initialMMG)
+  {
+    std::cout << "  initial MMG remesh:"
+              << " hmin=" << initialMMGHMin
+              << " hmax=" << initialMMGHMax
+              << " hausd=" << initialMMGHausd << "\n";
+    MMG::Mesh mmgMesh(std::move(mesh));
+    MMG::Optimizer optimizer;
+    optimizer.setHMin(initialMMGHMin)
+             .setHMax(initialMMGHMax)
+             .setAngleDetection(false);
+    if (initialMMGHausd > 0)
+      optimizer.setHausdorff(initialMMGHausd);
+    optimizer.optimize(mmgMesh);
+    mesh = std::move(static_cast<MMG::Mesh::Parent&>(mmgMesh));
+    mesh.getConnectivity().compute(1, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(2, 2);
+    mesh.getConnectivity().compute(0, 0);
+    tagBoundary(mesh);
+  }
+
+  using ScalarP1 = P1<Real, WNGIRMesh>;
+  using ScalarP0 = P0<Real, WNGIRMesh>;
+  using VectorP1 = P1<Math::SpatialVector<Real>, WNGIRMesh>;
 
   ScalarP1 sh(mesh);
   // Uniform-grid lattice index (i,j)->vertex, for the FD IR reinit.
@@ -467,17 +490,13 @@ int main(int argc, char** argv)
   TrialFunction adv(sh);
   TestFunction  advTest(sh);
 
-  WNGIRParameters wp;
-  wp.h = h;
-  wp.gammaM = wngirGammaMFactor / h;
-  wp.gammaH = wngirGammaHFactor / h;
-  wp.ellM = wngirEllFactor * h;
-  wp.maxIterations = wngirSteps;
-  wp.quadratureOrder = qOrder;
-  wp.activeRMSTol = wngirRMSTol;
-  wp.activeSupTol = wngirSupTol;
-  wp.hasInterfaceAttribute = true;
-  wp.interfaceAttribute = Gamma;
+  Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
+  wngirDefaults.maxIterations = 60;
+  wngirDefaults.activeRMSOverHTol = Real(0.2);
+  WNGIRParameters wp =
+    Rodin::Examples::makeWNGIRParameters(
+        argc, argv, h, Gamma, wngirDefaults);
+  wp.trace = trace;
   WNGIR wngir(u);
   wngir.setParameters(wp);
 
@@ -522,20 +541,25 @@ int main(int argc, char** argv)
   domainGrid.add(phiH, IO::XDMF::Center::Node);
   domainGrid.add(dJ,   IO::XDMF::Center::Node);
 
-  LocalMesh moved(mesh);
+  WNGIRMesh moved(mesh);
   VectorP1 vhMoved(moved, 2);
   TrialFunction g(vhMoved);
   TestFunction  w(vhMoved);
   auto stateGrid = xdmf.grid("state");
 
+  const std::string meshDescription =
+    meshFile.empty()
+      ? (initialMMG ? "uniform grid + initial MMG" : "uniform grid")
+      : (initialMMG ? meshFile + " + initial MMG" : meshFile);
   std::cout << "WNGIR cantilever on " << mesh.getCellCount() << " cells ("
-            << (meshFile.empty() ? "uniform grid" : meshFile) << ")"
+            << meshDescription << ")"
             << "\n  domain [0," << L << "]x[0," << H << "]"
             << "  ell=" << ell << "  alpha=" << alphaReg
             << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
             << "\n  WNGIR: gammaM=" << wp.gammaM
-            << " gammaH=" << wp.gammaH
+            << " gammaDev=" << wp.gammaH
+            << " gammaDiv=" << wp.gammaDiv
             << " ellM=" << wp.ellM
             << " rmsTol=" << wp.activeRMSTol
             << " supTol=" << wp.activeSupTol
@@ -576,8 +600,13 @@ int main(int argc, char** argv)
     return std::sqrt(gx * gx + gy * gy);
   };
 
-  for (std::size_t it = 0; it < maxIt; ++it)
+  std::size_t shapeAttempts = 0;
+  std::size_t acceptedShapeIterations = 0;
+  std::string stopReason = "completed-requested-accepted-iterations";
+  while (acceptedShapeIterations < maxIt)
   {
+    const std::size_t it = acceptedShapeIterations;
+    ++shapeAttempts;
     std::cout << "\n--- Iteration " << it << " ---\n";
     StageTimer iterTimer;
     Real tClassify = 0, tGrad = 0, tWNGIR = 0, tMoveTrim = 0;
@@ -726,10 +755,17 @@ int main(int argc, char** argv)
         const Real ux = u.getData()(d[0]), uy = u.getData()(d[1]);
         maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
       }
+      const Real activeRMSOverH =
+        h > Real(0) ? rep.activeRMS / h : Real(0);
+      const Real activeSupOverH =
+        h > Real(0) ? rep.activeSup / h : Real(0);
       std::cout << "  WNGIR: it=" << rep.iterations
                 << "  exit=" << rep.exitReason
                 << "  activeRMS=" << std::scientific << std::setprecision(2)
-                << rep.activeRMS << "  max|u|/h=" << maxUoverH << '\n';
+                << rep.activeRMS
+                << "  activeRMS/h=" << activeRMSOverH
+                << "  activeSup/h=" << activeSupOverH
+                << "  max|u|/h=" << maxUoverH << '\n';
     }
     tWNGIR = iterTimer.reset();
 
@@ -796,7 +832,11 @@ int main(int argc, char** argv)
       std::cout << "  REJECT (blow-up, compliance=" << std::scientific
                 << std::setprecision(2) << compliance
                 << "): reverting, dt -> " << dtCur << '\n';
-      if (dtCur < Real(1e-3) * h) break;
+      if (dtCur < Real(1e-3) * h)
+      {
+        stopReason = "dt-floor-after-blow-up-rejections";
+        break;
+      }
       continue;
     }
     if (objectiveIncreased)
@@ -807,7 +847,11 @@ int main(int argc, char** argv)
                 << std::setprecision(4) << objective
                 << " > " << lastAcceptedObjective
                 << "): reverting, dt -> " << dtCur << '\n';
-      if (dtCur < Real(1e-3) * h) break;
+      if (dtCur < Real(1e-3) * h)
+      {
+        stopReason = "dt-floor-after-objective-rejections";
+        break;
+      }
       continue;
     }
     phiGood = phiH.getData();   // accept current level set as the new best
@@ -825,8 +869,8 @@ int main(int argc, char** argv)
     // The state lives on `trimmed` (a SubMesh of `moved`), so the gradient and
     // the Hilbert extension must be posed on `moved` (its parent) — exactly as
     // the MMG reference poses them on `th`. The strain energy density Ae:e on
-    // the interface is lifted to a velocity field on `moved`, pinned on the
-    // loaded/clamped boundary.
+    // the interface is lifted to a velocity field on `moved`, pinned only on
+    // the structural Dirichlet boundary and on the Neumann/load boundary.
     auto jac = Jacobian(us.getSolution());
     jac.traceOf(interiorAttribute);
     auto e = Real(0.5) * (jac + jac.T());
@@ -837,7 +881,6 @@ int main(int argc, char** argv)
     hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
             + Integral(g, w)
             - FaceIntegral(Dot(Ae, e) - ell, Dot(nrm, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(Gamma0)
             + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaD)
             + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaN);
     Solver::CG(hilbert).solve();
@@ -848,6 +891,23 @@ int main(int argc, char** argv)
     // interface (acceptable for the descent direction).
     dJ.getData() = g.getSolution().getData();
     tHilbert = iterTimer.reset();
+
+    // ---- XDMF snapshot of the accepted objective state -------------------
+    // Write before redistance/advection mutates phiH into the next trial
+    // carrier. Thus every frame corresponds to a passed shape objective step.
+    const bool writeSnapshot =
+      (outputEvery > 0 && it % outputEvery == 0) || it + 1 == maxIt;
+    if (writeSnapshot)
+    {
+      domainGrid.clear();
+      domainGrid.add("phi", phiH, IO::XDMF::Center::Node);
+      domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
+      stateGrid.clear();
+      stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
+      stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
+      xdmf.write(static_cast<Real>(it)).flush();
+    }
+    tWrite = iterTimer.reset();
 
     // ---- Stage 5: redistance from the WNGIR-FITTED interface -------------
     // The FMM gives the correct *sign* field and far distances, but its zero
@@ -1277,20 +1337,6 @@ int main(int argc, char** argv)
     }
     tRepair = iterTimer.reset();
 
-    // ---- XDMF snapshot ---------------------------------------------------
-    const bool writeSnapshot =
-      (outputEvery > 0 && it % outputEvery == 0) || it + 1 == maxIt;
-    if (writeSnapshot)
-    {
-      domainGrid.clear();
-      domainGrid.add("phi", phiH, IO::XDMF::Center::Node);
-      domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
-      stateGrid.clear();
-      stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
-      stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
-      xdmf.write(static_cast<Real>(it)).flush();
-    }
-    tWrite = iterTimer.reset();
     if (printTiming)
     {
       const Real total = tClassify + tGrad + tWNGIR + tMoveTrim
@@ -1309,9 +1355,14 @@ int main(int argc, char** argv)
                 << " write=" << tWrite
                 << " total=" << total << '\n';
     }
+    ++acceptedShapeIterations;
   }
 
   xdmf.close();
-  std::cout << "\nDone. Objective history in LevelSetWNGIRCantilever2D.obj.txt\n";
+  std::cout << "\nDone. Accepted shape iterations: "
+            << acceptedShapeIterations << " / " << maxIt
+            << "  attempts=" << shapeAttempts
+            << "  stop=" << stopReason
+            << ". Objective history in LevelSetWNGIRCantilever2D.obj.txt\n";
   return 0;
 }

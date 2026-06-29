@@ -97,14 +97,18 @@ namespace Rodin::Adaptation::Detail
               qK = frob2 / (d * std::pow(jK, Real(2) / d));
               sJ0 = jK - params.jSafe;
               sQ0 = params.qMax - qK;
-              jActive = params.gammaJ > Real(0)
+              jActive = params.includeAdmissibilityMetric
+                && params.gammaJ > Real(0)
                 && sJ0 > Real(0) && sJ0 < params.s0J;
-              qActive = params.gammaQ > Real(0)
+              qActive = params.includeAdmissibilityMetric
+                && params.gammaQ > Real(0)
                 && sQ0 > Real(0) && sQ0 < params.s0Q;
-              qualActive = params.gammaQual > Real(0) && qK > params.qStar;
+              qualActive = params.includeQualityMetric
+                && params.gammaQual > Real(0) && qK > params.qStar;
             }
             const bool sizeActive =
-              params.gammaSize > Real(0) && jK < params.jStar;
+              params.includeQualityMetric
+              && params.gammaSize > Real(0) && jK < params.jStar;
             if (!jActive && !qActive && !qualActive && !sizeActive)
               continue;
 

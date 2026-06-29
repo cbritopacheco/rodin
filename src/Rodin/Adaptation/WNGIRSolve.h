@@ -53,11 +53,14 @@ namespace Rodin::Adaptation
     const Real h = p.h;
     const Real gammaM = p.gammaM > Real(0) ? p.gammaM : Real(1) / h;
     const Real gammaH = p.gammaH > Real(0) ? p.gammaH : Real(1) / h;
+    const Real gammaDiv = p.gammaDiv > Real(0) ? p.gammaDiv : gammaH;
     const Real ellM = p.ellM > Real(0) ? p.ellM : Real(3) * h;
     const Real activeRMSTol =
       p.activeRMSTol > Real(0) ? p.activeRMSTol : Real(4) * h * h;
     const Real activeSupTol =
       p.activeSupTol > Real(0) ? p.activeSupTol : Real(10) * h * h;
+    const Real activeRMSOverHTol = p.activeRMSOverHTol;
+    const Real activeSupOverHTol = p.activeSupOverHTol;
     const Real stepTol =
       p.stepTol > Real(0) ? p.stepTol : Real(1e-4) * h;
     constexpr Real epsG = Real(1e-12);
@@ -370,21 +373,33 @@ namespace Rodin::Adaptation
     // =================================================================
     // Constant bulk metric, pre-assembled once per frame.
     // =================================================================
-    // M_bulk = γ_M ∫ v·z + γ_H ℓ² ∫ ∇v:∇z is independent of u, so it is
-    // assembled and Dirichlet-eliminated once and reused across all
-    // iterations. Only the surface observation metric M_obs, the
-    // admissibility metric K_adm, and the RHS depend on u and are
-    // reassembled per iteration. Both this form and the per-iteration
-    // form carry the same homogeneous Dirichlet elimination, so each
-    // constrained boundary row is identity in both; the operator sum is
-    // ≤ 2·I there, harmless since the boundary RHS is 0 ⇒ u_bd = 0.
+    // M_bulk = γ_M ∫ v·z
+    //        + ℓ² ∫ γ_dev dev eps(v):dev eps(z)
+    //              + γ_div div(v) div(z)
+    // is independent of u, so it is assembled and Dirichlet-eliminated once
+    // and reused across all iterations. This first-derivative metric is
+    // FES-independent and distributes interface motion by penalizing shear
+    // and compression modes rather than raw gradient components.
     if (!bulkFormAssembled)
     {
+      const auto epsTrial = Real(0.5)
+        * (Variational::Jacobian(duStep)
+           + Variational::Jacobian(duStep).T());
+      const auto epsTest = Real(0.5)
+        * (Variational::Jacobian(vStep)
+           + Variational::Jacobian(vStep).T());
+      const auto divTrial = Variational::Trace(epsTrial);
+      const auto divTest = Variational::Trace(epsTest);
+      const auto devTrial =
+        epsTrial - (Real(1) / d) * divTrial * Variational::IdentityMatrix(meshDim);
+      const auto devTest =
+        epsTest - (Real(1) / d) * divTest * Variational::IdentityMatrix(meshDim);
       bulkForm =
           Variational::Integral(gammaM * duStep, vStep)
         + Variational::Integral(
-            gammaH * ellM * ellM * Variational::Jacobian(duStep),
-            Variational::Jacobian(vStep));
+            gammaH * ellM * ellM * devTrial, devTest)
+        + Variational::Integral(
+            gammaDiv * ellM * ellM * divTrial, divTest);
       bulkForm.assemble();
       bulkFormAssembled = true;
     }
@@ -412,45 +427,105 @@ namespace Rodin::Adaptation
           phi, grad, vStep, u, p, sigma2);
       surfaceForce.over(p.interfaceAttribute);
 
-      // Only the u-dependent terms are reassembled here: the surface
-      // observation metric, the admissibility + hinge-quality metric,
-      // and the Welsch first-variation RHS. The constant bulk metric is
-      // added to the operator below from the pre-assembled
-      // `bulkOperator`. `stepProblem` is caller-owned scratch; the body
-      // is reassigned. The gradient integrator carries the (optional)
-      // barrier first variation AND the hinge-quality force, so it is
-      // on the RHS whenever either is active.
+      // Only the u-dependent terms are reassembled here. The main fit RHS is
+      // Welsch + E_qual by default. Soft quality terms enter the metric only
+      // when includeQualityMetric is enabled. If includeQualityGradient is
+      // disabled, the main RHS is Welsch-only. In split mode a second solve
+      // uses the quality first variation as a
+      // quality-recovery RHS, and the final direction is v_fit + eta v_qual.
       const bool useGradientForce =
-        p.includeAdmissibilityGradient
-        || p.gammaQual > Real(0)
-        || p.gammaSize > Real(0);
-      if (useGradientForce)
-      {
-        typename ProblemT::ProblemBodyType body(bulkForm);
-        body = body + obsMetric + admMetric - surfaceForce - admGradient
-             + Variational::DirichletBC(duStep, zeroBoundary);
-        stepProblem = body;
-      }
-      else
+           p.includeAdmissibilityGradient
+        || p.includeQualityGradient;
+      const bool useSplitQuality =
+        p.splitQualityDirection
+        && (p.gammaQual > Real(0)
+            || p.gammaJ > Real(0)
+            || p.gammaSize > Real(0));
+
+      Math::Vector<Real> vK;
+      std::size_t linearIterations = 0;
+      Real linearError = std::numeric_limits<Real>::infinity();
+
+      if (useSplitQuality)
       {
         typename ProblemT::ProblemBodyType body(bulkForm);
         body = body + obsMetric + admMetric - surfaceForce
              + Variational::DirichletBC(duStep, zeroBoundary);
         stepProblem = body;
-      }
-      stepProblem.assemble();
-      rep.tAssembly += secondsSince(tic);
+        stepProblem.assemble();
+        rep.tAssembly += secondsSince(tic);
 
-      // ---- Solve the single backend-native assembled Problem ----
-      tic = Clock::now();
-      Math::Vector<Real> vK;
-      std::size_t linearIterations = 0;
-      Real linearError = std::numeric_limits<Real>::infinity();
-      if (!linearSolver.solve(
-            stepProblem, vK, linearIterations, linearError, p))
+        tic = Clock::now();
+        Math::Vector<Real> vFit;
+        std::size_t fitIterations = 0;
+        Real fitError = std::numeric_limits<Real>::infinity();
+        if (!linearSolver.solve(
+              stepProblem, vFit, fitIterations, fitError, p))
+        {
+          rep.exitReason = "solve-fit-linear-failed";
+          break;
+        }
+        rep.tSolve += secondsSince(tic);
+
+        tic = Clock::now();
+        typename ProblemT::ProblemBodyType qualityBody(bulkForm);
+        qualityBody = qualityBody + obsMetric + admMetric - admGradient
+                    + Variational::DirichletBC(duStep, zeroBoundary);
+        stepProblem = qualityBody;
+        stepProblem.assemble();
+        rep.tAssembly += secondsSince(tic);
+
+        tic = Clock::now();
+        Math::Vector<Real> vQual;
+        std::size_t qualIterations = 0;
+        Real qualError = std::numeric_limits<Real>::infinity();
+        if (!linearSolver.solve(
+              stepProblem, vQual, qualIterations, qualError, p))
+        {
+          rep.exitReason = "solve-quality-linear-failed";
+          break;
+        }
+        rep.tSolve += secondsSince(tic);
+
+        const Real fitNorm2 =
+          linearSolver.metricDot(stepProblem, vFit, vFit);
+        if (fitNorm2 > Real(1e-30) && std::isfinite(fitNorm2))
+        {
+          const Real qualFit =
+            linearSolver.metricDot(stepProblem, vQual, vFit);
+          if (std::isfinite(qualFit))
+            vQual -= (qualFit / fitNorm2) * vFit;
+        }
+        vK = vFit + p.qualityDirectionWeight * vQual;
+        linearIterations = fitIterations + qualIterations;
+        linearError = std::max(fitError, qualError);
+      }
+      else
       {
-        rep.exitReason = "solve-linear-failed";
-        break;
+        typename ProblemT::ProblemBodyType body(bulkForm);
+        if (useGradientForce)
+        {
+          body = body + obsMetric + admMetric - surfaceForce - admGradient
+               + Variational::DirichletBC(duStep, zeroBoundary);
+        }
+        else
+        {
+          body = body + obsMetric + admMetric - surfaceForce
+               + Variational::DirichletBC(duStep, zeroBoundary);
+        }
+        stepProblem = body;
+        stepProblem.assemble();
+        rep.tAssembly += secondsSince(tic);
+
+        // ---- Solve the single backend-native assembled Problem ----
+        tic = Clock::now();
+        if (!linearSolver.solve(
+              stepProblem, vK, linearIterations, linearError, p))
+        {
+          rep.exitReason = "solve-linear-failed";
+          break;
+        }
+        rep.tSolve += secondsSince(tic);
       }
       rep.linearIterations += linearIterations;
       rep.linearError = linearError;
@@ -459,7 +534,6 @@ namespace Rodin::Adaptation
         rep.exitReason = "solve-nonfinite";
         break;
       }
-      rep.tSolve += secondsSince(tic);
 
       // ---- 6. Optimal step rescale β = ⟨d,v⟩_Γ/⟨v,v⟩_Γ ----
       Real beta = Real(1);
@@ -509,7 +583,7 @@ namespace Rodin::Adaptation
       const Real maxStep = vK.cwiseAbs().maxCoeff();
       if (maxStep <= stepTol)
       {
-        rep.exitReason = "step-below-stepTol";
+        rep.exitReason = "best-effort-step-stagnation";
         break;
       }
 
@@ -640,6 +714,10 @@ namespace Rodin::Adaptation
                   << "  aaθ=" << aaTheta
                   << "  linIt=" << rep.linearIterations
                   << "  linErr=" << rep.linearError
+                  << "  qE=" << (p.includeQualityGradient ? 1 : 0)
+                  << "  qM=" << (p.includeQualityMetric ? 1 : 0)
+                  << "  admM=" << (p.includeAdmissibilityMetric ? 1 : 0)
+                  << "  splitQ=" << (useSplitQuality ? 1 : 0)
                   << "  α=" << alpha
                   << "  bt=" << backtracks
                   << "  min_j=" << rep.minJ
@@ -648,13 +726,27 @@ namespace Rodin::Adaptation
 
       if (surf.activeRMS <= activeRMSTol)
       {
-        rep.exitReason = "active-rms-converged";
+        rep.exitReason = "numerical-rms-converged";
         ++rep.iterations;
         break;
       }
       if (surf.activeSup <= activeSupTol)
       {
-        rep.exitReason = "active-sup-converged";
+        rep.exitReason = "numerical-sup-converged";
+        ++rep.iterations;
+        break;
+      }
+      if (activeRMSOverHTol > Real(0) && h > Real(0)
+          && surf.activeRMS / h <= activeRMSOverHTol)
+      {
+        rep.exitReason = "geometric-rms-converged";
+        ++rep.iterations;
+        break;
+      }
+      if (activeSupOverHTol > Real(0) && h > Real(0)
+          && surf.activeSup / h <= activeSupOverHTol)
+      {
+        rep.exitReason = "geometric-sup-converged";
         ++rep.iterations;
         break;
       }
@@ -662,7 +754,7 @@ namespace Rodin::Adaptation
         std::abs(ePrev - eNow) / std::max(ePrev, Real(1e-30));
       if (eRel < p.energyStagTol)
       {
-        rep.exitReason = "energy-stagnation";
+        rep.exitReason = "best-effort-energy-stagnation";
         ++rep.iterations;
         break;
       }

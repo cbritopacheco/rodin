@@ -47,6 +47,15 @@ namespace Rodin::Adaptation
         error = cg.error();
         return cg.info() == Eigen::Success && solution.allFinite();
       }
+
+      Real metricDot(
+          ProblemT& problem,
+          const Math::Vector<Real>& x,
+          const Math::Vector<Real>& y) const
+      {
+        const auto& system = problem.getLinearSystem();
+        return x.dot(system.getOperator() * y);
+      }
   };
 }
 
