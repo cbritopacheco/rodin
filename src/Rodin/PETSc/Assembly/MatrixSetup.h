@@ -92,6 +92,14 @@ namespace Rodin::PETSc::Assembly
               return ierr;
           }
 
+          if (options.keepNonzeroPattern)
+          {
+            ierr = MatSetOption(
+                m_matrix, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE);
+            if (ierr)
+              return ierr;
+          }
+
           ierr = MatSetUp(m_matrix);
           if (ierr)
             return ierr;

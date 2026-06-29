@@ -641,8 +641,7 @@ namespace Rodin::Assembly
                   for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
                   {
                     const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                    if (val != PetscScalar(0))
-                      add_matrix_entries(local, localRhs, rowsDOF[i], colsDOF[j], val);
+                    add_matrix_entries(local, localRhs, rowsDOF[i], colsDOF[j], val);
                   }
                 }
               }
@@ -657,8 +656,20 @@ namespace Rodin::Assembly
                 {
                   for (auto& [I,J,val] : buf)
                   {
-                    PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
+                    PetscErrorCode e;
+                    if (val == PetscScalar(0))
+                    {
+                      e = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                      e = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                    }
+                    else
+                    {
+                      e = MatSetValue(A, I, J, val, ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                    }
+                    (void) e;
                   }
                 }
                 if (doVector)
@@ -745,8 +756,7 @@ namespace Rodin::Assembly
                     for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
                     {
                       const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                      if (val != PetscScalar(0))
-                        add_matrix_entries(local, localRhs, rowsDOF[i], colsDOF[j], val);
+                      add_matrix_entries(local, localRhs, rowsDOF[i], colsDOF[j], val);
                     }
                   }
                 }
@@ -762,8 +772,20 @@ namespace Rodin::Assembly
                 {
                   for (auto& [I,J,val] : buf)
                   {
-                    PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
+                    PetscErrorCode e;
+                    if (val == PetscScalar(0))
+                    {
+                      e = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                      e = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                    }
+                    else
+                    {
+                      e = MatSetValue(A, I, J, val, ADD_VALUES);
+                      assert(e == PETSC_SUCCESS);
+                    }
+                    (void) e;
                   }
                 }
                 if (doVector)
@@ -1481,8 +1503,7 @@ namespace Rodin::Assembly
                     {
                       const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
                       const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                      if (val != PetscScalar(0))
-                        add_matrix_entries(local, localRhs, I, J, val);
+                      add_matrix_entries(local, localRhs, I, J, val);
                     }
                   }
                 });
@@ -1499,8 +1520,20 @@ namespace Rodin::Assembly
               {
                 for (auto& [I,J,val] : buf)
                 {
-                  PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
+                  PetscErrorCode e;
+                  if (val == PetscScalar(0))
+                  {
+                    e = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                    e = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                  }
+                  else
+                  {
+                    e = MatSetValue(A, I, J, val, ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                  }
+                  (void) e;
                 }
               }
               for (const auto& vecLocal : rhsChunks)
@@ -1596,8 +1629,7 @@ namespace Rodin::Assembly
                       {
                         const PetscInt J = static_cast<PetscInt>(uOff + static_cast<size_t>(cols[j]));
                         const PetscScalar val = static_cast<PetscScalar>(integrator->integrate(j, i));
-                        if (val != PetscScalar(0))
-                          add_matrix_entries(local, localRhs, I, J, val);
+                        add_matrix_entries(local, localRhs, I, J, val);
                       }
                     }
                   }
@@ -1615,8 +1647,20 @@ namespace Rodin::Assembly
               {
                 for (auto& [I,J,val] : buf)
                 {
-                  PetscErrorCode e = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
+                  PetscErrorCode e;
+                  if (val == PetscScalar(0))
+                  {
+                    e = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                    e = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                  }
+                  else
+                  {
+                    e = MatSetValue(A, I, J, val, ADD_VALUES);
+                    assert(e == PETSC_SUCCESS);
+                  }
+                  (void) e;
                 }
               }
               for (const auto& vecLocal : rhsChunks)

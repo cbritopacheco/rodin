@@ -474,8 +474,18 @@ namespace Rodin::Assembly
                 const PetscInt J = static_cast<PetscInt>(c.index);
                 const PetscScalar v =
                   r.coefficient * val * c.coefficient;
-                ierr = MatSetValue(A, I, J, v, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
+                if (v == PetscScalar(0))
+                {
+                  ierr = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                  ierr = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
+                else
+                {
+                  ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
               }
             }
           }
@@ -525,8 +535,7 @@ namespace Rodin::Assembly
                 for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
                 {
                   const PetscScalar val = PetscScalar(bfi.integrate(j, i));
-                  if (val != PetscScalar(0))
-                    matrix_entry(rowsDOF[i], colsDOF[j], val);
+                  matrix_entry(rowsDOF[i], colsDOF[j], val);
                 }
               }
             }
@@ -569,8 +578,7 @@ namespace Rodin::Assembly
                   for (PetscInt j = 0; j < static_cast<PetscInt>(colsDOF.size()); ++j)
                   {
                     const PetscScalar val = PetscScalar(bfi.integrate(j, i));
-                    if (val != PetscScalar(0))
-                      matrix_entry(rowsDOF[i], colsDOF[j], val);
+                    matrix_entry(rowsDOF[i], colsDOF[j], val);
                   }
                 }
               }
@@ -911,14 +919,6 @@ namespace Rodin::Assembly
           assert(ierr == PETSC_SUCCESS);
         }
 
-        // A is reused across re-assemblies with its
-        // structure kept. Zero-valued matrix entries are submitted to PETSc so
-        // they can seed the structural pattern; whether PETSc ignores zeros is
-        // controlled by matrix options rather than backend-side pruning. Allow
-        // pattern growth in case a caller or option still ignores structural
-        // zeros.
-        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-
         // ------------------------
         // Allocate / reset b (Seq Vec)
         // ------------------------
@@ -1098,8 +1098,18 @@ namespace Rodin::Assembly
               const PetscInt J = static_cast<PetscInt>(c.index);
               const PetscScalar v =
                 r.coefficient * val * c.coefficient;
-              ierr = MatSetValue(A, I, J, v, ADD_VALUES);
-              assert(ierr == PETSC_SUCCESS);
+              if (v == PetscScalar(0))
+              {
+                ierr = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                ierr = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
+              else
+              {
+                ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
             }
           }
         };

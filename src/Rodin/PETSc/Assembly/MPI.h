@@ -497,8 +497,18 @@ namespace Rodin::Assembly
                 const PetscInt J = static_cast<PetscInt>(c.index);
                 const PetscScalar v =
                   r.coefficient * val * c.coefficient;
-                ierr = MatSetValue(A, I, J, v, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
+                if (v == PetscScalar(0))
+                {
+                  ierr = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                  ierr = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
+                else
+                {
+                  ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+                  assert(ierr == PETSC_SUCCESS);
+                }
               }
             }
           }
@@ -554,8 +564,7 @@ namespace Rodin::Assembly
                 {
                   const PetscInt J = colsDOF[j];
                   const PetscScalar val = bfi.integrate(j, i);
-                  if (val != PetscScalar(0))
-                    matrix_entry(I, J, val);
+                  matrix_entry(I, J, val);
                 }
               }
             }
@@ -616,8 +625,7 @@ namespace Rodin::Assembly
                   {
                     const PetscInt J = colsDOF[j];
                     const PetscScalar val = bfi.integrate(j, i);
-                    if (val != PetscScalar(0))
-                      matrix_entry(I, J, val);
+                    matrix_entry(I, J, val);
                   }
                 }
               }
@@ -1184,8 +1192,18 @@ namespace Rodin::Assembly
               const PetscInt J = static_cast<PetscInt>(c.index);
               const PetscScalar v =
                 r.coefficient * val * c.coefficient;
-              ierr = MatSetValue(A, I, J, v, ADD_VALUES);
-              assert(ierr == PETSC_SUCCESS);
+              if (v == PetscScalar(0))
+              {
+                ierr = MatSetValue(A, I, J, PetscScalar(1), ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                ierr = MatSetValue(A, I, J, PetscScalar(-1), ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
+              else
+              {
+                ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+              }
             }
           }
         };
@@ -1256,8 +1274,7 @@ namespace Rodin::Assembly
                 {
                   const PetscInt J = uOff + cols[j];
                   const PetscScalar val = bfi.integrate(j, i);
-                  if (val != PetscScalar(0))
-                    matrix_entry(I, J, val);
+                  matrix_entry(I, J, val);
                 }
               }
             }
@@ -1324,8 +1341,7 @@ namespace Rodin::Assembly
                   {
                     const PetscInt J = uOff + cols[j];
                     const PetscScalar val = bfi.integrate(j, i);
-                    if (val != PetscScalar(0))
-                      matrix_entry(I, J, val);
+                    matrix_entry(I, J, val);
                   }
                 }
               }
