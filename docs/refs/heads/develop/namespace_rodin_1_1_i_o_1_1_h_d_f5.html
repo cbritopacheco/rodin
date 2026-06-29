@@ -235,6 +235,29 @@
             </dt>
             <dd>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to its <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology type id.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af1f45385f7989f0247a99808281ea455" class="m-doc">getXDMFQuadraticMixedTopologyId</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t) -&gt; <a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a></span>
+            </dt>
+            <dd>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to its quadratic <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology id.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd79b78ad29f71691b71d9403d8ce264" class="m-doc">getXDMFReferenceNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              size_t order) -&gt; std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt;</span>
+            </dt>
+            <dd>Reference nodes used by the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology for a cell.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a52c76ceb79aec44c3331d38ace5bf3" class="m-doc">asShard</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh) -&gt; const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Geometry::<wbr />Shard</a>*</span>
+            </dt>
+            <dd>Returns a non-null <code>Shard*</code> iff <code>mesh</code> is a partition shard.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a475db8b5e5873ed05d701ec8cfde3ecf" class="m-doc">isXDMFOwnedCell</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Geometry::<wbr />Shard</a>* shard,
+              std::size_t D,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) -&gt; bool</span>
+            </dt>
+            <dd>True iff cell <code>i</code> should appear in the per-rank <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> stream.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a915630ac3e2381776164f3a7dcde3282" class="m-doc">getXDMFRenderedCellCount</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh) -&gt; std::size_t</span>
+            </dt>
+            <dd>Number of cells the per-rank <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> stream renders.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adf88451bafe58d725ca7e5fbb0d1c4bd" class="m-doc">getXDMFMixedTopologySize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh) -&gt; size_t</span>
             </dt>
             <dd>Computes the total length of the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream for the given mesh.</dd>
@@ -284,13 +307,15 @@
             </dt>
             <dd>Reads the full shape of an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset as a vector of dimensions.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a78de307532ec54af170b29f28467d28a" class="m-doc">writeXDMFTopology</a>(</span><span class="m-doc-wrap">hid_t file,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a464b4001b8b2b246d5e34e423114721c" class="m-doc">writeXDMFTopology</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh,
+              bool allowUniformCurvedTopology = true)</span>
             </dt>
             <dd>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a8ce512b794dc20751458531b9ebd4c8f" class="m-doc">writeXDMFTopology</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a44a99cd8576c56206780e55a26c7b37a" class="m-doc">writeXDMFTopology</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh,
+              bool allowUniformCurvedTopology = true)</span>
             </dt>
             <dd>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an existing <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
             <dt>
@@ -304,22 +329,11 @@
             </dt>
             <dd>Writes polytope region attributes to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a1c1068399e04ee68f35b203a71eee71a" class="m-doc">writeXDMFMesh</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a4e6e247e7502b82997c8fc0aa8313721" class="m-doc">writeXDMFMesh</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh,
+              bool allowUniformCurvedTopology = true)</span>
             </dt>
             <dd>Writes a minimal <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization mesh file.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a69bcbfb344ddb4070284591b8344f31e" class="m-doc">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
-              const boost::filesystem::path&amp; filename)</span>
-            </dt>
-            <dd>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#af6fbd161163fe2d6697ac8a08e298a8c" class="m-doc">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
-              const boost::filesystem::path&amp; filename)</span>
-            </dt>
-            <dd>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a202d14641e452ff224b15cf7e9db3fa9" class="m-doc">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
@@ -329,11 +343,17 @@
             <dd>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a69bcbfb344ddb4070284591b8344f31e" class="m-doc">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const boost::filesystem::path&amp; filename)</span>
+            </dt>
+            <dd>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class GridFunctionType&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a62dcf1eb08b2f13cd8c5dbc56cf08c61" class="m-doc">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
               const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; visMesh,
               const boost::filesystem::path&amp; filename)</span>
             </dt>
-            <dd>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</dd>
+            <dd>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -969,6 +989,66 @@
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a href="https://www.xdmf.org/index.php/XDMF_Model_and_Format">XDMF Model and Format Specification</a></p></aside>
           </div></section>
+          <section class="m-doc-details" id="af1f45385f7989f0247a99808281ea455"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a4faf74064d8a0c88f84babb222296663" class="m-doc">U64</a> Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af1f45385f7989f0247a99808281ea455" class="m-doc-self">getXDMFQuadraticMixedTopologyId</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Maps a <a href="namespace_rodin.html" class="m-doc">Rodin</a> polytope type to its quadratic <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology id.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">t&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Polytope geometry type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> quadratic topology id for order-2 visualization.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Only XDMF-supported quadratic topologies are returned. The coordinates are sampled from the transformation at <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> reference nodes, so the exported node count/order is independent of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s internal geometry basis and node layout.</p>
+          </div></section>
+          <section class="m-doc-details" id="abd79b78ad29f71691b71d9403d8ce264"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="namespace_rodin_1_1_math.html#a6b12257ec310168270fdb39639f7197f" class="m-doc">Math::<wbr />SpatialPoint</a>&gt; Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd79b78ad29f71691b71d9403d8ce264" class="m-doc-self">getXDMFReferenceNodes</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> t,
+              size_t order)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Reference nodes used by the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> topology for a cell.</p>
+<p>If order &lt;= 1, the linear <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> nodes are returned. If order &gt; 1, the transformation is sampled at <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>&#x27;s quadratic node locations. This keeps visualization independent of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s internal finite-element node layout while intentionally approximating higher-order geometry by quadratic <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6a52c76ceb79aec44c3331d38ace5bf3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Geometry::<wbr />Shard</a>* Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a52c76ceb79aec44c3331d38ace5bf3" class="m-doc-self">asShard</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Returns a non-null <code>Shard*</code> iff <code>mesh</code> is a partition shard.</p>
+<p>The per-rank <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writers must filter out non-owned cells so that stitched visualization in ParaView does not show the same cell twice (once from the owning rank, once from each rank carrying it as a ghost). For a plain <code>Mesh&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code> this returns nullptr and the writers iterate every cell.</p>
+          </div></section>
+          <section class="m-doc-details" id="a475db8b5e5873ed05d701ec8cfde3ecf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a475db8b5e5873ed05d701ec8cfde3ecf" class="m-doc-self">isXDMFOwnedCell</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Geometry::<wbr />Shard</a>* shard,
+              std::size_t D,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>True iff cell <code>i</code> should appear in the per-rank <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> stream.</p>
+<p>On a <code>Shard</code> this means <code>isOwned(D, i)</code>. On a non-shard local mesh the predicate is identically true.</p>
+          </div></section>
+          <section class="m-doc-details" id="a915630ac3e2381776164f3a7dcde3282"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::size_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a915630ac3e2381776164f3a7dcde3282" class="m-doc-self">getXDMFRenderedCellCount</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+            </h3>
+            <p>Number of cells the per-rank <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> stream renders.</p>
+<p>Equals the shard&#x27;s owned-cell count when <code>mesh</code> is a <code>Shard</code>, otherwise <code>mesh.getCellCount()</code>.</p>
+          </div></section>
           <section class="m-doc-details" id="adf88451bafe58d725ca7e5fbb0d1c4bd"><div>
             <h3>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf88451bafe58d725ca7e5fbb0d1c4bd" class="m-doc-self">getXDMFMixedTopologySize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
@@ -1264,10 +1344,11 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a78de307532ec54af170b29f28467d28a"><div>
+          <section class="m-doc-details" id="a464b4001b8b2b246d5e34e423114721c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78de307532ec54af170b29f28467d28a" class="m-doc-self">writeXDMFTopology</a>(</span><span class="m-doc-wrap">hid_t file,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a464b4001b8b2b246d5e34e423114721c" class="m-doc-self">writeXDMFTopology</a>(</span><span class="m-doc-wrap">hid_t file,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh,
+              bool allowUniformCurvedTopology = true)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an open <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
@@ -1284,14 +1365,19 @@
                   <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Local mesh whose cells provide the topology data.</td>
                 </tr>
+                <tr>
+                  <td>allowUniformCurvedTopology</td>
+                  <td></td>
+                </tr>
               </tbody>
             </table>
 <p>Creates the <code>/Mesh/XDMF</code> group and writes the mixed-topology dataset at <code>/Mesh/XDMF/Topology</code> and its size at <code>/Mesh/XDMF/TopologySize</code>.</p><aside class="m-note m-info"><h4>Note</h4><p>Only local (sequential) meshes are supported. The mesh parameter is internally cast to <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code>.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a8ce512b794dc20751458531b9ebd4c8f"><div>
+          <section class="m-doc-details" id="a44a99cd8576c56206780e55a26c7b37a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ce512b794dc20751458531b9ebd4c8f" class="m-doc-self">writeXDMFTopology</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44a99cd8576c56206780e55a26c7b37a" class="m-doc-self">writeXDMFTopology</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh,
+              bool allowUniformCurvedTopology = true)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>Writes the <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream to an existing <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
@@ -1307,6 +1393,10 @@
                 <tr>
                   <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Local mesh whose cells provide the topology data.</td>
+                </tr>
+                <tr>
+                  <td>allowUniformCurvedTopology</td>
+                  <td></td>
                 </tr>
               </tbody>
             </table>
@@ -1360,10 +1450,11 @@
             </table>
 <p>Creates the <code>/Mesh/Attributes</code> group and writes an attribute array for each topological dimension from 0 to the mesh dimension.</p>
           </div></section>
-          <section class="m-doc-details" id="a1c1068399e04ee68f35b203a71eee71a"><div>
+          <section class="m-doc-details" id="a4e6e247e7502b82997c8fc0aa8313721"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c1068399e04ee68f35b203a71eee71a" class="m-doc-self">writeXDMFMesh</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e6e247e7502b82997c8fc0aa8313721" class="m-doc-self">writeXDMFMesh</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; mesh,
+              bool allowUniformCurvedTopology = true)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
             </h3>
             <p>Writes a minimal <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization mesh file.</p>
@@ -1380,81 +1471,13 @@
                   <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Local mesh to export for visualization.</td>
                 </tr>
-              </tbody>
-            </table>
-<p>Creates a new <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file containing only the datasets required for XDMF/ParaView visualization:</p><ul><li><code>/Mesh/Geometry/Vertices</code> — vertex coordinates</li><li><code>/Mesh/XDMF/Topology</code> — <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream</li><li><code>/Mesh/XDMF/TopologySize</code> — length of the topology stream</li><li><code>/Mesh/Attributes/{d}</code> — polytope region labels</li></ul><p>This function does <strong>not</strong> write the full canonical <a href="namespace_rodin.html" class="m-doc">Rodin</a> persistence data (connectivity CSR, incidence, state, transformations). Use <code><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa" class="m-doc">FileFormat::<wbr />HDF5</a>&gt;</code> for full persistence.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#a78de307532ec54af170b29f28467d28a" class="m-doc">writeXDMFTopology</a>, <a href="#a52bf1791ca96c8240cd08505a21e6183" class="m-doc">writeXDMFVertices</a>, <a href="#abba74fe87c69c400fe3e55613fbe9d1a" class="m-doc">writeXDMFRegionAttribute</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a69bcbfb344ddb4070284591b8344f31e"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class GridFunctionType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69bcbfb344ddb4070284591b8344f31e" class="m-doc-self">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
-              const boost::filesystem::path&amp; filename)</span></span>
-            </h3>
-            <p>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
                 <tr>
-                  <td style="width: 1%">GridFunctionType</td>
-                  <td>Concrete grid function type.</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Grid function to export.</td>
-                </tr>
-                <tr>
-                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                  <td>allowUniformCurvedTopology</td>
+                  <td></td>
                 </tr>
               </tbody>
             </table>
-<p>Evaluates the grid function at each vertex of the mesh and stores the result in the <code>/GridFunction/Values/Data</code> dataset. For scalar functions, a flat <code>[nv]</code> vector is written; for vector functions, a <code>[nv × vdim]</code> matrix is written.</p>
-          </div></section>
-          <section class="m-doc-details" id="af6fbd161163fe2d6697ac8a08e298a8c"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;class GridFunctionType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6fbd161163fe2d6697ac8a08e298a8c" class="m-doc-self">writeXDMFCellAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
-              const boost::filesystem::path&amp; filename)</span></span>
-            </h3>
-            <p>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">GridFunctionType</td>
-                  <td>Concrete grid function type.</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Grid function to export.</td>
-                </tr>
-                <tr>
-                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Evaluates the grid function at the vertices of each cell and averages the values to produce a single value per cell. The result is stored in the <code>/GridFunction/Values/Data</code> dataset.</p>
+<p>Creates a new <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file containing only the datasets required for XDMF/ParaView visualization:</p><ul><li><code>/Mesh/Geometry/Vertices</code> — vertex coordinates</li><li><code>/Mesh/XDMF/Topology</code> — <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> mixed-topology stream</li><li><code>/Mesh/XDMF/TopologySize</code> — length of the topology stream</li><li><code>/Mesh/Attributes/{d}</code> — polytope region labels</li></ul><p>This function does <strong>not</strong> write the full canonical <a href="namespace_rodin.html" class="m-doc">Rodin</a> persistence data (connectivity CSR, incidence, state, transformations). Use <code><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a>&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfea86459eb6a9c3edb9d09e9d6fe8d5b9fa" class="m-doc">FileFormat::<wbr />HDF5</a>&gt;</code> for full persistence.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#a464b4001b8b2b246d5e34e423114721c" class="m-doc">writeXDMFTopology</a>, <a href="#a52bf1791ca96c8240cd08505a21e6183" class="m-doc">writeXDMFVertices</a>, <a href="#abba74fe87c69c400fe3e55613fbe9d1a" class="m-doc">writeXDMFRegionAttribute</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a202d14641e452ff224b15cf7e9db3fa9"><div>
             <h3>
@@ -1497,6 +1520,42 @@
             </table>
 <p>This overload allows the grid function to be evaluated on a mesh that differs from <code>gf.getFiniteElementSpace().getMesh()</code>. This is essential for distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) visualization where the grid function is defined on a distributed mesh but visualization data must be written per-shard.</p>
           </div></section>
+          <section class="m-doc-details" id="a69bcbfb344ddb4070284591b8344f31e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class GridFunctionType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />HDF5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69bcbfb344ddb4070284591b8344f31e" class="m-doc-self">writeXDMFNodeAttribute</a>(</span><span class="m-doc-wrap">const GridFunctionType&amp; gf,
+              const boost::filesystem::path&amp; filename)</span></span>
+            </h3>
+            <p>Writes a grid function as vertex-centered (nodal) data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">GridFunctionType</td>
+                  <td>Concrete grid function type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to export.</td>
+                </tr>
+                <tr>
+                  <td>filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Convenience overload that uses the grid function&#x27;s own FES mesh as the visualization mesh. It delegates to the explicit-mesh overload, which carries the curved-vs-linear branch logic that aligns the emitted geometry / topology cardinality with the data cardinality.</p><p>Writing a node attribute on a curved mesh through a hand-rolled vertex iteration would silently produce <code>mesh.getVertexCount()</code> values while <code>writeXDMFVertices</code> / <code>writeXDMFTopology</code> emit <code>Σ_K |refNodes(K)|</code> per-cell visualization nodes — a cardinality mismatch that ParaView either rejects or, worse, plots silently misaligned. Routing through the explicit-mesh overload eliminates that pitfall.</p><aside class="m-note m-info"><h4>Note</h4><p>The visualization mesh MUST be a <code>Mesh&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code> (the mesh-level <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> writers cast unconditionally to it). In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode, <code>MeshBase::getCellCount()</code> / <code>getVertexCount()</code> on the parent <code>MPIMesh</code> return the GLOBAL allreduce&#x27;d counts while its iterators range only over shard-local indices — so sizing a values buffer by the global count and writing only the shard prefix silently corrupts the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset. We therefore guard the one-arg path with a <code>dynamic_cast</code> and fail loudly if the GF&#x27;s FES is built on a non-local mesh; in that case the caller must either use <code><a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">IO::<wbr />XDMF</a></code> with <code>setMesh(mpiMesh)</code> (which forwards the shard automatically) or call the explicit-mesh overload with <code>mpiMesh.getShard()</code>.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a62dcf1eb08b2f13cd8c5dbc56cf08c61"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
@@ -1507,7 +1566,7 @@
               const <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">Geometry::<wbr />MeshBase</a>&amp; visMesh,
               const boost::filesystem::path&amp; filename)</span></span>
             </h3>
-            <p>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</p>
+            <p>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -1536,7 +1595,7 @@
                 </tr>
               </tbody>
             </table>
-<p>This overload allows the grid function to be evaluated on a mesh that differs from <code>gf.getFiniteElementSpace().getMesh()</code>. This is essential for distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) visualization where the grid function is defined on a distributed mesh but visualization data must be written per-shard.</p>
+<p>Writes a grid function as cell-centered data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file for <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization, evaluated on an explicit mesh.</p><p>Evaluates the grid function at the cell CENTROID — a single <code><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a></code> per cell with that cell&#x27;s polytope and the polytope&#x27;s reference centroid — and stores the result in the <code>/GridFunction/Values/Data</code> dataset.</p><p>This is correct for true cell-centered FE spaces (e.g. P0, where the centroid evaluation returns the cell&#x27;s single DOF value) as well as for nodal FE spaces sampled at the centroid (e.g. P1, where it returns the interpolated value at the geometric centre of the cell). The previous implementation averaged values at the cell&#x27;s vertices, which is meaningless for P0 (vertex evaluation of a cell-centered field is not well defined) and yielded silently incorrect <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> output for any cell-centered scalar / vector field.</p><p>This overload allows the grid function to be evaluated on a mesh that differs from <code>gf.getFiniteElementSpace().getMesh()</code>. This is essential for distributed (<a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) visualization where the grid function is defined on a distributed mesh but visualization data must be written per-shard.</p>
           </div></section>
         </section>
         <section>

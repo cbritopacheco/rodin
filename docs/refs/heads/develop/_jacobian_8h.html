@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md412">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md413">Special Cases</a></li>
-            <li><a href="#autotoc_md414">Applications</a></li>
-            <li><a href="#autotoc_md415">Usage Example</a></li>
+            <li><a href="#autotoc_md413">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md414">Special Cases</a></li>
+            <li><a href="#autotoc_md415">Applications</a></li>
+            <li><a href="#autotoc_md416">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md412"><h3><a href="#autotoc_md412">Mathematical Foundation</a></h3><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
+<p>This file defines the Jacobian class, which computes the Jacobian matrix (matrix of all first-order partial derivatives) of vector-valued functions in variational formulations.</p><section id="autotoc_md413"><h3><a href="#autotoc_md413">Mathematical Foundation</a></h3><p>For a vector-valued function <svg class="m-math" style="width: 9.127em; height: 1.077em; vertical-align: -0.049em;" viewBox="0 -9.873238 87.618912 10.340659">
 <title>
 $ \mathbf{u} : \Omega \subset \mathbb{R}^d \to \mathbb{R}^n $
 </title>
@@ -160,7 +160,7 @@ $ n \times d $
 <use x='9.644269' y='0' xlink:href='#eq3-g0-2'/>
 <use x='21.59943' y='0' xlink:href='#eq3-g1-100'/>
 </g>
-</svg> matrix.</p></section><section id="autotoc_md413"><h3><a href="#autotoc_md413">Special Cases</a></h3><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
+</svg> matrix.</p></section><section id="autotoc_md414"><h3><a href="#autotoc_md414">Special Cases</a></h3><ul><li>When <svg class="m-math" style="width: 3.002em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 28.816609 8.302191">
 <title>
 $ n = d $
 </title>
@@ -227,7 +227,7 @@ $ J^T $
 <use x='0' y='0' xlink:href='#eq7-g1-74'/>
 <use x='7.577119' y='-4.338437' xlink:href='#eq7-g0-84'/>
 </g>
-</svg> gives the gradient of components</li></ul></section><section id="autotoc_md414"><h3><a href="#autotoc_md414">Applications</a></h3><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md415"><h3><a href="#autotoc_md415">Usage Example</a></h3><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
+</svg> gives the gradient of components</li></ul></section><section id="autotoc_md415"><h3><a href="#autotoc_md415">Applications</a></h3><ul><li>Nonlinear elasticity: deformation gradient tensor</li><li>Fluid dynamics: velocity gradient tensor</li><li>Differential geometry: metric tensor computations</li><li>Coordinate transformations</li></ul></section><section id="autotoc_md416"><h3><a href="#autotoc_md416">Usage Example</a></h3><pre class="m-code"><span class="c1">// Displacement gradient for elasticity</span>
 <span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Jacobian</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Deformation gradient F = \nablau</span></pre></section>

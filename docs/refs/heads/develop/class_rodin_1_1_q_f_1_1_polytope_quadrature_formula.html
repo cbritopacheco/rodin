@@ -81,8 +81,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md214">Automatic Rule Selection</a></li>
-            <li><a href="#autotoc_md215">Usage</a></li>
+            <li><a href="#autotoc_md215">Automatic Rule Selection</a></li>
+            <li><a href="#autotoc_md216">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a> provides a convenient interface for creating quadrature formulas without needing to know which specific quadrature rule to use for each geometry type. It automatically selects an appropriate quadrature formula based on:</p><ul><li>The polytope geometry (triangle, tetrahedron, etc.)</li><li>The desired polynomial degree of exactness</li></ul><section id="autotoc_md214"><h3><a href="#autotoc_md214">Automatic Rule Selection</a></h3><p>The class internally selects the most appropriate quadrature rule:</p><ul><li>For simplices (triangles, tetrahedra): Grundmann-Möller rules</li><li>For tensor-product elements (quads, hexahedra, wedges): Gauss-Legendre rules</li><li>For segments: Gauss-Legendre rules</li><li>For points: Single point with unit weight</li></ul></section><section id="autotoc_md215"><h3><a href="#autotoc_md215">Usage</a></h3><pre class="m-code"><span class="c1">// Create a quadrature rule exact for degree 3 polynomials on a triangle</span>
+<p><a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a> provides a convenient interface for creating quadrature formulas without needing to know which specific quadrature rule to use for each geometry type. It automatically selects an appropriate quadrature formula based on:</p><ul><li>The polytope geometry (triangle, tetrahedron, etc.)</li><li>The desired polynomial degree of exactness</li></ul><section id="autotoc_md215"><h3><a href="#autotoc_md215">Automatic Rule Selection</a></h3><p>The class internally selects the most appropriate quadrature rule:</p><ul><li>For simplices (triangles, tetrahedra): Grundmann-Möller rules</li><li>For tensor-product elements (quads, hexahedra, wedges): Gauss-Legendre rules</li><li>For segments: Gauss-Legendre rules</li><li>For points: Single point with unit weight</li></ul></section><section id="autotoc_md216"><h3><a href="#autotoc_md216">Usage</a></h3><pre class="m-code"><span class="c1">// Create a quadrature rule exact for degree 3 polynomials on a triangle</span>
 <span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 
 <span class="c1">// Use default order (degree 1)</span>

@@ -80,11 +80,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md309">Mathematical model</a></li>
-            <li><a href="#autotoc_md310">Exactness, by construction</a></li>
-            <li><a href="#autotoc_md311">Linear-system effect</a></li>
-            <li><a href="#autotoc_md312">Boundary specification</a></li>
-            <li><a href="#autotoc_md313">Usage examples</a></li>
+            <li><a href="#autotoc_md310">Mathematical model</a></li>
+            <li><a href="#autotoc_md311">Exactness, by construction</a></li>
+            <li><a href="#autotoc_md312">Linear-system effect</a></li>
+            <li><a href="#autotoc_md313">Boundary specification</a></li>
+            <li><a href="#autotoc_md314">Usage examples</a></li>
             <li>
               Reference
               <ul>
@@ -339,7 +339,7 @@ $ \delta u = A(\delta v) + d $
 <use x='60.299542' y='0' xlink:href='#eq11-g1-43'/>
 <use x='72.060857' y='0' xlink:href='#eq11-g0-100'/>
 </g>
-</svg>.</p></li></ol><section id="autotoc_md309"><h2><a href="#autotoc_md309">Mathematical model</a></h2><p>Let <svg class="m-math" style="width: 1.493em; height: 1.175em; vertical-align: -0.325em;" viewBox="0 -8.169366 14.328649 11.27848">
+</svg>.</p></li></ol><section id="autotoc_md310"><h2><a href="#autotoc_md310">Mathematical model</a></h2><p>Let <svg class="m-math" style="width: 1.493em; height: 1.175em; vertical-align: -0.325em;" viewBox="0 -8.169366 14.328649 11.27848">
 <title>
 $ V_h^u $
 </title>
@@ -961,7 +961,7 @@ $ R $
 <g id='eq37-page1'>
 <use x='0' y='0' xlink:href='#eq37-g0-82'/>
 </g>
-</svg> at the slave node.</p></section><section id="autotoc_md310"><h2><a href="#autotoc_md310">Exactness, by construction</a></h2><p>Slave/master DOF pairings are determined entirely by the selected face and the FES&#x27;s own connectivity (<code>fes_u.getDOFs(faceDim, fi)</code> and <code>fes_v.getDOFs(faceDim, fi)</code>). There is no geometric search and no tolerance anywhere in the assembly — the FE&#x27;s DOF-functional contract (<code>fe_u.getLinearForm(s)</code> applied to a callable <code>(Geometry::Point) -&gt; value</code> through the slave-FES pullback) is the only machinery used. Coefficient pruning uses strict <code>c != 0</code> so that Lagrange-dual-induced sparsity is preserved bit-for-bit.</p><p>The identification assembler constructs a pointwise IntegrationPoint from each Geometry::Point and passes it to ShapeFunctionBase::setIntegrationPoint before querying ShapeFunctionBase::getBasis. The pointwise integration point has <code>getQuadratureFormula() == nullptr</code>, which selects direct reference-point evaluation without inventing a single-point quadrature rule. During integration, ShapeFunctionBase::setIntegrationPoint remains the preferred path with a non-null quadrature formula pointer and quadrature index so cached basis tabulations remain available.</p></section><section id="autotoc_md311"><h2><a href="#autotoc_md311">Linear-system effect</a></h2><p>Problem assembly handles the two flavours differently by visiting the variant returned from DirichletBCBase::getDOFs:</p><ul><li><p>For DirichletBCBase::ValueDOFs at slave global index <svg class="m-math" style="width: 0.992em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 9.521226 7.47198">
+</svg> at the slave node.</p></section><section id="autotoc_md311"><h2><a href="#autotoc_md311">Exactness, by construction</a></h2><p>Slave/master DOF pairings are determined entirely by the selected face and the FES&#x27;s own connectivity (<code>fes_u.getDOFs(faceDim, fi)</code> and <code>fes_v.getDOFs(faceDim, fi)</code>). There is no geometric search and no tolerance anywhere in the assembly — the FE&#x27;s DOF-functional contract (<code>fe_u.getLinearForm(s)</code> applied to a callable <code>(Geometry::Point) -&gt; value</code> through the slave-FES pullback) is the only machinery used. Coefficient pruning uses strict <code>c != 0</code> so that Lagrange-dual-induced sparsity is preserved bit-for-bit.</p><p>The identification assembler constructs a pointwise IntegrationPoint from each Geometry::Point and passes it to ShapeFunctionBase::setIntegrationPoint before querying ShapeFunctionBase::getBasis. The pointwise integration point has <code>getQuadratureFormula() == nullptr</code>, which selects direct reference-point evaluation without inventing a single-point quadrature rule. During integration, ShapeFunctionBase::setIntegrationPoint remains the preferred path with a non-null quadrature formula pointer and quadrature index so cached basis tabulations remain available.</p></section><section id="autotoc_md312"><h2><a href="#autotoc_md312">Linear-system effect</a></h2><p>Problem assembly handles the two flavours differently by visiting the variant returned from DirichletBCBase::getDOFs:</p><ul><li><p>For DirichletBCBase::ValueDOFs at slave global index <svg class="m-math" style="width: 0.992em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 9.521226 7.47198">
 <title>
 $ g_s $
 </title>
@@ -1553,7 +1553,7 @@ $ x = T\hat{x}+\hat{d} $
 <use x='291.432739' y='-2.092176' xlink:href='#eq53-g1-115'/>
 <use x='295.922844' y='-4.881703' xlink:href='#eq53-g3-58'/>
 </g>
-</svg></div></li></ul><p>Identification mode is not zero-pinning, not row-only replacement, and not merely slave-column redirection. It is appropriate for tied fields, same-face linear identifications, periodic-like identifications, and monolithic FSI kinematic coupling where slave residuals/reactions must be transferred into the master equations.</p></section><section id="autotoc_md312"><h2><a href="#autotoc_md312">Boundary specification</a></h2><p><code>.on(attr)</code> (or <code>.on(attr1, attr2, ...)</code>) selects the subset <svg class="m-math" style="width: 1.510em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 14.496773 9.962629">
+</svg></div></li></ul><p>Identification mode is not zero-pinning, not row-only replacement, and not merely slave-column redirection. It is appropriate for tied fields, same-face linear identifications, periodic-like identifications, and monolithic FSI kinematic coupling where slave residuals/reactions must be transferred into the master equations.</p></section><section id="autotoc_md313"><h2><a href="#autotoc_md313">Boundary specification</a></h2><p><code>.on(attr)</code> (or <code>.on(attr1, attr2, ...)</code>) selects the subset <svg class="m-math" style="width: 1.510em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 14.496773 9.962629">
 <title>
 $ \Gamma_D $
 </title>
@@ -1565,7 +1565,7 @@ $ \Gamma_D $
 <use x='0' y='0' xlink:href='#eq54-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq54-g0-68'/>
 </g>
-</svg> from the mesh&#x27;s codimension-one attribute set. If no attributes are given, only exterior boundary faces are selected; if attributes are given, tagged interior interface faces are selected too. Both slave and master DOFs are read from the <em>same</em> face polytopes — the assembler never matches DOFs across distinct faces (no geometric pairing). For a cross-face periodic relation use <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">Rodin::<wbr />Variational::<wbr />PeriodicBC</a>, which takes an explicit DOF adjacency map.</p></section><section id="autotoc_md313"><h2><a href="#autotoc_md313">Usage examples</a></h2><pre class="m-code"><span class="c1">// Homogeneous Dirichlet BC: u = 0 on boundary</span>
+</svg> from the mesh&#x27;s codimension-one attribute set. If no attributes are given, only exterior boundary faces are selected; if attributes are given, tagged interior interface faces are selected too. Both slave and master DOFs are read from the <em>same</em> face polytopes — the assembler never matches DOFs across distinct faces (no geometric pairing). For a cross-face periodic relation use <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">Rodin::<wbr />Variational::<wbr />PeriodicBC</a>, which takes an explicit DOF adjacency map.</p></section><section id="autotoc_md314"><h2><a href="#autotoc_md314">Usage examples</a></h2><pre class="m-code"><span class="c1">// Homogeneous Dirichlet BC: u = 0 on boundary</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span>
 
 <span class="c1">// Inhomogeneous Dirichlet BC on attribute 1</span>

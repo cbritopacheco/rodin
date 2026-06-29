@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Geometry/IsoparametricTransformation.h file | Rodin</title>
+  <title>Rodin/PETSc/Check.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,40 +74,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_d1efb67081fb8c17d56b5a2c13c2a510.html">Geometry</a>/</span>IsoparametricTransformation.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ab40ac20c32b770619b2042a8223271e.html">PETSc</a>/</span>Check.h <span class="m-thin">file</span>
         </h1>
-        <p>Isoparametric transformation for finite elements.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Rodin::Geometry</a></dt>
-            <dd>Module for dealing with meshes, polytopes, and geometric operations.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FE&gt;</div>
-              class <a href="class_rodin_1_1_geometry_1_1_isoparametric_transformation.html" class="m-doc">Rodin::Geometry::IsoparametricTransformation</a>
-            </dt>
-            <dd>Template for isoparametric transformations.</dd>
-          </dl>
-        </section>
+        <p>Live error checking for PETSc calls.</p>
+<p>Historically the PETSc backends guarded every call with <code>assert</code>(ierr == PETSC_SUCCESS). Release builds define <code>NDEBUG</code>, which compiles those asserts out, so a failing PETSc call returned a nonzero error code that was silently dropped and execution continued into corrupt state (e.g. a failed <code>MatSetSizes</code> followed by an out-of-range <code>MatSetValues</code>).</p><p><code>RODIN_PETSC_CHECK_OK</code> surfaces the error in every build: it inspects the supplied error code and, when nonzero, raises a <a href="namespace_rodin.html" class="m-doc">Rodin</a> exception carrying the PETSc error number, its message, and the source location before aborting.</p>
       </div>
     </div>
   </div>
