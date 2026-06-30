@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <type_traits>
 #include <vector>
 
 #include "Rodin/Solver/CG.h"
@@ -20,7 +21,6 @@
 #include "Rodin/Variational/Trace.h"
 #include "Rodin/Variational/IdentityMatrix.h"
 
-#include "WNGIRBackend.h"
 #include "WNGIRAdmissibilityGradient.h"
 #include "WNGIRAdmissibilityMetric.h"
 #include "WNGIRParameters.h"
@@ -37,22 +37,23 @@ namespace Rodin::Adaptation
    * by repeatedly solving a regularized first-derivative metric problem and
    * line-searching the resulting displacement on the true geometry.
    *
-   * Constructed from a displacement GridFunction, the solver infers its whole
-   * backend (trial/test functions, step @ref Rodin::Variational::Problem, and
-   * @ref Rodin::Solver::CG) from that type via @ref WNGIRBackend. Every global
-   * quantity is a backend-matched GridFunction; only element-local geometry
-   * uses @ref Math::SpatialVector / @ref Math::SpatialMatrix. Linear solves go
-   * through @ref Rodin::Variational::Problem and @ref Rodin::Solver::CG, so the
-   * solver contains no backend-specific code.
+   * Constructed from backend-matched trial and test functions, the solver uses
+   * the ordinary Rodin form-language deduction path for the step
+   * @ref Rodin::Variational::Problem, the metric @ref Rodin::Variational::BilinearForm,
+   * and @ref Rodin::Solver::CG. Every global quantity is a backend-matched
+   * GridFunction; only element-local geometry uses @ref Math::SpatialVector /
+   * @ref Math::SpatialMatrix. WNGIR contains no backend-specific code.
    */
-  template <class Displacement>
+  template <class TrialFunctionType, class TestFunctionType>
   class WNGIR
   {
-      using Backend = WNGIRBackend<Displacement>;
-      using FESType = typename Backend::FESType;
-      using TrialFunctionType = typename Backend::TrialFunctionType;
-      using TestFunctionType = typename Backend::TestFunctionType;
-      using ProblemType = typename Backend::ProblemType;
+      using Displacement = std::remove_reference_t<
+        decltype(std::declval<TrialFunctionType&>().getSolution())>;
+      using FESType = std::remove_reference_t<
+        decltype(std::declval<Displacement&>().getFiniteElementSpace())>;
+      using ProblemType = std::decay_t<decltype(Variational::Problem(
+          std::declval<TrialFunctionType&>(),
+          std::declval<TestFunctionType&>()))>;
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
           std::declval<TrialFunctionType&>(),
           std::declval<TestFunctionType&>()))>;
@@ -61,10 +62,10 @@ namespace Rodin::Adaptation
       using SpatialMat = Math::SpatialMatrix<Real>;
 
     public:
-      explicit WNGIR(Displacement& u)
-        : m_u(&u),
-          m_duStep(u.getFiniteElementSpace()),
-          m_vStep(u.getFiniteElementSpace()),
+      WNGIR(TrialFunctionType& du, TestFunctionType& v)
+        : m_u(&du.getSolution()),
+          m_duStep(du.getFiniteElementSpace()),
+          m_vStep(v.getFiniteElementSpace()),
           m_stepProblem(m_duStep, m_vStep),
           m_bulkForm(m_duStep, m_vStep)
       {}

@@ -9,8 +9,7 @@
 
 #include <petscmat.h>
 
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/Alert/Raise.h"
+#include "Rodin/PETSc/Check.h"
 
 namespace Rodin::PETSc::Assembly
 {
@@ -72,52 +71,32 @@ namespace Rodin::PETSc::Assembly
       PetscErrorCode prepare(const Options& options) const
       {
         bool needsSetup = true;
-        PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
-        if (ierr)
-          return ierr;
+        RODIN_PETSC_CHECK_OK(needsStructuralSetup(options, needsSetup));
 
         if (needsSetup)
         {
-          ierr = MatSetSizes(
+          RODIN_PETSC_CHECK_OK(MatSetSizes(
               m_matrix,
               options.localRows,
               options.localCols,
               options.globalRows,
-              options.globalCols);
-          if (ierr)
-            return ierr;
+              options.globalCols));
 
           if (options.type)
-          {
-            ierr = MatSetType(m_matrix, options.type);
-            if (ierr)
-              return ierr;
-          }
+            RODIN_PETSC_CHECK_OK(MatSetType(m_matrix, options.type));
 
           if (options.setFromOptions)
-          {
-            ierr = MatSetFromOptions(m_matrix);
-            if (ierr)
-              return ierr;
-          }
+            RODIN_PETSC_CHECK_OK(MatSetFromOptions(m_matrix));
 
           if (options.keepNonzeroPattern)
-          {
-            ierr = MatSetOption(m_matrix, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE);
-            if (ierr)
-              return ierr;
-          }
+            RODIN_PETSC_CHECK_OK(MatSetOption(
+                m_matrix, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE));
 
-          ierr = MatSetUp(m_matrix);
-          if (ierr)
-            return ierr;
+          RODIN_PETSC_CHECK_OK(MatSetUp(m_matrix));
 
           if (options.keepNonzeroPattern)
-          {
-            ierr = MatSetOption(m_matrix, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
-            if (ierr)
-              return ierr;
-          }
+            RODIN_PETSC_CHECK_OK(MatSetOption(
+                m_matrix, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE));
         }
 
         return MatZeroEntries(m_matrix);
@@ -134,14 +113,10 @@ namespace Rodin::PETSc::Assembly
       {
         PetscInt curRows = 0;
         PetscInt curCols = 0;
-        PetscErrorCode ierr = MatGetSize(m_matrix, &curRows, &curCols);
-        if (ierr)
-          return ierr;
+        RODIN_PETSC_CHECK_OK(MatGetSize(m_matrix, &curRows, &curCols));
 
         PetscBool assembled = PETSC_FALSE;
-        ierr = MatAssembled(m_matrix, &assembled);
-        if (ierr)
-          return ierr;
+        RODIN_PETSC_CHECK_OK(MatAssembled(m_matrix, &assembled));
 
         if (assembled == PETSC_TRUE &&
             (curRows != options.globalRows || curCols != options.globalCols))

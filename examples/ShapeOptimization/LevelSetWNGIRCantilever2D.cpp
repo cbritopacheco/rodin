@@ -449,7 +449,10 @@ int main(int argc, char** argv)
   VectorP1 vh(mesh, 2);
 
   GridFunction phiH(sh);          phiH.setName("phi");
-  GridFunction u(vh);             u.setName("displacement");   // WNGIR fit
+  TrialFunction wngirTrial(vh);
+  TestFunction  wngirTest(vh);
+  auto& u = wngirTrial.getSolution();
+  u.setName("displacement");      // WNGIR fit
   GridFunction dJ(vh);            dJ.setName("dJ");            // shape velocity
 
   // Reusable background-space objects. The background mesh connectivity is
@@ -497,7 +500,7 @@ int main(int argc, char** argv)
     Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
-  WNGIR wngir(u);
+  WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
 
   // ---- Initial level set ---------------------------------------------------

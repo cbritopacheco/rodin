@@ -12,7 +12,6 @@ set(RodinAdaptation_HEADERS
   WNGIRAdmissibility.h
   WNGIRAdmissibilityGradient.h
   WNGIRAdmissibilityMetric.h
-  WNGIRBackend.h
   WNGIRCommon.h
   WNGIRDetail.h
   WNGIRParameters.h

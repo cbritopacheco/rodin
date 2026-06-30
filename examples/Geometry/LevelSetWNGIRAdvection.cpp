@@ -547,7 +547,10 @@ int main(int argc, char** argv)
   GridFunction phaseMoment(p0Fes);    phaseMoment.setName("phase_moment");
   GridFunction sigmaKgf(p0Fes);       sigmaKgf.setName("sigma_K");
 
-  GridFunction  u(vectorFes);         u.setName("displacement");
+  TrialFunction wngirTrial(vectorFes);
+  TestFunction  wngirTest(vectorFes);
+  auto& u = wngirTrial.getSolution();
+  u.setName("displacement");
 
   // -------------------------------------------------------------------------
   // phi (moved) side. Same combinatorics as `mesh`; coordinates and, for
@@ -992,7 +995,7 @@ int main(int argc, char** argv)
       const auto wngir =
         Rodin::Examples::makeWNGIRParameters(
             argc, argv, h, interfaceAttribute, wngirDefaults);
-      Rodin::Adaptation::WNGIR wngirSolver(u);
+      Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
       wngirSolver.setParameters(wngir);
       const auto wngirRep =
         wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);

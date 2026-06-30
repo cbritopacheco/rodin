@@ -363,7 +363,10 @@ int run(int argc, char** argv)
   ScalarP0 p0(mesh);
   VectorP1 vh(mesh, 3);
   GridFunction phiH(sh); phiH.setName("phi");
-  PETSc::Variational::GridFunction u(vh); u.setName("fit");
+  PETSc::Variational::TrialFunction wngirTrial(vh);
+  PETSc::Variational::TestFunction wngirTest(vh);
+  auto& u = wngirTrial.getSolution();
+  u.setName("fit");
   GridFunction dJ(vh); dJ.setName("dJ");
 
   // A solid box perforated by a regular array of spherical voids.
@@ -421,7 +424,7 @@ int run(int argc, char** argv)
     Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
-  Adaptation::WNGIR wngir(u);
+  Adaptation::WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
 
   WNGIRMesh moved(mesh);

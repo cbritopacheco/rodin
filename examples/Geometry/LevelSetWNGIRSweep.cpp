@@ -437,7 +437,9 @@ int main(int argc, char** argv)
   cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);
   phaseMoment.setName("phase_moment");
-  GridFunction u(vectorFes);
+  TrialFunction wngirTrial(vectorFes);
+  TestFunction  wngirTest(vectorFes);
+  auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   GridFunction du(vectorFes);
   du.setName("wngir_step");
@@ -653,7 +655,7 @@ int main(int argc, char** argv)
     {
       auto wngir = wngirParams;
       wngir.activeRMSTol = fitTol;
-      Rodin::Adaptation::WNGIR wngirSolver(u);
+      Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
       wngirSolver.setParameters(wngir);
       const auto wngirRep = wngirSolver.solve(
           mesh, interfaceFacets, phi, gradPhi);
