@@ -113,6 +113,23 @@ namespace
     }
   }
 
+  void expectOwnedVectorConstant(Vec vector, PetscScalar expected)
+  {
+    PetscErrorCode ierr;
+    PetscInt begin = 0;
+    PetscInt end = 0;
+    ierr = VecGetOwnershipRange(vector, &begin, &end);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    for (PetscInt i = begin; i < end; i++)
+    {
+      PetscScalar value = 0;
+      ierr = VecGetValues(vector, 1, &i, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_LE(PetscAbsScalar(value - expected), 1e-14) << "row " << i;
+    }
+  }
+
   void expectSameOwnedMatrix(Mat expected, Mat actual)
   {
     PetscErrorCode ierr;
@@ -267,6 +284,48 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     p.assemble();
 
     EXPECT_GT(matrixGlobalNonzeros(A), 0);
+  }
+
+  // The distributed right-hand side vector is rebuilt from scratch on every
+  // assembly and must be zeroed on reuse. The distributed solution vector is a
+  // solver iterate and must not be zeroed when the same Problem is assembled
+  // again.
+  TEST(PETSc_MPI_TargetedAssembly, ReusesVectorsCorrectly)
+  {
+    const auto& world = *g_world;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+
+    P1<Real, Mesh<Context::MPI>> fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+    RealFunction gamma(1.0);
+
+    Problem p(u, v);
+    p = Integral(gamma * Grad(u), Grad(v))
+      - Integral(RealFunction(1.0), v);
+    p.assemble();
+
+    Vec x = p.getLinearSystem().getSolution();
+    ASSERT_EQ(VecSet(x, 3.0), PETSC_SUCCESS);
+
+    p = Integral(gamma * Grad(u), Grad(v))
+      - Integral(RealFunction(2.0), v);
+    p.assemble();
+    expectOwnedVectorConstant(p.getLinearSystem().getSolution(), 3.0);
+
+    P1<Real, Mesh<Context::MPI>> expectedFES(mesh);
+    PETSc::Variational::TrialFunction uExpected(expectedFES);
+    PETSc::Variational::TestFunction  vExpected(expectedFES);
+    Problem expected(uExpected, vExpected);
+    expected = Integral(gamma * Grad(uExpected), Grad(vExpected))
+             - Integral(RealFunction(2.0), vExpected);
+    expected.assemble();
+
+    expectSameOwnedVector(
+        expected.getLinearSystem().getVector(),
+        p.getLinearSystem().getVector());
   }
 
   // A problem with different global dimensions must produce a different nonzero
