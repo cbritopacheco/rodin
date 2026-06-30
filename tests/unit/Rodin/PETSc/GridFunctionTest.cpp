@@ -51,6 +51,44 @@ namespace
       EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(cgf[i])), 7.0);
     cgf.flush();
   }
+
+  TEST(PETSc_GridFunction, SequentialMinReturnsValueAndIndex)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    for (Index i = 0; i < gf.getSize(); ++i)
+      gf[i] = static_cast<PetscScalar>(10.0 + static_cast<Real>(i));
+
+    constexpr Index expectedIdx = 3;
+    gf[expectedIdx] = static_cast<PetscScalar>(-2.5);
+    gf.flush();
+
+    Index idx = gf.getSize();
+    const auto value = gf.min(idx);
+    EXPECT_EQ(idx, expectedIdx);
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(value)), -2.5);
+  }
+
+  TEST(PETSc_GridFunction, SequentialMaxReturnsValueAndIndex)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    P1 fes(mesh);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    for (Index i = 0; i < gf.getSize(); ++i)
+      gf[i] = static_cast<PetscScalar>(-10.0 - static_cast<Real>(i));
+
+    constexpr Index expectedIdx = 5;
+    gf[expectedIdx] = static_cast<PetscScalar>(4.25);
+    gf.flush();
+
+    Index idx = gf.getSize();
+    const auto value = gf.max(idx);
+    EXPECT_EQ(idx, expectedIdx);
+    EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(value)), 4.25);
+  }
 }
 
 int main(int argc, char** argv)
