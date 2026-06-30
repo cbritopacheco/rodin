@@ -495,7 +495,8 @@ namespace Rodin::Assembly
           static_cast<PetscInt>(ncols),
           static_cast<PetscInt>(ncols),
           VECSEQ,
-          true
+          true,
+          false
         });
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
@@ -1296,7 +1297,8 @@ namespace Rodin::Assembly
           static_cast<PetscInt>(ncols),
           static_cast<PetscInt>(ncols),
           VECSEQ,
-          true
+          true,
+          false
         });
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;

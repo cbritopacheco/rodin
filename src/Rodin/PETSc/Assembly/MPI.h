@@ -415,7 +415,8 @@ namespace Rodin::Assembly
           static_cast<PetscInt>(localCols),
           static_cast<PetscInt>(globalCols),
           nullptr,
-          true
+          true,
+          false
         });
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
@@ -1110,7 +1111,8 @@ namespace Rodin::Assembly
           static_cast<PetscInt>(localCols),
           static_cast<PetscInt>(ncols),
           nullptr,
-          true
+          true,
+          false
         });
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;

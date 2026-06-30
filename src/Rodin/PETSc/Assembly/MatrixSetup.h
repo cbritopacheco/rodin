@@ -70,11 +70,28 @@ namespace Rodin::PETSc::Assembly
 
       PetscErrorCode prepare(const Options& options) const
       {
-        bool needsSetup = true;
-        PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
+        PetscInt curRows = 0;
+        PetscInt curCols = 0;
+        PetscErrorCode ierr = MatGetSize(m_matrix, &curRows, &curCols);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
 
+        PetscBool assembled = PETSC_FALSE;
+        ierr = MatAssembled(m_matrix, &assembled);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+
+        // A virgin matrix must be set up. An already-assembled matrix whose
+        // dimensions match is reused. Different dimensions violate the
+        // constant-space contract: use a fresh LinearSystem for a different
+        // finite element space or mesh.
+        assert(
+            (assembled != PETSC_TRUE ||
+             (curRows == options.globalRows && curCols == options.globalCols)) &&
+            "MatrixSetup cannot resize an assembled matrix; use a fresh "
+            "LinearSystem for a different space or mesh.");
+
+        const bool needsSetup = (assembled != PETSC_TRUE);
         if (needsSetup)
         {
           ierr = MatSetSizes(
@@ -109,35 +126,6 @@ namespace Rodin::PETSc::Assembly
       }
 
     private:
-      // Decides whether the matrix needs a structural (re)setup. A virgin
-      // matrix must be set up. An already-assembled matrix whose dimensions
-      // match is reused (only zeroed). An already-assembled matrix whose
-      // dimensions differ violates the constant-space contract and cannot be
-      // resized in place, so it fails the debug assertion.
-      PetscErrorCode needsStructuralSetup(
-          const Options& options, bool& needsSetup) const
-      {
-        PetscInt curRows = 0;
-        PetscInt curCols = 0;
-        PetscErrorCode ierr = MatGetSize(m_matrix, &curRows, &curCols);
-        assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
-
-        PetscBool assembled = PETSC_FALSE;
-        ierr = MatAssembled(m_matrix, &assembled);
-        assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
-
-        assert(
-            (assembled != PETSC_TRUE ||
-             (curRows == options.globalRows && curCols == options.globalCols)) &&
-            "MatrixSetup cannot resize an assembled matrix; use a fresh "
-            "LinearSystem for a different space or mesh.");
-
-        needsSetup = (assembled != PETSC_TRUE);
-        return PETSC_SUCCESS;
-      }
-
       ::Mat m_matrix;
   };
 }
