@@ -57,9 +57,8 @@ namespace
     return sharder.gather(0);
   }
 
-  // Per-rank stored nonzeros (size of this rank's slice of the pattern). With
-  // MAT_IGNORE_ZERO_ENTRIES = PETSC_FALSE (set by MatrixSetup) explicit zeros
-  // are kept, so this counts every allocated slot.
+  // Per-rank stored nonzeros, i.e. the size of this rank's PETSc-owned
+  // nonzero pattern under the current PETSc options.
   PetscInt matrixLocalNonzeros(Mat A)
   {
     MatInfo info;
@@ -85,14 +84,6 @@ namespace
     PetscErrorCode ierr = MatGetInfo(A, MAT_GLOBAL_SUM, &info);
     EXPECT_EQ(ierr, PETSC_SUCCESS);
     return static_cast<PetscInt>(info.nz_used);
-  }
-
-  PetscReal matrixMaxAbs(Mat A)
-  {
-    PetscReal norm = 0;
-    PetscErrorCode ierr = MatNorm(A, NORM_INFINITY, &norm);
-    EXPECT_EQ(ierr, PETSC_SUCCESS);
-    return norm;
   }
 
   void expectSameOwnedVector(Vec expected, Vec actual)
@@ -172,8 +163,6 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   TEST(PETSc_MPI_TargetedAssembly, AssemblesLHSAndRHS)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
@@ -213,8 +202,6 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   TEST(PETSc_MPI_TargetedAssembly, ReassemblyKeepsNonzeroPattern)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
@@ -246,41 +233,40 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     EXPECT_EQ(mallocs1, matrixLocalMallocs(A));
   }
 
-  // Scaling the form by zero makes every visited entry numerically zero. The
-  // slots must still be allocated on every rank, so the per-rank nonzero count
-  // matches the full stiffness matrix while the matrix is numerically zero.
-  TEST(PETSc_MPI_TargetedAssembly, StructuralZerosStayInPattern)
+  // The PETSc policy may also be changed between two assemblies of the same
+  // distributed LinearSystem. If the first assembly leaves an empty matrix
+  // pattern, then explicitly allowing new nonzero allocations before
+  // reassembly must let PETSc grow the pattern instead of being overridden by
+  // the MPI MatrixSetup path.
+  TEST(PETSc_MPI_TargetedAssembly, HonorsNewNonzeroOptionBeforeReassembly)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
 
-    P1<Real, Mesh<Context::MPI>> refFES(mesh);
-    PETSc::Variational::TrialFunction uRef(refFES);
-    PETSc::Variational::TestFunction  vRef(refFES);
-    RealFunction one(1.0);
-    Problem reference(uRef, vRef);
-    reference = Integral(one * Grad(uRef), Grad(vRef))
-              - Integral(RealFunction(1.0), vRef);
-    reference.assemble();
-    const PetscInt referenceNz =
-      matrixLocalNonzeros(reference.getLinearSystem().getOperator());
+    P1<Real, Mesh<Context::MPI>> fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+    RealFunction gamma(1.0);
 
-    P1<Real, Mesh<Context::MPI>> zeroFES(mesh);
-    PETSc::Variational::TrialFunction uZero(zeroFES);
-    PETSc::Variational::TestFunction  vZero(zeroFES);
-    RealFunction zero(0.0);
-    Problem zeroed(uZero, vZero);
-    zeroed = Integral(zero * Grad(uZero), Grad(vZero))
-           - Integral(RealFunction(1.0), vZero);
-    zeroed.assemble();
+    auto emptyLHS = Integral(gamma * Grad(u), Grad(v));
+    emptyLHS.over(999);
 
-    EXPECT_EQ(referenceNz,
-        matrixLocalNonzeros(zeroed.getLinearSystem().getOperator()));
-    EXPECT_LE(matrixMaxAbs(zeroed.getLinearSystem().getOperator()), 1e-14);
+    Problem p(u, v);
+    p = emptyLHS - Integral(RealFunction(1.0), v);
+    p.assemble();
+
+    Mat A = p.getLinearSystem().getOperator();
+    ASSERT_EQ(matrixGlobalNonzeros(A), 0);
+
+    ASSERT_EQ(
+        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE),
+        PETSC_SUCCESS);
+    p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
+    p.assemble();
+
+    EXPECT_GT(matrixGlobalNonzeros(A), 0);
   }
 
   // A problem with different global dimensions must produce a different nonzero
@@ -290,8 +276,6 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   TEST(PETSc_MPI_TargetedAssembly, ReassemblyChangesNonzeroPattern)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
 

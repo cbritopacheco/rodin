@@ -9,7 +9,7 @@
 
 #include <petscmat.h>
 
-#include "Rodin/PETSc/Check.h"
+#include <cassert>
 
 namespace Rodin::PETSc::Assembly
 {
@@ -30,9 +30,9 @@ namespace Rodin::PETSc::Assembly
    * means a different @c LinearSystem. PETSc has no in-place resize for an
    * already-assembled matrix (@c MatSetSizes is only valid before the layout is
    * established), so @c prepare does not attempt one. If it ever observes an
-   * already-assembled matrix whose dimensions differ from the requested ones —
+   * already-assembled matrix whose dimensions differ from the requested ones,
    * which can only happen if a @c LinearSystem is illegally reused across
-   * different spaces — it raises rather than silently corrupting state.
+   * different spaces, it fails the debug assertion.
    *
    * ## Why this matters
    *
@@ -46,9 +46,10 @@ namespace Rodin::PETSc::Assembly
    * expensive symbolic factorization on every residual/Jacobian evaluation.
    *
    * When the existing structure is reusable, @c prepare skips the structural
-   * calls and only does @c MatZeroEntries + refill. That preserves the nonzero
-   * state, so PETSc reports @c SAME_NONZERO_PATTERN and the symbolic
-   * factorization is computed once and reused across assemblies.
+   * calls and only does @c MatZeroEntries + refill. No PETSc nonzero-pattern
+   * policy is set here; if the user wants to forbid or allow new nonzeros, that
+   * remains controlled by PETSc defaults or explicit user calls to
+   * @c MatSetOption.
    */
   class MatrixSetup
   {
@@ -61,7 +62,6 @@ namespace Rodin::PETSc::Assembly
         PetscInt globalCols;
         MatType type = nullptr;
         bool setFromOptions = false;
-        bool keepNonzeroPattern = false;
       };
 
       explicit MatrixSetup(::Mat matrix)
@@ -71,32 +71,38 @@ namespace Rodin::PETSc::Assembly
       PetscErrorCode prepare(const Options& options) const
       {
         bool needsSetup = true;
-        RODIN_PETSC_CHECK_OK(needsStructuralSetup(options, needsSetup));
+        PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
         if (needsSetup)
         {
-          RODIN_PETSC_CHECK_OK(MatSetSizes(
+          ierr = MatSetSizes(
               m_matrix,
               options.localRows,
               options.localCols,
               options.globalRows,
-              options.globalCols));
+              options.globalCols);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
 
           if (options.type)
-            RODIN_PETSC_CHECK_OK(MatSetType(m_matrix, options.type));
+          {
+            ierr = MatSetType(m_matrix, options.type);
+            assert(ierr == PETSC_SUCCESS);
+            (void) ierr;
+          }
 
           if (options.setFromOptions)
-            RODIN_PETSC_CHECK_OK(MatSetFromOptions(m_matrix));
+          {
+            ierr = MatSetFromOptions(m_matrix);
+            assert(ierr == PETSC_SUCCESS);
+            (void) ierr;
+          }
 
-          if (options.keepNonzeroPattern)
-            RODIN_PETSC_CHECK_OK(MatSetOption(
-                m_matrix, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE));
-
-          RODIN_PETSC_CHECK_OK(MatSetUp(m_matrix));
-
-          if (options.keepNonzeroPattern)
-            RODIN_PETSC_CHECK_OK(MatSetOption(
-                m_matrix, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE));
+          ierr = MatSetUp(m_matrix);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
         }
 
         return MatZeroEntries(m_matrix);
@@ -107,30 +113,26 @@ namespace Rodin::PETSc::Assembly
       // matrix must be set up. An already-assembled matrix whose dimensions
       // match is reused (only zeroed). An already-assembled matrix whose
       // dimensions differ violates the constant-space contract and cannot be
-      // resized in place, so we raise.
+      // resized in place, so it fails the debug assertion.
       PetscErrorCode needsStructuralSetup(
           const Options& options, bool& needsSetup) const
       {
         PetscInt curRows = 0;
         PetscInt curCols = 0;
-        RODIN_PETSC_CHECK_OK(MatGetSize(m_matrix, &curRows, &curCols));
+        PetscErrorCode ierr = MatGetSize(m_matrix, &curRows, &curCols);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
         PetscBool assembled = PETSC_FALSE;
-        RODIN_PETSC_CHECK_OK(MatAssembled(m_matrix, &assembled));
+        ierr = MatAssembled(m_matrix, &assembled);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
-        if (assembled == PETSC_TRUE &&
-            (curRows != options.globalRows || curCols != options.globalCols))
-        {
-          Alert::Exception()
-            << "MatrixSetup: cannot resize an assembled matrix from "
-            << static_cast<long long>(curRows) << "x"
-            << static_cast<long long>(curCols) << " to "
-            << static_cast<long long>(options.globalRows) << "x"
-            << static_cast<long long>(options.globalCols)
-            << ". A LinearSystem is bound to fixed finite element spaces; "
-            << "use a fresh LinearSystem for a different space or mesh."
-            << Alert::Raise;
-        }
+        assert(
+            (assembled != PETSC_TRUE ||
+             (curRows == options.globalRows && curCols == options.globalCols)) &&
+            "MatrixSetup cannot resize an assembled matrix; use a fresh "
+            "LinearSystem for a different space or mesh.");
 
         needsSetup = (assembled != PETSC_TRUE);
         return PETSC_SUCCESS;
