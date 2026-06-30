@@ -23,8 +23,8 @@ namespace Rodin::PETSc::Assembly
    * first call lays the vector out (sizes, type, options); subsequent calls
    * reuse it. PETSc has no in-place resize for a vector whose layout is set, so
    * if @c prepare ever observes a typed vector whose size differs from the
-   * requested one — only possible if a @c LinearSystem is illegally reused
-   * across different spaces — it raises rather than silently corrupting state.
+   * requested one, which is only possible if a @c LinearSystem is illegally
+   * reused across different spaces, it fails the debug assertion.
    *
    * ## Zeroing
    *
@@ -62,20 +62,20 @@ namespace Rodin::PETSc::Assembly
         {
           ierr = VecSetSizes(m_vector, options.localSize, options.globalSize);
           assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+          (void) ierr;
 
           if (options.type)
           {
             ierr = VecSetType(m_vector, options.type);
             assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+            (void) ierr;
           }
 
           if (options.setFromOptions)
           {
             ierr = VecSetFromOptions(m_vector);
             assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+            (void) ierr;
           }
         }
 
@@ -89,7 +89,7 @@ namespace Rodin::PETSc::Assembly
       // A vector with no type yet is virgin and must be laid out. A typed
       // vector whose size matches is reused. A typed vector whose size differs
       // violates the constant-space contract and cannot be resized in place, so
-      // we raise.
+      // it fails the debug assertion.
       PetscErrorCode needsStructuralSetup(
           const Options& options, bool& needsSetup) const
       {
@@ -104,7 +104,7 @@ namespace Rodin::PETSc::Assembly
           PetscInt curSize = 0;
           ierr = VecGetSize(m_vector, &curSize);
           assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+          (void) ierr;
           assert(
               curSize == options.globalSize &&
               "VectorSetup cannot resize an assembled vector; use a fresh "
