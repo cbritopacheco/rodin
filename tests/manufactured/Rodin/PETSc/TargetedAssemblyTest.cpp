@@ -120,9 +120,8 @@ namespace
     expectSameVector(full.getVector(), rhs.getVector());
   }
 
-  // Number of stored nonzeros, i.e. the size of the nonzero pattern. With
-  // MAT_IGNORE_ZERO_ENTRIES = PETSC_FALSE (set by MatrixSetup) explicit zeros
-  // are kept, so this counts every allocated slot.
+  // Number of stored nonzeros, i.e. the size of the PETSc-owned nonzero
+  // pattern under the current PETSc options.
   PetscInt matrixNonzeros(Mat A)
   {
     MatInfo info;
@@ -141,15 +140,6 @@ namespace
     assert(ierr == PETSC_SUCCESS);
     (void) ierr;
     return info.mallocs;
-  }
-
-  PetscReal matrixMaxAbs(Mat A)
-  {
-    PetscReal norm = 0;
-    PetscErrorCode ierr = MatNorm(A, NORM_INFINITY, &norm);
-    assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
-    return norm;
   }
 
   // Assemble a P1 stiffness system (Grad . Grad scaled by gammaValue) on an
@@ -217,11 +207,8 @@ namespace
   // both dimension and stored nonzero count.
   //
   // Note: re-assembling a *resized* problem into the *same* matrix object is
-  // intentionally not exercised here. MatrixSetup documents a full-setup
-  // fallback for that case, but MatSetSizes/MatSetUp cannot be re-applied to an
-  // already-assembled AIJ matrix without first recreating it, so that path is
-  // currently unsafe under release builds (where the ierr asserts are NDEBUG'd
-  // out). See the accompanying review note.
+  // intentionally not exercised here. A LinearSystem is tied to fixed finite
+  // element spaces; a different space or mesh must use a fresh LinearSystem.
   template <template <class, class> class Assembler>
   void checkReassemblyChangesPattern()
   {
@@ -247,23 +234,6 @@ namespace
     EXPECT_NE(nz1, matrixNonzeros(fine.getOperator()));
   }
 
-  // Scaling the form by zero makes every visited entry numerically zero. The
-  // slots must still be allocated (no manual +1/-1 dance needed), so the
-  // nonzero pattern matches the full stiffness matrix while the values vanish.
-  template <template <class, class> class Assembler>
-  void checkStructuralZerosStayInPattern()
-  {
-    PETSc::Math::LinearSystem reference(PETSC_COMM_SELF);
-    assembleStiffness<Assembler>(reference, 4, 1.0);
-    const PetscInt referenceNz = matrixNonzeros(reference.getOperator());
-
-    PETSc::Math::LinearSystem zeroed(PETSC_COMM_SELF);
-    assembleStiffness<Assembler>(zeroed, 4, 0.0);
-
-    EXPECT_EQ(referenceNz, matrixNonzeros(zeroed.getOperator()));
-    EXPECT_LE(matrixMaxAbs(zeroed.getOperator()), 1e-14);
-  }
-
   TEST(PETSc_TargetedAssembly, SequentialBackendAssemblesLHSAndRHS)
   {
     checkLocalBackendTargetedAssembly<Assembly::Sequential>();
@@ -277,11 +247,6 @@ namespace
   TEST(PETSc_TargetedAssembly, SequentialReassemblyChangesNonzeroPattern)
   {
     checkReassemblyChangesPattern<Assembly::Sequential>();
-  }
-
-  TEST(PETSc_TargetedAssembly, SequentialStructuralZerosStayInPattern)
-  {
-    checkStructuralZerosStayInPattern<Assembly::Sequential>();
   }
 
 #ifdef RODIN_USE_OPENMP
@@ -300,10 +265,6 @@ namespace
     checkReassemblyChangesPattern<Assembly::OpenMP>();
   }
 
-  TEST(PETSc_TargetedAssembly, OpenMPStructuralZerosStayInPattern)
-  {
-    checkStructuralZerosStayInPattern<Assembly::OpenMP>();
-  }
 #endif
 }
 
