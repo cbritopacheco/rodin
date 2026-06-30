@@ -10,9 +10,13 @@
 /**
  * @file
  * @brief PETSc-backed WNGIR public include.
+ *
+ * Provides the PETSc specialization of @ref Rodin::Adaptation::WNGIRBackend, so
+ * that the backend-independent @ref Rodin::Adaptation::WNGIR solver, when
+ * constructed from a PETSc displacement GridFunction, runs its step problems on
+ * PETSc objects with no per-backend solver code.
  */
 
-#include "WNGIRLinearSolver.h"
-#include "WNGIRSolver.h"
+#include "WNGIRBackend.h"
 
 #endif

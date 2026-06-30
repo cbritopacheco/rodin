@@ -87,21 +87,18 @@ namespace Rodin::Adaptation::Detail
               sQ0 = params.qMax - qK;
               jBarrierActive =
                 (params.includeAdmissibilityGradient
-                 || params.includeQualityGradient
-                 || params.splitQualityDirection)
+                 || params.includeQualityGradient)
                 && params.gammaJ > Real(0)
                 && sJ0 > Real(0) && sJ0 < params.s0J;
               qBarrierActive = params.includeAdmissibilityGradient
                 && params.gammaQ > Real(0)
                 && sQ0 > Real(0) && sQ0 < params.s0Q;
               qualHingeActive =
-                (params.includeQualityGradient
-                 || params.splitQualityDirection)
+                params.includeQualityGradient
                 && params.gammaQual > Real(0) && qK > params.qStar;
             }
             const bool sizeHingeActive =
-              (params.includeQualityGradient
-               || params.splitQualityDirection)
+              params.includeQualityGradient
               && params.gammaSize > Real(0) && jK < params.jStar;
             if (!jBarrierActive && !qBarrierActive
                 && !qualHingeActive && !sizeHingeActive)

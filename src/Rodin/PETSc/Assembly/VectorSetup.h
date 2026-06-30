@@ -11,7 +11,6 @@
 
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/Raise.h"
-#include "Rodin/PETSc/Check.h"
 
 namespace Rodin::PETSc::Assembly
 {
@@ -56,18 +55,29 @@ namespace Rodin::PETSc::Assembly
       PetscErrorCode prepare(const Options& options) const
       {
         bool needsSetup = true;
-        RODIN_PETSC_CHECK_OK(needsStructuralSetup(options, needsSetup));
+        PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
+        if (ierr)
+          return ierr;
 
         if (needsSetup)
         {
-          RODIN_PETSC_CHECK_OK(VecSetSizes(
-              m_vector, options.localSize, options.globalSize));
+          ierr = VecSetSizes(m_vector, options.localSize, options.globalSize);
+          if (ierr)
+            return ierr;
 
           if (options.type)
-            RODIN_PETSC_CHECK_OK(VecSetType(m_vector, options.type));
+          {
+            ierr = VecSetType(m_vector, options.type);
+            if (ierr)
+              return ierr;
+          }
 
           if (options.setFromOptions)
-            RODIN_PETSC_CHECK_OK(VecSetFromOptions(m_vector));
+          {
+            ierr = VecSetFromOptions(m_vector);
+            if (ierr)
+              return ierr;
+          }
         }
 
         if (needsSetup || options.zeroOnReuse)
@@ -85,13 +95,17 @@ namespace Rodin::PETSc::Assembly
           const Options& options, bool& needsSetup) const
       {
         VecType curType = nullptr;
-        RODIN_PETSC_CHECK_OK(VecGetType(m_vector, &curType));
+        PetscErrorCode ierr = VecGetType(m_vector, &curType);
+        if (ierr)
+          return ierr;
 
         const bool hasType = (curType != nullptr);
         if (hasType)
         {
           PetscInt curSize = 0;
-          RODIN_PETSC_CHECK_OK(VecGetSize(m_vector, &curSize));
+          ierr = VecGetSize(m_vector, &curSize);
+          if (ierr)
+            return ierr;
           if (curSize != options.globalSize)
           {
             Alert::Exception()

@@ -7,6 +7,8 @@
 #ifndef RODIN_ADAPTATION_WNGIRDETAIL_H
 #define RODIN_ADAPTATION_WNGIRDETAIL_H
 
+#include "Rodin/Variational/Jacobian.h"
+
 #include "WNGIRCommon.h"
 
 namespace Rodin::Adaptation
@@ -174,6 +176,9 @@ namespace Rodin::Adaptation
       return jp;
     }
 
+    // F = I + ∇u at the integration point. Evaluated through the GridFunction's
+    // gradient so it is backend-independent (Eigen or PETSc-backed coefficients
+    // alike); the cached interpolation matches the explicit basis contraction.
     template <class Displacement>
     Math::SpatialMatrix<Real> deformationGradient(
         const Displacement& u,
@@ -181,18 +186,10 @@ namespace Rodin::Adaptation
         const Variational::IntegrationPoint& ip,
         std::size_t dim)
     {
-      const auto& fes = u.getFiniteElementSpace();
-      const auto& fe = fes.getFiniteElement(
-          polytope.getDimension(), polytope.getIndex());
-      const auto& dofs = fes.getDOFs(
-          polytope.getDimension(), polytope.getIndex());
-      const auto Jinv = ip.getPoint().getJacobianInverse();
-      const auto& rc = ip.getPoint().getReferenceCoordinates();
-
-      auto F = Math::SpatialMatrix<Real>::Identity(dim, dim);
-      for (std::size_t l = 0; l < fe.getCount(); ++l)
-        F += u.getData()(dofs[l])
-          * physicalJacobian(fe, l, rc, Jinv, dim);
+      (void) polytope;
+      Math::SpatialMatrix<Real> F =
+        Math::SpatialMatrix<Real>::Identity(dim, dim);
+      F += Variational::Jacobian(u).getValue(ip);
       return F;
     }
   }

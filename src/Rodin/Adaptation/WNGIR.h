@@ -12,10 +12,9 @@
  * @brief Public include for Welsch natural-gradient interface registration.
  */
 
+#include "WNGIRBackend.h"
 #include "WNGIRParameters.h"
 #include "WNGIRReport.h"
-#include "WNGIRSolve.h"
-#include "WNGIREigenLinearSolver.h"
 #include "WNGIRSolver.h"
 
 #endif

@@ -78,15 +78,6 @@ namespace Rodin::Adaptation
     /// If true, add the Q_rel and optional j-size hinge Gauss--Newton terms
     /// to the metric.
     bool includeQualityMetric = true;
-    /// Experimental split mode:
-    ///   A v_fit  = F_Gamma,
-    ///   A v_qual = F_hinge,
-    ///   v        = v_fit + qualityDirectionWeight v_qual.
-    /// Since A includes the surface observation metric and the quality metric,
-    /// v_fit is a Welsch-only fit direction through a quality-aware metric,
-    /// while v_qual recovers quality through the actual positive-part hinges.
-    bool splitQualityDirection = false;
-    Real qualityDirectionWeight = 1;
     /// Optimal 1-D rescale of the lifted step along itself:
     ///   β = ⟨d, v⟩_Γ / ⟨v, v⟩_Γ  (surface inner products),
     /// clamped to [1, betaMax]; line search starts at β·v instead of

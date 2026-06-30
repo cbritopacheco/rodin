@@ -12,13 +12,12 @@ set(RodinAdaptation_HEADERS
   WNGIRAdmissibility.h
   WNGIRAdmissibilityGradient.h
   WNGIRAdmissibilityMetric.h
+  WNGIRBackend.h
   WNGIRCommon.h
   WNGIRDetail.h
-  WNGIREigenLinearSolver.h
   WNGIRParameters.h
   WNGIRReport.h
   WNGIRSolver.h
-  WNGIRSolve.h
   WNGIRSurfaceForce.h
   WNGIRSurfaceObservationMetric.h
 )

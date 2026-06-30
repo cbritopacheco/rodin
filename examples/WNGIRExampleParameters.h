@@ -183,10 +183,6 @@ namespace Rodin::Examples
       boolOption(argc, argv, "wngir-admissibility-metric", true);
     p.includeAdmissibilityGradient =
       boolOption(argc, argv, "wngir-admissibility-gradient", false);
-    p.splitQualityDirection =
-      boolOption(argc, argv, "wngir-split-quality", false);
-    p.qualityDirectionWeight =
-      realOption(argc, argv, "wngir-quality-weight", Real(1));
 
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;

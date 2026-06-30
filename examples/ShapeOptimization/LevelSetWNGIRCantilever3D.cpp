@@ -216,9 +216,7 @@ namespace
     {
       const Vec3 x = mesh.getVertexCoordinates(v);
       const auto& d = fes.getDOFs(0, v);
-      moved.setVertexCoordinates(v, x + vec3(u.getData()(d[0]),
-                                             u.getData()(d[1]),
-                                             u.getData()(d[2])));
+      moved.setVertexCoordinates(v, x + vec3(u[d[0]], u[d[1]], u[d[2]]));
     }
   }
 
@@ -365,7 +363,7 @@ int run(int argc, char** argv)
   ScalarP0 p0(mesh);
   VectorP1 vh(mesh, 3);
   GridFunction phiH(sh); phiH.setName("phi");
-  GridFunction u(vh); u.setName("fit");
+  PETSc::Variational::GridFunction u(vh); u.setName("fit");
   GridFunction dJ(vh); dJ.setName("dJ");
 
   // A solid box perforated by a regular array of spherical voids.
@@ -423,7 +421,7 @@ int run(int argc, char** argv)
     Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
-  PETSc::Adaptation::WNGIR wngir(u);
+  Adaptation::WNGIR wngir(u);
   wngir.setParameters(wp);
 
   WNGIRMesh moved(mesh);
@@ -549,7 +547,7 @@ int run(int argc, char** argv)
     RealFunction phiFn([&](const Geometry::Point& p) { return phiH.getValue(p); });
     AnalyticVectorFunction gradFn(
         [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
-    u.getData().setZero();
+    u = Real(0);
     const auto report = wngir.solve(mesh, interfaceFacets, phiFn, gradFn);
     std::cout << "  WNGIR: it=" << report.iterations
               << " exit=" << report.exitReason
