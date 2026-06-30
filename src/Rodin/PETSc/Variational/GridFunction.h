@@ -546,11 +546,13 @@ namespace Rodin::Variational
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ScalarType res;
-        ierr = VecMin(data, idx, &res);
+        PetscInt pidx;
+        PetscReal res;
+        ierr = VecMin(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
-        return res;
+        idx = static_cast<Index>(pidx);
+        return static_cast<ScalarType>(res);
       }
 
       /**
@@ -568,11 +570,13 @@ namespace Rodin::Variational
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ScalarType res;
-        ierr = VecMax(data, idx, &res);
+        PetscInt pidx;
+        PetscReal res;
+        ierr = VecMax(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
-        return res;
+        idx = static_cast<Index>(pidx);
+        return static_cast<ScalarType>(res);
       }
 
       /**
