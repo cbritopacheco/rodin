@@ -163,8 +163,6 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   TEST(PETSc_MPI_TargetedAssembly, AssemblesLHSAndRHS)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
@@ -204,8 +202,6 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   TEST(PETSc_MPI_TargetedAssembly, ReassemblyKeepsNonzeroPattern)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx);
@@ -237,6 +233,42 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     EXPECT_EQ(mallocs1, matrixLocalMallocs(A));
   }
 
+  // The PETSc policy may also be changed between two assemblies of the same
+  // distributed LinearSystem. If the first assembly leaves an empty matrix
+  // pattern, then explicitly allowing new nonzero allocations before
+  // reassembly must let PETSc grow the pattern instead of being overridden by
+  // the MPI MatrixSetup path.
+  TEST(PETSc_MPI_TargetedAssembly, HonorsNewNonzeroOptionBeforeReassembly)
+  {
+    const auto& world = *g_world;
+
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+
+    P1<Real, Mesh<Context::MPI>> fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+    RealFunction gamma(1.0);
+
+    auto emptyLHS = Integral(gamma * Grad(u), Grad(v));
+    emptyLHS.over(999);
+
+    Problem p(u, v);
+    p = emptyLHS - Integral(RealFunction(1.0), v);
+    p.assemble();
+
+    Mat A = p.getLinearSystem().getOperator();
+    ASSERT_EQ(matrixGlobalNonzeros(A), 0);
+
+    ASSERT_EQ(
+        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE),
+        PETSC_SUCCESS);
+    p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
+    p.assemble();
+
+    EXPECT_GT(matrixGlobalNonzeros(A), 0);
+  }
+
   // A problem with different global dimensions must produce a different nonzero
   // pattern. Each distinct-size problem uses its own distributed mesh and
   // matrix (the production path for a different mesh); the two patterns must
@@ -244,8 +276,6 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   TEST(PETSc_MPI_TargetedAssembly, ReassemblyChangesNonzeroPattern)
   {
     const auto& world = *g_world;
-    if (world.size() > 4)
-      GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
 
