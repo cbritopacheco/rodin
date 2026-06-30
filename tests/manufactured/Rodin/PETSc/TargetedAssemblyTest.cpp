@@ -76,6 +76,22 @@ namespace
     }
   }
 
+  void expectVectorConstant(Vec vector, PetscScalar expected)
+  {
+    PetscErrorCode ierr;
+    PetscInt n = 0;
+    ierr = VecGetSize(vector, &n);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    for (PetscInt i = 0; i < n; i++)
+    {
+      PetscScalar value = 0;
+      ierr = VecGetValues(vector, 1, &i, &value);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_LE(PetscAbsScalar(value - expected), 1e-14) << "row " << i;
+    }
+  }
+
   void expectSameMatrix(Mat expected, Mat actual)
   {
     PetscErrorCode ierr;
@@ -151,7 +167,8 @@ namespace
       PETSc::Math::LinearSystem& ls,
       size_t n,
       double gammaValue,
-      bool emptyLHS)
+      bool emptyLHS,
+      double sourceValue)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
@@ -169,7 +186,7 @@ namespace
       lhs.over(999);
 
     typename ProblemType::ProblemBodyType body =
-      lhs - Integral(RealFunction(1.0), v);
+      lhs - Integral(RealFunction(sourceValue), v);
 
     Assembly::ProblemAssemblyInput<
       typename ProblemType::ProblemBodyType,
@@ -181,9 +198,19 @@ namespace
 
   template <template <class, class> class Assembler>
   void assembleStiffness(
+      PETSc::Math::LinearSystem& ls,
+      size_t n,
+      double gammaValue,
+      bool emptyLHS)
+  {
+    assembleStiffness<Assembler>(ls, n, gammaValue, emptyLHS, 1.0);
+  }
+
+  template <template <class, class> class Assembler>
+  void assembleStiffness(
       PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
   {
-    assembleStiffness<Assembler>(ls, n, gammaValue, false);
+    assembleStiffness<Assembler>(ls, n, gammaValue, false, 1.0);
   }
 
   // Re-assembling the identical problem into the same matrix must reuse the
@@ -248,6 +275,26 @@ namespace
     EXPECT_NE(nz1, matrixNonzeros(fine.getOperator()));
   }
 
+  // The right-hand side vector is rebuilt from scratch on every assembly and
+  // must be zeroed on reuse. The solution vector is a solver iterate and must
+  // not be zeroed when the same LinearSystem is assembled again.
+  template <template <class, class> class Assembler>
+  void checkVectorReuse()
+  {
+    PETSc::Math::LinearSystem ls(PETSC_COMM_SELF);
+    assembleStiffness<Assembler>(ls, 4, 1.0, false, 1.0);
+
+    PetscErrorCode ierr = VecSet(ls.getSolution(), 3.0);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    assembleStiffness<Assembler>(ls, 4, 1.0, false, 2.0);
+    expectVectorConstant(ls.getSolution(), 3.0);
+
+    PETSc::Math::LinearSystem expected(PETSC_COMM_SELF);
+    assembleStiffness<Assembler>(expected, 4, 1.0, false, 2.0);
+    expectSameVector(expected.getVector(), ls.getVector());
+  }
+
   // The PETSc policy may also be changed between two assemblies of the same
   // LinearSystem. If the first assembly leaves an empty matrix pattern, then
   // explicitly allowing new nonzero allocations before reassembly must let
@@ -305,6 +352,11 @@ namespace
     checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::Sequential>();
   }
 
+  TEST(PETSc_TargetedAssembly, SequentialReusesVectorsCorrectly)
+  {
+    checkVectorReuse<Assembly::Sequential>();
+  }
+
 #ifndef NDEBUG
   TEST(PETSc_TargetedAssembly, SequentialForbidsNewNonzeroBeforeReassembly)
   {
@@ -332,6 +384,11 @@ namespace
   TEST(PETSc_TargetedAssembly, OpenMPHonorsNewNonzeroOptionBeforeReassembly)
   {
     checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_TargetedAssembly, OpenMPReusesVectorsCorrectly)
+  {
+    checkVectorReuse<Assembly::OpenMP>();
   }
 
 #endif

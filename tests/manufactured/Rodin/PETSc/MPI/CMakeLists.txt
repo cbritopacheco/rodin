@@ -44,7 +44,7 @@ target_link_libraries(RodinManufacturedPETScMPITargetedAssemblyTest
   Rodin::MPI
   Rodin::PETSc)
 
-foreach(np 1 2 4)
+foreach(np 1 2 4 5)
   add_test(
     NAME RodinManufacturedPETScMPITargetedAssemblyTest_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
