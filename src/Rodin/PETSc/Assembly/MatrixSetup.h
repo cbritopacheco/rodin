@@ -9,7 +9,7 @@
 
 #include <petscmat.h>
 
-#include "Rodin/PETSc/Check.h"
+#include <cassert>
 
 namespace Rodin::PETSc::Assembly
 {
@@ -71,32 +71,52 @@ namespace Rodin::PETSc::Assembly
       PetscErrorCode prepare(const Options& options) const
       {
         bool needsSetup = true;
-        RODIN_PETSC_CHECK_OK(needsStructuralSetup(options, needsSetup));
+        PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
         if (needsSetup)
         {
-          RODIN_PETSC_CHECK_OK(MatSetSizes(
+          ierr = MatSetSizes(
               m_matrix,
               options.localRows,
               options.localCols,
               options.globalRows,
-              options.globalCols));
+              options.globalCols);
+          assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
           if (options.type)
-            RODIN_PETSC_CHECK_OK(MatSetType(m_matrix, options.type));
+          {
+            ierr = MatSetType(m_matrix, options.type);
+            assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+          }
 
           if (options.setFromOptions)
-            RODIN_PETSC_CHECK_OK(MatSetFromOptions(m_matrix));
+          {
+            ierr = MatSetFromOptions(m_matrix);
+            assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+          }
 
           if (options.keepNonzeroPattern)
-            RODIN_PETSC_CHECK_OK(MatSetOption(
-                m_matrix, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE));
+          {
+            ierr = MatSetOption(m_matrix, MAT_IGNORE_ZERO_ENTRIES, PETSC_FALSE);
+            assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+          }
 
-          RODIN_PETSC_CHECK_OK(MatSetUp(m_matrix));
+          ierr = MatSetUp(m_matrix);
+          assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
           if (options.keepNonzeroPattern)
-            RODIN_PETSC_CHECK_OK(MatSetOption(
-                m_matrix, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE));
+          {
+            ierr = MatSetOption(m_matrix, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+            assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
+          }
         }
 
         return MatZeroEntries(m_matrix);
@@ -113,24 +133,20 @@ namespace Rodin::PETSc::Assembly
       {
         PetscInt curRows = 0;
         PetscInt curCols = 0;
-        RODIN_PETSC_CHECK_OK(MatGetSize(m_matrix, &curRows, &curCols));
+        PetscErrorCode ierr = MatGetSize(m_matrix, &curRows, &curCols);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
         PetscBool assembled = PETSC_FALSE;
-        RODIN_PETSC_CHECK_OK(MatAssembled(m_matrix, &assembled));
+        ierr = MatAssembled(m_matrix, &assembled);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
-        if (assembled == PETSC_TRUE &&
-            (curRows != options.globalRows || curCols != options.globalCols))
-        {
-          Alert::Exception()
-            << "MatrixSetup: cannot resize an assembled matrix from "
-            << static_cast<long long>(curRows) << "x"
-            << static_cast<long long>(curCols) << " to "
-            << static_cast<long long>(options.globalRows) << "x"
-            << static_cast<long long>(options.globalCols)
-            << ". A LinearSystem is bound to fixed finite element spaces; "
-            << "use a fresh LinearSystem for a different space or mesh."
-            << Alert::Raise;
-        }
+        assert(
+            (assembled != PETSC_TRUE ||
+             (curRows == options.globalRows && curCols == options.globalCols)) &&
+            "MatrixSetup cannot resize an assembled matrix; use a fresh "
+            "LinearSystem for a different space or mesh.");
 
         needsSetup = (assembled != PETSC_TRUE);
         return PETSC_SUCCESS;
