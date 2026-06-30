@@ -148,7 +148,10 @@ namespace
   // structural setup.
   template <template <class, class> class Assembler>
   void assembleStiffness(
-      PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
+      PETSc::Math::LinearSystem& ls,
+      size_t n,
+      double gammaValue,
+      bool emptyLHS)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
@@ -161,8 +164,12 @@ namespace
 
     using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
+    auto lhs = Integral(gamma * Grad(u), Grad(v));
+    if (emptyLHS)
+      lhs.over(999);
+
     typename ProblemType::ProblemBodyType body =
-      Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
+      lhs - Integral(RealFunction(1.0), v);
 
     Assembly::ProblemAssemblyInput<
       typename ProblemType::ProblemBodyType,
@@ -170,6 +177,13 @@ namespace
 
     Assembler<LinearSystemType, ProblemType> assembler;
     assembler.execute(ls, input);
+  }
+
+  template <template <class, class> class Assembler>
+  void assembleStiffness(
+      PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
+  {
+    assembleStiffness<Assembler>(ls, n, gammaValue, false);
   }
 
   // Re-assembling the identical problem into the same matrix must reuse the
@@ -234,6 +248,43 @@ namespace
     EXPECT_NE(nz1, matrixNonzeros(fine.getOperator()));
   }
 
+  // The PETSc policy may also be changed between two assemblies of the same
+  // LinearSystem. If the first assembly leaves an empty matrix pattern, then
+  // explicitly allowing new nonzero allocations before reassembly must let
+  // PETSc grow the pattern instead of being overridden by MatrixSetup.
+  template <template <class, class> class Assembler>
+  void checkNewNonzeroOptionHonoredBeforeReassembly()
+  {
+    PETSc::Math::LinearSystem ls(PETSC_COMM_SELF);
+    assembleStiffness<Assembler>(ls, 4, 1.0, true);
+    ASSERT_EQ(matrixNonzeros(ls.getOperator()), 0);
+
+    PetscErrorCode ierr = MatSetOption(
+        ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    assembleStiffness<Assembler>(ls, 4, 1.0);
+    EXPECT_GT(matrixNonzeros(ls.getOperator()), 0);
+  }
+
+#ifndef NDEBUG
+  // Symmetrically, explicitly forbidding new nonzero allocations before the
+  // same reassembly must be enforced by PETSc. In debug builds the Rodin PETSc
+  // backend checks PETSc errors with assert, so a hidden override to allow new
+  // nonzeros would make this death test fail.
+  template <template <class, class> class Assembler>
+  void checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly()
+  {
+    PETSc::Math::LinearSystem ls(PETSC_COMM_SELF);
+    assembleStiffness<Assembler>(ls, 4, 1.0, true);
+    ASSERT_EQ(matrixNonzeros(ls.getOperator()), 0);
+
+    PetscErrorCode ierr = MatSetOption(
+        ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_DEATH(assembleStiffness<Assembler>(ls, 4, 1.0), "");
+  }
+#endif
+
   TEST(PETSc_TargetedAssembly, SequentialBackendAssemblesLHSAndRHS)
   {
     checkLocalBackendTargetedAssembly<Assembly::Sequential>();
@@ -249,6 +300,19 @@ namespace
     checkReassemblyChangesPattern<Assembly::Sequential>();
   }
 
+  TEST(PETSc_TargetedAssembly, SequentialHonorsNewNonzeroOptionBeforeReassembly)
+  {
+    checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::Sequential>();
+  }
+
+#ifndef NDEBUG
+  TEST(PETSc_TargetedAssembly, SequentialForbidsNewNonzeroBeforeReassembly)
+  {
+    checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly<
+      Assembly::Sequential>();
+  }
+#endif
+
 #ifdef RODIN_USE_OPENMP
   TEST(PETSc_TargetedAssembly, OpenMPBackendAssemblesLHSAndRHS)
   {
@@ -263,6 +327,11 @@ namespace
   TEST(PETSc_TargetedAssembly, OpenMPReassemblyChangesNonzeroPattern)
   {
     checkReassemblyChangesPattern<Assembly::OpenMP>();
+  }
+
+  TEST(PETSc_TargetedAssembly, OpenMPHonorsNewNonzeroOptionBeforeReassembly)
+  {
+    checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::OpenMP>();
   }
 
 #endif
