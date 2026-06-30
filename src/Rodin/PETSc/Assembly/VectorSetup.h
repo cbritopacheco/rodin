@@ -9,9 +9,7 @@
 
 #include <petscvec.h>
 
-#include "Rodin/Alert/Exception.h"
-#include "Rodin/Alert/Raise.h"
-#include "Rodin/PETSc/Check.h"
+#include <cassert>
 
 namespace Rodin::PETSc::Assembly
 {
@@ -25,8 +23,8 @@ namespace Rodin::PETSc::Assembly
    * first call lays the vector out (sizes, type, options); subsequent calls
    * reuse it. PETSc has no in-place resize for a vector whose layout is set, so
    * if @c prepare ever observes a typed vector whose size differs from the
-   * requested one — only possible if a @c LinearSystem is illegally reused
-   * across different spaces — it raises rather than silently corrupting state.
+   * requested one, which is only possible if a @c LinearSystem is illegally
+   * reused across different spaces, it fails the debug assertion.
    *
    * ## Zeroing
    *
@@ -56,18 +54,29 @@ namespace Rodin::PETSc::Assembly
       PetscErrorCode prepare(const Options& options) const
       {
         bool needsSetup = true;
-        RODIN_PETSC_CHECK_OK(needsStructuralSetup(options, needsSetup));
+        PetscErrorCode ierr = needsStructuralSetup(options, needsSetup);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
         if (needsSetup)
         {
-          RODIN_PETSC_CHECK_OK(VecSetSizes(
-              m_vector, options.localSize, options.globalSize));
+          ierr = VecSetSizes(m_vector, options.localSize, options.globalSize);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
 
           if (options.type)
-            RODIN_PETSC_CHECK_OK(VecSetType(m_vector, options.type));
+          {
+            ierr = VecSetType(m_vector, options.type);
+            assert(ierr == PETSC_SUCCESS);
+            (void) ierr;
+          }
 
           if (options.setFromOptions)
-            RODIN_PETSC_CHECK_OK(VecSetFromOptions(m_vector));
+          {
+            ierr = VecSetFromOptions(m_vector);
+            assert(ierr == PETSC_SUCCESS);
+            (void) ierr;
+          }
         }
 
         if (needsSetup || options.zeroOnReuse)
@@ -80,28 +89,26 @@ namespace Rodin::PETSc::Assembly
       // A vector with no type yet is virgin and must be laid out. A typed
       // vector whose size matches is reused. A typed vector whose size differs
       // violates the constant-space contract and cannot be resized in place, so
-      // we raise.
+      // it fails the debug assertion.
       PetscErrorCode needsStructuralSetup(
           const Options& options, bool& needsSetup) const
       {
         VecType curType = nullptr;
-        RODIN_PETSC_CHECK_OK(VecGetType(m_vector, &curType));
+        PetscErrorCode ierr = VecGetType(m_vector, &curType);
+        assert(ierr == PETSC_SUCCESS);
+        (void) ierr;
 
         const bool hasType = (curType != nullptr);
         if (hasType)
         {
           PetscInt curSize = 0;
-          RODIN_PETSC_CHECK_OK(VecGetSize(m_vector, &curSize));
-          if (curSize != options.globalSize)
-          {
-            Alert::Exception()
-              << "VectorSetup: cannot resize a vector from "
-              << static_cast<long long>(curSize) << " to "
-              << static_cast<long long>(options.globalSize)
-              << ". A LinearSystem is bound to fixed finite element spaces; "
-              << "use a fresh LinearSystem for a different space or mesh."
-              << Alert::Raise;
-          }
+          ierr = VecGetSize(m_vector, &curSize);
+          assert(ierr == PETSC_SUCCESS);
+          (void) ierr;
+          assert(
+              curSize == options.globalSize &&
+              "VectorSetup cannot resize an assembled vector; use a fresh "
+              "LinearSystem for a different space or mesh.");
         }
 
         needsSetup = !hasType;

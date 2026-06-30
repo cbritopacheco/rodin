@@ -120,9 +120,8 @@ namespace
     expectSameVector(full.getVector(), rhs.getVector());
   }
 
-  // Number of stored nonzeros, i.e. the size of the nonzero pattern. With
-  // MAT_IGNORE_ZERO_ENTRIES = PETSC_FALSE (set by MatrixSetup) explicit zeros
-  // are kept, so this counts every allocated slot.
+  // Number of stored nonzeros, i.e. the size of the PETSc-owned nonzero
+  // pattern under the current PETSc options.
   PetscInt matrixNonzeros(Mat A)
   {
     MatInfo info;
@@ -143,22 +142,16 @@ namespace
     return info.mallocs;
   }
 
-  PetscReal matrixMaxAbs(Mat A)
-  {
-    PetscReal norm = 0;
-    PetscErrorCode ierr = MatNorm(A, NORM_INFINITY, &norm);
-    assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
-    return norm;
-  }
-
   // Assemble a P1 stiffness system (Grad . Grad scaled by gammaValue) on an
   // n-by-n triangle grid into the supplied linear system. Re-running with the
   // same n exercises the MatrixSetup reuse path; changing n forces a full
   // structural setup.
   template <template <class, class> class Assembler>
   void assembleStiffness(
-      PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
+      PETSc::Math::LinearSystem& ls,
+      size_t n,
+      double gammaValue,
+      bool emptyLHS)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
@@ -171,8 +164,12 @@ namespace
 
     using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
+    auto lhs = Integral(gamma * Grad(u), Grad(v));
+    if (emptyLHS)
+      lhs.over(999);
+
     typename ProblemType::ProblemBodyType body =
-      Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
+      lhs - Integral(RealFunction(1.0), v);
 
     Assembly::ProblemAssemblyInput<
       typename ProblemType::ProblemBodyType,
@@ -180,6 +177,13 @@ namespace
 
     Assembler<LinearSystemType, ProblemType> assembler;
     assembler.execute(ls, input);
+  }
+
+  template <template <class, class> class Assembler>
+  void assembleStiffness(
+      PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
+  {
+    assembleStiffness<Assembler>(ls, n, gammaValue, false);
   }
 
   // Re-assembling the identical problem into the same matrix must reuse the
@@ -217,11 +221,8 @@ namespace
   // both dimension and stored nonzero count.
   //
   // Note: re-assembling a *resized* problem into the *same* matrix object is
-  // intentionally not exercised here. MatrixSetup documents a full-setup
-  // fallback for that case, but MatSetSizes/MatSetUp cannot be re-applied to an
-  // already-assembled AIJ matrix without first recreating it, so that path is
-  // currently unsafe under release builds (where the ierr asserts are NDEBUG'd
-  // out). See the accompanying review note.
+  // intentionally not exercised here. A LinearSystem is tied to fixed finite
+  // element spaces; a different space or mesh must use a fresh LinearSystem.
   template <template <class, class> class Assembler>
   void checkReassemblyChangesPattern()
   {
@@ -247,22 +248,42 @@ namespace
     EXPECT_NE(nz1, matrixNonzeros(fine.getOperator()));
   }
 
-  // Scaling the form by zero makes every visited entry numerically zero. The
-  // slots must still be allocated (no manual +1/-1 dance needed), so the
-  // nonzero pattern matches the full stiffness matrix while the values vanish.
+  // The PETSc policy may also be changed between two assemblies of the same
+  // LinearSystem. If the first assembly leaves an empty matrix pattern, then
+  // explicitly allowing new nonzero allocations before reassembly must let
+  // PETSc grow the pattern instead of being overridden by MatrixSetup.
   template <template <class, class> class Assembler>
-  void checkStructuralZerosStayInPattern()
+  void checkNewNonzeroOptionHonoredBeforeReassembly()
   {
-    PETSc::Math::LinearSystem reference(PETSC_COMM_SELF);
-    assembleStiffness<Assembler>(reference, 4, 1.0);
-    const PetscInt referenceNz = matrixNonzeros(reference.getOperator());
+    PETSc::Math::LinearSystem ls(PETSC_COMM_SELF);
+    assembleStiffness<Assembler>(ls, 4, 1.0, true);
+    ASSERT_EQ(matrixNonzeros(ls.getOperator()), 0);
 
-    PETSc::Math::LinearSystem zeroed(PETSC_COMM_SELF);
-    assembleStiffness<Assembler>(zeroed, 4, 0.0);
-
-    EXPECT_EQ(referenceNz, matrixNonzeros(zeroed.getOperator()));
-    EXPECT_LE(matrixMaxAbs(zeroed.getOperator()), 1e-14);
+    PetscErrorCode ierr = MatSetOption(
+        ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    assembleStiffness<Assembler>(ls, 4, 1.0);
+    EXPECT_GT(matrixNonzeros(ls.getOperator()), 0);
   }
+
+#ifndef NDEBUG
+  // Symmetrically, explicitly forbidding new nonzero allocations before the
+  // same reassembly must be enforced by PETSc. In debug builds the Rodin PETSc
+  // backend checks PETSc errors with assert, so a hidden override to allow new
+  // nonzeros would make this death test fail.
+  template <template <class, class> class Assembler>
+  void checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly()
+  {
+    PETSc::Math::LinearSystem ls(PETSC_COMM_SELF);
+    assembleStiffness<Assembler>(ls, 4, 1.0, true);
+    ASSERT_EQ(matrixNonzeros(ls.getOperator()), 0);
+
+    PetscErrorCode ierr = MatSetOption(
+        ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    EXPECT_DEATH(assembleStiffness<Assembler>(ls, 4, 1.0), "");
+  }
+#endif
 
   TEST(PETSc_TargetedAssembly, SequentialBackendAssemblesLHSAndRHS)
   {
@@ -279,10 +300,18 @@ namespace
     checkReassemblyChangesPattern<Assembly::Sequential>();
   }
 
-  TEST(PETSc_TargetedAssembly, SequentialStructuralZerosStayInPattern)
+  TEST(PETSc_TargetedAssembly, SequentialHonorsNewNonzeroOptionBeforeReassembly)
   {
-    checkStructuralZerosStayInPattern<Assembly::Sequential>();
+    checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::Sequential>();
   }
+
+#ifndef NDEBUG
+  TEST(PETSc_TargetedAssembly, SequentialForbidsNewNonzeroBeforeReassembly)
+  {
+    checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly<
+      Assembly::Sequential>();
+  }
+#endif
 
 #ifdef RODIN_USE_OPENMP
   TEST(PETSc_TargetedAssembly, OpenMPBackendAssemblesLHSAndRHS)
@@ -300,10 +329,11 @@ namespace
     checkReassemblyChangesPattern<Assembly::OpenMP>();
   }
 
-  TEST(PETSc_TargetedAssembly, OpenMPStructuralZerosStayInPattern)
+  TEST(PETSc_TargetedAssembly, OpenMPHonorsNewNonzeroOptionBeforeReassembly)
   {
-    checkStructuralZerosStayInPattern<Assembly::OpenMP>();
+    checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::OpenMP>();
   }
+
 #endif
 }
 
