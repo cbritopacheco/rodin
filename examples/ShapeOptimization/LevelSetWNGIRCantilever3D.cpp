@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -265,6 +266,21 @@ namespace
     KSPGetIterationNumber(ksp, &iterations);
     return iterations;
   }
+
+  struct StageTimer
+  {
+    using Clock = std::chrono::steady_clock;
+
+    Clock::time_point t = Clock::now();
+
+    Real reset()
+    {
+      const auto now = Clock::now();
+      const Real out = std::chrono::duration<Real>(now - t).count();
+      t = now;
+      return out;
+    }
+  };
 }
 
 int run(int argc, char** argv)
@@ -299,6 +315,7 @@ int run(int argc, char** argv)
   const std::size_t repairEvery = sizeOption(argc, argv, "repair-every", 5);
   const Real repairEta = realOption(argc, argv, "repair-eta", Real(0.5) * h);
   const std::size_t outputEvery = sizeOption(argc, argv, "output-every", 5);
+  const bool printTiming = sizeOption(argc, argv, "timing", 0) != 0;
   const bool trace = hasFlag(argc, argv, "trace");
 
   const std::size_t nx = static_cast<std::size_t>(std::lround(L / h)) + 1;
@@ -458,6 +475,18 @@ int run(int argc, char** argv)
   std::size_t acceptedShapeIterations = 0;
   while (acceptedShapeIterations < maxIt)
   {
+    StageTimer iterTimer;
+    Real tClassify = 0;
+    Real tGrad = 0;
+    Real tWNGIR = 0;
+    Real tMoveTrim = 0;
+    Real tElasticity = 0;
+    Real tHilbert = 0;
+    Real tWrite = 0;
+    Real tRedistance = 0;
+    Real tAdvect = 0;
+    Real tRepair = 0;
+
     const std::size_t itn = acceptedShapeIterations;
     ++shapeAttempts;
     std::cout << "\n--- Iteration " << itn << " ---\n";
@@ -499,9 +528,14 @@ int run(int argc, char** argv)
       if (mesh.getAttribute(D - 1, bit->getIndex()) == Attribute{GammaD})
         for (const Index c : conn.getIncidence({2, 3}, bit->getIndex()))
           support[c] = 1;
-    for (const auto& component : mesh.ccl(
+    // Note: keep the connected-components result in a named local. Iterating
+    // directly over `mesh.ccl(...).getComponents()` would bind the loop to a
+    // reference into the ccl() temporary, which is destroyed before the loop
+    // body runs (a dangling range-for over freed memory).
+    const auto materialComponents = mesh.ccl(
           [](const Polytope& a, const Polytope& b)
-          { return a.getAttribute() == b.getAttribute(); }).getComponents())
+          { return a.getAttribute() == b.getAttribute(); });
+    for (const auto& component : materialComponents.getComponents())
     {
       if (component.empty()) continue;
       const auto attr = mesh.getAttribute(D, *component.begin());
@@ -539,6 +573,7 @@ int run(int argc, char** argv)
       std::cerr << "  empty classified interface; stopping\n";
       break;
     }
+    tClassify = iterTimer.reset();
 
     gradProjection.assemble();
     gradProjection.solve(gradSolver);
@@ -547,6 +582,8 @@ int run(int argc, char** argv)
       std::cout << "  PETSc grad: it="
                 << kspIterations(gradSolver.getHandle()) << '\n';
     copyPETScToEigen(gp.getSolution().getData(), gradPhi.getData());
+    tGrad = iterTimer.reset();
+
     RealFunction phiFn([&](const Geometry::Point& p) { return phiH.getValue(p); });
     AnalyticVectorFunction gradFn(
         [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
@@ -558,6 +595,7 @@ int run(int argc, char** argv)
               << " activeRMS/h=" << (h > Real(0) ? report.activeRMS / h : Real(0))
               << " activeSup/h=" << (h > Real(0) ? report.activeSup / h : Real(0))
               << '\n';
+    tWNGIR = iterTimer.reset();
 
     updateMovedMesh(mesh, moved, u);
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
@@ -571,6 +609,8 @@ int run(int argc, char** argv)
     // necessarily rebuilt for the current design.
     SubMesh<Context::Local> trimmed = moved.trim(Exterior);
     trimmed.getConnectivity().compute(2, 3);
+    tMoveTrim = iterTimer.reset();
+
     VectorP1 vhInterior(trimmed, 3);
     PETSc::Variational::TrialFunction us(vhInterior);
     PETSc::Variational::TestFunction vs(vhInterior);
@@ -586,6 +626,8 @@ int run(int argc, char** argv)
     if (trace)
       std::cout << "  PETSc elasticity: it="
                 << kspIterations(elasticitySolver.getHandle()) << '\n';
+    tElasticity = iterTimer.reset();
+
     PetscScalar complianceValue = 0;
     VecDot(elasticity.getLinearSystem().getVector(),
            elasticity.getLinearSystem().getSolution(), &complianceValue);
@@ -634,6 +676,7 @@ int run(int argc, char** argv)
       std::cout << "  PETSc hilbert: it="
                 << kspIterations(hilbertSolver.getHandle()) << '\n';
     copyPETScToEigen(g.getSolution().getData(), dJ.getData());
+    tHilbert = iterTimer.reset();
 
     // Write before redistance/advection mutates phiH into the next trial
     // carrier. Thus every frame corresponds to a passed shape objective step.
@@ -646,7 +689,10 @@ int run(int argc, char** argv)
       stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
       stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
       xdmf.write(static_cast<Real>(itn)).flush();
+      domainGrid.clear();
+      stateGrid.clear();
     }
+    tWrite = iterTimer.reset();
 
     std::string activeMode = reinitMode;
     bool doRedistance = reinitMode != "none" && reinitEvery > 0
@@ -717,16 +763,39 @@ int run(int argc, char** argv)
     {
       dist.getData() = phiH.getData();
     }
+    tRedistance = iterTimer.reset();
 
     speed = Frobenius(dJ);
     dJ /= std::max(speed.max(), Real(1e-30));
     Advection::Lagrangian(adv, advTest, dist, dJ).step(dt);
     phiH.getData() = adv.getSolution().getData();
+    tAdvect = iterTimer.reset();
+
     if (repairEvery > 0
         && ((itn + 1) % repairEvery == 0 || itn + 1 == maxIt))
     {
       const Math::Vector<Real> rhs = mass.getOperator() * phiH.getData();
       phiH.getData() = repairCG.solve(rhs);
+    }
+    tRepair = iterTimer.reset();
+
+    if (printTiming)
+    {
+      const Real total = tClassify + tGrad + tWNGIR + tMoveTrim
+                       + tElasticity + tHilbert + tWrite + tRedistance
+                       + tAdvect + tRepair;
+      std::cout << "  timing:"
+                << " classify=" << std::scientific << std::setprecision(2) << tClassify
+                << " grad=" << tGrad
+                << " wngir=" << tWNGIR
+                << " moveTrim=" << tMoveTrim
+                << " elas=" << tElasticity
+                << " hilbert=" << tHilbert
+                << " write=" << tWrite
+                << " redist=" << tRedistance
+                << " advect=" << tAdvect
+                << " repair=" << tRepair
+                << " total=" << total << '\n';
     }
 
     ++acceptedShapeIterations;
