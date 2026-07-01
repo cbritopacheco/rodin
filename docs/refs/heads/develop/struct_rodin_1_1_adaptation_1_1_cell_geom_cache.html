@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/Grad.h file | Rodin</title>
+  <title>Rodin::Adaptation::CellGeomCache struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,41 +74,61 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Grad.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>CellGeomCache <span class="m-thin">struct</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_cell_geom_cache_8h.html">&lt;Rodin/Adaptation/CellGeomCache.h&gt;</a></div>
         </h1>
-        <p>Gradient operator for scalar functions and shape functions.</p>
+        <p>Per-cell geometry cache for the 2D triangular affine prototype.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This file defines the Grad class, which computes the gradient (spatial derivative) of scalar functions in variational formulations. The gradient is a fundamental differential operator in finite element analysis.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
+<p>For each triangle cell K the cache stores:</p><ul><li>sigma_K: the verified-consistent sign of det A_K(xhat_q) across the cell&#x27;s reference quadrature.</li><li>Jscale: J_K_scale = (1 / |Khat|) * integral_Khat |det A_K| dxhat.</li><li>A, Ainv, AinvT, C = A A^T: the affine map and its associates.</li><li>gradN: 3x2 spatial gradients of the P1 nodal basis (constant on K).</li></ul><p>The matrix A is sampled from <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s PolytopeTransformation at the reference centroid; for an affine triangle A is constant in xhat and one sample is exact.</p>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">Rodin::Variational::GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>
+            <dt id="aa4b45bf6cc9ca433ffa5ebd5e0425218">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#aa4b45bf6cc9ca433ffa5ebd5e0425218" class="m-doc-self">area</a>
             </dt>
-            <dd>Gradient operator for grid functions.</dd>
+            <dd>|K|</dd>
+            <dt id="ad3ef46f6f7a1c6593a2c35118bc9a704">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#ad3ef46f6f7a1c6593a2c35118bc9a704" class="m-doc-self">detAK</a>
+            </dt>
+            <dd>signed det(A_K), constant on K</dd>
+            <dt id="a3c67d693a984cf74a5e4214f7af3b000">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a3c67d693a984cf74a5e4214f7af3b000" class="m-doc-self">Jscale</a>
+            </dt>
+            <dd>(1/|Khat|) integral |det A_K| dxhat</dd>
+            <dt id="aae2f6995fa50138730f548199643767f">
+              <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">int</a> <a href="#aae2f6995fa50138730f548199643767f" class="m-doc-self">sigmaK</a>
+            </dt>
+            <dd>verified sign(det A_K(xhat_q))</dd>
+            <dt id="a814cdd83b17c0c1ff34d560605528efa">
+              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a814cdd83b17c0c1ff34d560605528efa" class="m-doc-self">A</a>
+            </dt>
+            <dd>A_K = D F_K.</dd>
+            <dt id="ae101cb9c836a2cc089ed29ab2abd3a14">
+              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#ae101cb9c836a2cc089ed29ab2abd3a14" class="m-doc-self">Ainv</a>
+            </dt>
+            <dd>A_K^{-1}.</dd>
+            <dt id="a64a7dcbb4a1f56bcf7f678cf588e5b5d">
+              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a64a7dcbb4a1f56bcf7f678cf588e5b5d" class="m-doc-self">AinvT</a>
+            </dt>
+            <dd>A_K^{-T}.</dd>
+            <dt id="a12f00c5c13e4a7ee48b7b7f295567534">
+              <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a12f00c5c13e4a7ee48b7b7f295567534" class="m-doc-self">C</a>
+            </dt>
+            <dd>A_K A_K^T.</dd>
+            <dt id="abae6f3d0a6f3146e5ec5abc4deeb95e8">
+              <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#abae6f3d0a6f3146e5ec5abc4deeb95e8" class="m-doc-self">gradN</a>
+            </dt>
+            <dd>3x2: rows are spatial grads of P1 basis</dd>
           </dl>
         </section>
       </div>

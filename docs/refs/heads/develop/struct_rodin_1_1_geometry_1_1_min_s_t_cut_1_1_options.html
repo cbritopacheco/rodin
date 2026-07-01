@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/Grad.h file | Rodin</title>
+  <title>Rodin::Geometry::MinSTCut::Options struct | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,42 +74,72 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Grad.h <span class="m-thin">file</span>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_min_s_t_cut.html">MinSTCut</a>::<wbr/></span>Options <span class="m-thin">struct</span>
         </h1>
-        <p>Gradient operator for scalar functions and shape functions.</p>
+        <p>Optional classification policies layered on top of the bare Potts graph cut.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This file defines the Grad class, which computes the gradient (spatial derivative) of scalar functions in variational formulations. The gradient is a fundamental differential operator in finite element analysis.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+<p>These options let callers control checkerboard suppression, narrow-band restriction, and zero-level-aware facet weighting without changing the underlying max-flow engine.</p>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">Rodin::Variational::GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a5ee85e9f300f90caa9b0884346776a30" class="m-doc">lambdaScale</a>
             </dt>
-            <dd>Gradient operator for grid functions.</dd>
+            <dd></dd>
+            <dt id="a4ebd86ac386d2c7228ad010aea17382e">
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a4ebd86ac386d2c7228ad010aea17382e" class="m-doc-self">unaryScale</a>
+            </dt>
+            <dd>Multiplicative scale applied to every unary cost.</dd>
+            <dt>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> <a href="#a00902749fdc83d3f209d1d868adeb48f" class="m-doc">farFieldThreshold</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; <a href="#a588607f9bf3d1b54f012e1f15cc9765b" class="m-doc">perEdgeLambda</a>
+            </dt>
+            <dd></dd>
+            <dt>
+              std::vector&lt;<a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt; <a href="#a6f30a6e1a04cb9ca2a074d99934ea57d" class="m-doc">cellInBand</a>
+            </dt>
+            <dd></dd>
           </dl>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a5ee85e9f300f90caa9b0884346776a30"><div>
+            <h3>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr />Options::<wbr /><a href="#a5ee85e9f300f90caa9b0884346776a30" class="m-doc-self">lambdaScale</a>
+            </h3>
+<p>Multiplicative scale applied to every pairwise capacity (Potts smoothing strength lambda).</p>
+          </div></section>
+          <section class="m-doc-details" id="a00902749fdc83d3f209d1d868adeb48f"><div>
+            <h3>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr />Options::<wbr /><a href="#a00902749fdc83d3f209d1d868adeb48f" class="m-doc-self">farFieldThreshold</a>
+            </h3>
+<p>If <code>|moment[i]| &gt;= farFieldThreshold</code> the cell <code>i</code> is pinned to <code>sign(-moment[i])</code> by injecting a large unary on the opposite terminal. Disabled when negative.</p>
+          </div></section>
+          <section class="m-doc-details" id="a588607f9bf3d1b54f012e1f15cc9765b"><div>
+            <h3>
+              std::vector&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt; Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr />Options::<wbr /><a href="#a588607f9bf3d1b54f012e1f15cc9765b" class="m-doc-self">perEdgeLambda</a>
+            </h3>
+<p>Per-edge multiplier replacing <code>lambdaScale</code> on the i-th edge. Use for zero-level-aware facet weighting (e.g. down-weight pairwise term where |phi| is small so the cut prefers to align with the actual interface). Size must be <code>edges.size()</code> or <code>0</code> (disabled).</p>
+          </div></section>
+          <section class="m-doc-details" id="a6f30a6e1a04cb9ca2a074d99934ea57d"><div>
+            <h3>
+              std::vector&lt;<a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a>&gt; Rodin::<wbr />Geometry::<wbr />MinSTCut::<wbr />Options::<wbr /><a href="#a6f30a6e1a04cb9ca2a074d99934ea57d" class="m-doc-self">cellInBand</a>
+            </h3>
+<p>Per-cell free/fixed mask. <code>cellInBand[i] == false</code> pins cell <code>i</code> to <code>sign(-moment[i])</code> via a large unary. Size must be <code>volumes.size()</code> or <code>0</code> (disabled, all cells free).</p>
+          </div></section>
         </section>
       </div>
     </div>

@@ -88,7 +88,6 @@
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
-                <li><a href="#pro-types">Protected types</a></li>
               </ul>
             </li>
           </ul>
@@ -157,15 +156,6 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a23914e6af4e1f5106d74c454cc5aaeb4" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_jacobian_base.html" class="m-doc">JacobianBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a polymorphic copy (to be overridden in derived class).</dd>
-          </dl>
-        </section>
-        <section id="pro-types">
-          <h2><a href="#pro-types">Protected types</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="struct_rodin_1_1_variational_1_1_jacobian_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4_1_1_cache.html" class="m-doc">Cache</a>
-            </dt>
-            <dd>Evaluation cache keyed by (mesh, polytope, quadrature point).</dd>
           </dl>
         </section>
         <section>
@@ -391,7 +381,7 @@ $ d $
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrixType</a> Rodin::<wbr />Variational::<wbr />JacobianBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92710f2dfdc2b08ee144e5449ad66d22" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> matrix at an <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>.</p>
-<p>If the polytope is owned by the FES mesh, performs a cache lookup keyed by (mesh, polytope, qf, qp); on a miss it dispatches to <code>interpolate(out, ip)</code> and caches the result. Falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
+<p>If the polytope is owned by the FES mesh, dispatches to <code>interpolate(out, ip)</code>. Otherwise falls back to inclusion / submesh restriction when the polytope&#x27;s mesh is not the FES mesh.</p>
           </div></section>
           <section class="m-doc-details" id="a1ffbdba2b29eb6f63414bd575f12f63a"><div>
             <h3>

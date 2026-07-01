@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin/Variational/Grad.h file | Rodin</title>
+  <title>Rodin::Adaptation::AnalyticMatrixFunction class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,42 +74,61 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span>Grad.h <span class="m-thin">file</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> F&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>AnalyticMatrixFunction <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Gradient operator for scalar functions and shape functions.</p>
+        <p>Matrix-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Real&gt;</code>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>This file defines the Grad class, which computes the gradient (spatial derivative) of scalar functions in variational formulations. The gradient is a fundamental differential operator in finite element analysis.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grad_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html" class="m-doc">Rodin::Variational::GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase&lt;Real, AnalyticMatrixFunction&lt;F&gt;&gt;</a>
             </dt>
-            <dd>Gradient operator for grid functions.</dd>
+            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#add4fd83502646378d479df5c42869bf5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy of the function.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="add4fd83502646378d479df5c42869bf5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">AnalyticMatrixFunction</a>* Rodin::<wbr />Adaptation::<wbr />AnalyticMatrixFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add4fd83502646378d479df5c42869bf5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy of the function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to newly allocated copy</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

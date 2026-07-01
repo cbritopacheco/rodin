@@ -91,7 +91,6 @@
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
-                <li><a href="#pro-types">Protected types</a></li>
               </ul>
             </li>
           </ul>
@@ -355,15 +354,6 @@ $ u_h = \sum_i u_i \phi_i $
             <dd>Copy function to be overriden in Derived type.</dd>
           </dl>
         </section>
-        <section id="pro-types">
-          <h2><a href="#pro-types">Protected types</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="struct_rodin_1_1_variational_1_1_grad_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4_1_1_cache.html" class="m-doc">Cache</a>
-            </dt>
-            <dd>Evaluation cache keyed by (mesh, polytope, quadrature point).</dd>
-          </dl>
-        </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a7cf7b0c71702a67dc64cebf6d848787e"><div>
@@ -451,7 +441,7 @@ $ \nabla u \in \mathbb{R}^d $
               <span class="m-doc-wrap-bumper"><a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a> Rodin::<wbr />Variational::<wbr />GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;&lt;FES, Data, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab6be6544d9c0013a4c9fa68f31ac83a6" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>&amp; ip) const</span></span>
             </h3>
             <p>Evaluates the gradient at an <a href="class_rodin_1_1_variational_1_1_integration_point.html" class="m-doc">IntegrationPoint</a>.</p>
-<p>If the polytope is owned by the FES mesh, performs a cache lookup keyed by (mesh, polytope, qf, qp); on a miss it dispatches to <code>interpolate(out, ip)</code> and caches the result. Falls back to inclusion / submesh restriction otherwise.</p>
+<p>If the polytope is owned by the FES mesh, dispatches to <code>interpolate(out, ip)</code>. Otherwise falls back to inclusion / submesh restriction.</p>
           </div></section>
           <section class="m-doc-details" id="ab37332aeb50920470a90d892d6a7e7e2"><div>
             <h3>

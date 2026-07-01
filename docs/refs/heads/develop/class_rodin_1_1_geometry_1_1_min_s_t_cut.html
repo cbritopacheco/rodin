@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Variational::GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;::Cache struct | Rodin</title>
+  <title>Rodin::Geometry::MinSTCut class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,11 +74,30 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_grad_base_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_00_01_derived_01_4.html">GradBase&lt;GridFunction&lt;FES, Data&gt;, Derived&gt;</a>::<wbr/></span>Cache <span class="m-thin">struct</span>
-          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_grad_8h.html">&lt;Rodin/Variational/Grad.h&gt;</a></div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>MinSTCut <span class="m-thin">class</span>
         </h1>
-        <p>Evaluation cache keyed by (mesh, polytope, quadrature point).</p>
-<p>Populated by getValue(IntegrationPoint) on a hit-miss path. Invalidated whenever evaluation falls back to inclusion / submesh restriction.</p>
+        <p>Serial binary Potts classifier solved by an s-t min cut.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Labels follow the level-set convention used by topology reconstruction:</p><ul><li>-1 is inside;</li><li>+1 is outside.</li></ul>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_geometry_1_1_min_s_t_cut_1_1_options.html" class="m-doc">Options</a>
+            </dt>
+            <dd>Optional classification policies layered on top of the bare Potts graph cut.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>
