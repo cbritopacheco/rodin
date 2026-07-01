@@ -8,6 +8,7 @@
 #define RODIN_ASSEMBLY_OPENMP_H
 
 #include <omp.h>
+#include <utility>
 
 #include "Rodin/Math/Vector.h"
 
@@ -600,7 +601,6 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
-        // initialize global vector
         res.resize(input.getFES().getSize());
         res.setZero();
 
@@ -615,16 +615,16 @@ namespace Rodin::Assembly
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
-          std::vector<VectorType> chunks(static_cast<size_t>(tc));
+          using VectorEntry = std::pair<Index, ScalarType>;
+          std::vector<std::vector<VectorEntry>> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
             const int tid = omp_get_thread_num();
             auto integrator =
               std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
-            VectorType local;
-            local.resize(res.size());
-            local.setZero();
+            std::vector<VectorEntry> local;
+            local.reserve(static_cast<size_t>(count));
 
 #pragma omp for
             for (Index i = 0; i < count; ++i)
@@ -642,7 +642,11 @@ namespace Rodin::Assembly
               const auto& dofs = input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
               for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
-                local(dofs(k)) += integrator->integrate(k);
+              {
+                const ScalarType value = integrator->integrate(k);
+                if (value != ScalarType(0))
+                  local.emplace_back(dofs(k), value);
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -650,7 +654,11 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& v : chunks) res += v;
+              for (const auto& chunk : chunks)
+              {
+                for (const auto& [row, value] : chunk)
+                  res(row) += value;
+              }
             }
           } // end parallel
         }
@@ -918,14 +926,11 @@ namespace Rodin::Assembly
         {
           // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-          std::vector<std::vector<ScalarType>> rhsChunks(
-            static_cast<size_t>(tc),
-            std::vector<ScalarType>(rows, ScalarType(0))
-          );
+          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
 
           auto sparse_entry =
             [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
-                std::vector<ScalarType>& localRhs,
+                std::vector<std::pair<Index, ScalarType>>& localRhs,
                 Index row, Index col, ScalarType val)
           {
             if (val == ScalarType(0))
@@ -939,8 +944,9 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs[static_cast<size_t>(r.index)] -=
-                  r.coefficient * val * colValue;
+                localRhs.emplace_back(
+                    r.index,
+                    -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
                 localT.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
@@ -948,13 +954,13 @@ namespace Rodin::Assembly
           };
 
           auto vector_entry =
-            [&](std::vector<ScalarType>& localRhs, Index row, ScalarType val)
+            [&](std::vector<std::pair<Index, ScalarType>>& localRhs, Index row, ScalarType val)
           {
             if (val == ScalarType(0))
               return;
 
             for (const auto& r : constraints.expand(row))
-              localRhs[static_cast<size_t>(r.index)] += r.coefficient * val;
+              localRhs.emplace_back(r.index, r.coefficient * val);
           };
 
           // ---------------- Local BFIs ----------------
@@ -1132,8 +1138,8 @@ namespace Rodin::Assembly
           for (int tid = 0; tid < tc; ++tid)
           {
             const auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
-            for (size_t i = 0; i < rows; ++i)
-              b.coeffRef(i) += localRhs[i];
+            for (const auto& [row, val] : localRhs)
+              b.coeffRef(static_cast<size_t>(row)) += val;
           }
 
           // ---------------- Merge triplets ----------------
@@ -1680,10 +1686,7 @@ namespace Rodin::Assembly
         // Thread-local accumulators
         // ------------------------------------------------------------------
         std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-        std::vector<std::vector<ScalarType>> rhsChunks(
-          static_cast<size_t>(tc),
-          std::vector<ScalarType>(nrows, ScalarType(0))
-        );
+        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
 
         std::vector<OperatorType> Achunks;
         if constexpr (!IsSparse)
@@ -1714,8 +1717,9 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != ScalarType(0))
-              rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(r.index)] -=
-                r.coefficient * val * colValue;
+              rhsChunks[static_cast<size_t>(tid)].emplace_back(
+                  r.index,
+                  -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
               tchunks[static_cast<size_t>(tid)].emplace_back(
                   r.index, c.index, r.coefficient * val * c.coefficient);
@@ -1797,8 +1801,9 @@ namespace Rodin::Assembly
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
-                            rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(r.index)] -=
-                              r.coefficient * val * colValue;
+                            rhsChunks[static_cast<size_t>(tid)].emplace_back(
+                                r.index,
+                                -r.coefficient * val * colValue);
                           for (const auto& c : constraints.expand(J))
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
@@ -1906,8 +1911,9 @@ namespace Rodin::Assembly
                           for (const auto& r : constraints.expand(I))
                           {
                             if (colValue != ScalarType(0))
-                              rhsChunks[static_cast<size_t>(tid)][static_cast<size_t>(r.index)] -=
-                                r.coefficient * val * colValue;
+                              rhsChunks[static_cast<size_t>(tid)].emplace_back(
+                                  r.index,
+                                  -r.coefficient * val * colValue);
                             for (const auto& c : constraints.expand(J))
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
@@ -1968,8 +1974,7 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs[static_cast<size_t>(r.index)] +=
-                      r.coefficient * val;
+                    localRhs.emplace_back(r.index, r.coefficient * val);
                 }
               }
             } // omp parallel
@@ -1982,11 +1987,11 @@ namespace Rodin::Assembly
         for (int tid = 0; tid < tc; ++tid)
         {
           auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
-          for (size_t i = 0; i < nrows; ++i)
+          for (const auto& [row, val] : localRhs)
           {
-            b.coeffRef(i) += localRhs[i];
-            localRhs[i] = ScalarType(0);
+            b.coeffRef(static_cast<size_t>(row)) += val;
           }
+          localRhs.clear();
         }
 
         // Preassembled LFs (serial, with block offsets)
@@ -2034,11 +2039,11 @@ namespace Rodin::Assembly
           for (int tid = 0; tid < tc; ++tid)
           {
             auto& localRhs = rhsChunks[static_cast<size_t>(tid)];
-            for (size_t i = 0; i < nrows; ++i)
+            for (const auto& [row, val] : localRhs)
             {
-              b.coeffRef(i) += localRhs[i];
-              localRhs[i] = ScalarType(0);
+              b.coeffRef(static_cast<size_t>(row)) += val;
             }
+            localRhs.clear();
           }
 
           // Merge triplets

@@ -7,6 +7,9 @@
 #ifndef RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 
+#include <atomic>
+#include <mutex>
+
 /**
  * @file GridFunction.h
  * @brief PETSc specialization of finite element grid functions.
@@ -628,7 +631,8 @@ namespace Rodin::Variational
        */
       const ScalarType& operator[](Index global) const
       {
-        this->acquire();
+        if (!m_readAcquired.load(std::memory_order_acquire))
+          this->acquire();
 
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -1105,34 +1109,39 @@ namespace Rodin::Variational
        */
       const GridFunction& acquire() const
       {
+        if (m_readAcquired.load(std::memory_order_acquire))
+          return *this;
+
+        std::lock_guard<std::mutex> lock(m_readMutex);
+        if (m_read.acquired)
+        {
+          m_readAcquired.store(true, std::memory_order_release);
+          return *this;
+        }
+
         PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          if (!m_read.acquired)
-          {
-            ierr = VecGetArrayRead(m_data, &m_read.raw);
-            assert(ierr == PETSC_SUCCESS);
+          ierr = VecGetArrayRead(m_data, &m_read.raw);
+          assert(ierr == PETSC_SUCCESS);
 
-            m_read.acquired = true;
-          }
+          m_read.acquired = true;
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
-          if (!m_read.acquired)
-          {
-            ierr = VecGhostGetLocalForm(m_data, &m_read.ghost);
-            assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostGetLocalForm(m_data, &m_read.ghost);
+          assert(ierr == PETSC_SUCCESS);
 
-            ierr = VecGetArrayRead(m_read.ghost, &m_read.raw);
-            assert(ierr == PETSC_SUCCESS);
+          ierr = VecGetArrayRead(m_read.ghost, &m_read.raw);
+          assert(ierr == PETSC_SUCCESS);
 
-            m_read.acquired = true;
-          }
+          m_read.acquired = true;
         }
         else
         {
           assert(false);
         }
+        m_readAcquired.store(true, std::memory_order_release);
         (void) ierr;
         return *this;
       }
@@ -1214,6 +1223,10 @@ namespace Rodin::Variational
        */
       const GridFunction& flush() const
       {
+        if (!m_readAcquired.exchange(false, std::memory_order_acq_rel))
+          return *this;
+
+        std::lock_guard<std::mutex> lock(m_readMutex);
         PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -1302,8 +1315,9 @@ namespace Rodin::Variational
       {
         PetscErrorCode ierr;
 
-        if (m_read.acquired)
+        if (m_readAcquired.exchange(false, std::memory_order_acq_rel))
         {
+          std::lock_guard<std::mutex> lock(m_readMutex);
           assert(m_read.raw);
           if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
           {
@@ -1363,6 +1377,8 @@ namespace Rodin::Variational
 
       mutable ArrayRead m_read;   ///< Read-access state (mutable to allow const `acquire`/`flush`).
       mutable ArrayWrite m_write; ///< Write-access state (mutable to allow const `acquire`/`flush`).
+      mutable std::atomic_bool m_readAcquired{false};
+      mutable std::mutex m_readMutex;
   };
 }
 
