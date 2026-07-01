@@ -557,6 +557,118 @@ namespace
     }
   }
 
+  void expectSameStandaloneVector(Vec expected, Vec actual)
+  {
+    PetscErrorCode ierr;
+    PetscInt nExpected = 0;
+    PetscInt nActual = 0;
+    ierr = VecGetSize(expected, &nExpected);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecGetSize(actual, &nActual);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ASSERT_EQ(nExpected, nActual);
+
+    for (PetscInt i = 0; i < nExpected; i++)
+    {
+      PetscScalar a = 0;
+      PetscScalar b = 0;
+      ierr = VecGetValues(expected, 1, &i, &a);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      ierr = VecGetValues(actual, 1, &i, &b);
+      ASSERT_EQ(ierr, PETSC_SUCCESS);
+      EXPECT_NEAR(PetscRealPart(a - b), 0.0, 1e-14) << "row " << i;
+    }
+  }
+
+  void expectSameStandaloneMatrix(Mat expected, Mat actual)
+  {
+    PetscErrorCode ierr;
+    PetscInt expectedRows = 0;
+    PetscInt expectedCols = 0;
+    PetscInt actualRows = 0;
+    PetscInt actualCols = 0;
+    ierr = MatGetSize(expected, &expectedRows, &expectedCols);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatGetSize(actual, &actualRows, &actualCols);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ASSERT_EQ(expectedRows, actualRows);
+    ASSERT_EQ(expectedCols, actualCols);
+
+    for (PetscInt i = 0; i < expectedRows; i++)
+    {
+      for (PetscInt j = 0; j < expectedCols; j++)
+      {
+        PetscScalar a = 0;
+        PetscScalar b = 0;
+        ierr = MatGetValues(expected, 1, &i, 1, &j, &a);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        ierr = MatGetValues(actual, 1, &i, 1, &j, &b);
+        ASSERT_EQ(ierr, PETSC_SUCCESS);
+        EXPECT_NEAR(PetscRealPart(a - b), 0.0, 1e-14)
+          << "entry (" << i << ", " << j << ")";
+      }
+    }
+  }
+
+#ifdef RODIN_USE_OPENMP
+  void checkPETScStandaloneOpenMPFormsMatchSequential()
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction  v(fes);
+
+    LinearForm lf(v);
+    lf = Integral(RealFunction(2.0), v);
+
+    using LFType = decltype(lf);
+    Vec seqVec = nullptr;
+    Vec ompVec = nullptr;
+    PetscErrorCode ierr = VecCreate(PETSC_COMM_SELF, &seqVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecCreate(PETSC_COMM_SELF, &ompVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    PETSc::Assembly::Sequential<::Vec, LFType> seqLF;
+    PETSc::Assembly::OpenMP<::Vec, LFType> ompLF;
+    seqLF.execute(seqVec, { fes, lf.getIntegrators() });
+    ompLF.execute(ompVec, { fes, lf.getIntegrators() });
+    expectSameStandaloneVector(seqVec, ompVec);
+
+    ierr = VecDestroy(&seqVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = VecDestroy(&ompVec);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    BilinearForm bf(u, v);
+    bf = Integral(Grad(u), Grad(v)) + Integral(u, v);
+
+    using BFType = decltype(bf);
+    Mat seqMat = nullptr;
+    Mat ompMat = nullptr;
+    ierr = MatCreate(PETSC_COMM_SELF, &seqMat);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatCreate(PETSC_COMM_SELF, &ompMat);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+    PETSc::Assembly::Sequential<::Mat, BFType> seqBF;
+    PETSc::Assembly::OpenMP<::Mat, BFType> ompBF;
+    seqBF.execute(seqMat, {
+        fes, fes, bf.getLocalIntegrators(), bf.getGlobalIntegrators() });
+    ompBF.execute(ompMat, {
+        fes, fes, bf.getLocalIntegrators(), bf.getGlobalIntegrators() });
+    expectSameStandaloneMatrix(seqMat, ompMat);
+
+    ierr = MatDestroy(&seqMat);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+    ierr = MatDestroy(&ompMat);
+    ASSERT_EQ(ierr, PETSC_SUCCESS);
+  }
+#endif
+}
+
   TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -746,6 +858,11 @@ namespace
   }
 
 #ifdef RODIN_USE_OPENMP
+  TEST(PETSc_Form, OpenMPStandaloneFormsMatchSequential)
+  {
+    checkPETScStandaloneOpenMPFormsMatchSequential();
+  }
+
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
@@ -766,7 +883,6 @@ namespace
     checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::OpenMP>();
   }
 #endif
-}
 
 int main(int argc, char** argv)
 {

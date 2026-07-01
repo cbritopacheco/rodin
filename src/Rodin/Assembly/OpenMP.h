@@ -8,6 +8,7 @@
 #define RODIN_ASSEMBLY_OPENMP_H
 
 #include <omp.h>
+#include <utility>
 
 #include "Rodin/Math/Vector.h"
 
@@ -600,7 +601,6 @@ namespace Rodin::Assembly
 
       void execute(VectorType& res, const InputType& input) const override
       {
-        // initialize global vector
         res.resize(input.getFES().getSize());
         res.setZero();
 
@@ -615,16 +615,16 @@ namespace Rodin::Assembly
           const Index d = seq.getDimension();
           const Index count = seq.getCount();
 
-          std::vector<VectorType> chunks(static_cast<size_t>(tc));
+          using VectorEntry = std::pair<Index, ScalarType>;
+          std::vector<std::vector<VectorEntry>> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
             const int tid = omp_get_thread_num();
             auto integrator =
               std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
-            VectorType local;
-            local.resize(res.size());
-            local.setZero();
+            std::vector<VectorEntry> local;
+            local.reserve(static_cast<size_t>(count));
 
 #pragma omp for
             for (Index i = 0; i < count; ++i)
@@ -642,7 +642,11 @@ namespace Rodin::Assembly
               const auto& dofs = input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
               for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
-                local(dofs(k)) += integrator->integrate(k);
+              {
+                const ScalarType value = integrator->integrate(k);
+                if (value != ScalarType(0))
+                  local.emplace_back(dofs(k), value);
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -650,7 +654,11 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& v : chunks) res += v;
+              for (const auto& chunk : chunks)
+              {
+                for (const auto& [row, value] : chunk)
+                  res(row) += value;
+              }
             }
           } // end parallel
         }

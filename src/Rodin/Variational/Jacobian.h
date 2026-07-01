@@ -146,45 +146,6 @@ namespace Rodin::Variational
         return getOperand().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-    protected:
-      /**
-       * @brief Evaluation cache keyed by (mesh, polytope, quadrature point).
-       *
-       * Populated on a hit-miss path by getValue(IntegrationPoint). The
-       * matching cell-level key is invalidated whenever evaluation falls
-       * back to inclusion/restriction.
-       */
-      struct Cache
-      {
-        struct Key
-        {
-          const void* mesh = nullptr;
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          size_t dim = 0;
-          Index cell = 0;
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = 0;
-          bool valid = false;
-
-          bool operator==(const Key& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return mesh == o.mesh
-                && geom == o.geom
-                && dim  == o.dim
-                && cell == o.cell
-                && qf   == o.qf
-                && qp   == o.qp;
-          }
-        };
-
-        Key key;
-        SpatialMatrixType value;
-      };
-
-      mutable Cache m_cache;
-
     public:
       /**
        * @brief Evaluates the Jacobian matrix at a Point.
@@ -223,30 +184,18 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the Jacobian matrix at an IntegrationPoint.
        *
-       * If the polytope is owned by the FES mesh, performs a cache lookup
-       * keyed by (mesh, polytope, qf, qp); on a miss it dispatches to
-       * @c interpolate(out, ip) and caches the result. Falls back to
-       * inclusion / submesh restriction when the polytope's mesh is not
-       * the FES mesh.
+       * If the polytope is owned by the FES mesh, dispatches to
+       * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
+       * restriction when the polytope's mesh is not the FES mesh.
        */
       SpatialMatrixType getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
-        const auto& polytope = p.getPolytope();
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
         if (fesMesh.isLocalPoint(p))
         {
-          typename Cache::Key key;
-          key.mesh = static_cast<const void*>(&fesMesh);
-          key.geom = polytope.getGeometry();
-          key.dim  = polytope.getDimension();
-          key.cell = polytope.getIndex();
-          key.qf   = ip.getQuadratureFormula();
-          key.qp   = ip.getIndex();
-          key.valid = true;
-
           SpatialMatrixType value;
           this->interpolate(value, ip);
           return value;

@@ -100,44 +100,6 @@ namespace Rodin::Variational
           m_u(std::move(other.m_u))
       {}
 
-    protected:
-      /**
-       * @brief Evaluation cache keyed by (mesh, polytope, quadrature point).
-       *
-       * Populated by getValue(IntegrationPoint) on a hit-miss path. Invalidated
-       * whenever evaluation falls back to inclusion / submesh restriction.
-       */
-      struct Cache
-      {
-        struct Key
-        {
-          const void* mesh = nullptr;
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          size_t dim = 0;
-          Index cell = 0;
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = 0;
-          bool valid = false;
-
-          bool operator==(const Key& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return mesh == o.mesh
-                && geom == o.geom
-                && dim  == o.dim
-                && cell == o.cell
-                && qf   == o.qf
-                && qp   == o.qp;
-          }
-        };
-
-        Key key;
-        ScalarType value = ScalarType(0);
-      };
-
-      mutable Cache m_cache;
-
     public:
       /**
        * @brief Evaluates the divergence at a Point.
@@ -176,29 +138,18 @@ namespace Rodin::Variational
       /**
        * @brief Evaluates the divergence at an IntegrationPoint.
        *
-       * If the polytope is owned by the FES mesh, performs a cache lookup
-       * keyed by (mesh, polytope, qf, qp); on a miss it dispatches to
-       * @c interpolate(out, ip) and caches the result. Falls back to
-       * inclusion / submesh restriction otherwise.
+       * If the polytope is owned by the FES mesh, dispatches to
+       * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
+       * restriction.
        */
       ScalarType getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
-        const auto& polytope = p.getPolytope();
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
         if (fesMesh.isLocalPoint(p))
         {
-          typename Cache::Key key;
-          key.mesh = static_cast<const void*>(&fesMesh);
-          key.geom = polytope.getGeometry();
-          key.dim  = polytope.getDimension();
-          key.cell = polytope.getIndex();
-          key.qf   = ip.getQuadratureFormula();
-          key.qp   = ip.getIndex();
-          key.valid = true;
-
           ScalarType value = ScalarType(0);
           this->interpolate(value, ip);
           return value;

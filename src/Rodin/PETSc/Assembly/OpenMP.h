@@ -104,6 +104,8 @@ namespace Rodin::Assembly
         const auto& mesh = input.getFES().getMesh();
         const int tc     = static_cast<int>(getThreadCount());
 
+        using VectorEntry = std::pair<PetscInt, PetscScalar>;
+
         for (auto& lfi : input.getLFIs())
         {
           const auto& attrs = lfi.getAttributes();
@@ -111,8 +113,7 @@ namespace Rodin::Assembly
           const PetscInt dim = PetscInt(seq.getDimension());
           const PetscInt cnt = PetscInt(seq.getCount());
 
-          // one dense buffer per thread, merged once
-          std::vector<std::vector<PetscScalar>> chunks(static_cast<size_t>(tc));
+          std::vector<std::vector<VectorEntry>> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
@@ -120,7 +121,8 @@ namespace Rodin::Assembly
             auto integrator =
               std::unique_ptr<Variational::LinearFormIntegratorBase<ScalarType>>(lfi.copy());
 
-            std::vector<PetscScalar> local(static_cast<size_t>(n), PetscScalar(0));
+            std::vector<VectorEntry> local;
+            local.reserve(static_cast<size_t>(cnt));
 
 #pragma omp for
             for (PetscInt i = 0; i < cnt; ++i)
@@ -137,7 +139,11 @@ namespace Rodin::Assembly
 
               const auto& dofs = input.getFES().getDOFs(dim, i);
               for (size_t k = 0; k < dofs.size(); ++k)
-                local[dofs[k]] += PetscScalar(integrator->integrate(k));
+              {
+                const PetscScalar value = PetscScalar(integrator->integrate(k));
+                if (value != PetscScalar(0))
+                  local.emplace_back(static_cast<PetscInt>(dofs[k]), value);
+              }
             }
 
             chunks[static_cast<size_t>(tid)] = std::move(local);
@@ -145,19 +151,27 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              // single serial flush to PETSc, avoids long critical sections
-              for (auto& v : chunks)
+              for (auto& chunk : chunks)
               {
-                for (PetscInt idx = 0; idx < n; ++idx)
+                if (chunk.empty())
+                  continue;
+                std::vector<PetscInt> rows;
+                std::vector<PetscScalar> vals;
+                rows.reserve(chunk.size());
+                vals.reserve(chunk.size());
+                for (const auto& [row, value] : chunk)
                 {
-                  const PetscScalar val = v[static_cast<size_t>(idx)];
-                  if (val != PetscScalar(0))
-                  {
-                    PetscErrorCode e = VecSetValue(res, idx, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                    (void) e;
-                  }
+                  rows.push_back(row);
+                  vals.push_back(value);
                 }
+                PetscErrorCode e = VecSetValues(
+                    res,
+                    static_cast<PetscInt>(rows.size()),
+                    rows.data(),
+                    vals.data(),
+                    ADD_VALUES);
+                assert(e == PETSC_SUCCESS);
+                (void) e;
               }
             }
           } // end parallel
@@ -262,6 +276,58 @@ namespace Rodin::Assembly
 
         const auto& mesh = input.getTestFES().getMesh();
         const int tc = static_cast<int>(getThreadCount());
+        using MatrixEntry = std::tuple<PetscInt, PetscInt, PetscScalar>;
+
+        auto flush_matrix_entries =
+          [&](std::vector<std::vector<MatrixEntry>>& chunks)
+        {
+          std::vector<MatrixEntry> entries;
+          size_t total = 0;
+          for (const auto& chunk : chunks)
+            total += chunk.size();
+          entries.reserve(total);
+          for (auto& chunk : chunks)
+          {
+            entries.insert(
+                entries.end(),
+                std::make_move_iterator(chunk.begin()),
+                std::make_move_iterator(chunk.end()));
+            chunk.clear();
+          }
+
+          std::sort(entries.begin(), entries.end(),
+              [](const MatrixEntry& a, const MatrixEntry& b)
+              {
+                if (std::get<0>(a) != std::get<0>(b))
+                  return std::get<0>(a) < std::get<0>(b);
+                return std::get<1>(a) < std::get<1>(b);
+              });
+
+          std::vector<PetscInt> cols;
+          std::vector<PetscScalar> vals;
+          for (size_t pos = 0; pos < entries.size();)
+          {
+            const PetscInt row = std::get<0>(entries[pos]);
+            cols.clear();
+            vals.clear();
+            while (pos < entries.size() && std::get<0>(entries[pos]) == row)
+            {
+              cols.push_back(std::get<1>(entries[pos]));
+              vals.push_back(std::get<2>(entries[pos]));
+              ++pos;
+            }
+            PetscErrorCode e = MatSetValues(
+                res,
+                1,
+                &row,
+                static_cast<PetscInt>(cols.size()),
+                cols.data(),
+                vals.data(),
+                ADD_VALUES);
+            assert(e == PETSC_SUCCESS);
+            (void) e;
+          }
+        };
 
         // Local contributions
         for (auto& bfi : input.getLocalBFIs())
@@ -271,15 +337,14 @@ namespace Rodin::Assembly
           const PetscInt dim = PetscInt(seq.getDimension());
           const PetscInt cnt = PetscInt(seq.getCount());
 
-          // per-thread triplet chunks, merged once
-          std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
+          std::vector<std::vector<MatrixEntry>> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
             const int tid = omp_get_thread_num();
             auto integrator =
               std::unique_ptr<Variational::LocalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+            std::vector<MatrixEntry> local;
             local.reserve(static_cast<size_t>(cnt));
 
 #pragma omp for
@@ -301,7 +366,10 @@ namespace Rodin::Assembly
                 for (size_t c = 0; c < cols.size(); ++c)
                 {
                   const PetscScalar v = Math::conj(integrator->integrate(c, r));
-                  local.emplace_back(rows[r], cols[c], v);
+                  local.emplace_back(
+                      static_cast<PetscInt>(rows[r]),
+                      static_cast<PetscInt>(cols[c]),
+                      v);
                 }
             }
 
@@ -310,16 +378,79 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              // single serial flush to PETSc
-              for (auto& buf : chunks)
+              flush_matrix_entries(chunks);
+            }
+          } // end parallel
+        }
+
+        for (auto& bfi : input.getGlobalBFIs())
+        {
+          const auto& trialAttrs = bfi.getTrialAttributes();
+          const auto& testAttrs  = bfi.getTestAttributes();
+
+          OpenMPIteration trialseq(mesh, bfi.getTrialRegion());
+          OpenMPIteration testseq(mesh, bfi.getTestRegion());
+
+          const PetscInt tdim = PetscInt(testseq.getDimension());
+          const PetscInt tcnt = PetscInt(testseq.getCount());
+
+          const PetscInt rdim = PetscInt(trialseq.getDimension());
+          const PetscInt rcnt = PetscInt(trialseq.getCount());
+
+          std::vector<std::vector<MatrixEntry>> chunks(static_cast<size_t>(tc));
+
+#pragma omp parallel num_threads(tc)
+          {
+            const int tid = omp_get_thread_num();
+            auto integrator =
+              std::unique_ptr<Variational::GlobalBilinearFormIntegratorBase<PetscScalar>>(bfi.copy());
+            std::vector<MatrixEntry> local;
+            local.reserve(static_cast<size_t>(tcnt));
+
+#pragma omp for
+            for (PetscInt te = 0; te < tcnt; ++te)
+            {
+              if (!testseq.filter(te)) continue;
+              if (!testAttrs.empty())
               {
-                for (auto& [i,j,v] : buf)
-                {
-                  PetscErrorCode e = MatSetValue(res, i, j, v, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
-                  (void) e;
-                }
+                const auto a = mesh.getAttribute(tdim, te);
+                if (!a || !testAttrs.count(*a)) continue;
               }
+
+              auto teIt = testseq.getIterator(te);
+              const auto& rows = input.getTestFES().getDOFs(tdim, te);
+
+              for (PetscInt tr = 0; tr < rcnt; ++tr)
+              {
+                if (!trialseq.filter(tr)) continue;
+                if (!trialAttrs.empty())
+                {
+                  const auto a = mesh.getAttribute(rdim, tr);
+                  if (!a || !trialAttrs.count(*a)) continue;
+                }
+
+                auto trIt = trialseq.getIterator(tr);
+                integrator->setPolytope(*trIt, *teIt);
+
+                const auto& cols = input.getTrialFES().getDOFs(rdim, tr);
+                for (size_t r = 0; r < rows.size(); ++r)
+                  for (size_t c = 0; c < cols.size(); ++c)
+                  {
+                    const PetscScalar v = Math::conj(integrator->integrate(c, r));
+                    local.emplace_back(
+                        static_cast<PetscInt>(rows[r]),
+                        static_cast<PetscInt>(cols[c]),
+                        v);
+                  }
+              }
+            }
+
+            chunks[static_cast<size_t>(tid)] = std::move(local);
+
+#pragma omp barrier
+#pragma omp single
+            {
+              flush_matrix_entries(chunks);
             }
           } // end parallel
         }
@@ -570,8 +701,6 @@ namespace Rodin::Assembly
               std::vector<VectorEntry>& localRhs,
               Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
@@ -1438,8 +1567,6 @@ namespace Rodin::Assembly
               std::vector<VectorEntry>& localRhs,
               Index row, Index col, PetscScalar val)
         {
-          if (val == PetscScalar(0))
-            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
