@@ -169,26 +169,26 @@ namespace Rodin::Variational
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
-        m_cache.key.valid = false;
+        ScalarType value = ScalarType(0);
         if (fesMesh.isLocalPoint(p))
         {
-          this->interpolate(m_cache.value, p);
+          this->interpolate(value, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(m_cache.value, *inclusion);
+          this->interpolate(value, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(m_cache.value, *restriction);
+          this->interpolate(value, *restriction);
         }
         else
         {
           assert(false);
         }
-        return m_cache.value;
+        return value;
       }
 
       /**
@@ -217,30 +217,27 @@ namespace Rodin::Variational
           key.qp   = ip.getIndex();
           key.valid = true;
 
-          if (m_cache.key == key)
-            return m_cache.value;
-
-          m_cache.key = key;
-          this->interpolate(m_cache.value, ip);
-          return m_cache.value;
+          ScalarType value = ScalarType(0);
+          this->interpolate(value, ip);
+          return value;
         }
 
-        m_cache.key.valid = false;
+        ScalarType value = ScalarType(0);
         if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(m_cache.value, *inclusion);
+          this->interpolate(value, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(m_cache.value, *restriction);
+          this->interpolate(value, *restriction);
         }
         else
         {
           assert(false);
         }
-        return m_cache.value;
+        return value;
       }
 
       /**

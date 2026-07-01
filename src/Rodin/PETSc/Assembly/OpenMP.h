@@ -15,8 +15,12 @@
 #include <omp.h>
 #include <petsc.h>
 #include <petscerror.h>
+#include <algorithm>
 #include <cassert>
 #include <optional>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "Rodin/Assembly/OpenMP.h"
 #include "Rodin/PETSc/Math/LinearSystem.h"
@@ -558,11 +562,16 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
+        using MatrixEntry = std::tuple<PetscInt, PetscInt, PetscScalar>;
+        using VectorEntry = std::pair<PetscInt, PetscScalar>;
+
         auto add_matrix_entries =
-          [&](std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>& local,
-              std::vector<PetscScalar>& localRhs,
+          [&](std::vector<MatrixEntry>& local,
+              std::vector<VectorEntry>& localRhs,
               Index row, Index col, PetscScalar val)
         {
+          if (val == PetscScalar(0))
+            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
@@ -570,8 +579,9 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != PetscScalar(0))
-              localRhs[static_cast<size_t>(r.index)] -=
-                r.coefficient * val * colValue;
+              localRhs.emplace_back(
+                  static_cast<PetscInt>(r.index),
+                  -r.coefficient * val * colValue);
             if (doMatrix)
             {
               for (const auto& c : constraints.expand(col))
@@ -584,12 +594,93 @@ namespace Rodin::Assembly
         };
 
         auto add_vector_entries =
-          [&](std::vector<PetscScalar>& local, Index row, PetscScalar val)
+          [&](std::vector<VectorEntry>& local, Index row, PetscScalar val)
         {
           if (val == PetscScalar(0))
             return;
           for (const auto& r : constraints.expand(row))
-            local[static_cast<size_t>(r.index)] += r.coefficient * val;
+            local.emplace_back(
+                static_cast<PetscInt>(r.index),
+                r.coefficient * val);
+        };
+
+        auto flush_matrix_entries =
+          [&](std::vector<std::vector<MatrixEntry>>& chunks)
+        {
+          std::vector<MatrixEntry> entries;
+          size_t total = 0;
+          for (const auto& chunk : chunks)
+            total += chunk.size();
+          entries.reserve(total);
+          for (auto& chunk : chunks)
+          {
+            entries.insert(
+                entries.end(),
+                std::make_move_iterator(chunk.begin()),
+                std::make_move_iterator(chunk.end()));
+            chunk.clear();
+          }
+
+          std::sort(entries.begin(), entries.end(),
+              [](const MatrixEntry& a, const MatrixEntry& b)
+              {
+                if (std::get<0>(a) != std::get<0>(b))
+                  return std::get<0>(a) < std::get<0>(b);
+                return std::get<1>(a) < std::get<1>(b);
+              });
+
+          std::vector<PetscInt> cols;
+          std::vector<PetscScalar> vals;
+          for (size_t pos = 0; pos < entries.size();)
+          {
+            const PetscInt row = std::get<0>(entries[pos]);
+            cols.clear();
+            vals.clear();
+            while (pos < entries.size() && std::get<0>(entries[pos]) == row)
+            {
+              cols.push_back(std::get<1>(entries[pos]));
+              vals.push_back(std::get<2>(entries[pos]));
+              ++pos;
+            }
+            PetscErrorCode e = MatSetValues(
+                A,
+                1,
+                &row,
+                static_cast<PetscInt>(cols.size()),
+                cols.data(),
+                vals.data(),
+                ADD_VALUES);
+            assert(e == PETSC_SUCCESS);
+            (void) e;
+          }
+        };
+
+        auto flush_vector_entries =
+          [&](std::vector<std::vector<VectorEntry>>& chunks)
+        {
+          for (auto& chunk : chunks)
+          {
+            if (chunk.empty())
+              continue;
+            std::vector<PetscInt> rows;
+            std::vector<PetscScalar> vals;
+            rows.reserve(chunk.size());
+            vals.reserve(chunk.size());
+            for (const auto& [row, val] : chunk)
+            {
+              rows.push_back(row);
+              vals.push_back(val);
+            }
+            PetscErrorCode e = VecSetValues(
+                b,
+                static_cast<PetscInt>(rows.size()),
+                rows.data(),
+                vals.data(),
+                ADD_VALUES);
+            assert(e == PETSC_SUCCESS);
+            (void) e;
+            chunk.clear();
+          }
         };
 
         const int tc = static_cast<int>(getThreadCount());
@@ -607,10 +698,8 @@ namespace Rodin::Assembly
             const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
             const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
 
-            std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
-            std::vector<std::vector<PetscScalar>> rhsChunks(
-                static_cast<size_t>(tc),
-                std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
+            std::vector<std::vector<MatrixEntry>> chunks(static_cast<size_t>(tc));
+            std::vector<std::vector<VectorEntry>> rhsChunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
             {
@@ -619,9 +708,9 @@ namespace Rodin::Assembly
               auto integrator =
                 std::unique_ptr<LocalBilinearIntegratorBase>(static_cast<LocalBilinearIntegratorBase*>(bfi.copy()));
 
-              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+              std::vector<MatrixEntry> local;
               local.reserve(static_cast<size_t>(cnt));
-              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+              std::vector<VectorEntry> localRhs;
 
 #pragma omp for
               for (PetscInt k = 0; k < cnt; ++k)
@@ -655,35 +744,9 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
               {
-                for (auto& buf : chunks)
-                {
-                  for (auto& [I,J,val] : buf)
-                  {
-                    PetscErrorCode e;
-                    // Insert unconditionally. PETSc decides whether zero-valued
-                    // insertions affect the pattern according to its current
-                    // matrix options.
-                    e = MatSetValue(A, I, J, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                    (void) e;
-                  }
-                }
+                flush_matrix_entries(chunks);
                 if (doVector)
-                {
-                  for (const auto& vecLocal : rhsChunks)
-                  {
-                    for (PetscInt i = 0; i < nrows; ++i)
-                    {
-                      const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                      if (val != PetscScalar(0))
-                      {
-                        PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                        assert(e == PETSC_SUCCESS);
-                        (void) e;
-                      }
-                    }
-                  }
-                }
+                  flush_vector_entries(rhsChunks);
               }
             } // omp parallel
           }
@@ -705,10 +768,8 @@ namespace Rodin::Assembly
             const PetscInt rdim = static_cast<PetscInt>(trialseq.getDimension());
             const PetscInt rcnt = static_cast<PetscInt>(trialseq.getCount());
 
-            std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
-            std::vector<std::vector<PetscScalar>> rhsChunks(
-                static_cast<size_t>(tc),
-                std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
+            std::vector<std::vector<MatrixEntry>> chunks(static_cast<size_t>(tc));
+            std::vector<std::vector<VectorEntry>> rhsChunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
             {
@@ -717,9 +778,9 @@ namespace Rodin::Assembly
               auto integrator =
                 std::unique_ptr<GlobalBilinearIntegratorBase>(static_cast<GlobalBilinearIntegratorBase*>(bfi.copy()));
 
-              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+              std::vector<MatrixEntry> local;
               local.reserve(static_cast<size_t>(tcnt));
-              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+              std::vector<VectorEntry> localRhs;
 
 #pragma omp for
               for (PetscInt te = 0; te < tcnt; ++te)
@@ -765,35 +826,9 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
               {
-                for (auto& buf : chunks)
-                {
-                  for (auto& [I,J,val] : buf)
-                  {
-                    PetscErrorCode e;
-                    // Insert unconditionally. PETSc decides whether zero-valued
-                    // insertions affect the pattern according to its current
-                    // matrix options.
-                    e = MatSetValue(A, I, J, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                    (void) e;
-                  }
-                }
+                flush_matrix_entries(chunks);
                 if (doVector)
-                {
-                  for (const auto& vecLocal : rhsChunks)
-                  {
-                    for (PetscInt i = 0; i < nrows; ++i)
-                    {
-                      const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                      if (val != PetscScalar(0))
-                      {
-                        PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                        assert(e == PETSC_SUCCESS);
-                        (void) e;
-                      }
-                    }
-                  }
-                }
+                  flush_vector_entries(rhsChunks);
               }
             } // omp parallel
           }
@@ -816,32 +851,22 @@ namespace Rodin::Assembly
               (void) ierr;
               for (PetscInt j = 0; j < nc; ++j)
               {
-                std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-                std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+                std::vector<MatrixEntry> local;
+                std::vector<VectorEntry> localRhs;
                 add_matrix_entries(
                     local,
                     localRhs,
                     static_cast<Index>(i),
                     static_cast<Index>(cols[j]),
                     vals[j]);
-                for (const auto& [I, J, val] : local)
-                {
-                  ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                  (void) ierr;
-                }
+                std::vector<std::vector<MatrixEntry>> matrixChunks(1);
+                matrixChunks[0] = std::move(local);
+                flush_matrix_entries(matrixChunks);
                 if (doVector)
                 {
-                  for (PetscInt r = 0; r < nrows; ++r)
-                  {
-                    const PetscScalar val = localRhs[static_cast<size_t>(r)];
-                    if (val != PetscScalar(0))
-                    {
-                      ierr = VecSetValue(b, r, val, ADD_VALUES);
-                      assert(ierr == PETSC_SUCCESS);
-                      (void) ierr;
-                    }
-                  }
+                  std::vector<std::vector<VectorEntry>> vectorChunks(1);
+                  vectorChunks[0] = std::move(localRhs);
+                  flush_vector_entries(vectorChunks);
                 }
               }
               ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
@@ -876,7 +901,7 @@ namespace Rodin::Assembly
             const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
             const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
 
-            std::vector<std::vector<PetscScalar>> chunks(static_cast<size_t>(tc));
+            std::vector<std::vector<VectorEntry>> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
             {
@@ -885,7 +910,7 @@ namespace Rodin::Assembly
               auto integrator =
                 std::unique_ptr<LinearIntegratorBase>(static_cast<LinearIntegratorBase*>(lfi.copy()));
 
-              std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
+              std::vector<VectorEntry> local;
 
 #pragma omp for
               for (PetscInt k = 0; k < cnt; ++k)
@@ -913,19 +938,7 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
               {
-                for (auto& vecLocal : chunks)
-                {
-                  for (PetscInt i = 0; i < nrows; ++i)
-                  {
-                    const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                    if (val != PetscScalar(0))
-                    {
-                      PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                      assert(e == PETSC_SUCCESS);
-                      (void) e;
-                    }
-                  }
-                }
+                flush_vector_entries(chunks);
               }
             } // omp parallel
           }
@@ -942,21 +955,12 @@ namespace Rodin::Assembly
             ierr = VecGetArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
             (void) ierr;
+            std::vector<std::vector<VectorEntry>> chunks(1);
             for (PetscInt i = 0; i < vecSize; ++i)
             {
-              std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
-              add_vector_entries(local, static_cast<Index>(i), arr[i]);
-              for (PetscInt r = 0; r < nrows; ++r)
-              {
-                const PetscScalar val = local[static_cast<size_t>(r)];
-                if (val != PetscScalar(0))
-                {
-                  ierr = VecSetValue(b, r, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                  (void) ierr;
-                }
-              }
+              add_vector_entries(chunks[0], static_cast<Index>(i), arr[i]);
             }
+            flush_vector_entries(chunks);
             ierr = VecRestoreArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
             (void) ierr;
@@ -1426,11 +1430,16 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
+        using MatrixEntry = std::tuple<PetscInt, PetscInt, PetscScalar>;
+        using VectorEntry = std::pair<PetscInt, PetscScalar>;
+
         auto add_matrix_entries =
-          [&](std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>& local,
-              std::vector<PetscScalar>& localRhs,
+          [&](std::vector<MatrixEntry>& local,
+              std::vector<VectorEntry>& localRhs,
               Index row, Index col, PetscScalar val)
         {
+          if (val == PetscScalar(0))
+            return;
           const PetscScalar colValue =
             constraints.isIdentified(col)
               ? constraints.getIdentificationValue(col)
@@ -1438,8 +1447,9 @@ namespace Rodin::Assembly
           for (const auto& r : constraints.expand(row))
           {
             if (colValue != PetscScalar(0))
-              localRhs[static_cast<size_t>(r.index)] -=
-                r.coefficient * val * colValue;
+              localRhs.emplace_back(
+                  static_cast<PetscInt>(r.index),
+                  -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
               local.emplace_back(
                   static_cast<PetscInt>(r.index),
@@ -1449,12 +1459,93 @@ namespace Rodin::Assembly
         };
 
         auto add_vector_entries =
-          [&](std::vector<PetscScalar>& local, Index row, PetscScalar val)
+          [&](std::vector<VectorEntry>& local, Index row, PetscScalar val)
         {
           if (val == PetscScalar(0))
             return;
           for (const auto& r : constraints.expand(row))
-            local[static_cast<size_t>(r.index)] += r.coefficient * val;
+            local.emplace_back(
+                static_cast<PetscInt>(r.index),
+                r.coefficient * val);
+        };
+
+        auto flush_matrix_entries =
+          [&](std::vector<std::vector<MatrixEntry>>& chunks)
+        {
+          std::vector<MatrixEntry> entries;
+          size_t total = 0;
+          for (const auto& chunk : chunks)
+            total += chunk.size();
+          entries.reserve(total);
+          for (auto& chunk : chunks)
+          {
+            entries.insert(
+                entries.end(),
+                std::make_move_iterator(chunk.begin()),
+                std::make_move_iterator(chunk.end()));
+            chunk.clear();
+          }
+
+          std::sort(entries.begin(), entries.end(),
+              [](const MatrixEntry& a, const MatrixEntry& b)
+              {
+                if (std::get<0>(a) != std::get<0>(b))
+                  return std::get<0>(a) < std::get<0>(b);
+                return std::get<1>(a) < std::get<1>(b);
+              });
+
+          std::vector<PetscInt> cols;
+          std::vector<PetscScalar> vals;
+          for (size_t pos = 0; pos < entries.size();)
+          {
+            const PetscInt row = std::get<0>(entries[pos]);
+            cols.clear();
+            vals.clear();
+            while (pos < entries.size() && std::get<0>(entries[pos]) == row)
+            {
+              cols.push_back(std::get<1>(entries[pos]));
+              vals.push_back(std::get<2>(entries[pos]));
+              ++pos;
+            }
+            PetscErrorCode e = MatSetValues(
+                A,
+                1,
+                &row,
+                static_cast<PetscInt>(cols.size()),
+                cols.data(),
+                vals.data(),
+                ADD_VALUES);
+            assert(e == PETSC_SUCCESS);
+            (void) e;
+          }
+        };
+
+        auto flush_vector_entries =
+          [&](std::vector<std::vector<VectorEntry>>& chunks)
+        {
+          for (auto& chunk : chunks)
+          {
+            if (chunk.empty())
+              continue;
+            std::vector<PetscInt> rows;
+            std::vector<PetscScalar> vals;
+            rows.reserve(chunk.size());
+            vals.reserve(chunk.size());
+            for (const auto& [row, val] : chunk)
+            {
+              rows.push_back(row);
+              vals.push_back(val);
+            }
+            PetscErrorCode e = VecSetValues(
+                b,
+                static_cast<PetscInt>(rows.size()),
+                rows.data(),
+                vals.data(),
+                ADD_VALUES);
+            assert(e == PETSC_SUCCESS);
+            (void) e;
+            chunk.clear();
+          }
         };
 
         const int tc = static_cast<int>(getThreadCount());
@@ -1481,10 +1572,8 @@ namespace Rodin::Assembly
             const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
             const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
 
-          std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
-          std::vector<std::vector<PetscScalar>> rhsChunks(
-              static_cast<size_t>(tc),
-              std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
+          std::vector<std::vector<MatrixEntry>> chunks(static_cast<size_t>(tc));
+          std::vector<std::vector<VectorEntry>> rhsChunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
@@ -1493,9 +1582,9 @@ namespace Rodin::Assembly
             auto integrator =
               std::unique_ptr<LocalBilinearIntegratorBase>(static_cast<LocalBilinearIntegratorBase*>(bfi.copy()));
 
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+            std::vector<MatrixEntry> local;
             local.reserve(static_cast<size_t>(cnt));
-            std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+            std::vector<VectorEntry> localRhs;
 
 #pragma omp for
             for (PetscInt k = 0; k < cnt; ++k)
@@ -1535,32 +1624,8 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& buf : chunks)
-              {
-                for (auto& [I,J,val] : buf)
-                {
-                  PetscErrorCode e;
-                  // Insert unconditionally. PETSc decides whether zero-valued
-                  // insertions affect the pattern according to its current
-                  // matrix options.
-                  e = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
-                  (void) e;
-                }
-              }
-              for (const auto& vecLocal : rhsChunks)
-              {
-                for (PetscInt i = 0; i < nrows; ++i)
-                {
-                  const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                  if (val != PetscScalar(0))
-                  {
-                    PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                    (void) e;
-                  }
-                }
-              }
+              flush_matrix_entries(chunks);
+              flush_vector_entries(rhsChunks);
             }
           } // omp parallel
         }
@@ -1588,10 +1653,8 @@ namespace Rodin::Assembly
           const PetscInt rdim = static_cast<PetscInt>(trialseq.getDimension());
           const PetscInt rcnt = static_cast<PetscInt>(trialseq.getCount());
 
-          std::vector<std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>>> chunks(static_cast<size_t>(tc));
-          std::vector<std::vector<PetscScalar>> rhsChunks(
-              static_cast<size_t>(tc),
-              std::vector<PetscScalar>(static_cast<size_t>(nrows), PetscScalar(0)));
+          std::vector<std::vector<MatrixEntry>> chunks(static_cast<size_t>(tc));
+          std::vector<std::vector<VectorEntry>> rhsChunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
@@ -1600,9 +1663,9 @@ namespace Rodin::Assembly
             auto integrator =
               std::unique_ptr<GlobalBilinearIntegratorBase>(static_cast<GlobalBilinearIntegratorBase*>(bfi.copy()));
 
-            std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
+            std::vector<MatrixEntry> local;
             local.reserve(static_cast<size_t>(tcnt));
-            std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+            std::vector<VectorEntry> localRhs;
 
 #pragma omp for
             for (PetscInt te = 0; te < tcnt; ++te)
@@ -1656,32 +1719,8 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& buf : chunks)
-              {
-                for (auto& [I,J,val] : buf)
-                {
-                  PetscErrorCode e;
-                  // Insert unconditionally. PETSc decides whether zero-valued
-                  // insertions affect the pattern according to its current
-                  // matrix options.
-                  e = MatSetValue(A, I, J, val, ADD_VALUES);
-                  assert(e == PETSC_SUCCESS);
-                  (void) e;
-                }
-              }
-              for (const auto& vecLocal : rhsChunks)
-              {
-                for (PetscInt i = 0; i < nrows; ++i)
-                {
-                  const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                  if (val != PetscScalar(0))
-                  {
-                    PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                    (void) e;
-                  }
-                }
-              }
+              flush_matrix_entries(chunks);
+              flush_vector_entries(rhsChunks);
             }
           } // omp parallel
         }
@@ -1714,30 +1753,20 @@ namespace Rodin::Assembly
             (void) ierr;
             for (PetscInt j = 0; j < nc; ++j)
             {
-              std::vector<std::tuple<PetscInt,PetscInt,PetscScalar>> local;
-              std::vector<PetscScalar> localRhs(static_cast<size_t>(nrows), PetscScalar(0));
+              std::vector<MatrixEntry> local;
+              std::vector<VectorEntry> localRhs;
               add_matrix_entries(
                   local,
                   localRhs,
                   static_cast<Index>(vOff) + static_cast<Index>(i),
                   static_cast<Index>(uOff) + static_cast<Index>(cols[j]),
                   vals[j]);
-              for (const auto& [I, J, val] : local)
-              {
-                ierr = MatSetValue(A, I, J, val, ADD_VALUES);
-                assert(ierr == PETSC_SUCCESS);
-                (void) ierr;
-              }
-              for (PetscInt r = 0; r < nrows; ++r)
-              {
-                const PetscScalar val = localRhs[static_cast<size_t>(r)];
-                if (val != PetscScalar(0))
-                {
-                  ierr = VecSetValue(b, r, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                  (void) ierr;
-                }
-              }
+              std::vector<std::vector<MatrixEntry>> matrixChunks(1);
+              matrixChunks[0] = std::move(local);
+              flush_matrix_entries(matrixChunks);
+              std::vector<std::vector<VectorEntry>> vectorChunks(1);
+              vectorChunks[0] = std::move(localRhs);
+              flush_vector_entries(vectorChunks);
             }
             ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
             assert(ierr == PETSC_SUCCESS);
@@ -1772,7 +1801,7 @@ namespace Rodin::Assembly
           const PetscInt dim = static_cast<PetscInt>(seq.getDimension());
           const PetscInt cnt = static_cast<PetscInt>(seq.getCount());
 
-          std::vector<std::vector<PetscScalar>> chunks(static_cast<size_t>(tc));
+          std::vector<std::vector<VectorEntry>> chunks(static_cast<size_t>(tc));
 
 #pragma omp parallel num_threads(tc)
           {
@@ -1781,7 +1810,7 @@ namespace Rodin::Assembly
             auto integrator =
               std::unique_ptr<LinearIntegratorBase>(static_cast<LinearIntegratorBase*>(lfi.copy()));
 
-            std::vector<PetscScalar> local(static_cast<size_t>(nrows), PetscScalar(0));
+            std::vector<VectorEntry> local;
 
 #pragma omp for
             for (PetscInt k = 0; k < cnt; ++k)
@@ -1812,19 +1841,7 @@ namespace Rodin::Assembly
 #pragma omp barrier
 #pragma omp single
             {
-              for (auto& vecLocal : chunks)
-              {
-                for (PetscInt i = 0; i < static_cast<PetscInt>(nrows); ++i)
-                {
-                  const PetscScalar val = vecLocal[static_cast<size_t>(i)];
-                  if (val != PetscScalar(0))
-                  {
-                    PetscErrorCode e = VecSetValue(b, i, val, ADD_VALUES);
-                    assert(e == PETSC_SUCCESS);
-                    (void) e;
-                  }
-                }
-              }
+              flush_vector_entries(chunks);
             }
           } // omp parallel
         }
@@ -1846,27 +1863,18 @@ namespace Rodin::Assembly
           ierr = VecGetArrayRead(vec, &arr);
           assert(ierr == PETSC_SUCCESS);
           (void) ierr;
+          std::vector<std::vector<VectorEntry>> chunks(1);
           for (PetscInt i = 0; i < vecSize; ++i)
           {
             if (arr[i] != PetscScalar(0))
             {
-              std::vector<PetscScalar> local(nrows, PetscScalar(0));
               add_vector_entries(
-                  local,
+                  chunks[0],
                   static_cast<Index>(vOff) + static_cast<Index>(i),
                   arr[i]);
-              for (PetscInt r = 0; r < static_cast<PetscInt>(nrows); r++)
-              {
-                const PetscScalar val = local[static_cast<size_t>(r)];
-                if (val != PetscScalar(0))
-                {
-                  ierr = VecSetValue(b, r, val, ADD_VALUES);
-                  assert(ierr == PETSC_SUCCESS);
-                  (void) ierr;
-                }
-              }
             }
           }
+          flush_vector_entries(chunks);
           ierr = VecRestoreArrayRead(vec, &arr);
           assert(ierr == PETSC_SUCCESS);
           (void) ierr;
