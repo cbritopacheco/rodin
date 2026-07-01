@@ -275,3 +275,15 @@ gtest_discover_tests(RodinGeometryPolytopeExtTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinGeometryMinSTCutTest MinSTCutTest.cpp)
+target_link_libraries(RodinGeometryMinSTCutTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryMinSTCutTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)

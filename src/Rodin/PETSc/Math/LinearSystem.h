@@ -269,7 +269,7 @@ namespace Rodin::Math
        */
       LinearSystem(MPI_Comm comm);
 
-      /// @brief Copy constructor (deep-copies PETSc handles).
+      /// @brief Copy constructor (increments PETSc handle reference counts).
       LinearSystem(const LinearSystem& other);
 
       /// @brief Move constructor.

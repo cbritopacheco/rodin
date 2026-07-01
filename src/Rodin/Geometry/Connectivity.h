@@ -341,18 +341,55 @@ namespace Rodin::Geometry
 
       /**
        * @brief Copy constructor.
+       *
+       * @c PolytopeIndex::left holds pointers into @c PolytopeIndex::right.
+       * A defaulted copy would leave them aliasing the source's @c right map
+       * (dangling once the source dies), so relink them into this object's
+       * own @c right map.
        */
-      Connectivity(const Connectivity&) = default;
+      Connectivity(const Connectivity& other)
+        : m_maximalDimension(other.m_maximalDimension),
+          m_dimension(other.m_dimension),
+          m_count(other.m_count),
+          m_gcount(other.m_gcount),
+          m_index(other.m_index),
+          m_dirty(other.m_dirty),
+          m_geometry(other.m_geometry),
+          m_connectivity(other.m_connectivity)
+      {
+        relinkIndex();
+      }
 
       /**
        * @brief Move constructor.
+       *
+       * Moving a @c std::unordered_map preserves node addresses, so the
+       * @c left pointers remain valid; a defaulted move is correct.
        */
       Connectivity(Connectivity&&) = default;
 
       /**
        * @brief Copy assignment operator.
+       *
+       * See the copy constructor: @c left is relinked into this object's
+       * own @c right map.
        */
-      Connectivity& operator=(const Connectivity&) = default;
+      Connectivity& operator=(const Connectivity& other)
+      {
+        if (this != &other)
+        {
+          m_maximalDimension = other.m_maximalDimension;
+          m_dimension = other.m_dimension;
+          m_count = other.m_count;
+          m_gcount = other.m_gcount;
+          m_index = other.m_index;
+          m_dirty = other.m_dirty;
+          m_geometry = other.m_geometry;
+          m_connectivity = other.m_connectivity;
+          relinkIndex();
+        }
+        return *this;
+      }
 
       /**
        * @brief Move assignment operator.
@@ -618,6 +655,27 @@ namespace Rodin::Geometry
       }
 
     private:
+      /**
+       * @brief Repoints every @c m_index[d].left entry into this object's own
+       * @c m_index[d].right map.
+       *
+       * Call after a memberwise copy: @c left still points at the source's
+       * @c right nodes; dereferencing yields the key, which is looked up in
+       * this object's copied @c right map.
+       */
+      void relinkIndex()
+      {
+        for (auto& idx : m_index)
+        {
+          for (const Polytope::Key*& ptr : idx.left)
+          {
+            const auto it = idx.right.find(*ptr);
+            assert(it != idx.right.end());
+            ptr = &it->first;
+          }
+        }
+      }
+
       size_t m_maximalDimension;
       size_t m_dimension;
       std::vector<size_t> m_count;

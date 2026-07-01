@@ -63,6 +63,7 @@ add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
 add_subdirectory(Serialization)
 
+add_subdirectory(Adaptation)
 add_subdirectory(Advection)
 add_subdirectory(Eikonal)
 add_subdirectory(Solid)

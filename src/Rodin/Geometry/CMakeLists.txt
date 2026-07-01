@@ -11,6 +11,7 @@ set(RodinGeometry_HEADERS
   Polytope.h
   PolytopeQuadrature.h
   Connectivity.h
+  MinSTCut.h
   PolytopeIterator.h
   PolytopeTransformation.h
 )
@@ -24,6 +25,7 @@ set(RodinGeometry_SRCS
   PolytopeIterator.cpp
   PolytopeTransformation.cpp
   Connectivity.cpp
+  MinSTCut.cpp
   SubMesh.cpp
   MeshBuilder.cpp
   SubMeshBuilder.cpp

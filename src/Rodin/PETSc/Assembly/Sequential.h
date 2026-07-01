@@ -64,10 +64,15 @@ namespace Rodin::Assembly
 
         PetscErrorCode ierr;
 
+        // setFromOptions = true so VecSetFromOptions assigns a concrete Vec
+        // type. Without it (and with no explicit type) the vector stays
+        // typeless and VecZeroEntries fails on PETSc 3.19 ("No method set for
+        // Vec of type (null)"); 3.22 is merely more lenient.
         ierr = PETSc::Assembly::VectorSetup(res).prepare({
           static_cast<PetscInt>(n),
           static_cast<PetscInt>(n),
-          nullptr
+          nullptr,
+          true
         });
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
