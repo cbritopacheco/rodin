@@ -557,6 +557,7 @@ namespace
     }
   }
 
+#ifdef RODIN_USE_OPENMP
   void expectSameStandaloneVector(Vec expected, Vec actual)
   {
     PetscErrorCode ierr;
@@ -610,7 +611,6 @@ namespace
     }
   }
 
-#ifdef RODIN_USE_OPENMP
   void checkPETScStandaloneOpenMPFormsMatchSequential()
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
