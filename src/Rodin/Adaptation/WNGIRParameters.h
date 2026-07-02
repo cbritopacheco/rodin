@@ -49,8 +49,16 @@ namespace Rodin::Adaptation
     Real activeSupTol = 0;      ///< ≤0 ⇒ 10h².
     Real activeRMSOverHTol = 0; ///< >0 enables scale-aware RMS stopping.
     Real activeSupOverHTol = 0; ///< >0 enables scale-aware sup stopping.
+    bool geometryAwareTolerances = true;
+    Real rmsFloor2D = Real(0.05);
+    Real supFloor2D = Real(0.25);
+    Real rmsFloor3D = Real(0.12);
+    Real supFloor3D = Real(0.65);
+    Real rmsNormalJumpFactor = Real(0.10);
+    Real supNormalJumpFactor = Real(0.15);
     Real energyStagTol = 1e-4;
     Real stepTol = 0;           ///< ≤0 ⇒ 1e-4·h.
+    Real acceptedStepOverHTol = Real(5e-3); ///< >0 stops best-effort when accepted step/h is small.
     Real pointLocationTolerance = 0; ///< ≤0 ⇒ 1e-10 for moved FE evaluation.
     Real cgRelativeTolerance = 1e-6; ///< relative residual tolerance for CG.
     std::size_t cgMaxIterations = 0; ///< 0 ⇒ min(2000, max(100, 2*ndofs)).

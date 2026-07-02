@@ -22,10 +22,16 @@ namespace Rodin::Adaptation
     Real activeRMS = 0;
     Real activeSup = 0;
     Real activeFraction = 0;
+    Real effectiveRMSOverHTol = 0;
+    Real effectiveSupOverHTol = 0;
+    Real normalJumpRMS = 0;
+    Real normalJumpMax = 0;
     Real energy = 0;
     const char* exitReason = "iter-budget";
     // Wall-clock breakdown (seconds, accumulated over iterations).
     Real tAssembly = 0;   ///< WNGIR variational problem assembly.
+    Real tSetup = 0;      ///< WNGIR geometry/sigma/validation tabulation.
+    Real tBulk = 0;       ///< One-time constant bulk metric assembly.
     Real tFactor = 0;     ///< CG setup/preconditioner.
     Real tSolve = 0;      ///< CG iterations.
     Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.

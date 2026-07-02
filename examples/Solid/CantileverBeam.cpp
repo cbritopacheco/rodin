@@ -312,7 +312,7 @@ int main(int, char**)
   grid.add(vel);
   grid.add(acc);
 
-  xdmf.write(0.0);
+  xdmf.write(0.0).flush();
 
   // ---- time loop ----------------------------------------------------------
   constexpr Real maxTraction = -1.0; // downward

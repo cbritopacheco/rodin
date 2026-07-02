@@ -144,15 +144,37 @@ namespace Rodin::Examples
     p.jLineSearchRatio =
       realOption(argc, argv, "j-ls", std::max(p.jMinRatio, Real(10) * jSafeRatio));
 
-    p.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", Real(4) * h * h);
-    p.activeSupTol = realOption(argc, argv, "wngir-sup-tol", Real(10) * h * h);
     p.activeRMSOverHTol =
       realOption(argc, argv, "wngir-rms-h-tol", defaults.activeRMSOverHTol);
     p.activeSupOverHTol =
       realOption(argc, argv, "wngir-sup-h-tol", defaults.activeSupOverHTol);
+    p.geometryAwareTolerances =
+      boolOption(argc, argv, "wngir-geometry-aware-tolerances", true);
+    p.rmsFloor2D =
+      realOption(argc, argv, "wngir-rms-floor-2d", p.rmsFloor2D);
+    p.supFloor2D =
+      realOption(argc, argv, "wngir-sup-floor-2d", p.supFloor2D);
+    p.rmsFloor3D =
+      realOption(argc, argv, "wngir-rms-floor-3d", p.rmsFloor3D);
+    p.supFloor3D =
+      realOption(argc, argv, "wngir-sup-floor-3d", p.supFloor3D);
+    p.rmsNormalJumpFactor =
+      realOption(argc, argv, "wngir-rms-normal-jump-factor", p.rmsNormalJumpFactor);
+    p.supNormalJumpFactor =
+      realOption(argc, argv, "wngir-sup-normal-jump-factor", p.supNormalJumpFactor);
+    const Real defaultRMSTol = p.activeRMSOverHTol > Real(0)
+      ? p.activeRMSOverHTol * h
+      : Real(4) * h * h;
+    const Real defaultSupTol = p.activeSupOverHTol > Real(0)
+      ? p.activeSupOverHTol * h
+      : Real(10) * h * h;
+    p.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", defaultRMSTol);
+    p.activeSupTol = realOption(argc, argv, "wngir-sup-tol", defaultSupTol);
     p.energyStagTol =
       realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
     p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
+    p.acceptedStepOverHTol =
+      realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
 
     p.quadratureOrder =
       sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);

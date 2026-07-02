@@ -160,7 +160,7 @@ int main(int argc, char** argv)
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
 
 
-    xdmf.write();
+    xdmf.write().flush();
     u.getSolution().save(filename, IO::FileFormat::MFEM);
   }
 
@@ -169,4 +169,3 @@ int main(int argc, char** argv)
   (void) ierr;
   PetscFinalize();
 }
-

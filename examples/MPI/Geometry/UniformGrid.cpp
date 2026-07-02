@@ -44,12 +44,11 @@ int main(int argc, char** argv)
 
   IO::XDMF xdmf(world, "UniformGrid");
   xdmf.grid().setMesh(mesh);
-  xdmf.write();
+  xdmf.write().flush();
   xdmf.close();
 
   return 0;
 }
-
 
 
 

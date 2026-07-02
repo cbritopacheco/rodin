@@ -633,7 +633,7 @@ int main(int argc, char** argv)
     solidOutputVelocity.setData(solidVelocity.getData());
     solidOutputFluidTraction.setData(solidFluidTraction.getData());
 
-    xdmf.write(0.0);
+    xdmf.write(0.0).flush();
 
     /*
      * Parameters.

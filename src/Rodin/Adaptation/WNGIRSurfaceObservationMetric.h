@@ -36,8 +36,8 @@ namespace Rodin::Adaptation::Detail
           : Parent(du.getLeaf(), v.getLeaf()),
             m_phi(phi.copy()),
             m_grad(grad.copy()),
-            m_du(du),
-            m_v(v),
+            m_du(std::cref(du)),
+            m_v(std::cref(v)),
             m_current(current),
             m_parameters(parameters),
             m_sigma2(sigma2)
@@ -69,8 +69,8 @@ namespace Rodin::Adaptation::Detail
 
           const std::size_t faceDim = polytope.getDimension();
           const Index faceIdx = polytope.getIndex();
-          const auto& trialFES = m_du.getFiniteElementSpace();
-          const auto& testFES = m_v.getFiniteElementSpace();
+          const auto& trialFES = m_du.get().getFiniteElementSpace();
+          const auto& testFES = m_v.get().getFiniteElementSpace();
           const auto& trialFE = trialFES.getFiniteElement(faceDim, faceIdx);
           const auto& testFE = testFES.getFiniteElement(faceDim, faceIdx);
           const auto& params = m_parameters.get();
@@ -149,8 +149,8 @@ namespace Rodin::Adaptation::Detail
       private:
         std::unique_ptr<PhiType> m_phi;
         std::unique_ptr<GradType> m_grad;
-        TrialFunction m_du;
-        TestFunction m_v;
+        std::reference_wrapper<const TrialFunction> m_du;
+        std::reference_wrapper<const TestFunction> m_v;
         std::reference_wrapper<const Displacement> m_current;
         std::reference_wrapper<const WNGIRParameters> m_parameters;
         Real m_sigma2;

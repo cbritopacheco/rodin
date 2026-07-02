@@ -47,7 +47,7 @@ int main(int, char**)
   // Save solution
   IO::XDMF xdmf("Poisson");
   xdmf.grid().setMesh(mesh).add("u", u.getSolution());
-  xdmf.write();
+  xdmf.write().flush();
   xdmf.close();
 
   return 0;

@@ -120,7 +120,7 @@ int main(int, char**)
 
     solver.solve(u);
 
-    xdmf.write(static_cast<Real>(step));
+    xdmf.write(static_cast<Real>(step)).flush();
   }
 
   return 0;

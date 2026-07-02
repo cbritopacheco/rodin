@@ -28,8 +28,8 @@ namespace Rodin::Adaptation::Detail
             const Displacement& current,
             const WNGIRParameters& parameters)
           : Parent(du.getLeaf(), v.getLeaf()),
-            m_du(du),
-            m_v(v),
+            m_du(std::cref(du)),
+            m_v(std::cref(v)),
             m_current(current),
             m_parameters(parameters)
         {}
@@ -53,8 +53,8 @@ namespace Rodin::Adaptation::Detail
           const auto geometry = polytope.getGeometry();
           const auto idx = polytope.getIndex();
 
-          const auto& trialFES = m_du.getFiniteElementSpace();
-          const auto& testFES = m_v.getFiniteElementSpace();
+          const auto& trialFES = m_du.get().getFiniteElementSpace();
+          const auto& testFES = m_v.get().getFiniteElementSpace();
           const auto& trialFE = trialFES.getFiniteElement(dim, idx);
           const auto& testFE = testFES.getFiniteElement(dim, idx);
           const auto& params = m_parameters.get();
@@ -212,8 +212,8 @@ namespace Rodin::Adaptation::Detail
         }
 
       private:
-        TrialFunction m_du;
-        TestFunction m_v;
+        std::reference_wrapper<const TrialFunction> m_du;
+        std::reference_wrapper<const TestFunction> m_v;
         std::reference_wrapper<const Displacement> m_current;
         std::reference_wrapper<const WNGIRParameters> m_parameters;
         const Geometry::Polytope* m_polytope = nullptr;

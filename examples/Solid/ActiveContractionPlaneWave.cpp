@@ -243,7 +243,7 @@ int main(int, char**)
   grid.add(fiberField,
            IO::XDMF::Center::Node,
            IO::XDMF::AttributePolicy::Static);   // written once, reused
-  xdmf.write(0.0);
+  xdmf.write(0.0).flush();
 
   // ---- commit sweep -------------------------------------------------------
   auto commitState = [&]()

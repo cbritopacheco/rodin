@@ -475,7 +475,7 @@ int main(int argc, char** argv)
   grid.add("pressure", pState);
   grid.add("displacement", dState);
   grid.add("mesh_velocity", meshVelocity);
-  xdmf.write(0.0);
+  xdmf.write(0.0).flush();
 
   const Real rhoF = 1.0;
   const Real muF = 0.02;
@@ -675,7 +675,7 @@ int main(int argc, char** argv)
     dOld.setData(dState.getData());
 
     moveMeshToCurrentDisplacement();
-    xdmf.write(t);
+    xdmf.write(t).flush();
     xdmf.flush();
   }
   }

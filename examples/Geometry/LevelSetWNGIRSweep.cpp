@@ -443,6 +443,10 @@ int main(int argc, char** argv)
   u.setName("displacement");
   GridFunction du(vectorFes);
   du.setName("wngir_step");
+  auto wngirSolveParams = wngirParams;
+  wngirSolveParams.activeRMSTol = fitTol;
+  Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
+  wngirSolver.setParameters(wngirSolveParams);
 
   LocalMesh moved(mesh);
   ScalarP0 p0FesMoved(moved);
@@ -653,10 +657,6 @@ int main(int argc, char** argv)
 
     const char* exitReason = "iter-budget";
     {
-      auto wngir = wngirParams;
-      wngir.activeRMSTol = fitTol;
-      Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
-      wngirSolver.setParameters(wngir);
       const auto wngirRep = wngirSolver.solve(
           mesh, interfaceFacets, phi, gradPhi);
       std::cout << "    wngir timing: it=" << wngirRep.iterations

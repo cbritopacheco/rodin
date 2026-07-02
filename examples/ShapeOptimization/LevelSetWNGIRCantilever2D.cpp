@@ -15,7 +15,7 @@
 // skeleton lands on phi=0, the exterior is trimmed away, and linear elasticity
 // is solved on the fitted material submesh. The shape gradient (boundary strain
 // energy density minus a fixed Lagrange multiplier) is Hilbert-regularized,
-// the level set is reinitialized (FMM) and advected by the descent velocity.
+// the level set is optionally redistanced and advected by the descent velocity.
 //
 //   J(Omega) = compliance(Omega) + ell * |Omega|.
 //
@@ -43,6 +43,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -97,6 +98,35 @@ namespace
       .norm();
   }
 
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  void installP2Transformations(WNGIRMesh& mesh)
+  {
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    const std::size_t sdim = mesh.getSpaceDimension();
+    for (std::size_t d = 1; d <= D; ++d)
+    {
+      for (auto pit = mesh.getPolytope(d); pit; ++pit)
+      {
+        const auto& polytope = *pit;
+        Variational::RealH1Element<2> geomFe(polytope.getGeometry());
+        Geometry::PointCloud pm(sdim, geomFe.getCount());
+        for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+        {
+          const auto& rc = geomFe.getNode(a);
+          polytope.getTransformation().transform(X, rc);
+          for (std::size_t c = 0; c < sdim; ++c)
+            pm(c, a) = X(c);
+        }
+        mesh.setPolytopeTransformation(
+            {d, polytope.getIndex()},
+            new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+              std::move(pm), geomFe));
+      }
+    }
+  }
+#endif
+
   // Distance from point p to segment [a,b].
   Real pointSegmentDistance(const Vec2& p, const Vec2& a, const Vec2& b)
   {
@@ -105,73 +135,6 @@ namespace
     Real t = len2 > Real(1e-30) ? ((p - a).dot(ab) / len2) : Real(0);
     t = std::max(Real(0), std::min(Real(1), t));
     return (p - (a + t * ab)).norm();
-  }
-
-  // Interface-residual (IR) reinit on a uniform lattice. Starting from the
-  // closest-point field `a` (exact zero set, medial-axis kinks), run K steps of
-  //   d_tau:  a <- a - dtau [ S0 (|grad a|_Godunov - 1) ]          (eikonal)
-  //                       + IR force from the fitted interface segments        (pin)
-  // The eikonal term cleans |grad a|->1 (smooths the kinks); the IR force
-  // -2*lambda*a(seg)*ds scattered to the 4 surrounding lattice nodes pins the
-  // zero set to the fitted interface (the int_Gamma a^2 gradient).
-  // `a` is row-major a[i*ny + j] on a gnx x gny lattice with spacing h.
-  void reinitIR(std::vector<Real>& a, int gnx, int gny, Real h,
-                const std::vector<std::array<Vec2, 2>>& seg,
-                int K, Real lambdaIR)
-  {
-    auto AT = [&](int i, int j) -> Real& { return a[i * gny + j]; };
-    auto bilinear = [&](Real x, Real y) -> Real {
-      Real gx = x / h, gy = y / h;
-      int i = std::max(0, std::min(gnx - 2, (int)gx));
-      int j = std::max(0, std::min(gny - 2, (int)gy));
-      Real u = gx - i, v = gy - j;
-      return (1 - u) * (1 - v) * AT(i, j) + u * (1 - v) * AT(i + 1, j)
-           + (1 - u) * v * AT(i, j + 1) + u * v * AT(i + 1, j + 1);
-    };
-    std::vector<Real> S0(a.size());
-    for (std::size_t k = 0; k < a.size(); ++k)
-      S0[k] = a[k] / std::sqrt(a[k] * a[k] + h * h);
-    const Real dtau = Real(0.3) * h;
-    std::vector<Real> np = a;
-    for (int it = 0; it < K; ++it)
-    {
-      np = a;
-      for (int i = 1; i < gnx - 1; ++i)
-        for (int j = 1; j < gny - 1; ++j)
-        {
-          const Real S = S0[i * gny + j];
-          const Real am = (AT(i, j) - AT(i - 1, j)) / h;
-          const Real ap = (AT(i + 1, j) - AT(i, j)) / h;
-          const Real cm = (AT(i, j) - AT(i, j - 1)) / h;
-          const Real cp = (AT(i, j + 1) - AT(i, j)) / h;
-          auto sq = [](Real x) { return x * x; };
-          Real gx2, gy2;
-          if (S > 0) {
-            gx2 = std::max(sq(std::max(am, Real(0))), sq(std::min(ap, Real(0))));
-            gy2 = std::max(sq(std::max(cm, Real(0))), sq(std::min(cp, Real(0))));
-          } else {
-            gx2 = std::max(sq(std::min(am, Real(0))), sq(std::max(ap, Real(0))));
-            gy2 = std::max(sq(std::min(cm, Real(0))), sq(std::max(cp, Real(0))));
-          }
-          np[i * gny + j] -= dtau * S * (std::sqrt(gx2 + gy2) - Real(1));
-        }
-      // IR pin: scatter the int_Gamma a^2 gradient from each fitted segment.
-      for (const auto& s : seg)
-      {
-        const Vec2 m = Real(0.5) * (s[0] + s[1]);
-        const Real ds = (s[1] - s[0]).norm();
-        Real gx = m(0) / h, gy = m(1) / h;
-        int i = (int)gx, j = (int)gy;
-        if (i < 1 || i > gnx - 2 || j < 1 || j > gny - 2) continue;
-        Real u = gx - i, v = gy - j;
-        const Real f = -dtau * lambdaIR * Real(2) * bilinear(m(0), m(1)) * ds / h;
-        np[i * gny + j]         += f * (1 - u) * (1 - v);
-        np[(i + 1) * gny + j]   += f * u * (1 - v);
-        np[i * gny + j + 1]     += f * (1 - u) * v;
-        np[(i + 1) * gny + j + 1] += f * u * v;
-      }
-      a.swap(np);
-    }
   }
 
   struct CellMomentInfo
@@ -232,6 +195,35 @@ namespace
       moved.setVertexCoordinates(v, vec2(x(0) + uData(dofs[0]),
                                          x(1) + uData(dofs[1])));
     }
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    Math::SpatialPoint X;
+    const std::size_t D = mesh.getDimension();
+    const std::size_t sdim = mesh.getSpaceDimension();
+    for (std::size_t d = 1; d <= D; ++d)
+    {
+      for (auto pit = mesh.getPolytope(d); pit; ++pit)
+      {
+        const auto& polytope = *pit;
+        Variational::RealH1Element<2> geomFe(polytope.getGeometry());
+        Geometry::PointCloud pm(sdim, geomFe.getCount());
+        for (std::size_t a = 0; a < geomFe.getCount(); ++a)
+        {
+          const auto& rc = geomFe.getNode(a);
+          polytope.getTransformation().transform(X, rc);
+          for (std::size_t c = 0; c < sdim; ++c)
+          {
+            const Real uc =
+              uData(uFes.getGlobalIndex({d, polytope.getIndex()}, a * sdim + c));
+            pm(c, a) = X(c) + uc;
+          }
+        }
+        moved.setPolytopeTransformation(
+            {d, polytope.getIndex()},
+            new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+              std::move(pm), geomFe));
+      }
+    }
+#endif
   }
 
   std::size_t parseSizeTOption(int argc, char** argv, const std::string& name,
@@ -315,46 +307,30 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "objective-decrease-tol", Real(1e-10));
   // Empty (default) => uniform grid; pass --mesh=<file> to load instead.
   const std::string meshFile = parseStringOption(argc, argv, "mesh", "");
-  // Stage-6 redistance:
-  //   "cp" (default) : SUB-CELL reinit — signed closest-point distance to the
-  //                    WNGIR-fitted interface segments, signed by the outward
-  //                    normal of the nearest fitted segment (NOT the stale FMM
-  //                    sign, which produced the spurious crossings / singular
-  //                    phi). Carries the sub-cell fit; stable.
-  //   "fmm"          : fast-marching eikonal reinit pinned at the CLASSIFIED
-  //                    (cell-staircase) interface. Robust but not sub-cell.
-  //   "ir"           : Li-Xu distance-regularized level-set reinitialization.
-  //                    It starts from the clean FMM signed distance and uses
-  //                    the WNGIR-fitted interface only through an implicit
-  //                    surface pin, so the zero set is pulled sub-cell without
-  //                    feeding closest-point kinks to the distance regularizer.
-  //   "ir-phi"       : same Li-Xu distance regularizer, but the zero set is
-  //                    pinned by the carried level set phi_h through the
-  //                    coarea weight delta_eps(phi_h)|grad phi_h|. This does
-  //                    not use the fitted/classified mesh interface as the
-  //                    geometric reference.
-  //   "none"         : no reinitialization; advect the current carried phi_h.
-  //                    This is the cheapest path and avoids DRLSE texture, but
-  //                    the level-set scale is then controlled only by advection.
-  const std::string reinitMode = parseStringOption(argc, argv, "reinit", "cp");
-  const std::size_t irSteps = parseSizeTOption(argc, argv, "ir-steps", 30);
-  const Real irLambda = parseRealOption(argc, argv, "ir-lambda", Real(20));
-  const Real irDtauFactor =
-    parseRealOption(argc, argv, "ir-dtau-factor", Real(0.1));
-  const Real irDeltaEps =
-    parseRealOption(argc, argv, "ir-delta-eps", Real(1.5) * h);
-  const std::size_t reinitEvery =
-    parseSizeTOption(argc, argv, "reinit-every", 1);
+  const std::string shapeDerivativeMode =
+    parseStringOption(argc, argv, "shape-derivative", "volume");
+  // Adaptive redistance is enabled by default. Periodic redistance is only
+  // requested through --redistance-every; use --redistance-mode=none to disable.
+  const std::size_t classifyEvery =
+    parseSizeTOption(argc, argv, "classify-every", 1);
+  const std::string defaultRedistanceMode =
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    "cp";
+#else
+    "fmm";
+#endif
   const std::string redistanceMode =
-    parseStringOption(argc, argv, "redistance-mode", "none");
+    parseStringOption(argc, argv, "redistance-mode", defaultRedistanceMode);
   const std::size_t redistanceEvery =
     parseSizeTOption(argc, argv, "redistance-every", 0);
+  const bool adaptiveRedistance =
+    parseSizeTOption(argc, argv, "redistance-adaptive", 1) != 0;
+  const Real redistanceEikonalTol =
+    parseRealOption(argc, argv, "redistance-eikonal-tol", Real(0.35));
   const std::size_t outputEvery =
     parseSizeTOption(argc, argv, "output-every", 1);
-  const std::size_t irDpUpdateEvery =
-    std::max<std::size_t>(1, parseSizeTOption(argc, argv, "ir-dp-update-every", 1));
   const std::size_t repairEvery =
-    parseSizeTOption(argc, argv, "repair-every", 5);
+    parseSizeTOption(argc, argv, "repair-every", 0);
   const Real repairEta = parseRealOption(argc, argv, "repair-eta", Real(0.5) * h);
   const Real repairBand = parseRealOption(argc, argv, "repair-band", Real(4) * h);
   const bool repairCalibrate =
@@ -426,27 +402,30 @@ int main(int argc, char** argv)
     mesh.getConnectivity().compute(0, 0);
     tagBoundary(mesh);
   }
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  installP2Transformations(mesh);
+#endif
 
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+  using ScalarFES = H1<2, Real, WNGIRMesh>;
+  using VectorFES = H1<2, Math::SpatialVector<Real>, WNGIRMesh>;
+#else
+  using ScalarFES = P1<Real, WNGIRMesh>;
+  using VectorFES = P1<Math::SpatialVector<Real>, WNGIRMesh>;
+#endif
   using ScalarP1 = P1<Real, WNGIRMesh>;
-  using ScalarP0 = P0<Real, WNGIRMesh>;
   using VectorP1 = P1<Math::SpatialVector<Real>, WNGIRMesh>;
 
-  ScalarP1 sh(mesh);
-  // Uniform-grid lattice index (i,j)->vertex, for the FD IR reinit.
-  const int gnx = static_cast<int>(std::lround(L / h)) + 1;
-  const int gny = static_cast<int>(std::lround(H / h)) + 1;
-  std::vector<Index> gridVtx(static_cast<std::size_t>(gnx) * gny, 0);
-  if (meshFile.empty())
-    for (Index v = 0; v < mesh.getVertexCount(); ++v)
-    {
-      const Vec2 Xv = mesh.getVertexCoordinates(v);
-      const int i = static_cast<int>(std::lround(Xv(0) / h));
-      const int j = static_cast<int>(std::lround(Xv(1) / h));
-      if (i >= 0 && i < gnx && j >= 0 && j < gny)
-        gridVtx[static_cast<std::size_t>(i) * gny + j] = v;
-    }
-  ScalarP0 p0(mesh);
-  VectorP1 vh(mesh, 2);
+  ScalarFES sh(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      std::integral_constant<std::size_t, 2>{},
+#endif
+      mesh);
+  VectorFES vh(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      std::integral_constant<std::size_t, 2>{},
+#endif
+      mesh, 2);
 
   GridFunction phiH(sh);          phiH.setName("phi");
   TrialFunction wngirTrial(vh);
@@ -457,7 +436,11 @@ int main(int argc, char** argv)
 
   // Reusable background-space objects. The background mesh connectivity is
   // fixed; only coefficients, attributes, and vertex coordinates are updated.
-  VectorP1 gradFes(mesh, 2);
+  VectorFES gradFes(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      std::integral_constant<std::size_t, 2>{},
+#endif
+      mesh, 2);
   GridFunction gradPhiSmoothed(gradFes);
   auto gradPhiDiscrete = Grad(phiH);
   TrialFunction gradTrial(gradFes);
@@ -468,34 +451,32 @@ int main(int argc, char** argv)
 
   GridFunction dist(sh);
   GridFunction speed(sh);
-  GridFunction phiR(sh);
-  GridFunction dp(p0);
-  TrialFunction irTrial(sh);
-  TestFunction  irTest(sh);
-  BilinearForm irMass(irTrial, irTest);
-  irMass = Integral(irTrial, irTest);
-  irMass.assemble();
-  const Math::Vector<Real> irMassLump =
-    irMass.getOperator() * Math::Vector<Real>::Ones(phiH.getData().size());
-  BilinearForm irDiffusion(irTrial, irTest);
-  irDiffusion = Integral(dp * Grad(irTrial), Grad(irTest));
-  BilinearForm repairStiffness(irTrial, irTest);
-  repairStiffness = Integral(Grad(irTrial), Grad(irTest));
-  repairStiffness.assemble();
-  Math::SparseMatrix<Real> repairOperator = irMass.getOperator();
-  repairOperator += (repairEta * repairEta) * repairStiffness.getOperator();
+  TrialFunction repairTrial(sh);
+  TestFunction  repairTest(sh);
+  BilinearForm repairMass(repairTrial, repairTest);
+  BilinearForm repairStiffness(repairTrial, repairTest);
   Eigen::ConjugateGradient<Math::SparseMatrix<Real>,
     Eigen::Lower | Eigen::Upper> repairCG;
   repairCG.setTolerance(Real(1e-10));
   repairCG.setMaxIterations(static_cast<int>(phiH.getData().size()));
-  repairCG.compute(repairOperator);
+  if (repairEvery > 0)
+  {
+    repairMass = Integral(repairTrial, repairTest);
+    repairMass.assemble();
+    repairStiffness = Integral(Grad(repairTrial), Grad(repairTest));
+    repairStiffness.assemble();
+    Math::SparseMatrix<Real> repairOperator = repairMass.getOperator();
+    repairOperator += (repairEta * repairEta) * repairStiffness.getOperator();
+    repairCG.compute(repairOperator);
+  }
 
   TrialFunction adv(sh);
   TestFunction  advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
-  wngirDefaults.activeRMSOverHTol = Real(0.2);
+  wngirDefaults.activeRMSOverHTol = Real(0.05);
+  wngirDefaults.activeSupOverHTol = Real(0.25);
   WNGIRParameters wp =
     Rodin::Examples::makeWNGIRParameters(
         argc, argv, h, Gamma, wngirDefaults);
@@ -530,12 +511,18 @@ int main(int argc, char** argv)
       const bool ib = b && *b == interiorAttribute;
       if (ia != ib) mesh.setAttribute({D - 1, f}, Gamma);
     }
-    phiH = Real(0);
-    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiH)
+    ScalarP1 shP1(mesh);
+    GridFunction phiP1(shP1);
+    phiP1 = Real(0);
+    Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiP1)
       .setInterior(interiorAttribute)
       .setInterface(Gamma)
       .solve()
       .sign();
+    phiH = [&](const Geometry::Point& p) -> Real
+    {
+      return phiP1.getValue(p);
+    };
   }
 
   IO::XDMF xdmf("LevelSetWNGIRCantilever2D");
@@ -545,9 +532,14 @@ int main(int argc, char** argv)
   domainGrid.add(dJ,   IO::XDMF::Center::Node);
 
   WNGIRMesh moved(mesh);
-  VectorP1 vhMoved(moved, 2);
+  VectorFES vhMoved(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      std::integral_constant<std::size_t, 2>{},
+#endif
+      moved, 2);
   TrialFunction g(vhMoved);
   TestFunction  w(vhMoved);
+  auto fittedGrid = xdmf.grid("fitted");
   auto stateGrid = xdmf.grid("state");
 
   const std::string meshDescription =
@@ -567,8 +559,10 @@ int main(int argc, char** argv)
             << " rmsTol=" << wp.activeRMSTol
             << " supTol=" << wp.activeSupTol
             << " steps=" << wp.maxIterations
-            << "  reinit=" << reinitMode << "/" << reinitEvery
+            << "  classify=" << classifyEvery
             << "  redistance=" << redistanceMode << "/" << redistanceEvery
+            << " adaptive=" << adaptiveRedistance
+            << " eikTol=" << redistanceEikonalTol
             << "  repairEvery=" << repairEvery
             << "  outputEvery=" << outputEvery << '\n';
   std::ofstream fObj("LevelSetWNGIRCantilever2D.obj.txt");
@@ -602,10 +596,40 @@ int main(int argc, char** argv)
     const Real gy = (-J01 * g0 + J00 * g1) / det;
     return std::sqrt(gx * gx + gy * gy);
   };
+  auto weightedEikonalDefect = [&](const auto& gf, Real eta) -> Real
+  {
+    const Real eta2 = std::max(eta * eta, Real(1e-30));
+    Real weightedError = 0;
+    Real weightSum = 0;
+    for (auto cit = mesh.getCell(); cit; ++cit)
+    {
+      const auto& vv = cit->getVertices();
+      const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
+      const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
+      const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
+      const Real area = std::abs(Real(0.5)
+        * ((x1(0) - x0(0)) * (x2(1) - x0(1))
+         - (x1(1) - x0(1)) * (x2(0) - x0(0))));
+      Real phiAvg = 0;
+      for (const Index v : vv)
+        phiAvg += gf.getData()(sh.getGlobalIndex({0, v}, 0));
+      phiAvg /= static_cast<Real>(vv.size());
+      const Real omega = std::exp(-(phiAvg * phiAvg) / eta2);
+      const Real gradMag = backgroundCellGradientMagnitude(gf, *cit);
+      weightedError += area * omega * (gradMag - Real(1)) * (gradMag - Real(1));
+      weightSum += area * omega;
+    }
+    return weightSum > Real(0) ? std::sqrt(weightedError / weightSum) : Real(0);
+  };
 
   std::size_t shapeAttempts = 0;
   std::size_t acceptedShapeIterations = 0;
   std::string stopReason = "completed-requested-accepted-iterations";
+  bool haveClassification = false;
+  std::vector<char> previousInterior(mesh.getCellCount(), 0);
+  std::vector<Index> cachedInterfaceFacets;
+  Real cachedAreaInterior = 0;
+  std::size_t cachedInsideCount = 0;
   while (acceptedShapeIterations < maxIt)
   {
     const std::size_t it = acceptedShapeIterations;
@@ -616,123 +640,153 @@ int main(int argc, char** argv)
     Real tElasticity = 0, tHilbert = 0, tRedistance = 0, tAdvect = 0;
     Real tRepair = 0, tWrite = 0;
 
-    // ---- Stage 1: classify the carried level set -------------------------
-    for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-      mesh.setAttribute({D, c}, Attribute{0});
-    // Clear ALL faces too: otherwise last iteration's Gamma interface faces
-    // persist, and FaceIntegral.over(Gamma)+traceOf(interior) hits a stale
-    // face with no interior neighbor -> crash. Re-tag the outer boundary after.
-    for (auto it = mesh.getFace(); it; ++it)
-      mesh.setAttribute({D - 1, it->getIndex()}, Attribute{0});
-    tagBoundary(mesh);
-
-    const auto cellMoments = collectCellMomentInfo(mesh, phiH, epsilon);
-    std::unordered_map<Index, std::size_t> cellToLocal;
-    std::vector<Index> localToCell;
-    cellToLocal.reserve(cellMoments.size());
-    for (std::size_t l = 0; l < cellMoments.size(); ++l)
-    {
-      cellToLocal[cellMoments[l].index] = l;
-      localToCell.push_back(cellMoments[l].index);
-    }
-    std::vector<Real> volumes(cellMoments.size()), moments(cellMoments.size());
-    for (std::size_t l = 0; l < cellMoments.size(); ++l)
-    {
-      volumes[l] = cellMoments[l].area;
-      moments[l] = cellMoments[l].moment;
-    }
-
-    std::vector<MinSTCut::Edge> graphEdges;
-    for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
-    {
-      const Index facet = faceIt->getIndex();
-      const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, facet);
-      if (inc.size() != 2) continue;
-      const auto a = cellToLocal.find(inc[0]);
-      const auto b = cellToLocal.find(inc[1]);
-      if (a == cellToLocal.end() || b == cellToLocal.end()) continue;
-      graphEdges.push_back({ static_cast<Index>(a->second),
-                             static_cast<Index>(b->second),
-                             lambdaC * facetLength(mesh, facet), facet });
-    }
-
-    const MinSTCut cut;
-    const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
-
-    for (std::size_t l = 0; l < classified.labels.size(); ++l)
-      mesh.setAttribute({D, localToCell[l]},
-                        classified.labels[l] == MinSTCut::Inside
-                          ? interiorAttribute : exteriorAttribute);
-
-    // ---- Connected-component cleanup -------------------------------------
-    // Remove interior material not connected, through interior cells, to the
-    // clamped support GammaD. Floating islands and load-only fragments carry
-    // rigid-body modes that make the elasticity solve singular; dropping them
-    // keeps every iteration well-posed (the body-fitted analogue of the weak
-    // ersatz material used on fixed grids).
-    {
-      std::vector<char> isSupportCell(mesh.getCellCount(), 0);
-      for (auto it = mesh.getBoundary(); it; ++it)
-      {
-        if (mesh.getAttribute(D - 1, it->getIndex()) != Attribute{GammaD})
-          continue;
-        for (const Index c :
-             mesh.getConnectivity().getIncidence({1, 2}, it->getIndex()))
-          isSupportCell[c] = 1;
-      }
-      const auto comps = mesh.ccl(
-          [](const Polytope& a, const Polytope& b)
-          { return a.getAttribute() == b.getAttribute(); }).getComponents();
-      std::size_t removed = 0;
-      for (const auto& comp : comps)
-      {
-        if (comp.empty()) continue;
-        const Index rep = *comp.begin();
-        const auto ra = mesh.getAttribute(D, rep);
-        if (!ra || *ra != interiorAttribute) continue;   // exterior component
-        bool anchored = false;
-        for (const Index c : comp)
-          if (isSupportCell[c]) { anchored = true; break; }
-        if (!anchored)
-          for (const Index c : comp)
-          { mesh.setAttribute({D, c}, exteriorAttribute); ++removed; }
-      }
-      if (removed)
-        std::cout << "  CCL: removed " << removed
-                  << " floating interior cells (unsupported components)\n";
-    }
-
-    // ---- Interface = internal faces between interior and exterior --------
     std::vector<Index> interfaceFacets;
-    for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+    std::size_t nInside = cachedInsideCount;
+    Real areaInterior = cachedAreaInterior;
+    const bool doClassify =
+      !haveClassification || classifyEvery == 0 || (it % classifyEvery == 0);
+    if (doClassify)
     {
-      const Index f = faceIt->getIndex();
-      const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-      if (inc.size() != 2) continue;
-      const auto a = mesh.getAttribute(D, inc[0]);
-      const auto b = mesh.getAttribute(D, inc[1]);
-      const bool ia = a && *a == interiorAttribute;
-      const bool ib = b && *b == interiorAttribute;
-      if (ia != ib)
+      for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
+        mesh.setAttribute({D, c}, Attribute{0});
+      for (auto fit = mesh.getFace(); fit; ++fit)
+        mesh.setAttribute({D - 1, fit->getIndex()}, Attribute{0});
+      tagBoundary(mesh);
+
+      const auto cellMoments = collectCellMomentInfo(mesh, phiH, epsilon);
+      std::unordered_map<Index, std::size_t> cellToLocal;
+      std::vector<Index> localToCell;
+      cellToLocal.reserve(cellMoments.size());
+      for (std::size_t l = 0; l < cellMoments.size(); ++l)
       {
-        interfaceFacets.push_back(f);
-        mesh.setAttribute({D - 1, f}, Gamma);
+        cellToLocal[cellMoments[l].index] = l;
+        localToCell.push_back(cellMoments[l].index);
       }
-    }
+      std::vector<Real> volumes(cellMoments.size()), moments(cellMoments.size());
+      for (std::size_t l = 0; l < cellMoments.size(); ++l)
+      {
+        volumes[l] = cellMoments[l].area;
+        moments[l] = cellMoments[l].moment;
+      }
 
-    std::size_t nInside = 0;
-    Real areaInterior = 0;
-    for (std::size_t l = 0; l < classified.labels.size(); ++l)
+      std::vector<MinSTCut::Edge> graphEdges;
+      for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+      {
+        const Index facet = faceIt->getIndex();
+        const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, facet);
+        if (inc.size() != 2) continue;
+        const auto a = cellToLocal.find(inc[0]);
+        const auto b = cellToLocal.find(inc[1]);
+        if (a == cellToLocal.end() || b == cellToLocal.end()) continue;
+        graphEdges.push_back({ static_cast<Index>(a->second),
+                               static_cast<Index>(b->second),
+                               lambdaC * facetLength(mesh, facet), facet });
+      }
+
+      const MinSTCut cut;
+      const MinSTCut::Result classified =
+        cut.classify(volumes, moments, graphEdges);
+
+      for (std::size_t l = 0; l < classified.labels.size(); ++l)
+        mesh.setAttribute({D, localToCell[l]},
+                          classified.labels[l] == MinSTCut::Inside
+                            ? interiorAttribute : exteriorAttribute);
+
+      {
+        std::vector<char> isSupportCell(mesh.getCellCount(), 0);
+        for (auto bit = mesh.getBoundary(); bit; ++bit)
+        {
+          if (mesh.getAttribute(D - 1, bit->getIndex()) != Attribute{GammaD})
+            continue;
+          for (const Index c :
+               mesh.getConnectivity().getIncidence({1, 2}, bit->getIndex()))
+            isSupportCell[c] = 1;
+        }
+        const auto comps = mesh.ccl(
+            [](const Polytope& a, const Polytope& b)
+            { return a.getAttribute() == b.getAttribute(); }).getComponents();
+        std::size_t removed = 0;
+        for (const auto& comp : comps)
+        {
+          if (comp.empty()) continue;
+          const Index rep = *comp.begin();
+          const auto ra = mesh.getAttribute(D, rep);
+          if (!ra || *ra != interiorAttribute) continue;
+          bool anchored = false;
+          for (const Index c : comp)
+            if (isSupportCell[c]) { anchored = true; break; }
+          if (!anchored)
+            for (const Index c : comp)
+            { mesh.setAttribute({D, c}, exteriorAttribute); ++removed; }
+        }
+        if (removed)
+          std::cout << "  CCL: removed " << removed
+                    << " floating interior cells (unsupported components)\n";
+      }
+
+      for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
+      {
+        const Index f = faceIt->getIndex();
+        const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
+        if (inc.size() != 2) continue;
+        const auto a = mesh.getAttribute(D, inc[0]);
+        const auto b = mesh.getAttribute(D, inc[1]);
+        const bool ia = a && *a == interiorAttribute;
+        const bool ib = b && *b == interiorAttribute;
+        if (ia != ib)
+        {
+          interfaceFacets.push_back(f);
+          mesh.setAttribute({D - 1, f}, Gamma);
+        }
+      }
+
+      std::vector<char> currentInterior(mesh.getCellCount(), 0);
+      nInside = 0;
+      areaInterior = 0;
+      for (std::size_t l = 0; l < classified.labels.size(); ++l)
+      {
+        const auto a = mesh.getAttribute(D, localToCell[l]);
+        if (a && *a == interiorAttribute)
+        {
+          ++nInside;
+          areaInterior += cellMoments[l].area;
+          currentInterior[localToCell[l]] = 1;
+        }
+      }
+      std::size_t changedCells = 0;
+      if (haveClassification)
+        for (std::size_t c = 0; c < currentInterior.size(); ++c)
+          if (currentInterior[c] != previousInterior[c]) ++changedCells;
+      std::vector<Index> oldFacets = cachedInterfaceFacets;
+      std::vector<Index> newFacets = interfaceFacets;
+      std::sort(oldFacets.begin(), oldFacets.end());
+      std::sort(newFacets.begin(), newFacets.end());
+      std::vector<Index> changedFacets;
+      std::set_symmetric_difference(
+          oldFacets.begin(), oldFacets.end(),
+          newFacets.begin(), newFacets.end(),
+          std::back_inserter(changedFacets));
+      previousInterior = std::move(currentInterior);
+      cachedInterfaceFacets = interfaceFacets;
+      cachedAreaInterior = areaInterior;
+      cachedInsideCount = nInside;
+      haveClassification = true;
+      std::cout << "  classify: interior cells=" << nInside
+                << "  interface facets=" << interfaceFacets.size()
+                << "  area=" << std::fixed << std::setprecision(4)
+                << areaInterior
+                << "  changedCells=" << changedCells
+                << "  changedInterface=" << changedFacets.size() << '\n';
+    }
+    else
     {
-      const auto a = mesh.getAttribute(D, localToCell[l]);
-      if (a && *a == interiorAttribute)
-      { ++nInside; areaInterior += cellMoments[l].area; }
+      interfaceFacets = cachedInterfaceFacets;
+      std::cout << "  classify: skipped"
+                << "  interior cells=" << nInside
+                << "  interface facets=" << interfaceFacets.size()
+                << "  area=" << std::fixed << std::setprecision(4)
+                << areaInterior << '\n';
     }
-
-    std::cout << "  classify: interior cells=" << nInside
-              << "  interface facets=" << interfaceFacets.size()
-              << "  area=" << std::fixed << std::setprecision(4)
-              << areaInterior << '\n';
     tClassify = iterTimer.reset();
 
     // ---- Stage 2: WNGIR fit mesh so skeleton lands on phi=0 --------------
@@ -747,8 +801,9 @@ int main(int argc, char** argv)
         { return gradPhiSmoothed.getValue(p); }, /*dim=*/2);
 
     u.getData().setZero();
+    WNGIRReport rep;
     {
-      const auto rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
+      rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
       // Diagnostic: did WNGIR actually move the mesh, and did it converge?
       Real maxUoverH = 0;
       const auto& uFes = u.getFiniteElementSpace();
@@ -768,6 +823,9 @@ int main(int argc, char** argv)
                 << rep.activeRMS
                 << "  activeRMS/h=" << activeRMSOverH
                 << "  activeSup/h=" << activeSupOverH
+                << "  tolRMS/h=" << rep.effectiveRMSOverHTol
+                << "  tolSup/h=" << rep.effectiveSupOverHTol
+                << "  nJumpRMS=" << rep.normalJumpRMS
                 << "  max|u|/h=" << maxUoverH << '\n';
     }
     tWNGIR = iterTimer.reset();
@@ -787,9 +845,20 @@ int main(int argc, char** argv)
     // ---- Stage 3: elasticity on the fitted material submesh --------------
     SubMesh<Context::Local> trimmed = moved.trim(exteriorAttribute);
     trimmed.getConnectivity().compute(1, 2);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    trimmed.getConnectivity().compute(2, 1);
+    trimmed.getConnectivity().compute(1, 0);
+    trimmed.getConnectivity().compute(2, 2);
+#endif
     tMoveTrim = iterTimer.reset();
 
-    VectorP1 vhInt(trimmed, 2);
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+    using StateVectorFES = H1<2, Math::SpatialVector<Real>, WNGIRMesh>;
+    StateVectorFES vhInt(std::integral_constant<std::size_t, 2>{}, trimmed, 2);
+#else
+    using StateVectorFES = P1<Math::SpatialVector<Real>, WNGIRMesh>;
+    StateVectorFES vhInt(trimmed, 2);
+#endif
     auto fLoad = VectorFunction{ Real(0), Real(-1) };
     TrialFunction us(vhInt);
     TestFunction  vs(vhInt);
@@ -880,12 +949,141 @@ int main(int argc, char** argv)
     auto Ae = Real(2) * muLame * e + lambdaLame * Trace(e) * IdentityMatrix(2);
     auto nrm = FaceNormal(moved);
     nrm.traceOf(interiorAttribute);
+    auto shapeDensity = Dot(Ae, e) - ell;
+    if (trace)
+    {
+      Real minFaceDist = std::numeric_limits<Real>::infinity();
+      Real maxFaceDist = Real(0);
+      Real maxAbsRho = Real(0);
+      Real maxAbsWeightedRho = Real(0);
+      Index minDistFacet = -1;
+      Index maxRhoFacet = -1;
+      Index maxWeightedFacet = -1;
+      std::size_t faceCount = 0;
+      for (auto fit = moved.getFace(); fit; ++fit)
+      {
+        const auto attr = fit->getAttribute();
+        if (!attr || *attr != Gamma)
+          continue;
+        ++faceCount;
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(8, fit->getGeometry());
+        const auto& q = fit->getQuadrature(qf);
+        for (std::size_t qp = 0; qp < q.getSize(); ++qp)
+        {
+          const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, &qf, qp);
+          const Real dist = p.getDistortion();
+          const Real rho = shapeDensity(ip);
+          const Real absRho = std::abs(rho);
+          const Real absWeightedRho = absRho * dist;
+          if (dist < minFaceDist)
+          {
+            minFaceDist = dist;
+            minDistFacet = fit->getIndex();
+          }
+          if (dist > maxFaceDist)
+            maxFaceDist = dist;
+          if (absRho > maxAbsRho)
+          {
+            maxAbsRho = absRho;
+            maxRhoFacet = fit->getIndex();
+          }
+          if (absWeightedRho > maxAbsWeightedRho)
+          {
+            maxAbsWeightedRho = absWeightedRho;
+            maxWeightedFacet = fit->getIndex();
+          }
+        }
+      }
+      std::cout << "  hilbertFaceDiag: faces=" << faceCount
+                << " minDist=" << std::scientific << minFaceDist
+                << "@f" << minDistFacet
+                << " maxDist=" << maxFaceDist
+                << " max|rho|=" << maxAbsRho
+                << "@f" << maxRhoFacet
+                << " max|rho|ds=" << maxAbsWeightedRho
+                << "@f" << maxWeightedFacet << '\n';
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+      LinearForm faceRhs(w);
+      faceRhs -= FaceIntegral(shapeDensity, Dot(nrm, w)).over(Gamma);
+      faceRhs.assemble();
+
+      const auto assembleManualFaceRhs =
+        [&](std::size_t order)
+      {
+        Math::Vector<Real> manual(faceRhs.getVector().size());
+        manual.setZero();
+        const std::size_t vdim = vhMoved.getVectorDimension();
+        for (auto fit = moved.getFace(); fit; ++fit)
+        {
+          const auto attr = fit->getAttribute();
+          if (!attr || *attr != Gamma)
+            continue;
+          const auto& qf =
+            QF::PolytopeQuadratureFormula::get(order, fit->getGeometry());
+          const auto& q = fit->getQuadrature(qf);
+          const Variational::RealH1Element<2> scalarFE(fit->getGeometry());
+          const auto& tab = scalarFE.getTabulation(qf);
+          const auto& dofs = vhMoved.getDOFs(fit->getDimension(), fit->getIndex());
+          for (std::size_t qp = 0; qp < q.getSize(); ++qp)
+          {
+            const auto& p = q.getPoint(qp);
+            const IntegrationPoint ip(p, &qf, qp);
+            const Real wdet = qf.getWeight(qp) * p.getDistortion();
+            const Real rho = shapeDensity(ip);
+            const Vec2 normal = nrm(ip);
+            for (std::size_t l = 0; l < static_cast<std::size_t>(dofs.size()); ++l)
+            {
+              const std::size_t scalarLocal = l / vdim;
+              const std::size_t comp = l % vdim;
+              manual(dofs(l)) -= wdet * rho * normal(comp)
+                * tab.getBasis(qp, scalarLocal);
+            }
+          }
+        }
+        return manual;
+      };
+      Eigen::Index iForm = 0;
+      const Real maxForm = faceRhs.getVector().cwiseAbs().maxCoeff(&iForm);
+      std::cout << "  faceRhsCheck: maxForm=" << maxForm
+                << "@dof" << iForm;
+      for (const std::size_t order : {std::size_t(2), std::size_t(4), std::size_t(8)})
+      {
+        const Math::Vector<Real> manual = assembleManualFaceRhs(order);
+        const Math::Vector<Real> diff = faceRhs.getVector() - manual;
+        const Real manualNorm = std::max(manual.norm(), Real(1e-30));
+        Eigen::Index iManual = 0, iDiff = 0;
+        const Real maxManual = manual.cwiseAbs().maxCoeff(&iManual);
+        const Real maxDiff = diff.cwiseAbs().maxCoeff(&iDiff);
+        std::cout << " q" << order
+                  << " relL2=" << diff.norm() / manualNorm
+                  << " maxManual=" << maxManual << "@dof" << iManual
+                  << " maxDiff=" << maxDiff << "@dof" << iDiff;
+      }
+      std::cout << '\n';
+#endif
+    }
     Problem hilbert(g, w);
-    hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
-            + Integral(g, w)
-            - FaceIntegral(Dot(Ae, e) - ell, Dot(nrm, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaD)
-            + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaN);
+    if (shapeDerivativeMode == "volume")
+    {
+      auto eshelby =
+        shapeDensity * IdentityMatrix(2)
+        - Real(2) * jac.T() * Ae;
+      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
+              + Integral(g, w)
+              - Integral(eshelby, Jacobian(w)).over(interiorAttribute)
+              + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaD)
+              + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaN);
+    }
+    else
+    {
+      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
+              + Integral(g, w)
+              - FaceIntegral(shapeDensity, Dot(nrm, w)).over(Gamma)
+              + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaD)
+              + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaN);
+    }
     Solver::CG(hilbert).solve();
     // Velocity is computed on `moved`; carry it to the fixed background grid
     // (same connectivity) to advect phi there. The moved->background transfer
@@ -905,6 +1103,9 @@ int main(int argc, char** argv)
       domainGrid.clear();
       domainGrid.add("phi", phiH, IO::XDMF::Center::Node);
       domainGrid.add("dJ", dJ, IO::XDMF::Center::Node);
+      fittedGrid.clear();
+      fittedGrid.setMesh(moved, IO::XDMF::MeshPolicy::Transient);
+      fittedGrid.add("dJ_fit", g.getSolution(), IO::XDMF::Center::Node);
       stateGrid.clear();
       stateGrid.setMesh(trimmed, IO::XDMF::MeshPolicy::Transient);
       stateGrid.add("u", us.getSolution(), IO::XDMF::Center::Node);
@@ -912,79 +1113,74 @@ int main(int argc, char** argv)
     }
     tWrite = iterTimer.reset();
 
-    // ---- Stage 5: redistance from the WNGIR-FITTED interface -------------
-    // The FMM gives the correct *sign* field and far distances, but its zero
-    // set is the cell-quantized classifier staircase. Inside a narrow band we
-    // overwrite the magnitude with the exact distance to the WNGIR-fitted
-    // interface facets (moved-mesh segments at X+u), so phi carries the
-    // sub-cell interface position forward instead of re-quantizing every step.
-    std::string activeReinitMode = reinitMode;
-    bool doReinit =
-      reinitMode != "none"
-      && reinitEvery > 0
-      && (it % reinitEvery == 0 || it + 1 == maxIt);
-    if (!doReinit && reinitMode == "none" && redistanceMode != "none"
-        && redistanceEvery > 0
-        && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt))
-    {
-      activeReinitMode = redistanceMode;
-      doReinit = true;
-    }
-    if (!doReinit)
+    // ---- Stage 5: optional redistance --------------------------------------
+    const Real redistanceEta = std::max(rep.sigma, Real(3) * h);
+    const Real eikonalDefect =
+      weightedEikonalDefect(phiH, redistanceEta);
+    const bool periodicRedistance = redistanceEvery > 0
+      && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt);
+    const bool adaptiveRedistanceNow =
+      adaptiveRedistance && eikonalDefect > redistanceEikonalTol;
+    const bool doRedistance = redistanceMode != "none"
+      && (periodicRedistance || adaptiveRedistanceNow);
+    if (!doRedistance)
     {
       dist.getData() = phiH.getData();
+      std::cout << "  redistance: skipped"
+                << " eikWelsch=" << std::scientific << eikonalDefect
+                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
+                << '\n';
     }
     else
     {
-      dist = Real(0);
-      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(dist)
+      ScalarP1 shP1(mesh);
+      GridFunction distP1(shP1);
+      distP1 = Real(0);
+      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
         .setInterior(interiorAttribute)
         .setInterface(Gamma)
         .solve()
         .sign();
+      dist = [&](const Geometry::Point& p) -> Real
+      {
+        return distP1.getValue(p);
+      };
       const Math::Vector<Real> fmmDist = dist.getData();
-      // reinit=fmm: use the plain FMM signed distance (the reference example's
-      // reinit) with NO closest-point/IR overwrite — diagnostic baseline.
-      if (activeReinitMode != "fmm")
+      if (redistanceMode == "cp")
       {
-      // Each fitted segment gets an OUTWARD unit normal (pointing from the
-      // interior neighbour to the exterior), so the closest-point sign is taken
-      // from the fitted interface itself, NOT from the stale FMM/staircase sign.
-      // Using the FMM sign caused a spurious zero crossing (phantom sliver ->
-      // singular elasticity) wherever the fit moved the interface across a node.
-      std::vector<std::array<Vec2, 2>> fittedSeg;
-      std::vector<Vec2> fittedN;
-      fittedSeg.reserve(interfaceFacets.size());
-      fittedN.reserve(interfaceFacets.size());
-      for (const Index f : interfaceFacets)
-      {
-        const auto& vv = moved.getFace(f)->getVertices();
-        const Vec2 a = moved.getVertexCoordinates(vv[0]);
-        const Vec2 b = moved.getVertexCoordinates(vv[1]);
-        Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));        // perp to segment
-        const Real nn = nrm.norm();
-        if (nn > Real(1e-30)) nrm = nrm / nn; else nrm = vec2(1, 0);
-        // orient away from the interior incident cell's (moved) centroid
-        const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-        Vec2 cInt = vec2(0, 0); bool haveInt = false;
-        for (const Index c : inc)
+        std::vector<std::array<Vec2, 2>> fittedSeg;
+        std::vector<Vec2> fittedN;
+        fittedSeg.reserve(interfaceFacets.size());
+        fittedN.reserve(interfaceFacets.size());
+        for (const Index f : interfaceFacets)
         {
-          const auto at = mesh.getAttribute(D, c);
-          if (at && *at == interiorAttribute)
+          const auto& vv = moved.getFace(f)->getVertices();
+          const Vec2 a = moved.getVertexCoordinates(vv[0]);
+          const Vec2 b = moved.getVertexCoordinates(vv[1]);
+          Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));
+          const Real nn = nrm.norm();
+          nrm = nn > Real(1e-30) ? nrm / nn : vec2(1, 0);
+          const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
+          Vec2 cInt = vec2(0, 0);
+          bool haveInt = false;
+          for (const Index c : inc)
           {
-            const auto& cvv = mesh.getCell(c)->getVertices();
-            Vec2 ctr = vec2(0, 0);
-            for (const Index cv : cvv) ctr += moved.getVertexCoordinates(cv);
-            cInt = ctr / static_cast<Real>(cvv.size()); haveInt = true; break;
+            const auto at = mesh.getAttribute(D, c);
+            if (at && *at == interiorAttribute)
+            {
+              const auto& cvv = mesh.getCell(c)->getVertices();
+              Vec2 ctr = vec2(0, 0);
+              for (const Index cv : cvv) ctr += moved.getVertexCoordinates(cv);
+              cInt = ctr / static_cast<Real>(cvv.size());
+              haveInt = true;
+              break;
+            }
           }
+          const Vec2 mid = Real(0.5) * (a + b);
+          if (haveInt && (mid - cInt).dot(nrm) < Real(0)) nrm = -nrm;
+          fittedSeg.push_back({ a, b });
+          fittedN.push_back(nrm);
         }
-        const Vec2 mid = Real(0.5) * (a + b);
-        if (haveInt && (mid - cInt).dot(nrm) < Real(0)) nrm = -nrm;
-        fittedSeg.push_back({ a, b });
-        fittedN.push_back(nrm);
-      }
-      auto overwriteClosestPointBand = [&]()
-      {
         const Real band = Real(6) * h;
         for (Index v = 0; v < mesh.getVertexCount(); ++v)
         {
@@ -1004,308 +1200,48 @@ int main(int argc, char** argv)
             const Vec2 mid =
               Real(0.5) * (fittedSeg[kmin][0] + fittedSeg[kmin][1]);
             const Real s = (X - mid).dot(fittedN[kmin]) >= Real(0)
-                             ? Real(1) : Real(-1);   // outward = exterior = +
+              ? Real(1) : Real(-1);
             dist.getData()(d) = s * dmin;
           }
         }
-      };
-
-      auto cellGradientMagnitude = [&](const auto& gf,
-                                       const Polytope& cell) -> Real
-      {
-        const auto& vv = cell.getVertices();
-        const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-        const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-        const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-        const Real p0v = gf.getData()(sh.getGlobalIndex({0, vv[0]}, 0));
-        const Real p1v = gf.getData()(sh.getGlobalIndex({0, vv[1]}, 0));
-        const Real p2v = gf.getData()(sh.getGlobalIndex({0, vv[2]}, 0));
-        const Real J00 = x1(0) - x0(0), J01 = x2(0) - x0(0);
-        const Real J10 = x1(1) - x0(1), J11 = x2(1) - x0(1);
-        const Real det = J00 * J11 - J01 * J10;
-        if (std::abs(det) < Real(1e-30))
-          return Real(1);
-        const Real g0 = p1v - p0v;
-        const Real g1 = p2v - p0v;
-        const Real gx = ( J11 * g0 - J10 * g1) / det;
-        const Real gy = (-J01 * g0 + J00 * g1) / det;
-        return std::sqrt(gx * gx + gy * gy);
-      };
-
-      auto gradientStats = [&](const auto& gf, bool cutCellsOnly)
-      {
-        Real gmin = std::numeric_limits<Real>::infinity();
-        Real gmax = Real(0);
-        const Real band = Real(4) * h;
-        std::size_t cnt = 0;
-        for (auto cit = mesh.getCell(); cit; ++cit)
-        {
-          const auto& vv = cit->getVertices();
-          Real av = Real(0);
-          Real vmin = std::numeric_limits<Real>::infinity();
-          Real vmax = -std::numeric_limits<Real>::infinity();
-          for (const Index v : vv)
-          {
-            const Real pv = gf.getData()(sh.getGlobalIndex({0, v}, 0));
-            av += std::abs(pv);
-            vmin = std::min(vmin, pv);
-            vmax = std::max(vmax, pv);
-          }
-          av /= static_cast<Real>(vv.size());
-          if (cutCellsOnly)
-          {
-            if (!(vmin <= Real(0) && vmax >= Real(0)))
-              continue;
-          }
-          else if (av > band)
-          {
-            continue;
-          }
-          const Real gm = cellGradientMagnitude(gf, *cit);
-          gmin = std::min(gmin, gm);
-          gmax = std::max(gmax, gm);
-          ++cnt;
-        }
-        if (cnt == 0)
-          return std::array<Real, 2>{ Real(0), Real(0) };
-        return std::array<Real, 2>{ gmin, gmax };
-      };
-
-      if (activeReinitMode == "ir" || activeReinitMode == "ir-phi")
-      {
-        // Li-Xu DRLSE with the full signed bounded double-well diffusivity
-        //
-        //   d_p(s) = 1 - 1/s,                 s >= 1,
-        //          = sin(2*pi*s)/(2*pi*s),    s <  1,
-        //
-        // and an implicit interface pin. For reinit=ir, the pin is
-        // int_{Gamma_fit} phi^2 ds on the moved WNGIR segments. For
-        // reinit=ir-phi, the pin is the coarea approximation
-        // int delta_eps(phi_h) |grad phi_h| phi^2 dx, hence the geometric
-        // reference is the level set itself and not the classified mesh.
-        const Real dtauR = irDtauFactor * h * h;
-        const int  Kr    = static_cast<int>(irSteps);
-        if (activeReinitMode == "ir")
-        {
-          // Mesh-pinned variant: start from the clean FMM SDF and use the
-          // fitted mesh only as a zero-trace constraint.
-          dist.getData() = fmmDist;
-          phiR.getData() = dist.getData();
-        }
-        else
-        {
-          // Phi-pinned variant: start from the carried level set, rescaled by
-          // the average cut-cell gradient so the unknown has distance units.
-          Real gsum = Real(0);
-          std::size_t gcnt = 0;
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            Real vmin = std::numeric_limits<Real>::infinity();
-            Real vmax = -std::numeric_limits<Real>::infinity();
-            for (const Index v : vv)
-            {
-              const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
-              vmin = std::min(vmin, pv);
-              vmax = std::max(vmax, pv);
-            }
-            if (vmin <= Real(0) && vmax >= Real(0))
-            {
-              gsum += cellGradientMagnitude(phiH, *cit);
-              ++gcnt;
-            }
-          }
-          const Real gscale =
-            gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12))
-                     : Real(1);
-          phiR.getData() = phiH.getData() / gscale;
-        }
-        std::vector<Eigen::Triplet<Real>> pinTriplets;
-
-        auto addPinPoint = [&](const Vec2& y, Real w)
-        {
-          Math::SpatialPoint pc(2);
-          pc(0) = y(0);
-          pc(1) = y(1);
-          constexpr Real tol = Real(1e-10);
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            Math::SpatialPoint rc(2);
-            cit->getTransformation().inverse(rc, pc);
-            const Real l0 = Real(1) - rc(0) - rc(1);
-            const Real l1 = rc(0);
-            const Real l2 = rc(1);
-            if (l0 < -tol || l1 < -tol || l2 < -tol)
-              continue;
-            const auto& vv = cit->getVertices();
-            const std::array<Real, 3> N = {{ l0, l1, l2 }};
-            for (std::size_t a = 0; a < 3; ++a)
-            {
-              const Index ia = sh.getGlobalIndex({0, vv[a]}, 0);
-              for (std::size_t b = 0; b < 3; ++b)
-              {
-                const Index ib = sh.getGlobalIndex({0, vv[b]}, 0);
-                pinTriplets.emplace_back(
-                    static_cast<int>(ia),
-                    static_cast<int>(ib),
-                    w * N[a] * N[b]);
-              }
-            }
-            return;
-          }
-        };
-
-        if (activeReinitMode == "ir")
-        {
-          pinTriplets.reserve(18 * fittedSeg.size());
-          // Two-point Gauss quadrature on every moved interface segment.
-          constexpr Real q0 = Real(0.21132486540518711775);
-          constexpr Real q1 = Real(0.78867513459481288225);
-          for (const auto& seg : fittedSeg)
-          {
-            const Vec2 a = seg[0];
-            const Vec2 b = seg[1];
-            const Real ds = (b - a).norm();
-            addPinPoint((Real(1) - q0) * a + q0 * b, Real(0.5) * ds);
-            addPinPoint((Real(1) - q1) * a + q1 * b, Real(0.5) * ds);
-          }
-        }
-        else
-        {
-          pinTriplets.reserve(27 * mesh.getCellCount());
-          Real gsum = Real(0);
-          std::size_t gcnt = 0;
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            Real vmin = std::numeric_limits<Real>::infinity();
-            Real vmax = -std::numeric_limits<Real>::infinity();
-            for (const Index v : vv)
-            {
-              const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
-              vmin = std::min(vmin, pv);
-              vmax = std::max(vmax, pv);
-            }
-            if (vmin <= Real(0) && vmax >= Real(0))
-            {
-              gsum += cellGradientMagnitude(phiH, *cit);
-              ++gcnt;
-            }
-          }
-          const Real gavg =
-            gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12))
-                     : Real(1);
-          const Real epsPhi = std::max(irDeltaEps * gavg, Real(1e-12));
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-            const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-            const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-            const Real area = std::abs(Real(0.5) *
-              ((x1(0) - x0(0)) * (x2(1) - x0(1))
-             - (x1(1) - x0(1)) * (x2(0) - x0(0))));
-            const Real gmag = cellGradientMagnitude(phiH, *cit);
-            std::array<Index, 3> gd;
-            std::array<Real, 3> pv;
-            for (std::size_t a = 0; a < 3; ++a)
-            {
-              gd[a] = sh.getGlobalIndex({0, vv[a]}, 0);
-              pv[a] = phiH.getData()(gd[a]);
-            }
-            for (const auto& bary : TriangleBarycentricQuadrature)
-            {
-              const std::array<Real, 3> N = {{ bary[0], bary[1], bary[2] }};
-              const Real phiq = N[0] * pv[0] + N[1] * pv[1] + N[2] * pv[2];
-              if (std::abs(phiq) >= epsPhi)
-                continue;
-              const Real delta =
-                (Real(1) / (Real(2) * epsPhi))
-                * (Real(1) + std::cos(M_PI * phiq / epsPhi));
-              const Real w = (area / Real(3)) * delta * gmag;
-              for (std::size_t a = 0; a < 3; ++a)
-                for (std::size_t b = 0; b < 3; ++b)
-                  pinTriplets.emplace_back(
-                      static_cast<int>(gd[a]),
-                      static_cast<int>(gd[b]),
-                      w * N[a] * N[b]);
-            }
-          }
-        }
-
-        Math::SparseMatrix<Real> A(phiR.getData().size(), phiR.getData().size());
-        std::vector<Eigen::Triplet<Real>> aTriplets;
-        aTriplets.reserve(
-            static_cast<std::size_t>(phiR.getData().size()) + pinTriplets.size());
-        for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
-          aTriplets.emplace_back(
-              static_cast<int>(i), static_cast<int>(i), irMassLump(i) / dtauR);
-        for (const auto& t : pinTriplets)
-          aTriplets.emplace_back(t.row(), t.col(), Real(2) * irLambda * t.value());
-        A.setFromTriplets(aTriplets.begin(), aTriplets.end());
-        Eigen::ConjugateGradient<Math::SparseMatrix<Real>,
-          Eigen::Lower | Eigen::Upper> irCG;
-        irCG.setTolerance(Real(1e-10));
-        irCG.setMaxIterations(static_cast<int>(phiR.getData().size()));
-        irCG.compute(A);
-        const auto gInCut = gradientStats(phiR, true);
-        const auto gInBand = gradientStats(phiR, false);
-        Math::Vector<Real> rK(phiR.getData().size());
-        for (int kk = 0; kk < Kr; ++kk)
-        {
-          if (kk == 0 || static_cast<std::size_t>(kk) % irDpUpdateEvery == 0)
-          {
-            for (auto cit = mesh.getCell(); cit; ++cit)
-            {
-              const Index dc = p0.getGlobalIndex({D, cit->getIndex()}, 0);
-              const Real s = cellGradientMagnitude(phiR, *cit);
-              Real dpv;
-              if (s >= Real(1)) dpv = Real(1) - Real(1)/s;
-              else { const Real x = Real(2)*M_PI*s;
-                     dpv = s > Real(1e-6) ? std::sin(x)/x : Real(1); }
-              dp.getData()(dc) = dpv;
-            }
-            irDiffusion.assemble();
-          }
-          rK = irDiffusion.getOperator() * phiR.getData();
-          Math::Vector<Real> rhs(phiR.getData().size());
-          for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
-            rhs(i) = (irMassLump(i) / dtauR) * phiR.getData()(i) - rK(i);
-          phiR.getData() = irCG.solve(rhs);
-        }
-        const auto gOutCut = gradientStats(phiR, true);
-        const auto gOutBand = gradientStats(phiR, false);
-        std::cout << "    IR-DRLSE"
-                  << (activeReinitMode == "ir-phi" ? "-phi" : "")
-                  << ": |grad phi| cut ["
-                  << std::fixed << std::setprecision(3)
-                  << gInCut[0] << "," << gInCut[1] << "] -> ["
-                  << gOutCut[0] << "," << gOutCut[1] << "]"
-                  << "  band [" << gInBand[0] << "," << gInBand[1]
-                  << "] -> [" << gOutBand[0] << "," << gOutBand[1] << "]\n";
-        dist.getData() = phiR.getData();
       }
-      else
+      else if (redistanceMode != "fmm")
       {
-        overwriteClosestPointBand();
+        std::cerr << "Unsupported redistance mode: " << redistanceMode << '\n';
+        return 2;
       }
-      }
+      std::cout << "  redistance: mode=" << redistanceMode
+                << " reason="
+                << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
+                    : periodicRedistance ? "periodic" : "adaptive")
+                << " eikWelsch=" << std::scientific << eikonalDefect
+                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
+                << '\n';
     }
     tRedistance = iterTimer.reset();
 
     // Normalize the descent velocity, advect distance by one step.
     speed = Frobenius(dJ);
     const Real vmax = std::max(speed.max(), Real(1e-30));
+    const Math::Vector<Real> phiBeforeAdvection = phiH.getData();
     dJ /= vmax;
     Advection::Lagrangian(adv, advTest, dist, dJ).step(dtCur);
     phiH.getData() = adv.getSolution().getData();
+    Real maxPhiChange = 0;
+    for (Eigen::Index i = 0; i < phiH.getData().size(); ++i)
+      maxPhiChange =
+        std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
+    std::cout << "  advect: dt/h=" << (h > Real(0) ? dtCur / h : Real(0))
+              << " rawSpeedMax=" << vmax
+              << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0))
+              << '\n';
     tAdvect = iterTimer.reset();
 
     const bool doRepair =
       repairEvery > 0 && ((it + 1) % repairEvery == 0 || it + 1 == maxIt);
     if (doRepair)
     {
-      const Math::Vector<Real> rhs = irMass.getOperator() * phiH.getData();
+      const Math::Vector<Real> rhs = repairMass.getOperator() * phiH.getData();
       phiH.getData() = repairCG.solve(rhs);
       if (repairCalibrate)
       {
