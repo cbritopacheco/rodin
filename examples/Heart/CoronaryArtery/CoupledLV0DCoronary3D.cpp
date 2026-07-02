@@ -96,7 +96,7 @@ CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI &context,
       m_tauh(m_mesh), m_u(m_uh), m_p(m_ph), m_mu(m_ph), m_v(m_uh), m_q(m_ph),
       m_r(m_ph), m_uOld(m_uh), m_pOld(m_ph), m_one(m_ph), m_qFlux(m_ph),
       m_sub(m_uph), m_subOld(m_uph), m_up(m_uph), m_vp(m_uph), m_tau(m_tauh),
-      m_t(m_tauh), m_tauOld(m_tauh), m_flux(m_qFlux),
+      m_t(m_tauh), m_tauOld(m_tauh), m_flux(m_qFlux), m_shearWall(m_uh),
       m_flow(m_u, m_p, m_v, m_q), m_flowKSP(m_flow), m_flowSolver(m_flowKSP),
       m_viscosityProjection(m_mu, m_r),
       m_viscosityProjectionKSP(m_viscosityProjection), m_l2ConvU(m_up, m_vp),
@@ -466,7 +466,7 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
     return sgn * (*root);
   };
 
-  const Real alpha = 0.7;
+  const Real alpha = 0.5;
   const Real dPim = alpha * (s.pv - h.nm1.pv) / dt;
   const Real Qim = bc.C * dPim;
 
@@ -623,6 +623,7 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
   m_up.setName("projected_convection");
   m_sub.setName("subscale");
   m_tau.setName("tau");
+  m_shearWall.setName("shearStress");
 
   m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
   m_pOld = 0.0;
@@ -630,16 +631,64 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
   m_mu.getSolution() = 0.0;
   m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
   m_tauOld = 0.0;
+  m_shearWall = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
   m_xdmf.add("velocity", m_u.getSolution());
   m_xdmf.add("pressure", m_p.getSolution());
   m_xdmf.add("viscosity", m_mu.getSolution());
   m_xdmf.add("subscale", m_sub.getSolution());
   m_xdmf.add("tau", m_tau.getSolution());
+  m_xdmf.add("shearStress", m_shearWall);
 
   m_wk.clear();
   for (const Attribute tag : m_cfg.outlets)
     m_wk.emplace(tag, m_cfg.defaultRCR);
+
+  // ---- Automatic Murray-law outlet calibration --------------------------
+  // Size each outlet's total resistance so the branch flows split according to
+  // Murray's law (Q_i proportional to r_i^3) and sum to lcaTargetFlow, driven
+  // by the current 0D pressure gradient. The surrogate outlet-law radii are
+  // then backed out (keeping the branch lengths) so updateRCRNonNew stays
+  // consistent, and a uniform time constant tau = Rd*C is imposed.
+  if (m_cfg.autoCalibrateOutlets) {
+    const Real mu0 = m_cfg.viscosity.mu0;
+    const Real PI = std::numbers::pi_v<Real>;
+    const Real pim = 0.45 * m_model.getState().pv; // alpha * pv (distal level)
+    const Real par0 = m_model.getState().par;
+    const Real dP = std::max<Real>(par0 - pim, 1.0);
+
+    // Equivalent radius r = sqrt(A/pi) from the measured outlet area.
+    std::map<Attribute, Real> rEq;
+    Real sumR3 = 0.0;
+    for (const Attribute tag : m_cfg.outlets) {
+      m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
+      m_flux.assemble();
+      const Real area = std::max<Real>(m_flux(m_one), 1e-12);
+      rEq[tag] = std::sqrt(area / PI);
+      sumR3 += rEq[tag] * rEq[tag] * rEq[tag];
+    }
+
+    const Real fp = std::clamp(m_cfg.proximalResistanceFraction, 0.0, 0.5);
+    for (const Attribute tag : m_cfg.outlets) {
+      const Real w = (rEq[tag] * rEq[tag] * rEq[tag]) / std::max(sumR3, 1e-30);
+      const Real Qi = std::max<Real>(m_cfg.lcaTargetFlow * w, 1e-12);
+      const Real Ri = dP / Qi;         // total branch resistance
+      const Real Rd = (1.0 - fp) * Ri; // distal (peripheral)
+      const Real Rp = fp * Ri;         // proximal (characteristic)
+      // Back out the surrogate radii (keep Lp, Ld): r = (8 mu0 L/(pi R))^1/4.
+      auto &g = m_cfg.outletFlowLaw.geometricParam.at(tag);
+      g.Rd = std::pow(8.0 * mu0 * g.Ld / (PI * Rd), 0.25);
+      g.Rp = std::pow(8.0 * mu0 * g.Lp / (PI * Rp), 0.25);
+      m_wk.at(tag).C = m_cfg.rcrTau / Rd; // uniform tau = Rd*C
+      if (isRoot())
+        Alert::Info() << "  [calib] outlet " << tag
+                      << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
+                      << "  Q=" << (Qi * 6.0e7) << " mL/min"
+                      << "  Rd=" << Rd << "  C=" << m_wk.at(tag).C
+                      << "  tau=" << (Rd * m_wk.at(tag).C) << " s"
+                      << Alert::Raise;
+    }
+  }
 
   m_flowSolver.setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
       .setStateUpdate([this](const PETSc::Math::Vector &x) {
@@ -1350,6 +1399,80 @@ void CoupledLV0DCoronary3D::computeFluxes() {
   m_stepData.t = s.t;
 }
 
+void CoupledLV0DCoronary3D::computeWallShear() {
+  const auto &cy = m_cfg.viscosity;
+  const auto normal = BoundaryNormal(m_mesh);
+  const auto &uSol = m_u.getSolution();
+
+  VelocityTrialFunctionType gradRecTrial(m_uh);
+  VelocityTestFunctionType gradRecTest(m_uh);
+
+  const auto jacRow0 = VectorFunction(Component(Jacobian(uSol), 0, 0),
+                                      Component(Jacobian(uSol), 0, 1),
+                                      Component(Jacobian(uSol), 0, 2));
+  const auto jacRow1 = VectorFunction(Component(Jacobian(uSol), 1, 0),
+                                      Component(Jacobian(uSol), 1, 1),
+                                      Component(Jacobian(uSol), 1, 2));
+  const auto jacRow2 = VectorFunction(Component(Jacobian(uSol), 2, 0),
+                                      Component(Jacobian(uSol), 2, 1),
+                                      Component(Jacobian(uSol), 2, 2));
+
+  VelocityGridFunctionType gradRec0(m_uh);
+  VelocityGridFunctionType gradRec1(m_uh);
+  VelocityGridFunctionType gradRec2(m_uh);
+
+  // Same mass matrix, three right-hand sides: reuse one problem + one KSP.
+  VelocityProjectionProblemType gradRecProj(gradRecTrial, gradRecTest);
+  Rodin::Solver::KSP gradRecKSP(gradRecProj);
+
+  gradRecProj =
+      Integral(gradRecTrial, gradRecTest) - Integral(jacRow0, gradRecTest);
+  gradRecProj.solve(gradRecKSP);
+  gradRec0.setData(gradRecTrial.getSolution().getData());
+
+  gradRecProj =
+      Integral(gradRecTrial, gradRecTest) - Integral(jacRow1, gradRecTest);
+  gradRecProj.solve(gradRecKSP);
+  gradRec1.setData(gradRecTrial.getSolution().getData());
+
+  gradRecProj =
+      Integral(gradRecTrial, gradRecTest) - Integral(jacRow2, gradRecTest);
+  gradRecProj.solve(gradRecKSP);
+  gradRec2.setData(gradRecTrial.getSolution().getData());
+
+  // (grad u . n)_i = gradRec_i . n is the wall-normal directional derivative.
+  const auto gradUn0 = Dot(gradRec0, normal);
+  const auto gradUn1 = Dot(gradRec1, normal);
+  const auto gradUn2 = Dot(gradRec2, normal);
+  const auto tracRec = VectorFunction(cy.muInf * gradUn0, cy.muInf * gradUn1,
+                                      cy.muInf * gradUn2);
+  const auto wallStressRec = tracRec - Dot(tracRec, normal) * normal;
+
+  VelocityTrialFunctionType wssTrial(m_uh);
+  VelocityTestFunctionType wssTest(m_uh);
+  const Real wssReg = 1.0e-3;
+  VelocityProjectionProblemType wssProj(wssTrial, wssTest);
+  wssProj = BoundaryIntegral(Dot(wssTrial, wssTest)).over(m_cfg.wall) +
+            wssReg * Integral(Dot(wssTrial, wssTest)) -
+            BoundaryIntegral(Dot(wallStressRec, wssTest)).over(m_cfg.wall);
+  Rodin::Solver::KSP wssKSP(wssProj);
+  wssProj.solve(wssKSP);
+  m_shearWall.setData(wssTrial.getSolution().getData());
+
+  if (isRoot()) {
+    ::Vec fvec = m_shearWall.getData();
+    PetscInt nf = 0;
+    VecGetLocalSize(fvec, &nf);
+    const PetscScalar *farr = nullptr;
+    VecGetArrayRead(fvec, &farr);
+    Real fieldMax = 0.0;
+    for (PetscInt i = 0; i < nf; ++i)
+      fieldMax = std::max(fieldMax, std::abs(farr[i]));
+    VecRestoreArrayRead(fvec, &farr);
+    Alert::Info() << "  [wss] field max = " << fieldMax << " Pa" << Alert::Raise;
+  }
+}
+
 void CoupledLV0DCoronary3D::updateHistory() {
   m_uOld.setData(m_u.getSolution().getData());
   m_pOld.setData(m_p.getSolution().getData());
@@ -1369,6 +1492,8 @@ void CoupledLV0DCoronary3D::writeOutputs() {
 
   m_viscosityProjection = Integral(m_mu, m_r) - Integral(mu, m_r);
   m_viscosityProjection.solve(m_viscosityProjectionKSP);
+
+  computeWallShear();
 
   m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
 }

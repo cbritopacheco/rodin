@@ -65,6 +65,10 @@ public:
       Rodin::Variational::Problem<LinearSystemType, PressureTrialFunctionType,
                                   PressureTestFunctionType>;
 
+  using VelocityProjectionProblemType =
+      Rodin::Variational::Problem<LinearSystemType, VelocityTrialFunctionType,
+                                  VelocityTestFunctionType>;
+
   using TauFESType = Rodin::Variational::P1<Real, MeshType>;
 
   using TauGridFunctionType =
@@ -118,15 +122,15 @@ public:
    */
   struct CarreauYasuda {
     /// @brief Low-shear viscosity.
-    Real mu0 = 0.104;
+    Real mu0 = 0.0186058;
     /// @brief Infinite-shear viscosity.
-    Real muInf = 0.00536;
+    Real muInf = 0.0042963;
     /// @brief Relaxation time.
-    Real lambda = 11.1048;
+    Real lambda = 0.2435;
     /// @brief Power-law index.
-    Real n = 0.1502;
+    Real n = 0.2079;
     /// @brief Yasuda transition exponent.
-    Real yasuda = 0.8625;
+    Real yasuda = 1.541;
     /// @brief Shear-rate regularization used in the 3D viscosity.
     Real gammaRegularization = 1.0e-3;
   };
@@ -269,11 +273,11 @@ public:
     /// @brief Proximal arterial resistance.
     Real Rp = 5e7;
     /// @brief Proximal arterial compliance.
-    Real Cp = 5e-9;
+    Real Cp = 8e-9;
     /// @brief Distal arterial resistance.
     Real Rd = 1.0e8;
     /// @brief Distal arterial compliance.
-    Real Cd = 6.0e-10;
+    Real Cd = 5.0e-10;
     /// @brief Atrial valve coefficient.
     Real Kat = 2.0e-6;
     /// @brief Peripheral valve coefficient.
@@ -339,21 +343,21 @@ public:
     /// @brief Initial distal pressure.
     Real initialPd = 10000.0;
     /// @brief Low-shear viscosity.
-    Real mu_0 = 0.104;
+    Real mu_0 = 0.0186058;
     /// @brief Infinite-shear viscosity.
-    Real mu_Inf = 0.00536;
+    Real mu_Inf = 0.0042963;
     /// @brief Relaxation time.
-    Real lambda = 11.1048;
+    Real lambda = 0.2435;
     /// @brief Power-law index.
-    Real n = 0.1502;
+    Real n = 0.2079;
     /// @brief Yasuda transition exponent.
-    Real yasuda = 0.8625;
+    Real yasuda = 1.541;
     /// @brief Proximal surrogate vessel radius.
     Real proximalRadius = 0.0125;
     /// @brief Proximal surrogate vessel length.
     Real proximalLength = 0.4;
     /// @brief Distal surrogate vessel radius.
-    Real distalRadius = 0.005;
+    Real distalRadius = 0.00175;
     /// @brief Distal surrogate vessel length.
     Real distalLength = 0.2;
   };
@@ -436,7 +440,21 @@ public:
     /// @brief 0D LV model parameters and initial conditions.
     LVModel lv;
     /// @brief Default RCR parameters copied to every outlet at startup.
-    RCR defaultRCR{5.0e8, 1.0e-11, 1.0e9, 500.0, 10400.0, 10400.0};
+    RCR defaultRCR{5.0e8, 2.0e-11, 1.0e9, 500.0, 10000.0, 10000.0};
+
+    /// @brief Enable automatic Murray-law outlet RCR calibration at startup.
+    /// @details When true, each outlet's total resistance is sized so the
+    ///          branch flows split as Q_i proportional to r_i^3 (Murray's law),
+    ///          summing to lcaTargetFlow, with the same time constant rcrTau on
+    ///          every branch. Outlet areas are measured from the mesh.
+    bool autoCalibrateOutlets = true;
+    /// @brief Total target coronary inflow distributed across outlets (m^3/s).
+    /// @details ~1.0e-6 m^3/s is about 60 mL/min; LCA rest flow ~150-250.
+    Real lcaTargetFlow = 1.0e-6;
+    /// @brief Uniform coronary RCR time constant tau = Rd*C (s).
+    Real rcrTau = 0.2;
+    /// @brief Proximal resistance fraction Rp/(Rp+Rd), clamped to [0, 0.5].
+    Real proximalResistanceFraction = 0.075;
 
     Real inletTangentialDamping = 1e3;
     Real inletVelocityDamping = 0.0;
@@ -512,6 +530,7 @@ private:
   void solveStatic();
   bool solve3D();
   void computeFluxes();
+  void computeWallShear();
   void updateHistory();
   void writeOutputs();
   void writeCSVHeader();
@@ -545,6 +564,10 @@ private:
   PressureTestFunctionType m_qFlux;
 
   FluxLinearFormType m_flux;
+
+  /// @brief Recovered wall shear stress field (P2 velocity space), written to
+  ///        XDMF as "shearStress".
+  VelocityGridFunctionType m_shearWall;
 
   VMSTrialFunctionType m_sub;
   VMSGridFunctionType m_subOld;

@@ -1301,6 +1301,7 @@ int main(int argc, char **argv) {
 
     LaplacianFES lh(std::integral_constant<size_t, 1>{}, meshSolid);
 
+
     // Fluid trial/test (velocity-pressure).
     PETSc::Variational::TrialFunction u(uh);
     PETSc::Variational::TrialFunction p(ph);
@@ -2161,6 +2162,36 @@ int main(int argc, char **argv) {
     Solver::KSP(laplacian).solve();
     xdmf_laplacian.write().flush();
     xdmf_laplacian.close();
+
+    // using ProteinFES = H1<1, Real, MeshType>;
+    // ProteinFES proh(std::integral_constant<size_t, 1>{}, meshFluid);
+    // PETSc::Variational::TrialFunction th(proh);
+    // PETSc::Variational::TrialFunction fg(proh);
+    // PETSc::Variational::TestFunction vth(proh);
+    // PETSc::Variational::TestFunction vfg(proh);
+
+    // PETSc::Variational::GridFunction thCur(proh);
+    // PETSc::Variational::GridFunction fgCur(proh);
+
+    // Problem protein(th, fg, vth, vfg);
+    // protein = (1. / dt) * Integral(th, vth) + (1. / dt) * Integral(fg, vfg)
+    //     - Dth * Integral(grad(th), grad(vth)) + Integral(Dot(uCur, grad(th)), vth) - Integral(Rt, vth)
+    //     - Dfg * Integral(grad(fg), grad(vfg)) + Integral(Dot(uCur, grad(fg)), vfg) + keff * Integral(thCur * fg, vfg);
+
+    // //ECAP = OSI / TAWSS;
+    // protein.assemble(); // preguntar sobre setfields con petsc?
+    // Solver::KSP(protein).solve();
+    // thCur.setData(th.getSolution().getData());
+    // fgCur.setData(fg.getSolution().getData());
+
+    // // términos estabilizantes
+    // // VMS th
+    // + Integral(Rt, Dot(uCur, grad(vth))) + Integral(Dot(uCur, grad(th)), Dot(uCur, grad(vth)))
+    // // VMS fg
+    // + Integral(Dot(uCur, grad(fg)), Dot(uCur, grad(vfg))) + keff * Integral(thCur * fg, Dot(uCur, grad(vfg)))
+    // + keff * Integral(Dot(uCur, grad(fg)), Dot(thCur, vfg)) + keff * keff * Integral(thCur * fg, thCur * vfg)
+
+    // we miss fn but lets test with this by the moment. Treatment ECAP? it has to be computed after second time cycle, otherwise zero. no contribution on the problem (FIRSTARTICLE). Treatment uncertaintinty ecap along the years?  fast methods to try. Then, regrowth modeling on fluid mesh? how we couoke? can we prove stability?
 
     if (cfg.prestressSteps > 0) {
       // Prestress statically to prestressFraction*par; the dynamic loop ramps
