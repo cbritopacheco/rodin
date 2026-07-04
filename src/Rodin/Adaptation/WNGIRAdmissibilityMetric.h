@@ -72,6 +72,13 @@ namespace Rodin::Adaptation::Detail
               static_cast<Eigen::Index>(ntr));
           m_matrix.setZero();
 
+          auto smoothStep = [](Real x, Real delta) -> Real
+          {
+            if (delta <= Real(0))
+              return x > Real(0) ? Real(1) : Real(0);
+            return Real(0.5) * (Real(1) + std::tanh(x / delta));
+          };
+
           for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
           {
             const auto& pt = quad.getPoint(qp);
@@ -90,36 +97,73 @@ namespace Rodin::Adaptation::Detail
             Real frob2 = 0;
             Real qK = 0;
             Real sJ0 = 0, sQ0 = 0;
-            bool jActive = false, qActive = false, qualActive = false;
+            Real jWeight = 0, qWeight = 0, qualWeight = 0;
+            Math::SpatialMatrix<Real> dQdF = makeZeroMatrix(dim);
             if (shapeOK)
             {
               frob2 = F.squaredNorm();
+              const auto FinvT = F.inverse().transpose();
               qK = frob2 / (d * std::pow(jK, Real(2) / d));
+              dQdF =
+                Math::SpatialMatrix<Real>(
+                    (Real(2) / d) * std::pow(jK, -Real(2) / d)
+                    * (F - (frob2 / d) * FinvT));
               sJ0 = jK - params.jSafe;
               sQ0 = params.qMax - qK;
-              jActive = params.includeAdmissibilityMetric
-                && params.gammaJ > Real(0)
-                && sJ0 > Real(0) && sJ0 < params.s0J;
-              qActive = params.includeAdmissibilityMetric
-                && params.gammaQ > Real(0)
-                && sQ0 > Real(0) && sQ0 < params.s0Q;
-              qualActive = params.includeQualityMetric
-                && params.gammaQual > Real(0) && qK > params.qStar;
+              if (params.includeAdmissibilityMetric
+                  && params.gammaJ > Real(0) && sJ0 > Real(0))
+              {
+                if (params.metricActivation == WNGIRMetricActivation::Smooth)
+                {
+                  const Real s =
+                    std::max(sJ0, params.metricActivationEpsilon);
+                  jWeight =
+                    smoothStep(params.s0J - sJ0, params.jBarrierSmoothDelta)
+                    / (s * s);
+                }
+                else if (sJ0 < params.s0J)
+                  jWeight = Real(1) / (sJ0 * sJ0);
+              }
+              if (params.includeAdmissibilityMetric
+                  && params.gammaQ > Real(0) && sQ0 > Real(0))
+              {
+                if (params.metricActivation == WNGIRMetricActivation::Smooth)
+                {
+                  const Real s =
+                    std::max(sQ0, params.metricActivationEpsilon);
+                  qWeight =
+                    smoothStep(params.s0Q - sQ0, params.qBarrierSmoothDelta)
+                    / (s * s);
+                }
+                else if (sQ0 < params.s0Q)
+                  qWeight = Real(1) / (sQ0 * sQ0);
+              }
+              if (params.includeQualityMetric && params.gammaQual > Real(0))
+              {
+                if (params.metricActivation == WNGIRMetricActivation::Smooth)
+                  qualWeight =
+                    smoothStep(qK - params.qStar, params.qualitySmoothDelta);
+                else if (qK > params.qStar)
+                  qualWeight = Real(1);
+              }
             }
-            const bool sizeActive =
-              params.includeQualityMetric
-              && params.gammaSize > Real(0) && jK < params.jStar;
-            if (!jActive && !qActive && !qualActive && !sizeActive)
+            Real sizeWeight = 0;
+            if (params.includeQualityMetric
+                && params.gammaSize > Real(0))
+            {
+              if (params.metricActivation == WNGIRMetricActivation::Smooth)
+                sizeWeight =
+                  smoothStep(params.jStar - jK, params.jBarrierSmoothDelta);
+              else if (jK < params.jStar)
+                sizeWeight = Real(1);
+            }
+            if (jWeight <= Real(0) && qWeight <= Real(0)
+                && qualWeight <= Real(0) && sizeWeight <= Real(0))
               continue;
 
             const auto Jinv = pt.getJacobianInverse();
             const auto& rc = pt.getReferenceCoordinates();
             const auto FinvT = F.inverse().transpose();
-            const auto dQdF = shapeOK
-              ? Math::SpatialMatrix<Real>(
-                  (Real(2) / d) * std::pow(jK, -Real(2) / d)
-                  * (F - (frob2 / d) * FinvT))
-              : makeZeroMatrix(dim);
 
             std::vector<Real> aJTrial(ntr), aQTrial(ntr);
             std::vector<Real> aJTest(nte), aQTest(nte);
@@ -146,29 +190,27 @@ namespace Rodin::Adaptation::Detail
             fillActions(trialFE, aJTrial, aQTrial);
             fillActions(testFE, aJTest, aQTest);
 
-            if (jActive)
+            if (jWeight > Real(0))
             {
-              const Real bpp = Real(1) / (sJ0 * sJ0);
               for (std::size_t te = 0; te < nte; ++te)
                 for (std::size_t tr = 0; tr < ntr; ++tr)
                   m_matrix(
                       static_cast<Eigen::Index>(te),
                       static_cast<Eigen::Index>(tr))
-                    += w * params.gammaJ * bpp
+                    += w * params.gammaJ * jWeight
                     * aJTrial[tr] * aJTest[te];
             }
-            if (qActive)
+            if (qWeight > Real(0))
             {
-              const Real bpp = Real(1) / (sQ0 * sQ0);
               for (std::size_t te = 0; te < nte; ++te)
                 for (std::size_t tr = 0; tr < ntr; ++tr)
                   m_matrix(
                       static_cast<Eigen::Index>(te),
                       static_cast<Eigen::Index>(tr))
-                    += w * params.gammaQ * bpp
+                    += w * params.gammaQ * qWeight
                     * aQTrial[tr] * aQTest[te];
             }
-            if (qualActive)
+            if (qualWeight > Real(0))
             {
               // Gauss–Newton Hessian of the quality hinge: ρ''(Q)=1.
               for (std::size_t te = 0; te < nte; ++te)
@@ -176,10 +218,10 @@ namespace Rodin::Adaptation::Detail
                   m_matrix(
                       static_cast<Eigen::Index>(te),
                       static_cast<Eigen::Index>(tr))
-                    += w * params.gammaQual
+                    += w * params.gammaQual * qualWeight
                     * aQTrial[tr] * aQTest[te];
             }
-            if (sizeActive)
+            if (sizeWeight > Real(0))
             {
               // GN Hessian of the size hinge: ρ''(j)=1 for j < jStar.
               for (std::size_t te = 0; te < nte; ++te)
@@ -187,7 +229,7 @@ namespace Rodin::Adaptation::Detail
                   m_matrix(
                       static_cast<Eigen::Index>(te),
                       static_cast<Eigen::Index>(tr))
-                    += w * params.gammaSize
+                    += w * params.gammaSize * sizeWeight
                     * aJTrial[tr] * aJTest[te];
             }
           }

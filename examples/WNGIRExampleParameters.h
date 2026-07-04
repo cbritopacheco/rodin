@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
+#include <stdexcept>
 #include <string>
 
 #include <Rodin/Adaptation/WNGIRParameters.h>
@@ -21,6 +22,13 @@ namespace Rodin::Examples
     std::size_t maxIterations = 60;
     std::size_t quadratureOrder = 4;
     Real betaMax = 50;
+    Real gammaMFactor = 1;
+    Real gammaHFactor = 1;
+    Real gammaDivFactor = -1;
+    Real ellOverH = 3;
+    Real gammaJ = 1;
+    Real gammaQ = 1;
+    Real gammaQual = 1;
     Real activeRMSOverHTol = 0;
     Real activeSupOverHTol = 0;
     Real gammaSize = 0;
@@ -97,6 +105,31 @@ namespace Rodin::Examples
     return std::strtoull(value.c_str(), nullptr, 10) != 0;
   }
 
+  inline std::string stringOption(
+      int argc,
+      char** argv,
+      const std::string& name,
+      std::string fallback)
+  {
+    std::string value;
+    if (!findOption(argc, argv, name, &value) || value.empty())
+      return fallback;
+    return value;
+  }
+
+  inline Adaptation::WNGIRMetricActivation parseMetricActivation(
+      int argc, char** argv)
+  {
+    const auto value =
+      stringOption(argc, argv, "wngir-metric-activation", "hard");
+    if (value == "hard")
+      return Adaptation::WNGIRMetricActivation::Hard;
+    if (value == "smooth")
+      return Adaptation::WNGIRMetricActivation::Smooth;
+    throw std::invalid_argument(
+        "Unknown --wngir-metric-activation value: " + value);
+  }
+
   inline Adaptation::WNGIRParameters makeWNGIRParameters(
       int argc,
       char** argv,
@@ -108,32 +141,47 @@ namespace Rodin::Examples
     p.h = h;
 
     const Real gammaMFactor =
-      realOption(argc, argv, "wngir-gamma-m", Real(1));
+      realOption(argc, argv, "wngir-gamma-m", defaults.gammaMFactor);
     const Real gammaHFactor =
-      realOption(argc, argv, "wngir-gamma-h", Real(1));
+      realOption(argc, argv, "wngir-gamma-h", defaults.gammaHFactor);
     const Real gammaDivFactor =
-      realOption(argc, argv, "wngir-gamma-div", gammaHFactor);
+      realOption(argc, argv, "wngir-gamma-div",
+          defaults.gammaDivFactor > Real(0)
+            ? defaults.gammaDivFactor
+            : gammaHFactor);
     p.gammaM = gammaMFactor / h;
     p.gammaH = gammaHFactor / h;
     p.gammaDiv = gammaDivFactor / h;
-    p.ellM = realOption(argc, argv, "wngir-ell", Real(3)) * h;
+    p.ellM = realOption(argc, argv, "wngir-ell", defaults.ellOverH) * h;
 
     p.gammaObs = realOption(argc, argv, "wngir-gamma-obs", Real(1));
     p.residualStabilizedObservationMetric =
       boolOption(argc, argv, "wngir-residual-stabilized-obs", true);
+    p.initialGuessGamma = Real(0);
+    p.initialGuessGamma =
+      realOption(argc, argv, "wngir-init-gamma", p.initialGuessGamma);
+    p.initialGuessCapH =
+      realOption(argc, argv, "wngir-init-cap-h", p.initialGuessCapH);
     p.betaMax = realOption(argc, argv, "wngir-beta-max", defaults.betaMax);
 
-    p.gammaJ = realOption(argc, argv, "wngir-gamma-j", Real(1));
-    p.gammaQ = realOption(argc, argv, "wngir-gamma-q", Real(1));
+    p.gammaJ = realOption(argc, argv, "wngir-gamma-j", defaults.gammaJ);
+    p.gammaQ = realOption(argc, argv, "wngir-gamma-q", defaults.gammaQ);
     p.jSafe = realOption(argc, argv, "wngir-jsafe", Real(1e-2));
     p.qMax = realOption(argc, argv, "wngir-qmax", Real(10));
     p.s0J = realOption(argc, argv, "wngir-s0j", Real(0.25));
     p.s0Q = realOption(argc, argv, "wngir-s0q", Real(2));
 
-    p.gammaQual = realOption(argc, argv, "wngir-gamma-qual", Real(1));
+    p.gammaQual = realOption(argc, argv, "wngir-gamma-qual", defaults.gammaQual);
     p.qStar = realOption(argc, argv, "wngir-qstar", Real(1.75));
     p.gammaSize = realOption(argc, argv, "wngir-gamma-size", defaults.gammaSize);
     p.jStar = realOption(argc, argv, "wngir-jstar", Real(0.3));
+    p.metricActivation = parseMetricActivation(argc, argv);
+    p.qualitySmoothDelta =
+      realOption(argc, argv, "wngir-quality-smooth-delta", p.qualitySmoothDelta);
+    p.jBarrierSmoothDelta =
+      realOption(argc, argv, "wngir-jbar-smooth-delta", p.jBarrierSmoothDelta);
+    p.qBarrierSmoothDelta =
+      realOption(argc, argv, "wngir-qbar-smooth-delta", p.qBarrierSmoothDelta);
 
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
@@ -197,14 +245,10 @@ namespace Rodin::Examples
     p.andersonMinDamping =
       realOption(argc, argv, "wngir-aa-min-damping", p.andersonMinDamping);
 
-    p.includeQualityGradient =
-      boolOption(argc, argv, "wngir-quality-energy", false);
     p.includeQualityMetric =
       boolOption(argc, argv, "wngir-quality-metric", true);
     p.includeAdmissibilityMetric =
       boolOption(argc, argv, "wngir-admissibility-metric", true);
-    p.includeAdmissibilityGradient =
-      boolOption(argc, argv, "wngir-admissibility-gradient", false);
 
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;

@@ -106,8 +106,9 @@ namespace Rodin::Adaptation::Detail
                                   params.pointLocationTolerance);
             const Real r = m_phi->getValue(moved);
             const auto g = m_grad->getValue(moved);
+            const Real g2 = g.dot(g);
             const Real obsWeight =
-                g.dot(g) + epsG
+                g2 + epsG
               + (params.residualStabilizedObservationMetric
                   ? (r * r) / m_sigma2 : Real(0));
 

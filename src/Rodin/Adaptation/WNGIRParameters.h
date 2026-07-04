@@ -11,6 +11,12 @@
 
 namespace Rodin::Adaptation
 {
+  enum class WNGIRMetricActivation
+  {
+    Hard,
+    Smooth
+  };
+
   struct WNGIRParameters
   {
     Real h = 0;                 ///< reference mesh size (required).
@@ -20,17 +26,18 @@ namespace Rodin::Adaptation
     Real ellM = 0;              ///< Sobolev length; ≤0 ⇒ 3h.
     Real gammaObs = 1;          ///< surface observation metric weight.
     bool residualStabilizedObservationMetric = true;
+    Real initialGuessGamma = 1000;
+    Real initialGuessCapH = 2;
     Real gammaJ = 1;            ///< j-barrier weight.
     Real gammaQ = 1;            ///< Q-barrier weight.
     Real jSafe = 1e-2;          ///< barrier floor on j.
     Real qMax = 10;             ///< barrier + line-search ceiling on Q.
     Real s0J = 0.25;            ///< j-barrier activation width.
     Real s0Q = 2;               ///< Q-barrier activation width.
-    /// One-sided relative-distortion quality hinge:
-    ///   E_Q(u) = gammaQual/2 ∫ max(Q_rel(F_u)-qStar,0)^2 dX.
-    /// By default this contributes to the energy/RHS only, not to the metric.
-    /// Set includeQualityMetric=true to also add the Gauss--Newton metric
+    /// One-sided relative-distortion quality metric:
     ///   K_Q(v,z) = gammaQual ∫_{Q_rel>qStar} a_Q(v) a_Q(z) dX.
+    /// This changes the Riesz metric only; no quality force is added to the
+    /// right-hand side.
     /// gammaQual ≤ 0 disables the Q hinge.
     Real gammaQual = 1;
     Real qStar = Real(1.75);
@@ -40,6 +47,11 @@ namespace Rodin::Adaptation
     /// and the true-geometry line search, allowing small well-shaped cells.
     Real gammaSize = 0;
     Real jStar = Real(0.3);
+    WNGIRMetricActivation metricActivation = WNGIRMetricActivation::Hard;
+    Real qualitySmoothDelta = Real(0.1);
+    Real jBarrierSmoothDelta = Real(0.05);
+    Real qBarrierSmoothDelta = Real(0.1);
+    Real metricActivationEpsilon = Real(1e-8);
     Real omegaMin = 0.1;        ///< active-set threshold on ω.
     Real alphaMin = 1e-4;       ///< line-search floor.
     bool energyLineSearch = true;
@@ -52,10 +64,10 @@ namespace Rodin::Adaptation
     bool geometryAwareTolerances = true;
     Real rmsFloor2D = Real(0.05);
     Real supFloor2D = Real(0.25);
-    Real rmsFloor3D = Real(0.12);
-    Real supFloor3D = Real(0.65);
-    Real rmsNormalJumpFactor = Real(0.10);
-    Real supNormalJumpFactor = Real(0.15);
+    Real rmsFloor3D = Real(0.03);
+    Real supFloor3D = Real(0.20);
+    Real rmsNormalJumpFactor = Real(0.03);
+    Real supNormalJumpFactor = Real(0.05);
     Real energyStagTol = 1e-4;
     Real stepTol = 0;           ///< ≤0 ⇒ 1e-4·h.
     Real acceptedStepOverHTol = Real(5e-3); ///< >0 stops best-effort when accepted step/h is small.
@@ -71,18 +83,9 @@ namespace Rodin::Adaptation
     bool hasInterfaceAttribute = false;
     Geometry::Attribute interfaceAttribute = 0;
     bool trace = false;
-    /// If true, also add the nonlinear Q-barrier first variation to the RHS.
-    /// The j-barrier first variation is part of the quality energy when
-    /// includeQualityGradient=true.
-    bool includeAdmissibilityGradient = false;
     /// If true, add near-boundary admissibility barriers to the metric.
-    /// Default false for the energy-quality model: admissibility is enforced
-    /// by the true-geometry line search.
+    /// The true-geometry line search remains the final admissibility check.
     bool includeAdmissibilityMetric = true;
-    /// If true, add E_qual to the main WNGIR RHS:
-    ///   E_qual = Q_rel positive-part hinge + near-zero j barrier.
-    /// Default false: quality is not an energy force.
-    bool includeQualityGradient = false;
     /// If true, add the Q_rel and optional j-size hinge Gauss--Newton terms
     /// to the metric.
     bool includeQualityMetric = true;

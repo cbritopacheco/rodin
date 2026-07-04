@@ -16,6 +16,7 @@
 #include <Rodin/Distance/Eikonal.h>
 #include <Rodin/Geometry.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/Location.h>
 #include <Rodin/Math.h>
 #include <Rodin/MMG.h>
 #include <Rodin/Solver/CG.h>
@@ -41,6 +42,7 @@
 using namespace Rodin;
 using namespace Rodin::Adaptation;
 using namespace Rodin::Geometry;
+using namespace Rodin::Location;
 using namespace Rodin::Variational;
 
 namespace
@@ -158,6 +160,73 @@ namespace
 
     const Real denom = Real(1) / (va + vb + vc);
     return (p - (a + vb * denom * ab + vc * denom * ac)).norm();
+  }
+
+  struct FittedInterface3D
+  {
+    struct Face
+    {
+      std::array<Vec3, 3> x;
+      Vec3 normal;
+    };
+    std::vector<Face> faces;
+  };
+
+  FittedInterface3D buildFittedInterface(
+      const WNGIRMesh& background,
+      const WNGIRMesh& fitted,
+      const std::vector<Index>& interfaceFacets)
+  {
+    FittedInterface3D out;
+    out.faces.reserve(interfaceFacets.size());
+    const auto& conn = background.getConnectivity();
+    for (const Index f : interfaceFacets)
+    {
+      const auto& fv = fitted.getFace(f)->getVertices();
+      FittedInterface3D::Face ff;
+      for (int i = 0; i < 3; ++i)
+        ff.x[i] = fitted.getVertexCoordinates(fv[i]);
+      ff.normal = cross3(ff.x[1] - ff.x[0], ff.x[2] - ff.x[0]);
+      ff.normal /= std::max(ff.normal.norm(), Real(1e-30));
+      const Vec3 fc = (ff.x[0] + ff.x[1] + ff.x[2]) / Real(3);
+      for (const Index c : conn.getIncidence({2, 3}, f))
+      {
+        if (background.getAttribute(3, c) != Attribute{Interior})
+          continue;
+        Vec3 cc = vec3();
+        for (const Index v : fitted.getCell(c)->getVertices())
+          cc += fitted.getVertexCoordinates(v);
+        cc /= Real(4);
+        if ((fc - cc).dot(ff.normal) < 0)
+          ff.normal = -ff.normal;
+        break;
+      }
+      out.faces.push_back(ff);
+    }
+    return out;
+  }
+
+  Real signedDistanceToFittedInterface(
+      const Vec3& x,
+      const FittedInterface3D& fittedInterface)
+  {
+    Real dmin = std::numeric_limits<Real>::infinity();
+    std::size_t nearest = 0;
+    for (std::size_t i = 0; i < fittedInterface.faces.size(); ++i)
+    {
+      const auto& f = fittedInterface.faces[i];
+      const Real d = pointTriangleDistance(x, f.x[0], f.x[1], f.x[2]);
+      if (d < dmin)
+      {
+        dmin = d;
+        nearest = i;
+      }
+    }
+    if (!std::isfinite(dmin))
+      return Real(0);
+    const auto& f = fittedInterface.faces[nearest];
+    const Vec3 fc = (f.x[0] + f.x[1] + f.x[2]) / Real(3);
+    return (x - fc).dot(f.normal) >= 0 ? dmin : -dmin;
   }
 
   constexpr std::array<std::array<Real, 4>, 4> TetraQuadrature = {{
@@ -412,11 +481,6 @@ int run(int argc, char** argv)
     tagBoundary(mesh);
   }
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  // Affine copy of the background grid, taken before the parametric P2
-  // transformations are installed. Lagrangian advection locates a
-  // characteristic foot point per DOF; on parametric cells each location is
-  // an inverse-map Newton solve, on this copy it is a single affine inverse.
-  WNGIRMesh advectionMesh(mesh);
   mesh.getConnectivity().compute(1, 0);
   mesh.getConnectivity().compute(3, 1);
   mesh.getConnectivity().compute(2, 1);
@@ -528,25 +592,15 @@ int run(int argc, char** argv)
   }
 
   GridFunction dist(sh), speed(sh);
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  // Advection state lives on the affine background copy: transport the P1
-  // vertex values there, then recover the mid-edge DOFs of phiH by
-  // interpolating the advected field (same pattern as the redistance stage).
-  ScalarP1 advFes(advectionMesh);
-  VectorP1 advVelFes(advectionMesh, 3);
-  ScalarP1 vertexFes(mesh);
-  GridFunction advDist(advFes);
-  GridFunction advVel(advVelFes);
-  GridFunction phiAdvected(vertexFes);
-  TrialFunction adv(advFes);
-  TestFunction advTest(advFes);
-#else
   TrialFunction adv(sh);
   TestFunction advTest(sh);
-#endif
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
+  wngirDefaults.gammaMFactor = Real(0.25);
+  wngirDefaults.gammaHFactor = Real(0.25);
+  wngirDefaults.gammaDivFactor = Real(0.25);
+  wngirDefaults.ellOverH = Real(1.5);
   wngirDefaults.activeRMSOverHTol = Real(0.12);
   wngirDefaults.activeSupOverHTol = Real(0.65);
   WNGIRParameters wp =
@@ -573,6 +627,31 @@ int run(int argc, char** argv)
   std::ofstream objectiveFile("LevelSetWNGIRCantilever3D.obj.txt");
 
   Math::Vector<Real> phiGood = phiH.getData();
+
+  auto resampleFromMoved =
+    [&](auto& out, const auto& src, const WNGIRMesh& movedMesh)
+    {
+      std::size_t misses = 0;
+      out.getData() = src.getData();
+      AABB locator(movedMesh);
+      Math::SpatialPoint x;
+      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+      {
+        const Index c = cellIt->getIndex();
+        const auto& fe = sh.getFiniteElement(D, c);
+        const auto& dofs = sh.getDOFs(D, c);
+        for (Index local = 0; local < fe.getCount(); ++local)
+        {
+          const Index global = dofs[local];
+          mesh.getPolytopeTransformation(D, c).transform(x, fe.getNode(local));
+          if (const auto p = locator.locate(x))
+            out.getData()(global) = src.getValue(*p);
+          else
+            misses++;
+        }
+      }
+      return misses;
+    };
   Real dt = std::min(dt0, dtMax);
   Real lastObjective = std::numeric_limits<Real>::infinity();
   Real complianceCap = std::numeric_limits<Real>::infinity();
@@ -957,6 +1036,10 @@ int run(int argc, char** argv)
     hilbert.assemble();
     hilbert.solve(hilbertSolver);
     dJ.getData() = g.getSolution().getData();
+    speed = Frobenius(dJ);
+    const Real dJNormInf = std::max(speed.max(), Real(1e-30));
+    g.getSolution().getData() /= dJNormInf;
+    dJ.getData() /= dJNormInf;
     tHilbert = iterTimer.reset();
 
     // Write before redistance/advection mutates phiH into the next trial
@@ -989,72 +1072,99 @@ int run(int argc, char** argv)
       && (periodicRedistance || adaptiveRedistanceNow);
     if (doRedistance)
     {
-      ScalarP1 shP1(mesh);
-      GridFunction distP1(shP1);
-      distP1 = Real(0);
-      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
-        .setInterior(Interior).setInterface(Gamma).solve().sign();
-      dist = [&](const Geometry::Point& p) -> Real
+      bool distanciationApplied = true;
+      if ((redistanceMode == "cp" || redistanceMode == "poisson")
+          && interfaceFacets.empty())
       {
-        return distP1.getValue(p);
-      };
-      if (redistanceMode == "cp")
+        dist.getData() = phiH.getData();
+        distanciationApplied = false;
+        std::cout << "  redistance: skipped-empty-interface"
+                  << " mode=" << redistanceMode
+                  << " eikWelsch=" << std::scientific << eikonalDefect
+                  << '\n';
+      }
+      else if (redistanceMode == "poisson")
       {
-        struct FittedFace { std::array<Vec3, 3> x; Vec3 normal; };
-        std::vector<FittedFace> fitted;
-        fitted.reserve(interfaceFacets.size());
-        for (const Index f : interfaceFacets)
+        ScalarFES shFit(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+            std::integral_constant<std::size_t, 2>{},
+#endif
+            moved);
+        ScalarP0 p0Fit(moved);
+        GridFunction source(p0Fit);
+        for (auto cellIt = moved.getCell(); cellIt; ++cellIt)
         {
-          const auto& fv = moved.getFace(f)->getVertices();
-          FittedFace ff;
-          for (int i = 0; i < 3; ++i) ff.x[i] = moved.getVertexCoordinates(fv[i]);
-          ff.normal = cross3(ff.x[1] - ff.x[0], ff.x[2] - ff.x[0]);
-          ff.normal /= std::max(ff.normal.norm(), Real(1e-30));
-          Vec3 fc = (ff.x[0] + ff.x[1] + ff.x[2]) / Real(3);
-          for (const Index c : conn.getIncidence({2, 3}, f))
-            if (mesh.getAttribute(D, c) == Attribute{Interior})
-            {
-              Vec3 cc = vec3();
-              for (const Index v : moved.getCell(c)->getVertices())
-                cc += moved.getVertexCoordinates(v);
-              cc /= Real(4);
-              if ((fc - cc).dot(ff.normal) < 0) ff.normal = -ff.normal;
-              break;
-            }
-          fitted.push_back(ff);
+          const Index c = cellIt->getIndex();
+          const auto at = moved.getAttribute(D, c);
+          source.getData()(p0Fit.getGlobalIndex({D, c}, 0)) =
+            (at && *at == Interior) ? Real(-1) : Real(1);
         }
+        TrialFunction pd(shFit);
+        TestFunction qd(shFit);
+        RealFunction zero = 0;
+        Problem poissonDistance(pd, qd);
+        poissonDistance =
+            Integral(Grad(pd), Grad(qd))
+          - Integral(source, qd)
+          + DirichletBC(pd, zero).on(Gamma);
+        Solver::CG(poissonDistance).solve();
+        const std::size_t misses =
+          resampleFromMoved(dist, pd.getSolution(), moved);
+        std::cout << "  distanciation-resample: misses=" << misses << '\n';
+      }
+      else if (redistanceMode == "cp")
+      {
+        const auto fittedInterface =
+          buildFittedInterface(mesh, moved, interfaceFacets);
+        ScalarP1 shP1(mesh);
+        GridFunction distP1(shP1);
+        distP1 = Real(0);
+        Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
+          .setInterior(Interior).setInterface(Gamma).solve().sign();
+        dist = [&](const Geometry::Point& p) -> Real
+        {
+          return distP1.getValue(p);
+        };
         const Real band = Real(6) * h;
         for (Index v = 0; v < mesh.getVertexCount(); ++v)
         {
           const Index dof = sh.getGlobalIndex({0, v}, 0);
-          if (std::abs(dist.getData()(dof)) > band) continue;
+          if (std::abs(dist.getData()(dof)) > band)
+            continue;
           const Vec3 x = mesh.getVertexCoordinates(v);
-          Real dmin = std::numeric_limits<Real>::infinity();
-          std::size_t nearest = 0;
-          for (std::size_t i = 0; i < fitted.size(); ++i)
-          {
-            const Real d = pointTriangleDistance(
-                x, fitted[i].x[0], fitted[i].x[1], fitted[i].x[2]);
-            if (d < dmin) { dmin = d; nearest = i; }
-          }
-          const Vec3 fc = (fitted[nearest].x[0] + fitted[nearest].x[1]
-                         + fitted[nearest].x[2]) / Real(3);
           dist.getData()(dof) =
-            ((x - fc).dot(fitted[nearest].normal) >= 0 ? dmin : -dmin);
+            signedDistanceToFittedInterface(x, fittedInterface);
         }
       }
-      else if (redistanceMode != "fmm")
+      else if (redistanceMode == "fmm")
+      {
+        ScalarP1 shP1(mesh);
+        GridFunction distP1(shP1);
+        distP1 = Real(0);
+        Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
+          .setInterior(Interior).setInterface(Gamma).solve().sign();
+        dist = [&](const Geometry::Point& p) -> Real
+        {
+          return distP1.getValue(p);
+        };
+      }
+      else
       {
         std::cerr << "Unsupported 3D redistance mode: " << redistanceMode << '\n';
         return 2;
       }
-      std::cout << "  redistance: mode=" << redistanceMode
-                << " reason="
-                << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
-                    : periodicRedistance ? "periodic" : "adaptive")
-                << " eikWelsch=" << std::scientific << eikonalDefect
-                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
-                << '\n';
+      if (distanciationApplied)
+      {
+        const char* label =
+          redistanceMode == "poisson" ? "distanciation" : "redistance";
+        std::cout << "  " << label << ": mode=" << redistanceMode
+                  << " reason="
+                  << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
+                      : periodicRedistance ? "periodic" : "adaptive")
+                  << " eikWelsch=" << std::scientific << eikonalDefect
+                  << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
+                  << '\n';
+      }
     }
     else
     {
@@ -1066,36 +1176,17 @@ int run(int argc, char** argv)
     }
     tRedistance = iterTimer.reset();
 
+    const Math::Vector<Real> phiBeforeAdvection = dist.getData();
     speed = Frobenius(dJ);
-    const Real rawSpeedMax = std::max(speed.max(), Real(1e-30));
-    const Math::Vector<Real> phiBeforeAdvection = phiH.getData();
-    dJ /= rawSpeedMax;
-#ifdef RODIN_WNGIR_P2_DISPLACEMENT
-    for (Index v = 0; v < mesh.getVertexCount(); ++v)
-    {
-      advDist.getData()(advFes.getGlobalIndex({0, v}, 0)) =
-        dist.getData()(sh.getGlobalIndex({0, v}, 0));
-      const auto& src = vh.getDOFs(0, v);
-      const auto& dst = advVelFes.getDOFs(0, v);
-      for (std::size_t c = 0; c < 3; ++c)
-        advVel.getData()(dst[c]) = dJ.getData()(src[c]);
-    }
-    Advection::Lagrangian(adv, advTest, advDist, advVel).step(dt);
-    phiAdvected.getData() = adv.getSolution().getData();
-    phiH = [&](const Geometry::Point& p) -> Real
-    {
-      return phiAdvected.getValue(p);
-    };
-#else
+    const Real dJMax = speed.max();
     Advection::Lagrangian(adv, advTest, dist, dJ).step(dt);
     phiH.getData() = adv.getSolution().getData();
-#endif
     Real maxPhiChange = 0;
     for (Eigen::Index i = 0; i < phiH.getData().size(); ++i)
       maxPhiChange =
         std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
     std::cout << "  advect: dt/h=" << (h > Real(0) ? dt / h : Real(0))
-              << " rawSpeedMax=" << rawSpeedMax
+              << " max|dJ|=" << dJMax
               << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0))
               << '\n';
     tAdvect = iterTimer.reset();

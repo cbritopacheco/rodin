@@ -363,8 +363,14 @@ int main(int argc, char** argv)
     parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
+  wngirDefaults.gammaMFactor = Real(0.25);
+  wngirDefaults.gammaHFactor = Real(0.25);
+  wngirDefaults.gammaDivFactor = Real(0.25);
+  wngirDefaults.ellOverH = Real(1.5);
+  wngirDefaults.activeRMSOverHTol = Real(0.03);
+  wngirDefaults.activeSupOverHTol = Real(0.20);
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-  wngirDefaults.betaMax = 10;
+  wngirDefaults.betaMax = 50;
 #else
   wngirDefaults.betaMax = 100;
 #endif

@@ -26,6 +26,7 @@
 #include <Rodin/Geometry.h>
 #include <Rodin/Geometry/Region.h>
 #include <Rodin/IO/XDMF.h>
+#include <Rodin/Location.h>
 #include <Rodin/Math.h>
 #include <Rodin/MMG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
@@ -45,11 +46,13 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
+using namespace Rodin::Location;
 using namespace Rodin::Variational;
 using namespace Rodin::Adaptation;
 
@@ -79,9 +82,9 @@ namespace
     return out;
   }
 
-  Real applyPhaseMomentMap(Real phi, Real epsilon)
+  Real applyPhaseMomentMap(Real phi, Real epsilon, Real scale)
   {
-    return std::tanh(phi / epsilon);
+    return std::tanh(phi / (epsilon * std::max(scale, Real(1e-12))));
   }
 
   constexpr std::array<std::array<Real, 3>, 3> TriangleBarycentricQuadrature = {{
@@ -137,6 +140,79 @@ namespace
     return (p - (a + t * ab)).norm();
   }
 
+  struct FittedInterface2D
+  {
+    std::vector<std::array<Vec2, 2>> segments;
+    std::vector<Vec2> normals;
+  };
+
+  FittedInterface2D buildFittedInterface(
+      const WNGIRMesh& background,
+      const WNGIRMesh& fitted,
+      const std::vector<Index>& interfaceFacets)
+  {
+    FittedInterface2D out;
+    out.segments.reserve(interfaceFacets.size());
+    out.normals.reserve(interfaceFacets.size());
+    for (const Index f : interfaceFacets)
+    {
+      const auto& vv = fitted.getFace(f)->getVertices();
+      const Vec2 a = fitted.getVertexCoordinates(vv[0]);
+      const Vec2 b = fitted.getVertexCoordinates(vv[1]);
+      Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));
+      const Real nn = nrm.norm();
+      nrm = nn > Real(1e-30) ? nrm / nn : vec2(1, 0);
+      const auto& inc = background.getConnectivity().getIncidence({1, 2}, f);
+      Vec2 cInt = vec2(0, 0);
+      bool haveInt = false;
+      for (const Index c : inc)
+      {
+        const auto at = background.getAttribute(2, c);
+        if (at && *at == interiorAttribute)
+        {
+          const auto& cvv = background.getCell(c)->getVertices();
+          Vec2 ctr = vec2(0, 0);
+          for (const Index cv : cvv)
+            ctr += fitted.getVertexCoordinates(cv);
+          cInt = ctr / static_cast<Real>(cvv.size());
+          haveInt = true;
+          break;
+        }
+      }
+      const Vec2 mid = Real(0.5) * (a + b);
+      if (haveInt && (mid - cInt).dot(nrm) < Real(0))
+        nrm = -nrm;
+      out.segments.push_back({ a, b });
+      out.normals.push_back(nrm);
+    }
+    return out;
+  }
+
+  Real signedDistanceToFittedInterface(
+      const Vec2& x,
+      const FittedInterface2D& fittedInterface)
+  {
+    Real dmin = std::numeric_limits<Real>::infinity();
+    std::size_t kmin = 0;
+    for (std::size_t k = 0; k < fittedInterface.segments.size(); ++k)
+    {
+      const Real dk = pointSegmentDistance(
+          x, fittedInterface.segments[k][0], fittedInterface.segments[k][1]);
+      if (dk < dmin)
+      {
+        dmin = dk;
+        kmin = k;
+      }
+    }
+    if (!std::isfinite(dmin))
+      return Real(0);
+    const Vec2 mid = Real(0.5) *
+      (fittedInterface.segments[kmin][0] + fittedInterface.segments[kmin][1]);
+    const Real s = (x - mid).dot(fittedInterface.normals[kmin]) >= Real(0)
+      ? Real(1) : Real(-1);
+    return s * dmin;
+  }
+
   struct CellMomentInfo
   {
     Index index = 0;
@@ -167,6 +243,26 @@ namespace
       const Vec2 e1 = info.x[1] - info.x[0];
       const Vec2 e2 = info.x[2] - info.x[0];
       info.area = std::abs(Real(0.5) * (e1(0) * e2(1) - e1(1) * e2(0)));
+      auto vertexValue = [&](Real r0, Real r1) -> Real
+      {
+        Math::SpatialPoint rc(2);
+        rc(0) = r0;
+        rc(1) = r1;
+        return phiH.getValue(Geometry::Point(cell, rc));
+      };
+      const Real p0 = vertexValue(0, 0);
+      const Real p1 = vertexValue(1, 0);
+      const Real p2 = vertexValue(0, 1);
+      const Real det = e1(0) * e2(1) - e1(1) * e2(0);
+      Real gradScale = Real(1);
+      if (std::abs(det) > Real(1e-30))
+      {
+        const Real g0 = p1 - p0;
+        const Real g1 = p2 - p0;
+        const Real gx = ( e2(1) * g0 - e1(1) * g1) / det;
+        const Real gy = (-e2(0) * g0 + e1(0) * g1) / det;
+        gradScale = std::sqrt(gx * gx + gy * gy);
+      }
       Real moment = 0;
       for (const auto& bary : TriangleBarycentricQuadrature)
       {
@@ -174,7 +270,7 @@ namespace
         rc(0) = bary[1];
         rc(1) = bary[2];
         const Geometry::Point pt(cell, rc);
-        moment += applyPhaseMomentMap(phiH.getValue(pt), epsilon);
+        moment += applyPhaseMomentMap(phiH.getValue(pt), epsilon, gradScale);
       }
       info.moment = moment / TriangleBarycentricQuadrature.size();
       cells.push_back(std::move(info));
@@ -321,12 +417,16 @@ int main(int argc, char** argv)
 #endif
   const std::string redistanceMode =
     parseStringOption(argc, argv, "redistance-mode", defaultRedistanceMode);
+  const std::string redistanceTransfer =
+    parseStringOption(argc, argv, "redistance-transfer", "project");
   const std::size_t redistanceEvery =
     parseSizeTOption(argc, argv, "redistance-every", 0);
   const bool adaptiveRedistance =
     parseSizeTOption(argc, argv, "redistance-adaptive", 1) != 0;
   const Real redistanceEikonalTol =
     parseRealOption(argc, argv, "redistance-eikonal-tol", Real(0.35));
+  const Real poissonTransferInterfaceWeight =
+    parseRealOption(argc, argv, "poisson-transfer-interface-weight", Real(10) * h);
   const std::size_t outputEvery =
     parseSizeTOption(argc, argv, "output-every", 1);
   const std::size_t repairEvery =
@@ -414,6 +514,7 @@ int main(int argc, char** argv)
   using VectorFES = P1<Math::SpatialVector<Real>, WNGIRMesh>;
 #endif
   using ScalarP1 = P1<Real, WNGIRMesh>;
+  using ScalarP0 = P0<Real, WNGIRMesh>;
   using VectorP1 = P1<Math::SpatialVector<Real>, WNGIRMesh>;
 
   ScalarFES sh(
@@ -561,8 +662,10 @@ int main(int argc, char** argv)
             << " steps=" << wp.maxIterations
             << "  classify=" << classifyEvery
             << "  redistance=" << redistanceMode << "/" << redistanceEvery
+            << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance
             << " eikTol=" << redistanceEikonalTol
+            << " poissonTransferInterfaceWeight=" << poissonTransferInterfaceWeight
             << "  repairEvery=" << repairEvery
             << "  outputEvery=" << outputEvery << '\n';
   std::ofstream fObj("LevelSetWNGIRCantilever2D.obj.txt");
@@ -572,6 +675,146 @@ int main(int argc, char** argv)
   // We checkpoint the last good level set and, on a blown-up step, revert and
   // halve the step length.
   Math::Vector<Real> phiGood = phiH.getData();
+
+  auto resampleFromMoved =
+    [&](auto& out, const auto& src, const WNGIRMesh& movedMesh)
+    {
+      std::size_t misses = 0;
+      if (out.getData().size() == src.getData().size())
+        out.getData() = src.getData();
+      else
+        out = Real(0);
+      AABB locator(movedMesh);
+      Math::SpatialPoint x;
+      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+      {
+        const Index c = cellIt->getIndex();
+        const auto& fe = sh.getFiniteElement(D, c);
+        const auto& dofs = sh.getDOFs(D, c);
+        for (Index local = 0; local < fe.getCount(); ++local)
+        {
+          const Index global = dofs[local];
+          mesh.getPolytopeTransformation(D, c).transform(x, fe.getNode(local));
+          if (const auto p = locator.locate(x))
+            out.getData()(global) = src.getValue(*p);
+          else
+            misses++;
+        }
+      }
+      return misses;
+    };
+  auto fittedInterfaceResidual =
+    [&](const std::vector<Index>& facets,
+        const auto& gf, const WNGIRMesh& gfMesh, bool locateOnBackground)
+    {
+      AABB backgroundLocator(mesh);
+      Real maxResidual = 0;
+      Real rmsResidual = 0;
+      std::size_t samples = 0;
+      std::size_t misses = 0;
+      const std::array<Real, 3> qpts{ Real(0), Real(0.5), Real(1) };
+      for (const Index f : facets)
+      {
+        const auto face = moved.getFace(f);
+        for (const Real t : qpts)
+        {
+          Math::SpatialPoint rc(1);
+          rc(0) = t;
+          Math::SpatialPoint y;
+          face->getTransformation().transform(y, rc);
+          Real value = 0;
+          if (locateOnBackground)
+          {
+            if (const auto p = backgroundLocator.locate(y))
+              value = gf.getValue(*p);
+            else
+            {
+              misses++;
+              continue;
+            }
+          }
+          else
+          {
+            value = gf.getValue(Geometry::Point(*face, rc, y));
+          }
+          const Real a = std::abs(value);
+          maxResidual = std::max(maxResidual, a);
+          rmsResidual += a * a;
+          samples++;
+        }
+      }
+      rmsResidual = samples > 0 ? std::sqrt(rmsResidual / samples) : Real(0);
+      return std::tuple<Real, Real, std::size_t>{maxResidual, rmsResidual, misses};
+    };
+  auto addFittedInterfacePenalty =
+    [&](auto& transferSystem, const std::vector<Index>& facets)
+    {
+      if (!(poissonTransferInterfaceWeight > Real(0)))
+        return;
+      AABB backgroundLocator(mesh);
+      std::vector<Eigen::Triplet<Real>> triplets;
+      triplets.reserve(facets.size() * 18);
+      const std::array<Real, 3> qx{
+        Real(0.5) - std::sqrt(Real(3) / Real(5)) / Real(2),
+        Real(0.5),
+        Real(0.5) + std::sqrt(Real(3) / Real(5)) / Real(2)
+      };
+      const std::array<Real, 3> qw{
+        Real(5) / Real(18),
+        Real(4) / Real(9),
+        Real(5) / Real(18)
+      };
+      std::size_t interfacePenaltyMisses = 0;
+      for (const Index f : facets)
+      {
+        const auto face = moved.getFace(f);
+        for (std::size_t q = 0; q < qx.size(); ++q)
+        {
+          Math::SpatialPoint rFace(1);
+          rFace(0) = qx[q];
+          Math::SpatialPoint y;
+          face->getTransformation().transform(y, rFace);
+          Math::SpatialMatrix<Real> JFace;
+          face->getTransformation().jacobian(JFace, rFace);
+          const Real ds =
+            JFace.cols() > 0 ? JFace.col(0).norm() * qw[q] : Real(0);
+          if (!(ds > Real(0)))
+            continue;
+          const auto p = backgroundLocator.locate(y);
+          if (!p)
+          {
+            interfacePenaltyMisses++;
+            continue;
+          }
+          const Index c = p->getPolytope().getIndex();
+          const auto& fe = sh.getFiniteElement(D, c);
+          const auto& dofs = sh.getDOFs(D, c);
+          const Real wq = poissonTransferInterfaceWeight * ds;
+          for (Index a = 0; a < fe.getCount(); ++a)
+          {
+            const Real phiA = fe.getBasis(a)(p->getReferenceCoordinates());
+            if (std::abs(phiA) <= Real(1e-14))
+              continue;
+            const Index ia = dofs[a];
+            for (Index b = 0; b < fe.getCount(); ++b)
+            {
+              const Real phiB = fe.getBasis(b)(p->getReferenceCoordinates());
+              if (std::abs(phiB) <= Real(1e-14))
+                continue;
+              triplets.emplace_back(ia, dofs[b], wq * phiA * phiB);
+            }
+          }
+        }
+      }
+      Math::SparseMatrix<Real> interfacePenalty(
+          transferSystem.getOperator().rows(),
+          transferSystem.getOperator().cols());
+      interfacePenalty.setFromTriplets(triplets.begin(), triplets.end());
+      transferSystem.getOperator() += interfacePenalty;
+      if (interfacePenaltyMisses > 0)
+        std::cout << "  redistance-interface-penalty:"
+                  << " misses=" << interfacePenaltyMisses << '\n';
+    };
   Real dtCur = dt;
   Real complianceCap = std::numeric_limits<Real>::infinity();  // set after it 0
   Real lastAcceptedObjective = std::numeric_limits<Real>::infinity();
@@ -1085,12 +1328,16 @@ int main(int argc, char** argv)
               + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaN);
     }
     Solver::CG(hilbert).solve();
+    dJ.getData() = g.getSolution().getData();
+    speed = Frobenius(dJ);
+    const Real dJNormInf = std::max(speed.max(), Real(1e-30));
+    g.getSolution().getData() /= dJNormInf;
+    dJ.getData() /= dJNormInf;
     // Velocity is computed on `moved`; carry it to the fixed background grid
     // (same connectivity) to advect phi there. The moved->background transfer
     // is a coefficient copy; since the fit displacement is zero on the outer
     // boundary and the velocity is H1-smooth, the discrepancy is O(u) near the
     // interface (acceptable for the descent direction).
-    dJ.getData() = g.getSolution().getData();
     tHilbert = iterTimer.reset();
 
     // ---- XDMF snapshot of the accepted objective state -------------------
@@ -1133,98 +1380,195 @@ int main(int argc, char** argv)
     }
     else
     {
-      ScalarP1 shP1(mesh);
-      GridFunction distP1(shP1);
-      distP1 = Real(0);
-      Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
-        .setInterior(interiorAttribute)
-        .setInterface(Gamma)
-        .solve()
-        .sign();
-      dist = [&](const Geometry::Point& p) -> Real
+      bool distanciationApplied = true;
+      if ((redistanceMode == "cp" || redistanceMode == "poisson")
+          && interfaceFacets.empty())
       {
-        return distP1.getValue(p);
-      };
-      const Math::Vector<Real> fmmDist = dist.getData();
-      if (redistanceMode == "cp")
+        dist.getData() = phiH.getData();
+        distanciationApplied = false;
+        std::cout << "  redistance: skipped-empty-interface"
+                  << " mode=" << redistanceMode
+                  << " eikWelsch=" << std::scientific << eikonalDefect
+                  << '\n';
+      }
+      else if (redistanceMode == "poisson")
       {
-        std::vector<std::array<Vec2, 2>> fittedSeg;
-        std::vector<Vec2> fittedN;
-        fittedSeg.reserve(interfaceFacets.size());
-        fittedN.reserve(interfaceFacets.size());
-        for (const Index f : interfaceFacets)
+        ScalarFES shFit(
+#ifdef RODIN_WNGIR_P2_DISPLACEMENT
+            std::integral_constant<std::size_t, 2>{},
+#endif
+            moved);
+        ScalarP0 p0Fit(moved);
+        GridFunction source(p0Fit);
+        for (auto cellIt = moved.getCell(); cellIt; ++cellIt)
         {
-          const auto& vv = moved.getFace(f)->getVertices();
-          const Vec2 a = moved.getVertexCoordinates(vv[0]);
-          const Vec2 b = moved.getVertexCoordinates(vv[1]);
-          Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));
-          const Real nn = nrm.norm();
-          nrm = nn > Real(1e-30) ? nrm / nn : vec2(1, 0);
-          const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-          Vec2 cInt = vec2(0, 0);
-          bool haveInt = false;
-          for (const Index c : inc)
-          {
-            const auto at = mesh.getAttribute(D, c);
-            if (at && *at == interiorAttribute)
-            {
-              const auto& cvv = mesh.getCell(c)->getVertices();
-              Vec2 ctr = vec2(0, 0);
-              for (const Index cv : cvv) ctr += moved.getVertexCoordinates(cv);
-              cInt = ctr / static_cast<Real>(cvv.size());
-              haveInt = true;
-              break;
-            }
-          }
-          const Vec2 mid = Real(0.5) * (a + b);
-          if (haveInt && (mid - cInt).dot(nrm) < Real(0)) nrm = -nrm;
-          fittedSeg.push_back({ a, b });
-          fittedN.push_back(nrm);
+          const Index c = cellIt->getIndex();
+          const auto at = moved.getAttribute(D, c);
+          source.getData()(p0Fit.getGlobalIndex({D, c}, 0)) =
+            (at && *at == interiorAttribute) ? Real(-1) : Real(1);
         }
-        const Real band = Real(6) * h;
-        for (Index v = 0; v < mesh.getVertexCount(); ++v)
+        TrialFunction pd(shFit);
+        TestFunction qd(shFit);
+        RealFunction zero = 0;
+        Problem poissonDistance(pd, qd);
+        poissonDistance =
+            Integral(Grad(pd), Grad(qd))
+          - Integral(source, qd)
+          + DirichletBC(pd, zero).on(Gamma);
+        Solver::CG(poissonDistance).solve();
+        const auto [srcMaxGamma, srcRMSGamma, srcMissesGamma] =
+          fittedInterfaceResidual(interfaceFacets, pd.getSolution(), moved, false);
+        GridFunction nodalDist(sh);
+        const std::size_t misses =
+          resampleFromMoved(nodalDist, pd.getSolution(), moved);
+        if (redistanceTransfer == "resample")
         {
-          const Index d = sh.getGlobalIndex({0, v}, 0);
-          if (std::abs(fmmDist(d)) > band) continue;
-          const Vec2 X = mesh.getVertexCoordinates(v);
-          Real dmin = std::numeric_limits<Real>::infinity();
-          std::size_t kmin = 0;
-          for (std::size_t k = 0; k < fittedSeg.size(); ++k)
+          dist.getData() = nodalDist.getData();
+        }
+        else if (redistanceTransfer == "project")
+        {
+          AABB fittedLocator(moved);
+          RealFunction fittedPhi(
+              [&](const Geometry::Point& p) -> Real
+              {
+                if (const auto q = fittedLocator.locate(p.getPhysicalCoordinates()))
+                  return pd.getSolution().getValue(*q);
+                return nodalDist.getValue(p);
+              });
+          TrialFunction tp(sh);
+          TestFunction tq(sh);
+          Problem transfer(tp, tq);
+          transfer =
+              Integral(tp, tq)
+            - Integral(fittedPhi, tq);
+          transfer.assemble();
+          auto& transferSystem = transfer.getLinearSystem();
+          addFittedInterfacePenalty(transferSystem, interfaceFacets);
+          Eigen::ConjugateGradient<
+            Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> transferSolver;
+          transferSystem.getSolution() =
+            transferSolver.compute(transferSystem.getOperator())
+                          .solve(transferSystem.getVector());
+          tp.getSolution().getData() = transferSystem.getSolution();
+          dist.getData() = tp.getSolution().getData();
+        }
+        else
+        {
+          std::cerr << "Unsupported redistance transfer: "
+                    << redistanceTransfer << '\n';
+          return 2;
+        }
+        const auto [dstMaxGamma, dstRMSGamma, dstMissesGamma] =
+          fittedInterfaceResidual(interfaceFacets, dist, mesh, true);
+        const auto [nodalMaxGamma, nodalRMSGamma, nodalMissesGamma] =
+          fittedInterfaceResidual(interfaceFacets, nodalDist, mesh, true);
+        std::cout << "  distanciation-resample: misses=" << misses << '\n';
+        std::cout << "  distanciation-interface:"
+                  << " srcMax=" << srcMaxGamma
+                  << " srcRMS=" << srcRMSGamma
+                  << " srcMiss=" << srcMissesGamma
+                  << " nodalMax=" << nodalMaxGamma
+                  << " nodalRMS=" << nodalRMSGamma
+                  << " nodalMiss=" << nodalMissesGamma
+                  << " dstMax=" << dstMaxGamma
+                  << " dstRMS=" << dstRMSGamma
+                  << " dstMiss=" << dstMissesGamma
+                  << '\n';
+      }
+      else if (redistanceMode == "cp")
+      {
+        const auto fittedInterface =
+          buildFittedInterface(mesh, moved, interfaceFacets);
+        dist = Real(0);
+        Math::SpatialPoint X;
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const Index c = cellIt->getIndex();
+          const auto& fe = sh.getFiniteElement(D, c);
+          const auto& dofs = sh.getDOFs(D, c);
+          for (Index local = 0; local < fe.getCount(); ++local)
           {
-            const Real dk =
-              pointSegmentDistance(X, fittedSeg[k][0], fittedSeg[k][1]);
-            if (dk < dmin) { dmin = dk; kmin = k; }
-          }
-          if (std::isfinite(dmin))
-          {
-            const Vec2 mid =
-              Real(0.5) * (fittedSeg[kmin][0] + fittedSeg[kmin][1]);
-            const Real s = (X - mid).dot(fittedN[kmin]) >= Real(0)
-              ? Real(1) : Real(-1);
-            dist.getData()(d) = s * dmin;
+            mesh.getPolytopeTransformation(D, c).transform(X, fe.getNode(local));
+            dist.getData()(dofs[local]) =
+              signedDistanceToFittedInterface(X, fittedInterface);
           }
         }
       }
-      else if (redistanceMode != "fmm")
+      else if (redistanceMode == "fmm")
+      {
+        ScalarP1 shP1(moved);
+        GridFunction distP1(shP1);
+        distP1 = Real(0);
+        Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
+          .setInterior(interiorAttribute)
+          .setInterface(Gamma)
+          .solve()
+          .sign();
+        GridFunction nodalDist(sh);
+        const std::size_t misses = resampleFromMoved(nodalDist, distP1, moved);
+        if (redistanceTransfer == "resample")
+        {
+          dist.getData() = nodalDist.getData();
+        }
+        else if (redistanceTransfer == "project")
+        {
+          AABB fittedLocator(moved);
+          RealFunction fittedPhi(
+              [&](const Geometry::Point& p) -> Real
+              {
+                if (const auto q = fittedLocator.locate(p.getPhysicalCoordinates()))
+                  return distP1.getValue(*q);
+                return nodalDist.getValue(p);
+              });
+          TrialFunction tp(sh);
+          TestFunction tq(sh);
+          Problem transfer(tp, tq);
+          transfer =
+              Integral(tp, tq)
+            - Integral(fittedPhi, tq);
+          transfer.assemble();
+          auto& transferSystem = transfer.getLinearSystem();
+          addFittedInterfacePenalty(transferSystem, interfaceFacets);
+          Eigen::ConjugateGradient<
+            Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> transferSolver;
+          transferSystem.getSolution() =
+            transferSolver.compute(transferSystem.getOperator())
+                          .solve(transferSystem.getVector());
+          tp.getSolution().getData() = transferSystem.getSolution();
+          dist.getData() = tp.getSolution().getData();
+        }
+        else
+        {
+          std::cerr << "Unsupported redistance transfer: "
+                    << redistanceTransfer << '\n';
+          return 2;
+        }
+        std::cout << "  redistance-resample: misses=" << misses << '\n';
+      }
+      else
       {
         std::cerr << "Unsupported redistance mode: " << redistanceMode << '\n';
         return 2;
       }
-      std::cout << "  redistance: mode=" << redistanceMode
-                << " reason="
-                << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
-                    : periodicRedistance ? "periodic" : "adaptive")
-                << " eikWelsch=" << std::scientific << eikonalDefect
-                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
-                << '\n';
+      if (distanciationApplied)
+      {
+        const char* label =
+          redistanceMode == "poisson" ? "distanciation" : "redistance";
+        std::cout << "  " << label << ": mode=" << redistanceMode
+                  << " reason="
+                  << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
+                      : periodicRedistance ? "periodic" : "adaptive")
+                  << " eikWelsch=" << std::scientific << eikonalDefect
+                  << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
+                  << '\n';
+      }
     }
     tRedistance = iterTimer.reset();
 
-    // Normalize the descent velocity, advect distance by one step.
+    // Advect the current carrier with the normalized descent direction.
+    const Math::Vector<Real> phiBeforeAdvection = dist.getData();
     speed = Frobenius(dJ);
-    const Real vmax = std::max(speed.max(), Real(1e-30));
-    const Math::Vector<Real> phiBeforeAdvection = phiH.getData();
-    dJ /= vmax;
+    const Real dJMax = speed.max();
     Advection::Lagrangian(adv, advTest, dist, dJ).step(dtCur);
     phiH.getData() = adv.getSolution().getData();
     Real maxPhiChange = 0;
@@ -1232,7 +1576,7 @@ int main(int argc, char** argv)
       maxPhiChange =
         std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
     std::cout << "  advect: dt/h=" << (h > Real(0) ? dtCur / h : Real(0))
-              << " rawSpeedMax=" << vmax
+              << " max|dJ|=" << dJMax
               << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0))
               << '\n';
     tAdvect = iterTimer.reset();

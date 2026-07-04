@@ -24,8 +24,8 @@
 #include "Rodin/Variational/Trace.h"
 #include "Rodin/Variational/IdentityMatrix.h"
 
-#include "WNGIRAdmissibilityGradient.h"
 #include "WNGIRAdmissibilityMetric.h"
+#include "WNGIRNormalOffsetInitializer.h"
 #include "WNGIRParameters.h"
 #include "WNGIRReport.h"
 #include "WNGIRSurfaceForce.h"
@@ -484,7 +484,6 @@ namespace Rodin::Adaptation
           return s;
         };
 
-        Real ePrev = surfaceState(u).energy;
         rep.tSetup = secondsSince(setupTic);
 
         // ============================================================
@@ -514,13 +513,95 @@ namespace Rodin::Adaptation
           m_bulkFormAssembled = true;
         }
 
-        // ============================================================
-        // Nonlinear iteration.
-        // ============================================================
         Displacement vK(fes);
         Displacement scratch(fes);
         Displacement previousU(fes);
         Displacement uTrial(fes);
+
+        if (p.initialGuessGamma > Real(0))
+        {
+          auto tic = Clock::now();
+          auto zeroBoundary = Variational::VectorFunction(
+              meshDim,
+              [&](const Geometry::Point&) { return SpatialVec::Zero(meshDim); });
+          Detail::WNGIRNormalOffsetMetric initMetric(
+              phi, grad, m_duStep, m_vStep, p, sigma2);
+          initMetric.over(p.interfaceAttribute);
+          Detail::WNGIRNormalOffsetForce initForce(
+              phi, grad, m_vStep, p, sigma2);
+          initForce.over(p.interfaceAttribute);
+          typename ProblemType::ProblemBodyType body(m_bulkForm);
+          body = body + initMetric - initForce
+               + Variational::DirichletBC(m_duStep, zeroBoundary);
+          m_stepProblem = body;
+          m_stepProblem.assemble();
+          rep.tAssembly += secondsSince(tic);
+
+          tic = Clock::now();
+          std::size_t linearIterations = 0;
+          Real linearError = 0;
+          const bool solveOk = solveStep(vK, linearIterations, linearError);
+          rep.tSolve += secondsSince(tic);
+          rep.linearIterations += linearIterations;
+          rep.linearError = linearError;
+          if (!solveOk)
+          {
+            rep.exitReason = "initial-guess-solve-failed";
+            m_report = rep;
+            return rep;
+          }
+
+          tic = Clock::now();
+          previousU = u;
+          const Real eBase = surfaceState(previousU).energy;
+          Real alpha = Real(1);
+          bool accepted = false;
+          FastAdm adm{};
+          Real eTrial = std::numeric_limits<Real>::infinity();
+          while (alpha >= p.alphaMin)
+          {
+            uTrial = vK;
+            uTrial *= alpha;
+            uTrial += previousU;
+            adm = fastAdmissibility(uTrial);
+            const bool jOK =
+              adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+            const bool qOK = adm.maxQ < p.qMax;
+            bool eOK = true;
+            if (jOK && qOK && p.energyLineSearch)
+            {
+              eTrial = surfaceState(uTrial).energy;
+              eOK = std::isfinite(eTrial) && eTrial <= eBase;
+            }
+            if (jOK && qOK && eOK)
+            {
+              u = uTrial;
+              accepted = true;
+              break;
+            }
+            alpha *= Real(0.5);
+          }
+          rep.tLineSearch += secondsSince(tic);
+          if (p.trace)
+          {
+            const auto surf = surfaceState(u);
+            std::cout << "      wngir init=normal-offset"
+                      << "  accepted=" << (accepted ? 1 : 0)
+                      << "  alpha=" << alpha
+                      << "  actRMS=" << std::scientific << surf.activeRMS
+                      << "  actRMS/h="
+                      << (h > Real(0) ? surf.activeRMS / h : Real(0))
+                      << "  min_j=" << (accepted ? adm.minJ : rep.minJ)
+                      << "  max_Q=" << (accepted ? adm.maxQ : rep.maxQRel)
+                      << '\n';
+          }
+        }
+
+        Real ePrev = surfaceState(u).energy;
+
+        // ============================================================
+        // Nonlinear iteration.
+        // ============================================================
         for (; rep.iterations < p.maxIterations; ++rep.iterations)
         {
           auto tic = Clock::now();
@@ -529,7 +610,6 @@ namespace Rodin::Adaptation
               [&](const Geometry::Point&) { return SpatialVec::Zero(meshDim); });
 
           Detail::WNGIRAdmissibilityMetric admMetric(m_duStep, m_vStep, u, p);
-          Detail::WNGIRAdmissibilityGradient admGradient(m_vStep, u, p);
           Detail::WNGIRSurfaceObservationMetric obsMetric(
               phi, grad, m_duStep, m_vStep, u, p, sigma2);
           obsMetric.over(p.interfaceAttribute);
@@ -537,19 +617,12 @@ namespace Rodin::Adaptation
               phi, grad, m_vStep, u, p, sigma2);
           surfaceForce.over(p.interfaceAttribute);
 
-          const bool useGradientForce =
-               p.includeAdmissibilityGradient || p.includeQualityGradient;
-
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
 
           typename ProblemType::ProblemBodyType body(m_bulkForm);
-          if (useGradientForce)
-            body = body + obsMetric + admMetric - surfaceForce - admGradient
-                 + Variational::DirichletBC(m_duStep, zeroBoundary);
-          else
-            body = body + obsMetric + admMetric - surfaceForce
-                 + Variational::DirichletBC(m_duStep, zeroBoundary);
+          body = body + obsMetric + admMetric - surfaceForce
+               + Variational::DirichletBC(m_duStep, zeroBoundary);
           m_stepProblem = body;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);

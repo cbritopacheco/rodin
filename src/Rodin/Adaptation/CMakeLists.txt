@@ -10,10 +10,10 @@ set(RodinAdaptation_HEADERS
   CellGeomCache.h
   WNGIR.h
   WNGIRAdmissibility.h
-  WNGIRAdmissibilityGradient.h
   WNGIRAdmissibilityMetric.h
   WNGIRCommon.h
   WNGIRDetail.h
+  WNGIRNormalOffsetInitializer.h
   WNGIRParameters.h
   WNGIRReport.h
   WNGIRSolver.h
