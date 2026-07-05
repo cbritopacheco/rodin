@@ -91,6 +91,7 @@ int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 
+
   const auto setPETScDefault =
     [](const char* name, const char* value)
     {
