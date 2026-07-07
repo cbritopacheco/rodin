@@ -274,15 +274,21 @@ namespace Rodin::MMG
           ids.push_back(i);
       }
       size_t newna = ids.size();
+      // MMG treats a non-null edge array as holding at least one entry, so an
+      // empty result must leave the pointer null. Likewise, namax must stay
+      // positive as MMG uses it to size internal allocations.
       MMG5_pEdge edges = nullptr;
-      MMG5_SAFE_CALLOC(edges, newna + 1, MMG5_Edge,
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to reallocate edge memory." << Alert::Raise);
-      for (int i = 1; i <= newna; i++)
-        edges[i] = mesh->edge[ids[i - 1]];
+      if (newna > 0)
+      {
+        MMG5_SAFE_CALLOC(edges, newna + 1, MMG5_Edge,
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to reallocate edge memory." << Alert::Raise);
+        for (size_t i = 1; i <= newna; i++)
+          edges[i] = mesh->edge[ids[i - 1]];
+        mesh->namax = newna;
+      }
       MMG5_SAFE_FREE(mesh->edge);
       mesh->na = newna;
-      mesh->namax = newna;
       mesh->edge = edges;
     }
     else if (mesh->dim == 3)
@@ -296,15 +302,21 @@ namespace Rodin::MMG
           ids.push_back(i);
       }
       size_t newnt = ids.size();
+      // MMG treats a non-null triangle array as holding at least one entry,
+      // so an empty result must leave the pointer null. Likewise, ntmax must
+      // stay positive as MMG5_bdrySet sizes xtetra from it.
       MMG5_pTria triangles = nullptr;
-      MMG5_SAFE_CALLOC(triangles, newnt + 1, MMG5_Tria,
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to reallocate triangles." << Alert::Raise);
-      for (int i = 1; i <= newnt; i++)
-        triangles[i] = mesh->tria[ids[i - 1]];
+      if (newnt > 0)
+      {
+        MMG5_SAFE_CALLOC(triangles, newnt + 1, MMG5_Tria,
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to reallocate triangles." << Alert::Raise);
+        for (size_t i = 1; i <= newnt; i++)
+          triangles[i] = mesh->tria[ids[i - 1]];
+        mesh->ntmax = newnt;
+      }
       MMG5_SAFE_FREE(mesh->tria);
       mesh->nt = newnt;
-      mesh->ntmax = newnt;
       mesh->tria = triangles;
     }
     else
