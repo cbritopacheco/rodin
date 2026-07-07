@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <cmath>
+#include <vector>
 
 #include <Rodin/Geometry.h>
 #include <Rodin/Variational.h>
@@ -18,6 +19,260 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  static Index getFirstBoundaryTriangleIndex(MMG::Mesh& mesh)
+  {
+    mesh.getConnectivity().compute(2, 3);
+    auto it = mesh.getBoundary();
+    EXPECT_FALSE(it.end());
+    if (it.end())
+      return 0;
+    EXPECT_EQ(it->getGeometry(), Polytope::Type::Triangle);
+    return it->getIndex();
+  }
+
+  static void setAllFaceAttributes(MMG::Mesh& mesh, Attribute attr)
+  {
+    mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
+    for (auto it = mesh.getFace(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, attr);
+  }
+
+  static void setAllBoundaryAttributes(MMG::Mesh& mesh, Attribute attr)
+  {
+    mesh.getConnectivity().compute(mesh.getDimension() - 1, mesh.getDimension());
+    for (auto it = mesh.getBoundary(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, attr);
+  }
+
+  static void setAllSegmentAttributes(MMG::Mesh& mesh, Attribute attr)
+  {
+    mesh.getConnectivity().compute(1, mesh.getDimension());
+    for (auto it = mesh.getPolytope(1); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, attr);
+  }
+
+  static bool samePoint(const Point& a, const Point& b, Real tol = 1e-10)
+  {
+    if (a.getDimension() != b.getDimension())
+      return false;
+    for (size_t i = 0; i < a.getDimension(); i++)
+    {
+      if (std::abs(a.getCoordinates()(i) - b.getCoordinates()(i)) > tol)
+        return false;
+    }
+    return true;
+  }
+
+  static size_t getDimension(Polytope::Type type)
+  {
+    switch (type)
+    {
+      case Polytope::Type::Point:
+        return 0;
+      case Polytope::Type::Segment:
+        return 1;
+      case Polytope::Type::Triangle:
+      case Polytope::Type::Quadrilateral:
+        return 2;
+      case Polytope::Type::Tetrahedron:
+      case Polytope::Type::Pyramid:
+      case Polytope::Type::Hexahedron:
+      case Polytope::Type::Wedge:
+        return 3;
+      default:
+        assert(false);
+        return 0;
+    }
+  }
+
+  static std::vector<Point> getVertexCoordinates(const Mesh<Context::Local>& mesh, const Polytope& p)
+  {
+    std::vector<Point> points;
+    for (const auto& v : p.getVertices())
+    {
+      const auto coords = mesh.getVertexCoordinates(v);
+      points.emplace_back(p, coords, coords);
+    }
+    return points;
+  }
+
+  static bool containsPointSet(const std::vector<Point>& haystack, const std::vector<Point>& needles)
+  {
+    for (const auto& needle : needles)
+    {
+      bool found = false;
+      for (const auto& point : haystack)
+      {
+        if (samePoint(point, needle))
+        {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        return false;
+    }
+    return true;
+  }
+
+  static bool hasEntityWithCoordinates(
+      MMG::Mesh& mesh,
+      Polytope::Type type,
+      const std::vector<Point>& points)
+  {
+    const size_t dimension = getDimension(type);
+    if (dimension < mesh.getDimension())
+      mesh.getConnectivity().compute(dimension, mesh.getDimension());
+    for (auto it = mesh.getPolytope(getDimension(type)); it; ++it)
+    {
+      if (it->getGeometry() != type)
+        continue;
+      const auto candidate = getVertexCoordinates(mesh, *it);
+      if (containsPointSet(candidate, points) && containsPointSet(points, candidate))
+        return true;
+    }
+    return false;
+  }
+
+  static bool hasVertexWithCoordinates(MMG::Mesh& mesh, const Point& point)
+  {
+    for (Index i = 0; i < mesh.getVertexCount(); i++)
+    {
+      const auto coords = mesh.getVertexCoordinates(i);
+      const Point candidate(*mesh.getVertex(i), coords, coords);
+      if (samePoint(candidate, point))
+        return true;
+    }
+    return false;
+  }
+
+  static bool isCutByLevelSet(
+      const Mesh<Context::Local>& mesh,
+      const Polytope& p,
+      const std::function<Real(const Point&)>& ls)
+  {
+    bool hasNegative = false;
+    bool hasPositive = false;
+    for (const auto& v : p.getVertices())
+    {
+      const auto coords = mesh.getVertexCoordinates(v);
+      const Real value = ls(Point(p, coords, coords));
+      hasNegative = hasNegative || value < 0;
+      hasPositive = hasPositive || value > 0;
+    }
+    return hasNegative && hasPositive;
+  }
+
+  static Index getFirstCutEntity(
+      MMG::Mesh& mesh,
+      Polytope::Type type,
+      const std::function<Real(const Point&)>& ls)
+  {
+    for (auto it = mesh.getPolytope(getDimension(type)); it; ++it)
+    {
+      if (it->getGeometry() != type)
+        continue;
+      if (isCutByLevelSet(mesh, *it, ls))
+        return it->getIndex();
+    }
+    ADD_FAILURE() << "Could not find cut entity.";
+    return 0;
+  }
+
+  static Index getFirstUncutEntity(
+      MMG::Mesh& mesh,
+      Polytope::Type type,
+      const std::function<Real(const Point&)>& ls)
+  {
+    for (auto it = mesh.getPolytope(getDimension(type)); it; ++it)
+    {
+      if (it->getGeometry() != type)
+        continue;
+      if (!isCutByLevelSet(mesh, *it, ls))
+        return it->getIndex();
+    }
+    ADD_FAILURE() << "Could not find uncut entity.";
+    return 0;
+  }
+
+  static void setCellsContainingVertices(
+      MMG::Mesh& mesh,
+      const Polytope::Key& vertices,
+      Attribute attr)
+  {
+    for (auto it = mesh.getCell(); it; ++it)
+    {
+      bool containsAll = true;
+      for (const auto& vertex : vertices)
+      {
+        bool containsVertex = false;
+        for (const auto& cellVertex : it->getVertices())
+        {
+          if (cellVertex == vertex)
+          {
+            containsVertex = true;
+            break;
+          }
+        }
+        containsAll = containsAll && containsVertex;
+      }
+      if (containsAll)
+        mesh.setAttribute({ it->getDimension(), it->getIndex() }, attr);
+    }
+  }
+
+  static std::vector<Index> getCellsContainingVertices(
+      MMG::Mesh& mesh,
+      const Polytope::Key& vertices)
+  {
+    std::vector<Index> cells;
+    for (auto it = mesh.getCell(); it; ++it)
+    {
+      bool containsAll = true;
+      for (const auto& vertex : vertices)
+      {
+        bool containsVertex = false;
+        for (const auto& cellVertex : it->getVertices())
+        {
+          if (cellVertex == vertex)
+          {
+            containsVertex = true;
+            break;
+          }
+        }
+        containsAll = containsAll && containsVertex;
+      }
+      if (containsAll)
+        cells.emplace_back(it->getIndex());
+    }
+    return cells;
+  }
+
+  static std::vector<Index> getEdgesOnTriangle(MMG::Mesh& mesh, const Polytope::Key& vertices)
+  {
+    std::vector<Index> edges;
+    mesh.getConnectivity().compute(1, mesh.getDimension());
+    for (auto it = mesh.getPolytope(1); it; ++it)
+    {
+      const auto& edgeVertices = it->getVertices();
+      size_t matches = 0;
+      for (const auto& edgeVertex : edgeVertices)
+      {
+        for (const auto& triangleVertex : vertices)
+        {
+          if (edgeVertex == triangleVertex)
+          {
+            matches++;
+            break;
+          }
+        }
+      }
+      if (matches == edgeVertices.size())
+        edges.emplace_back(it->getIndex());
+    }
+    return edges;
+  }
+
   // ========================================================================
   // MMG::Mesh construction tests
   // ========================================================================
@@ -30,6 +285,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getRidges().size(), 0);
     EXPECT_EQ(mesh.getRequiredVertices().size(), 0);
     EXPECT_EQ(mesh.getRequiredEdges().size(), 0);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 0);
+    EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 0);
   }
 
   TEST(Rodin_MMG_Mesh, UniformGridConstruction)
@@ -107,6 +364,32 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredEdges().count(1));
   }
 
+  TEST(Rodin_MMG_Mesh, SetRequiredTriangle)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+
+    mesh.setRequiredTriangle(0);
+    mesh.setRequiredTriangle(3);
+
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 2);
+    EXPECT_TRUE(mesh.getRequiredTriangles().count(0));
+    EXPECT_TRUE(mesh.getRequiredTriangles().count(3));
+  }
+
+  TEST(Rodin_MMG_Mesh, SetRequiredTetrahedron)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+
+    mesh.setRequiredTetrahedron(0);
+    mesh.setRequiredTetrahedron(2);
+
+    EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 2);
+    EXPECT_TRUE(mesh.getRequiredTetrahedra().count(0));
+    EXPECT_TRUE(mesh.getRequiredTetrahedra().count(2));
+  }
+
   // ========================================================================
   // MMG::Mesh copy and move tests
   // ========================================================================
@@ -120,6 +403,8 @@ namespace Rodin::Tests::Unit
     mesh.setRidge(0);
     mesh.setRequiredVertex(5);
     mesh.setRequiredEdge(2);
+    mesh.setRequiredTriangle(1);
+    mesh.setRequiredTetrahedron(0);
 
     MMG::Mesh copy(mesh);
     EXPECT_EQ(copy.getVertexCount(), mesh.getVertexCount());
@@ -128,8 +413,12 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(copy.getRidges().size(), 1);
     EXPECT_EQ(copy.getRequiredVertices().size(), 1);
     EXPECT_EQ(copy.getRequiredEdges().size(), 1);
+    EXPECT_EQ(copy.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(copy.getRequiredTetrahedra().size(), 1);
     EXPECT_TRUE(copy.getCorners().count(0));
     EXPECT_TRUE(copy.getCorners().count(3));
+    EXPECT_TRUE(copy.getRequiredTriangles().count(1));
+    EXPECT_TRUE(copy.getRequiredTetrahedra().count(0));
   }
 
   TEST(Rodin_MMG_Mesh, MoveConstruction)
@@ -140,6 +429,8 @@ namespace Rodin::Tests::Unit
     mesh.setRidge(0);
     mesh.setRequiredVertex(5);
     mesh.setRequiredEdge(2);
+    mesh.setRequiredTriangle(1);
+    mesh.setRequiredTetrahedron(0);
 
     size_t vertexCount = mesh.getVertexCount();
     size_t cellCount = mesh.getCellCount();
@@ -151,6 +442,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(moved.getRidges().size(), 1);
     EXPECT_EQ(moved.getRequiredVertices().size(), 1);
     EXPECT_EQ(moved.getRequiredEdges().size(), 1);
+    EXPECT_EQ(moved.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(moved.getRequiredTetrahedra().size(), 1);
   }
 
   TEST(Rodin_MMG_Mesh, MoveAssignment)
@@ -221,24 +514,29 @@ namespace Rodin::Tests::Unit
   {
     MMG::Mesh mesh =
       MMG::Mesh::Builder()
-      .initialize(2)
+      .initialize(3)
       .nodes(4)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .vertex({1, 1})
+      .vertex({0, 0, 0})
+      .vertex({1, 0, 0})
+      .vertex({0, 1, 0})
+      .vertex({0, 0, 1})
+      .polytope(Polytope::Type::Segment, {0, 1})
       .polytope(Polytope::Type::Triangle, {0, 1, 2})
-      .polytope(Polytope::Type::Triangle, {1, 3, 2})
+      .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
       .corner(0)
       .ridge(0)
       .requiredVertex(1)
       .requiredEdge(0)
+      .requiredTriangle(0)
+      .requiredTetrahedron(0)
       .finalize();
 
     EXPECT_EQ(mesh.getCorners().size(), 1);
     EXPECT_EQ(mesh.getRidges().size(), 1);
     EXPECT_EQ(mesh.getRequiredVertices().size(), 1);
     EXPECT_EQ(mesh.getRequiredEdges().size(), 1);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 1);
   }
 
   // ========================================================================
@@ -263,6 +561,8 @@ namespace Rodin::Tests::Unit
 
     mesh.setRequiredVertex(0);
     mesh.setRequiredVertex(15);
+    mesh.setRequiredTriangle(0);
+    mesh.setRequiredTriangle(1);
 
     // Save to file
     const std::string filename = "/tmp/rodin_mmg_test_roundtrip.mesh";
@@ -280,6 +580,9 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(loaded.getCorners().size(), mesh.getCorners().size());
     EXPECT_EQ(loaded.getRidges().size(), mesh.getRidges().size());
     EXPECT_EQ(loaded.getRequiredVertices().size(), mesh.getRequiredVertices().size());
+    EXPECT_EQ(loaded.getRequiredEdges().size(), mesh.getRequiredEdges().size());
+    EXPECT_EQ(loaded.getRequiredTriangles().size(), mesh.getRequiredTriangles().size());
+    EXPECT_EQ(loaded.getRequiredTetrahedra().size(), mesh.getRequiredTetrahedra().size());
 
     // Verify specific corners
     EXPECT_TRUE(loaded.getCorners().count(0));
@@ -290,8 +593,91 @@ namespace Rodin::Tests::Unit
     // Verify required vertices
     EXPECT_TRUE(loaded.getRequiredVertices().count(0));
     EXPECT_TRUE(loaded.getRequiredVertices().count(15));
+    EXPECT_TRUE(loaded.getRequiredTriangles().count(0));
+    EXPECT_TRUE(loaded.getRequiredTriangles().count(1));
 
     // Clean up
+    std::remove(filename.c_str());
+  }
+
+  TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRequiredTriangles2D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+
+    mesh.setRequiredTriangle(0);
+    mesh.setRequiredTriangle(4);
+
+    const std::string filename = "/tmp/rodin_mmg_required_triangles_2d.mesh";
+    mesh.save(filename, IO::FileFormat::MEDIT);
+
+    MMG::Mesh loaded;
+    loaded.load(filename, IO::FileFormat::MEDIT);
+
+    EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(loaded.getRequiredTriangles().size(), 2);
+    EXPECT_TRUE(loaded.getRequiredTriangles().count(0));
+    EXPECT_TRUE(loaded.getRequiredTriangles().count(4));
+
+    std::remove(filename.c_str());
+  }
+
+  TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRequiredTriangles3D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    setAllFaceAttributes(mesh, 7);
+    const Index required = 0;
+    mesh.setRequiredTriangle(required);
+
+    const std::string filename = "/tmp/rodin_mmg_required_triangles_3d.mesh";
+    mesh.save(filename, IO::FileFormat::MEDIT);
+
+    MMG::Mesh loaded;
+    loaded.load(filename, IO::FileFormat::MEDIT);
+
+    EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(loaded.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(loaded.getRequiredTriangles().count(required));
+
+    std::remove(filename.c_str());
+  }
+
+  TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRequiredEntities3D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    setAllSegmentAttributes(mesh, 8);
+    setAllFaceAttributes(mesh, 7);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = getFirstBoundaryTriangleIndex(mesh);
+    const Index requiredTetrahedron = 0;
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+    mesh.setRequiredTetrahedron(requiredTetrahedron);
+
+    const std::string filename = "/tmp/rodin_mmg_required_entities_3d.mesh";
+    mesh.save(filename, IO::FileFormat::MEDIT);
+
+    MMG::Mesh loaded;
+    loaded.load(filename, IO::FileFormat::MEDIT);
+
+    EXPECT_EQ(loaded.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(loaded.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(loaded.getRequiredVertices().size(), 1);
+    EXPECT_EQ(loaded.getRequiredEdges().size(), 1);
+    EXPECT_EQ(loaded.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(loaded.getRequiredTetrahedra().size(), 1);
+    EXPECT_TRUE(loaded.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(loaded.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(loaded.getRequiredTriangles().count(requiredTriangle));
+    EXPECT_TRUE(loaded.getRequiredTetrahedra().count(requiredTetrahedron));
+
     std::remove(filename.c_str());
   }
 
@@ -314,6 +700,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(loaded.getRidges().size(), 0);
     EXPECT_EQ(loaded.getRequiredVertices().size(), 0);
     EXPECT_EQ(loaded.getRequiredEdges().size(), 0);
+    EXPECT_EQ(loaded.getRequiredTriangles().size(), 0);
+    EXPECT_EQ(loaded.getRequiredTetrahedra().size(), 0);
 
     std::remove(filename.c_str());
   }
@@ -367,6 +755,7 @@ namespace Rodin::Tests::Unit
     }
 
     mesh.setRequiredVertex(0);
+    mesh.setRequiredTriangle(1);
 
     // Convert to MMG and back
     MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
@@ -385,6 +774,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.getRequiredVertices().size(), mesh.getRequiredVertices().size());
     EXPECT_TRUE(result.getRequiredVertices().count(0));
 
+    // Required triangles should be preserved
+    EXPECT_EQ(result.getRequiredTriangles().size(), mesh.getRequiredTriangles().size());
+    EXPECT_TRUE(result.getRequiredTriangles().count(1));
+
     // Ridges live on edges; only attributed edges survive the roundtrip.
     // Verify that the result carries at least some ridges if any attributed
     // edges were marked.
@@ -392,6 +785,117 @@ namespace Rodin::Tests::Unit
     {
       EXPECT_GT(result.getRidges().size(), 0);
     }
+  }
+
+  TEST(Rodin_MMG_MMG5, RequiredTrianglesRoundtrip2D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.setRequiredTriangle(0);
+    mesh.setRequiredTriangle(3);
+
+    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    ASSERT_NE(mmgMesh, nullptr);
+
+    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
+    MMG::MMG5::destroyMesh(mmgMesh);
+
+    EXPECT_EQ(result.getRequiredTriangles().size(), 2);
+    EXPECT_TRUE(result.getRequiredTriangles().count(0));
+    EXPECT_TRUE(result.getRequiredTriangles().count(3));
+  }
+
+  TEST(Rodin_MMG_MMG5, RequiredEntitiesRoundtrip2D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    setAllSegmentAttributes(mesh, 8);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = 3;
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+
+    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    ASSERT_NE(mmgMesh, nullptr);
+
+    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
+    MMG::MMG5::destroyMesh(mmgMesh);
+
+    EXPECT_EQ(result.getRequiredVertices().size(), 1);
+    EXPECT_EQ(result.getRequiredEdges().size(), 1);
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+  }
+
+  TEST(Rodin_MMG_MMG5, RequiredTrianglesRoundtrip3DWithoutFaceAttributes)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    const Index required = getFirstBoundaryTriangleIndex(mesh);
+    mesh.setRequiredTriangle(required);
+
+    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    ASSERT_NE(mmgMesh, nullptr);
+
+    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
+    MMG::MMG5::destroyMesh(mmgMesh);
+
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+  }
+
+  TEST(Rodin_MMG_MMG5, RequiredTrianglesRoundtrip3DPreservesBoundaryMetadataWithFaceAttributes)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    setAllBoundaryAttributes(mesh, 7);
+    const Index required = getFirstBoundaryTriangleIndex(mesh);
+    mesh.setRequiredTriangle(required);
+
+    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    ASSERT_NE(mmgMesh, nullptr);
+
+    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
+    MMG::MMG5::destroyMesh(mmgMesh);
+
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(result.getRequiredTriangles().count(0));
+  }
+
+  TEST(Rodin_MMG_MMG5, RequiredEntitiesRoundtrip3D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    setAllSegmentAttributes(mesh, 8);
+    setAllBoundaryAttributes(mesh, 7);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = getFirstBoundaryTriangleIndex(mesh);
+    const Index requiredTetrahedron = 0;
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+    mesh.setRequiredTetrahedron(requiredTetrahedron);
+
+    MMG5_pMesh mmgMesh = MMG::MMG5::rodinToMesh(mesh);
+    ASSERT_NE(mmgMesh, nullptr);
+
+    MMG::Mesh result = MMG::MMG5::meshToRodin(mmgMesh);
+    MMG::MMG5::destroyMesh(mmgMesh);
+
+    EXPECT_EQ(result.getRequiredVertices().size(), 1);
+    EXPECT_EQ(result.getRequiredEdges().size(), 1);
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(result.getRequiredTetrahedra().size(), 1);
+    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(result.getRequiredTriangles().count(0));
+    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
   }
 
   // ========================================================================
@@ -455,6 +959,99 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(mesh.isEmpty());
     EXPECT_GT(mesh.getVertexCount(), 0);
     EXPECT_GT(mesh.getCellCount(), 0);
+  }
+
+  TEST(Rodin_MMG_Optimizer, PreservesRequiredTriangles2D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 6, 6 });
+    const Index required = 0;
+    mesh.setRequiredTriangle(required);
+
+    MMG::Optimizer()
+      .setHMax(0.5)
+      .optimize(mesh);
+
+    EXPECT_FALSE(mesh.isEmpty());
+    EXPECT_GT(mesh.getCellCount(), 0);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(mesh.getRequiredTriangles().count(required));
+  }
+
+  TEST(Rodin_MMG_Optimizer, PreservesRequiredTriangles3D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    const Index required = getFirstBoundaryTriangleIndex(mesh);
+    mesh.setRequiredTriangle(required);
+
+    MMG::Optimizer()
+      .setHMax(0.75)
+      .optimize(mesh);
+
+    EXPECT_FALSE(mesh.isEmpty());
+    EXPECT_GT(mesh.getCellCount(), 0);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(mesh.getRequiredTriangles().count(required));
+  }
+
+  TEST(Rodin_MMG_Optimizer, PreservesRequiredEntities2D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 6, 6 });
+    setAllSegmentAttributes(mesh, 8);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = 0;
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+
+    MMG::Optimizer()
+      .setHMax(0.5)
+      .optimize(mesh);
+
+    EXPECT_FALSE(mesh.isEmpty());
+    EXPECT_GT(mesh.getCellCount(), 0);
+    EXPECT_EQ(mesh.getRequiredVertices().size(), 1);
+    EXPECT_EQ(mesh.getRequiredEdges().size(), 1);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(mesh.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(mesh.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(mesh.getRequiredTriangles().count(requiredTriangle));
+  }
+
+  TEST(Rodin_MMG_Optimizer, PreservesRequiredEntities3D)
+  {
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });
+    setAllSegmentAttributes(mesh, 8);
+    setAllFaceAttributes(mesh, 7);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = getFirstBoundaryTriangleIndex(mesh);
+    const Index requiredTetrahedron = 0;
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+    mesh.setRequiredTetrahedron(requiredTetrahedron);
+
+    MMG::Optimizer()
+      .setHMax(0.75)
+      .optimize(mesh);
+
+    EXPECT_FALSE(mesh.isEmpty());
+    EXPECT_GT(mesh.getCellCount(), 0);
+    EXPECT_EQ(mesh.getRequiredVertices().size(), 1);
+    EXPECT_EQ(mesh.getRequiredEdges().size(), 1);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 1);
+    EXPECT_TRUE(mesh.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(mesh.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(mesh.getRequiredTriangles().count(requiredTriangle));
+    EXPECT_TRUE(mesh.getRequiredTetrahedra().count(requiredTetrahedron));
   }
 
   // ========================================================================
@@ -678,6 +1275,831 @@ namespace Rodin::Tests::Unit
 
     EXPECT_FALSE(result.isEmpty());
     EXPECT_GT(result.getVertexCount(), 0);
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredTriangles2D)
+  {
+    static constexpr Attribute interior = 1;
+    static constexpr Attribute exterior = 2;
+
+    const size_t n = 16;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(1.0 / (n - 1));
+    const Index required = 0;
+    mesh.setRequiredTriangle(required);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = [](const Geometry::Point& p)
+    {
+      return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
+    };
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(interior, { interior, exterior })
+        .setBoundaryReference(10)
+        .setHMax(0.1)
+        .discretize(ls);
+
+    EXPECT_FALSE(result.isEmpty());
+    EXPECT_GT(result.getCellCount(), 0);
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(result.getRequiredTriangles().count(required));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredTriangles3D)
+  {
+    static constexpr Attribute interior = 1;
+    static constexpr Attribute exterior = 2;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    const Index required = getFirstBoundaryTriangleIndex(mesh);
+    mesh.setRequiredTriangle(required);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = [](const Geometry::Point& p)
+    {
+      const Real dx = p.x() - 0.5;
+      const Real dy = p.y() - 0.5;
+      const Real dz = p.z() - 0.5;
+      return dx * dx + dy * dy + dz * dz - 0.16;
+    };
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(interior, { interior, exterior })
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_FALSE(result.isEmpty());
+    EXPECT_GT(result.getCellCount(), 0);
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(result.getRequiredTriangles().count(required));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredEntities2D)
+  {
+    static constexpr Attribute interior = 1;
+    static constexpr Attribute exterior = 2;
+
+    const size_t n = 16;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(1.0 / (n - 1));
+    setAllSegmentAttributes(mesh, 8);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = 0;
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = [](const Geometry::Point& p)
+    {
+      return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
+    };
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(interior, { interior, exterior })
+        .setBoundaryReference(10)
+        .setHMax(0.1)
+        .discretize(ls);
+
+    EXPECT_FALSE(result.isEmpty());
+    EXPECT_GT(result.getCellCount(), 0);
+    EXPECT_EQ(result.getRequiredVertices().size(), 1);
+    EXPECT_EQ(result.getRequiredEdges().size(), 1);
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, PreservesUncutRequiredEntityGeometry2D)
+  {
+    static constexpr Attribute interior = 1;
+    static constexpr Attribute exterior = 2;
+
+    const size_t n = 16;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(1, 2);
+    setAllSegmentAttributes(mesh, 8);
+
+    const auto lsFn = [](const Point& p)
+    {
+      return (p.x() - 0.5) * (p.x() - 0.5) + (p.y() - 0.5) * (p.y() - 0.5) - 0.1;
+    };
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = getFirstUncutEntity(mesh, Polytope::Type::Segment, lsFn);
+    const Index requiredTriangle = getFirstUncutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto vertexCoords = mesh.getVertexCoordinates(requiredVertex);
+    const Point requiredVertexPoint(
+        *mesh.getVertex(requiredVertex), vertexCoords, vertexCoords);
+    const auto requiredEdgePoints =
+      getVertexCoordinates(mesh, *mesh.getPolytope(getDimension(Polytope::Type::Segment), requiredEdge));
+    const auto requiredTrianglePoints =
+      getVertexCoordinates(mesh, *mesh.getPolytope(getDimension(Polytope::Type::Triangle), requiredTriangle));
+
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(interior, { interior, exterior })
+        .setBoundaryReference(10)
+        .setHMax(0.1)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    EXPECT_TRUE(hasVertexWithCoordinates(result, requiredVertexPoint));
+    EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredEdgePoints));
+    EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredTrianglePoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredEntities3D)
+  {
+    static constexpr Attribute interior = 1;
+    static constexpr Attribute exterior = 2;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    setAllSegmentAttributes(mesh, 8);
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = 0;
+    const Index requiredTriangle = getFirstBoundaryTriangleIndex(mesh);
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = [](const Geometry::Point& p)
+    {
+      const Real dx = p.x() - 0.5;
+      const Real dy = p.y() - 0.5;
+      const Real dz = p.z() - 0.5;
+      return dx * dx + dy * dy + dz * dz - 0.16;
+    };
+
+    Index requiredTetrahedron = 0;
+    bool foundUncutTetrahedron = false;
+    for (auto it = mesh.getCell(); it; ++it)
+    {
+      bool hasNegative = false;
+      bool hasPositive = false;
+      for (const auto& vertex : it->getVertices())
+      {
+        hasNegative = hasNegative || ls[vertex] < 0;
+        hasPositive = hasPositive || ls[vertex] > 0;
+      }
+      if (!(hasNegative && hasPositive))
+      {
+        requiredTetrahedron = it->getIndex();
+        foundUncutTetrahedron = true;
+        break;
+      }
+    }
+    ASSERT_TRUE(foundUncutTetrahedron);
+    mesh.setRequiredTetrahedron(requiredTetrahedron);
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(interior, { interior, exterior })
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_FALSE(result.isEmpty());
+    EXPECT_GT(result.getCellCount(), 0);
+    EXPECT_EQ(result.getRequiredVertices().size(), 1);
+    EXPECT_EQ(result.getRequiredEdges().size(), 1);
+    EXPECT_EQ(result.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(result.getRequiredTetrahedra().size(), 1);
+    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, PreservesUncutRequiredEntityGeometry3D)
+  {
+    static constexpr Attribute interior = 1;
+    static constexpr Attribute exterior = 2;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(1, 3);
+    mesh.getConnectivity().compute(2, 3);
+    setAllSegmentAttributes(mesh, 8);
+
+    const auto lsFn = [](const Point& p)
+    {
+      const Real dx = p.x() - 0.5;
+      const Real dy = p.y() - 0.5;
+      const Real dz = p.z() - 0.5;
+      return dx * dx + dy * dy + dz * dz - 0.16;
+    };
+
+    const Index requiredVertex = 0;
+    const Index requiredEdge = getFirstUncutEntity(mesh, Polytope::Type::Segment, lsFn);
+    const Index requiredTriangle = getFirstUncutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const Index requiredTetrahedron = getFirstUncutEntity(mesh, Polytope::Type::Tetrahedron, lsFn);
+    const auto vertexCoords = mesh.getVertexCoordinates(requiredVertex);
+    const Point requiredVertexPoint(
+        *mesh.getVertex(requiredVertex), vertexCoords, vertexCoords);
+    const auto requiredEdgePoints =
+      getVertexCoordinates(mesh, *mesh.getPolytope(getDimension(Polytope::Type::Segment), requiredEdge));
+    const auto requiredTrianglePoints =
+      getVertexCoordinates(mesh, *mesh.getPolytope(getDimension(Polytope::Type::Triangle), requiredTriangle));
+    const auto requiredTetrahedronPoints =
+      getVertexCoordinates(mesh, *mesh.getPolytope(getDimension(Polytope::Type::Tetrahedron), requiredTetrahedron));
+
+    mesh.setRequiredVertex(requiredVertex);
+    mesh.setRequiredEdge(requiredEdge);
+    mesh.setRequiredTriangle(requiredTriangle);
+    mesh.setRequiredTetrahedron(requiredTetrahedron);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, interior);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(interior, { interior, exterior })
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getRequiredVertices().count(requiredVertex));
+    EXPECT_TRUE(result.getRequiredEdges().count(requiredEdge));
+    EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
+    EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
+    EXPECT_TRUE(hasVertexWithCoordinates(result, requiredVertexPoint));
+    EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredEdgePoints));
+    EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredTrianglePoints));
+    EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Tetrahedron, requiredTetrahedronPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredEdge2D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 16;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(1, 2);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() - 0.75; };
+    const Index required = getFirstCutEntity(mesh, Polytope::Type::Segment, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Segment), required);
+    const auto requiredPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setRequiredEdge(required);
+    setCellsContainingVertices(mesh, entity->getVertices(), protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.1)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredTriangle2D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 16;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(1.0 / (n - 1));
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() - 0.75; };
+    const Index required = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), required);
+    const auto requiredPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setRequiredTriangle(required);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.1)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveIndividuallyLabeledCutTriangle2D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 16;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { n, n });
+    mesh.scale(1.0 / (n - 1));
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() - 0.75; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.1)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredEdge3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(1, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index required = getFirstCutEntity(mesh, Polytope::Type::Segment, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Segment), required);
+    const auto requiredPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setRequiredEdge(required);
+    setCellsContainingVertices(mesh, entity->getVertices(), protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index required = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), required);
+    const auto requiredPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setRequiredTriangle(required);
+    setCellsContainingVertices(mesh, entity->getVertices(), protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitAdjacentTetrahedraDoesNotPreserveCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    setCellsContainingVertices(mesh, entity->getVertices(), protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitAdjacentTetrahedraDoesNotPreserveLabeledRequiredCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+    mesh.setRequiredTriangle(protectedTriangle);
+    setCellsContainingVertices(mesh, entity->getVertices(), protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitRequiredAdjacentTetrahedraDoesNotPreserveCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+    const auto adjacentTetrahedra = getCellsContainingVertices(mesh, entity->getVertices());
+    ASSERT_FALSE(adjacentTetrahedra.empty());
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    for (const auto& tetrahedron : adjacentTetrahedra)
+    {
+      mesh.setRequiredTetrahedron(tetrahedron);
+      mesh.setAttribute({ getDimension(Polytope::Type::Tetrahedron), tetrahedron }, protectedRef);
+    }
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitRequiredTriangleClosureDoesNotPreserveCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+    const auto adjacentTetrahedra = getCellsContainingVertices(mesh, entity->getVertices());
+    const auto edges = getEdgesOnTriangle(mesh, entity->getVertices());
+    ASSERT_FALSE(adjacentTetrahedra.empty());
+    ASSERT_EQ(edges.size(), 3);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    for (const auto& vertex : entity->getVertices())
+      mesh.setRequiredVertex(vertex);
+    for (const auto& edge : edges)
+      mesh.setRequiredEdge(edge);
+    for (const auto& tetrahedron : adjacentTetrahedra)
+    {
+      mesh.setRequiredTetrahedron(tetrahedron);
+      mesh.setAttribute({ getDimension(Polytope::Type::Tetrahedron), tetrahedron }, protectedRef);
+    }
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitRequiredFullTriangleClosureDoesNotPreserveCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+    const auto adjacentTetrahedra = getCellsContainingVertices(mesh, entity->getVertices());
+    const auto edges = getEdgesOnTriangle(mesh, entity->getVertices());
+    ASSERT_FALSE(adjacentTetrahedra.empty());
+    ASSERT_EQ(edges.size(), 3);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    for (const auto& vertex : entity->getVertices())
+      mesh.setRequiredVertex(vertex);
+    for (const auto& edge : edges)
+      mesh.setRequiredEdge(edge);
+    mesh.setRequiredTriangle(protectedTriangle);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+    for (const auto& tetrahedron : adjacentTetrahedra)
+    {
+      mesh.setRequiredTetrahedron(tetrahedron);
+      mesh.setAttribute({ getDimension(Polytope::Type::Tetrahedron), tetrahedron }, protectedRef);
+    }
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveIndividuallyLabeledCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_FALSE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveIndividuallyLabeledRequiredCutTriangle3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+    mesh.getConnectivity().compute(2, 3);
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index protectedTriangle = getFirstCutEntity(mesh, Polytope::Type::Triangle, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Triangle), protectedTriangle);
+    const auto protectedPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+    mesh.setRequiredTriangle(protectedTriangle);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_FALSE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
+  }
+
+  TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredTetrahedron3D)
+  {
+    static constexpr Attribute splitRef = 1;
+    static constexpr Attribute exterior = 2;
+    static constexpr Attribute protectedRef = 7;
+
+    const size_t n = 4;
+    MMG::Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+    mesh.scale(1.0 / (n - 1));
+
+    const auto lsFn = [](const Point& p) { return p.x() + p.y() + p.z() - 0.8; };
+    const Index required = getFirstCutEntity(mesh, Polytope::Type::Tetrahedron, lsFn);
+    const auto entity = mesh.getPolytope(getDimension(Polytope::Type::Tetrahedron), required);
+    const auto requiredPoints = getVertexCoordinates(mesh, *entity);
+
+    for (auto it = mesh.getCell(); it; ++it)
+      mesh.setAttribute({ it->getDimension(), it->getIndex() }, splitRef);
+    mesh.setRequiredTetrahedron(required);
+    mesh.setAttribute({ entity->getDimension(), entity->getIndex() }, protectedRef);
+
+    P1 fes(mesh);
+    MMG::RealGridFunction ls(fes);
+    ls = lsFn;
+
+    MMG::Mesh result =
+      MMG::LevelSetDiscretizer()
+        .split(splitRef, { splitRef, exterior })
+        .noSplit(protectedRef)
+        .setBoundaryReference(10)
+        .setHMax(0.35)
+        .discretize(ls);
+
+    EXPECT_TRUE(result.getAttributeIndex().getAttributes(result.getDimension()).count(protectedRef));
+    EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Tetrahedron, requiredPoints));
   }
 
   // ========================================================================
@@ -912,6 +2334,8 @@ namespace Rodin::Tests::Unit
     mesh.setRidge(1);
     mesh.setRequiredVertex(5);
     mesh.setRequiredEdge(2);
+    mesh.setRequiredTriangle(1);
+    mesh.setRequiredTetrahedron(0);
 
     MMG::Mesh target;
     target = std::move(mesh);
@@ -921,6 +2345,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(target.getRidges().size(), 1);
     EXPECT_EQ(target.getRequiredVertices().size(), 1);
     EXPECT_EQ(target.getRequiredEdges().size(), 1);
+    EXPECT_EQ(target.getRequiredTriangles().size(), 1);
+    EXPECT_EQ(target.getRequiredTetrahedra().size(), 1);
     EXPECT_FALSE(target.isEmpty());
   }
 
@@ -948,6 +2374,8 @@ namespace Rodin::Tests::Unit
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
     mesh.setCorner(0);
     mesh.setRidge(1);
+    mesh.setRequiredTriangle(0);
+    mesh.setRequiredTetrahedron(0);
 
     // Assign from parent type (which has no MMG metadata)
     Mesh<Context::Local> parentMesh;
@@ -960,6 +2388,8 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getRidges().size(), 0);
     EXPECT_EQ(mesh.getRequiredVertices().size(), 0);
     EXPECT_EQ(mesh.getRequiredEdges().size(), 0);
+    EXPECT_EQ(mesh.getRequiredTriangles().size(), 0);
+    EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 0);
   }
 
   TEST(Rodin_MMG_Mesh, IsSurface)

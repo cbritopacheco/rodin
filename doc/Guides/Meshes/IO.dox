@@ -74,7 +74,7 @@
   @subsection guides-meshes-io-saving-medit MEDIT Format
 
   The MEDIT format is commonly used with the
-  @ref Rodin::External::MMG "MMG" mesh adaptation tools:
+  @ref Rodin::MMG "MMG" mesh adaptation tools:
 
   @code{.cpp}
   mesh.save("domain.mesh", IO::FileFormat::MEDIT);
@@ -120,7 +120,7 @@
 
   [MMG](https://www.mmgtools.org/) is used for mesh adaptation and
   optimization. Rodin integrates directly with MMG through the
-  @ref Rodin::External::MMG "External::MMG" module. See the
+  @ref Rodin::MMG "MMG" module. See the
   @ref examples-mmg-index "MMG examples" for details.
 
   @section guides-meshes-io-paths File Paths

@@ -348,7 +348,7 @@
   @endcode
 
   See the @ref examples-mmg-index "MMG examples" for more details on using
-  Rodin's @ref Rodin::External::MMG "MMG" integration.
+  Rodin's @ref Rodin::MMG "MMG" integration.
 
   @section guides-io-workflow Recommended Workflow
 

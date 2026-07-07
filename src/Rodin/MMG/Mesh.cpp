@@ -30,6 +30,18 @@ namespace Rodin::MMG
     return *this;
   }
 
+  Mesh& Mesh::setRequiredTriangle(Index triangleIdx)
+  {
+    m_requiredTriangleIndex.insert(triangleIdx);
+    return *this;
+  }
+
+  Mesh& Mesh::setRequiredTetrahedron(Index tetrahedronIdx)
+  {
+    m_requiredTetrahedronIndex.insert(tetrahedronIdx);
+    return *this;
+  }
+
   Mesh& Mesh::setRequiredVertex(Index vertexIdx)
   {
     m_requiredVertexIndex.insert(vertexIdx);
@@ -79,4 +91,3 @@ namespace Rodin::MMG
     return *this;
   }
 }
-

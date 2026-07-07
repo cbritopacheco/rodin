@@ -21,8 +21,9 @@ namespace Rodin::MMG
    * @brief Loads an @ref Rodin::MMG::Mesh from the MEDIT format.
    *
    * Extends the base MEDIT loader by additionally parsing MMG-specific sections
-   * (corners, ridges, required vertices and required edges) and storing them in
-   * the associated @ref MMG::Mesh metadata sets.
+   * (corners, ridges, required vertices, required edges, required triangles,
+   * and required tetrahedra) and storing them in the associated @ref MMG::Mesh
+   * metadata sets.
    */
   class MeshLoader : public IO::MeshLoader<IO::FileFormat::MEDIT, Context::Local>
   {

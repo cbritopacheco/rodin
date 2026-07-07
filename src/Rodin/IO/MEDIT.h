@@ -61,6 +61,8 @@ namespace Rodin::IO::MEDIT
     SolAtHexahedra,        ///< Solution at hexahedra
     RequiredVertices,      ///< Required vertices section
     RequiredEdges,         ///< Required edges section
+    RequiredTriangles,     ///< Required triangles section
+    RequiredTetrahedra,    ///< Required tetrahedra section
     Normals,               ///< Normal vectors section
     NormalAtVertices,      ///< Normals at vertices
     Tangents,              ///< Tangent vectors section
@@ -121,6 +123,10 @@ namespace Rodin::IO::MEDIT
         return "RequiredVertices";
       case Keyword::RequiredEdges:
         return "RequiredEdges";
+      case Keyword::RequiredTriangles:
+        return "RequiredTriangles";
+      case Keyword::RequiredTetrahedra:
+        return "RequiredTetrahedra";
       case Keyword::Normals:
         return "Normals";
       case Keyword::NormalAtVertices:
@@ -236,6 +242,10 @@ namespace Rodin::IO::MEDIT
       res = Keyword::RequiredVertices;
     else if (str == Keyword::RequiredEdges)
       res = Keyword::RequiredEdges;
+    else if (str == Keyword::RequiredTriangles)
+      res = Keyword::RequiredTriangles;
+    else if (str == Keyword::RequiredTetrahedra)
+      res = Keyword::RequiredTetrahedra;
     else if (str == Keyword::Normals)
       res = Keyword::Normals;
     else if (str == Keyword::NormalAtVertices)

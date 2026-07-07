@@ -80,7 +80,7 @@
   beam, minimizing the compliance (structural stiffness) subject to a
   volume constraint. The shape gradient is computed and regularized via the
   Hilbert extension-regularization procedure, and the mesh is updated using
-  the @ref Rodin::External::MMG "MMG" remesher.
+  the @ref Rodin::MMG "MMG" remesher.
 
   @subsection gallery-shapeopt-levelset Level-Set Shape Optimization
 
@@ -90,7 +90,7 @@
   cantilever" example combines body-fitted meshing with level-set
   techniques. The optimizer advects a signed-distance function and recovers
   the implicit domain at each iteration using the
-  @ref Rodin::External::MMG "MMG" level-set discretizer.
+  @ref Rodin::MMG "MMG" level-set discretizer.
 
   @subsection gallery-density-temp Density Optimization: Temperature
 

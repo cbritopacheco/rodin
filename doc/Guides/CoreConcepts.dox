@@ -193,7 +193,7 @@
   | `Jacobian(u)` | @f$ \nabla \mathbf{u} @f$ | Matrix (for vector @f$ \mathbf{u} @f$) |
   | `Transpose(A)` | @f$ A^T @f$ | Transpose of a matrix expression |
   | `Trace(A)` | @f$ \text{tr}(A) @f$ | Scalar (sum of diagonal entries) |
-  | `Frobenius(A)` | @f$ \|A\|_F @f$ | Scalar (Frobenius norm) |
+  | `Frobenius(A)` | @f$ \lVert A\rVert_F @f$ | Scalar (Frobenius norm) |
   | `Dot(a, b)` | @f$ \mathbf{a} \cdot \mathbf{b} @f$ | Scalar (inner product or double contraction) |
   | `Component(u, i)` | @f$ u_i @f$ | Scalar (i-th component of vector @f$ \mathbf{u} @f$) |
   | `BoundaryNormal(mesh)` | @f$ \mathbf{n} @f$ | Outward unit normal on @f$ \partial\Omega @f$ |
@@ -201,7 +201,7 @@
   | `IdentityMatrix(n)` | @f$ I_n @f$ | @f$ n \times n @f$ identity matrix |
   | `Potential(K, u)` | @f$ \int K(\mathbf{x}, \mathbf{y}) u(\mathbf{y}) \, d\mathbf{y} @f$ | Integral convolution (BEM/integral equations) |
   | `Flow(t, u, vel)` | @f$ u \circ \Phi_t @f$ | Flow composition (semi-Lagrangian advection) |
-  | `TraceOperator(u, attr)` | @f$ u\|_{\partial\Omega} @f$ | Boundary trace (restriction to boundary) |
+  | `TraceOperator(u, attr)` | @f$ u\vert_{\partial\Omega} @f$ | Boundary trace (restriction to boundary) |
 
   @code{.cpp}
   TrialFunction u(Vh);
@@ -513,7 +513,7 @@
   | Sine | `Sin(f)` | @f$ \sin(f) @f$ |
   | Cosine | `Cos(f)` | @f$ \cos(f) @f$ |
   | Tangent | `Tan(f)` | @f$ \tan(f) @f$ |
-  | Absolute value | `Abs(f)` | @f$ |f| @f$ |
+  | Absolute value | `Abs(f)` | @f$ \lvert f\rvert @f$ |
   | Maximum | `Max(f, g)` | @f$ \max(f, g) @f$ |
   | Minimum | `Min(f, g)` | @f$ \min(f, g) @f$ |
 
