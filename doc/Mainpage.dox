@@ -6,9 +6,40 @@
 
   Rodin is a lightweight and modular C++20 finite element framework designed
   for solving partial differential equations (PDEs) and performing shape and
-  topology optimization. It provides a compositional form language that lets
+  topology optimization.
+
+  @image html Images/Logo_Inverse.png width=210px
+
+  It is named after the French sculptor [Auguste
+  Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
+  of modern sculpture.
+
+  @section poisson-example-mainpage A simple example
+
+  Rodin provides a compositional form language that lets
   you express variational problems in C++ code that closely mirrors the
-  mathematical notation:
+  mathematical notation.
+
+  For example, the Poisson problem with homogeneous Dirichlet boundary
+  conditions, in strong form, for a domain @f$\Omega@f$ with boundary
+  @f$\partial\Omega@f$ is
+
+  @f[
+    \begin{aligned}
+      -\Delta u &= f && \text{in } \Omega,\\
+      u &= 0 && \text{on } \partial\Omega.
+    \end{aligned}
+  @f]
+
+  The corresponding weak form is: find @f$u \in H^1_0(\Omega)@f$ such that
+
+  @f[
+    \int_\Omega \nabla u \cdot \nabla v \, dx
+      = \int_\Omega f v \, dx
+      \qquad \forall v \in H^1_0(\Omega).
+  @f]
+
+  In the code one can implement it as such:
 
   @code{.cpp}
   Mesh mesh;
@@ -26,36 +57,6 @@
 
   Solver::CG(problem).solve();
   @endcode
-
-  This example solves the Poisson problem with homogeneous Dirichlet boundary
-  conditions. In strong form, for a domain @f$\Omega@f$ with boundary
-  @f$\partial\Omega@f$, it is
-
-  @f[
-    \begin{aligned}
-      -\Delta u &= f && \text{in } \Omega,\\
-      u &= 0 && \text{on } \partial\Omega.
-    \end{aligned}
-  @f]
-
-  The corresponding weak form is: find @f$u \in H^1_0(\Omega)@f$ such that
-
-  @f[
-    \int_\Omega \nabla u \cdot \nabla v \, dx
-      = \int_\Omega f v \, dx
-      \qquad \forall v \in H^1_0(\Omega).
-  @f]
-
-  The Rodin expression
-  `Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero())`
-  is the residual form of this equation, assembled and solved in the finite
-  element space `P1`.
-
-  @image html Images/Logo_Inverse.png width=210px
-
-  It is named after the French sculptor [Auguste
-  Rodin](https://en.wikipedia.org/wiki/Auguste_Rodin), considered the founder
-  of modern sculpture.
 
   @section rodin-architecture Architecture
 
