@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <utility>
 
 #include "Rodin/Heart/CCMLC2014.h"
 #include <Rodin/Geometry.h>
@@ -122,15 +123,15 @@ public:
    */
   struct CarreauYasuda {
     /// @brief Low-shear viscosity.
-    Real mu0 = 0.0186058;
+    Real mu0 = 0.353;
     /// @brief Infinite-shear viscosity.
-    Real muInf = 0.0042963;
+    Real muInf = 0.004181;
     /// @brief Relaxation time.
-    Real lambda = 0.2435;
+    Real lambda = 15.6821;
     /// @brief Power-law index.
-    Real n = 0.2079;
+    Real n = 0.2050;
     /// @brief Yasuda transition exponent.
-    Real yasuda = 1.541;
+    Real yasuda = 0.6497;
     /// @brief Shear-rate regularization used in the 3D viscosity.
     Real gammaRegularization = 1.0e-3;
   };
@@ -343,15 +344,15 @@ public:
     /// @brief Initial distal pressure.
     Real initialPd = 10000.0;
     /// @brief Low-shear viscosity.
-    Real mu_0 = 0.0186058;
+    Real mu_0 = 0.353;
     /// @brief Infinite-shear viscosity.
-    Real mu_Inf = 0.0042963;
+    Real mu_Inf = 0.004181;
     /// @brief Relaxation time.
-    Real lambda = 0.2435;
+    Real lambda = 15.6821;
     /// @brief Power-law index.
-    Real n = 0.2079;
+    Real n = 0.2050;
     /// @brief Yasuda transition exponent.
-    Real yasuda = 1.541;
+    Real yasuda = 0.6497;
     /// @brief Proximal surrogate vessel radius.
     Real proximalRadius = 0.0125;
     /// @brief Proximal surrogate vessel length.
@@ -431,6 +432,23 @@ public:
     FlowMode flowMode = FlowMode::Oseen;
     /// @brief Blood viscosity model shared by 3D flow and outlet laws.
     CarreauYasuda viscosity;
+    /// @brief Blood rheology used ONLY to size the outlet surrogate geometry
+    ///        during startup calibration.
+    /// @details Kept independent of @ref viscosity and fixed at a healthy
+    ///          reference by default. This decouples the calibration operating
+    ///          point from the running rheology: perturbing @ref viscosity /
+    ///          lambda to model a rheological pathology is then NOT cancelled
+    ///          out by re-tuning the outlet resistance, so the pathology shows
+    ///          up as an emergent change in coronary flux instead of being
+    ///          pinned back to lcaTargetFlow.
+    CarreauYasuda calibrationViscosity;
+    /// @brief Calibrate outlet geometry at @ref calibrationViscosity (true,
+    ///        recommended) or at the running @ref viscosity (false).
+    /// @details True lets rheological pathologies affect flux while keeping the
+    ///          outlet radii anchored to a physiological baseline. False
+    ///          restores the older self-consistent behaviour that pins the
+    ///          baseline flux to lcaTargetFlow regardless of rheology.
+    bool calibrateAtReferenceViscosity = true;
     /// @brief Non-Newtonian outlet flow-law parameters.
     OutletFlowLaw outletFlowLaw;
     /// @brief Prescribed LV activation waveform parameters.
@@ -450,7 +468,7 @@ public:
     bool autoCalibrateOutlets = true;
     /// @brief Total target coronary inflow distributed across outlets (m^3/s).
     /// @details ~1.0e-6 m^3/s is about 60 mL/min; LCA rest flow ~150-250.
-    Real lcaTargetFlow = 1.0e-6;
+    Real lcaTargetFlow = 3.0e-6;
     /// @brief Uniform coronary RCR time constant tau = Rd*C (s).
     Real rcrTau = 0.2;
     /// @brief Proximal resistance fraction Rp/(Rp+Rd), clamped to [0, 0.5].
@@ -517,6 +535,23 @@ private:
   static void updateRCR(const Model &model, RCR &bc, Real Q, Real dt);
   static void updateRCRNonNew(const Config &cfg, const Attribute& tag, const Model &model, RCR &bc,
                               Real Q, Real dt);
+
+  /// @brief Non-Newtonian (Carreau-Yasuda) coronary outlet flow law.
+  /// @param visc Blood rheology to evaluate the law with.
+  /// @returns {Q, dQ/d(dp)} through a tube of length @p L and radius
+  ///          @p radius at pressure drop @p dp, via the WRMS relation.
+  static std::pair<Real, Real> outletFlow(const Config &cfg,
+                                          const CarreauYasuda &visc, Real dp,
+                                          Real L, Real radius);
+
+  /// @brief Surrogate outlet radius whose non-Newtonian flow law (evaluated at
+  ///        @p visc) delivers @p targetQ at operating pressure drop @p dp over
+  ///        length @p L. Replaces the mu0-Poiseuille sizing so the realized
+  ///        outlet resistance is consistent with updateRCRNonNew.
+  static Real calibrateOutletRadius(const Config &cfg,
+                                    const CarreauYasuda &visc, Real targetQ,
+                                    Real dp, Real L);
+
   static Real periodic_activation(const Activation &cfg, Real t);
   static Real atrial_pressure(const AtrialPressure &cfg, Real t);
 

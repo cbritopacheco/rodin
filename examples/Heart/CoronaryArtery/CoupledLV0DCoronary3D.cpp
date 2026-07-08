@@ -293,6 +293,171 @@ void CoupledLV0DCoronary3D::updateRCR(const Model &model, RCR &bc, Real Q,
   bc.pout = bc.pc + bc.Rp * Q;
 }
 
+std::pair<CoupledLV0DCoronary3D::Real, CoupledLV0DCoronary3D::Real>
+CoupledLV0DCoronary3D::outletFlow(const Config &cfg, const CarreauYasuda &visc,
+                                  Real dp, Real L, Real radius) {
+  const auto &law = cfg.outletFlowLaw;
+  const auto &cy = visc;
+
+  const Real mu0 = cy.mu0;
+  const Real muInf = cy.muInf;
+  const Real lambda = cy.lambda;
+  const Real n = cy.n;
+  const Real yasuda = cy.yasuda;
+  const Real delta = mu0 - muInf;
+
+  const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
+  const Real adp = std::abs(dp);
+
+  const Real R0 =
+      8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
+
+  if (adp < law.pressureDropTolerance)
+    return {dp / R0, 1.0 / R0};
+
+  const Real tauW = radius * adp / (2.0 * L);
+
+  auto mu = [&](Real g) -> Real {
+    return muInf + delta * std::pow(1.0 + std::pow(lambda * g, yasuda),
+                                    (n - 1.0) / yasuda);
+  };
+
+  auto dmu = [&](Real g) -> Real {
+    const Real base = 1.0 + std::pow(lambda * g, yasuda);
+
+    return delta * (n - 1.0) * std::pow(base, (n - 1.0 - yasuda) / yasuda) *
+           std::pow(lambda, yasuda) * std::pow(g, yasuda - 1.0);
+  };
+
+  auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real> {
+    const Real m = mu(g);
+    const Real dm = dmu(g);
+    return {g * m - tauW, m + g * dm};
+  };
+
+  Math::RootFinding::NewtonRaphson<Real> rootFinder(
+      law.shearAbsoluteTolerance, law.shearRelativeTolerance,
+      law.shearStepTolerance, law.shearMaxIterations);
+
+  Real gHi = std::max<Real>(tauW / muInf, law.minShearRate);
+
+  for (int k = 0;
+       k < law.maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
+    gHi *= 2.0;
+
+  if (tauMinusTauW(gHi).first < 0.0) {
+    std::cerr << "Warning: failed to bracket wall shear rate. "
+              << "Using Poiseuille fallback.\n";
+    return {dp / R0, 1.0 / R0};
+  }
+
+  const auto gammaRoot =
+      rootFinder.solve(tauMinusTauW, 0.5 * gHi, law.shearStepTolerance, gHi);
+
+  if (!gammaRoot) {
+    std::cerr << "Warning: failed to solve wall shear rate. "
+              << "Using Poiseuille fallback.\n";
+    return {dp / R0, 1.0 / R0};
+  }
+
+  const Real gammaW = *gammaRoot;
+
+  auto integrand = [&](Real g) -> Real {
+    if (g <= 0.0)
+      return 0.0;
+
+    const Real m = mu(g);
+    const Real dm = dmu(g);
+    const Real dtau = m + g * dm;
+
+    return std::pow(g, 3.0) * m * m * dtau;
+  };
+
+  Math::RungeKutta::RK4 integrator;
+
+  const int steps = law.integralSteps;
+  const Real hStep = gammaW / static_cast<Real>(steps);
+
+  Real I = 0.0;
+
+  auto rhs = [&](Real g, Real y) -> Real {
+    (void)y;
+    return integrand(g);
+  };
+
+  for (int i = 0; i < steps; ++i) {
+    const Real g = static_cast<Real>(i) * hStep;
+    integrator.step(I, g, hStep, I, rhs);
+  }
+
+  if (I <= 0.0 || !std::isfinite(I)) {
+    std::cerr << "Warning: invalid WRMS integral. "
+              << "Using Poiseuille fallback.\n";
+    return {dp / R0, 1.0 / R0};
+  }
+
+  const Real qAbs = std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I /
+                    std::pow(tauW, 3.0);
+
+  const Real dqAbs = (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW -
+                      3.0 * qAbs) /
+                     adp;
+
+  if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0) {
+    std::cerr << "Warning: invalid WRMS flow derivative. "
+              << "Using Poiseuille fallback.\n";
+    return {dp / R0, 1.0 / R0};
+  }
+
+  return {sgn * qAbs, dqAbs};
+}
+
+CoupledLV0DCoronary3D::Real
+CoupledLV0DCoronary3D::calibrateOutletRadius(const Config &cfg,
+                                             const CarreauYasuda &visc,
+                                             Real targetQ, Real dp, Real L) {
+  // Size a surrogate outlet radius so that the non-Newtonian flow law evaluated
+  // at the *calibration* rheology `visc` delivers targetQ at operating pressure
+  // drop dp. Using the shear-thinning law here (instead of the mu0-Poiseuille
+  // closed form) makes the realized outlet resistance dp/targetQ match the
+  // calibration target. When `visc` is a fixed healthy reference, the resulting
+  // geometry is anchored to a physiological baseline while the running rheology
+  // is free to move the flux (see Config::calibrationViscosity).
+  const Real PI = std::numbers::pi_v<Real>;
+  const Real mu0 = visc.mu0;
+
+  const Real q = std::max<Real>(std::abs(targetQ), 1e-300);
+  const Real Rlin = std::abs(dp) / q; // target resistance = 8 mu0 L/(pi r^4)
+
+  // Newtonian (mu0) radius. Because the shear-thinning law passes at least as
+  // much flow at the same radius, this is a strict upper bracket for the root.
+  const Real rHi0 = std::pow(8.0 * mu0 * L / (PI * std::max(Rlin, 1e-300)), 0.25);
+
+  auto f = [&](Real r) -> Real {
+    const auto [qr, dqr] = outletFlow(cfg, visc, dp, L, r);
+    (void)dqr;
+    return std::abs(qr) - q;
+  };
+
+  Real hi = rHi0;
+  // Safety: guarantee f(hi) >= 0 (should already hold).
+  for (int k = 0; k < 60 && f(hi) < 0.0; ++k)
+    hi *= 1.5;
+  Real lo = 1e-6 * hi;
+  for (int k = 0; k < 60 && f(lo) > 0.0; ++k)
+    lo *= 0.5;
+
+  for (int it = 0; it < 100; ++it) {
+    const Real mid = 0.5 * (lo + hi);
+    if (f(mid) > 0.0)
+      hi = mid;
+    else
+      lo = mid;
+  }
+
+  return 0.5 * (lo + hi);
+}
+
 void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
                                             const Attribute &tag,
                                             const Model &model, RCR &bc, Real Q,
@@ -304,7 +469,6 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   const Real pcOld = bc.pc;
 
   const auto &law = cfg.outletFlowLaw;
-  const auto &cy = cfg.viscosity;
 
   const Real radiusP = law.geometricParam.at(tag).Rp;
   const Real lengthP = law.geometricParam.at(tag).Lp;
@@ -313,118 +477,8 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   const Real lengthD = law.geometricParam.at(tag).Ld;
 
   auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real> {
-    const Real mu0 = cy.mu0;
-    const Real muInf = cy.muInf;
-    const Real lambda = cy.lambda;
-    const Real n = cy.n;
-    const Real yasuda = cy.yasuda;
-    const Real delta = mu0 - muInf;
-
-    const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
-    const Real adp = std::abs(dp);
-
-    const Real R0 =
-        8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
-
-    if (adp < law.pressureDropTolerance)
-      return {dp / R0, 1.0 / R0};
-
-    const Real tauW = radius * adp / (2.0 * L);
-
-    auto mu = [&](Real g) -> Real {
-      return muInf + delta * std::pow(1.0 + std::pow(lambda * g, yasuda),
-                                      (n - 1.0) / yasuda);
-    };
-
-    auto dmu = [&](Real g) -> Real {
-      const Real base = 1.0 + std::pow(lambda * g, yasuda);
-
-      return delta * (n - 1.0) * std::pow(base, (n - 1.0 - yasuda) / yasuda) *
-             std::pow(lambda, yasuda) * std::pow(g, yasuda - 1.0);
-    };
-
-    auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real> {
-      const Real m = mu(g);
-      const Real dm = dmu(g);
-      return {g * m - tauW, m + g * dm};
-    };
-
-    Math::RootFinding::NewtonRaphson<Real> rootFinder(
-        law.shearAbsoluteTolerance, law.shearRelativeTolerance,
-        law.shearStepTolerance, law.shearMaxIterations);
-
-    Real gHi = std::max<Real>(tauW / muInf, law.minShearRate);
-
-    for (int k = 0;
-         k < law.maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
-      gHi *= 2.0;
-
-    if (tauMinusTauW(gHi).first < 0.0) {
-      std::cerr << "Warning: failed to bracket wall shear rate. "
-                << "Using Poiseuille fallback.\n";
-      return {dp / R0, 1.0 / R0};
-    }
-
-    const auto gammaRoot =
-        rootFinder.solve(tauMinusTauW, 0.5 * gHi, law.shearStepTolerance, gHi);
-
-    if (!gammaRoot) {
-      std::cerr << "Warning: failed to solve wall shear rate. "
-                << "Using Poiseuille fallback.\n";
-      return {dp / R0, 1.0 / R0};
-    }
-
-    const Real gammaW = *gammaRoot;
-
-    auto integrand = [&](Real g) -> Real {
-      if (g <= 0.0)
-        return 0.0;
-
-      const Real m = mu(g);
-      const Real dm = dmu(g);
-      const Real dtau = m + g * dm;
-
-      return std::pow(g, 3.0) * m * m * dtau;
-    };
-
-    Math::RungeKutta::RK4 integrator;
-
-    const int steps = law.integralSteps;
-    const Real h = gammaW / static_cast<Real>(steps);
-
-    Real I = 0.0;
-
-    auto rhs = [&](Real g, Real y) -> Real {
-      (void)y;
-      return integrand(g);
-    };
-
-    for (int i = 0; i < steps; ++i) {
-      const Real g = static_cast<Real>(i) * h;
-      integrator.step(I, g, h, I, rhs);
-    }
-
-    if (I <= 0.0 || !std::isfinite(I)) {
-      std::cerr << "Warning: invalid WRMS integral. "
-                << "Using Poiseuille fallback.\n";
-      return {dp / R0, 1.0 / R0};
-    }
-
-    const Real qAbs = std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I /
-                      std::pow(tauW, 3.0);
-
-    const Real dqAbs =
-        (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW -
-         3.0 * qAbs) /
-        adp;
-
-    if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0) {
-      std::cerr << "Warning: invalid WRMS flow derivative. "
-                << "Using Poiseuille fallback.\n";
-      return {dp / R0, 1.0 / R0};
-    }
-
-    return {sgn * qAbs, dqAbs};
+    // Stepping always uses the *running* rheology so pathologies move the flux.
+    return outletFlow(cfg, cfg.viscosity, dp, L, radius);
   };
 
   auto solvePressureDropForFlow = [&](Real targetQ, Real L, Real radius,
@@ -651,7 +705,6 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
   // then backed out (keeping the branch lengths) so updateRCRNonNew stays
   // consistent, and a uniform time constant tau = Rd*C is imposed.
   if (m_cfg.autoCalibrateOutlets) {
-    const Real mu0 = m_cfg.viscosity.mu0;
     const Real PI = std::numbers::pi_v<Real>;
     const Real pim = 0.45 * m_model.getState().pv; // alpha * pv (distal level)
     const Real par0 = m_model.getState().par;
@@ -675,10 +728,20 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
       const Real Ri = dP / Qi;         // total branch resistance
       const Real Rd = (1.0 - fp) * Ri; // distal (peripheral)
       const Real Rp = fp * Ri;         // proximal (characteristic)
-      // Back out the surrogate radii (keep Lp, Ld): r = (8 mu0 L/(pi R))^1/4.
+      // Size the surrogate radii (keep Lp, Ld) by inverting the non-Newtonian
+      // flow law at each branch's operating point, so the realized outlet
+      // resistance matches Rd/Rp. Calibrating at a fixed reference rheology
+      // (calibrationViscosity) anchors the geometry to a physiological baseline
+      // so that changing the running viscosity/lambda (a pathology) moves the
+      // flux instead of being cancelled by re-tuning the resistance. A
+      // mu0-Poiseuille sizing (r = (8 mu0 L/(pi R))^1/4) instead systematically
+      // under-resists strongly shear-thinning blood, inflating the flow.
+      const CarreauYasuda &calibVisc = m_cfg.calibrateAtReferenceViscosity
+                                           ? m_cfg.calibrationViscosity
+                                           : m_cfg.viscosity;
       auto &g = m_cfg.outletFlowLaw.geometricParam.at(tag);
-      g.Rd = std::pow(8.0 * mu0 * g.Ld / (PI * Rd), 0.25);
-      g.Rp = std::pow(8.0 * mu0 * g.Lp / (PI * Rp), 0.25);
+      g.Rd = calibrateOutletRadius(m_cfg, calibVisc, Qi, Rd * Qi, g.Ld);
+      g.Rp = calibrateOutletRadius(m_cfg, calibVisc, Qi, Rp * Qi, g.Lp);
       m_wk.at(tag).C = m_cfg.rcrTau / Rd; // uniform tau = Rd*C
       if (isRoot())
         Alert::Info() << "  [calib] outlet " << tag
