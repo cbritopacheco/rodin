@@ -182,7 +182,6 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-jbar-smooth-delta", p.jBarrierSmoothDelta);
     p.qBarrierSmoothDelta =
       realOption(argc, argv, "wngir-qbar-smooth-delta", p.qBarrierSmoothDelta);
-
     p.omegaMin = realOption(argc, argv, "wngir-omega-min", Real(0.1));
     p.alphaMin = realOption(argc, argv, "wngir-alpha-min", Real(1e-4));
     p.energyLineSearch = !boolOption(argc, argv, "wngir-no-energy-ls", false);

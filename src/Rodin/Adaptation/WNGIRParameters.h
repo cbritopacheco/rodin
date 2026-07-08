@@ -20,10 +20,10 @@ namespace Rodin::Adaptation
   struct WNGIRParameters
   {
     Real h = 0;                 ///< reference mesh size (required).
-    Real gammaM = 0;            ///< L² weight; ≤0 ⇒ 1/h.
-    Real gammaH = 0;            ///< deviatoric-strain weight; ≤0 ⇒ 1/h.
-    Real gammaDiv = 0;          ///< divergence weight; ≤0 ⇒ gammaH.
-    Real ellM = 0;              ///< Sobolev length; ≤0 ⇒ 3h.
+    Real gammaM = -1;           ///< L² weight; <0 ⇒ 1/h.
+    Real gammaH = -1;           ///< deviatoric-strain weight; <0 ⇒ 1/h.
+    Real gammaDiv = -1;         ///< divergence weight; <0 ⇒ gammaH.
+    Real ellM = -1;             ///< Sobolev length; <0 ⇒ 3h.
     Real gammaObs = 1;          ///< surface observation metric weight.
     bool residualStabilizedObservationMetric = true;
     Real initialGuessGamma = 1000;

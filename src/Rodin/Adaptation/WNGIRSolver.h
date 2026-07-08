@@ -109,10 +109,10 @@ namespace Rodin::Adaptation
 
         WNGIRReport rep;
         const Real h = p.h;
-        const Real gammaM = p.gammaM > Real(0) ? p.gammaM : Real(1) / h;
-        const Real gammaH = p.gammaH > Real(0) ? p.gammaH : Real(1) / h;
-        const Real gammaDiv = p.gammaDiv > Real(0) ? p.gammaDiv : gammaH;
-        const Real ellM = p.ellM > Real(0) ? p.ellM : Real(3) * h;
+        const Real gammaM = p.gammaM >= Real(0) ? p.gammaM : Real(1) / h;
+        const Real gammaH = p.gammaH >= Real(0) ? p.gammaH : Real(1) / h;
+        const Real gammaDiv = p.gammaDiv >= Real(0) ? p.gammaDiv : gammaH;
+        const Real ellM = p.ellM >= Real(0) ? p.ellM : Real(3) * h;
         const Real activeRMSTol =
           p.activeRMSTol > Real(0) ? p.activeRMSTol : Real(4) * h * h;
         const Real activeSupTol =
