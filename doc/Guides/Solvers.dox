@@ -187,8 +187,8 @@
   | Method | Default | Description |
   |--------|---------|-------------|
   | `setMaxIterations(n)` | 100 | Maximum Newton iterations |
-  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Converged when @f$ \|r\| \le \mathrm{atol} @f$ |
-  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Converged when @f$ \|r\|/\|r_0\| \le \mathrm{rtol} @f$ |
+  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Converged when @f$ \lVert r\rVert \le \mathrm{atol} @f$ |
+  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Converged when @f$ \lVert r\rVert/\lVert r_0\rVert \le \mathrm{rtol} @f$ |
 
   Convergence is declared when **either** criterion is satisfied (not both).
 

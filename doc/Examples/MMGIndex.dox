@@ -1,10 +1,11 @@
 /**
   @page examples-mmg-index Working with MMG
-  @brief Showcases the usage of the Rodin::External::MMG module
+  @brief Showcases the usage of the Rodin::MMG module
 
   - @subpage examples-mmg-simple_io
   - @subpage examples-mmg-mesh_optimization
   - @subpage examples-mmg-mesh_adaptation
+  - @subpage examples-mmg-behavior
   - @subpage examples-mmg-casting
 
   */

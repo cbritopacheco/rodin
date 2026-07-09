@@ -66,7 +66,7 @@
 | @f$ \varepsilon(\mathbf{u}) @f$ | See below | Symmetric gradient (linearized strain tensor): @f$ \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T) @f$. |
 | @f$ \mathrm{tr}(A) @f$ | `Trace(A)` | Trace of a matrix: @f$ \mathrm{tr}(A) = \sum_i A_{ii} @f$. |
 | @f$ A : B @f$    | `Dot(A, B)` | Frobenius (double-contraction) inner product of two matrices: @f$ A : B = \sum_{ij} A_{ij} B_{ij} @f$. |
-| @f$ \|A\|_F @f$  | `Frobenius(A)` | Frobenius norm: @f$ \|A\|_F = \sqrt{A : A} @f$. |
+| @f$ \lVert A\rVert_F @f$  | `Frobenius(A)` | Frobenius norm: @f$ \lVert A\rVert_F = \sqrt{A : A} @f$. |
 | @f$ u_i @f$      | `Component(u, i)` | The @f$ i @f$-th component of a vector function (0-indexed). Shorthand: `u.x()`, `u.y()`, `u.z()`. |
 
   @note The symmetric gradient @f$ \varepsilon(\mathbf{u}) @f$ can be built
@@ -128,4 +128,3 @@
 | @f$ \int_\Omega K(\mathbf{x}, \mathbf{y}) f(\mathbf{y}) \, d\mathbf{y} @f$ | `Potential(K, f)` | Integral convolution with kernel @f$ K @f$. |
 
   */
-

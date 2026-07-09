@@ -26,6 +26,8 @@ namespace Rodin::MMG
    * - `Ridges`
    * - `RequiredVertices`
    * - `RequiredEdges`
+   * - `RequiredTriangles`
+   * - `RequiredTetrahedra`
    */
   class MeshPrinter : public IO::Printer<MMG::Mesh>
   {
@@ -65,6 +67,16 @@ namespace Rodin::MMG
        * @param[out] os Output stream.
        */
       void printRequiredEdges(std::ostream& os);
+      /**
+       * @brief Prints the `RequiredTriangles` section.
+       * @param[out] os Output stream.
+       */
+      void printRequiredTriangles(std::ostream& os);
+      /**
+       * @brief Prints the `RequiredTetrahedra` section.
+       * @param[out] os Output stream.
+       */
+      void printRequiredTetrahedra(std::ostream& os);
 
       /**
        * @brief Gets the mesh bound to this printer.

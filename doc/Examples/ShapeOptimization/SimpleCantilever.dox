@@ -29,7 +29,7 @@
   @subsection examples-shapeopt-sc-setup-includes Includes
 
   We need the core Rodin modules plus the linear-elasticity helper and the
-  @ref Rodin::External::MMG "MMG" remesher:
+  @ref Rodin::MMG "MMG" remesher:
 
   @code{.cpp}
   #include <Rodin/Solver.h>
@@ -71,7 +71,7 @@
   @subsection examples-shapeopt-sc-setup-mesh Loading the Mesh
 
   The initial cantilever mesh is loaded from an MFEM file using the
-  @ref Rodin::External::MMG "MMG::Mesh" class, which extends
+  @ref Rodin::MMG "MMG::Mesh" class, which extends
   @ref Rodin::Geometry::Mesh "Mesh" with remeshing capabilities:
 
   @code{.cpp}
@@ -146,7 +146,7 @@
   @subsection examples-shapeopt-sc-loop-remesh Step 4 — Remeshing with MMG
 
   After displacing the mesh, we remesh with the
-  @ref Rodin::External::MMG "MMG::Optimizer" to maintain good element quality:
+  @ref Rodin::MMG "MMG::Optimizer" to maintain good element quality:
 
   @code{.cpp}
   MMG::Optimizer().setHMax(hmax).setHMin(hmin).optimize(Omega);

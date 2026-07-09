@@ -20,7 +20,7 @@
   @section examples-io-medit-load Loading a MEDIT Mesh
 
   A mesh in MEDIT format can be loaded into either a standard
-  @ref Rodin::Geometry::Mesh "Mesh" or an @ref Rodin::External::MMG
+  @ref Rodin::Geometry::Mesh "Mesh" or an @ref Rodin::MMG
   "MMG::Mesh":
 
   @code{.cpp}
@@ -55,7 +55,7 @@
 
   @section examples-io-medit-mmg Using with MMG
 
-  When working with the @ref Rodin::External::MMG "MMG" module, MEDIT is the
+  When working with the @ref Rodin::MMG "MMG" module, MEDIT is the
   recommended format because it preserves MMG-specific metadata:
 
   @code{.cpp}

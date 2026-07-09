@@ -56,7 +56,7 @@
 
   @section examples-index-mmg Working with MMG
 
-  The @ref Rodin::External::MMG "MMG" module has a wide variety of uses which
+  The @ref Rodin::MMG "MMG" module has a wide variety of uses which
   ranges from optimization of the mesh, to implicit domain meshing. It provides
   many C++ wrappers to execute the functionality of the [Mmg
   Platform](https://www.mmgtools.org/):
@@ -132,7 +132,7 @@
 
   | Problem | Kernel | Example |
   |---------|--------|---------|
-  | Newtonian potential | @f$ \frac{1}{4\pi\|\mathbf{x}-\mathbf{y}\|} @f$ | `examples/IntegralEquations/NewtonianPotential.cpp` |
+  | Newtonian potential | @f$ \frac{1}{4\pi\lVert\mathbf{x}-\mathbf{y}\rVert} @f$ | `examples/IntegralEquations/NewtonianPotential.cpp` |
   | Elastic distribution | Navier 3×3 kernel | `examples/IntegralEquations/ElasticDistribution.cpp` |
 
   @section examples-index-surfevol Surface Evolution
