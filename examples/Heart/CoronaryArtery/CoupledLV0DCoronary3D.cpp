@@ -520,12 +520,22 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
     return sgn * (*root);
   };
 
-  const Real alpha = 0.5;
-  const Real dPim = alpha * (s.pv - h.nm1.pv) / dt;
+  // Intramyocardial pressure, low-pass filtered through a series R_a = tau/C.
+  // A directly applied p_im = alpha*pv injects C*d(p_im)/dt straight into the
+  // capacitor balance, so any kink in pv (isovolumic phases) becomes a flow
+  // spike and drives a large retrograde peak. Filtering p_im bounds d(p_im)/dt
+  // (implicit Euler: unconditionally stable) and removes those artifacts.
+  const Real alpha = cfg.intramyocardialFraction;
+  const Real tauIm = std::max<Real>(cfg.intramyocardialFilterTau, 0.0);
+  const Real pimTarget = alpha * s.pv;
+  const Real pimOld = bc.pimFilt;
+  const Real theta = (tauIm > 0.0) ? dt / (dt + tauIm) : 1.0;
+  const Real pim = pimOld + theta * (pimTarget - pimOld); // filtered p_im^{n+1}
+  const Real dPim = (pim - pimOld) / dt;
   const Real Qim = bc.C * dPim;
+  (void)h;
 
   auto distalResidual = [&](Real pc) -> std::pair<Real, Real> {
-    const Real pim = alpha * s.pv;
     const Real x = std::max(pc - pim, Real(0.0));
     const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
 
@@ -568,8 +578,7 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
     }
   }
 
-  const Real pim_f = alpha * s.pv;
-  const auto [qd, dqd_f] = flowLaw(std::max(bc.pc - pim_f, Real(0.0)), lengthD, radiusD);
+  const auto [qd, dqd_f] = flowLaw(std::max(bc.pc - pim, Real(0.0)), lengthD, radiusD);
   (void)dqd_f;
   bc.qd = qd;
 
@@ -577,6 +586,9 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   const Real dpP = solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
 
   bc.pout = bc.pc + dpP;
+
+  // Persist the filtered intramyocardial pressure for the next step.
+  bc.pimFilt = pim;
 }
 
 CoupledLV0DCoronary3D::Real
@@ -584,21 +596,33 @@ CoupledLV0DCoronary3D::periodic_activation(const Activation &cfg, Real t) {
   const Real T = cfg.period;
   const Real tau = t - T * std::floor(t / T);
 
+  // C1-continuous (smoothstep) ramps: derivative -> 0 at every segment
+  // junction, so d(activation)/dt has no jumps. The original piecewise-linear
+  // ramps produced discontinuous dP/dt, which the intramyocardial capacitor
+  // turned into coronary flow spikes.
+  auto ss = [](Real s) {
+    s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
+    return s * s * (3.0 - 2.0 * s);
+  };
+
   if (tau < cfg.tRampStart)
     return 0.0;
   if (tau < cfg.tRampEnd)
     return cfg.positiveValue *
-           ((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
+           ss((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
   if (tau < cfg.tPlateauEnd)
     return cfg.positiveValue;
   if (tau < cfg.tRelaxEnd)
     return cfg.positiveValue +
            (cfg.negativeValue - cfg.positiveValue) *
-               ((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
+               ss((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
   if (tau < cfg.tNegativeEnd)
     return cfg.negativeValue;
 
-  return 0.0;
+  // Smooth return from the negative plateau back to baseline over the rest of
+  // the cycle (removes the old instantaneous negativeValue -> 0 jump).
+  return cfg.negativeValue *
+         (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
 }
 
 CoupledLV0DCoronary3D::Real
@@ -606,28 +630,30 @@ CoupledLV0DCoronary3D::atrial_pressure(const AtrialPressure &cfg, Real t) {
   const Real T = cfg.period;
   const Real tau = t - T * std::floor(t / T);
 
-  Real alpha = 0.0;
-  Real value = cfg.minValue;
+  // C1-continuous (smoothstep) ramps between the same plateau values, so the
+  // prescribed atrial/venous pressure has no derivative kinks.
+  auto ss = [](Real s) {
+    s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
+    return s * s * (3.0 - 2.0 * s);
+  };
+  auto ramp = [&](Real a, Real b, Real s) { return a + (b - a) * ss(s); };
 
-  if (tau < cfg.t1) {
-    alpha = -(tau - cfg.t1) / cfg.t1;
-    value = alpha * cfg.minValue + (1.0 - alpha) * cfg.maxValue;
-  } else if (tau < cfg.t2) {
-    value = cfg.maxValue;
-  } else if (tau < cfg.t3) {
-    alpha = -(tau - cfg.t3) / (cfg.t3 - cfg.t2);
-    value = alpha * cfg.maxValue + (1.0 - alpha) * cfg.minValue;
-  } else if (tau < cfg.t4) {
-    alpha = -(tau - cfg.t4) / (cfg.t4 - cfg.t3);
-    value = alpha * cfg.minValue + (1.0 - alpha) * cfg.secondThreshold;
-  } else if (tau < cfg.t5) {
-    value = cfg.secondThreshold;
-  } else if (tau < cfg.t6) {
-    alpha = -(tau - cfg.t6) / (cfg.t6 - cfg.t5);
-    value = alpha * cfg.secondThreshold + (1.0 - alpha) * cfg.minValue;
-  }
+  if (tau < cfg.t1)
+    return ramp(cfg.minValue, cfg.maxValue, tau / cfg.t1);
+  if (tau < cfg.t2)
+    return cfg.maxValue;
+  if (tau < cfg.t3)
+    return ramp(cfg.maxValue, cfg.minValue, (tau - cfg.t2) / (cfg.t3 - cfg.t2));
+  if (tau < cfg.t4)
+    return ramp(cfg.minValue, cfg.secondThreshold,
+                (tau - cfg.t3) / (cfg.t4 - cfg.t3));
+  if (tau < cfg.t5)
+    return cfg.secondThreshold;
+  if (tau < cfg.t6)
+    return ramp(cfg.secondThreshold, cfg.minValue,
+                (tau - cfg.t5) / (cfg.t6 - cfg.t5));
 
-  return value;
+  return cfg.minValue;
 }
 
 CoupledLV0DCoronary3D &CoupledLV0DCoronary3D::initialize() {

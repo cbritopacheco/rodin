@@ -116,6 +116,13 @@ public:
     Real pout = 0.0;
     /// @brief Distal branch flow leaving the capacitor.
     Real qd = 0.0;
+    /// @brief Low-pass-filtered intramyocardial pressure state.
+    /// @details Models the finite (non-instantaneous) transmission of LV
+    ///          pressure to the intramyocardial compartment via a series
+    ///          resistance R_a = tau_im / C. Filtering p_im before it drives
+    ///          the capacitor removes the dP/dt flow spikes that a directly
+    ///          applied intramyocardial pressure produces.
+    Real pimFilt = 0.0;
   };
 
   /**
@@ -473,6 +480,16 @@ public:
     Real rcrTau = 0.2;
     /// @brief Proximal resistance fraction Rp/(Rp+Rd), clamped to [0, 0.5].
     Real proximalResistanceFraction = 0.075;
+
+    /// @brief Fraction of LV pressure transmitted to the intramyocardial
+    ///        compartment (p_im = intramyocardialFraction * pv).
+    Real intramyocardialFraction = 0.5;
+    /// @brief Time constant (s) of the intramyocardial pressure low-pass
+    ///        filter, i.e. the series R_a*C on the intramyocardial branch.
+    /// @details Set to 0 to recover the old, directly-applied p_im (spiky).
+    ///          ~0.01-0.03 s removes the dP/dt spikes and tames the systolic
+    ///          retrograde peak without materially shifting mean flow.
+    Real intramyocardialFilterTau = 0.02;
 
     Real inletTangentialDamping = 1e3;
     Real inletVelocityDamping = 0.0;

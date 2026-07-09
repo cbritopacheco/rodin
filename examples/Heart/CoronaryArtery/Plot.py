@@ -156,7 +156,15 @@ def add_derived_columns(df):
             df["OutletFluxSumCheck"] - df["CoronaryOutletFluxTotal"]
         )
 
-        total = df["CoronaryOutletFluxTotal"].replace(0.0, np.nan)
+        # Flux fractions are only meaningful when the total flux is well away
+        # from zero. Near flow reversals the total crosses zero, so dividing by
+        # it produces huge non-physical spikes. Mask those samples: require
+        # |total| above a small fraction of its typical magnitude.
+        abs_total = df["CoronaryOutletFluxTotal"].abs()
+        fraction_floor = 0.05 * abs_total.median()
+        total = df["CoronaryOutletFluxTotal"].where(
+            abs_total >= fraction_floor, np.nan
+        )
 
         for c in outlet_fluxes:
             df[c + "_mL_s"] = 1e6 * df[c]

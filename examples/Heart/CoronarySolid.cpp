@@ -276,7 +276,6 @@ int main(int, char **) {
   // ---- Finite-element space -----------------------------------------------
   const size_t dim = mesh.getSpaceDimension();
   P1 Vh(mesh, dim);
-
   // Laplacian problem
   P1 V_lh(mesh);
   // Fe functions
