@@ -94,7 +94,7 @@
         </nav>
 <p>The <a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a> module offers several methods for computing distance functions on finite element meshes, each with different trade-offs between accuracy, speed, and smoothness.</p><section id="autotoc_md533"><h3><a href="#autotoc_md533">Available Methods</a></h3><table class="m-table"><thead><tr><th>Method</th><th>Class</th><th>Equation</th><th>Properties</th></tr></thead><tbody><tr><td><strong><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Distance::<wbr />Eikonal</a></code></td><td><svg class="m-math" style="width: 5.167em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.599878 11.955168">
 <title>
-$ \|\nabla d\| = 1 $
+$ \lVert\nabla d\rVert = 1 $
 </title>
 <defs>
 <path id='eq1-g2-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
@@ -111,9 +111,9 @@ $ \|\nabla d\| = 1 $
 <use x='31.321407' y='0' xlink:href='#eq1-g2-61'/>
 <use x='43.746887' y='0' xlink:href='#eq1-g2-49'/>
 </g>
-</svg></td><td>Exact distances via FMM; supports signed distance with interior/interface regions</td></tr><tr><td><strong><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Distance::<wbr />Poisson</a></code></td><td><svg class="m-math" style="width: 10.590em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 101.665294 11.955168">
+</svg></td><td>Exact distances via FMM; supports signed distance with interior/interface regions</td></tr><tr><td><strong><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Poisson</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_poisson.html" class="m-doc">Distance::<wbr />Poisson</a></code></td><td><svg class="m-math" style="width: 10.313em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 99.008578 11.955168">
 <title>
-$ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 $
+$ -\Delta u = 1, \; u\vert_{\partial\Omega} = 0 $
 </title>
 <defs>
 <path id='eq2-g3-10' d='M5.730511-1.315068H5.483437C5.467497-1.235367 5.379826-.828892 5.324035-.6934C5.284184-.605729 5.260274-.541968 4.790037-.541968H4.144458C4.27995-1.012204 4.519054-1.354919 4.877709-1.865006C5.228394-2.359153 5.634869-2.933001 5.634869-3.618431C5.634869-4.702366 4.519054-5.610959 3.052553-5.610959S.470237-4.702366 .470237-3.618431C.470237-2.925031 .852802-2.383064 1.291158-1.761395C1.586052-1.354919 1.825156-1.004234 1.960648-.541968H1.315068C.844832-.541968 .820922-.605729 .781071-.6934C.72528-.828892 .637609-1.235367 .621669-1.315068H.374595L.653549 0H2.016438C2.183811 0 2.239601 0 2.239601-.175342C2.239601-.757161 1.960648-1.43462 1.753425-1.928767C1.530262-2.470735 1.299128-3.044583 1.299128-3.618431C1.299128-4.805978 2.199751-5.387796 3.052553-5.387796S4.805978-4.798007 4.805978-3.618431C4.805978-3.052553 4.582814-2.502615 4.383562-2.008468C4.144458-1.42665 3.865504-.757161 3.865504-.183313C3.865504 0 3.913325 0 4.096638 0H5.451557L5.730511-1.315068Z'/>
@@ -125,7 +125,7 @@ $ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 $
 <path id='eq2-g4-49' d='M3.443088-7.663263C3.443088-7.938232 3.443088-7.950187 3.203985-7.950187C2.917061-7.627397 2.319303-7.185056 1.08792-7.185056V-6.838356C1.362889-6.838356 1.960648-6.838356 2.618182-7.149191V-.920548C2.618182-.490162 2.582316-.3467 1.530262-.3467H1.159651V0C1.482441-.02391 2.642092-.02391 3.036613-.02391S4.578829-.02391 4.901619 0V-.3467H4.531009C3.478954-.3467 3.443088-.490162 3.443088-.920548V-7.663263Z'/>
 <path id='eq2-g4-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
 <path id='eq2-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
-<path id='eq2-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+<path id='eq2-g0-106' d='M1.900872-8.53599C1.900872-8.751183 1.900872-8.966376 1.661768-8.966376S1.422665-8.751183 1.422665-8.53599V2.558406C1.422665 2.773599 1.422665 2.988792 1.661768 2.988792S1.900872 2.773599 1.900872 2.558406V-8.53599Z'/>
 </defs>
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-0'/>
@@ -135,15 +135,15 @@ $ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 $
 <use x='41.462231' y='0' xlink:href='#eq2-g4-49'/>
 <use x='47.315221' y='0' xlink:href='#eq2-g2-59'/>
 <use x='55.880209' y='0' xlink:href='#eq2-g2-117'/>
-<use x='62.542649' y='0' xlink:href='#eq2-g0-107'/>
-<use x='68.520255' y='1.793263' xlink:href='#eq2-g1-64'/>
-<use x='73.45182' y='1.793263' xlink:href='#eq2-g3-10'/>
-<use x='83.386823' y='0' xlink:href='#eq2-g4-61'/>
-<use x='95.812304' y='0' xlink:href='#eq2-g4-48'/>
+<use x='62.542649' y='0' xlink:href='#eq2-g0-106'/>
+<use x='65.863539' y='1.793263' xlink:href='#eq2-g1-64'/>
+<use x='70.795103' y='1.793263' xlink:href='#eq2-g3-10'/>
+<use x='80.730107' y='0' xlink:href='#eq2-g4-61'/>
+<use x='93.155588' y='0' xlink:href='#eq2-g4-48'/>
 </g>
-</svg></td><td>Smooth approximation; fast (one linear solve); does not give exact distances</td></tr><tr><td><strong><a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">Distance::<wbr />SignedPoisson</a></code></td><td><svg class="m-math" style="width: 13.575em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 130.318811 11.955168">
+</svg></td><td>Smooth approximation; fast (one linear solve); does not give exact distances</td></tr><tr><td><strong><a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">SignedPoisson</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_signed_poisson.html" class="m-doc">Distance::<wbr />SignedPoisson</a></code></td><td><svg class="m-math" style="width: 13.298em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 127.662094 11.955168">
 <title>
-$ -\Delta u = 2\chi_\Omega - 1, \; u\|_\Gamma = 0 $
+$ -\Delta u = 2\chi_\Omega - 1, \; u\vert_\Gamma = 0 $
 </title>
 <defs>
 <path id='eq3-g2-0' d='M4.702366-5.419676H.350685V-5.156663H.526027C1.139726-5.156663 1.155666-5.068991 1.155666-4.774097V-.645579C1.155666-.350685 1.139726-.263014 .526027-.263014H.350685V0C1.028144-.02391 1.044085-.02391 1.578082-.02391C1.952677-.02391 2.534496-.02391 2.893151 0V-.263014H2.638107C1.888917-.263014 1.888917-.374595 1.888917-.653549V-4.829888C1.888917-5.100872 1.904857-5.156663 2.271482-5.156663H3.188045C4.423412-5.156663 4.550934-4.638605 4.686426-3.610461H4.933499L4.702366-5.419676Z'/>
@@ -157,7 +157,7 @@ $ -\Delta u = 2\chi_\Omega - 1, \; u\|_\Gamma = 0 $
 <path id='eq3-g3-50' d='M5.260274-2.008468H4.99726C4.961395-1.80523 4.865753-1.147696 4.746202-.956413C4.662516-.848817 3.981071-.848817 3.622416-.848817H1.41071C1.733499-1.123786 2.462765-1.888917 2.773599-2.175841C4.590785-3.849564 5.260274-4.471233 5.260274-5.654795C5.260274-7.029639 4.172354-7.950187 2.785554-7.950187S.585803-6.766625 .585803-5.738481C.585803-5.128767 1.111831-5.128767 1.147696-5.128767C1.398755-5.128767 1.709589-5.308095 1.709589-5.69066C1.709589-6.025405 1.482441-6.252553 1.147696-6.252553C1.0401-6.252553 1.016189-6.252553 .980324-6.240598C1.207472-7.053549 1.853051-7.603487 2.630137-7.603487C3.646326-7.603487 4.267995-6.75467 4.267995-5.654795C4.267995-4.638605 3.682192-3.753923 3.000747-2.988792L.585803-.286924V0H4.94944L5.260274-2.008468Z'/>
 <path id='eq3-g3-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
 <path id='eq3-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
-<path id='eq3-g0-107' d='M2.056289-8.5599C2.056289-8.751183 2.056289-8.966376 1.817186-8.966376S1.578082-8.703362 1.578082-8.524035V2.546451C1.578082 2.737733 1.578082 2.988792 1.817186 2.988792S2.056289 2.773599 2.056289 2.582316V-8.5599ZM4.387547-8.524035C4.387547-8.715318 4.387547-8.966376 4.148443-8.966376S3.90934-8.751183 3.90934-8.5599V2.582316C3.90934 2.773599 3.90934 2.988792 4.148443 2.988792S4.387547 2.725778 4.387547 2.546451V-8.524035Z'/>
+<path id='eq3-g0-106' d='M1.900872-8.53599C1.900872-8.751183 1.900872-8.966376 1.661768-8.966376S1.422665-8.751183 1.422665-8.53599V2.558406C1.422665 2.773599 1.422665 2.988792 1.661768 2.988792S1.900872 2.773599 1.900872 2.558406V-8.53599Z'/>
 </defs>
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-0'/>
@@ -171,14 +171,14 @@ $ -\Delta u = 2\chi_\Omega - 1, \; u\|_\Gamma = 0 $
 <use x='75.874775' y='0' xlink:href='#eq3-g3-49'/>
 <use x='81.727765' y='0' xlink:href='#eq3-g1-59'/>
 <use x='90.292754' y='0' xlink:href='#eq3-g1-117'/>
-<use x='96.955193' y='0' xlink:href='#eq3-g0-107'/>
-<use x='102.9328' y='1.793263' xlink:href='#eq3-g2-0'/>
-<use x='112.04034' y='0' xlink:href='#eq3-g3-61'/>
-<use x='124.465821' y='0' xlink:href='#eq3-g3-48'/>
+<use x='96.955193' y='0' xlink:href='#eq3-g0-106'/>
+<use x='100.276083' y='1.793263' xlink:href='#eq3-g2-0'/>
+<use x='109.383623' y='0' xlink:href='#eq3-g3-61'/>
+<use x='121.809104' y='0' xlink:href='#eq3-g3-48'/>
 </g>
 </svg></td><td>Region-dependent forcing yields a signed smooth distance</td></tr><tr><td><strong><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Distance::<wbr />Rvachev</a></code></td><td><svg class="m-math" style="width: 7.626em; height: 1.923em; vertical-align: -1.062em;" viewBox="0 -8.302191 73.20706 18.464028">
 <title>
-$ d = \frac{u}{\sqrt{u^2 + \|\nabla u\|^2}} $
+$ d = \frac{u}{\sqrt{u^2 + \lVert\nabla u\rVert^2}} $
 </title>
 <defs>
 <path id='eq4-g0-107' d='M1.45056-5.68269C1.45056-5.810212 1.45056-5.977584 1.267248-5.977584S1.083935-5.778331 1.083935-5.650809V1.665753C1.083935 1.793275 1.083935 1.992528 1.267248 1.992528S1.45056 1.825156 1.45056 1.697634V-5.68269ZM3.140224-5.650809C3.140224-5.778331 3.140224-5.977584 2.956912-5.977584S2.773599-5.810212 2.773599-5.68269V1.697634C2.773599 1.825156 2.773599 1.992528 2.956912 1.992528S3.140224 1.793275 3.140224 1.665753V-5.650809Z'/>
@@ -206,9 +206,9 @@ $ d = \frac{u}{\sqrt{u^2 + \|\nabla u\|^2}} $
 <use x='64.821833' y='6.711982' xlink:href='#eq4-g0-107'/>
 <use x='69.056016' y='4.442721' xlink:href='#eq4-g4-50'/>
 </g>
-</svg></td><td>Normalizes a level-set field to approximate distance; preserves zero set and sign</td></tr></tbody></table><p>| <strong><a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a></strong> | <code><a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">Distance::<wbr />SpaldingTucker</a></code> | <svg class="m-math" style="width: 10.939em; height: 2.084em; vertical-align: -1.062em;" viewBox="0 -9.843428 105.00966 20.005264">
+</svg></td><td>Normalizes a level-set field to approximate distance; preserves zero set and sign</td></tr><tr><td><strong><a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a></strong></td><td><code><a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">Distance::<wbr />SpaldingTucker</a></code></td><td><svg class="m-math" style="width: 10.939em; height: 2.084em; vertical-align: -1.062em;" viewBox="0 -9.843428 105.00966 20.005264">
 <title>
-$ d = \frac{2u}{\|\nabla u\| + \sqrt{\|\nabla u\|^2 + 2|u|}} $
+$ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\rvert}} $
 </title>
 <defs>
 <path id='eq5-g4-50' d='M3.21594-1.117808H2.99477C2.982814-1.034122 2.923039-.639601 2.833375-.573848C2.791532-.537983 2.307347-.537983 2.223661-.537983H1.105853L1.870984-1.159651C2.074222-1.321046 2.606227-1.703611 2.791532-1.882939C2.970859-2.062267 3.21594-2.367123 3.21594-2.791532C3.21594-3.53873 2.540473-3.975093 1.739477-3.975093C.968369-3.975093 .430386-3.466999 .430386-2.905106C.430386-2.600249 .687422-2.564384 .753176-2.564384C.902615-2.564384 1.075965-2.67198 1.075965-2.887173C1.075965-3.01868 .998257-3.209963 .735243-3.209963C.872727-3.514819 1.23736-3.741968 1.649813-3.741968C2.27746-3.741968 2.612204-3.275716 2.612204-2.791532C2.612204-2.367123 2.331258-1.93076 1.912827-1.548194L.496139-.251059C.436364-.191283 .430386-.185305 .430386 0H3.030635L3.21594-1.117808Z'/>
@@ -246,7 +246,7 @@ $ d = \frac{2u}{\|\nabla u\| + \sqrt{\|\nabla u\|^2 + 2|u|}} $
 <use x='97.754366' y='6.711982' xlink:href='#eq5-g2-117'/>
 <use x='102.657336' y='6.711982' xlink:href='#eq5-g0-106'/>
 </g>
-</svg> | Better gradient normalization than <a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a>; more accurate near the interface |</p><p>All methods except <code><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a></code> and <code><a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a></code> inherit from a common CRTP <code><a href="class_rodin_1_1_distance_1_1_base.html" class="m-doc">Base</a>&lt;Derived&gt;</code> that provides <code>setInterior()</code> and <code>setInterface()</code> methods for specifying the signed-distance regions (mesh boundary attributes).</p></section><section id="autotoc_md534"><h3><a href="#autotoc_md534">Eikonal Distance (FMM)</a></h3><p>The <code><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a></code> class wraps the FMM solver and provides the most accurate distance computation. Seeds are automatically identified from the interface attributes. Calling <code>sign()</code> after <code>solve()</code> negates interior values to produce a signed distance field.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></td><td>Better gradient normalization than <a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a>; more accurate near the interface</td></tr></tbody></table><p>All methods except <code><a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a></code> and <code><a href="class_rodin_1_1_distance_1_1_spalding_tucker.html" class="m-doc">SpaldingTucker</a></code> inherit from a common CRTP <code><a href="class_rodin_1_1_distance_1_1_base.html" class="m-doc">Base</a>&lt;Derived&gt;</code> that provides <code>setInterior()</code> and <code>setInterface()</code> methods for specifying the signed-distance regions (mesh boundary attributes).</p></section><section id="autotoc_md534"><h3><a href="#autotoc_md534">Eikonal Distance (FMM)</a></h3><p>The <code><a href="class_rodin_1_1_distance_1_1_eikonal.html" class="m-doc">Eikonal</a></code> class wraps the FMM solver and provides the most accurate distance computation. Seeds are automatically identified from the interface attributes. Calling <code>sign()</code> after <code>solve()</code> negates interior values to produce a signed distance field.</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">d</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="n">Distance</span><span class="o">::</span><span class="n">Eikonal</span><span class="w"> </span><span class="nf">eikonal</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>

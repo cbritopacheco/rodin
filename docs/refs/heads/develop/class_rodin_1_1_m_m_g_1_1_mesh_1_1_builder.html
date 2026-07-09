@@ -127,13 +127,21 @@
             </dt>
             <dd>Marks an edge as required.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa9af7233c7e2844b386cc475e37db62b" class="m-doc">requiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+            </dt>
+            <dd>Marks a triangle as required.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adcf11c18660c6f550220b4f876d823e1" class="m-doc">requiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+            </dt>
+            <dd>Marks a tetrahedron as required.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac78a306933f9328cb9e9a1bdf3ac9521" class="m-doc">requiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
             </dt>
             <dd>Marks a vertex as required.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a724cf71c62a5a993f687ee82b83bd00b" class="m-doc">finalize</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a></span>
             </dt>
-            <dd>Finalizes and returns the constructed MMG mesh.</dd>
+            <dd>Finalizes and returns the constructed <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</dd>
           </dl>
         </section>
         <section>
@@ -207,6 +215,52 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="aa9af7233c7e2844b386cc475e37db62b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa9af7233c7e2844b386cc475e37db62b" class="m-doc-self">requiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx)</span></span>
+            </h3>
+            <p>Marks a triangle as required.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">triangleIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Triangle index in the mesh.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adcf11c18660c6f550220b4f876d823e1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcf11c18660c6f550220b4f876d823e1" class="m-doc-self">requiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx)</span></span>
+            </h3>
+            <p>Marks a tetrahedron as required.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tetrahedronIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Tetrahedron index in the mesh.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this builder.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ac78a306933f9328cb9e9a1bdf3ac9521"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac78a306933f9328cb9e9a1bdf3ac9521" class="m-doc-self">requiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx)</span></span>
@@ -234,12 +288,12 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> Rodin::<wbr />MMG::<wbr />Mesh::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a724cf71c62a5a993f687ee82b83bd00b" class="m-doc-self">finalize</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Finalizes and returns the constructed MMG mesh.</p>
+            <p>Finalizes and returns the constructed <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Fully built mesh containing both topology/geometry and MMG metadata (corners, ridges, required entities).</td>
+                  <td>Fully built mesh containing both topology/geometry and <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> metadata (corners, ridges, required entities).</td>
                 </tr>
               </tfoot>
             </table>

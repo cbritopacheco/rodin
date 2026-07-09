@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>In addition to standard mesh topology/geometry, this printer serializes MMG-specific sections:</p><ul><li><code>Corners</code></li><li><code>Ridges</code></li><li><code>RequiredVertices</code></li><li><code>RequiredEdges</code></li></ul>
+<p>In addition to standard mesh topology/geometry, this printer serializes MMG-specific sections:</p><ul><li><code>Corners</code></li><li><code>Ridges</code></li><li><code>RequiredVertices</code></li><li><code>RequiredEdges</code></li><li><code>RequiredTriangles</code></li><li><code>RequiredTetrahedra</code></li></ul>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -108,7 +108,7 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa8fcfa32ce16a6450a8486c05872715c" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span>
             </dt>
-            <dd>Constructs a printer for a given MMG mesh.</dd>
+            <dd>Constructs a printer for a given <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -135,6 +135,14 @@
             </dt>
             <dd>Prints the <code>RequiredEdges</code> section.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a04e2da055fcdfba9fea05b5f911c04d4" class="m-doc">printRequiredTriangles</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Prints the <code>RequiredTriangles</code> section.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a1e93fa42d045284e1c26df56a8e2ddae" class="m-doc">printRequiredTetrahedra</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
+            </dt>
+            <dd>Prints the <code>RequiredTetrahedra</code> section.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac9d6bd71c9896bd37bf8a0f6622dc5e4" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the mesh bound to this printer.</dd>
@@ -146,7 +154,7 @@
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa8fcfa32ce16a6450a8486c05872715c" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>&amp; mesh)</span></span>
             </h3>
-            <p>Constructs a printer for a given MMG mesh.</p>
+            <p>Constructs a printer for a given <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -232,6 +240,40 @@
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98f3d70dba95f6d6ed136aca7d38e17f" class="m-doc-self">printRequiredEdges</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
             <p>Prints the <code>RequiredEdges</code> section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a04e2da055fcdfba9fea05b5f911c04d4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04e2da055fcdfba9fea05b5f911c04d4" class="m-doc-self">printRequiredTriangles</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the <code>RequiredTriangles</code> section.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Output stream.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1e93fa42d045284e1c26df56a8e2ddae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />MMG::<wbr />MeshPrinter::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e93fa42d045284e1c26df56a8e2ddae" class="m-doc-self">printRequiredTetrahedra</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
+            </h3>
+            <p>Prints the <code>RequiredTetrahedra</code> section.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

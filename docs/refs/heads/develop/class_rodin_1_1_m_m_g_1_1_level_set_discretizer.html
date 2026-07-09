@@ -111,7 +111,7 @@ $D$
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-68'/>
 </g>
-</svg>, this class drives MMG level-set mode to construct either:</p><ul><li>a boundary-fitted volume mesh for one side of <svg class="m-math" style="width: 3.182em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 30.543433 10.626798">
+</svg>, this class drives <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> level-set mode to construct either:</p><ul><li>a boundary-fitted volume mesh for one side of <svg class="m-math" style="width: 3.182em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 30.543433 10.626798">
 <title>
 $\phi = \mathrm{ls}$
 </title>
@@ -127,7 +127,7 @@ $\phi = \mathrm{ls}$
 <use x='22.674412' y='0' xlink:href='#eq3-g1-108'/>
 <use x='25.926074' y='0' xlink:href='#eq3-g1-115'/>
 </g>
-</svg>, or</li><li>an explicit surface mesh of the isovalue when <a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc">surface</a> is enabled.</li></ul><p>It also supports material-splitting policies (see <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>) so multi-material meshes can be split into interior/exterior regions with user-defined labels.</p><p>The canonical signed-distance interpretation is:</p><div class="m-math"><svg style="width: 12.906em; height: 5.230em;" viewBox="131.725694 -50.485895 123.896085 50.212217">
+</svg>, or</li><li>an explicit surface mesh of the isovalue when <a href="#a036c115db34db9f781c9694d4b564f95" class="m-doc">surface</a> is enabled.</li></ul><p>It also supports material-splitting policies (see <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>) so multi-material meshes can be split into interior/exterior regions with user-defined labels.</p><p>The output topology is chosen by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>. In particular, required entities and <code><a href="#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc">noSplit()</a></code> material policies do not force an entity crossed by the level set to remain geometrically untouched. <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s tested behavior is that required vertices, edges, triangles, and tetrahedra away from the cut keep their metadata and original geometry in the covered 2D/3D cases. Cut-through required entities may be replaced by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>.</p><p>The canonical signed-distance interpretation is:</p><div class="m-math"><svg style="width: 12.906em; height: 5.230em;" viewBox="131.725694 -50.485895 123.896085 50.212217">
 <title>
 \[
  \left\{
@@ -204,7 +204,7 @@ $\phi = \mathrm{ls}$
 <rect x='247.167459' y='-14.415896' height='.478187' width='8.454319'/>
 <use x='247.167459' y='-4.333785' xlink:href='#eq4-g6-10'/>
 </g>
-</svg></div><p>Inherits common remeshing controls from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/ gradation/angle detection).</p>
+</svg></div><p>Inherits common remeshing controls from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/ gradation/angle detection).</p><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -263,7 +263,7 @@ $ \partial \Omega $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc">setSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp;</span>
             </dt>
             <dd>Specifies how to split the materials into an interior and exterior domains.</dd>
             <dt>
@@ -276,7 +276,7 @@ $ \partial \Omega $
             </dt>
             <dd>Indicates that a material reference should not be split.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_grid_function_8h.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc">discretize</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
             <dd>Discretizes and optimizes an implicitly defined surface defined by a level set function.</dd>
             <dt>
@@ -300,7 +300,7 @@ $ \partial \Omega $
             </dt>
             <dd>Sets the allowed gradation between adjacent edge sizes.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc">getSplitMap</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc">getSplitMap</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp;</span>
             </dt>
             <dd>Gets the configured material split map.</dd>
           </dl>
@@ -366,7 +366,7 @@ $ \partial \Omega $
               <tbody>
                 <tr>
                   <td style="width: 1%">rmc&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Relative volume threshold used by MMG to remove tiny connected components generated by cutting operations.</td>
+                  <td>Relative volume threshold used by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> to remove tiny connected components generated by cutting operations.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -473,7 +473,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="a53e38d7a8b5e750f61d6cd0f17f1132d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a53e38d7a8b5e750f61d6cd0f17f1132d" class="m-doc-self">setSplit</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; split)</span></span>
             </h3>
             <p>Specifies how to split the materials into an interior and exterior domains.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -545,10 +545,11 @@ $ \partial \Omega $
                 </tr>
               </tfoot>
             </table>
+<p>This configures <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>&#x27;s material-reference split policy. It does not make each individual edge, triangle, or tetrahedron with that reference immutable when the level set cuts through it.</p>
           </div></section>
           <section class="m-doc-details" id="a82f47c875e92ce44fb1edf0530cc2c03"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="_m_m_g_2_grid_function_8h.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a82f47c875e92ce44fb1edf0530cc2c03" class="m-doc-self">discretize</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_m_m_g.html#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">MMG::<wbr />RealGridFunction</a>&amp; ls)</span></span>
             </h3>
             <p>Discretizes and optimizes an implicitly defined surface defined by a level set function.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -564,11 +565,11 @@ $ \partial \Omega $
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Output MMG mesh after cutting/remeshing.</td>
+                  <td>Output <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh after cutting/remeshing.</td>
                 </tr>
               </tfoot>
             </table>
-<p>The material reference of the generated level-set boundary defaults to <code>10</code> unless changed via <a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc">setBoundaryReference</a>.</p>
+<p>The material reference of the generated level-set boundary defaults to <code>10</code> unless changed via <a href="#ae06c5c2b72b0e432c897a7a093759d0c" class="m-doc">setBoundaryReference</a>.</p><aside class="m-note m-info"><h4>Note</h4><p>Required entities that are not crossed by the level set are tested to keep their metadata and original geometry in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s 2D/3D cases. If the level set crosses a required entity, <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> may replace it while conforming the output mesh to the isovalue.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a98aa82f90b48db2a73518a7bd4182053"><div>
             <h3>
@@ -687,7 +688,7 @@ $ \partial \Omega $
           </div></section>
           <section class="m-doc-details" id="ac61e13611f13b842d41ad0498cc6621a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">const <a href="_m_m_g_2_common_8h.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc-self">getSplitMap</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="namespace_rodin_1_1_m_m_g.html#a14f11f18e0531a8e76581e4adfabdc83" class="m-doc">SplitMap</a>&amp; Rodin::<wbr />MMG::<wbr />LevelSetDiscretizer::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac61e13611f13b842d41ad0498cc6621a" class="m-doc-self">getSplitMap</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the configured material split map.</p>
             <table class="m-table m-fullwidth m-flat">

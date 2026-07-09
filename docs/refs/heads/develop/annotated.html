@@ -206,13 +206,6 @@
               </li>
               <li>namespace <a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Elasticity</a> <span class="m-doc">Module which provides models for solid mechanics and elasticity.</span></li>
               <li class="m-doc-collapsible collapsed">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_external.html" class="m-doc">External</a> <span class="m-doc">Third-party library integrations with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
-                <ul class="m-doc">
-                  <li>namespace <a href="namespace_rodin_1_1_external_1_1_m_f_e_m.html" class="m-doc">MFEM</a> <span class="m-doc"><a href="namespace_rodin_1_1_external_1_1_m_f_e_m.html" class="m-doc">MFEM</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
-                  <li>namespace <a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> <span class="m-doc"><a href="namespace_rodin_1_1_external_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
-                </ul>
-              </li>
-              <li class="m-doc-collapsible collapsed">
                 <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> <span class="m-doc">Module for writing high level abstract expressions.</span>
                 <ul class="m-doc">
                   <li>class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> <span class="m-doc"><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</span></li>
@@ -530,6 +523,26 @@
                   <li>class <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> <span class="m-doc">Spatial matrix with bounded maximum dimensions.</span></li>
                   <li>class <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-doc">Spatial vector with bounded maximum size.</span></li>
                   <li>class <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> <span class="m-doc">Base class for units using CRTP.</span></li>
+                </ul>
+              </li>
+              <li class="m-doc-collapsible collapsed">
+                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> <span class="m-doc"><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span>
+                <ul class="m-doc">
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a> <span class="m-doc">Performs anisotropic/isotropic remeshing from a nodal size map.</span></li>
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a> <span class="m-doc">Discretizes implicit geometry defined by a nodal level-set field.</span></li>
+                  <li class="m-doc-collapsible collapsed">
+                    <a href="#" onclick="return toggle(this)">class</a> <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> <span class="m-doc">Local mesh enriched with <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary tags and constraints.</span>
+                    <ul class="m-doc">
+                      <li>class <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a> <span class="m-doc">Class used to build <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instances.</span></li>
+                    </ul>
+                  </li>
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_mesh_loader.html" class="m-doc">MeshLoader</a> <span class="m-doc">Loads an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Rodin::<wbr />MMG::<wbr />Mesh</a> from the MEDIT format.</span></li>
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a> <span class="m-doc">Printer for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Rodin::<wbr />MMG::<wbr />Mesh</a> in MEDIT/MMG-compatible syntax.</span></li>
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> <span class="m-doc">Base class for MMG-backed operations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</span></li>
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5_exception.html" class="m-doc">MMG5Exception</a> <span class="m-doc">Exception type for <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> wrapper failures.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a> <span class="m-doc">Tag type indicating that a material reference must not be split.</span></li>
+                  <li>class <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a> <span class="m-doc">Improves mesh quality while preserving characteristic local sizes.</span></li>
+                  <li>struct <a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a> <span class="m-doc">Interior/exterior labels produced when splitting one material.</span></li>
                 </ul>
               </li>
               <li>namespace <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> <span class="m-doc">Distributed-memory parallel extensions using <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>.</span></li>

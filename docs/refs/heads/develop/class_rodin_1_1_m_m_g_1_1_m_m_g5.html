@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides:</p><ul><li>allocation/deallocation helpers for MMG mesh and solution structures,</li><li>conversion between <a href="namespace_rodin.html" class="m-doc">Rodin</a> meshes/grid functions and MMG native data,</li><li>shared remeshing parameter configuration (hmin/hmax/hausd/hgrad/angle).</li></ul><p>High-level operators such as <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>, <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>, and <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a> build on this class.</p>
+<p>Provides:</p><ul><li>allocation/deallocation helpers for <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh and solution structures,</li><li>conversion between <a href="namespace_rodin.html" class="m-doc">Rodin</a> meshes/grid functions and <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> native data,</li><li>shared remeshing parameter configuration (hmin/hmax/hausd/hgrad/angle).</li></ul><p>High-level operators such as <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a>, <a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a>, and <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a> build on this class.</p>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -118,7 +118,7 @@
             <dt id="aa76c71a7e15f48ed6e09d0af71df6056">
               static int <a href="#aa76c71a7e15f48ed6e09d0af71df6056" class="m-doc-self">s_meshVersionFormatted</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>MMG mesh version tag used in generated MMG mesh objects.</dd>
+            <dd><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh version tag used in generated <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh objects.</dd>
           </dl>
         </section>
         <section id="pub-static-methods">
@@ -127,11 +127,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc">rodinToMesh</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src) -&gt; MMG5_pMesh</span>
             </dt>
-            <dd>Converts a <a href="namespace_rodin.html" class="m-doc">Rodin</a> local mesh to a native MMG mesh.</dd>
+            <dd>Converts a <a href="namespace_rodin.html" class="m-doc">Rodin</a> local mesh to a native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></span>
             </dt>
-            <dd>Converts a native MMG mesh to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
+            <dd>Converts a native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -174,7 +174,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afb5c3ccd7f6e8748cd36345967656fdf" class="m-doc">setParameters</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp;</span>
             </dt>
-            <dd>Applies configured remeshing parameters to an MMG mesh.</dd>
+            <dd>Applies configured remeshing parameters to an <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</dd>
           </dl>
         </section>
         <section>
@@ -183,7 +183,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">static MMG5_pMesh Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bd883b7f95228226fd6f267d044287" class="m-doc-self">rodinToMesh</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a2e85a5056404a8833600ced8a9fc603f" class="m-doc">Rodin::<wbr />Geometry::<wbr />LocalMesh</a>&amp; src)</span></span>
             </h3>
-            <p>Converts a <a href="namespace_rodin.html" class="m-doc">Rodin</a> local mesh to a native MMG mesh.</p>
+            <p>Converts a <a href="namespace_rodin.html" class="m-doc">Rodin</a> local mesh to a native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -197,7 +197,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Newly allocated MMG mesh.</td>
+                  <td>Newly allocated <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</td>
                 </tr>
               </tfoot>
             </table>
@@ -207,7 +207,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc-self">meshToRodin</a>(</span><span class="m-doc-wrap">const MMG5_pMesh src)</span></span>
             </h3>
-            <p>Converts a native MMG mesh to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
+            <p>Converts a native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -215,7 +215,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">src&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Source MMG mesh handle.</td>
+                  <td>Source <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh handle.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -415,7 +415,7 @@ $ e_2 $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>&amp; Rodin::<wbr />MMG::<wbr />MMG5::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afb5c3ccd7f6e8748cd36345967656fdf" class="m-doc-self">setParameters</a>(</span><span class="m-doc-wrap">MMG5_pMesh mesh) <span class="m-label m-warning">protected</span></span></span>
             </h3>
-            <p>Applies configured remeshing parameters to an MMG mesh.</p>
+            <p>Applies configured remeshing parameters to an <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -423,7 +423,7 @@ $ e_2 $
               <tbody>
                 <tr>
                   <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Target MMG mesh.</td>
+                  <td>Target <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</td>
                 </tr>
               </tbody>
               <tfoot>

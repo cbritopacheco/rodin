@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_8h.html">&lt;Rodin/MMG/Mesh.h&gt;</a></div>
         </h1>
-        <p>Local mesh enriched with MMG boundary tags and constraints.</p>
+        <p>Local mesh enriched with <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary tags and constraints.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> with index sets required by MMG workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges).</li></ul><p>These sets are preserved when converting to/from native MMG structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">MMG5::<wbr />rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">MMG5::<wbr />meshToRodin</a>.</p>
+<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> with index sets used by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges),</li><li>required triangles (<code>MG_REQ</code> on triangle entities),</li><li>required tetrahedra (<code>MG_REQ</code> on tetrahedra).</li></ul><p>These sets are preserved when converting to/from native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">MMG5::<wbr />rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">MMG5::<wbr />meshToRodin</a>. The optimizer and level-set wrappers also restore the required index sets when the original indices are still valid in the remeshed output. In MMG3D, required triangles refer to boundary triangles exported to <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary triangles when face-cell incidence is available.</p><aside class="m-note m-info"><h4>Note</h4><p>Required entities are <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> constraints, not an unconditional element-integrity promise for every workflow. In level-set discretization, required entities that are not crossed by the level set are tested to keep their metadata and geometry in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s 2D/3D test cases. If the level set crosses a required entity, <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> may alter that entity in order to conform the output mesh to the isovalue.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -135,6 +135,14 @@
               using <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc-self">RequiredEdgeIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
             </dt>
             <dd>Index set of required edges in the mesh.</dd>
+            <dt id="a62d197fcdc9c3cecb383e7dd130b31ff">
+              using <a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc-self">RequiredTriangleIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
+            </dt>
+            <dd>Index set of required triangles in the mesh.</dd>
+            <dt id="a14904369e8cc37993f124233f9470968">
+              using <a href="#a14904369e8cc37993f124233f9470968" class="m-doc-self">RequiredTetrahedronIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
+            </dt>
+            <dd>Index set of required tetrahedra in the mesh.</dd>
           </dl>
         </section>
         <section id="pub-static-methods">
@@ -152,7 +160,7 @@
             <dt id="a51021126098595338e367d7ee42aa24c">
               <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Constructs an empty MMG mesh.</dd>
+            <dd>Constructs an empty <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</dd>
             <dt id="afceeead3b92b95c2a5b054efc880a83e">
               <span class="m-doc-wrap-bumper"><a href="#afceeead3b92b95c2a5b054efc880a83e" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span>
             </dt>
@@ -181,7 +189,7 @@
             <dt id="acf02536ee4b763b4ed403e777a2d8926">
               <span class="m-doc-wrap-bumper">auto <a href="#acf02536ee4b763b4ed403e777a2d8926" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Move-assigns from a parent mesh, clearing MMG metadata.</dd>
+            <dd>Move-assigns from a parent mesh, clearing <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> metadata.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
@@ -194,6 +202,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a5865a18e254a94a9dea279342546f7da" class="m-doc">setRequiredEdge</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> edgeIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
             <dd>Marks an edge as required.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a72ddbe6a916cc401b268d595e4ff52bd" class="m-doc">setRequiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            </dt>
+            <dd>Marks a triangle as required.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd159aec635152735f8008310f2b71aa" class="m-doc">setRequiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
+            </dt>
+            <dd>Marks a tetrahedron as required.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a660daeaf3faa7b58bbda95c8d9ae8254" class="m-doc">setRequiredVertex</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
@@ -222,6 +238,22 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a077fbaf7b5a6b6f8a28276cc62005ae6" class="m-doc">getRequiredEdges</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab2f9371ffc5d977987f9e254890b3c49" class="m-doc">RequiredEdgeIndex</a>&amp;</span>
             </dt>
             <dd>Gets the required-edge index set (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a540627ac002702c673cbd7c4af6777d3" class="m-doc">getRequiredTriangles</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-triangle index set.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a775f588914e98a44c539222219b4f18a" class="m-doc">getRequiredTriangles</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-triangle index set (const).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a211d516885637388258500051385830c" class="m-doc">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-tetrahedron index set.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad8f845fb3d6175b67afd893f6784d01b" class="m-doc">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp;</span>
+            </dt>
+            <dd>Gets the required-tetrahedron index set (const).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac233b71ca7afeae0535518452390bb1b" class="m-doc">getRequiredVertices</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a03d97325a79a1055b1118aac754d1dde" class="m-doc">RequiredVertexIndex</a>&amp;</span>
             </dt>
@@ -324,6 +356,52 @@
                 <tr>
                   <td style="width: 1%">edgeIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Edge index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a72ddbe6a916cc401b268d595e4ff52bd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a72ddbe6a916cc401b268d595e4ff52bd" class="m-doc-self">setRequiredTriangle</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> triangleIdx)</span></span>
+            </h3>
+            <p>Marks a triangle as required.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">triangleIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Triangle index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this mesh.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abd159aec635152735f8008310f2b71aa"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd159aec635152735f8008310f2b71aa" class="m-doc-self">setRequiredTetrahedron</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> tetrahedronIdx)</span></span>
+            </h3>
+            <p>Marks a tetrahedron as required.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tetrahedronIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Tetrahedron index.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -437,6 +515,62 @@
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Immutable set of required edge indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a540627ac002702c673cbd7c4af6777d3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a540627ac002702c673cbd7c4af6777d3" class="m-doc-self">getRequiredTriangles</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the required-triangle index set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable set of required triangle indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a775f588914e98a44c539222219b4f18a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a62d197fcdc9c3cecb383e7dd130b31ff" class="m-doc">RequiredTriangleIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a775f588914e98a44c539222219b4f18a" class="m-doc-self">getRequiredTriangles</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the required-triangle index set (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable set of required triangle indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a211d516885637388258500051385830c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a211d516885637388258500051385830c" class="m-doc-self">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+            <p>Gets the required-tetrahedron index set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable set of required tetrahedron indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad8f845fb3d6175b67afd893f6784d01b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a href="#a14904369e8cc37993f124233f9470968" class="m-doc">RequiredTetrahedronIndex</a>&amp; Rodin::<wbr />MMG::<wbr />Mesh::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad8f845fb3d6175b67afd893f6784d01b" class="m-doc-self">getRequiredTetrahedra</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the required-tetrahedron index set (const).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Immutable set of required tetrahedron indices.</td>
                 </tr>
               </tfoot>
             </table>

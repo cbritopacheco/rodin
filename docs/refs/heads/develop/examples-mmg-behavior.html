@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Examples and tutorials &raquo; Working with MMG &raquo; MMG behavior and guarantees | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="examples-mmg-mesh_adaptation.html" />
+  <link rel="next" href="examples-mmg-casting.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="examples-index.html">Examples and tutorials</a> &raquo;</span>
+          <span class="m-breadcrumb"><a href="examples-mmg-index.html">Working with MMG</a> &raquo;</span>
+          MMG behavior and guarantees
+        </h1>
+        <p>Tested behavior of <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s MMG wrappers, required entities, and level-set cuts.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#examples-mmg-behavior-overview">Overview</a></li>
+            <li>
+              <a href="#examples-mmg-behavior-required">Required entity behavior</a>
+              <ul>
+                <li><a href="#examples-mmg-behavior-required-uncut">Uncut level-set entities</a></li>
+                <li><a href="#examples-mmg-behavior-required-cut">Cut-through level-set entities</a></li>
+              </ul>
+            </li>
+            <li><a href="#examples-mmg-behavior-nosplit">NoSplit and material labels</a></li>
+            <li><a href="#examples-mmg-behavior-workarounds">Workarounds for protected geometry</a></li>
+            <li><a href="#examples-mmg-behavior-tests">Test coverage</a></li>
+            <li><a href="#examples-mmg-behavior-see-also">See Also</a></li>
+          </ul>
+        </nav>
+<section id="examples-mmg-behavior-overview"><h2><a href="#examples-mmg-behavior-overview">Overview</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> module wraps the Mmg Platform for local mesh processing. It provides three distinct workflows:</p><table class="m-table"><thead><tr><th>Workflow</th><th><a href="namespace_rodin.html" class="m-doc">Rodin</a> entry point</th><th>Expected behavior</th></tr></thead><tbody><tr><td>Mesh-quality optimization</td><td><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">MMG::<wbr />Optimizer</a></td><td>Improves element quality while staying close to the existing local size distribution</td></tr><tr><td>Metric/field adaptation</td><td><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">MMG::<wbr />Adapt</a></td><td>Refines, coarsens, moves, and reconnects elements according to a size field</td></tr><tr><td>Level-set discretization</td><td><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">MMG::<wbr />LevelSetDiscretizer</a></td><td>Cuts an input mesh with an isovalue and produces a body-fitted mesh or extracted surface</td></tr></tbody></table><p>All three workflows convert <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> to native MMG data structures, run MMG, and convert the result back to <a href="namespace_rodin.html" class="m-doc">Rodin</a>. The returned mesh is therefore a new mesh topology chosen by MMG; users should not assume that every input element index still names the same geometric entity after remeshing.</p></section><section id="examples-mmg-behavior-required"><h2><a href="#examples-mmg-behavior-required">Required entity behavior</a></h2><p><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> stores required vertices, edges, triangles, and tetrahedra:</p><pre class="m-code"><span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredVertex</span><span class="p">(</span><span class="n">vertexIndex</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredEdge</span><span class="p">(</span><span class="n">edgeIndex</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredTriangle</span><span class="p">(</span><span class="n">triangleIndex</span><span class="p">);</span>
+<span class="n">mesh</span><span class="p">.</span><span class="n">setRequiredTetrahedron</span><span class="p">(</span><span class="n">tetrahedronIndex</span><span class="p">);</span></pre><p>These sets are:</p><ul><li>written to MEDIT as <code>RequiredVertices</code>, <code>RequiredEdges</code>, <code>RequiredTriangles</code>, and <code>RequiredTetrahedra</code>;</li><li>read back from MEDIT into the same <a href="namespace_rodin.html" class="m-doc">Rodin</a> metadata;</li><li>passed to native MMG structures as <code>MG_REQ</code> tags;</li><li>recovered from native MMG output when converting back to <a href="namespace_rodin.html" class="m-doc">Rodin</a>;</li><li>restored by the optimizer and level-set wrappers when the original index is still valid in the output.</li></ul><p>The test suite covers this metadata path in 2D and 3D, including MEDIT I/O, native MMG conversion, optimization, and level-set discretization. In MMG3D, triangle metadata is boundary-surface metadata: when face-cell incidence is available, <a href="namespace_rodin.html" class="m-doc">Rodin</a> exports only boundary triangles to MMG&#x27;s native triangle table. Interior faces of a tetrahedral mesh are not a supported MMG3D <code>RequiredTriangles</code> preservation mechanism.</p><section id="examples-mmg-behavior-required-uncut"><h3><a href="#examples-mmg-behavior-required-uncut">Uncut level-set entities</a></h3><p>For level-set discretization, <a href="namespace_rodin.html" class="m-doc">Rodin</a> has explicit geometry-preservation tests for required entities that are not crossed by the level set:</p><ul><li>in 2D, required vertices, edges, and triangles retain their required metadata and the original entity coordinates remain present in the output;</li><li>in 3D, required vertices, edges, triangles, and tetrahedra retain their required metadata and the original entity coordinates remain present in the output.</li></ul><p>These tests compare geometry, not only the required index sets. This is the expected behavior for required entities that are away from the level-set cut.</p></section><section id="examples-mmg-behavior-required-cut"><h3><a href="#examples-mmg-behavior-required-cut">Cut-through level-set entities</a></h3><p>Required entities are not a hard &quot;never cut this element&quot; constraint when MMG level-set discretization must conform the mesh to an isovalue crossing that entity.</p><p>In particular, for 3D level-set discretization, if the zero level set cuts a required boundary triangle face in a tetrahedral mesh, MMG may replace that triangle. Interior tetrahedral faces are not passed to MMG as boundary triangles. The same caveat applies to other cut-through entities. In this situation MMG can emit a warning containing <code>Required entity ignored.</code></p><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> intentionally documents and tests this behavior rather than promising a stricter guarantee than MMG provides.</p></section></section><section id="examples-mmg-behavior-nosplit"><h2><a href="#examples-mmg-behavior-nosplit">NoSplit and material labels</a></h2><p><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html#a81c6ed00a0f1c80f2889a750fde03c0b" class="m-doc">LevelSetDiscretizer::<wbr />noSplit</a> applies MMG&#x27;s material split policy to a material reference:</p><pre class="m-code"><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MMG</span><span class="o">::</span><span class="n">LevelSetDiscretizer</span><span class="p">()</span>
+<span class="w">  </span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="n">exterior</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="n">noSplit</span><span class="p">(</span><span class="n">protectedReference</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">levelSet</span><span class="p">);</span></pre><p><code>noSplit(ref)</code> means that the material with reference <code>ref</code> should not be split into the configured inside/outside references. It does not mean that a particular edge, triangle face, or tetrahedron is an immutable geometric object.</p><p>The characterization tests cover the following cut-through combinations:</p><table class="m-table"><thead><tr><th>Protected entity</th><th>Extra labels or requirements</th><th>Exact original geometry preserved?</th></tr></thead><tbody><tr><td>edge in a 2D triangle mesh</td><td>required edge and <code>noSplit</code> on containing triangles</td><td>no</td></tr><tr><td>triangle in a 2D mesh</td><td>individual label, with or without required triangle</td><td>no</td></tr><tr><td>edge in a 3D tetrahedral mesh</td><td>required edge and <code>noSplit</code> on adjacent tetrahedra</td><td>no</td></tr><tr><td>triangle face in a 3D tetrahedral mesh</td><td>required triangle and/or individual face label</td><td>no</td></tr><tr><td>triangle face in a 3D tetrahedral mesh</td><td><code>noSplit</code> on adjacent tetrahedra</td><td>no</td></tr><tr><td>triangle face in a 3D tetrahedral mesh</td><td>required vertices, edges, face, and adjacent tetrahedra</td><td>no</td></tr><tr><td>tetrahedron in a 3D mesh</td><td>required tetrahedron and <code>noSplit</code> on its material reference</td><td>no</td></tr></tbody></table><p>The practical rule is:</p><ul><li>if the level set does not cut the required entity, <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s tested behavior is preservation of the required metadata and original geometry;</li><li>if the level set cuts the entity, MMG may alter it to conform the output mesh to the interface, even when <code>MG_REQ</code>, individual labels, adjacent tetrahedron labels, and <code>noSplit</code> are used.</li></ul></section><section id="examples-mmg-behavior-workarounds"><h2><a href="#examples-mmg-behavior-workarounds">Workarounds for protected geometry</a></h2><p>If an element or face must remain untouched, treat that requirement as an input validity condition before calling MMG level-set discretization:</p><ul><li>preflight the level-set values on the protected entity and reject the step if the isovalue crosses it;</li><li>change or clamp the level set so the protected entity lies entirely on one side of the cut;</li><li>pre-partition the mesh so the protected surface is already part of the mesh/interface rather than asking MMG to cut through it;</li><li>use <code>noSplit(ref)</code> only for material-reference splitting policy, not as an element-integrity guarantee.</li></ul></section><section id="examples-mmg-behavior-tests"><h2><a href="#examples-mmg-behavior-tests">Test coverage</a></h2><p>The MMG unit suite exercises:</p><ul><li>required vertex, edge, triangle, and tetrahedron API lifecycle;</li><li>MEDIT I/O round trips for required entities;</li><li>native MMG conversion with required entities;</li><li>optimization preservation of required metadata;</li><li>level-set discretization preservation for uncut required geometry in 2D and 3D;</li><li>cut-through characterization with <code>MG_REQ</code>, labels, adjacent tetrahedra, local closure requirements, and <code>noSplit</code>.</li></ul></section><section id="examples-mmg-behavior-see-also"><h2><a href="#examples-mmg-behavior-see-also">See Also</a></h2><ul><li><a href="examples-mmg-simple_io.html" class="m-doc">MMG I/O</a></li><li><a href="examples-mmg-mesh_optimization.html" class="m-doc">Mesh optimization</a></li><li><a href="examples-mmg-mesh_adaptation.html" class="m-doc">Mesh adaptation</a></li><li><a href="examples-shapeoptimization-levelset_cantilever.html" class="m-doc">Level-set cantilever</a></li><li><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG namespace</a></li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="examples-mmg-mesh_adaptation.html" class="m-doc">&laquo; Adapting the mesh</a> | <a href="examples-mmg-index.html" class="m-doc">Working with MMG</a> | <a href="examples-mmg-casting.html" class="m-doc">Casting between MMG and Rodin &raquo;</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
