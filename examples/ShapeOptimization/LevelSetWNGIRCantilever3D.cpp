@@ -392,6 +392,9 @@ int run(int argc, char** argv)
   const Real initialMMGHausd =
     realOption(argc, argv, "initial-mmg-hausd", Real(0));
   const Real ell = realOption(argc, argv, "ell", Real(0.5));
+  const Real perimeterWeight =
+    realOption(argc, argv, "perimeter",
+        realOption(argc, argv, "surface", Real(0)));
   const Real alphaReg = realOption(argc, argv, "alpha", Real(2) * h);
   const std::size_t holesX = sizeOption(argc, argv, "holes-x", 6);
   const std::size_t holesY = sizeOption(argc, argv, "holes-y", 2);
@@ -416,11 +419,15 @@ int run(int argc, char** argv)
 #endif
   const std::string redistanceMode =
     stringOption(argc, argv, "redistance-mode", defaultRedistanceMode);
+  const std::string redistanceTransfer =
+    stringOption(argc, argv, "redistance-transfer", "project");
   const std::size_t redistanceEvery = sizeOption(argc, argv, "redistance-every", 0);
   const bool adaptiveRedistance =
     sizeOption(argc, argv, "redistance-adaptive", 1) != 0;
   const Real redistanceEikonalTol =
     realOption(argc, argv, "redistance-eikonal-tol", Real(0.35));
+  const Real poissonTransferInterfaceWeight =
+    realOption(argc, argv, "poisson-transfer-interface-weight", Real(10) * h);
   const std::size_t repairEvery = sizeOption(argc, argv, "repair-every", 0);
   const Real repairEta = realOption(argc, argv, "repair-eta", Real(0.5) * h);
   const std::size_t outputEvery = sizeOption(argc, argv, "output-every", 1);
@@ -652,18 +659,78 @@ int run(int argc, char** argv)
       }
       return misses;
     };
+  auto addFittedInterfacePenalty =
+    [&](auto& transferSystem, const std::vector<Index>& facets)
+    {
+      if (!(poissonTransferInterfaceWeight > Real(0)))
+        return;
+      AABB backgroundLocator(mesh);
+      std::vector<Eigen::Triplet<Real>> triplets;
+      triplets.reserve(facets.size() * 120);
+      std::size_t interfacePenaltyMisses = 0;
+      for (const Index f : facets)
+      {
+        const auto face = moved.getFace(f);
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+        const auto& quad = face->getQuadrature(qf);
+        for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
+        {
+          const auto& q = quad.getPoint(qp);
+          const Real ds = qf.getWeight(qp) * q.getDistortion();
+          if (!(ds > Real(0)))
+            continue;
+          const auto p =
+            backgroundLocator.locate(q.getPhysicalCoordinates());
+          if (!p)
+          {
+            interfacePenaltyMisses++;
+            continue;
+          }
+          const Index c = p->getPolytope().getIndex();
+          const auto& fe = sh.getFiniteElement(D, c);
+          const auto& dofs = sh.getDOFs(D, c);
+          const Real wq = poissonTransferInterfaceWeight * ds;
+          for (Index a = 0; a < fe.getCount(); ++a)
+          {
+            const Real phiA = fe.getBasis(a)(p->getReferenceCoordinates());
+            if (std::abs(phiA) <= Real(1e-14))
+              continue;
+            const Index ia = dofs[a];
+            for (Index b = 0; b < fe.getCount(); ++b)
+            {
+              const Real phiB = fe.getBasis(b)(p->getReferenceCoordinates());
+              if (std::abs(phiB) <= Real(1e-14))
+                continue;
+              triplets.emplace_back(ia, dofs[b], wq * phiA * phiB);
+            }
+          }
+        }
+      }
+      Math::SparseMatrix<Real> interfacePenalty(
+          transferSystem.getOperator().rows(),
+          transferSystem.getOperator().cols());
+      interfacePenalty.setFromTriplets(triplets.begin(), triplets.end());
+      transferSystem.getOperator() += interfacePenalty;
+      if (interfacePenaltyMisses > 0)
+        std::cout << "  redistance-interface-penalty:"
+                  << " misses=" << interfacePenaltyMisses << '\n';
+    };
   Real dt = std::min(dt0, dtMax);
   Real lastObjective = std::numeric_limits<Real>::infinity();
   Real complianceCap = std::numeric_limits<Real>::infinity();
 
   std::cout << "3D WNGIR cantilever: " << mesh.getCellCount() << " tetrahedra"
             << "  grid=" << nx << "x" << ny << "x" << nz
-            << "\n  h=" << h << " ell=" << ell << " alpha=" << alphaReg
+            << "\n  h=" << h << " ell=" << ell
+            << " perimeter=" << perimeterWeight
+            << " alpha=" << alphaReg
             << " holes=" << holesX << "x" << holesY << "x" << holesZ
             << " holeR=" << holeRadiusFactor * std::min(H, W)
             << " boundaryHoles=" << boundaryHoles
             << " dt=" << dt << " classify=" << classifyEvery
             << " redistance=" << redistanceMode << "/" << redistanceEvery
+            << " transfer=" << redistanceTransfer
             << " adaptive=" << adaptiveRedistance
             << " eikTol=" << redistanceEikonalTol
             << " repair=" << repairEvery
@@ -904,6 +971,7 @@ int run(int argc, char** argv)
     trimmed.getConnectivity().compute(3, 1);
     trimmed.getConnectivity().compute(2, 1);
 #endif
+    const Real gammaPerimeter = trimmed.getPerimeter(Gamma);
     tMoveTrim = iterTimer.reset();
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
@@ -927,7 +995,8 @@ int run(int argc, char** argv)
     const Real compliance =
       elasticity.getLinearSystem().getVector().dot(
           elasticity.getLinearSystem().getSolution());
-    const Real objective = compliance + ell * volume;
+    const Real objective =
+      compliance + ell * volume + perimeterWeight * gammaPerimeter;
     const bool invalid = !std::isfinite(compliance) || compliance < 0
                          || compliance > complianceCap;
     const bool increased = objectiveGuard && std::isfinite(lastObjective)
@@ -947,6 +1016,7 @@ int run(int argc, char** argv)
     if (itn == 0) complianceCap = Real(50) * compliance;
     objectiveFile << objective << '\n';
     std::cout << "  compliance=" << compliance << " volume=" << volume
+              << " perimeter=" << gammaPerimeter
               << " J=" << objective << " dt=" << dt << '\n';
 
     auto jac = Jacobian(us.getSolution());
@@ -957,6 +1027,13 @@ int run(int argc, char** argv)
     auto normal = FaceNormal(moved);
     normal.traceOf(Interior);
     auto shapeDensity = Dot(stress, strain) - ell;
+    AnalyticMatrixFunction surfaceProjector(
+        [&](const Geometry::Point& p) -> Mat3
+        {
+          const auto n = normal.getValue(p);
+          return Mat3::Identity(3, 3) - n * n.transpose();
+        },
+        3, 3);
     if (trace)
     {
       Real minFaceDist = std::numeric_limits<Real>::infinity();
@@ -1021,6 +1098,7 @@ int run(int argc, char** argv)
       hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
               + Integral(g, w)
               - Integral(eshelby, Jacobian(w)).over(Interior)
+              + FaceIntegral(perimeterWeight * surfaceProjector, Jacobian(w)).over(Gamma)
               + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD)
               + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     }
@@ -1029,6 +1107,7 @@ int run(int argc, char** argv)
       hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
               + Integral(g, w)
               - FaceIntegral(shapeDensity, Dot(normal, w)).over(Gamma)
+              + FaceIntegral(perimeterWeight * surfaceProjector, Jacobian(w)).over(Gamma)
               + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD)
               + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     }
@@ -1108,8 +1187,47 @@ int run(int argc, char** argv)
           - Integral(source, qd)
           + DirichletBC(pd, zero).on(Gamma);
         Solver::CG(poissonDistance).solve();
+        GridFunction nodalDist(sh);
         const std::size_t misses =
-          resampleFromMoved(dist, pd.getSolution(), moved);
+          resampleFromMoved(nodalDist, pd.getSolution(), moved);
+        if (redistanceTransfer == "resample")
+        {
+          dist.getData() = nodalDist.getData();
+        }
+        else if (redistanceTransfer == "project")
+        {
+          AABB fittedLocator(moved);
+          RealFunction fittedPhi(
+              [&](const Geometry::Point& p) -> Real
+              {
+                if (const auto q =
+                    fittedLocator.locate(p.getPhysicalCoordinates()))
+                  return pd.getSolution().getValue(*q);
+                return nodalDist.getValue(p);
+              });
+          TrialFunction tp(sh);
+          TestFunction tq(sh);
+          Problem transfer(tp, tq);
+          transfer =
+              Integral(tp, tq)
+            - Integral(fittedPhi, tq);
+          transfer.assemble();
+          auto& transferSystem = transfer.getLinearSystem();
+          addFittedInterfacePenalty(transferSystem, interfaceFacets);
+          Eigen::ConjugateGradient<
+            Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> transferSolver;
+          transferSystem.getSolution() =
+            transferSolver.compute(transferSystem.getOperator())
+                          .solve(transferSystem.getVector());
+          tp.getSolution().getData() = transferSystem.getSolution();
+          dist.getData() = tp.getSolution().getData();
+        }
+        else
+        {
+          std::cerr << "Unsupported redistance transfer: "
+                    << redistanceTransfer << '\n';
+          return 2;
+        }
         std::cout << "  distanciation-resample: misses=" << misses << '\n';
       }
       else if (redistanceMode == "cp")
@@ -1138,15 +1256,53 @@ int run(int argc, char** argv)
       }
       else if (redistanceMode == "fmm")
       {
-        ScalarP1 shP1(mesh);
+        ScalarP1 shP1(moved);
         GridFunction distP1(shP1);
         distP1 = Real(0);
         Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
           .setInterior(Interior).setInterface(Gamma).solve().sign();
-        dist = [&](const Geometry::Point& p) -> Real
+        GridFunction nodalDist(sh);
+        const std::size_t misses =
+          resampleFromMoved(nodalDist, distP1, moved);
+        if (redistanceTransfer == "resample")
         {
-          return distP1.getValue(p);
-        };
+          dist.getData() = nodalDist.getData();
+        }
+        else if (redistanceTransfer == "project")
+        {
+          AABB fittedLocator(moved);
+          RealFunction fittedPhi(
+              [&](const Geometry::Point& p) -> Real
+              {
+                if (const auto q =
+                    fittedLocator.locate(p.getPhysicalCoordinates()))
+                  return distP1.getValue(*q);
+                return nodalDist.getValue(p);
+              });
+          TrialFunction tp(sh);
+          TestFunction tq(sh);
+          Problem transfer(tp, tq);
+          transfer =
+              Integral(tp, tq)
+            - Integral(fittedPhi, tq);
+          transfer.assemble();
+          auto& transferSystem = transfer.getLinearSystem();
+          addFittedInterfacePenalty(transferSystem, interfaceFacets);
+          Eigen::ConjugateGradient<
+            Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> transferSolver;
+          transferSystem.getSolution() =
+            transferSolver.compute(transferSystem.getOperator())
+                          .solve(transferSystem.getVector());
+          tp.getSolution().getData() = transferSystem.getSolution();
+          dist.getData() = tp.getSolution().getData();
+        }
+        else
+        {
+          std::cerr << "Unsupported redistance transfer: "
+                    << redistanceTransfer << '\n';
+          return 2;
+        }
+        std::cout << "  distanciation-resample: misses=" << misses << '\n';
       }
       else
       {

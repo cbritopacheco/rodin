@@ -521,9 +521,6 @@ namespace Rodin::Adaptation
         if (p.initialGuessGamma > Real(0))
         {
           auto tic = Clock::now();
-          auto zeroBoundary = Variational::VectorFunction(
-              meshDim,
-              [&](const Geometry::Point&) { return SpatialVec::Zero(meshDim); });
           Detail::WNGIRNormalOffsetMetric initMetric(
               phi, grad, m_duStep, m_vStep, p, sigma2);
           initMetric.over(p.interfaceAttribute);
@@ -531,8 +528,7 @@ namespace Rodin::Adaptation
               phi, grad, m_vStep, p, sigma2);
           initForce.over(p.interfaceAttribute);
           typename ProblemType::ProblemBodyType body(m_bulkForm);
-          body = body + initMetric - initForce
-               + Variational::DirichletBC(m_duStep, zeroBoundary);
+          body = body + initMetric - initForce;
           m_stepProblem = body;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
@@ -605,10 +601,6 @@ namespace Rodin::Adaptation
         for (; rep.iterations < p.maxIterations; ++rep.iterations)
         {
           auto tic = Clock::now();
-          auto zeroBoundary = Variational::VectorFunction(
-              meshDim,
-              [&](const Geometry::Point&) { return SpatialVec::Zero(meshDim); });
-
           Detail::WNGIRAdmissibilityMetric admMetric(m_duStep, m_vStep, u, p);
           Detail::WNGIRSurfaceObservationMetric obsMetric(
               phi, grad, m_duStep, m_vStep, u, p, sigma2);
@@ -621,8 +613,7 @@ namespace Rodin::Adaptation
           Real linearError = std::numeric_limits<Real>::infinity();
 
           typename ProblemType::ProblemBodyType body(m_bulkForm);
-          body = body + obsMetric + admMetric - surfaceForce
-               + Variational::DirichletBC(m_duStep, zeroBoundary);
+          body = body + obsMetric + admMetric - surfaceForce;
           m_stepProblem = body;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
