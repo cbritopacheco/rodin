@@ -65,8 +65,10 @@ namespace Rodin::Solid
        * @param c2 Second material constant
        * @param kappa Bulk modulus @f$ \kappa @f$
        */
-      MooneyRivlin(Real c1, Real c2, Real bulkModulus)
-        : m_c1(c1), m_c2(c2), m_kappa(bulkModulus)
+      MooneyRivlin(Real c1, Real c2, Real kappa)
+        : m_c1(c1),
+          m_c2(c2),
+          m_kappa(kappa)
       {}
 
       MooneyRivlin(const MooneyRivlin&) = default;

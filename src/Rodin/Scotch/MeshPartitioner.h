@@ -1,3 +1,11 @@
+/**
+ * @file MeshPartitioner.h
+ * @brief Scotch-based mesh partitioner.
+ *
+ * Implements the @ref Rodin::Geometry "Geometry" partitioner interface
+ * using the SCOTCH graph partitioning library, for distributing meshes
+ * across processes.
+ */
 #ifndef RODIN_SCOTCH_MESH_PARTITIONER_H
 #define RODIN_SCOTCH_MESH_PARTITIONER_H
 

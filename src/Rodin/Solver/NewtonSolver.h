@@ -147,6 +147,24 @@ namespace Rodin::Solver
    * @f]
    * where @f$ \alpha > 0 @f$ is a constant damping factor.
    *
+   * @par Globalization
+   * The damping factor is @e constant: this solver performs no line search
+   * and no step-acceptance test, so convergence is only guaranteed close to
+   * a solution (the classical local quadratic convergence of Newton's
+   * method). Practical consequences:
+   * - For problems solved far from equilibrium (large loads, strong
+   *   nonlinearity), use @e incremental @e loading — ramp the load over
+   *   several solves so each Newton run starts inside its basin of
+   *   attraction (see @c examples/Solid/BlockGravity.cpp).
+   * - Merit functions with barriers (e.g. terms that blow up as an element
+   *   Jacobian determinant approaches zero) cannot be minimized reliably
+   *   with a constant step: they require a backtracking line search with a
+   *   validity test, which callers must currently implement around this
+   *   solver.
+   * - A damping factor @f$ \alpha < 1 @f$ trades convergence speed for
+   *   robustness and can stabilize mildly nonconvex problems, but it is not
+   *   a substitute for a line search.
+   *
    * The nonlinear state vector passed to @c solve() is updated in place and is
    * used both as the initial guess and as the storage for the final iterate.
    *
@@ -208,6 +226,26 @@ namespace Rodin::Solver
    * - step tolerance: 0.0 (disabled)
    * - damping factor: 1.0
    * - monitor: none
+   *
+   * @par Usage
+   * A typical nonlinear solve pairs a Newton problem in the increment
+   * @f$ \delta u @f$ with a linear solver and iterates into the state
+   * @f$ u @f$:
+   * @code{.cpp}
+   * auto ivw = Solid::InternalVirtualWork(law, u);  // residual + tangent
+   *
+   * Problem newton(du, v);
+   * newton = ivw(du, v)
+   *        - Integral(load, v)
+   *        + DirichletBC(du, zero).on(fixedBoundary);
+   *
+   * SparseLU linearSolver(newton);
+   * NewtonSolver solver(linearSolver);
+   * solver.setMaxIterations(50)
+   *       .setAbsoluteTolerance(1e-10)
+   *       .setRelativeTolerance(1e-8);
+   * solver.solve(u);   // u is the initial guess and receives the solution
+   * @endcode
    *
    * @tparam LinearSolver
    *   Type of the linear solver used at each Newton step. It must have a
@@ -272,12 +310,12 @@ namespace Rodin::Solver
         /**
          * @brief Residual norm at the initial iterate.
          */
-        Real initial_residual = 0.0;
+        Real initialResidual = 0.0;
 
         /**
          * @brief Residual norm of the last assembled tangential system.
          */
-        Real final_residual = 0.0;
+        Real finalResidual = 0.0;
 
         /**
          * @brief Norm of the last damped Newton correction.
@@ -288,12 +326,12 @@ namespace Rodin::Solver
          * @f]
          * It is zero until a linear correction has been computed.
          */
-        Real final_step_norm = 0.0;
+        Real finalStepNorm = 0.0;
 
         /**
          * @brief Damping factor used during the solve.
          */
-        Real damping_factor = 1.0;
+        Real dampingFactor = 1.0;
 
         /**
          * @brief Reason for termination.
@@ -324,11 +362,14 @@ namespace Rodin::Solver
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
 
+      /**
+       * @brief Outcome of a single Newton step.
+       */
       struct StepResult
       {
         bool accepted = true;
         bool converged = false;
-        Real step_norm = 0.0;
+        Real stepNorm = 0.0;
       };
 
       using StepPolicy =
@@ -617,7 +658,7 @@ namespace Rodin::Solver
       void solve(SolutionType& x) override
       {
         m_report = Report{};
-        m_report.damping_factor = m_alpha;
+        m_report.dampingFactor = m_alpha;
 
         Real r0 = 0.0;
 
@@ -632,9 +673,9 @@ namespace Rodin::Solver
           if (!std::isfinite(r))
           {
             m_report.iterations = it;
-            m_report.initial_residual = r0;
-            m_report.final_residual = r;
-            m_report.final_step_norm = 0.0;
+            m_report.initialResidual = r0;
+            m_report.finalResidual = r;
+            m_report.finalStepNorm = 0.0;
             m_report.reason = ConvergedReason::ResidualNormIsNotFinite;
             m_report.converged = false;
             notify();
@@ -645,9 +686,9 @@ namespace Rodin::Solver
             r0 = r;
 
           m_report.iterations = it;
-          m_report.initial_residual = r0;
-          m_report.final_residual = r;
-          m_report.final_step_norm = 0.0;
+          m_report.initialResidual = r0;
+          m_report.finalResidual = r;
+          m_report.finalStepNorm = 0.0;
 
           if (r <= m_atol)
           {
@@ -671,7 +712,7 @@ namespace Rodin::Solver
           {
             const StepResult step =
               (*m_stepPolicy)(x, linearSystem, m_report);
-            if (!std::isfinite(step.step_norm))
+            if (!std::isfinite(step.stepNorm))
             {
               m_report.reason = ConvergedReason::StepNormIsNotFinite;
               m_report.converged = false;
@@ -679,7 +720,7 @@ namespace Rodin::Solver
               return;
             }
 
-            m_report.final_step_norm = step.step_norm;
+            m_report.finalStepNorm = step.stepNorm;
             if (!step.accepted)
             {
               m_report.reason = ConvergedReason::StepRejected;
@@ -709,7 +750,7 @@ namespace Rodin::Solver
             return;
           }
 
-          m_report.final_step_norm = dxNorm;
+          m_report.finalStepNorm = dxNorm;
 
           if (m_stol > 0.0 && dxNorm <= m_stol)
           {

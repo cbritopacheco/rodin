@@ -42,7 +42,7 @@ namespace Rodin::Assembly
        * @param[in] mesh Distributed mesh.
        * @param[in] region Region descriptor to iterate.
        */
-      MPIIteration(const MeshType& mesh, Geometry::Region);
+      MPIIteration(const MeshType& mesh, Geometry::Region region);
 
       /**
        * @brief Builds an iterator over the configured region.

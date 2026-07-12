@@ -185,8 +185,14 @@ namespace Rodin::Heart::CCMLC2014::Model
     size_t iterations = 0;      ///< Number of nonlinear iterations used.
     Scalar finalResidual = 0.0; ///< Final residual norm.
     Scalar finalStepNorm = 0.0; ///< Final step norm.
-    using ConvergenceReason =
-      typename Solver::NewtonSolver<::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergedReason;
+    /**
+     * @brief Termination reason of the nonlinear solve.
+     *
+     * Fully qualified: inside Rodin::Heart::CCMLC2014 the name Solver::
+     * resolves to the nested CCMLC2014::Solver namespace, not Rodin::Solver.
+     */
+    using ConvergenceReason = typename ::Rodin::Solver::NewtonSolver<
+      ::Rodin::Solver::PartialPivLU<DenseLinearSystem>>::ConvergedReason;
     ConvergenceReason reason = ConvergenceReason::MaxIterations; ///< Nonlinear convergence reason.
   };
 

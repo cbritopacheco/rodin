@@ -1,3 +1,7 @@
+/**
+ * @file Optional.h
+ * @brief boost::serialization support for std::optional.
+ */
 #ifndef RODIN_SERIALIZATION_OPTIONAL_H
 #define RODIN_SERIALIZATION_OPTIONAL_H
 

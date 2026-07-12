@@ -1,3 +1,9 @@
+/**
+ * @file Export.h
+ * @brief Polymorphic class export registrations for serialization
+ * (e.g. polytope transformations), required to serialize objects
+ * through base-class pointers.
+ */
 #ifndef RODIN_SERIALIZATION_EXPORT_H
 #define RODIN_SERIALIZATION_EXPORT_H
 

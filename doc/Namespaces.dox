@@ -1643,3 +1643,99 @@
   @dir Rodin/tests/benchmarks
   @brief Namespace @ref Rodin::Tests::Benchmarks
  */
+
+/**
+  @dir Rodin/Adaptation
+  @brief Namespace @ref Rodin::Adaptation
+ */
+
+/**
+  @namespace Rodin::Adaptation
+  @brief Module for moving-interface mesh adaptation.
+
+  The Adaptation module provides tools for fitting and adapting meshes to
+  moving interfaces described by level set functions. Its centerpiece is
+  WNGIR (Welsch natural-gradient interface registration): a variational
+  method that displaces mesh vertices so that a discrete interface tracks
+  the zero set of a level set function @f$ \phi @f$, while preserving
+  element quality.
+
+  ## Design
+
+  The module follows a strict separation of concerns:
+  - The **level set** @f$ \phi @f$ owns the topology of the tracked domain
+    (@f$ \phi < 0 @f$ inside, @f$ \phi > 0 @f$ outside).
+  - **Classification** converts @f$ \phi @f$ into discrete cell attributes
+    (see @ref Rodin::Geometry "Geometry" utilities such as the min s-t cut
+    classifier).
+  - **Geometry fitting** (WNGIR) moves and curves the mesh. It never
+    decides topology.
+
+  The WNGIR step solves a metric-preconditioned (natural-gradient) problem
+  built entirely in the variational form language: a surface force
+  (the Welsch first variation, assembled on interface facets) balanced
+  against bulk, observation, and admissibility metrics. Hard admissibility
+  (element validity) is enforced by a nonlinear line search.
+
+  ## Key classes
+  - WNGIRParameters — solve configuration (budgets, tolerances, weights)
+  - WNGIRReport — per-solve diagnostics
+  - WNGIRSolver — backend-independent solver driver
+
+  @note Interface-fitting constraints are formulated as smooth penalties;
+  the module deliberately avoids hard geometric projections inside the
+  solve, which break line-search continuity.
+ */
+
+/**
+  @dir Rodin/Heart
+  @brief Namespace @ref Rodin::Heart
+ */
+
+/**
+  @namespace Rodin::Heart
+  @brief Module for reduced-order (0D) cardiac models.
+
+  Provides lumped-parameter ventricular models used to calibrate and
+  validate the 3D constitutive laws of the @ref Rodin::Solid "Solid"
+  module. The main component is the CCMLC2014 0D ventricular model: a
+  cardiac-cycle stepper driven by a reduced Holzapfel-type passive energy
+  (reduced invariants with first and second derivatives) coupled to an
+  active contraction law.
+
+  0D models integrate ordinary differential equations over a heartbeat and
+  are orders of magnitude cheaper than 3D simulations; parameters should
+  round-trip between the 0D cycle and the corresponding 3D laws before
+  debugging full simulations.
+ */
+
+/**
+  @dir Rodin/Location
+  @brief Namespace @ref Rodin::Location
+ */
+
+/**
+  @namespace Rodin::Location
+  @brief Module for spatial search and point location.
+
+  Provides acceleration structures for locating points within meshes. The
+  main component is a bounding-volume hierarchy over axis-aligned bounding
+  boxes (AABB) supporting point-in-mesh queries, used by operations that
+  must evaluate fields at arbitrary physical coordinates.
+ */
+
+/**
+  @dir Rodin/Serialization
+  @brief Namespace support for serialization of Rodin types.
+ */
+
+/**
+  @namespace Rodin::Serialization
+  @brief Module providing boost::serialization support for Rodin types.
+
+  Contains serialization adapters for Rodin, Eigen, and Boost container
+  types (connectivity, arrays, flat maps/sets, dense matrices, optionals),
+  enabling binary checkpointing of meshes and fields. Polymorphic types
+  (such as polytope transformations) are registered through export headers
+  so they can be serialized through base-class pointers.
+ */

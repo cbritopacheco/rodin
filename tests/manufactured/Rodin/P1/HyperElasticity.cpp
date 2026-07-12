@@ -121,12 +121,8 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       P1 scalar(mesh);
       GridFunction err2(scalar);
       err2 = Pow(Frobenius(uCurrent - uExact), 2);
-      return {
-        Integral(err2).compute(),
-        newton.converged(),
-        newton.getReport().initial_residual,
-        newton.getReport().final_residual
-      };
+      return {Integral(err2).compute(), newton.converged(),
+        newton.getReport().initialResidual, newton.getReport().finalResidual};
     }
   }
 

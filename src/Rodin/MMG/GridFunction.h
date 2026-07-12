@@ -23,7 +23,7 @@ namespace Rodin::MMG
    * for vector fields).
    *
    * MMG workflows in Rodin operate on first-order nodal fields defined on
-   * @ref Rodin::Geometry::Mesh<Context::Local> "local meshes". This alias
+   * @ref Rodin::Geometry::Mesh "local meshes". This alias
    * standardizes that representation for scalar and vector quantities transferred
    * to/from MMG solution structures.
    */

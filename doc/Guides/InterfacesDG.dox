@@ -1,0 +1,113 @@
+/**
+  @page guides-interfaces-dg Interfaces, traces, and discontinuous Galerkin
+  @brief Working on facets: traces, jumps and averages, interface tagging, and DG formulations
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-ifdg-intro Introduction
+
+  Many formulations live on *facets* rather than cells: Neumann data on
+  the boundary, transmission conditions on material interfaces, and the
+  entire discontinuous Galerkin (DG) family. This guide collects the
+  facet-side vocabulary of the form language and its correct use.
+
+  @section guides-ifdg-integrals The facet integral family
+
+  | Class | Ranges over | Typical use |
+  |-------|-------------|-------------|
+  | @ref Rodin::Variational::BoundaryIntegral "BoundaryIntegral" | Exterior (codimension-1 boundary) facets | Neumann/Robin terms |
+  | @ref Rodin::Variational::InterfaceIntegral "InterfaceIntegral" | Interior facets | DG coupling, transmission terms |
+  | @ref Rodin::Variational::FaceIntegral "FaceIntegral" | All facets | Terms defined uniformly on faces |
+
+  All accept attribute restriction via `.over(attr, ...)`, so a term can
+  target a *tagged* subset of facets. Normals are provided by
+  @ref Rodin::Variational::BoundaryNormal "BoundaryNormal" (outward on the
+  boundary) and @ref Rodin::Variational::FaceNormal "FaceNormal" (a fixed
+  orientation convention on interior faces — sign-sensitive terms must use
+  it consistently on both sides).
+
+  @section guides-ifdg-traces Traces: which side is meant?
+
+  An @f$ H^1 @f$ function has a well-defined boundary trace, but on an
+  *interior* facet a discontinuous quantity (a `P0` function, a gradient
+  of a `P1` function, any DG field) has **two** one-sided values. Rodin
+  requires you to disambiguate:
+
+  - `f.traceOf(attr)` selects the trace *seen from* the cells with
+    attribute `attr` — the tool for transmission problems where a
+    coefficient jumps across a material interface;
+  - if evaluation on an interior facet is attempted without a
+    determined side, the library raises
+    @ref Rodin::Variational::UndeterminedTraceDomainException
+    "UndeterminedTraceDomainException" — this exception almost always
+    means a missing `traceOf` on a coefficient in an interface term.
+
+  Interfaces themselves are just *tagged facets*: use
+  `mesh.trace({{attr1, attr2}, ifaceAttr})` to label the facets between
+  two cell attributes, after computing the facet-cell connectivity (see
+  @ref guides-connectivity).
+
+  @section guides-ifdg-jump Jump and average
+
+  The two facet operators of DG methods, defined for a quantity @f$ w @f$
+  with one-sided values @f$ w^+, w^- @f$:
+
+  @f[
+    [\![ w ]\!] = w^+ - w^-, \qquad \{ w \} = \tfrac12 (w^+ + w^-),
+  @f]
+
+  available as @ref Rodin::Variational::Jump "Jump" and
+  @ref Rodin::Variational::Average "Average":
+
+  @code{.cpp}
+  auto jf = Jump(f);       // f: any function with facet traces
+  auto af = Average(f);
+  @endcode
+
+  Sanity properties worth internalizing (they are what the unit tests
+  assert): the jump of any continuous function — a constant, or a
+  conforming `P1`/`H1` grid function — is zero on every interior facet;
+  the average of a continuous function equals its trace.
+
+  @section guides-ifdg-dg Interior penalty DG in the form language
+
+  The symmetric interior penalty (SIPG) discretization of
+  @f$ -\Delta u = f @f$ reads
+
+  @f[
+    \sum_K \int_K \nabla u \cdot \nabla v
+    \;-\; \int_{\mathcal F_i} \{\nabla u\}\cdot n \,[\![ v ]\!]
+    \;-\; \int_{\mathcal F_i} \{\nabla v\}\cdot n \,[\![ u ]\!]
+    \;+\; \int_{\mathcal F_i} \frac{\eta}{h} [\![ u ]\!]\,[\![ v ]\!]
+    \;=\; \int_\Omega f v ,
+  @f]
+
+  written with `Integral` for the cell term and `InterfaceIntegral` for
+  the three facet terms (plus `BoundaryIntegral` analogues to impose
+  Dirichlet data weakly, Nitsche-style). Structural facts the mathematics
+  imposes:
+
+  - the **penalty scaling** @f$ \eta / h @f$ with @f$ \eta @f$ large
+    enough (growing with the polynomial degree) is what makes the form
+    coercive — omitting or under-sizing it is the standard DG
+    instability, and it manifests as an indefinite system, not a crash;
+  - the two consistency terms must be *transposes* of each other for
+    symmetry (SIPG); flipping one sign gives the nonsymmetric NIPG
+    variant with different penalty requirements;
+  - assembled DG systems are not SPD in general — see
+    @ref guides-solvers for appropriate solvers.
+
+  See `examples/DG` for a starting point, and the `Jump`/`Average` unit
+  tests (`tests/unit/Rodin/Variational/JumpTest.cpp`, `AverageTest.cpp`)
+  for the precise operational semantics.
+
+  @section guides-ifdg-seealso See also
+
+  - @ref guides-boundary-conditions — strong (eliminated) boundary
+    conditions, as opposed to the weak impositions here
+  - @ref guides-connectivity — computing the facet incidences these
+    integrals require
+  - @ref guides-variational — the general problem-composition machinery
+*/

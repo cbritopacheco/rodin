@@ -999,8 +999,8 @@ int main(int argc, char** argv)
               {
                 Alert::Info()
                   << "    it=" << rep.iterations
-                  << " r=" << rep.final_residual
-                  << " dx=" << rep.final_step_norm
+                  << " r=" << rep.finalResidual
+                  << " dx=" << rep.finalStepNorm
                   << Alert::Raise;
               });
 

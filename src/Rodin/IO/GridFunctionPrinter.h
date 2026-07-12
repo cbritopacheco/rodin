@@ -41,7 +41,7 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::Exception()
           << "No GridFunctionPrinter specialization for this format/FES/Data combination."

@@ -74,6 +74,22 @@
   - @subpage guides-solvers — Direct solvers (SparseLU, UMFPack, CHOLMOD),
     iterative solvers (CG, GMRES, BiCGSTAB), and the Newton solver
 
+  - @subpage guides-interfaces-dg — Facet integrals, traces, jump and
+    average operators, interface tagging, and discontinuous Galerkin
+    formulations
+
+  @section guides-applications-index Application modules
+
+  Higher-level functionality built on the variational core:
+
+  - @subpage guides-shape-optimization — Shape derivatives, Hilbertian
+    regularization (@ref Rodin::Hilbert::H1a "H1a"), level-set evolution,
+    redistancing, and the shape optimization loop
+
+  - @subpage guides-solid-mechanics — Finite-strain kinematics,
+    hyperelastic constitutive laws, the internal virtual work
+    residual/tangent pair, and active contraction
+
   @section guides-io-index I/O in Rodin
 
   Reading and writing meshes, grid functions, and simulation data:
@@ -92,6 +108,10 @@
 
   - @subpage guides-petsc — PETSc-backed variational forms, distributed
     linear algebra, KSP/SNES solvers, and multi-field problems
+
+  - @subpage guides-thread-safety — The thread-safety model, the
+    @ref Rodin::Threads "Threads" utilities, and how parallel assembly
+    scales
 
   @section guides-getting-started-help Getting Help
 

@@ -377,20 +377,20 @@ int main(int, char**)
     {
       std::cout
         << "  Newton " << std::setw(2) << report.iterations
-        << " residual = " << report.final_residual
-        << " step = " << report.final_step_norm
-        << " damping = " << report.damping_factor;
+        << " residual = " << report.finalResidual
+        << " step = " << report.finalStepNorm
+        << " damping = " << report.dampingFactor;
       if (std::isfinite(previousNewtonResidual)
           && previousNewtonResidual > 0.0)
       {
         std::cout
           << " ratio = "
-          << report.final_residual / previousNewtonResidual;
+          << report.finalResidual / previousNewtonResidual;
       }
       if (report.converged)
         std::cout << " converged";
       std::cout << std::endl;
-      previousNewtonResidual = report.final_residual;
+      previousNewtonResidual = report.finalResidual;
     });
 
     solver.solve(u);
@@ -414,7 +414,7 @@ int main(int, char**)
       << "  summary:"
       << " converged = " << (report.converged ? "yes" : "no")
       << " iterations = " << report.iterations
-      << " final_residual = " << report.final_residual
+      << " finalResidual = " << report.finalResidual
       << " |u| = " << u.getData().norm()
       << " |BDF(u)| = " << bdfData.norm()
       << " ec = [" << diagnostics.minActiveExtension

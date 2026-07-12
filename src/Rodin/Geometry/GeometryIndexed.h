@@ -171,8 +171,8 @@ namespace Rodin::Geometry
      * @param ar Archive object
      * @param version Serialization version (unused)
      */
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int)
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
     {
       for (size_t i = 0; i < Count; ++i)
         ar & *ptr(i);

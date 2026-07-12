@@ -1,3 +1,7 @@
+/**
+ * @file UnorderedMap.h
+ * @brief boost::serialization support for boost::unordered_map.
+ */
 #ifndef RODIN_SERIALIZATION_UNORDEREDMAP_H
 #define RODIN_SERIALIZATION_UNORDEREDMAP_H
 

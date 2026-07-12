@@ -1,3 +1,7 @@
+/**
+ * @file FlatSet.h
+ * @brief boost::serialization support for boost::container::flat_set.
+ */
 #ifndef RODIN_SERIALIZATION_FLATSET_H
 #define RODIN_SERIALIZATION_FLATSET_H
 

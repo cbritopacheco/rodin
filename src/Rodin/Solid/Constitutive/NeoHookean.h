@@ -66,8 +66,9 @@ namespace Rodin::Solid
        * @param lambda First Lamé parameter @f$ \lambda @f$
        * @param mu Second Lamé parameter (shear modulus) @f$ \mu @f$
        */
-      NeoHookean(Real lameFirstParameter, Real shearModulus)
-        : m_lambda(lameFirstParameter), m_mu(shearModulus)
+      NeoHookean(Real lambda, Real mu)
+        : m_lambda(lambda),
+          m_mu(mu)
       {}
 
       NeoHookean(const NeoHookean&) = default;

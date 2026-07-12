@@ -1,3 +1,7 @@
+/**
+ * @file Array.h
+ * @brief boost::serialization support for Rodin::Array types.
+ */
 #ifndef RODIN_SERIALIZATION_ARRAYSERIALIZATION_H
 #define RODIN_SERIALIZATION_ARRAYSERIALIZATION_H
 

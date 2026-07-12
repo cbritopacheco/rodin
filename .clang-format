@@ -1,0 +1,91 @@
+# Rodin house style. Derived empirically from the existing codebase — when in
+# doubt, match the surrounding code, not this file. Enforcement in CI is on
+# changed lines only (git clang-format); see CONTRIBUTING.md.
+#
+# Requires clang-format >= 16 (AlignTrailingComments: Leave); CI uses 18.
+#
+# Known deviations clang-format cannot express (accepted, low-churn under
+# changed-lines enforcement):
+#  - members of access-specifier-less structs (Traits blocks) sit at +2 in
+#    the codebase but IndentAccessModifiers indents them to +4;
+#  - the codebase sometimes places `constexpr` on its own line before the
+#    declaration; clang-format joins it;
+#  - manually broken template-argument lists may be repacked.
+Language: Cpp
+Standard: c++20
+BasedOnStyle: LLVM
+
+# Layout
+ColumnLimit: 90
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ContinuationIndentWidth: 2
+NamespaceIndentation: All
+IndentAccessModifiers: true
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# Braces: Allman everywhere; empty bodies "{}" stay together on their own line.
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+AllowShortBlocksOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+
+# Classes and constructors
+BreakInheritanceList: BeforeColon
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerIndentWidth: 2
+PackConstructorInitializers: Never
+EmptyLineBeforeAccessModifier: Always
+
+# Templates and declarations
+AlwaysBreakTemplateDeclarations: Yes
+SpaceAfterTemplateKeyword: true
+PointerAlignment: Left
+ReferenceAlignment: Left
+QualifierAlignment: Leave
+
+# Includes: never reorder — include order is load-bearing (ForwardDecls,
+# Configure.h) and re-sorting creates churn.
+SortIncludes: Never
+IncludeBlocks: Preserve
+SortUsingDeclarations: false
+
+# Comments and misc
+ReflowComments: false
+AlignTrailingComments:
+  Kind: Leave
+SpacesBeforeTrailingComments: 1
+FixNamespaceComments: false
+AlignAfterOpenBracket: DontAlign
+BinPackArguments: true
+BinPackParameters: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AlignOperands: DontAlign
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+IndentCaseLabels: true
+IndentPPDirectives: None

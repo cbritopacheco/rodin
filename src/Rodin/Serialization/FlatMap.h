@@ -1,3 +1,7 @@
+/**
+ * @file FlatMap.h
+ * @brief boost::serialization support for boost::container::flat_map.
+ */
 #ifndef RODIN_SERIALIZATION_FLATMAP_H
 #define RODIN_SERIALIZATION_FLATMAP_H
 

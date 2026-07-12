@@ -419,6 +419,7 @@ namespace Rodin::IO
       explicit
       XDMF(const boost::filesystem::path& stem);
 
+#ifdef RODIN_USE_MPI
       /**
        * @brief Constructs an XDMF writer in distributed (MPI) mode.
        *
@@ -445,7 +446,6 @@ namespace Rodin::IO
        * xdmf.close();
        * ```
        */
-#ifdef RODIN_USE_MPI
       XDMF(MPI_Comm comm,
            const boost::filesystem::path& stem,
            size_t rootRank = 0);

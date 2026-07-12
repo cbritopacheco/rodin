@@ -260,7 +260,7 @@ namespace Rodin::IO
        * @brief Stream-based overload — not supported for HDF5.
        * @throws Alert::MemberFunctionException Always; use print(path) instead.
        */
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction printing is file-path based."

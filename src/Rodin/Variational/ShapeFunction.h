@@ -364,7 +364,7 @@ namespace Rodin::Variational
        * - Returns std::nullopt for non-polynomial expressions.
        * - The value is not guaranteed to be sharp.
        *
-       * @param geom Reference geometry type.
+       * @param poly Polytope on which the order is queried.
        * @return Polynomial order bound, or std::nullopt if not polynomial.
        */
       constexpr

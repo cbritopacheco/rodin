@@ -100,7 +100,6 @@ namespace Rodin::Advection
        *
        * @param[in] dt          Signed time step used by the tracer (kept for API symmetry).
        * @param[in] mesh        Mesh on which tracing occurs.
-       * @param[in] velocity    Velocity field functor (kept for API symmetry; not used by this policy).
        * @param[in] eps_in_phys Inward physical offset used to place the footpoint strictly inside.
        */
       StopInsideBoundaryPolicy(

@@ -1051,7 +1051,7 @@ int main(int argc, char** argv)
     struct AggregateReport
     {
       std::size_t iterations;
-      Real        final_residual;
+      Real finalResidual;
       Real        interface_fit;
       bool        converged;
     } report{
@@ -1174,9 +1174,8 @@ int main(int argc, char** argv)
                 << maxUoverH << '\n';
     }
 
-    std::cout << "    WNGIR it=" << report.iterations
-              << "  activeRMS=" << std::scientific << std::setprecision(3)
-              << report.final_residual
+    std::cout << "    WNGIR it=" << report.iterations << "  activeRMS=" << std::scientific
+              << std::setprecision(3) << report.finalResidual
               << "  fit_h=" << std::setprecision(3) << interfaceFit
               << "  fit_an=" << std::setprecision(3) << interfaceFitAnalytic
               << "  init=cold"

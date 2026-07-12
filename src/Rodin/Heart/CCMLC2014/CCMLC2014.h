@@ -15,18 +15,10 @@
 #include "Rodin/Heart/CCMLC2014/PassiveLaw.h"
 #include "Rodin/Heart/CCMLC2014/Solver/Stepper.h"
 
-namespace Rodin::Heart
-{
-  /**
-   * @brief Default CCMLC2014 0D model type.
-   *
-   * @tparam PassiveEnergyLaw Reduced passive energy law.
-   * @tparam PassiveLaw Passive stress operator from the reduced invariants.
-   */
-  template <
-    class PassiveEnergyLaw = HolzapfelReducedLaw<Real>,
-    class PassiveLaw = CCMLC2014PassiveLaw<Real>>
-  using CCMLC2014T = CCMLC2014::Solver::StepperT<PassiveEnergyLaw, PassiveLaw>;
-}
+// The user-facing CCMLC2014T alias (with its default law arguments) is
+// declared exactly once, in Rodin/Heart/ForwardDecls.h — an alias template
+// cannot be redeclared, and default template arguments may appear in only
+// one declaration.
+#include "Rodin/Heart/ForwardDecls.h"
 
 #endif

@@ -1,3 +1,7 @@
+/**
+ * @file EigenMatrix.h
+ * @brief boost::serialization support for Eigen dense matrix types.
+ */
 #ifndef RODIN_SERIALIZATION_MATRIXSERIALIZATION_H
 #define RODIN_SERIALIZATION_MATRIXSERIALIZATION_H
 

@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Random.h
+ * @brief Top-level include for randomized-input test utilities
+ * (random floats and integers with reproducible seeding).
+ */
 #ifndef RODIN_TEST_RANDOM_H
 #define RODIN_TEST_RANDOM_H
 

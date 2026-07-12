@@ -1,3 +1,7 @@
+/**
+ * @file PolytopeType.h
+ * @brief boost::serialization support for Geometry::Polytope::Type.
+ */
 #ifndef RODIN_SERIALIZATION_POLYTOPETYPE_H
 #define RODIN_SERIALIZATION_POLYTOPETYPE_H
 

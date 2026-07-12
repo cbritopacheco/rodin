@@ -63,8 +63,9 @@ namespace Rodin::Solid
        * @param lambda First Lamé parameter @f$ \lambda @f$
        * @param mu Second Lamé parameter (shear modulus) @f$ \mu @f$
        */
-      SaintVenantKirchhoff(Real lameFirstParameter, Real shearModulus)
-        : m_lambda(lameFirstParameter), m_mu(shearModulus)
+      SaintVenantKirchhoff(Real lambda, Real mu)
+        : m_lambda(lambda),
+          m_mu(mu)
       {}
 
       SaintVenantKirchhoff(const SaintVenantKirchhoff&) = default;

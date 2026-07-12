@@ -241,8 +241,8 @@ namespace Rodin::Heart::CCMLC2014::Solver
         const auto& nr = m_newton.getReport();
         m_report.converged = nr.converged;
         m_report.iterations = nr.iterations;
-        m_report.finalResidual = nr.final_residual;
-        m_report.finalStepNorm = nr.final_step_norm;
+        m_report.finalResidual = nr.finalResidual;
+        m_report.finalStepNorm = nr.finalStepNorm;
         m_report.reason = nr.reason;
 
         if (nr.converged)

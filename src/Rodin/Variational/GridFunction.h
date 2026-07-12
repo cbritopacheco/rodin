@@ -77,6 +77,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Traits for GridFunctionBase: exposes the space and data types.
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
@@ -84,6 +85,7 @@ namespace Rodin::FormLanguage
     using DataType = Data;
   };
 
+  /// @brief Traits for GridFunction: exposes the space and data types.
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
@@ -266,6 +268,36 @@ namespace Rodin::Variational
    * GridFunction object. It provides a common interface for the manipulation
    * of its data and weights, as well as projection utilities and convenience
    * functions.
+   *
+   * @par Projection semantics
+   * Assigning an expression to a grid function computes the
+   * @e interpolant: the space's degree-of-freedom functionals are applied
+   * to the expression, @f$ u_h = \sum_i \sigma_i(f)\, \phi_i @f$. This is
+   * @e not the @f$ L^2 @f$-orthogonal projection — the two coincide only
+   * when the expression already lies in the space. When the
+   * @f$ L^2 @f$ projection is required (e.g. for optimal-order transfer of
+   * rough data), solve the mass-matrix problem explicitly:
+   * @code{.cpp}
+   * TrialFunction u(vh);
+   * TestFunction  v(vh);
+   * Problem l2(u, v);
+   * l2 = Integral(u, v) - Integral(f, v);
+   * Solver::CG(l2).solve();
+   * @endcode
+   *
+   * @par Coefficients vs values
+   * For nodal spaces of degree one (@ref P1 "P1") the coefficient vector
+   * holds vertex values. For higher-order spaces (@ref H1 "H1\<K\>",
+   * @f$ K \ge 2 @f$) the underlying basis is not plain nodal Lagrange, and
+   * @b coefficients @b are @b not @b nodal @b values: always evaluate
+   * through getValue() (or the element basis) instead of reading the data
+   * vector positionally.
+   *
+   * @par Thread safety
+   * Concurrent reads (getValue() from multiple threads) on a fully
+   * constructed grid function are safe; any mutation (assignment,
+   * setData(), load()) requires exclusive access. See the
+   * @ref guides-thread-safety "thread safety guide".
    */
   template <
     class Derived,
@@ -785,8 +817,8 @@ namespace Rodin::Variational
       constexpr
       ScalarType min() const
       {
-        Index _unused;
-        return static_cast<const Derived&>(*this).min(_unused);
+        Index unused;
+        return static_cast<const Derived&>(*this).min(unused);
       }
 
       /**
@@ -803,8 +835,8 @@ namespace Rodin::Variational
       constexpr
       ScalarType max() const
       {
-        Index _unused;
-        return static_cast<const Derived&>(*this).max(_unused);
+        Index unused;
+        return static_cast<const Derived&>(*this).max(unused);
       }
 
       constexpr
@@ -1019,6 +1051,12 @@ namespace Rodin::Variational
 
   };
 
+  /**
+   * @ingroup GridFunctionSpecializations
+   * @brief Grid function storing its degrees of freedom in a dense
+   * Math::Vector over the space's scalar type (the standard local
+   * backend).
+   */
   template <class FES>
   class GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>> final
     : public GridFunctionBase<

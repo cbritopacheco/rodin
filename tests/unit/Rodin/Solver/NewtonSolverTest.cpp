@@ -177,15 +177,11 @@ TEST(NewtonSolverTest, ScalarResidualShowsQuadraticConvergenceRate)
   Solver::NewtonSolver newton(linearSolver);
   std::vector<Real> residuals;
 
-  newton
-    .setMaxIterations(20)
+  newton.setMaxIterations(20)
     .setAbsoluteTolerance(1e-15)
     .setRelativeTolerance(1e-15)
     .setStepTolerance(0.0)
-    .setMonitor([&](const auto& report)
-    {
-      residuals.push_back(report.final_residual);
-    });
+    .setMonitor([&](const auto& report) { residuals.push_back(report.finalResidual); });
 
   newton.solve(u);
 

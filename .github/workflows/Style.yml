@@ -1,0 +1,116 @@
+name: Style
+
+# Style enforcement, layered (see CONTRIBUTING.md):
+#   Format         clang-format on CHANGED LINES only (never the whole tree)
+#   StyleLint      house rules: include guards, license blocks, @file docs,
+#                  no #pragma once, PETSc containment (dev/style_lint.py)
+#   ClangTidy      identifier naming on the headers a change touches
+#   DoxygenRatchet no new documentation warnings (dev/check_doxygen_warnings.py)
+#
+# Every job reports failures as inline PR annotations with file and line.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - develop
+
+concurrency:
+  group: Style-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+
+jobs:
+  Format:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install clang-format
+        # The clang-format binary is pinned via pip to the exact version the
+        # tree was formatted with — patch releases of clang-format can wrap
+        # lines differently. apt provides the git-clang-format driver script.
+        run: |
+          sudo apt-get update && sudo apt-get install -y clang-format-18
+          pip install clang-format==18.1.8
+      - name: Check formatting of changed lines
+        run: >-
+          python3 dev/check_format.py --base "$BASE_REF" --head HEAD
+          --binary clang-format --git-clang-format git-clang-format-18
+
+  StyleLint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run house-style linter
+        run: python3 dev/style_lint.py
+
+  ClangTidy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: Install dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          clang-tidy-18 libomp-18-dev cmake libboost-all-dev libeigen3-dev
+          libhdf5-dev
+      - name: Collect changed C++ files
+        id: changed
+        run: |
+          git diff --name-only --diff-filter=ACMR "$BASE_REF"...HEAD -- \
+            'src/Rodin/**/*.h' 'src/Rodin/**/*.hpp' 'src/Rodin/**/*.cpp' \
+            > changed.txt || true
+          echo "count=$(wc -l < changed.txt)" >> "$GITHUB_OUTPUT"
+          cat changed.txt
+      - name: Configure (generates Configure.h)
+        if: steps.changed.outputs.count != '0'
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DRODIN_BUILD_EXAMPLES=OFF -DRODIN_USE_PETSC=OFF
+      - name: clang-tidy (naming) on touched headers
+        if: steps.changed.outputs.count != '0'
+        run: |
+          # Build a header-filter regex from the changed header paths so only
+          # the code this change touches must be clean (per-file ratchet).
+          FILTER=$(grep -E '\.(h|hpp)$' changed.txt | sed 's/[.[\*^$()+?{|]/\\&/g' | paste -sd'|' -)
+          FLAGS="-std=c++20 -I$PWD/src -I$PWD/build/src -I$PWD/third-party/termcolor/include -isystem /usr/include/eigen3 -isystem /usr/include/hdf5/serial"
+          if [ -n "$FILTER" ]; then
+            clang-tidy-18 dev/TidyTU.cpp --header-filter="(^|/)($FILTER)$" -- $FLAGS
+          fi
+          # Changed translation units are checked directly.
+          CPPS=$(grep -E '\.cpp$' changed.txt || true)
+          if [ -n "$CPPS" ]; then
+            clang-tidy-18 $CPPS --header-filter='-' -- $FLAGS
+          fi
+
+  DoxygenRatchet:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install pinned doxygen
+        # The warning baseline (dev/doxygen_warnings.baseline) is only
+        # comparable against the doxygen version it was generated with.
+        # texlive-binaries provides bibtex, without which every \cite emits
+        # a warning that is absent from the baseline.
+        run: |
+          sudo apt-get update && sudo apt-get install -y texlive-binaries
+          curl -sSL -o doxygen.tar.gz \
+            https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+          tar -xzf doxygen.tar.gz
+          echo "$PWD/doxygen-1.14.0/bin" >> "$GITHUB_PATH"
+      - name: Check for new documentation warnings
+        run: python3 dev/check_doxygen_warnings.py
