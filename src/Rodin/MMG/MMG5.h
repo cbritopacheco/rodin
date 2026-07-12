@@ -8,8 +8,8 @@
  * @file MMG5.h
  * @brief Core MMG wrapper utilities for mesh/solution conversion and parameters.
  */
-#ifndef RODIN_RODINEXTERNAL_MMG_MMG5_H
-#define RODIN_RODINEXTERNAL_MMG_MMG5_H
+#ifndef RODIN_MMG_MMG5_H
+#define RODIN_MMG_MMG5_H
 
 #include <boost/filesystem.hpp>
 

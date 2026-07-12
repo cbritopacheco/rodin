@@ -37,8 +37,8 @@
  *
  * @see BiCGSTAB for the solver implementation
  */
-#ifndef RODIN_SOLVER_BiCGSTAB_H
-#define RODIN_SOLVER_BiCGSTAB_H
+#ifndef RODIN_SOLVER_BICGSTAB_H
+#define RODIN_SOLVER_BICGSTAB_H
 
 #include <Eigen/SparseCholesky>
 

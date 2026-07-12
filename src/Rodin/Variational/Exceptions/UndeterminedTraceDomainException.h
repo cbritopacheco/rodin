@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file UndeterminedTraceDomainException.h
+ * @brief Exception raised when a function is evaluated on an interior facet
+ * without a determined trace side (see FunctionBase::traceOf).
+ */
 #ifndef RODIN_VARIATIONAL_EXCEPTIONS_UNDETERMINEDTRACEDOMAINEXCEPTION_H
 #define RODIN_VARIATIONAL_EXCEPTIONS_UNDETERMINEDTRACEDOMAINEXCEPTION_H
 

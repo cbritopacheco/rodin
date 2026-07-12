@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_QF_CENTROID_H
-#define RODIN_VARIATIONAL_QF_CENTROID_H
+#ifndef RODIN_QF_CENTROID_H
+#define RODIN_QF_CENTROID_H
 
 /**
  * @file

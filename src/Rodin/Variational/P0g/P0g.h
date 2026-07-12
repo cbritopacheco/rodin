@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_P0g_P0G_H
-#define RODIN_VARIATIONAL_P0g_P0G_H
+#ifndef RODIN_VARIATIONAL_P0G_P0G_H
+#define RODIN_VARIATIONAL_P0G_P0G_H
 
 #include <cassert>
 #include <cstddef>

@@ -1,0 +1,3 @@
+# Known pre-existing style_lint violations (check:path).
+# Shrink by fixing; never grow to silence a new finding.
+# Regenerate with: python3 dev/style_lint.py --update-baseline

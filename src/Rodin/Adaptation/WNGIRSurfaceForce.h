@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRSurfaceForce.h
+ * @brief Linear-form integrator assembling the Welsch first-variation
+ * surface force on interface facets (the WNGIR right-hand side).
+ */
 #ifndef RODIN_ADAPTATION_WNGIRSURFACEFORCE_H
 #define RODIN_ADAPTATION_WNGIRSURFACEFORCE_H
 

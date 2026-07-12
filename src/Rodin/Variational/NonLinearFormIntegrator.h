@@ -17,8 +17,8 @@
  * ProblemBody containing both contributions — suitable for direct use in a
  * Problem assignment expression.
  */
-#ifndef RODIN_VARIATIONAL_NON_LINEAR_FORM_INTEGRATOR_H
-#define RODIN_VARIATIONAL_NON_LINEAR_FORM_INTEGRATOR_H
+#ifndef RODIN_VARIATIONAL_NONLINEARFORMINTEGRATOR_H
+#define RODIN_VARIATIONAL_NONLINEARFORMINTEGRATOR_H
 
 namespace Rodin::Variational
 {

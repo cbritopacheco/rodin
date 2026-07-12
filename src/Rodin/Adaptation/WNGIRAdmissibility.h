@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRAdmissibility.h
+ * @brief Admissibility constraints and safeguards for WNGIR displacements.
+ */
 #ifndef RODIN_ADAPTATION_WNGIRADMISSIBILITY_H
 #define RODIN_ADAPTATION_WNGIRADMISSIBILITY_H
 

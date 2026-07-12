@@ -8,8 +8,8 @@
  * @file LevelSetDiscretizer.h
  * @brief Level-set based implicit-domain discretization utilities.
  */
-#ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
-#define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
+#ifndef RODIN_MMG_LEVELSETDISCRETIZER_H
+#define RODIN_MMG_LEVELSETDISCRETIZER_H
 
 #include "Mesh.h"
 

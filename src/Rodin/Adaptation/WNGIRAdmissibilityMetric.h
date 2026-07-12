@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRAdmissibilityMetric.h
+ * @brief Bilinear-form integrator adding the admissibility (barrier) metric
+ * to the WNGIR step system.
+ */
 #ifndef RODIN_ADAPTATION_WNGIRADMISSIBILITYMETRIC_H
 #define RODIN_ADAPTATION_WNGIRADMISSIBILITYMETRIC_H
 

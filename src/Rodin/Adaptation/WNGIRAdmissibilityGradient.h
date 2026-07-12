@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRAdmissibilityGradient.h
+ * @brief Linear-form integrator assembling the admissibility gradient
+ * contribution to the WNGIR step system.
+ */
 #ifndef RODIN_ADAPTATION_WNGIRADMISSIBILITYGRADIENT_H
 #define RODIN_ADAPTATION_WNGIRADMISSIBILITYGRADIENT_H
 

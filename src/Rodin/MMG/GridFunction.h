@@ -8,8 +8,8 @@
  * @file GridFunction.h
  * @brief Grid function aliases for MMG-driven workflows.
  */
-#ifndef RODIN_RODINEXTERNAL_MMG_GRIDFUNCTION_H
-#define RODIN_RODINEXTERNAL_MMG_GRIDFUNCTION_H
+#ifndef RODIN_MMG_GRIDFUNCTION_H
+#define RODIN_MMG_GRIDFUNCTION_H
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Variational/ForwardDecls.h"

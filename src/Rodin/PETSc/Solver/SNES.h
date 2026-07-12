@@ -1,5 +1,11 @@
-#ifndef RODIN_SOLVER_PETSC_SNES_H
-#define RODIN_SOLVER_PETSC_SNES_H
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_PETSC_SOLVER_SNES_H
+#define RODIN_PETSC_SOLVER_SNES_H
 
 /**
  * @file SNES.h
@@ -238,4 +244,4 @@ namespace Rodin::PETSc::Solver
   using SNES = Rodin::Solver::SNES;
 }
 
-#endif // RODIN_SOLVER_PETSC_SNES_H
+#endif // RODIN_PETSC_SOLVER_SNES_H

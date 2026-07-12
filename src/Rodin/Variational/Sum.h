@@ -9,8 +9,8 @@
  * @brief Addition operation for functions, shape functions, and form integrators.
  */
 
-#ifndef RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
-#define RODIN_VARIATIONAL_FORMLANGUAGE_SUM_H
+#ifndef RODIN_VARIATIONAL_SUM_H
+#define RODIN_VARIATIONAL_SUM_H
 
 #include "Rodin/FormLanguage/List.h"
 #include "Rodin/Math/Traits.h"

@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file RandomPointOnTriangle.h
+ * @brief Uniform random point sampling on reference triangles for
+ * randomized tests.
+ */
 #ifndef RODIN_TEST_RANDOM_RANDOMPOINTONTRIANGLE_H
 #define RODIN_TEST_RANDOM_RANDOMPOINTONTRIANGLE_H
 

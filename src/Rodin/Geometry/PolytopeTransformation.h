@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_GEOMETRY_TRANSFORMATION_H
-#define RODIN_GEOMETRY_TRANSFORMATION_H
+#ifndef RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
+#define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
 /**
  * @file

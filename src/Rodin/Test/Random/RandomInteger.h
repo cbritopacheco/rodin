@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file RandomInteger.h
+ * @brief Uniform random integer generators for randomized tests.
+ */
 #ifndef RODIN_TEST_RANDOM_RANDOMINTEGER_H
 #define RODIN_TEST_RANDOM_RANDOMINTEGER_H
 

@@ -4,6 +4,12 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRSurfaceObservationMetric.h
+ * @brief Bilinear-form integrator assembling the residual-stabilized
+ * observation metric on interface facets (Levenberg-Marquardt-type
+ * damping of the WNGIR step).
+ */
 #ifndef RODIN_ADAPTATION_WNGIRSURFACEOBSERVATIONMETRIC_H
 #define RODIN_ADAPTATION_WNGIRSURFACEOBSERVATIONMETRIC_H
 

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_COS_H
-#define RODIN_VARIATIONAL_COS_H
+#ifndef RODIN_VARIATIONAL_COSINE_H
+#define RODIN_VARIATIONAL_COSINE_H
 
 /**
  * @file Cosine.h

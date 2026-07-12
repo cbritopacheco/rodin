@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRDetail.h
+ * @brief Implementation details for the WNGIR module (reference-cell
+ * margins, local geometry helpers). Not part of the public interface.
+ */
 #ifndef RODIN_ADAPTATION_WNGIRDETAIL_H
 #define RODIN_ADAPTATION_WNGIRDETAIL_H
 

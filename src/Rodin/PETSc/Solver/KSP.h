@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_SOLVER_PETSC_KSP_H
-#define RODIN_SOLVER_PETSC_KSP_H
+#ifndef RODIN_PETSC_SOLVER_KSP_H
+#define RODIN_PETSC_SOLVER_KSP_H
 
 /**
  * @file KSP.h
@@ -163,4 +163,4 @@ namespace Rodin::PETSc::Solver
   using KSP = Rodin::Solver::KSP;
 }
 
-#endif // RODIN_SOLVER_PETSC_KSP_H
+#endif // RODIN_PETSC_SOLVER_KSP_H

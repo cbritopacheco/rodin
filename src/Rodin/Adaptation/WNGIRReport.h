@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file WNGIRReport.h
+ * @brief Per-solve diagnostics reported by WNGIR.
+ */
 #ifndef RODIN_ADAPTATION_WNGIRREPORT_H
 #define RODIN_ADAPTATION_WNGIRREPORT_H
 

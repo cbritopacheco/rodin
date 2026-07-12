@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
-#define RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
+#ifndef RODIN_IO_GRIDFUNCTIONPRINTER_H
+#define RODIN_IO_GRIDFUNCTIONPRINTER_H
 
 #include <functional>
 #include <boost/filesystem.hpp>

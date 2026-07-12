@@ -73,12 +73,16 @@ def read_lines(path):
 
 
 def expected_guard(relpath):
-    # src/Rodin/Variational/H1/H1.h -> RODIN_VARIATIONAL_H1_H1_H
+    # src/Rodin/Variational/H1/H1.h   -> RODIN_VARIATIONAL_H1_H1_H
+    # src/Rodin/Variational/H1/H1.hpp -> RODIN_VARIATIONAL_H1_H1_HPP
+    # (.h and .hpp must NOT share a guard: the .hpp companions hold the
+    # out-of-line inline definitions and would be guarded out.)
     parts = relpath.split(os.sep)[2:]  # strip src/Rodin
     stem = parts[-1]
+    suffix = "_HPP" if stem.endswith(".hpp") else "_H"
     stem = re.sub(r"\.h(pp)?$", "", stem)
     parts = parts[:-1] + [stem]
-    return "RODIN_" + "_".join(p.upper() for p in parts) + "_H"
+    return "RODIN_" + "_".join(p.upper() for p in parts) + suffix
 
 
 def check_file(relpath, lines):

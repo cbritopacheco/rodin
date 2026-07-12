@@ -11,8 +11,8 @@
  * This file provides the Lagrangian class, which implements semi-Lagrangian
  * advection schemes for scalar fields in variational form.
  */
-#ifndef RODIN_MODELS_ADVECTION_LAGRANGIAN_H
-#define RODIN_MODELS_ADVECTION_LAGRANGIAN_H
+#ifndef RODIN_ADVECTION_LAGRANGIAN_H
+#define RODIN_ADVECTION_LAGRANGIAN_H
 
 #include <functional>
 

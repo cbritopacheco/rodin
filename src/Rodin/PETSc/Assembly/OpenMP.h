@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ASSEMBLY_OPENMP_PETSC_H
-#define RODIN_ASSEMBLY_OPENMP_PETSC_H
+#ifndef RODIN_PETSC_ASSEMBLY_OPENMP_H
+#define RODIN_PETSC_ASSEMBLY_OPENMP_H
 
 /**
  * @file
@@ -2176,4 +2176,4 @@ namespace Rodin::PETSc::Assembly
   using OpenMP = Rodin::Assembly::OpenMP<LinearAlgebraType, Operand>;
 }
 
-#endif // RODIN_ASSEMBLY_OPENMP_PETSC_H
+#endif // RODIN_PETSC_ASSEMBLY_OPENMP_H

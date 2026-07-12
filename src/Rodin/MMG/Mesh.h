@@ -8,8 +8,8 @@
  * @file Mesh.h
  * @brief MMG-aware mesh type extending Rodin local meshes.
  */
-#ifndef RODIN_EXTERNAL_MMG_MESH_H
-#define RODIN_EXTERNAL_MMG_MESH_H
+#ifndef RODIN_MMG_MESH_H
+#define RODIN_MMG_MESH_H
 
 #include "Rodin/Geometry.h"
 
