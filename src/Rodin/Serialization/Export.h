@@ -11,8 +11,13 @@
 #include "Rodin/Geometry/ParametricTransformation.h"
 #include "Rodin/Variational/P1/P1Element.h"
 
+// ParametricTransformation<FE> requires a scalar real-valued finite
+// element (its static_assert enforces FE::RangeType == Real): geometry
+// charts are built from scalar bases, with coordinates handled
+// per-component. RealP1Element is therefore the only exportable P1
+// instantiation; the previous Complex/Vector registrations could never
+// compile (and VectorP1Element is an alias template usable only with an
+// explicit scalar argument).
 BOOST_CLASS_EXPORT(Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealP1Element>);
-BOOST_CLASS_EXPORT(Rodin::Geometry::ParametricTransformation<Rodin::Variational::ComplexP1Element>);
-BOOST_CLASS_EXPORT(Rodin::Geometry::ParametricTransformation<Rodin::Variational::VectorP1Element>);
 
 #endif

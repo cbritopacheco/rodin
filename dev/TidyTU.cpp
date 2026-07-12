@@ -29,6 +29,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Heart.h>
 #include <Rodin/IO.h>
+#include <Rodin/Serialization/Export.h>
 #include <Rodin/Adaptation/WNGIR.h>
 
 int main()
