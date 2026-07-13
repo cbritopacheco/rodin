@@ -429,31 +429,6 @@ src/Rodin/Geometry/Point.h: warning: Member operator+(const Geometry::Point &p, 
 src/Rodin/Geometry/Point.h: warning: Member operator+(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator-(const Geometry::Point &p, const Math::SpatialVector< Scalar > &v) (function) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator-(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member Key(std::initializer_list< Index > vertices) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member Key(std::uint8_t n) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member Vertices (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member begin() (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member begin() const (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member const_iterator (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member const_reference (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member cswap(Index &a, Index &b) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member end() (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member end() const (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member getVertices() const (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member iterator (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member operator()(const Key &a, const Key &b) const (function) of struct Rodin::Geometry::Polytope::Key::SymmetricEquality is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member operator()(const Key &poly) const (function) of struct Rodin::Geometry::Polytope::Key::SymmetricHash is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member operator()(std::uint8_t i) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member operator()(std::uint8_t i) const (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member operator[](std::uint8_t i) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member operator[](std::uint8_t i) const (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member reference (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member resize(std::uint8_t n) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member serialize(Archive &ar, const unsigned int) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member size() const (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member size_type (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member sm64(std::uint64_t x) (function) of class Rodin::Geometry::Polytope::Key is not documented.
-src/Rodin/Geometry/Polytope.h: warning: Member value_type (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
 src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase is not documented.
 src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase< Cell, CellIterator > is not documented.
 src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase< Face, FaceIterator > is not documented.
