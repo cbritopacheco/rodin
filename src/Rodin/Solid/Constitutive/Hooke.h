@@ -55,7 +55,9 @@ namespace Rodin::Solid
           m_mu(mu)
       {}
 
+      /// @brief Copy constructor.
       Hooke(const Hooke&) = default;
+      /// @brief Move constructor.
       Hooke(Hooke&&) = default;
 
       /// @brief Gets the first Lamé parameter.

@@ -71,7 +71,9 @@ namespace Rodin::Solid
           m_mu(mu)
       {}
 
+      /// @brief Copy constructor.
       NeoHookean(const NeoHookean&) = default;
+      /// @brief Move constructor.
       NeoHookean(NeoHookean&&) = default;
 
       /// @brief Gets the first Lamé parameter.
@@ -80,6 +82,7 @@ namespace Rodin::Solid
       /// @brief Gets the shear modulus.
       Real getShearModulus() const { return m_mu; }
 
+      /// @brief Populates the invariant cache at a constitutive point.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -89,6 +92,7 @@ namespace Rodin::Solid
         cache.logJ = state.getLogJacobian();
       }
 
+      /// @brief Returns the stored strain-energy density.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const size_t d = cp.getKinematicState().getDimension();
@@ -97,6 +101,7 @@ namespace Rodin::Solid
              + 0.5 * m_lambda * cache.logJ * cache.logJ;
       }
 
+      /// @brief Computes the first Piola-Kirchhoff stress.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -110,6 +115,7 @@ namespace Rodin::Solid
         P = m_mu * F + (m_lambda * cache.logJ - m_mu) * FinvT;
       }
 
+      /// @brief Computes the material tangent action.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

@@ -73,10 +73,14 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<Range, Mesh>;
 
+      /// @brief Shear modulus function type.
       using MuType     = FunctionBase<MuDerived>;
+      /// @brief First Lamé parameter function type.
       using LambdaType = FunctionBase<LambdaDerived>;
 
       /// @brief Parent class type.
@@ -93,6 +97,7 @@ namespace Rodin::Variational
       static_assert(FormLanguage::IsVectorRange<Range>::Value);
 
     public:
+      /// @brief Constructs the P1 linear elasticity integrator.
       LinearElasticityIntegrator(
           const TrialFunction<Solution, TrialFESType>& u,
           const TestFunction<TestFESType>& v,
@@ -107,6 +112,7 @@ namespace Rodin::Variational
           m_quadrature(nullptr)
       {}
 
+      /// @brief Copy constructor.
       LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
         : Parent(other),
           m_lambda(other.m_lambda ? other.m_lambda->copy() : nullptr),
@@ -119,6 +125,7 @@ namespace Rodin::Variational
           m_matrix()
       {}
 
+      /// @brief Move constructor.
       LinearElasticityIntegrator(LinearElasticityIntegrator&& other)
         : Parent(std::move(other)),
           m_lambda(std::move(other.m_lambda)),
@@ -131,11 +138,13 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
       }
 
+      /// @brief Sets the current polytope and assembles the local matrix.
       LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -289,6 +298,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the current element stiffness matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -316,6 +326,7 @@ namespace Rodin::Variational
         return *m_lambda;
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Cells;

@@ -37,18 +37,28 @@ namespace Rodin::Solid
   class ActiveContraction final : public HyperElasticLaw<ActiveContraction<PassiveLaw, ActiveLaw>>
   {
     public:
+      /// @brief Cached passive and active quantities at a quadrature point.
       struct Cache
       {
+        /// @brief Passive law cache.
         typename PassiveLaw::Cache passive;
+        /// @brief Fiber kinematics built from the constitutive point.
         FiberKinematics fiber;
+        /// @brief Fiber strain driving the active branch.
         Real strain = 0.0;
+        /// @brief Current active extension.
         Real activeExtension = 0.0;
+        /// @brief Active branch response.
         typename ActiveLaw::Response active;
+        /// @brief Updated active branch internal state.
         typename ActiveLaw::State newState;
+        /// @brief Whether the dynamic active update was used.
         bool dynamic = false;
+        /// @brief Number of local Newton iterations used.
         size_t localIterations = 0;
       };
 
+      /// @brief Constructs the coupled active contraction law.
       ActiveContraction(
           const PassiveLaw& passiveLaw,
           const ActiveLaw& activeLaw = ActiveLaw())
@@ -73,16 +83,19 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns the passive hyperelastic law.
       const PassiveLaw& getPassiveLaw() const
       {
         return m_passiveLaw;
       }
 
+      /// @brief Returns the active fiber law.
       const ActiveLaw& getActiveLaw() const
       {
         return m_activeLaw;
       }
 
+      /// @brief Populates cached passive and active quantities.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         m_passiveLaw.setCache(cache.passive, cp);
@@ -147,6 +160,7 @@ namespace Rodin::Solid
         }
       }
 
+      /// @brief Returns the sum of passive and active strain-energy densities.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real passiveEnergy =
@@ -160,6 +174,7 @@ namespace Rodin::Solid
         return passiveEnergy + activeEnergy;
       }
 
+      /// @brief Adds the active contribution to the first Piola-Kirchhoff stress.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -171,6 +186,7 @@ namespace Rodin::Solid
               * cache.fiber.tensor();
       }
 
+      /// @brief Adds the active contribution to the material tangent action.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

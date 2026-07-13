@@ -136,6 +136,7 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const override
       {
         return m_polytope.value().get();
@@ -312,6 +313,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the current element stiffness matrix.
       ScalarType integrate(size_t tr, size_t te) override
       {
         return m_matrix(te, tr);
