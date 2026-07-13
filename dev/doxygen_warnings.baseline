@@ -398,25 +398,6 @@ src/Rodin/Geometry/Mesh.h: warning: Member triangle(T &&vs) (function) of class 
 src/Rodin/Geometry/Mesh.h: warning: Member wedge(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
 src/Rodin/Geometry/MeshBuilder.cpp: warning: no matching class member found for 
 src/Rodin/Geometry/MeshBuilder.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/MinSTCut.h: warning: Compound Rodin::Geometry::MinSTCut::Edge is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Compound Rodin::Geometry::MinSTCut::Result is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member Inside (variable) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member InvalidIndex (variable) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member Outside (variable) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member capacity (variable) of struct Rodin::Geometry::MinSTCut::Edge is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member classify(const std::vector< Real > &volumes, const std::vector< Real > &moments, const std::vector< Edge > &edges) const (function) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member classify(const std::vector< Real > &volumes, const std::vector< Real > &moments, const std::vector< Edge > &edges, const Options &options) const (function) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member cutEdges (variable) of struct Rodin::Geometry::MinSTCut::Result is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member energy (variable) of struct Rodin::Geometry::MinSTCut::Result is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member first (variable) of struct Rodin::Geometry::MinSTCut::Edge is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member getInsideCost(Real volume, Real moment) noexcept (function) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member getOutsideCost(Real volume, Real moment) noexcept (function) of class Rodin::Geometry::MinSTCut is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member index (variable) of struct Rodin::Geometry::MinSTCut::Edge is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member insideCells (variable) of struct Rodin::Geometry::MinSTCut::Result is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member labels (variable) of struct Rodin::Geometry::MinSTCut::Result is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member outsideCells (variable) of struct Rodin::Geometry::MinSTCut::Result is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member second (variable) of struct Rodin::Geometry::MinSTCut::Edge is not documented.
-src/Rodin/Geometry/MinSTCut.h: warning: Member solve(const std::vector< Real > &insideCosts, const std::vector< Real > &outsideCosts, const std::vector< Edge > &edges) const (function) of class Rodin::Geometry::MinSTCut is not documented.
 src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(Geometry::PointCloud &&pm, FE &&fe) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
 src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(Geometry::PointCloud &&pm, const FE &fe) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
 src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(ParametricTransformation &&other) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
