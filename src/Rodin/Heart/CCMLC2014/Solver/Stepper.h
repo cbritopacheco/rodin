@@ -47,15 +47,24 @@ namespace Rodin::Heart::CCMLC2014::Solver
   class StepperT
   {
     public:
+      /// @brief Scalar type used by the reduced model.
       using Scalar = Real;
+      /// @brief Dense matrix type used for Newton systems.
       using DenseMatrix = Math::Matrix<Scalar>;
+      /// @brief Dense vector type used for states and residuals.
       using DenseVector = Math::Vector<Scalar>;
+      /// @brief Dense linear system assembled by the reduced model.
       using DenseLinearSystem = Math::LinearSystem<DenseMatrix, DenseVector>;
 
+      /// @brief Dynamic state type.
       using State = Model::StateT<Scalar>;
+      /// @brief Model input and parameter type.
       using Input = Model::InputT<Scalar, PassiveEnergyLaw>;
+      /// @brief Nonlinear solve report type.
       using Report = Model::ReportT<Scalar, DenseLinearSystem>;
+      /// @brief Residual/Jacobian evaluation cache type.
       using EvalData = Model::EvalDataT<Scalar>;
+      /// @brief Time-history type.
       using History = Model::HistoryT<State>;
 
       /**
@@ -70,8 +79,13 @@ namespace Rodin::Heart::CCMLC2014::Solver
         public:
           /// @brief Parent class type.
           using Parent = Variational::ProblemBase<DenseLinearSystem>;
+          /// @brief Problem body type accepted by the variational interface.
           using ProblemBodyType = typename Parent::ProblemBodyType;
 
+          /**
+           * @brief Constructs the problem adapter from model inputs.
+           * @param in Model input parameters.
+           */
           explicit Problem(const Input& in)
             : m_dynamicSystem(in)
           {
@@ -105,6 +119,10 @@ namespace Rodin::Heart::CCMLC2014::Solver
             return *this;
           }
 
+          /**
+           * @brief Solves the assembled dense linear system.
+           * @param solver Linear solver used for the Newton correction.
+           */
           void solve(
               ::Rodin::Solver::LinearSolverBase<DenseLinearSystem>& solver) override
           {
@@ -118,8 +136,18 @@ namespace Rodin::Heart::CCMLC2014::Solver
           }
           Problem* copy() const noexcept override { return new Problem(*this); }
 
+          /**
+           * @brief Sets the current nonlinear unknown vector.
+           * @param xCurrent Current unknown vector.
+           */
           void setCurrent(DenseVector& xCurrent) { m_xCurrent = &xCurrent; }
 
+          /**
+           * @brief Sets state history and time-step data for assembly.
+           * @param history Previous state history.
+           * @param time Target time for the step.
+           * @param dt Time-step size.
+           */
           void setStepData(const History& history, Scalar time, Scalar dt)
           {
             m_history = history;
@@ -137,12 +165,21 @@ namespace Rodin::Heart::CCMLC2014::Solver
           Scalar m_dt = 0.0;
       };
 
+      /**
+       * @brief Constructs a stepper from model input parameters.
+       * @param input Model input parameters.
+       */
       explicit StepperT(const Input& input)
         : m_input(input), m_problem(input), m_solver(m_problem), m_newton(m_solver)
       {
         m_x = packUnknowns(m_state);
       }
 
+      /**
+       * @brief Sets the Newton absolute residual tolerance.
+       * @param atol Absolute tolerance.
+       * @return Reference to this stepper.
+       */
       StepperT& setAbsoluteTolerance(const Scalar atol)
       {
         m_atol = atol;
@@ -150,6 +187,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         return *this;
       }
 
+      /**
+       * @brief Sets the Newton relative residual tolerance.
+       * @param rtol Relative tolerance.
+       * @return Reference to this stepper.
+       */
       StepperT& setRelativeTolerance(const Scalar rtol)
       {
         m_rtol = rtol;
@@ -157,6 +199,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         return *this;
       }
 
+      /**
+       * @brief Sets the Newton step tolerance.
+       * @param stol Step tolerance.
+       * @return Reference to this stepper.
+       */
       StepperT& setStepTolerance(const Scalar stol)
       {
         m_stol = stol;
@@ -164,6 +211,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         return *this;
       }
 
+      /**
+       * @brief Sets the maximum number of Newton iterations.
+       * @param maxIt Maximum iteration count.
+       * @return Reference to this stepper.
+       */
       StepperT& setMaxIterations(const size_t maxIt)
       {
         m_maxIt = maxIt;
@@ -171,6 +223,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         return *this;
       }
 
+      /**
+       * @brief Sets the Newton damping factor.
+       * @param alpha Damping factor.
+       * @return Reference to this stepper.
+       */
       StepperT& setDampingFactor(const Scalar alpha)
       {
         m_damping = alpha;
@@ -178,6 +235,10 @@ namespace Rodin::Heart::CCMLC2014::Solver
         return *this;
       }
 
+      /**
+       * @brief Initializes the dynamic state and history.
+       * @param initial Initial state.
+       */
       void initialize(const State& initial)
       {
         m_state = initial;
@@ -226,6 +287,11 @@ namespace Rodin::Heart::CCMLC2014::Solver
         m_x = packUnknowns(m_state);
       }
 
+      /**
+       * @brief Advances the model by one time step.
+       * @param dt Time-step size.
+       * @return Report for the nonlinear solve.
+       */
       Report step(const Scalar dt)
       {
         assert(dt > Scalar(0));
@@ -256,11 +322,22 @@ namespace Rodin::Heart::CCMLC2014::Solver
         return m_report;
       }
 
+      /// @brief Returns the current state.
       const State& getState() const noexcept { return m_state; }
+      /// @brief Returns the stored time history.
       const History& getHistory() const noexcept { return m_history; }
+      /// @brief Returns the most recent nonlinear solve report.
       const Report& getReport() const noexcept { return m_report; }
+      /// @brief Returns the packed unknown vector.
       const DenseVector& getUnknowns() const noexcept { return m_x; }
 
+      /**
+       * @brief Restores a previously saved stepper state.
+       * @param state Current dynamic state.
+       * @param history Stored time history.
+       * @param unknowns Packed unknown vector.
+       * @param report Last nonlinear solve report.
+       */
       void restore(
           const State& state,
           const History& history,

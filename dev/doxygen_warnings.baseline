@@ -124,63 +124,6 @@ src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getPolytop
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member integrate(std::size_t tr, std::size_t te) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member HolzapfelReducedLaw(const Parameters &params=Parameters()) (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
-src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member getParameters() const noexcept (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member distalLength (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member distalRadius (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member gamma_c (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member k_0 (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member k_Inf (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member lambda (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member m (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member mu_0 (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member mu_Inf (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member mu_plasma (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member n (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member phi_quemada (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member proximalLength (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member proximalRadius (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member yasuda (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Compound Rodin::Heart::CCMLC2014::Physics::Rheology::CarreauYasuda is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Compound Rodin::Heart::CCMLC2014::Physics::Rheology::Cross is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Compound Rodin::Heart::CCMLC2014::Physics::Rheology::Newtonian is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Compound Rodin::Heart::CCMLC2014::Physics::Rheology::PowerLaw is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Compound Rodin::Heart::CCMLC2014::Physics::Rheology::Quemada is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Compound Rodin::Heart::CCMLC2014::Physics::SolverConfig is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member WindkesselOutflowEvaluator(const Input &input) (function) of class Rodin::Heart::CCMLC2014::Physics::WindkesselOutflowEvaluator is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member evaluate(EvalData &data) const (function) of class Rodin::Heart::CCMLC2014::Physics::WindkesselOutflowEvaluator is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member flowLaw(Real dp, Real L, Real radius, Real fallbackResistance, const Input &input) (function) of struct Rodin::Heart::CCMLC2014::Physics::Rheology::CarreauYasuda is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member flowLaw(Real dp, Real L, Real radius, Real fallbackResistance, const Input &input) (function) of struct Rodin::Heart::CCMLC2014::Physics::Rheology::Cross is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member flowLaw(Real dp, Real L, Real radius, Real fallbackResistance, const Input &input) (function) of struct Rodin::Heart::CCMLC2014::Physics::Rheology::Newtonian is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member flowLaw(Real dp, Real L, Real radius, Real fallbackResistance, const Input &input) (function) of struct Rodin::Heart::CCMLC2014::Physics::Rheology::PowerLaw is not documented.
-src/Rodin/Heart/CCMLC2014/Physics/Windkessel.h: warning: Member flowLaw(Real dp, Real L, Real radius, Real fallbackResistance, const Input &input) (function) of struct Rodin::Heart::CCMLC2014::Physics::Rheology::Quemada is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member DenseLinearSystem (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member DenseMatrix (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member DenseVector (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member EvalData (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member History (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member Input (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member Problem(const Input &in) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT::Problem is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member ProblemBodyType (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT::Problem is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member Report (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member Scalar (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member State (typedef) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member StepperT(const Input &input) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member getHistory() const noexcept (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member getReport() const noexcept (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member getState() const noexcept (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member getUnknowns() const noexcept (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member initialize(const State &initial) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member restore(const State &state, const History &history, const DenseVector &unknowns, const Report &report) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setAbsoluteTolerance(const Scalar atol) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setCurrent(DenseVector &xCurrent) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT::Problem is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setDampingFactor(const Scalar alpha) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setMaxIterations(const size_t maxIt) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setRelativeTolerance(const Scalar rtol) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setStepData(const History &history, Scalar time, Scalar dt) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT::Problem is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member setStepTolerance(const Scalar stol) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member solve(::Rodin::Solver::LinearSolverBase< DenseLinearSystem > &solver) override (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT::Problem is not documented.
-src/Rodin/Heart/CCMLC2014/Solver/Stepper.h: warning: Member step(const Scalar dt) (function) of class Rodin::Heart::CCMLC2014::Solver::StepperT is not documented.
 src/Rodin/IO/GridFunctionLoader.h: warning: Compound Rodin::IO::GridFunctionLoaderBase is not documented.
 src/Rodin/IO/GridFunctionLoader.h: warning: Member GridFunctionLoader(ObjectType &gf) (function) of class Rodin::IO::GridFunctionLoader is not documented.
 src/Rodin/IO/GridFunctionLoader.h: warning: Member ObjectType (typedef) of class Rodin::IO::GridFunctionLoader is not documented.

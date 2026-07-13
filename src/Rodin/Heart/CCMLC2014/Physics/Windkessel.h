@@ -25,6 +25,9 @@
 
 namespace Rodin::Heart::CCMLC2014::Physics
 {
+  /**
+   * @brief Numerical tolerances and iteration limits for branch-flow solves.
+   */
   struct SolverConfig
   {
     /// @brief Pressure-drop threshold for the Poiseuille fallback.
@@ -61,8 +64,21 @@ namespace Rodin::Heart::CCMLC2014::Physics
 
   namespace Rheology
   {
+    /**
+     * @brief Linear Newtonian branch-flow law.
+     */
     struct Newtonian
     {
+      /**
+       * @brief Evaluates flow and derivative with respect to pressure drop.
+       * @tparam Input Model input type.
+       * @param dp Pressure drop.
+       * @param L Branch length.
+       * @param radius Branch radius.
+       * @param fallbackResistance Linear fallback resistance.
+       * @param input Model input parameters.
+       * @return Pair containing flow and derivative.
+       */
       template <typename Input>
       static std::pair<Real, Real> flowLaw(
           Real dp, Real L, Real radius, Real fallbackResistance, const Input &input)
@@ -71,8 +87,21 @@ namespace Rodin::Heart::CCMLC2014::Physics
       }
   };
 
+  /**
+   * @brief Power-law non-Newtonian branch-flow law.
+   */
   struct PowerLaw
   {
+    /**
+     * @brief Evaluates flow and derivative with respect to pressure drop.
+     * @tparam Input Model input type.
+     * @param dp Pressure drop.
+     * @param L Branch length.
+     * @param radius Branch radius.
+     * @param fallbackResistance Linear fallback resistance.
+     * @param input Model input parameters.
+     * @return Pair containing flow and derivative.
+     */
     template <typename Input>
     static std::pair<Real, Real> flowLaw(
         Real dp, Real L, Real radius, Real fallbackResistance, const Input &input)
@@ -103,8 +132,21 @@ namespace Rodin::Heart::CCMLC2014::Physics
     }
   };
 
+  /**
+   * @brief Quemada non-Newtonian branch-flow law.
+   */
   struct Quemada
   {
+    /**
+     * @brief Evaluates flow and derivative with respect to pressure drop.
+     * @tparam Input Model input type.
+     * @param dp Pressure drop.
+     * @param L Branch length.
+     * @param radius Branch radius.
+     * @param fallbackResistance Linear fallback resistance.
+     * @param input Model input parameters.
+     * @return Pair containing flow and derivative.
+     */
     template <typename Input>
     static std::pair<Real, Real> flowLaw(
         Real dp, Real L, Real radius, Real fallbackResistance, const Input &input)
@@ -220,8 +262,21 @@ namespace Rodin::Heart::CCMLC2014::Physics
     }
   };
 
+  /**
+   * @brief Cross non-Newtonian branch-flow law.
+   */
   struct Cross
   {
+    /**
+     * @brief Evaluates flow and derivative with respect to pressure drop.
+     * @tparam Input Model input type.
+     * @param dp Pressure drop.
+     * @param L Branch length.
+     * @param radius Branch radius.
+     * @param fallbackResistance Linear fallback resistance.
+     * @param input Model input parameters.
+     * @return Pair containing flow and derivative.
+     */
     template <typename Input>
     static std::pair<Real, Real> flowLaw(
         Real dp, Real L, Real radius, Real fallbackResistance, const Input &input)
@@ -357,8 +412,21 @@ namespace Rodin::Heart::CCMLC2014::Physics
     }
   };
 
+  /**
+   * @brief Carreau-Yasuda non-Newtonian branch-flow law.
+   */
   struct CarreauYasuda
   {
+    /**
+     * @brief Evaluates flow and derivative with respect to pressure drop.
+     * @tparam Input Model input type.
+     * @param dp Pressure drop.
+     * @param L Branch length.
+     * @param radius Branch radius.
+     * @param fallbackResistance Linear fallback resistance.
+     * @param input Model input parameters.
+     * @return Pair containing flow and derivative.
+     */
     template <typename Input>
     static std::pair<Real, Real> flowLaw(Real dp, Real L, Real radius,
                                          Real fallbackResistance,
@@ -507,9 +575,18 @@ namespace Rodin::Heart::CCMLC2014::Physics
   class WindkesselOutflowEvaluator
   {
     public:
+      /**
+       * @brief Constructs an evaluator from model input parameters.
+       * @param input Model input parameters.
+       */
       explicit WindkesselOutflowEvaluator(const Input &input) : m_input(input)
       {}
 
+      /**
+       * @brief Evaluates Windkessel flows and derivatives into cached data.
+       * @tparam EvalData Evaluation-data type.
+       * @param data Evaluation data updated in place.
+       */
       template <class EvalData> void evaluate(EvalData &data) const
       {
         using Scalar = decltype(data.y);
