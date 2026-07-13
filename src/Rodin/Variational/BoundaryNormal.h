@@ -220,8 +220,9 @@ namespace Rodin::Variational
           const auto xf = p.getCoordinates();
 
           // cell interior point (physical)
-          const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
-          Geometry::Point pc(cellPoly, rc_cell);
+          const auto rcCell =
+            Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+          Geometry::Point pc(cellPoly, rcCell);
           const auto xc = pc.getCoordinates();
 
           // If res points into the cell, flip it to point outward.

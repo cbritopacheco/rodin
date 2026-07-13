@@ -177,8 +177,8 @@ namespace Rodin::Variational
         skey.vdim  = vdim;
         skey.valid = true;
 
-        const bool structure_changed = !(m_cache.skey == skey);
-        if (structure_changed)
+        const bool structureChanged = !(m_cache.skey == skey);
+        if (structureChanged)
         {
           m_cache.skey = skey;
           m_cache.vkey = {}; // invalidate value cache
@@ -211,8 +211,8 @@ namespace Rodin::Variational
         vkey.qp    = qp;
         vkey.valid = true;
 
-        const bool value_changed = !qf || !(m_cache.vkey == vkey);
-        if (value_changed)
+        const bool valueChanged = !qf || !(m_cache.vkey == vkey);
+        if (valueChanged)
         {
           m_cache.vkey = vkey;
 
@@ -220,11 +220,11 @@ namespace Rodin::Variational
             qf ? qf->getPoint(qp) : p.getReferenceCoordinates();
 
           // Cheap scalar P1 element (no allocations)
-          const P1Element<ScalarType> fe_scalar(geom);
-          const size_t nv = fe_scalar.getCount();
+          const P1Element<ScalarType> feScalar(geom);
+          const size_t nv = feScalar.getCount();
 
           for (size_t a = 0; a < nv; ++a)
-            m_cache.phi_vertex[a] = fe_scalar.getBasis(a)(rq);
+            m_cache.phi_vertex[a] = feScalar.getBasis(a)(rq);
 
           if constexpr (std::is_same_v<RangeType, ScalarType>)
           {

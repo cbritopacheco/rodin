@@ -949,11 +949,9 @@ namespace Rodin::Assembly
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
           std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
 
-          auto sparse_entry =
-            [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
-                std::vector<std::pair<Index, ScalarType>>& localRhs,
-                Index row, Index col, ScalarType val)
-          {
+          auto sparseEntry = [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
+                               std::vector<std::pair<Index, ScalarType>>& localRhs,
+                               Index row, Index col, ScalarType val) {
             if (val == ScalarType(0))
               return;
 
@@ -974,9 +972,8 @@ namespace Rodin::Assembly
             }
           };
 
-          auto vector_entry =
-            [&](std::vector<std::pair<Index, ScalarType>>& localRhs, Index row, ScalarType val)
-          {
+          auto vectorEntry = [&](std::vector<std::pair<Index, ScalarType>>& localRhs,
+                               Index row, ScalarType val) {
             if (val == ScalarType(0))
               return;
 
@@ -1023,7 +1020,7 @@ namespace Rodin::Assembly
                   {
                     const Index J = colsDOF(j);
                     const ScalarType val = Math::conj(integrator->integrate(j, i));
-                    sparse_entry(localT, localRhs, I, J, val);
+                    sparseEntry(localT, localRhs, I, J, val);
                   }
                 }
               }
@@ -1088,7 +1085,7 @@ namespace Rodin::Assembly
                     {
                       const Index J = colsDOF(j);
                       const ScalarType val = Math::conj(integrator->integrate(j, i));
-                      sparse_entry(localT, localRhs, I, J, val);
+                      sparseEntry(localT, localRhs, I, J, val);
                     }
                   }
                 }
@@ -1102,7 +1099,7 @@ namespace Rodin::Assembly
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                sparse_entry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
+                sparseEntry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
           }
 
           // ---------------- LFIs ----------------
@@ -1137,8 +1134,8 @@ namespace Rodin::Assembly
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = dofs(l);
-                  vector_entry(
-                      localRhs, I, -static_cast<ScalarType>(integrator->integrate(l)));
+                  vectorEntry(
+                    localRhs, I, -static_cast<ScalarType>(integrator->integrate(l)));
                 }
               }
             }
@@ -1149,10 +1146,8 @@ namespace Rodin::Assembly
           {
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
-              vector_entry(
-                  rhsChunks[0],
-                  static_cast<Index>(i),
-                  static_cast<ScalarType>(vec.coeff(i)));
+              vectorEntry(rhsChunks[0], static_cast<Index>(i),
+                static_cast<ScalarType>(vec.coeff(i)));
           }
 
           // ---------------- Reduce RHS chunks into b ----------------
@@ -1731,8 +1726,7 @@ namespace Rodin::Assembly
             tchunks.shrink_to_fit();
         }
 
-        auto sparse_entry = [&](int tid, Index row, Index col, ScalarType val)
-        {
+        auto sparseEntry = [&](int tid, Index row, Index col, ScalarType val) {
           if (val == ScalarType(0))
             return;
 
@@ -1818,7 +1812,7 @@ namespace Rodin::Assembly
                         continue;
 
                       if constexpr (IsSparse)
-                        sparse_entry(tid, I, J, val);
+                        sparseEntry(tid, I, J, val);
                       else
                       {
                         const ScalarType colValue =
@@ -1928,7 +1922,7 @@ namespace Rodin::Assembly
                           continue;
 
                         if constexpr (IsSparse)
-                          sparse_entry(tid, I, J, val);
+                          sparseEntry(tid, I, J, val);
                         else
                         {
                           const ScalarType colValue =
@@ -2057,11 +2051,9 @@ namespace Rodin::Assembly
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-	                sparse_entry(0,
-	                  static_cast<Index>(vOff) + it.row(),
-	                  static_cast<Index>(uOff) + it.col(),
-	                  it.value());
-	          }
+                sparseEntry(0, static_cast<Index>(vOff) + it.row(),
+                  static_cast<Index>(uOff) + it.col(), it.value());
+          }
 
           for (int tid = 0; tid < tc; ++tid)
           {
@@ -2281,9 +2273,9 @@ namespace Rodin::Assembly
         auto& Av = const_cast<ValueType&>(input.getShapeFunction());
         const auto& essBdr = input.getEssentialBoundary();
 
-        const auto& fes_u = u.getFiniteElementSpace();
-        const auto& fes_v = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh  = fes_u.getMesh();
+        const auto& fesU = u.getFiniteElementSpace();
+        const auto& fesV = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh = fesU.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
 
         res.clear();
@@ -2296,15 +2288,13 @@ namespace Rodin::Assembly
             if (!a || !essBdr.count(*a)) continue;
           }
 
-          const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
-          const auto& fe_v = fes_v.getFiniteElement(faceDim, fi);
-          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
-          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          const auto& feU = fesU.getFiniteElement(faceDim, fi);
+          const auto& feV = fesV.getFiniteElement(faceDim, fi);
+          const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
 
-          const Index nMasters = static_cast<Index>(fe_v.getCount());
-          for (Index s = 0;
-               s < static_cast<Index>(fe_u.getCount());
-               s++)
+          const Index nMasters = static_cast<Index>(feV.getCount());
+          for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
           {
             const Index slave = slaveDOFs[s];
             if (res.find(slave) != res.end()) continue;
@@ -2324,9 +2314,8 @@ namespace Rodin::Assembly
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =
-                fes_u.getPullback({ faceDim, fi }, std::move(basisCallable));
-              const Scalar c =
-                static_cast<Scalar>(fe_u.getLinearForm(s)(mapping));
+                fesU.getPullback({faceDim, fi}, std::move(basisCallable));
+              const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
               if (c != Scalar(0))
               {
                 mIdx.push_back(masterDOFs[j]);

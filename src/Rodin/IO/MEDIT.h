@@ -317,9 +317,13 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::repeat;
         size_t i = 0;
         Data res{ Array<Index>(m_n), ~Geometry::Attribute(0) };
-        const auto get_vertex = [&](auto& ctx) { assert(i < m_n); res.vertices(i++) = _attr(ctx); };
-        const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
-        const auto p = uint_[get_vertex] >> repeat(m_n - 1)[uint_[get_vertex]] >> uint_[get_attribute];
+        const auto getVertex = [&](auto& ctx) {
+          assert(i < m_n);
+          res.vertices(i++) = _attr(ctx);
+        };
+        const auto getAttribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
+        const auto p =
+          uint_[getVertex] >> repeat(m_n - 1)[uint_[getVertex]] >> uint_[getAttribute];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
         if (begin != end)
           return {};
@@ -357,14 +361,18 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::repeat;
         size_t i = 0;
         Data res{ Math::SpatialPoint(m_sdim), ~Geometry::Attribute(0) };
-        const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
-        const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
+        const auto getX = [&](auto& ctx) {
+          assert(i < m_sdim);
+          res.vertex(i++) = _attr(ctx);
+        };
+        const auto getAttribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const bool r = [&]()
         {
           if (m_sdim == 0)
-            return boost::spirit::x3::phrase_parse(begin, end, uint_[get_attribute], space);
+            return boost::spirit::x3::phrase_parse(
+              begin, end, uint_[getAttribute], space);
           const auto p =
-            double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
+            double_[getX] >> repeat(m_sdim - 1)[double_[getX]] >> uint_[getAttribute];
           return boost::spirit::x3::phrase_parse(begin, end, p, space);
         }();
         if (begin != end)
@@ -420,8 +428,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::alpha;
 
       std::string kw;
-      const auto get_keyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto p = (+alpha)[get_keyword];
+      const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
+      const auto p = (+alpha)[getKeyword];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -443,8 +451,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
 
       int v;
-      const auto get_integer = [&](auto& ctx) { v = _attr(ctx); };
-      const auto p = int_[get_integer];
+      const auto getInteger = [&](auto& ctx) { v = _attr(ctx); };
+      const auto p = int_[getInteger];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -466,8 +474,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
 
       unsigned int v;
-      const auto get_unsigned_integer = [&](auto& ctx) { v = _attr(ctx); };
-      const auto p = uint_[get_unsigned_integer];
+      const auto getUnsignedInteger = [&](auto& ctx) { v = _attr(ctx); };
+      const auto p = uint_[getUnsignedInteger];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -490,8 +498,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
       using boost::spirit::x3::alpha;
       std::string kw;
-      const auto get_keyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto pkw = (+alpha)[get_keyword];
+      const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
+      const auto pkw = (+alpha)[getKeyword];
       const bool rkw = boost::spirit::x3::phrase_parse(begin, end, pkw, space);
       if (rkw)
       {
@@ -499,8 +507,8 @@ namespace Rodin::IO::MEDIT
         if (kw == expected)
         {
           unsigned int version;
-          const auto get_version = [&](auto& ctx) { version = _attr(ctx); };
-          const auto pversion = uint_[get_version];
+          const auto getVersion = [&](auto& ctx) { version = _attr(ctx); };
+          const auto pversion = uint_[getVersion];
           const bool rversion = boost::spirit::x3::phrase_parse(begin, end, pversion, space);
           if (begin != end)
             return {};
@@ -536,8 +544,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
       using boost::spirit::x3::alpha;
       std::string kw;
-      const auto get_keyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto pkw = (+alpha)[get_keyword];
+      const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
+      const auto pkw = (+alpha)[getKeyword];
       const bool rkw = boost::spirit::x3::phrase_parse(begin, end, pkw, space);
       if (rkw)
       {
@@ -545,8 +553,8 @@ namespace Rodin::IO::MEDIT
         if (kw == expected)
         {
           unsigned int dimension;
-          const auto get_dimension = [&](auto& ctx) { dimension = _attr(ctx); };
-          const auto pdimension = uint_[get_dimension];
+          const auto getDimension = [&](auto& ctx) { dimension = _attr(ctx); };
+          const auto pdimension = uint_[getDimension];
           const bool rdimension = boost::spirit::x3::phrase_parse(begin, end, pdimension, space);
           if (begin != end)
             return {};
@@ -784,9 +792,9 @@ namespace Rodin::IO
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
-        const auto get_sol_count = [&](auto& ctx) { solCount = _attr(ctx); };
-        const auto get_solution_type = [&](auto& ctx) { solutionType = _attr(ctx); };
-        const auto p = uint_[get_sol_count] >> uint_[get_solution_type];
+        const auto getSolCount = [&](auto& ctx) { solCount = _attr(ctx); };
+        const auto getSolutionType = [&](auto& ctx) { solutionType = _attr(ctx); };
+        const auto p = uint_[getSolCount] >> uint_[getSolutionType];
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
@@ -977,10 +985,10 @@ namespace Rodin::IO
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
 
-        const auto get_sol_count = [&](auto& ctx) { solCount  = _attr(ctx); };
-        const auto get_solution_type = [&](auto& ctx) { solutionType = _attr(ctx); };
+        const auto getSolCount = [&](auto& ctx) { solCount = _attr(ctx); };
+        const auto getSolutionType = [&](auto& ctx) { solutionType = _attr(ctx); };
 
-        const auto p = uint_[get_sol_count] >> uint_[get_solution_type];
+        const auto p = uint_[getSolCount] >> uint_[getSolutionType];
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
@@ -1064,16 +1072,12 @@ namespace Rodin::IO
 
         // P1/Q1 evaluators on reference elements
 
-        auto evalP1_on_segment = [&](Real x,
-                                     const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnSegment = [&](Real x, const ScalarType* u) -> ScalarType {
           // Reference segment [0,1]; vertex 0 at x=0, vertex 1 at x=1
           return (ScalarType(1) - x) * u[0] + x * u[1];
         };
 
-        auto evalP1_on_triangle = [&](Real x, Real y,
-                                      const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnTriangle = [&](Real x, Real y, const ScalarType* u) -> ScalarType {
           // Ref triangle (0,0)-(1,0)-(0,1)
           const Real l0 = Real(1) - x - y;
           const Real l1 = x;
@@ -1081,25 +1085,22 @@ namespace Rodin::IO
           return l0 * u[0] + l1 * u[1] + l2 * u[2];
         };
 
-        auto evalQ1_on_quad = [&](Real x, Real y,
-                                  const ScalarType* u) -> ScalarType
-        {
+        auto evalQ1OnQuad = [&](Real x, Real y, const ScalarType* u) -> ScalarType {
           // Ref quad [0,1]^2 with vertices:
           // 0:(0,0), 1:(1,0), 2:(1,1), 3:(0,1)
-          const Real one_x = Real(1) - x;
-          const Real one_y = Real(1) - y;
+          const Real oneX = Real(1) - x;
+          const Real oneY = Real(1) - y;
 
-          const Real psi0 = one_x * one_y;
-          const Real psi1 = x      * one_y;
+          const Real psi0 = oneX * oneY;
+          const Real psi1 = x * oneY;
           const Real psi2 = x      * y;
-          const Real psi3 = one_x  * y;
+          const Real psi3 = oneX * y;
 
           return psi0 * u[0] + psi1 * u[1] + psi2 * u[2] + psi3 * u[3];
         };
 
-        auto evalP1_on_tet = [&](Real x, Real y, Real z,
-                                 const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnTet = [&](
+                             Real x, Real y, Real z, const ScalarType* u) -> ScalarType {
           // Ref tet (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1)
           const Real l0 = Real(1) - x - y - z;
           const Real l1 = x;
@@ -1108,9 +1109,8 @@ namespace Rodin::IO
           return l0 * u[0] + l1 * u[1] + l2 * u[2] + l3 * u[3];
         };
 
-        auto evalP1_on_wedge = [&](Real x, Real y, Real z,
-                                   const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnWedge = [&](Real x, Real y, Real z,
+                               const ScalarType* u) -> ScalarType {
           // Ref wedge = triangle(x,y) × segment(z)
           //
           // Triangle barycentric:
@@ -1124,11 +1124,11 @@ namespace Rodin::IO
           const Real l1 = x;
           const Real l2 = y;
 
-          const Real one_z = Real(1) - z;
+          const Real oneZ = Real(1) - z;
 
-          const Real psi0 = l0 * one_z;
-          const Real psi1 = l1 * one_z;
-          const Real psi2 = l2 * one_z;
+          const Real psi0 = l0 * oneZ;
+          const Real psi1 = l1 * oneZ;
+          const Real psi2 = l2 * oneZ;
           const Real psi3 = l0 * z;
           const Real psi4 = l1 * z;
           const Real psi5 = l2 * z;
@@ -1137,9 +1137,8 @@ namespace Rodin::IO
                + psi3 * u[3] + psi4 * u[4] + psi5 * u[5];
         };
 
-        auto evalP1_on_pyramid = [&](Real x, Real y, Real z,
-                                     const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnPyramid = [&](Real x, Real y, Real z,
+                                 const ScalarType* u) -> ScalarType {
           const Real q = Real(1) - z;
           if (q == Real(0))
             return u[4];
@@ -1205,47 +1204,46 @@ namespace Rodin::IO
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             // Gather vertex values u_vert[0..nCellVertices-1]
-            ScalarType u_vert[8];
+            ScalarType uVert[8];
             for (size_t lv = 0; lv < nCellVertices; ++lv)
             {
               const Index vIdx = verts[lv];
               assert(static_cast<size_t>(vIdx) < nVertices);
-              u_vert[lv] =
-                vertexValues[comp * nVertices + static_cast<size_t>(vIdx)];
+              uVert[lv] = vertexValues[comp * nVertices + static_cast<size_t>(vIdx)];
             }
 
             // Interpolate at each H1 nodal point of this cell
             for (size_t j = 0; j < nLocal; ++j)
             {
               const auto& pt = nodes[j];
-              ScalarType u_val{};
+              ScalarType uVal{};
 
               switch (geom)
               {
                 case Geometry::Polytope::Type::Point:
                 {
                   // Single vertex, nothing to interpolate
-                  u_val = u_vert[0];
+                  uVal = uVert[0];
                   break;
                 }
                 case Geometry::Polytope::Type::Segment:
                 {
                   const Real x = pt.x();
-                  u_val = evalP1_on_segment(x, u_vert);
+                  uVal = evalP1OnSegment(x, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Triangle:
                 {
                   const Real x = pt.x();
                   const Real y = pt.y();
-                  u_val = evalP1_on_triangle(x, y, u_vert);
+                  uVal = evalP1OnTriangle(x, y, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Quadrilateral:
                 {
                   const Real x = pt.x();
                   const Real y = pt.y();
-                  u_val = evalQ1_on_quad(x, y, u_vert);
+                  uVal = evalQ1OnQuad(x, y, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Tetrahedron:
@@ -1253,7 +1251,7 @@ namespace Rodin::IO
                   const Real x = pt.x();
                   const Real y = pt.y();
                   const Real z = pt.z();
-                  u_val = evalP1_on_tet(x, y, z, u_vert);
+                  uVal = evalP1OnTet(x, y, z, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Pyramid:
@@ -1261,7 +1259,7 @@ namespace Rodin::IO
                   const Real x = pt.x();
                   const Real y = pt.y();
                   const Real z = pt.z();
-                  u_val = evalP1_on_pyramid(x, y, z, u_vert);
+                  uVal = evalP1OnPyramid(x, y, z, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Wedge:
@@ -1269,7 +1267,7 @@ namespace Rodin::IO
                   const Real x = pt.x();
                   const Real y = pt.y();
                   const Real z = pt.z();
-                  u_val = evalP1_on_wedge(x, y, z, u_vert);
+                  uVal = evalP1OnWedge(x, y, z, uVert);
                   break;
                 }
                 default:
@@ -1278,7 +1276,7 @@ namespace Rodin::IO
 
               const Index gdof = cdofs(static_cast<Index>(j));
               assert(static_cast<size_t>(gdof) < scalarSize);
-              data.coeffRef(gdof + static_cast<Index>(comp * scalarSize)) = u_val;
+              data.coeffRef(gdof + static_cast<Index>(comp * scalarSize)) = uVal;
             }
           }
         }

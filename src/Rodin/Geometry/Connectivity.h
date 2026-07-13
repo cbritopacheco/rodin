@@ -295,11 +295,11 @@ namespace Rodin::Geometry
           void save(Archive& ar, const unsigned int /*version*/) const
           {
             ar & right;
-            std::vector<Polytope::Key> left_keys;
-            left_keys.reserve(left.size());
+            std::vector<Polytope::Key> leftKeys;
+            leftKeys.reserve(left.size());
             for (const Polytope::Key* p : left)
-              left_keys.push_back(*p);
-            ar & left_keys;
+              leftKeys.push_back(*p);
+            ar & leftKeys;
           }
 
           /**
@@ -310,11 +310,11 @@ namespace Rodin::Geometry
           void load(Archive& ar, const unsigned int /*version*/)
           {
             ar & right;
-            std::vector<Polytope::Key> left_keys;
-            ar & left_keys;
+            std::vector<Polytope::Key> leftKeys;
+            ar & leftKeys;
             left.clear();
-            left.reserve(left_keys.size());
-            for (const auto& k : left_keys)
+            left.reserve(leftKeys.size());
+            for (const auto& k : leftKeys)
             {
               auto it = right.find(k);
               assert(it != right.end());

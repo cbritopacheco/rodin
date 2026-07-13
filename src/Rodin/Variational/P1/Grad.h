@@ -349,8 +349,8 @@ namespace Rodin::Variational
         ckey.transOrder = transOrder;
         ckey.valid = true;
 
-        const bool cell_changed = !(m_cache.cellKey == ckey);
-        if (cell_changed)
+        const bool cellChanged = !(m_cache.cellKey == ckey);
+        if (cellChanged)
         {
           m_cache.cellKey = ckey;
           m_cache.qpKey = {}; // invalidate qp cache
@@ -365,15 +365,14 @@ namespace Rodin::Variational
         }
 
         // ---- decide if gradients depend on quadrature point
-        const bool tensor_ref =
-          (geom == Geometry::Polytope::Type::Quadrilateral) ||
+        const bool tensorRef = (geom == Geometry::Polytope::Type::Quadrilateral) ||
           (geom == Geometry::Polytope::Type::Wedge) ||
           (geom == Geometry::Polytope::Type::Hexahedron);
 
-        const bool needs_qp = (transOrder > 1) || tensor_ref;
+        const bool needsQp = (transOrder > 1) || tensorRef;
 
         typename Cache::QpKey qkey;
-        if (needs_qp)
+        if (needsQp)
         {
           qkey.qf = qf;
           qkey.qp = qf ? ip.getIndex() : 0;
@@ -387,8 +386,8 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
-        if (cell_changed || qp_changed)
+        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
+        if (cellChanged || qpChanged)
         {
           m_cache.qpKey = qkey;
 

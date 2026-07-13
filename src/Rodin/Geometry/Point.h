@@ -187,13 +187,13 @@ namespace Rodin::Geometry
 
       /**
        * @brief Computes the Lp norm.
-       * @tparam p Norm order
+       * @tparam P Norm order
        * @returns Lp norm @f$ \|p\|_p @f$
        */
-      template <size_t p>
+      template <size_t P>
       Real lpNorm() const
       {
-        return vector().lpNorm<p>();
+        return vector().lpNorm<P>();
       }
 
       /**

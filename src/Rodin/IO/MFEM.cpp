@@ -46,13 +46,11 @@ namespace Rodin::IO
   {
     auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto kw = MFEM::ParseKeyword()(line.begin(), line.end());
-    if (!kw && *kw != MFEM::Keyword::dimension)
+    if (!kw && *kw != MFEM::Keyword::Dimension)
     {
       Alert::MemberFunctionException(*this, __func__)
-         << "Expected "
-         << std::quoted(toCharString(MFEM::Keyword::dimension))
-         << " on line " << m_currentLineNumber << "."
-         << Alert::Raise;
+        << "Expected " << std::quoted(toCharString(MFEM::Keyword::Dimension))
+        << " on line " << m_currentLineNumber << "." << Alert::Raise;
     }
     line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
     auto dimension = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
@@ -98,7 +96,7 @@ namespace Rodin::IO
 
       switch (*keyword)
       {
-        case MFEM::Keyword::boundary:
+        case MFEM::Keyword::Boundary:
         {
           MFEM::getline(is, line, m_currentLineNumber);
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
@@ -138,7 +136,7 @@ namespace Rodin::IO
           }
           continue;
         }
-        case MFEM::Keyword::elements:
+        case MFEM::Keyword::Elements:
         {
           MFEM::getline(is, line, m_currentLineNumber);
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
@@ -167,7 +165,7 @@ namespace Rodin::IO
           }
           continue;
         }
-        case MFEM::Keyword::vertices:
+        case MFEM::Keyword::Vertices:
         {
           MFEM::getline(is, line, m_currentLineNumber);
           auto count = MFEM::ParseUnsignedInteger()(line.begin(), line.end());
@@ -267,7 +265,7 @@ namespace Rodin::IO
   void MeshPrinter<FileFormat::MFEM, Context::Local>::printMesh(std::ostream &os)
   {
     const auto& mesh = getObject();
-    os << MFEM::Keyword::elements << '\n' << mesh.getCellCount() << '\n';
+    os << MFEM::Keyword::Elements << '\n' << mesh.getCellCount() << '\n';
     for (auto it = mesh.getCell(); !it.end(); ++it)
     {
       auto g = MFEM::getGeometry(it->getGeometry());
@@ -331,7 +329,7 @@ namespace Rodin::IO
     os << '\n';
 
     const size_t faceCount = mesh.getDimension() == 0 ? 0 : mesh.getFaceCount();
-    os << MFEM::Keyword::boundary << '\n' << faceCount << '\n';
+    os << MFEM::Keyword::Boundary << '\n' << faceCount << '\n';
     if (mesh.getDimension() > 0)
     {
       for (auto it = mesh.getFace(); !it.end(); ++it)
@@ -397,7 +395,7 @@ namespace Rodin::IO
     }
     os << '\n';
 
-    os << MFEM::Keyword::vertices << '\n'
+    os << MFEM::Keyword::Vertices << '\n'
        << mesh.getVertexCount() << '\n'
        << mesh.getSpaceDimension() << '\n';
 

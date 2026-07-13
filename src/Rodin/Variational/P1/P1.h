@@ -232,48 +232,56 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Point);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Point);
+            return sElement;
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Segment);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Segment);
+            return sElement;
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Triangle);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Triangle);
+            return sElement;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Quadrilateral);
+            return sElement;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Tetrahedron);
+            return sElement;
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Pyramid);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Pyramid);
+            return sElement;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Wedge);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Wedge);
+            return sElement;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Hexahedron);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Hexahedron);
+            return sElement;
           }
         }
         assert(false);
-        static thread_local constexpr ElementType s_null;
-        return s_null;
+        static thread_local constexpr ElementType sNull;
+        return sNull;
       }
 
       /**

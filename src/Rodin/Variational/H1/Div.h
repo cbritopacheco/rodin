@@ -207,7 +207,7 @@ namespace Rodin::Variational
           // assume vdim==d; we take dot with mapped gradients component-wise.
           const auto JinvT = p.getJacobianInverse().transpose();
 
-          SpatialVectorType grad_phys(d);
+          SpatialVectorType gradPhys(d);
 
           out = ScalarType(0);
 
@@ -232,17 +232,17 @@ namespace Rodin::Variational
             for (size_t j = 0; j < d; ++j)
               ref(j) = feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
-            grad_phys = JinvT * ref;
+            gradPhys = JinvT * ref;
 
             // divergence contribution is u_comp * dphi/dx_comp if comp < d
             // (only makes sense when vdim == d; if vdim != d, we only sum over min(vdim,d))
             if (comp < d)
             {
-              const auto& u_a = gf[fes.getGlobalIndex({d, i}, a)];
+              const auto& uA = gf[fes.getGlobalIndex({d, i}, a)];
               // u_a is vector coefficient for basis "component", but in your layout
               // GridFunction DOF for vector space is scalar (component value).
               // If gf[...] returns ScalarType (typical), then:
-              out += u_a * grad_phys(comp);
+              out += uA * gradPhys(comp);
             }
           }
         }
@@ -335,7 +335,8 @@ namespace Rodin::Variational
           }
         };
 
-        std::vector<ScalarType> div_phys; // size = ndof (vector dofs)
+        /// @brief Cached physical divergences per vector DOF (size = ndof).
+        std::vector<ScalarType> divPhys;
         Key key;
       };
 
@@ -418,8 +419,8 @@ namespace Rodin::Variational
         const size_t nscalar = feS.getCount();
         const size_t ndof = vdim * nscalar;
 
-        if (m_cache.div_phys.size() != ndof)
-          m_cache.div_phys.resize(ndof);
+        if (m_cache.divPhys.size() != ndof)
+          m_cache.divPhys.resize(ndof);
 
         const auto* tab = qf ? &feS.getTabulation(*qf) : nullptr;
         const auto& rc = p.getReferenceCoordinates();
@@ -443,7 +444,7 @@ namespace Rodin::Variational
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             const size_t local = alpha * vdim + comp;
-            m_cache.div_phys[local] = (comp < d) ? phys(comp) : ScalarType(0);
+            m_cache.divPhys[local] = (comp < d) ? phys(comp) : ScalarType(0);
           }
         }
 
@@ -453,8 +454,8 @@ namespace Rodin::Variational
       ScalarType getBasis(size_t local) const
       {
         assert(m_cache.key);
-        assert(local < m_cache.div_phys.size());
-        return m_cache.div_phys[local];
+        assert(local < m_cache.divPhys.size());
+        return m_cache.divPhys[local];
       }
 
       constexpr

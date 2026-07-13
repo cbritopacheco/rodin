@@ -173,8 +173,8 @@ namespace Rodin::QF
        *   w_i = \frac{2}{n(n-1) [P_{n-1}(x_i)]^2}
        * @f]
        */
-      static void gll_1d_unit(size_t n, std::vector<Real>& x01, std::vector<Real>& w01,
-                              size_t maxIt = 100, Real tol = 1e-14)
+      static void gll1dUnit(size_t n, std::vector<Real>& x01, std::vector<Real>& w01,
+        size_t maxIt = 100, Real tol = 1e-14)
       {
         assert(n >= 2);
         // On [-1,1], endpoints ±1, interior are roots of P'_{n-1}(x).
@@ -217,20 +217,21 @@ namespace Rodin::QF
               // Here we use a stable relation:
               // d/dx P_j satisfies: P'_j = j/(x^2-1) (x P_j - P_{j-1})
               // Differentiate again (closed form). For robustness, use a small step secant on dPn1.
-              Real xk_eps = xk * (1.0 + 1e-8) + ((xk==0)?1e-8:0);
+              Real xkEps = xk * (1.0 + 1e-8) + ((xk == 0) ? 1e-8 : 0);
               // evaluate dP at xk_eps
               {
-                Real p0e = 1.0, p1e = xk_eps;
+                Real p0e = 1.0, p1e = xkEps;
                 for (size_t j = 2; j <= mdeg; ++j)
                 {
                   const Real jj = static_cast<Real>(j);
-                  const Real pj = ((2*jj-1)*xk_eps*p1e - (jj-1)*p0e) / jj;
+                  const Real pj = ((2 * jj - 1) * xkEps * p1e - (jj - 1) * p0e) / jj;
                   p0e = p1e; p1e = pj;
                 }
                 const Real Pn1e  = p1e;
                 const Real Pn2e  = p0e;
-                const Real dPn1e = (static_cast<Real>(mdeg) * (xk_eps*Pn1e - Pn2e)) / (xk_eps*xk_eps - 1.0);
-                const Real d2 = (dPn1e - dPn1) / (xk_eps - xk);
+                const Real dPn1e = (static_cast<Real>(mdeg) * (xkEps * Pn1e - Pn2e)) /
+                  (xkEps * xkEps - 1.0);
+                const Real d2 = (dPn1e - dPn1) / (xkEps - xk);
                 const Real dx = dPn1 / d2;
                 xk -= dx;
                 if (std::abs(dx) < tol) break;
@@ -272,14 +273,30 @@ namespace Rodin::QF
       {
         switch (getGeometry())
         {
-          case Geometry::Polytope::Type::Point:         build_point();                break;
-          case Geometry::Polytope::Type::Segment:       build_segment(m_nx);          break;
-          case Geometry::Polytope::Type::Quadrilateral: build_quad(m_nx, m_ny);       break;
-          case Geometry::Polytope::Type::Triangle:      build_tri(m_nx, m_nx);        break;
-          case Geometry::Polytope::Type::Tetrahedron:   build_tet(m_nx, m_ny, m_nz);  break;
-          case Geometry::Polytope::Type::Pyramid:       build_pyramid(m_nx, m_ny, m_nz); break;
-          case Geometry::Polytope::Type::Wedge:         build_wedge(m_nx, m_nz);      break;
-          case Geometry::Polytope::Type::Hexahedron:    build_hex(m_nx, m_ny, m_nz);  break;
+          case Geometry::Polytope::Type::Point:
+            buildPoint();
+            break;
+          case Geometry::Polytope::Type::Segment:
+            buildSegment(m_nx);
+            break;
+          case Geometry::Polytope::Type::Quadrilateral:
+            buildQuad(m_nx, m_ny);
+            break;
+          case Geometry::Polytope::Type::Triangle:
+            buildTri(m_nx, m_nx);
+            break;
+          case Geometry::Polytope::Type::Tetrahedron:
+            buildTet(m_nx, m_ny, m_nz);
+            break;
+          case Geometry::Polytope::Type::Pyramid:
+            buildPyramid(m_nx, m_ny, m_nz);
+            break;
+          case Geometry::Polytope::Type::Wedge:
+            buildWedge(m_nx, m_nz);
+            break;
+          case Geometry::Polytope::Type::Hexahedron:
+            buildHex(m_nx, m_ny, m_nz);
+            break;
         }
       }
 
@@ -288,7 +305,7 @@ namespace Rodin::QF
        *
        * Creates a single quadrature point at the origin with weight 1.
        */
-      void build_point()
+      void buildPoint()
       {
         m_points.clear();
         m_weights.resize(1);
@@ -304,9 +321,10 @@ namespace Rodin::QF
        * Constructs @f$ n @f$ Gauss-Lobatto points on the reference segment
        * @f$ [0,1] @f$ including both endpoints.
        */
-      void build_segment(size_t n)
+      void buildSegment(size_t n)
       {
-        std::vector<Real> x,w; gll_1d_unit(n,x,w);
+        std::vector<Real> x, w;
+        gll1dUnit(n, x, w);
         m_points.clear(); m_points.reserve(n); m_weights.resize(n);
         for (size_t i=0;i<n;++i){
           Math::SpatialVector<Real> p; p.resize(1); p[0]=x[i];
@@ -324,10 +342,11 @@ namespace Rodin::QF
        * quadrilateral @f$ [0,1] \times [0,1] @f$ using 1D Gauss-Lobatto
        * rules in each direction. Total number of points: @f$ nx \times ny @f$.
        */
-      void build_quad(size_t nx, size_t ny)
+      void buildQuad(size_t nx, size_t ny)
       {
         std::vector<Real> x,wx,y,wy;
-        gll_1d_unit(nx,x,wx); gll_1d_unit(ny,y,wy);
+        gll1dUnit(nx, x, wx);
+        gll1dUnit(ny, y, wy);
         const size_t N = nx*ny;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
@@ -352,12 +371,13 @@ namespace Rodin::QF
        * with Jacobian @f$ (1-u) @f$. The reference triangle has vertices
        * at @f$ (0,0) @f$, @f$ (1,0) @f$, and @f$ (0,1) @f$ with area 1/2.
        */
-      void build_tri(size_t nu, size_t nv)
+      void buildTri(size_t nu, size_t nv)
       {
         // Duffy with 1D GLL in each param:
         // (r,s)=(u,(1-u)v),  J=(1-u)
         std::vector<Real> u,wu,v,wv;
-        gll_1d_unit(nu,u,wu); gll_1d_unit(nv,v,wv);
+        gll1dUnit(nu, u, wu);
+        gll1dUnit(nv, v, wv);
         const size_t N = nu*nv;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
@@ -385,12 +405,14 @@ namespace Rodin::QF
        * with Jacobian @f$ (1-u)^2(1-v) @f$. The reference tetrahedron has
        * volume 1/6.
        */
-      void build_tet(size_t nu, size_t nv, size_t nw)
+      void buildTet(size_t nu, size_t nv, size_t nw)
       {
         // 3D Duffy with 1D GLL:
         // (r,s,t)=(u,(1-u)v,(1-u)(1-v)w),  J=(1-u)^2(1-v)
         std::vector<Real> u,wu,v,wv,w,ww;
-        gll_1d_unit(nu,u,wu); gll_1d_unit(nv,v,wv); gll_1d_unit(nw,w,ww);
+        gll1dUnit(nu, u, wu);
+        gll1dUnit(nv, v, wv);
+        gll1dUnit(nw, w, ww);
         const size_t N = nu*nv*nw;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
@@ -417,11 +439,13 @@ namespace Rodin::QF
        *
        * The reference wedge has volume 1/2.
        */
-      void build_wedge(size_t ntri, size_t nz)
+      void buildWedge(size_t ntri, size_t nz)
       {
         // triangle (Duffy with GLL) × segment (GLL)
         std::vector<Real> u,wu,v,wv,z,wz;
-        gll_1d_unit(ntri,u,wu); gll_1d_unit(ntri,v,wv); gll_1d_unit(nz,z,wz);
+        gll1dUnit(ntri, u, wu);
+        gll1dUnit(ntri, v, wv);
+        gll1dUnit(nz, z, wz);
         const size_t N = ntri*ntri*nz;
         m_points.clear(); m_points.reserve(N); m_weights.resize(N);
         size_t k=0;
@@ -446,12 +470,12 @@ namespace Rodin::QF
        * Maps tensor-product Gauss-Lobatto points by
        * @f$ x=(1-z)u, y=(1-z)v @f$ with Jacobian @f$ (1-z)^2 @f$.
        */
-      void build_pyramid(size_t nx, size_t ny, size_t nz)
+      void buildPyramid(size_t nx, size_t ny, size_t nz)
       {
         std::vector<Real> u,wu,v,wv,z,wz;
-        gll_1d_unit(nx,u,wu);
-        gll_1d_unit(ny,v,wv);
-        gll_1d_unit(nz,z,wz);
+        gll1dUnit(nx, u, wu);
+        gll1dUnit(ny, v, wv);
+        gll1dUnit(nz, z, wz);
         const size_t N = nx*ny*nz;
         m_points.clear();
         m_points.reserve(N);
@@ -486,12 +510,12 @@ namespace Rodin::QF
        * hexahedron @f$ [0,1]^3 @f$. Total number of points:
        * @f$ nx \times ny \times nz @f$.
        */
-      void build_hex(size_t nx, size_t ny, size_t nz)
+      void buildHex(size_t nx, size_t ny, size_t nz)
       {
         std::vector<Real> x, wx, y, wy, z, wz;
-        gll_1d_unit(nx, x, wx);
-        gll_1d_unit(ny, y, wy);
-        gll_1d_unit(nz, z, wz);
+        gll1dUnit(nx, x, wx);
+        gll1dUnit(ny, y, wy);
+        gll1dUnit(nz, z, wz);
 
         const size_t N = nx * ny * nz;
         m_points.clear();

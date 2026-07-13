@@ -60,7 +60,7 @@ namespace Rodin::Variational
       }
 
     private:
-      static constexpr Real constexpr_cos(Real x)
+      static constexpr Real constexprCos(Real x)
       {
         constexpr Real pi = Math::Constants::pi();
         const Real twoPi = static_cast<Real>(2.0) * pi;
@@ -108,17 +108,17 @@ namespace Rodin::Variational
           // Initial guess: Chebyshev point
           const Real ii   = static_cast<Real>(i);
           const Real kReal = static_cast<Real>(K);
-          Real x = static_cast<Real>(-constexpr_cos(Math::Constants::pi() * ii / kReal));
+          Real x = static_cast<Real>(-constexprCos(Math::Constants::pi() * ii / kReal));
 
           for (size_t it = 0; it < RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS; ++it)
           {
             Real P, dP;
             LegendrePolynomial<K>::getValue(P, dP, x); // P_K(x), P'_K(x)
 
-            const Real one_minus_x2 = static_cast<Real>(1.0) - x * x;
+            const Real oneMinusX2 = static_cast<Real>(1.0) - x * x;
 
             // f(x) = (1 - x^2) P'_K(x)
-            const Real f = one_minus_x2 * dP;
+            const Real f = oneMinusX2 * dP;
 
             // From Legendre ODE: f'(x) = -K(K+1) P_K(x)
             const Real df = -static_cast<Real>(K) * static_cast<Real>(K + 1) * P;

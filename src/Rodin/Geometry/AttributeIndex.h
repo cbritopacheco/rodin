@@ -156,14 +156,14 @@ namespace Rodin::Geometry
 
         if (first == this)
         {
-          std::unique_lock<std::shared_mutex> lock_this(mutex);
-          std::shared_lock<std::shared_mutex> lock_other(other.mutex);
+          std::unique_lock<std::shared_mutex> lockThis(mutex);
+          std::shared_lock<std::shared_mutex> lockOther(other.mutex);
           slots = other.slots;
         }
         else
         {
-          std::shared_lock<std::shared_mutex> lock_other(other.mutex);
-          std::unique_lock<std::shared_mutex> lock_this(mutex);
+          std::shared_lock<std::shared_mutex> lockOther(other.mutex);
+          std::unique_lock<std::shared_mutex> lockThis(mutex);
           slots = other.slots;
         }
 
@@ -198,9 +198,9 @@ namespace Rodin::Geometry
         if (this == &other)
           return *this;
 
-        std::unique_lock<std::shared_mutex> this_lock(mutex, std::defer_lock);
-        std::unique_lock<std::shared_mutex> other_lock(other.mutex, std::defer_lock);
-        std::lock(this_lock, other_lock);
+        std::unique_lock<std::shared_mutex> thisLock(mutex, std::defer_lock);
+        std::unique_lock<std::shared_mutex> otherLock(other.mutex, std::defer_lock);
+        std::lock(thisLock, otherLock);
 
         slots = std::move(other.slots);
         return *this;

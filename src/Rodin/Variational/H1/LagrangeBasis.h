@@ -227,13 +227,13 @@ namespace Rodin::Variational
           if (n == 0)
             continue;
 
-          Real L_n = 1;
+          Real lN = 1;
           for (size_t m = 0; m < n; ++m)
           {
-            L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-            L_n /= static_cast<Real>(m + 1);
+            lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+            lN /= static_cast<Real>(m + 1);
           }
-          result *= L_n;
+          result *= lN;
         }
 
         return result;
@@ -271,7 +271,7 @@ namespace Rodin::Variational
                 break;
               }
 
-              Real dL_n = 0;
+              Real dLN = 0;
               for (size_t p = 0; p < n; ++p)
               {
                 Real prod = static_cast<Real>(K);
@@ -284,22 +284,22 @@ namespace Rodin::Variational
                   }
                 }
                 prod /= static_cast<Real>(p + 1);
-                dL_n += prod;
+                dLN += prod;
               }
-              term *= dL_n;
+              term *= dLN;
             }
             else
             {
               if (n == 0)
                 continue;
 
-              Real L_n = 1;
+              Real lN = 1;
               for (size_t m = 0; m < n; ++m)
               {
-                L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                L_n /= static_cast<Real>(m + 1);
+                lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+                lN /= static_cast<Real>(m + 1);
               }
-              term *= L_n;
+              term *= lN;
             }
           }
 
@@ -341,13 +341,13 @@ namespace Rodin::Variational
           if (n == 0)
             continue;
 
-          Real L_n = 1;
+          Real lN = 1;
           for (size_t m = 0; m < n; ++m)
           {
-            L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-            L_n /= static_cast<Real>(m + 1);
+            lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+            lN /= static_cast<Real>(m + 1);
           }
-          result *= L_n;
+          result *= lN;
         }
 
         return result;
@@ -391,7 +391,7 @@ namespace Rodin::Variational
                 break;
               }
 
-              Real dL_n = 0;
+              Real dLN = 0;
               for (size_t p = 0; p < n; ++p)
               {
                 Real prod = static_cast<Real>(K);
@@ -404,22 +404,22 @@ namespace Rodin::Variational
                   }
                 }
                 prod /= static_cast<Real>(p + 1);
-                dL_n += prod;
+                dLN += prod;
               }
-              term *= dL_n;
+              term *= dLN;
             }
             else
             {
               if (n == 0)
                 continue;
 
-              Real L_n = 1;
+              Real lN = 1;
               for (size_t m = 0; m < n; ++m)
               {
-                L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                L_n /= static_cast<Real>(m + 1);
+                lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+                lN /= static_cast<Real>(m + 1);
               }
-              term *= L_n;
+              term *= lN;
             }
           }
 
@@ -609,38 +609,38 @@ namespace Rodin::Variational
         // Triangle part
         const Real lambda[3] = { 1.0 - x - y, x, y };
 
-        const size_t tri_indices[3] = { K - i - j, i, j };
+        const size_t triIndices[3] = {K - i - j, i, j};
 
-        Real tri_val = 1;
+        Real triVal = 1;
         for (size_t dim = 0; dim < 3; ++dim)
         {
-          const size_t n = tri_indices[dim];
+          const size_t n = triIndices[dim];
           if (n == 0)
             continue;
 
-          Real L_n = 1;
+          Real lN = 1;
           for (size_t m = 0; m < n; ++m)
           {
-            L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-            L_n /= static_cast<Real>(m + 1);
+            lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+            lN /= static_cast<Real>(m + 1);
           }
-          tri_val *= L_n;
+          triVal *= lN;
         }
 
         // Segment part in z on GLL01<K>
         const auto& nodes = GLL01<K>::getNodes();
-        Real seg_val = 1;
+        Real segVal = 1;
         const Real zk = nodes[k];
         for (size_t s = 0; s <= K; ++s)
         {
           if (s != k)
           {
             const Real zs = nodes[s];
-            seg_val *= (z - zs) / (zk - zs);
+            segVal *= (z - zs) / (zk - zs);
           }
         }
 
-        return tri_val * seg_val;
+        return triVal * segVal;
       }
 
       // deriv_dim = 0 -> \partial/\partialx, 1 -> \partial/\partialy, 2 -> \partial/\partialz
@@ -648,7 +648,7 @@ namespace Rodin::Variational
         size_t i, size_t j, size_t k, size_t deriv_dim,
         Real x, Real y, Real z)
       {
-        const auto& seg_nodes = GLL01<K>::getNodes();
+        const auto& segNodes = GLL01<K>::getNodes();
 
         if (deriv_dim < 2)
         {
@@ -656,9 +656,9 @@ namespace Rodin::Variational
           // Triangle derivative
           const Real lambda[3] = { 1.0 - x - y, x, y };
           const Real dlambda[3][2] = { {-1, -1}, { 1, 0 }, { 0, 1 } };
-          const size_t tri_indices[3] = { K - i - j, i, j };
+          const size_t triIndices[3] = {K - i - j, i, j};
 
-          Real tri_deriv = 0;
+          Real triDeriv = 0;
 
           for (size_t d = 0; d < 3; ++d)
           {
@@ -666,7 +666,7 @@ namespace Rodin::Variational
 
             for (size_t dim = 0; dim < 3; ++dim)
             {
-              const size_t n = tri_indices[dim];
+              const size_t n = triIndices[dim];
 
               if (dim == d)
               {
@@ -676,7 +676,7 @@ namespace Rodin::Variational
                   break;
                 }
 
-                Real dL_n = 0;
+                Real dLN = 0;
                 for (size_t p = 0; p < n; ++p)
                 {
                   Real prod = static_cast<Real>(K);
@@ -689,41 +689,41 @@ namespace Rodin::Variational
                     }
                   }
                   prod /= static_cast<Real>(p + 1);
-                  dL_n += prod;
+                  dLN += prod;
                 }
-                term *= dL_n;
+                term *= dLN;
               }
               else
               {
                 if (n == 0)
                   continue;
 
-                Real L_n = 1;
+                Real lN = 1;
                 for (size_t m = 0; m < n; ++m)
                 {
-                  L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-                  L_n /= static_cast<Real>(m + 1);
+                  lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+                  lN /= static_cast<Real>(m + 1);
                 }
-                term *= L_n;
+                term *= lN;
               }
             }
 
-            tri_deriv += term;
+            triDeriv += term;
           }
 
           // Segment value
-          Real seg_val = 1;
-          const Real zk = seg_nodes[k];
+          Real segVal = 1;
+          const Real zk = segNodes[k];
           for (size_t s = 0; s <= K; ++s)
           {
             if (s != k)
             {
-              const Real zs = seg_nodes[s];
-              seg_val *= (z - zs) / (zk - zs);
+              const Real zs = segNodes[s];
+              segVal *= (z - zs) / (zk - zs);
             }
           }
 
-          return tri_deriv * seg_val;
+          return triDeriv * segVal;
         }
         else
         {
@@ -731,40 +731,40 @@ namespace Rodin::Variational
           // Triangle value
           const Real lambda[3] = { 1.0 - x - y, x, y };
 
-          size_t tri_indices[3] = { K - i - j, i, j };
+          size_t triIndices[3] = {K - i - j, i, j};
 
-          Real tri_val = 1;
+          Real triVal = 1;
           for (size_t dim = 0; dim < 3; ++dim)
           {
-            size_t n = tri_indices[dim];
+            size_t n = triIndices[dim];
             if (n == 0)
               continue;
 
-            Real L_n = 1;
+            Real lN = 1;
             for (size_t m = 0; m < n; ++m)
             {
-              L_n *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
-              L_n /= static_cast<Real>(m + 1);
+              lN *= (static_cast<Real>(K) * lambda[dim] - static_cast<Real>(m));
+              lN /= static_cast<Real>(m + 1);
             }
-            tri_val *= L_n;
+            triVal *= lN;
           }
 
           // Segment derivative
-          const Real zk = seg_nodes[k];
+          const Real zk = segNodes[k];
           Real dseg = 0;
 
           for (size_t s = 0; s <= K; ++s)
           {
             if (s != k)
             {
-              const Real zs = seg_nodes[s];
+              const Real zs = segNodes[s];
               Real term = 1;
 
               for (size_t q = 0; q <= K; ++q)
               {
                 if (q != k && q != s)
                 {
-                  const Real zq = seg_nodes[q];
+                  const Real zq = segNodes[q];
                   term *= (z - zq) / (zk - zq);
                 }
               }
@@ -773,7 +773,7 @@ namespace Rodin::Variational
             }
           }
 
-          return tri_val * dseg;
+          return triVal * dseg;
         }
       }
   };

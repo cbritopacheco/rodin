@@ -184,7 +184,8 @@ namespace Rodin::QF
        * on the unit interval @f$ [0,1] @f$. Nodes are the zeros of the
        * Legendre polynomial @f$ P_n(x) @f$, found using Newton's method.
        */
-      static void gl_1d_unit(size_t n, std::vector<Real>& x, std::vector<Real>& w, size_t maxIt = 100, Real tol = 1e-14);
+      static void gl1dUnit(size_t n, std::vector<Real>& x, std::vector<Real>& w,
+        size_t maxIt = 100, Real tol = 1e-14);
 
       /**
        * @brief Builds the quadrature rule for the selected geometry.
@@ -194,27 +195,27 @@ namespace Rodin::QF
       /**
        * @brief Builds quadrature for a point (0D).
        */
-      void build_point();
+      void buildPoint();
 
       /**
        * @brief Builds 1D Gauss-Legendre quadrature on a segment.
        * @param n Number of quadrature points
        */
-      void build_segment(size_t n);
+      void buildSegment(size_t n);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a quadrilateral.
        * @param nx Number of points in first direction
        * @param ny Number of points in second direction
        */
-      void build_quad(size_t nx, size_t ny);
+      void buildQuad(size_t nx, size_t ny);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a triangle.
        * @param nu Number of points in first parametric direction
        * @param nv Number of points in second parametric direction
        */
-      void build_tri(size_t nu, size_t nv);
+      void buildTri(size_t nu, size_t nv);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a tetrahedron.
@@ -222,14 +223,14 @@ namespace Rodin::QF
        * @param nv Number of points in second parametric direction
        * @param nw Number of points in third parametric direction
        */
-      void build_tet(size_t nu, size_t nv, size_t nw);
+      void buildTet(size_t nu, size_t nv, size_t nw);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a wedge (prism).
        * @param ntri Number of points for the triangular cross-section
        * @param nz Number of points in the extrusion direction
        */
-      void build_wedge(size_t ntri, size_t nz);
+      void buildWedge(size_t ntri, size_t nz);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a pyramid.
@@ -237,7 +238,7 @@ namespace Rodin::QF
        * @param ny Number of points in collapsed y-direction
        * @param nz Number of points in collapsed z-direction
        */
-      void build_pyramid(size_t nx, size_t ny, size_t nz);
+      void buildPyramid(size_t nx, size_t ny, size_t nz);
 
       /**
        * @brief Builds Gauss-Legendre quadrature on a hexahedron (cube).
@@ -245,7 +246,7 @@ namespace Rodin::QF
        * @param ny Number of points in y-direction
        * @param nz Number of points in z-direction
        */
-      void build_hex(size_t nx, size_t ny, size_t nz);
+      void buildHex(size_t nx, size_t ny, size_t nz);
 
       Geometry::Polytope::Type m_geometry; ///< Polytope geometry type
       size_t m_nx { 2 }, m_ny { 2 }, m_nz { 2 }; ///< Number of points per direction

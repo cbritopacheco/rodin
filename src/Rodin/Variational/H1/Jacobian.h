@@ -345,7 +345,8 @@ namespace Rodin::Variational
         };
 
         // minimal cache: physical gradients for scalar basis indices alpha
-        std::vector<SpatialVectorType> grad_phys; // size = nscalar, each size = dim
+        /// @brief Cached physical gradients per scalar DOF (size = nscalar).
+        std::vector<SpatialVectorType> gradPhys;
         Key key;
       };
 
@@ -430,10 +431,10 @@ namespace Rodin::Variational
         const H1Element<K, ScalarType> feS(geom);
         const size_t nscalar = feS.getCount();
 
-        if (m_cache.grad_phys.size() != nscalar)
-          m_cache.grad_phys.resize(nscalar);
+        if (m_cache.gradPhys.size() != nscalar)
+          m_cache.gradPhys.resize(nscalar);
 
-        for (auto& g : m_cache.grad_phys)
+        for (auto& g : m_cache.gradPhys)
           if (g.size() != d) g.resize(d);
 
         const auto* tab = qf ? &feS.getTabulation(*qf) : nullptr;
@@ -450,7 +451,7 @@ namespace Rodin::Variational
                 ? tab->getGradient(qp, alpha)[j]
                 : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
-          m_cache.grad_phys[alpha] = JinvT * ref;
+          m_cache.gradPhys[alpha] = JinvT * ref;
         }
 
         return *this;
@@ -469,7 +470,7 @@ namespace Rodin::Variational
         const size_t alpha = local / vdim;
         const size_t comp  = local % vdim;
 
-        assert(alpha < m_cache.grad_phys.size());
+        assert(alpha < m_cache.gradPhys.size());
         assert(vdim <= RangeType::MaxSize);
         assert(d <= RangeType::MaxSize);
 
@@ -477,7 +478,7 @@ namespace Rodin::Variational
         J.setZero();
 
         for (std::uint8_t j = 0; j < d; ++j)
-          J(comp, j) = m_cache.grad_phys[alpha](j);
+          J(comp, j) = m_cache.gradPhys[alpha](j);
 
         return J;
       }

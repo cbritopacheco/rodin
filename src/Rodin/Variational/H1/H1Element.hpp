@@ -341,7 +341,7 @@ namespace Rodin::Variational
       const auto& rc = qf.getPoint(qp);
 
       Scalar* phi_row  = t.phi.data()  + qp * ndof;
-      Scalar* dphi_row = t.dphi.data() + qp * ndof * dim;
+      Scalar* dphiRow = t.dphi.data() + qp * ndof * dim;
 
       for (size_t a = 0; a < ndof; ++a)
       {
@@ -349,7 +349,7 @@ namespace Rodin::Variational
 
         phi_row[a] = bfa(rc);
 
-        Scalar* d = dphi_row + a * dim;
+        Scalar* d = dphiRow + a * dim;
         for (size_t i = 0; i < dim; ++i)
           d[i] = bfa.template getDerivative<1>(i)(rc);
       }
@@ -613,32 +613,27 @@ namespace Rodin::Variational
         DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
 
         Scalar result = Scalar(0);
-        size_t mode_idx = 0;
+        size_t modeIdx = 0;
 
-        Rodin::Utility::ForIndex<K + 1>(
-            [&](auto p_idx)
-            {
-              constexpr size_t P = p_idx.value;
-              Rodin::Utility::ForIndex<K + 1 - P>(
-                  [&](auto q_idx)
-                  {
-                    constexpr size_t Q = q_idx.value;
-                    Real psi;
-                    DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
-                    result += inverse(mode_idx, m_local) * psi;
-                    ++mode_idx;
-                  });
-            });
+        Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+          constexpr size_t P = pIdx.value;
+          Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+            constexpr size_t Q = qIdx.value;
+            Real psi;
+            DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+            result += inverse(modeIdx, m_local) * psi;
+            ++modeIdx;
+          });
+        });
 
         return result;
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
         // Tensor product GLL01 × GLL01 (Lagrange)
-        const size_t j_idx = m_local / (K + 1);
-        const size_t i_idx = m_local % (K + 1);
-        return LagrangeBasisQuadrilateral<K>::getBasis(
-            i_idx, j_idx, r.x(), r.y());
+        const size_t jIdx = m_local / (K + 1);
+        const size_t iIdx = m_local % (K + 1);
+        return LagrangeBasisQuadrilateral<K>::getBasis(iIdx, jIdx, r.x(), r.y());
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
@@ -650,28 +645,21 @@ namespace Rodin::Variational
             ac, bc, cc, r.x(), r.y(), r.z());
 
         Real result = 0;
-        size_t mode_idx = 0;
+        size_t modeIdx = 0;
 
-        Rodin::Utility::ForIndex<K + 1>(
-            [&](auto p_idx)
-            {
-              constexpr size_t P = p_idx.value;
-              Rodin::Utility::ForIndex<K + 1 - P>(
-                  [&](auto q_idx)
-                  {
-                    constexpr size_t Q = q_idx.value;
-                    Rodin::Utility::ForIndex<K + 1 - P - Q>(
-                        [&](auto r_idx)
-                        {
-                          constexpr size_t R = r_idx.value;
-                          Real psi;
-                          DubinerTetrahedron<K>::template getBasis<P, Q, R>(
-                              psi, ac, bc, cc);
-                          result += inverse(mode_idx, m_local) * psi;
-                          ++mode_idx;
-                        });
-                  });
+        Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+          constexpr size_t P = pIdx.value;
+          Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+            constexpr size_t Q = qIdx.value;
+            Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
+              constexpr size_t R = rIdx.value;
+              Real psi;
+              DubinerTetrahedron<K>::template getBasis<P, Q, R>(psi, ac, bc, cc);
+              result += inverse(modeIdx, m_local) * psi;
+              ++modeIdx;
             });
+          });
+        });
 
         return result;
       }
@@ -700,29 +688,25 @@ namespace Rodin::Variational
         Real rc, sc;
         DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
 
-        Scalar tri_val = Scalar(0);
-        size_t mode_idx = 0;
+        Scalar triVal = Scalar(0);
+        size_t modeIdx = 0;
 
-        Rodin::Utility::ForIndex<K + 1>(
-            [&](auto p_idx)
-            {
-              constexpr size_t P = p_idx.value;
-              Rodin::Utility::ForIndex<K + 1 - P>(
-                  [&](auto q_idx)
-                  {
-                    constexpr size_t Q = q_idx.value;
-                    Real psi;
-                    DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
-                    tri_val += Vinv(mode_idx, alpha) * psi;
-                    ++mode_idx;
-                  });
-            });
+        Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+          constexpr size_t P = pIdx.value;
+          Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+            constexpr size_t Q = qIdx.value;
+            Real psi;
+            DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+            triVal += Vinv(modeIdx, alpha) * psi;
+            ++modeIdx;
+          });
+        });
 
         // --- segment factor in z (GLL01, Lagrange) ---
         const Real z = r(2);
-        const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
+        const Real segVal = LagrangeBasisSegment<K>::getBasis(k, z);
 
-        return tri_val * seg_val;
+        return triVal * segVal;
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
@@ -788,45 +772,39 @@ namespace Rodin::Variational
           const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
           Scalar result = Scalar(0);
-          size_t mode_idx = 0;
+          size_t modeIdx = 0;
 
-          Rodin::Utility::ForIndex<K + 1>(
-              [&](auto p_idx)
+          Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+            constexpr size_t P = pIdx.value;
+            Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+              constexpr size_t Q = qIdx.value;
+
+              Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+              DubinerTriangle<K>::template getGradient<P, Q>(dpsi_dr, dpsi_ds, rc, sc);
+
+              Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+
+              // r = 2x/(1-y) - 1, s = 2y - 1
+              if (Math::abs(Scalar(1) - y) > eps)
               {
-                constexpr size_t P = p_idx.value;
-                Rodin::Utility::ForIndex<K + 1 - P>(
-                    [&](auto q_idx)
-                    {
-                      constexpr size_t Q = q_idx.value;
+                const Scalar denom = Scalar(1) - y;
+                const Scalar dr_dx = Scalar(2) / denom;
+                const Scalar dr_dy = Scalar(2) * x / (denom * denom);
+                const Scalar ds_dx = Scalar(0);
+                const Scalar ds_dy = Scalar(2);
 
-                      Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
-                      DubinerTriangle<K>::template getGradient<P, Q>(
-                          dpsi_dr, dpsi_ds, rc, sc);
+                dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
+                dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
+              }
 
-                      Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+              if (m_i == 0) // \partial/\partialx
+                result += Vinv(modeIdx, m_local) * dpsi_dx;
+              else if (m_i == 1) // \partial/\partialy
+                result += Vinv(modeIdx, m_local) * dpsi_dy;
 
-                      // r = 2x/(1-y) - 1, s = 2y - 1
-                      if (Math::abs(Scalar(1) - y) > eps)
-                      {
-                        const Scalar denom = Scalar(1) - y;
-                        const Scalar dr_dx = Scalar(2) / denom;
-                        const Scalar dr_dy =
-                            Scalar(2) * x / (denom * denom);
-                        const Scalar ds_dx = Scalar(0);
-                        const Scalar ds_dy = Scalar(2);
-
-                        dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
-                        dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
-                      }
-
-                      if (m_i == 0)      // \partial/\partialx
-                        result += Vinv(mode_idx, m_local) * dpsi_dx;
-                      else if (m_i == 1) // \partial/\partialy
-                        result += Vinv(mode_idx, m_local) * dpsi_dy;
-
-                      ++mode_idx;
-                    });
-              });
+              ++modeIdx;
+            });
+          });
 
           return result;
         }
@@ -834,18 +812,18 @@ namespace Rodin::Variational
         case Geometry::Polytope::Type::Quadrilateral:
         {
           // Tensor product Lagrange on GLL01 × GLL01
-          const size_t j_idx = m_local / (K + 1);
-          const size_t i_idx = m_local % (K + 1);
+          const size_t jIdx = m_local / (K + 1);
+          const size_t iIdx = m_local % (K + 1);
 
           if (m_i == 0) // \partial/\partialx
           {
             return LagrangeBasisQuadrilateral<K>::getDerivative(
-                       i_idx, j_idx, 0, r.x(), r.y());
+              iIdx, jIdx, 0, r.x(), r.y());
           }
           else if (m_i == 1) // \partial/\partialy
           {
             return LagrangeBasisQuadrilateral<K>::getDerivative(
-                       i_idx, j_idx, 1, r.x(), r.y());
+              iIdx, jIdx, 1, r.x(), r.y());
           }
           return Scalar(0);
         }
@@ -865,78 +843,63 @@ namespace Rodin::Variational
           const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
           Scalar result = Scalar(0);
-          size_t mode_idx = 0;
+          size_t modeIdx = 0;
 
-          Rodin::Utility::ForIndex<K + 1>(
-              [&](auto p_idx)
-              {
-                constexpr size_t P = p_idx.value;
-                Rodin::Utility::ForIndex<K + 1 - P>(
-                    [&](auto q_idx)
-                    {
-                      constexpr size_t Q = q_idx.value;
-                      Rodin::Utility::ForIndex<K + 1 - P - Q>(
-                          [&](auto r_idx)
-                          {
-                            constexpr size_t R = r_idx.value;
+          Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+            constexpr size_t P = pIdx.value;
+            Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+              constexpr size_t Q = qIdx.value;
+              Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
+                constexpr size_t R = rIdx.value;
 
-                            Scalar dpsi_da = Scalar(0);
-                            Scalar dpsi_db = Scalar(0);
-                            Scalar dpsi_dc = Scalar(0);
-                            DubinerTetrahedron<K>::template getGradient<P, Q, R>(
-                                dpsi_da, dpsi_db, dpsi_dc, ac, bc, cc);
+                Scalar dpsi_da = Scalar(0);
+                Scalar dpsi_db = Scalar(0);
+                Scalar dpsi_dc = Scalar(0);
+                DubinerTetrahedron<K>::template getGradient<P, Q, R>(
+                  dpsi_da, dpsi_db, dpsi_dc, ac, bc, cc);
 
-                            Scalar dpsi_dx = Scalar(0);
-                            Scalar dpsi_dy = Scalar(0);
-                            Scalar dpsi_dz = Scalar(0);
+                Scalar dpsi_dx = Scalar(0);
+                Scalar dpsi_dy = Scalar(0);
+                Scalar dpsi_dz = Scalar(0);
 
-                            const Scalar denom2 = Scalar(1) - z;       // 1 - z
-                            const Scalar denom3 = Scalar(1) - y - z;   // 1 - y - z
+                const Scalar denom2 = Scalar(1) - z; // 1 - z
+                const Scalar denom3 = Scalar(1) - y - z; // 1 - y - z
 
-                            if (Math::abs(denom2) > eps &&
-                                Math::abs(denom3) > eps)
-                            {
-                              // a = 2x / (1 - y - z) - 1
-                              const Scalar da_dx = Scalar(2) / denom3;
-                              const Scalar da_dy =
-                                  Scalar(2) * x / (denom3 * denom3);
-                              const Scalar da_dz = da_dy;
+                if (Math::abs(denom2) > eps && Math::abs(denom3) > eps)
+                {
+                  // a = 2x / (1 - y - z) - 1
+                  const Scalar da_dx = Scalar(2) / denom3;
+                  const Scalar da_dy = Scalar(2) * x / (denom3 * denom3);
+                  const Scalar da_dz = da_dy;
 
-                              // b = 2y / (1 - z) - 1
-                              const Scalar db_dx = Scalar(0);
-                              const Scalar db_dy = Scalar(2) / denom2;
-                              const Scalar db_dz =
-                                  Scalar(2) * y / (denom2 * denom2);
+                  // b = 2y / (1 - z) - 1
+                  const Scalar db_dx = Scalar(0);
+                  const Scalar db_dy = Scalar(2) / denom2;
+                  const Scalar db_dz = Scalar(2) * y / (denom2 * denom2);
 
-                              // c = 2z - 1
-                              const Scalar dc_dx = Scalar(0);
-                              const Scalar dc_dy = Scalar(0);
-                              const Scalar dc_dz = Scalar(2);
+                  // c = 2z - 1
+                  const Scalar dc_dx = Scalar(0);
+                  const Scalar dc_dy = Scalar(0);
+                  const Scalar dc_dz = Scalar(2);
 
-                              dpsi_dx = dpsi_da * da_dx
-                                      + dpsi_db * db_dx
-                                      + dpsi_dc * dc_dx;
+                  dpsi_dx = dpsi_da * da_dx + dpsi_db * db_dx + dpsi_dc * dc_dx;
 
-                              dpsi_dy = dpsi_da * da_dy
-                                      + dpsi_db * db_dy
-                                      + dpsi_dc * dc_dy;
+                  dpsi_dy = dpsi_da * da_dy + dpsi_db * db_dy + dpsi_dc * dc_dy;
 
-                              dpsi_dz = dpsi_da * da_dz
-                                      + dpsi_db * db_dz
-                                      + dpsi_dc * dc_dz;
-                            }
+                  dpsi_dz = dpsi_da * da_dz + dpsi_db * db_dz + dpsi_dc * dc_dz;
+                }
 
-                            if (m_i == 0)      // \partial/\partialx
-                              result += Vinv(mode_idx, m_local) * dpsi_dx;
-                            else if (m_i == 1) // \partial/\partialy
-                              result += Vinv(mode_idx, m_local) * dpsi_dy;
-                            else if (m_i == 2) // \partial/\partialz
-                              result += Vinv(mode_idx, m_local) * dpsi_dz;
+                if (m_i == 0) // \partial/\partialx
+                  result += Vinv(modeIdx, m_local) * dpsi_dx;
+                else if (m_i == 1) // \partial/\partialy
+                  result += Vinv(modeIdx, m_local) * dpsi_dy;
+                else if (m_i == 2) // \partial/\partialz
+                  result += Vinv(modeIdx, m_local) * dpsi_dz;
 
-                            ++mode_idx;
-                          });
-                    });
+                ++modeIdx;
               });
+            });
+          });
 
           return result;
         }
@@ -976,50 +939,44 @@ namespace Rodin::Variational
             const Scalar y   = r.y();
             const Scalar eps = RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE;
 
-            Scalar tri_deriv = Scalar(0);
-            size_t mode_idx  = 0;
+            Scalar triDeriv = Scalar(0);
+            size_t modeIdx = 0;
 
-            Rodin::Utility::ForIndex<K + 1>(
-                [&](auto p_idx)
+            Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+              constexpr size_t P = pIdx.value;
+              Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+                constexpr size_t Q = qIdx.value;
+
+                Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
+                DubinerTriangle<K>::template getGradient<P, Q>(dpsi_dr, dpsi_ds, rc, sc);
+
+                Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+
+                // r = 2x/(1-y) - 1, s = 2y - 1
+                if (Math::abs(Scalar(1) - y) > eps)
                 {
-                  constexpr size_t P = p_idx.value;
-                  Rodin::Utility::ForIndex<K + 1 - P>(
-                      [&](auto q_idx)
-                      {
-                        constexpr size_t Q = q_idx.value;
+                  const Scalar denom = Scalar(1) - y;
+                  const Scalar dr_dx = Scalar(2) / denom;
+                  const Scalar dr_dy = Scalar(2) * x / (denom * denom);
+                  const Scalar ds_dx = Scalar(0);
+                  const Scalar ds_dy = Scalar(2);
 
-                        Scalar dpsi_dr = Scalar(0), dpsi_ds = Scalar(0);
-                        DubinerTriangle<K>::template getGradient<P, Q>(
-                            dpsi_dr, dpsi_ds, rc, sc);
+                  dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
+                  dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
+                }
 
-                        Scalar dpsi_dx = Scalar(0), dpsi_dy = Scalar(0);
+                if (m_i == 0) // \partial/\partialx
+                  triDeriv += Vinv(modeIdx, alpha) * dpsi_dx;
+                else if (m_i == 1) // \partial/\partialy
+                  triDeriv += Vinv(modeIdx, alpha) * dpsi_dy;
 
-                        // r = 2x/(1-y) - 1, s = 2y - 1
-                        if (Math::abs(Scalar(1) - y) > eps)
-                        {
-                          const Scalar denom = Scalar(1) - y;
-                          const Scalar dr_dx = Scalar(2) / denom;
-                          const Scalar dr_dy =
-                              Scalar(2) * x / (denom * denom);
-                          const Scalar ds_dx = Scalar(0);
-                          const Scalar ds_dy = Scalar(2);
-
-                          dpsi_dx = dpsi_dr * dr_dx + dpsi_ds * ds_dx;
-                          dpsi_dy = dpsi_dr * dr_dy + dpsi_ds * ds_dy;
-                        }
-
-                        if (m_i == 0)      // \partial/\partialx
-                          tri_deriv += Vinv(mode_idx, alpha) * dpsi_dx;
-                        else if (m_i == 1) // \partial/\partialy
-                          tri_deriv += Vinv(mode_idx, alpha) * dpsi_dy;
-
-                        ++mode_idx;
-                      });
-                });
+                ++modeIdx;
+              });
+            });
 
             // --- segment value in z ---
-            const Real seg_val = LagrangeBasisSegment<K>::getBasis(k, z);
-            return tri_deriv * seg_val;
+            const Real segVal = LagrangeBasisSegment<K>::getBasis(k, z);
+            return triDeriv * segVal;
           }
           else // m_i == 2 → \partial/\partialz
           {
@@ -1029,27 +986,23 @@ namespace Rodin::Variational
             Real rc, sc;
             DubinerTriangle<K>::getCollapsed(rc, sc, r.x(), r.y());
 
-            Scalar tri_val = Scalar(0);
-            size_t mode_idx = 0;
+            Scalar triVal = Scalar(0);
+            size_t modeIdx = 0;
 
-            Rodin::Utility::ForIndex<K + 1>(
-                [&](auto p_idx)
-                {
-                  constexpr size_t P = p_idx.value;
-                  Rodin::Utility::ForIndex<K + 1 - P>(
-                      [&](auto q_idx)
-                      {
-                        constexpr size_t Q = q_idx.value;
-                        Real psi;
-                        DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
-                        tri_val += Vinv(mode_idx, alpha) * psi;
-                        ++mode_idx;
-                      });
-                });
+            Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+              constexpr size_t P = pIdx.value;
+              Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+                constexpr size_t Q = qIdx.value;
+                Real psi;
+                DubinerTriangle<K>::template getBasis<P, Q>(psi, rc, sc);
+                triVal += Vinv(modeIdx, alpha) * psi;
+                ++modeIdx;
+              });
+            });
 
             // --- 1D derivative in z ---
             const Real dseg = LagrangeBasisSegment<K>::getDerivative(k, z);
-            return tri_val * dseg;
+            return triVal * dseg;
           }
         }
         case Geometry::Polytope::Type::Hexahedron:

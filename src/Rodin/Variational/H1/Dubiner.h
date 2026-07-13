@@ -67,13 +67,13 @@ namespace Rodin::Variational
       {
         static_assert(P + Q <= K, "DubinerTriangle: P + Q must be <= K.");
 
-        Real _unused;
+        Real unused;
 
         Real psi_p;
-        JacobiPolynomial<P>::getValue(psi_p, _unused, 0.0, 0.0, a);
+        JacobiPolynomial<P>::getValue(psi_p, unused, 0.0, 0.0, a);
 
         Real psi_q;
-        JacobiPolynomial<Q>::getValue(psi_q, _unused, 2.0 * P + 1.0, 0.0, b);
+        JacobiPolynomial<Q>::getValue(psi_q, unused, 2.0 * P + 1.0, 0.0, b);
 
         basis = psi_p * psi_q * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
       }
@@ -111,17 +111,18 @@ namespace Rodin::Variational
         Real Pb, dPb;
         JacobiPolynomial<Q>::getValue(Pb, dPb, 2.0 * P + 1.0, 0.0, b);
 
-        const Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        const Real scaleB =
+          Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
 
         // \partialψ/\partiala
-        dpsi_da = dPa * Pb * scale_b;
+        dpsi_da = dPa * Pb * scaleB;
 
         // \partialψ/\partialb
         Real dscale_db = 0.0;
         if constexpr (P > 0)
           dscale_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
 
-        dpsi_db = Pa * (dPb * scale_b + Pb * dscale_db);
+        dpsi_db = Pa * (dPb * scaleB + Pb * dscale_db);
       }
 
       /**
@@ -190,27 +191,23 @@ namespace Rodin::Variational
           s_vandermonde.resize(N, N);
 
           // Fill Vandermonde matrix
-          size_t mode_idx = 0;
-          Rodin::Utility::ForIndex<K + 1>(
-              [&](auto p_idx)
+          size_t modeIdx = 0;
+          Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+            constexpr size_t P = pIdx.value;
+            Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+              constexpr size_t Q = qIdx.value;
+              for (size_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)
               {
-                constexpr size_t P = p_idx.value;
-                Rodin::Utility::ForIndex<K + 1 - P>(
-                    [&](auto q_idx)
-                    {
-                      constexpr size_t Q = q_idx.value;
-                      for (size_t node_idx = 0; node_idx < N; ++node_idx)
-                      {
-                        Real r, s;
-                        DubinerTriangle<K>::getCollapsed(
-                            r, s, nodes[node_idx].x(), nodes[node_idx].y());
+                Real r, s;
+                DubinerTriangle<K>::getCollapsed(
+                  r, s, nodes[nodeIdx].x(), nodes[nodeIdx].y());
 
-                        DubinerTriangle<K>::template getBasis<P, Q>(
-                            s_vandermonde(node_idx, mode_idx), r, s);
-                      }
-                      ++mode_idx;
-                    });
-              });
+                DubinerTriangle<K>::template getBasis<P, Q>(
+                  s_vandermonde(nodeIdx, modeIdx), r, s);
+              }
+              ++modeIdx;
+            });
+          });
         }
         return s_vandermonde;
       }
@@ -275,21 +272,21 @@ namespace Rodin::Variational
       {
         static_assert(P + Q + R <= K, "DubinerTetrahedron: P + Q + R must be <= K.");
 
-        Real _unused;
+        Real unused;
 
-        Real P_a;
-        JacobiPolynomial<P>::getValue(P_a, _unused, 0.0, 0.0, a);
+        Real pA;
+        JacobiPolynomial<P>::getValue(pA, unused, 0.0, 0.0, a);
 
-        Real P_b;
-        JacobiPolynomial<Q>::getValue(P_b, _unused, 2.0 * P + 1.0, 0.0, b);
+        Real pB;
+        JacobiPolynomial<Q>::getValue(pB, unused, 2.0 * P + 1.0, 0.0, b);
 
-        Real P_c;
-        JacobiPolynomial<R>::getValue(P_c, _unused, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
+        Real pC;
+        JacobiPolynomial<R>::getValue(pC, unused, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
 
-        Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
-        Real scale_c = Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
+        Real scaleB = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        Real scaleC = Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
 
-        basis = P_a * P_b * P_c * scale_b * scale_c;
+        basis = pA * pB * pC * scaleB * scaleC;
       }
 
       template <size_t P, size_t Q, size_t R>
@@ -298,34 +295,39 @@ namespace Rodin::Variational
                                         Real& dpsi_dc,
                                         Real a, Real b, Real c)
       {
-        Real P_a, dP_a;
-        JacobiPolynomial<P>::getValue(P_a, dP_a, 0.0, 0.0, a);
+        Real pA, dPA;
+        JacobiPolynomial<P>::getValue(pA, dPA, 0.0, 0.0, a);
 
-        Real P_b, dP_b;
-        JacobiPolynomial<Q>::getValue(P_b, dP_b, 2.0 * P + 1.0, 0.0, b);
+        Real pB, dPB;
+        JacobiPolynomial<Q>::getValue(pB, dPB, 2.0 * P + 1.0, 0.0, b);
 
-        Real P_c, dP_c;
-        JacobiPolynomial<R>::getValue(P_c, dP_c, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
+        Real pC, dPC;
+        JacobiPolynomial<R>::getValue(pC, dPC, 2.0 * P + 2.0 * Q + 2.0, 0.0, c);
 
-        const Real scale_b = Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
-        const Real scale_c = Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
+        const Real scaleB =
+          Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P>{});
+        const Real scaleC =
+          Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q>{});
 
         // \partialψ / \partiala
-        dpsi_da = dP_a * P_b * P_c * scale_b * scale_c;
+        dpsi_da = dPA * pB * pC * scaleB * scaleC;
 
         // \partialψ / \partialb
-        Real dscale_b_db = 0.0;
+        Real dscaleBDb = 0.0;
         if constexpr (P > 0)
-          dscale_b_db = P * Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
+          dscaleBDb = P *
+            Math::pow(0.5 * (1.0 - b), std::integral_constant<size_t, P - 1>{}) * (-0.5);
 
-        dpsi_db = P_a * (dP_b * scale_b + P_b * dscale_b_db) * P_c * scale_c;
+        dpsi_db = pA * (dPB * scaleB + pB * dscaleBDb) * pC * scaleC;
 
         // \partialψ / \partialc
-        Real dscale_c_dc = 0.0;
+        Real dscaleCDc = 0.0;
         if constexpr (P + Q > 0)
-          dscale_c_dc = (P + Q) * Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q - 1>{}) * (-0.5);
+          dscaleCDc = (P + Q) *
+            Math::pow(0.5 * (1.0 - c), std::integral_constant<size_t, P + Q - 1>{}) *
+            (-0.5);
 
-        dpsi_dc = P_a * P_b * (dP_c * scale_c + P_c * dscale_c_dc) * scale_b;
+        dpsi_dc = pA * pB * (dPC * scaleC + pC * dscaleCDc) * scaleB;
       }
 
       // Map reference tetra (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1) → (a,b,c) ∈ [-1,1]^3
@@ -344,14 +346,14 @@ namespace Rodin::Variational
       {
         c = 2.0 * z - 1.0;
 
-        const Real one_minus_z = 1.0 - z;
-        if (one_minus_z > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+        const Real oneMinusZ = 1.0 - z;
+        if (oneMinusZ > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
         {
-          b = 2.0 * (y / one_minus_z) - 1.0;
+          b = 2.0 * (y / oneMinusZ) - 1.0;
 
-          const Real one_minus_yz = 1.0 - y - z;
-          if (one_minus_yz > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
-            a = 2.0 * (x / one_minus_yz) - 1.0;
+          const Real oneMinusYz = 1.0 - y - z;
+          if (oneMinusYz > RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE)
+            a = 2.0 * (x / oneMinusYz) - 1.0;
           else
             a = -1.0; // collapse along edge
         }
@@ -379,35 +381,26 @@ namespace Rodin::Variational
           const auto& nodes = FeketeTetrahedron<K>::getNodes();
           s_vandermonde.resize(N, N);
 
-          size_t mode_idx = 0;
-          Rodin::Utility::ForIndex<K + 1>(
-              [&](auto p_idx)
-              {
-                constexpr size_t P = p_idx.value;
-                Rodin::Utility::ForIndex<K + 1 - P>(
-                    [&](auto q_idx)
-                    {
-                      constexpr size_t Q = q_idx.value;
-                      Rodin::Utility::ForIndex<K + 1 - P - Q>(
-                          [&](auto r_idx)
-                          {
-                            constexpr size_t R = r_idx.value;
-                            for (size_t node_idx = 0; node_idx < N; ++node_idx)
-                            {
-                              Real a, b, c;
-                              DubinerTetrahedron<K>::getCollapsed(
-                                  a, b, c,
-                                  nodes[node_idx].x(),
-                                  nodes[node_idx].y(),
-                                  nodes[node_idx].z());
+          size_t modeIdx = 0;
+          Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
+            constexpr size_t P = pIdx.value;
+            Rodin::Utility::ForIndex<K + 1 - P>([&](auto qIdx) {
+              constexpr size_t Q = qIdx.value;
+              Rodin::Utility::ForIndex<K + 1 - P - Q>([&](auto rIdx) {
+                constexpr size_t R = rIdx.value;
+                for (size_t nodeIdx = 0; nodeIdx < N; ++nodeIdx)
+                {
+                  Real a, b, c;
+                  DubinerTetrahedron<K>::getCollapsed(
+                    a, b, c, nodes[nodeIdx].x(), nodes[nodeIdx].y(), nodes[nodeIdx].z());
 
-                              DubinerTetrahedron<K>::template getBasis<P, Q, R>(
-                                  s_vandermonde(node_idx, mode_idx), a, b, c);
-                            }
-                            ++mode_idx;
-                          });
-                    });
+                  DubinerTetrahedron<K>::template getBasis<P, Q, R>(
+                    s_vandermonde(nodeIdx, modeIdx), a, b, c);
+                }
+                ++modeIdx;
               });
+            });
+          });
         }
 
         return s_vandermonde;

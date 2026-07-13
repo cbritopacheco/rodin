@@ -898,10 +898,11 @@ namespace Rodin::Variational
               const ScalarType phi_te = teTab.getBasis(qp, ib);
               for (size_t ia = 0; ia < scalarCountTr; ++ia)
               {
-                const ScalarType basis_prod = wdet * phi_te * trTab.getBasis(qp, ia);
+                const ScalarType basisProd = wdet * phi_te * trTab.getBasis(qp, ia);
                 for (size_t dd = 0; dd < vdim; ++dd)
                   for (size_t cc = 0; cc < vdim; ++cc)
-                    A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] += basis_prod * m_cmv(dd, cc);
+                    A[(ib * vdim + dd) * ntr + (ia * vdim + cc)] +=
+                      basisProd * m_cmv(dd, cc);
               }
             }
           }
@@ -1238,8 +1239,8 @@ namespace Rodin::Variational
               const auto& gb = Gte[b];
               for (size_t a = 0; a < ntr; ++a)
               {
-                Math::SpatialVector<ScalarType> AGtr_a = m_cmv * Gtr[a];
-                row[a] += wdet * Math::dot(gb, AGtr_a);
+                Math::SpatialVector<ScalarType> aGtrA = m_cmv * Gtr[a];
+                row[a] += wdet * Math::dot(gb, aGtrA);
               }
             }
           }
@@ -2422,15 +2423,15 @@ namespace Rodin::Variational
               for (size_t ia = 0; ia < trialScalarCount; ++ia)
               {
                 // grad_tr . grad_te (scalar dot of physical gradients)
-                const ScalarType grad_dot = Math::dot(gb, GtrS[ia]);
+                const ScalarType gradDot = Math::dot(gb, GtrS[ia]);
 
-                for (size_t d_comp = 0; d_comp < vdim; ++d_comp)
+                for (size_t dComp = 0; dComp < vdim; ++dComp)
                 {
-                  const size_t row = ib * vdim + d_comp;
-                  for (size_t c_comp = 0; c_comp < vdim; ++c_comp)
+                  const size_t row = ib * vdim + dComp;
+                  for (size_t cComp = 0; cComp < vdim; ++cComp)
                   {
-                    const size_t col = ia * vdim + c_comp;
-                    A_data[row * ntr + col] += wdet * m_cmv(d_comp, c_comp) * grad_dot;
+                    const size_t col = ia * vdim + cComp;
+                    A_data[row * ntr + col] += wdet * m_cmv(dComp, cComp) * gradDot;
                   }
                 }
               }
@@ -2645,9 +2646,9 @@ namespace Rodin::Variational
         const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
 
         const auto geometry = polytope.getGeometry();
-        const bool recompute_qf = (!m_set || m_order != order || m_geometry != geometry);
+        const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
 
-        if (recompute_qf)
+        if (recomputeQf)
         {
           m_set = true;
           m_order = order;
@@ -2977,9 +2978,9 @@ namespace Rodin::Variational
         const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
 
         const auto geometry = polytope.getGeometry();
-        const bool recompute_qf = (!m_set || m_order != order || m_geometry != geometry);
+        const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
 
-        if (recompute_qf)
+        if (recomputeQf)
         {
           m_set      = true;
           m_order    = order;
@@ -3006,9 +3007,9 @@ namespace Rodin::Variational
         assert(ntr % trialScalarCount == 0);
         assert(nte % testScalarCount  == 0);
 
-        const size_t vdim_tr = ntr / trialScalarCount;
-        assert(vdim_tr == nte / testScalarCount);
-        const size_t vdim = vdim_tr;
+        const size_t vdimTr = ntr / trialScalarCount;
+        assert(vdimTr == nte / testScalarCount);
+        const size_t vdim = vdimTr;
 
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
@@ -3345,9 +3346,9 @@ namespace Rodin::Variational
         const size_t order = (k_tr == 0) ? k_te : (k_tr + k_te - 1);
 
         const auto geometry = polytope.getGeometry();
-        const bool recompute_qf = (!m_set || m_order != order || m_geometry != geometry);
+        const bool recomputeQf = (!m_set || m_order != order || m_geometry != geometry);
 
-        if (recompute_qf)
+        if (recomputeQf)
         {
           m_set      = true;
           m_order    = order;

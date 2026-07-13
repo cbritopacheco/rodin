@@ -868,8 +868,7 @@ namespace Rodin::Assembly
         // ------------------------------------------------------------
         // Sparse-only: eliminate during assembly; Dense: accumulate
         // ------------------------------------------------------------
-        auto matrix_entry = [&](Index row, Index col, ScalarType val)
-        {
+        auto matrixEntry = [&](Index row, Index col, ScalarType val) {
           if (val == ScalarType(0))
             return;
 
@@ -901,8 +900,7 @@ namespace Rodin::Assembly
           }
         };
 
-        auto vector_entry = [&](Index row, ScalarType val)
-        {
+        auto vectorEntry = [&](Index row, ScalarType val) {
           if (val == ScalarType(0))
             return;
 
@@ -961,7 +959,7 @@ namespace Rodin::Assembly
                   {
                     const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
                     const ScalarType val = Math::conj(bfi.integrate(j, i));
-                    matrix_entry(I, J, val);
+                    matrixEntry(I, J, val);
                   }
                 }
               }
@@ -1030,7 +1028,7 @@ namespace Rodin::Assembly
                     {
                       const Index J = static_cast<Index>(uOff + static_cast<size_t>(cols[j]));
                       const ScalarType val = Math::conj(bfi.integrate(j, i));
-                      matrix_entry(I, J, val);
+                      matrixEntry(I, J, val);
                     }
                   }
                 }
@@ -1071,7 +1069,7 @@ namespace Rodin::Assembly
               for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
               {
                 const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
-                vector_entry(I, -static_cast<ScalarType>(lfi.integrate(l)));
+                vectorEntry(I, -static_cast<ScalarType>(lfi.integrate(l)));
               }
             }
           });
@@ -1096,10 +1094,8 @@ namespace Rodin::Assembly
           {
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                matrix_entry(
-                  static_cast<Index>(vOff) + it.row(),
-                  static_cast<Index>(uOff) + it.col(),
-                  it.value());
+                matrixEntry(static_cast<Index>(vOff) + it.row(),
+                  static_cast<Index>(uOff) + it.col(), it.value());
           }
           else
           {
@@ -1110,10 +1106,8 @@ namespace Rodin::Assembly
               {
                 const auto val = op(i, j);
                 if (val != ScalarType(0))
-                  matrix_entry(
-                      static_cast<Index>(vOff) + i,
-                      static_cast<Index>(uOff) + j,
-                      val);
+                  matrixEntry(
+                    static_cast<Index>(vOff) + i, static_cast<Index>(uOff) + j, val);
               }
           }
         }
@@ -1129,9 +1123,8 @@ namespace Rodin::Assembly
 
           const auto& vec = lf.getVector();
           for (Eigen::Index i = 0; i < vec.size(); ++i)
-            vector_entry(
-                static_cast<Index>(vOff) + i,
-                static_cast<ScalarType>(vec.coeff(i)));
+            vectorEntry(
+              static_cast<Index>(vOff) + i, static_cast<ScalarType>(vec.coeff(i)));
         }
 
         // ------------------------------------------------------------
@@ -1428,8 +1421,7 @@ namespace Rodin::Assembly
         // Sparse-only: eliminate during assembly
         // Dense: do plain accumulation; eliminate afterwards
         // ------------------------------------------------------------
-        auto matrix_entry = [&](Index row, Index col, ScalarType val)
-        {
+        auto matrixEntry = [&](Index row, Index col, ScalarType val) {
           if (val == ScalarType(0))
             return;
 
@@ -1461,8 +1453,7 @@ namespace Rodin::Assembly
           }
         };
 
-        auto vector_entry = [&](Index row, ScalarType val)
-        {
+        auto vectorEntry = [&](Index row, ScalarType val) {
           if (val == ScalarType(0))
             return;
 
@@ -1501,7 +1492,7 @@ namespace Rodin::Assembly
               for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
               {
                 const ScalarType val = Math::conj(bfi.integrate(j, i));
-                matrix_entry(rowsDOF[i], colsDOF[j], val);
+                matrixEntry(rowsDOF[i], colsDOF[j], val);
               }
             }
           }
@@ -1546,7 +1537,7 @@ namespace Rodin::Assembly
                 for (size_t j = 0; j < static_cast<size_t>(colsDOF.size()); ++j)
                 {
                   const ScalarType val = Math::conj(bfi.integrate(j, i));
-                  matrix_entry(rowsDOF[i], colsDOF[j], val);
+                  matrixEntry(rowsDOF[i], colsDOF[j], val);
                 }
               }
             }
@@ -1563,7 +1554,7 @@ namespace Rodin::Assembly
           {
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                matrix_entry(it.row(), it.col(), it.value());
+                matrixEntry(it.row(), it.col(), it.value());
           }
           else
           {
@@ -1574,7 +1565,7 @@ namespace Rodin::Assembly
               {
                 const auto val = op(i, j);
                 if (val != ScalarType(0))
-                  matrix_entry(static_cast<Index>(i), static_cast<Index>(j), val);
+                  matrixEntry(static_cast<Index>(i), static_cast<Index>(j), val);
               }
           }
         }
@@ -1601,7 +1592,7 @@ namespace Rodin::Assembly
             lfi.setPolytope(*it);
             const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
             for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
-              vector_entry(dofs[l], -static_cast<ScalarType>(lfi.integrate(l)));
+              vectorEntry(dofs[l], -static_cast<ScalarType>(lfi.integrate(l)));
           }
         }
 
@@ -1609,7 +1600,7 @@ namespace Rodin::Assembly
         {
           const auto& vec = lf.getVector();
           for (Eigen::Index i = 0; i < vec.size(); ++i)
-            vector_entry(static_cast<Index>(i), static_cast<ScalarType>(vec.coeff(i)));
+            vectorEntry(static_cast<Index>(i), static_cast<ScalarType>(vec.coeff(i)));
         }
         } // doVector
 
@@ -1891,9 +1882,9 @@ namespace Rodin::Assembly
         auto& Av = const_cast<ValueType&>(input.getShapeFunction());
         const auto& essBdr = input.getEssentialBoundary();
 
-        const auto& fes_u = u.getFiniteElementSpace();
-        const auto& fes_v = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh  = fes_u.getMesh();
+        const auto& fesU = u.getFiniteElementSpace();
+        const auto& fesV = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh = fesU.getMesh();
         const size_t faceCount = mesh.getFaceCount();
         const size_t faceDim   = mesh.getDimension() - 1;
 
@@ -1910,16 +1901,14 @@ namespace Rodin::Assembly
               continue;
           }
 
-          const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
-          const auto& fe_v = fes_v.getFiniteElement(faceDim, fi);
-          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
-          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          const auto& feU = fesU.getFiniteElement(faceDim, fi);
+          const auto& feV = fesV.getFiniteElement(faceDim, fi);
+          const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
 
-          const Index nMasters = static_cast<Index>(fe_v.getCount());
+          const Index nMasters = static_cast<Index>(feV.getCount());
 
-          for (Index s = 0;
-               s < static_cast<Index>(fe_u.getCount());
-               s++)
+          for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
           {
             const Index slave = slaveDOFs[s];
             if (res.find(slave) != res.end())
@@ -1950,9 +1939,8 @@ namespace Rodin::Assembly
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =
-                fes_u.getPullback({ faceDim, fi }, std::move(basisCallable));
-              const Scalar c =
-                static_cast<Scalar>(fe_u.getLinearForm(s)(mapping));
+                fesU.getPullback({faceDim, fi}, std::move(basisCallable));
+              const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
               if (c != Scalar(0))
               {
                 mIdx.push_back(masterDOFs[j]);

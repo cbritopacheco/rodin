@@ -102,20 +102,18 @@ namespace Rodin::Solid
           oldState.gamma = cp.get<Tags::PreviousActiveGamma>();
           oldState.beta = cp.get<Tags::PreviousActiveBeta>();
           const Real dt = cp.get<Tags::TimeStep>();
-          const Real ec_n = cp.get<Tags::PreviousActiveExtension>();
+          const Real ecN = cp.get<Tags::PreviousActiveExtension>();
           const Real activation = cp.get<Tags::ElectricalActivation>();
 
           // Initial guess: previous extension, optionally overridden by the
           // input via Tags::ActiveExtension (warm start).
-          Real c = cp.has<Tags::ActiveExtension>()
-            ? cp.get<Tags::ActiveExtension>()
-            : ec_n;
+          Real c =
+            cp.has<Tags::ActiveExtension>() ? cp.get<Tags::ActiveExtension>() : ecN;
 
           typename ActiveLaw::State newState =
-            m_activeLaw.update(dt, oldState, ec_n, c, activation);
-          typename ActiveLaw::Response resp =
-            m_activeLaw.evaluateDynamic(
-                dt, oldState, newState, cache.strain, ec_n, c, activation);
+            m_activeLaw.update(dt, oldState, ecN, c, activation);
+          typename ActiveLaw::Response resp = m_activeLaw.evaluateDynamic(
+            dt, oldState, newState, cache.strain, ecN, c, activation);
 
           size_t it = 0;
           for (; it < m_localMaxIterations; ++it)
@@ -124,11 +122,9 @@ namespace Rodin::Solid
             // dc = -residual.  Stop when the update is below tolerance.
             const Real dc = -resp.residual;
             c += dc;
-            newState =
-              m_activeLaw.update(dt, oldState, ec_n, c, activation);
-            resp =
-              m_activeLaw.evaluateDynamic(
-                  dt, oldState, newState, cache.strain, ec_n, c, activation);
+            newState = m_activeLaw.update(dt, oldState, ecN, c, activation);
+            resp = m_activeLaw.evaluateDynamic(
+              dt, oldState, newState, cache.strain, ecN, c, activation);
             if (std::abs(dc) < m_localTolerance)
               break;
           }

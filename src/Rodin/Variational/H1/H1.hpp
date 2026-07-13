@@ -201,23 +201,20 @@ namespace Rodin::Variational
             {
               constexpr size_t r = ii.value;   // 0..K
               constexpr size_t j = r;          // parameter along hypotenuse
-              constexpr size_t rowStart_j =
-                  j * (K + 1) - (j * (j - 1)) / 2;
-              constexpr size_t idx = rowStart_j + (K - j);
+              constexpr size_t rowStartJ = j * (K + 1) - (j * (j - 1)) / 2;
+              constexpr size_t idx = rowStartJ + (K - j);
               codomain[idx] = domain[r];
             });
           }
           else if (local == 2)
           {
             // left edge (2->0)
-            Utility::ForIndex<SegmentCount>([&](auto ii)
-            {
-              constexpr size_t r_on_edge = ii.value;  // 0..K
-              constexpr size_t j         = K - r_on_edge;
-              constexpr size_t rowStart_j =
-                  j * (K + 1) - (j * (j - 1)) / 2;
-              constexpr size_t idx = rowStart_j;      // i = 0 on row j
-              codomain[idx] = domain[r_on_edge];
+            Utility::ForIndex<SegmentCount>([&](auto ii) {
+              constexpr size_t rOnEdge = ii.value; // 0..K
+              constexpr size_t j = K - rOnEdge;
+              constexpr size_t rowStartJ = j * (K + 1) - (j * (j - 1)) / 2;
+              constexpr size_t idx = rowStartJ; // i = 0 on row j
+              codomain[idx] = domain[rOnEdge];
             });
           }
         }
@@ -329,13 +326,12 @@ namespace Rodin::Variational
                   constexpr size_t k = j2;
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
-                  constexpr size_t m_tail = K - k;
+                  constexpr size_t mTail = K - k;
                   constexpr size_t tetraTail =
-                      (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                  constexpr size_t offset_k = tetraTotal - tetraTail;
-                  constexpr size_t offset_j =
-                      j * (K - k + 1) - (j * (j - 1)) / 2;
-                  constexpr size_t tetIdx = offset_k + offset_j + i;
+                    (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                  constexpr size_t offsetK = tetraTotal - tetraTail;
+                  constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
+                  constexpr size_t tetIdx = offsetK + offsetJ + i;
                   codomain[tetIdx] = domain[triIdx];
                 }
               });
@@ -362,13 +358,12 @@ namespace Rodin::Variational
                   constexpr size_t k = i2;
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
-                  constexpr size_t m_tail = K - k;
+                  constexpr size_t mTail = K - k;
                   constexpr size_t tetraTail =
-                      (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                  constexpr size_t offset_k = tetraTotal - tetraTail;
-                  constexpr size_t offset_j =
-                      j * (K - k + 1) - (j * (j - 1)) / 2;
-                  constexpr size_t tetIdx = offset_k + offset_j + i;
+                    (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                  constexpr size_t offsetK = tetraTotal - tetraTail;
+                  constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
+                  constexpr size_t tetIdx = offsetK + offsetJ + i;
                   codomain[tetIdx] = domain[triIdx];
                 }
               });
@@ -397,15 +392,14 @@ namespace Rodin::Variational
 
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
-                  constexpr size_t m_tail = K - k;
+                  constexpr size_t mTail = K - k;
                   constexpr size_t tetraTail =
-                      (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                  constexpr size_t offset_k = tetraTotal - tetraTail;
+                    (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                  constexpr size_t offsetK = tetraTotal - tetraTail;
 
-                  constexpr size_t offset_j =
-                      j * (K - k + 1) - (j * (j - 1)) / 2;
+                  constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
 
-                  constexpr size_t tetIdx = offset_k + offset_j + i;
+                  constexpr size_t tetIdx = offsetK + offsetJ + i;
 
                   codomain[tetIdx] = domain[triIdx];
                 }
@@ -433,13 +427,12 @@ namespace Rodin::Variational
                   constexpr size_t k = 0;
                   constexpr size_t tetraTotal =
                       (K + 1) * (K + 2) * (K + 3) / 6;
-                  constexpr size_t m_tail = K - k;
+                  constexpr size_t mTail = K - k;
                   constexpr size_t tetraTail =
-                      (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                  constexpr size_t offset_k = tetraTotal - tetraTail;
-                  constexpr size_t offset_j =
-                      j * (K - k + 1) - (j * (j - 1)) / 2;
-                  constexpr size_t tetIdx = offset_k + offset_j + i;
+                    (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                  constexpr size_t offsetK = tetraTotal - tetraTail;
+                  constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
+                  constexpr size_t tetIdx = offsetK + offsetJ + i;
                   codomain[tetIdx] = domain[triIdx];
                 }
               });
@@ -551,9 +544,8 @@ namespace Rodin::Variational
                   constexpr size_t quadIdx = j * (K + 1) + i;
                   // triangle edge 2->0 (Segment->Triangle Local=2)
                   constexpr size_t r      = i;
-                  constexpr size_t j_edge = K - r;
-                  constexpr size_t rowStart =
-                      j_edge * (K + 1) - (j_edge * (j_edge - 1)) / 2;
+                  constexpr size_t jEdge = K - r;
+                  constexpr size_t rowStart = jEdge * (K + 1) - (jEdge * (jEdge - 1)) / 2;
                   constexpr size_t triEdgeIdx = rowStart; // i=0 on that row
                   constexpr size_t wedgeIdx = j * TriangleCount + triEdgeIdx;
                   codomain[wedgeIdx] = domain[quadIdx];
@@ -909,9 +901,8 @@ namespace Rodin::Variational
             const size_t rr    = forward ? r : (Ns - 1 - r);
 
             constexpr size_t j = r;              // parameter along hypotenuse
-            constexpr size_t rowStart_j =
-                j * (K + 1) - (j * (j - 1)) / 2;
-            constexpr size_t tId = rowStart_j + (K - j);
+            constexpr size_t rowStartJ = j * (K + 1) - (j * (j - 1)) / 2;
+            constexpr size_t tId = rowStartJ + (K - j);
 
             local[tId] = edge[rr];
             used[tId]  = 1;
@@ -931,9 +922,8 @@ namespace Rodin::Variational
             const size_t rr    = forward ? r : (Ns - 1 - r);
 
             constexpr size_t j = K - r;
-            constexpr size_t rowStart_j =
-                j * (K + 1) - (j * (j - 1)) / 2;
-            constexpr size_t tId = rowStart_j;   // i = 0 on row j
+            constexpr size_t rowStartJ = j * (K + 1) - (j * (j - 1)) / 2;
+            constexpr size_t tId = rowStartJ; // i = 0 on row j
 
             local[tId] = edge[rr];
             used[tId]  = 1;
@@ -1192,17 +1182,16 @@ namespace Rodin::Variational
               // Triangle-local barycentric integers (a_t,b_t,c_t)
               // for vertices 0,1,2 of that triangle:
               // const size_t a_t = abc[ triToCanon[0] ];
-              const size_t b_t = abc[ triToCanon[1] ];
-              const size_t c_t = abc[ triToCanon[2] ];
+              const size_t bT = abc[triToCanon[1]];
+              const size_t cT = abc[triToCanon[2]];
 
               // Back to the triangle's Fekete enumeration:
               //  i_loc = b_t, j_loc = c_t
-              const size_t i_loc = b_t;
-              const size_t j_loc = c_t;
+              const size_t iLoc = bT;
+              const size_t jLoc = cT;
 
-              const size_t rowStartLoc =
-                  j_loc * (K + 1) - (j_loc * (j_loc - 1)) / 2;
-              const size_t locIdx = rowStartLoc + i_loc;
+              const size_t rowStartLoc = jLoc * (K + 1) - (jLoc * (jLoc - 1)) / 2;
+              const size_t locIdx = rowStartLoc + iLoc;
 
               faceCanon[canonIdx] = faceLocal[locIdx];
             }
@@ -1230,15 +1219,13 @@ namespace Rodin::Variational
                 constexpr size_t j = i2;
                 constexpr size_t k = j2;
 
-                constexpr size_t m_tail   = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
+                constexpr size_t mTail = K - k;
+                constexpr size_t tetraTail = (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                constexpr size_t offsetK = tetraTotal - tetraTail;
 
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
+                constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
 
-                constexpr size_t tetIdx = offset_k + offset_j + i;
+                constexpr size_t tetIdx = offsetK + offsetJ + i;
 
                 local[tetIdx] = faceCanon[triIdx];
                 used[tetIdx]  = 1;
@@ -1267,15 +1254,13 @@ namespace Rodin::Variational
                 constexpr size_t j = j2;
                 constexpr size_t k = i2;
 
-                constexpr size_t m_tail   = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
+                constexpr size_t mTail = K - k;
+                constexpr size_t tetraTail = (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                constexpr size_t offsetK = tetraTotal - tetraTail;
 
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
+                constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
 
-                constexpr size_t tetIdx = offset_k + offset_j + i;
+                constexpr size_t tetIdx = offsetK + offsetJ + i;
 
                 local[tetIdx] = faceCanon[triIdx];
                 used[tetIdx]  = 1;
@@ -1304,15 +1289,13 @@ namespace Rodin::Variational
                 constexpr size_t j = 0;
                 constexpr size_t k = j2;
 
-                constexpr size_t m_tail   = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
+                constexpr size_t mTail = K - k;
+                constexpr size_t tetraTail = (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                constexpr size_t offsetK = tetraTotal - tetraTail;
 
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
+                constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
 
-                constexpr size_t tetIdx = offset_k + offset_j + i;
+                constexpr size_t tetIdx = offsetK + offsetJ + i;
 
                 local[tetIdx] = faceCanon[triIdx];
                 used[tetIdx]  = 1;
@@ -1341,15 +1324,13 @@ namespace Rodin::Variational
                 constexpr size_t j = i2;
                 constexpr size_t k = 0;
 
-                constexpr size_t m_tail   = K - k;
-                constexpr size_t tetraTail =
-                    (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-                constexpr size_t offset_k = tetraTotal - tetraTail;
+                constexpr size_t mTail = K - k;
+                constexpr size_t tetraTail = (mTail + 1) * (mTail + 2) * (mTail + 3) / 6;
+                constexpr size_t offsetK = tetraTotal - tetraTail;
 
-                constexpr size_t offset_j =
-                    j * (K - k + 1) - (j * (j - 1)) / 2;
+                constexpr size_t offsetJ = j * (K - k + 1) - (j * (j - 1)) / 2;
 
-                constexpr size_t tetIdx = offset_k + offset_j + i;
+                constexpr size_t tetIdx = offsetK + offsetJ + i;
 
                 local[tetIdx] = faceCanon[triIdx];
                 used[tetIdx]  = 1;
@@ -1547,12 +1528,11 @@ namespace Rodin::Variational
               const size_t c = j2;
               const size_t abc[3] = { a, b, c };
 
-              const size_t b_t = abc[triToCanon[1]];
-              const size_t c_t = abc[triToCanon[2]];
+              const size_t bT = abc[triToCanon[1]];
+              const size_t cT = abc[triToCanon[2]];
 
-              const size_t rowStartLoc =
-                  c_t * (K + 1) - (c_t * (c_t - 1)) / 2;
-              const size_t locIdx = rowStartLoc + b_t;
+              const size_t rowStartLoc = cT * (K + 1) - (cT * (cT - 1)) / 2;
+              const size_t locIdx = rowStartLoc + bT;
 
               faceCanon[canonIdx] = faceLocal[locIdx];
             }
@@ -1884,14 +1864,13 @@ namespace Rodin::Variational
               const size_t c = j2;
               const size_t abc[3] = { a, b, c };
 
-              const size_t b_t = abc[triToCanon[1]];
-              const size_t c_t = abc[triToCanon[2]];
+              const size_t bT = abc[triToCanon[1]];
+              const size_t cT = abc[triToCanon[2]];
 
-              const size_t i_loc = b_t;
-              const size_t j_loc = c_t;
-              const size_t rowStartLoc =
-                  j_loc * (K + 1) - (j_loc * (j_loc - 1)) / 2;
-              const size_t locIdx = rowStartLoc + i_loc;
+              const size_t iLoc = bT;
+              const size_t jLoc = cT;
+              const size_t rowStartLoc = jLoc * (K + 1) - (jLoc * (jLoc - 1)) / 2;
+              const size_t locIdx = rowStartLoc + iLoc;
 
               faceCanon[canonIdx] = faceLocal[locIdx];
             }
@@ -2142,9 +2121,8 @@ namespace Rodin::Variational
               constexpr size_t quadIdx = j * (K + 1) + i;
 
               constexpr size_t r      = i;
-              constexpr size_t j_edge = K - r;
-              constexpr size_t rowStart =
-                  j_edge * (K + 1) - (j_edge * (j_edge - 1)) / 2;
+              constexpr size_t jEdge = K - r;
+              constexpr size_t rowStart = jEdge * (K + 1) - (jEdge * (jEdge - 1)) / 2;
               constexpr size_t triEdgeIdx = rowStart;
               constexpr size_t wedgeIdx   = j * TriCount + triEdgeIdx;
 

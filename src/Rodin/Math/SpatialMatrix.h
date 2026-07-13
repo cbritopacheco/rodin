@@ -1170,20 +1170,20 @@ namespace Rodin::Math
       {
         // Moore-Penrose pseudoinverse via (A^T A)^{-1} A^T for full column rank
         // and A^T (A A^T)^{-1} for full row rank.
-        SpatialMatrix<Scalar> A_T = this->transpose();
+        SpatialMatrix<Scalar> aT = this->transpose();
         if (m_rows >= m_cols)
         {
           // Full column rank assumed
-          SpatialMatrix<Scalar> AtA = A_T * (*this);
-          SpatialMatrix<Scalar> AtA_inv = AtA.inverse();
-          return AtA_inv * A_T;
+          SpatialMatrix<Scalar> AtA = aT * (*this);
+          SpatialMatrix<Scalar> atAInv = AtA.inverse();
+          return atAInv * aT;
         }
         else
         {
           // Full row rank assumed
-          SpatialMatrix<Scalar> AAt = (*this) * A_T;
-          SpatialMatrix<Scalar> AAt_inv = AAt.inverse();
-          return A_T * AAt_inv;
+          SpatialMatrix<Scalar> AAt = (*this) * aT;
+          SpatialMatrix<Scalar> aAtInv = AAt.inverse();
+          return aT * aAtInv;
         }
       }
 
