@@ -48,6 +48,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for LeastSquaresCG solvers.
   template <class LinearSystem>
   struct Traits<Solver::LeastSquaresCG<LinearSystem>>
   {
@@ -318,5 +319,4 @@ namespace Rodin::Solver
 }
 
 #endif
-
 

@@ -58,6 +58,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for GMRES solvers.
   template <class LinearSystem>
   struct Traits<Solver::GMRES<LinearSystem>>
   {

@@ -44,6 +44,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for IDRS solvers.
   template <class LinearSystem>
   struct Traits<Solver::IDRS<LinearSystem>>
   {
@@ -132,6 +133,8 @@ namespace Rodin::Solver
        * Typical values: 4, 8, 16. Larger s can improve robustness but increases
        * work per iteration.
        */
+      /// @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
+      /// @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
       IDRS& setS(size_t s)
       {
         m_solver.setS(s);
@@ -220,6 +223,7 @@ namespace Rodin::Solver
         return *this;
       }
 
+      /// @brief Sets the IDR(s) shadow-space dimension; returns a reference to this solver.
       IDRS& setS(size_t s)
       {
         m_solver.setS(s);

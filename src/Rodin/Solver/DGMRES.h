@@ -44,6 +44,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for DGMRES solvers.
   template <class LinearSystem>
   struct Traits<Solver::DGMRES<LinearSystem>>
   {
@@ -235,6 +236,7 @@ namespace Rodin::Solver
         return *this;
       }
 
+      /// @brief Sets the number of deflation vectors; returns a reference to this solver.
       DGMRES& setDeflationSize(size_t d)
       {
         m_solver.set_d(d);

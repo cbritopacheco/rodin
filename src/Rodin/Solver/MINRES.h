@@ -59,6 +59,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for MINRES solvers.
   template <class LinearSystem>
   struct Traits<Solver::MINRES<LinearSystem>>
   {

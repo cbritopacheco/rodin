@@ -49,6 +49,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for SimplicialLDLT solvers.
   template <class LinearSystem>
   struct Traits<Solver::SimplicialLDLT<LinearSystem>>
   {
@@ -166,5 +167,4 @@ namespace Rodin::Solver
 }
 
 #endif
-
 

@@ -50,6 +50,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for HouseholderQR solvers.
   template <class LinearSystem>
   struct Traits<Solver::HouseholderQR<LinearSystem>>
   {
@@ -136,7 +137,6 @@ namespace Rodin::Solver
 }
 
 #endif
-
 
 
 

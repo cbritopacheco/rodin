@@ -45,6 +45,7 @@ namespace Rodin::Solver
   class NewtonSolverBase : public Copyable
   {
     public:
+      /// @brief Linear solver type used by this Newton solver.
       using LinearSolverType = LinearSolver;
       /// @brief Linear system type.
       using LinearSystemType = typename FormLanguage::Traits<LinearSolver>::LinearSystemType;
@@ -118,11 +119,19 @@ namespace Rodin::Solver
       }
 
     protected:
+      /**
+       * @brief Returns the problem assembled by the associated linear solver.
+       * @return Mutable problem reference.
+       */
       ProblemBaseType& getProblem() noexcept
       {
         return m_solver.get().getProblem();
       }
 
+      /**
+       * @brief Returns the problem assembled by the associated linear solver.
+       * @return Const problem reference.
+       */
       const ProblemBaseType& getProblem() const noexcept
       {
         return m_solver.get().getProblem();
@@ -368,6 +377,7 @@ namespace Rodin::Solver
       using ProblemBaseType = typename Parent::ProblemBaseType;
       /// @brief Solution vector type.
       using SolutionType = typename Parent::SolutionType;
+      /// @brief Linear solver type used by this Newton solver.
       using LinearSolverType = LinearSolver;
 
       /**
@@ -375,11 +385,15 @@ namespace Rodin::Solver
        */
       struct StepResult
       {
+        /// @brief Whether the step was accepted by the policy.
         bool accepted = true;
+        /// @brief Whether the policy declares convergence.
         bool converged = false;
+        /// @brief Norm reported for the accepted or rejected step.
         Real stepNorm = 0.0;
       };
 
+      /// @brief Callback type for custom Newton step acceptance and updates.
       using StepPolicy =
         std::function<StepResult(SolutionType&, LinearSystemType&, Report&)>;
 
@@ -608,12 +622,21 @@ namespace Rodin::Solver
         return m_monitor;
       }
 
+      /**
+       * @brief Sets the optional custom step policy.
+       * @param policy Optional policy used to accept, reject, or update steps.
+       * @returns Reference to this solver.
+       */
       NewtonSolver& setStepPolicy(Optional<StepPolicy> policy)
       {
         m_stepPolicy = std::move(policy);
         return *this;
       }
 
+      /**
+       * @brief Gets the optional custom step policy.
+       * @returns The currently installed step policy, if any.
+       */
       const Optional<StepPolicy>& getStepPolicy() const noexcept
       {
         return m_stepPolicy;
@@ -831,6 +854,7 @@ namespace Rodin::Solver
        */
       Optional<Monitor> m_monitor;
 
+      /// @brief Optional custom step policy.
       Optional<StepPolicy> m_stepPolicy;
 
       /**

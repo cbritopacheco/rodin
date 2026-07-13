@@ -42,6 +42,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for IDRSTABL solvers.
   template <class LinearSystem>
   struct Traits<Solver::IDRSTABL<LinearSystem>>
   {
@@ -130,6 +131,8 @@ namespace Rodin::Solver
        * Typical values: 2, 4, 8. Larger l may improve robustness but increases
        * work and storage.
        */
+      /// @brief Sets the IDRstab(l) polynomial degree; returns a reference to this solver.
+      /// @brief Sets the IDRstab(l) polynomial degree; returns a reference to this solver.
       IDRSTABL& setL(size_t l)
       {
         m_solver.setL(l);
@@ -218,6 +221,7 @@ namespace Rodin::Solver
         return *this;
       }
 
+      /// @brief Sets the IDRstab(l) polynomial degree; returns a reference to this solver.
       IDRSTABL& setL(size_t l)
       {
         m_solver.setL(l);

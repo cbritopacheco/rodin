@@ -50,6 +50,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for BiCGSTAB solvers.
   template <class LinearSystem>
   struct Traits<Solver::BiCGSTAB<LinearSystem>>
   {
@@ -222,5 +223,4 @@ namespace Rodin::Solver
 }
 
 #endif
-
 

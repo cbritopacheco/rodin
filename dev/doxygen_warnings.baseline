@@ -728,38 +728,6 @@ src/Rodin/Solid/Local/Input.h: warning: Member Input(Input &&)=default (function
 src/Rodin/Solid/Local/Input.h: warning: Member Input(const Input &)=default (function) of class Rodin::Solid::Input is not documented.
 src/Rodin/Solid/Local/Input.h: warning: Member operator=(Input &&)=default (function) of class Rodin::Solid::Input is not documented.
 src/Rodin/Solid/Local/Input.h: warning: Member operator=(const Input &)=default (function) of class Rodin::Solid::Input is not documented.
-src/Rodin/Solver/BiCGSTAB.h: warning: Compound Rodin::FormLanguage::Traits< Solver::BiCGSTAB< LinearSystem > > is not documented.
-src/Rodin/Solver/CG.h: warning: Compound Rodin::FormLanguage::Traits< Solver::CG< LinearSystem > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Compound Rodin::FormLanguage::Traits< Solver::DGMRES< LinearSystem > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member setDeflationSize(size_t d) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Compound Rodin::FormLanguage::Traits< Solver::GMRES< LinearSystem > > is not documented.
-src/Rodin/Solver/HouseholderQR.h: warning: Compound Rodin::FormLanguage::Traits< Solver::HouseholderQR< LinearSystem > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Compound Rodin::FormLanguage::Traits< Solver::IDRS< LinearSystem > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member setS(size_t s) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Compound Rodin::FormLanguage::Traits< Solver::IDRSTABL< LinearSystem > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member setL(size_t l) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/LDLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::LDLT< LinearSystem > > is not documented.
-src/Rodin/Solver/LeastSquaresCG.h: warning: Compound Rodin::FormLanguage::Traits< Solver::LeastSquaresCG< LinearSystem > > is not documented.
-src/Rodin/Solver/LinearSolver.h: warning: Compound Rodin::FormLanguage::Traits< Solver::LinearSolverBase< LinearSystem > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Compound Rodin::FormLanguage::Traits< Solver::MINRES< LinearSystem > > is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member LinearSolverType (typedef) of class Rodin::Solver::NewtonSolver is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member LinearSolverType (typedef) of class Rodin::Solver::NewtonSolverBase is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member LinearSolverType (typedef) of class Rodin::Solver::NewtonSolverBase< KSP > is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member StepPolicy (typedef) of class Rodin::Solver::NewtonSolver is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member accepted (variable) of struct Rodin::Solver::NewtonSolver::StepResult is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member converged (variable) of struct Rodin::Solver::NewtonSolver::StepResult is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member getProblem() const noexcept (function) of class Rodin::Solver::NewtonSolverBase is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member getProblem() const noexcept (function) of class Rodin::Solver::NewtonSolverBase< KSP > is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member getProblem() noexcept (function) of class Rodin::Solver::NewtonSolverBase is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member getProblem() noexcept (function) of class Rodin::Solver::NewtonSolverBase< KSP > is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member getStepPolicy() const noexcept (function) of class Rodin::Solver::NewtonSolver is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member setStepPolicy(Optional< StepPolicy > policy) (function) of class Rodin::Solver::NewtonSolver is not documented.
-src/Rodin/Solver/NewtonSolver.h: warning: Member stepNorm (variable) of struct Rodin::Solver::NewtonSolver::StepResult is not documented.
-src/Rodin/Solver/PartialPivLU.h: warning: Compound Rodin::FormLanguage::Traits< Solver::PartialPivLU< LinearSystem > > is not documented.
-src/Rodin/Solver/SimplicialLDLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SimplicialLDLT< LinearSystem > > is not documented.
-src/Rodin/Solver/SimplicialLLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SimplicialLLT< LinearSystem > > is not documented.
-src/Rodin/Solver/SparseLU.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SparseLU< LinearSystem > > is not documented.
-src/Rodin/Solver/SparseQR.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SparseQR< LinearSystem > > is not documented.
 src/Rodin/Variational/AND.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
 src/Rodin/Variational/Abs.h: warning: Member Abs(const FunctionBase< NestedDerived > &) -> Abs< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Abs.h: warning: Member abs(const FunctionBase< NestedDerived > &op) (function) of namespace Rodin::Variational is not documented.
