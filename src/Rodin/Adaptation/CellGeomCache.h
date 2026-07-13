@@ -56,7 +56,6 @@ namespace Rodin::Adaptation
    */
   struct CellGeomCache
   {
-    /// @brief Mesh cell index for this cache entry.
     Index index = 0;
     Real area = 0;                    ///< |K|
     Real detAK = 0;                   ///< signed det(A_K), constant on K
@@ -67,7 +66,6 @@ namespace Rodin::Adaptation
     Math::SpatialMatrix<Real> AinvT;  ///< A_K^{-T}
     Math::SpatialMatrix<Real> C;      ///< A_K A_K^T
     Math::Matrix<Real> gradN;         ///< 3x2: rows are spatial grads of P1 basis
-    /// @brief Vertex indices of the triangular cell.
     std::array<Index, 3> vertices = {{ 0, 0, 0 }};
   };
 

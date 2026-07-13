@@ -4,12 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/**
- * @file WNGIRSurfaceObservationMetric.h
- * @brief Bilinear-form integrator assembling the residual-stabilized
- * observation metric on interface facets (Levenberg-Marquardt-type
- * damping of the WNGIR step).
- */
 #ifndef RODIN_ADAPTATION_WNGIRSURFACEOBSERVATIONMETRIC_H
 #define RODIN_ADAPTATION_WNGIRSURFACEOBSERVATIONMETRIC_H
 
@@ -18,9 +12,6 @@
 
 namespace Rodin::Adaptation::Detail
 {
-    /**
-     * @brief Bilinear-form integrator for the WNGIR surface observation metric.
-     */
     template <class PhiDerived, class GradDerived,
               class TrialFunction, class TestFunction, class Displacement>
     class WNGIRSurfaceObservationMetric final
@@ -28,17 +19,12 @@ namespace Rodin::Adaptation::Detail
           typename TrialFunction::ScalarType>
     {
       public:
-        /// @brief Scalar value type.
         using ScalarType = typename TrialFunction::ScalarType;
-        /// @brief Parent class type.
         using Parent =
           Variational::LocalBilinearFormIntegratorBase<ScalarType>;
-        /// @brief Level-set function type.
         using PhiType = Variational::RealFunctionBase<PhiDerived>;
-        /// @brief Level-set gradient function type.
         using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
-        /// @brief Constructs the surface observation metric integrator.
         WNGIRSurfaceObservationMetric(
             const PhiType& phi,
             const GradType& grad,
@@ -57,7 +43,6 @@ namespace Rodin::Adaptation::Detail
             m_sigma2(sigma2)
         {}
 
-        /// @brief Copy constructor.
         WNGIRSurfaceObservationMetric(
             const WNGIRSurfaceObservationMetric& other)
           : Parent(other),
@@ -71,14 +56,12 @@ namespace Rodin::Adaptation::Detail
             m_polytope(other.m_polytope)
         {}
 
-        /// @brief Returns the current polytope.
         const Geometry::Polytope& getPolytope() const final override
         {
           assert(m_polytope);
           return *m_polytope;
         }
 
-        /// @brief Sets the current face and assembles the local matrix.
         WNGIRSurfaceObservationMetric& setPolytope(
             const Geometry::Polytope& polytope) final override
         {
@@ -146,7 +129,6 @@ namespace Rodin::Adaptation::Detail
           return *this;
         }
 
-        /// @brief Returns an entry of the current face matrix.
         ScalarType integrate(std::size_t tr, std::size_t te) final override
         {
           return m_matrix(
@@ -154,13 +136,11 @@ namespace Rodin::Adaptation::Detail
               static_cast<Eigen::Index>(tr));
         }
 
-        /// @brief Returns the integration region.
         Geometry::Region getRegion() const final override
         {
           return Geometry::Region::Faces;
         }
 
-        /// @brief Polymorphically copies this surface-observation metric.
         WNGIRSurfaceObservationMetric* copy() const noexcept final override
         {
           return new WNGIRSurfaceObservationMetric(*this);

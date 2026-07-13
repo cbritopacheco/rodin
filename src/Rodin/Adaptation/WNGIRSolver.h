@@ -41,15 +41,14 @@ namespace Rodin::Adaptation
    * the ordinary Rodin form-language deduction path for the step
    * @ref Rodin::Variational::Problem, the metric @ref Rodin::Variational::BilinearForm,
    * and @ref Rodin::Solver::CG. Every global quantity is a backend-matched
-   * GridFunction; only element-local geometry uses `Mat`h::SpatialVector /
-   * `Mat`h::SpatialMatrix. WNGIR contains no backend-specific code.
+   * GridFunction; only element-local geometry uses @ref Math::SpatialVector /
+   * @ref Math::SpatialMatrix. WNGIR contains no backend-specific code.
    */
   template <class TrialFunctionType, class TestFunctionType>
   class WNGIR
   {
       using Displacement = std::remove_reference_t<
         decltype(std::declval<TrialFunctionType&>().getSolution())>;
-      /// @brief Finite element space type.
       using FESType = std::remove_reference_t<
         decltype(std::declval<Displacement&>().getFiniteElementSpace())>;
       using ProblemType = std::decay_t<decltype(Variational::Problem(
@@ -63,7 +62,6 @@ namespace Rodin::Adaptation
       using SpatialMat = Math::SpatialMatrix<Real>;
 
     public:
-      /// @brief Constructs the WNGIR solver from trial and test functions.
       WNGIR(TrialFunctionType& du, TestFunctionType& v)
         : m_u(&du.getSolution()),
           m_duStep(du.getFiniteElementSpace()),
@@ -72,7 +70,6 @@ namespace Rodin::Adaptation
           m_bulkForm(m_duStep, m_vStep)
       {}
 
-      /// @brief Sets WNGIR runtime parameters.
       WNGIR& setParameters(const WNGIRParameters& parameters)
       {
         m_parameters = parameters;
@@ -80,20 +77,17 @@ namespace Rodin::Adaptation
         return *this;
       }
 
-      /// @brief Returns the current WNGIR parameters.
       const WNGIRParameters& getParameters() const
       {
         return m_parameters;
       }
 
-      /// @brief Returns diagnostics from the most recent solve.
       const WNGIRReport& getReport() const
       {
         return m_report;
       }
 
       template <class Mesh, class PhiDerived, class GradDerived>
-      /// @brief Solves the WNGIR fitting problem on marked interface facets.
       WNGIRReport solve(
           const Mesh& mesh,
           const std::vector<Rodin::Index>& interfaceFacets,

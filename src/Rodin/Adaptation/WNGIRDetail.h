@@ -4,11 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/**
- * @file WNGIRDetail.h
- * @brief Implementation details for the WNGIR module (reference-cell
- * margins, local geometry helpers). Not part of the public interface.
- */
 #ifndef RODIN_ADAPTATION_WNGIRDETAIL_H
 #define RODIN_ADAPTATION_WNGIRDETAIL_H
 
@@ -20,7 +15,6 @@ namespace Rodin::Adaptation
 {
   namespace Detail
   {
-    /// @brief Computes the signed margin to the nearest reference-cell face.
     inline Real referenceCellMargin(
         Geometry::Polytope::Type geometry,
         const Math::SpatialPoint& rc,
@@ -42,7 +36,6 @@ namespace Rodin::Adaptation
       return margin;
     }
 
-    /// @brief Builds a geometry point located at a translated physical point.
     inline Geometry::Point makeTranslatedPoint(
         const Geometry::Point& source,
         const Math::SpatialVector<Real>& yPhysical,
@@ -139,7 +132,6 @@ namespace Rodin::Adaptation
     }
 
     template <class Function, class Vector>
-    /// @brief Evaluates a function at a translated source point.
     decltype(auto) evaluateTranslatedPoint(
         const Function& f,
         const Geometry::Point& source,
@@ -159,7 +151,6 @@ namespace Rodin::Adaptation
         return f(p);
     }
 
-    /// @brief Returns a zero spatial matrix of size @p dim.
     inline Math::SpatialMatrix<Real> makeZeroMatrix(std::size_t dim)
     {
       Math::SpatialMatrix<Real> out(dim, dim);
@@ -168,7 +159,6 @@ namespace Rodin::Adaptation
     }
 
     template <class FE, class ReferencePoint, class JacobianInverse>
-    /// @brief Computes a basis-function physical Jacobian.
     Math::SpatialMatrix<Real> physicalJacobian(
         const FE& fe,
         std::size_t local,
@@ -190,7 +180,6 @@ namespace Rodin::Adaptation
     // gradient so it is backend-independent (Eigen or PETSc-backed coefficients
     // alike); the cached interpolation matches the explicit basis contraction.
     template <class Displacement>
-    /// @brief Evaluates @f$I+\nabla u@f$ at an integration point.
     Math::SpatialMatrix<Real> deformationGradient(
         const Displacement& u,
         const Geometry::Polytope& polytope,

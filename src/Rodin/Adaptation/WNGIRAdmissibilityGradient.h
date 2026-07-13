@@ -4,11 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/**
- * @file WNGIRAdmissibilityGradient.h
- * @brief Linear-form integrator assembling the admissibility gradient
- * contribution to the WNGIR step system.
- */
 #ifndef RODIN_ADAPTATION_WNGIRADMISSIBILITYGRADIENT_H
 #define RODIN_ADAPTATION_WNGIRADMISSIBILITYGRADIENT_H
 
@@ -17,21 +12,15 @@
 
 namespace Rodin::Adaptation::Detail
 {
-    /**
-     * @brief Linear-form integrator for WNGIR admissibility and quality gradients.
-     */
     template <class TestFunction, class Displacement>
     class WNGIRAdmissibilityGradient final
       : public Variational::LinearFormIntegratorBase<
           typename TestFunction::ScalarType>
     {
       public:
-        /// @brief Scalar value type.
         using ScalarType = typename TestFunction::ScalarType;
-        /// @brief Parent class type.
         using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
-        /// @brief Constructs the admissibility-gradient integrator.
         WNGIRAdmissibilityGradient(
             const TestFunction& v,
             const Displacement& current,
@@ -42,18 +31,15 @@ namespace Rodin::Adaptation::Detail
             m_parameters(parameters)
         {}
 
-        /// @brief Copy constructor.
         WNGIRAdmissibilityGradient(
             const WNGIRAdmissibilityGradient&) = default;
 
-        /// @brief Returns the current polytope.
         const Geometry::Polytope& getPolytope() const final override
         {
           assert(m_polytope);
           return *m_polytope;
         }
 
-        /// @brief Sets the current polytope and assembles the local vector.
         WNGIRAdmissibilityGradient& setPolytope(
             const Geometry::Polytope& polytope) final override
         {
@@ -168,19 +154,16 @@ namespace Rodin::Adaptation::Detail
           return *this;
         }
 
-        /// @brief Returns an entry of the current element vector.
         ScalarType integrate(std::size_t local) final override
         {
           return m_vector(static_cast<Eigen::Index>(local));
         }
 
-        /// @brief Returns the integration region.
         Geometry::Region getRegion() const final override
         {
           return Geometry::Region::Cells;
         }
 
-        /// @brief Polymorphically copies this admissibility-gradient integrand.
         WNGIRAdmissibilityGradient* copy() const noexcept final override
         {
           return new WNGIRAdmissibilityGradient(*this);

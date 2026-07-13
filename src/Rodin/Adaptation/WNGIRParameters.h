@@ -4,10 +4,6 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-/**
- * @file WNGIRParameters.h
- * @brief Parameters controlling a WNGIR solve.
- */
 #ifndef RODIN_ADAPTATION_WNGIRPARAMETERS_H
 #define RODIN_ADAPTATION_WNGIRPARAMETERS_H
 
@@ -15,7 +11,6 @@
 
 namespace Rodin::Adaptation
 {
-  /// @brief Runtime parameters controlling WNGIR assembly and iteration.
   struct WNGIRParameters
   {
     Real h = 0;                 ///< reference mesh size (required).
@@ -24,7 +19,7 @@ namespace Rodin::Adaptation
     Real gammaDiv = 0;          ///< divergence weight; ≤0 ⇒ gammaH.
     Real ellM = 0;              ///< Sobolev length; ≤0 ⇒ 3h.
     Real gammaObs = 1;          ///< surface observation metric weight.
-    bool residualStabilizedObservationMetric = true; ///< Add residual damping to observation metric.
+    bool residualStabilizedObservationMetric = true;
     Real gammaJ = 1;            ///< j-barrier weight.
     Real gammaQ = 1;            ///< Q-barrier weight.
     Real jSafe = 1e-2;          ///< barrier floor on j.
@@ -38,23 +33,23 @@ namespace Rodin::Adaptation
     ///   K_Q(v,z) = gammaQual ∫_{Q_rel>qStar} a_Q(v) a_Q(z) dX.
     /// gammaQual ≤ 0 disables the Q hinge.
     Real gammaQual = 1;
-    Real qStar = Real(1.75); ///< Relative-distortion hinge threshold.
+    Real qStar = Real(1.75);
     /// Optional one-sided size hinge:
     ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
     /// Disabled by default. Inversion is handled by the near-zero j barrier
     /// and the true-geometry line search, allowing small well-shaped cells.
     Real gammaSize = 0;
-    Real jStar = Real(0.3); ///< Jacobian size-hinge threshold.
+    Real jStar = Real(0.3);
     Real omegaMin = 0.1;        ///< active-set threshold on ω.
     Real alphaMin = 1e-4;       ///< line-search floor.
-    bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
+    bool energyLineSearch = true;
     Real jMinRatio = 1e-8;      ///< hard inadmissibility floor.
-    Real jLineSearchRatio = 1e-2; ///< Jacobian floor ratio enforced by line search.
+    Real jLineSearchRatio = 1e-2;
     Real activeRMSTol = 0;      ///< ≤0 ⇒ 4h².
     Real activeSupTol = 0;      ///< ≤0 ⇒ 10h².
     Real activeRMSOverHTol = 0; ///< >0 enables scale-aware RMS stopping.
     Real activeSupOverHTol = 0; ///< >0 enables scale-aware sup stopping.
-    Real energyStagTol = 1e-4; ///< Relative energy stagnation tolerance.
+    Real energyStagTol = 1e-4;
     Real stepTol = 0;           ///< ≤0 ⇒ 1e-4·h.
     Real pointLocationTolerance = 0; ///< ≤0 ⇒ 1e-10 for moved FE evaluation.
     Real cgRelativeTolerance = 1e-6; ///< relative residual tolerance for CG.
@@ -63,11 +58,11 @@ namespace Rodin::Adaptation
     std::size_t andersonStart = 2;   ///< first iteration where AA may be used.
     Real andersonDamping = 1;        ///< first AA damping trial.
     Real andersonMinDamping = 0.125; ///< smallest AA damping trial.
-    std::size_t maxIterations = 200; ///< Maximum nonlinear WNGIR iterations.
+    std::size_t maxIterations = 200;
     std::size_t quadratureOrder = 0; ///< 0 ⇒ 2·(FE order).
-    bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
-    Geometry::Attribute interfaceAttribute = 0; ///< Mesh attribute identifying interface facets.
-    bool trace = false; ///< Print per-iteration diagnostics when true.
+    bool hasInterfaceAttribute = false;
+    Geometry::Attribute interfaceAttribute = 0;
+    bool trace = false;
     /// If true, also add the nonlinear Q-barrier first variation to the RHS.
     /// The j-barrier first variation is part of the quality energy when
     /// includeQualityGradient=true.
