@@ -237,6 +237,9 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles only the requested target into the linear system.
+      /// @param[in] target Assembly target to update.
+      /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
@@ -608,6 +611,9 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles only the requested target into the block linear system.
+      /// @param[in] target Assembly target to update.
+      /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
         computeOffsets();

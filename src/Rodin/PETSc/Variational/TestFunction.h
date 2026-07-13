@@ -69,6 +69,7 @@ namespace Rodin::Variational
   template <class FES>
   struct IsTestFunction<PETSc::Variational::TestFunction<FES>>
   {
+    /// @brief True because the PETSc wrapper models a test function.
     static constexpr Boolean Value = true;
   };
 }

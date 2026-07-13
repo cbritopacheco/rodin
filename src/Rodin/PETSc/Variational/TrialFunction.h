@@ -74,6 +74,7 @@ namespace Rodin::Variational
   template <class Solution, class FES>
   struct IsTrialFunction<PETSc::Variational::TrialFunction<Solution, FES>>
   {
+    /// @brief True because the PETSc wrapper models a trial function.
     static constexpr Boolean Value = true;
   };
 }

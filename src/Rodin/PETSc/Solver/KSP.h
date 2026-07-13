@@ -82,9 +82,13 @@ namespace Rodin::Solver
 
       virtual ~KSP() override;
 
+      /// @brief Default relative residual tolerance.
       static constexpr PetscReal DEFAULT_RTOL = 1e-10;
+      /// @brief Default absolute residual tolerance.
       static constexpr PetscReal DEFAULT_ABSTOL = 1e-50;
+      /// @brief Default divergence tolerance.
       static constexpr PetscReal DEFAULT_DTOL = 1e5;
+      /// @brief Default maximum number of Krylov iterations.
       static constexpr PetscInt  DEFAULT_MAXIT = 100000;
 
       /**
@@ -126,6 +130,11 @@ namespace Rodin::Solver
        */
       KSP& setPreconditioner(OperatorType P) noexcept;
 
+      /**
+       * @brief Sets the PETSc options prefix used by this KSP object.
+       * @param[in] prefix Optional prefix, without PETSc's leading hyphen.
+       * @returns Reference to `*this`.
+       */
       KSP& setPrefix(const Optional<std::string>& prefix) noexcept;
 
       /// @brief Returns a mutable reference to the underlying PETSc KSP handle.

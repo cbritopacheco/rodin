@@ -41,6 +41,7 @@ namespace Rodin::Math
     }
   }
 
+  /// @cond
   LinearSystem<::Mat, ::Vec>::LinearSystem(MPI_Comm comm)
     : m_comm(comm)
   {
@@ -116,4 +117,5 @@ namespace Rodin::Math
     }
     return *this;
   }
+  /// @endcond
 }

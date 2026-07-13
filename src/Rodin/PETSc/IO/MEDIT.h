@@ -62,6 +62,10 @@ namespace Rodin::IO
 
       using Parent::Parent;
 
+      /**
+       * @brief Writes PETSc-backed grid function coefficients in MEDIT order.
+       * @param[in,out] os Output stream receiving one vertex value per line.
+       */
       void printData(std::ostream& os) override
       {
         os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);

@@ -107,10 +107,15 @@ namespace Rodin::Solver
 
       using NewtonSolverParent::solve;
 
+      /// @brief Default nonlinear relative residual tolerance.
       static constexpr PetscReal DEFAULT_RTOL   = 1e-8;
+      /// @brief Default nonlinear absolute residual tolerance.
       static constexpr PetscReal DEFAULT_ABSTOL = 1e-50;
+      /// @brief Default step norm convergence tolerance.
       static constexpr PetscReal DEFAULT_STOL   = 1e-8;
+      /// @brief Default maximum number of nonlinear iterations.
       static constexpr PetscInt  DEFAULT_MAXIT  = 50;
+      /// @brief Default maximum number of residual evaluations.
       static constexpr PetscInt  DEFAULT_MAXF   = 10000;
 
       /**
@@ -198,6 +203,11 @@ namespace Rodin::Solver
        */
       bool converged() const;
 
+      /**
+       * @brief Returns PETSc's convergence reason from the most recent solve.
+       * @returns Positive values for convergence, negative values for
+       *          divergence, and zero before PETSc has decided.
+       */
       ::SNESConvergedReason getConvergedReason() const;
 
       /// @brief Returns a mutable reference to the underlying PETSc SNES handle.

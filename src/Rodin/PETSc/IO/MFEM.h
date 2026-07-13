@@ -63,10 +63,18 @@ namespace Rodin::IO
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");
 
+      /**
+       * @brief Constructs a PETSc-backed P0 MFEM printer.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Writes P0 coefficients in MFEM node ordering.
+       * @param[in,out] os Output stream receiving coefficient data.
+       */
       void printData(std::ostream& os) override
       {
         os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);
@@ -146,10 +154,18 @@ namespace Rodin::IO
       /// @brief Context type (Local or MPI) of the finite element space mesh.
       using FESMeshContextType = typename FormLanguage::Traits<typename FESType::MeshType>::ContextType;
 
+      /**
+       * @brief Constructs a PETSc-backed P1 MFEM printer.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Writes P1 coefficients in MFEM node ordering.
+       * @param[in,out] os Output stream receiving coefficient data.
+       */
       void printData(std::ostream& os) override
       {
         const auto& gf = this->getObject();
@@ -227,10 +243,18 @@ namespace Rodin::IO
       static_assert(std::is_same_v<ScalarType, PetscScalar>,
         "PETSc MFEM printer: Range scalar must be PetscScalar.");
 
+      /**
+       * @brief Constructs a PETSc-backed H1 MFEM printer.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Writes high-order H1 coefficients in MFEM node ordering.
+       * @param[in,out] os Output stream receiving coefficient data.
+       */
       void printData(std::ostream& os) override
       {
         os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);
@@ -535,11 +559,12 @@ namespace Rodin::IO
       }
   };
 
-  // Convenience aliases to match your existing specializations pattern
+  /// @brief Convenience alias for local PETSc-backed H1 MFEM printers.
   template <size_t K, class Range>
   using MFEM_H1_PETSc_Local_Printer =
     GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::Local>>, ::Vec>;
 
+  /// @brief Convenience alias for MPI PETSc-backed H1 MFEM printers.
   template <size_t K, class Range>
   using MFEM_H1_PETSc_MPI_Printer =
     GridFunctionPrinter<FileFormat::MFEM, Variational::H1<K, Range, Geometry::Mesh<Context::MPI>>, ::Vec>;

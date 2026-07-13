@@ -63,6 +63,11 @@ namespace Rodin::Assembly
 
       static_assert(std::is_same_v<ScalarType, PetscScalar>);
 
+      /**
+       * @brief Assembles the linear form into a PETSc vector.
+       * @param[in,out] res PETSc vector receiving accumulated entries.
+       * @param[in] input Linear-form assembly input.
+       */
       void execute(VectorType& res, const InputType& input) const override
       {
         assert(res);
@@ -117,6 +122,7 @@ namespace Rodin::Assembly
         (void) ierr;
       }
 
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -160,6 +166,11 @@ namespace Rodin::Assembly
         "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
       );
 
+      /**
+       * @brief Assembles the bilinear form into a PETSc matrix.
+       * @param[in,out] res PETSc matrix receiving accumulated entries.
+       * @param[in] input Bilinear-form assembly input.
+       */
       void execute(OperatorType& res, const InputType& input) const override
       {
         assert(res);
@@ -258,6 +269,7 @@ namespace Rodin::Assembly
         (void) ierr;
       }
 
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -307,11 +319,22 @@ namespace Rodin::Assembly
       /// @brief Context type (Local or MPI) for the trial mesh.
       using TrialMeshContextType = typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
 
+      /**
+       * @brief Assembles the full single-field PETSc linear system.
+       * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
+       * @param[in] input Single-field problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Assembles only the requested single-field system target.
+       * @param[in,out] axb Linear system receiving the requested target.
+       * @param[in] input Single-field problem assembly input.
+       * @param[in] target Assembly target to update.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -830,6 +853,7 @@ namespace Rodin::Assembly
       }
 
     public:
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -876,11 +900,22 @@ namespace Rodin::Assembly
       /// @brief PETSc vector type (`::Vec`) for the block RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
+      /**
+       * @brief Assembles the full multi-field PETSc linear system.
+       * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
+       * @param[in] input Multi-field problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Assembles only the requested multi-field system target.
+       * @param[in,out] axb Linear system receiving the requested target.
+       * @param[in] input Multi-field problem assembly input.
+       * @param[in] target Assembly target to update.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -1546,6 +1581,7 @@ namespace Rodin::Assembly
       }
 
     public:
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -1555,6 +1591,7 @@ namespace Rodin::Assembly
 
 namespace Rodin::PETSc::Assembly
 {
+  /// @brief PETSc namespace alias for sequential assembly specializations.
   template <class LinearAlgebraType, class Operand>
   using Sequential = Rodin::Assembly::Sequential<LinearAlgebraType, Operand>;
 }

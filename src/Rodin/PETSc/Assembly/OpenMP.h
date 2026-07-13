@@ -54,6 +54,7 @@ namespace Rodin::Assembly
       using VectorType =
         ::Vec;
 
+      /// @brief Linear form type being assembled.
       using LinearFormType =
         Variational::LinearForm<FES, VectorType>;
 
@@ -61,16 +62,20 @@ namespace Rodin::Assembly
       using Parent =
         AssemblyBase<VectorType, LinearFormType>;
 
+      /// @brief Input data type for the assembly pipeline.
       using InputType =
         typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -89,6 +94,11 @@ namespace Rodin::Assembly
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Assembles the linear form into a PETSc vector using OpenMP.
+       * @param[in,out] res PETSc vector receiving accumulated entries.
+       * @param[in] input Linear-form assembly input.
+       */
       void execute(VectorType& res, const InputType& input) const override
       {
         assert(res);
@@ -188,6 +198,7 @@ namespace Rodin::Assembly
         (void) ierr2;
       }
 
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -213,6 +224,7 @@ namespace Rodin::Assembly
     : public AssemblyBase<::Mat, Variational::BilinearForm<Solution, TrialFES, TestFES, ::Mat>>
   {
     public:
+      /// @brief Scalar type resulting from the dot product of trial and test scalars.
       using DotType       = typename FormLanguage::Dot<
                              typename FormLanguage::Traits<TrialFES>::ScalarType,
                              typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
@@ -225,9 +237,11 @@ namespace Rodin::Assembly
       using OperatorType =
         ::Mat;
 
+      /// @brief Bilinear form type being assembled.
       using BilinearFormType =
         Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Base type for local bilinear form integrators.
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<PetscScalar>;
 
@@ -235,14 +249,18 @@ namespace Rodin::Assembly
       using Parent =
         AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Input data type for the assembly pipeline.
       using InputType =
         typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -261,6 +279,11 @@ namespace Rodin::Assembly
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Assembles the bilinear form into a PETSc matrix using OpenMP.
+       * @param[in,out] res PETSc matrix receiving accumulated entries.
+       * @param[in] input Bilinear-form assembly input.
+       */
       void execute(OperatorType& res, const InputType& input) const override
       {
         assert(res);
@@ -468,6 +491,7 @@ namespace Rodin::Assembly
         (void) ierr2;
       }
 
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -499,50 +523,80 @@ namespace Rodin::Assembly
     public:
       /// @brief Linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
+      /// @brief Problem type being assembled.
       using ProblemType      = Rodin::Variational::Problem<LinearSystemType, U, V>;
+      /// @brief Parent assembly base class.
       using Parent           = AssemblyBase<LinearSystemType, ProblemType>;
+      /// @brief Input data type for the assembly pipeline.
       using InputType        = typename Parent::InputType;
 
       /// @brief Assembled operator type.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      /// @brief PETSc vector type for the RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
+      /// @brief PETSc scalar type.
       using ScalarType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
 
+      /// @brief Finite element space type for the trial function.
       using TrialFESType        = typename Rodin::FormLanguage::Traits<U>::FESType;
+      /// @brief Mesh type for the trial finite element space.
       using TrialMeshType       = typename Rodin::FormLanguage::Traits<TrialFESType>::MeshType;
+      /// @brief Context type for the trial mesh.
       using TrialMeshContextType= typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
 
-      // If you have these base classes in Variational, keep them; otherwise adapt to your hierarchy.
+      /// @brief Base type for local bilinear form integrators.
       using LocalBilinearIntegratorBase  = Variational::LocalBilinearFormIntegratorBase<PetscScalar>;
+      /// @brief Base type for global bilinear form integrators.
       using GlobalBilinearIntegratorBase = Variational::GlobalBilinearFormIntegratorBase<PetscScalar>;
+      /// @brief Base type for linear form integrators.
       using LinearIntegratorBase         = Variational::LinearFormIntegratorBase<PetscScalar>;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other), m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(std::move(other.m_threadCount))
       {}
 
+      /**
+       * @brief Sets the number of OpenMP threads used by this backend.
+       * @param[in] tc Thread count.
+       * @returns Reference to `*this`.
+       */
       OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
       }
 
+      /// @brief Returns the configured thread count, or OpenMP's maximum.
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Assembles the full single-field PETSc linear system.
+       * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
+       * @param[in] input Single-field problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Assembles only the requested single-field system target.
+       * @param[in,out] axb Linear system receiving the requested target.
+       * @param[in] input Single-field problem assembly input.
+       * @param[in] target Assembly target to update.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -1265,6 +1319,7 @@ namespace Rodin::Assembly
       }
 
     public:
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -1299,46 +1354,73 @@ namespace Rodin::Assembly
       /// @brief Linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
 
+      /// @brief Multi-field problem type being assembled.
       using ProblemType =
         Rodin::Variational::Problem<LinearSystemType, U1, U2, U3, Us...>;
 
+      /// @brief Parent assembly base class.
       using Parent    = AssemblyBase<LinearSystemType, ProblemType>;
+      /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
       /// @brief Assembled operator type.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
+      /// @brief PETSc vector type for the block RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
+      /// @brief Base type for local bilinear form integrators.
       using LocalBilinearIntegratorBase  = Variational::LocalBilinearFormIntegratorBase<PetscScalar>;
+      /// @brief Base type for global bilinear form integrators.
       using GlobalBilinearIntegratorBase = Variational::GlobalBilinearFormIntegratorBase<PetscScalar>;
+      /// @brief Base type for linear form integrators.
       using LinearIntegratorBase         = Variational::LinearFormIntegratorBase<PetscScalar>;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other), m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(std::move(other.m_threadCount))
       {}
 
+      /**
+       * @brief Sets the number of OpenMP threads used by this backend.
+       * @param[in] tc Thread count.
+       * @returns Reference to `*this`.
+       */
       OpenMP& setThreadCount(size_t tc) noexcept
       {
         m_threadCount = tc;
         return *this;
       }
 
+      /// @brief Returns the configured thread count, or OpenMP's maximum.
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Assembles the full multi-field PETSc linear system.
+       * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
+       * @param[in] input Multi-field problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Assembles only the requested multi-field system target.
+       * @param[in,out] axb Linear system receiving the requested target.
+       * @param[in] input Multi-field problem assembly input.
+       * @param[in] target Assembly target to update.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -2169,6 +2251,7 @@ namespace Rodin::Assembly
       }
 
     public:
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -2181,6 +2264,7 @@ namespace Rodin::Assembly
 
 namespace Rodin::PETSc::Assembly
 {
+  /// @brief PETSc namespace alias for OpenMP assembly specializations.
   template <class LinearAlgebraType, class Operand>
   using OpenMP = Rodin::Assembly::OpenMP<LinearAlgebraType, Operand>;
 }
