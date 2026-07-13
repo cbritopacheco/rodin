@@ -116,19 +116,24 @@ namespace Rodin::Assembly
       /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
 
+      /// @brief Linear form type assembled by this backend.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<VectorType, LinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -164,6 +169,10 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -208,23 +217,30 @@ namespace Rodin::Assembly
       /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -291,6 +307,10 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -335,19 +355,24 @@ namespace Rodin::Assembly
       /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
+      /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -371,12 +396,19 @@ namespace Rodin::Assembly
         res.setFromTriplets(triplets.begin(), triplets.end());
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
       }
   };
 
+  /**
+   * @brief Sequential bilinear form assembly into Eigen triplets.
+   */
   template <class Solution, class TrialFES, class TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<
@@ -409,26 +441,33 @@ namespace Rodin::Assembly
       /// @brief Assembled operator type.
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
+      /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType =
         Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType =
         Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
@@ -508,12 +547,19 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
       }
   };
 
+  /**
+   * @brief Sequential block bilinear form assembly into Eigen triplets.
+   */
   template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     std::vector<Eigen::Triplet<Real>>,
@@ -529,30 +575,43 @@ namespace Rodin::Assembly
       /// @brief Assembled operator type.
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
+      /// @brief Tuple of bilinear forms assembled by this backend.
       using TupleType =
         Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>...>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, TupleType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Block offset array type.
       using Offsets = typename InputType::Offsets;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Executes block triplet assembly.
+       * @param res Output triplet array.
+       * @param input Block assembly input.
+       */
       void execute(OperatorType& res, const InputType& input) const override
       {
         using AssemblyTuple =
@@ -591,12 +650,19 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
       }
   };
 
+  /**
+   * @brief Sequential block bilinear form assembly into a sparse matrix.
+   */
   template <class ... Solution, class ... TrialFES, class ... TestFES>
   class Sequential<
     Math::SparseMatrix<Real>,
@@ -612,21 +678,30 @@ namespace Rodin::Assembly
             Math::SparseMatrix<Real>,
             Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>>;
 
+        /// @brief Assembly input data type.
         using InputType = typename Parent::InputType;
 
         /// @brief Assembled operator type.
         using OperatorType = Math::SparseMatrix<Real>;
 
+        /// @brief Default constructor.
         Sequential() = default;
 
+        /// @brief Copy constructor.
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
+        /// @brief Move constructor.
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
 
+        /**
+         * @brief Executes block sparse matrix assembly.
+         * @param res Output sparse matrix.
+         * @param input Block assembly input.
+         */
         void execute(OperatorType& res, const InputType& input) const override
         {
           Sequential<
@@ -640,12 +715,19 @@ namespace Rodin::Assembly
           res.setFromTriplets(triplets.begin(), triplets.end());
         }
 
+        /**
+         * @brief Creates a polymorphic copy.
+         * @return Pointer to a new copy.
+         */
         Sequential* copy() const noexcept override
         {
           return new Sequential(*this);
         }
     };
 
+  /**
+   * @brief Sequential block linear form assembly into a vector.
+   */
   template <class ... FES>
   class Sequential<
     Math::Vector<Real>,
@@ -661,21 +743,30 @@ namespace Rodin::Assembly
             Math::Vector<Real>,
             Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>>;
 
+        /// @brief Assembly input data type.
         using InputType = typename Parent::InputType;
 
         /// @brief Vector type of the linear system.
         using VectorType = Math::Vector<Real>;
 
+        /// @brief Default constructor.
         Sequential() = default;
 
+        /// @brief Copy constructor.
         Sequential(const Sequential& other)
           : Parent(other)
         {}
 
+        /// @brief Move constructor.
         Sequential(Sequential&& other)
           : Parent(std::move(other))
         {}
 
+        /**
+         * @brief Executes block vector assembly.
+         * @param res Output vector.
+         * @param input Block assembly input.
+         */
         void execute(VectorType& res, const InputType& input) const override
         {
           using AssemblyTuple =
@@ -702,6 +793,10 @@ namespace Rodin::Assembly
               });
         }
 
+        /**
+         * @brief Creates a polymorphic copy.
+         * @return Pointer to a new copy.
+         */
         Sequential* copy() const noexcept override
         {
           return new Sequential(*this);
@@ -709,6 +804,9 @@ namespace Rodin::Assembly
     };
 
 
+  /**
+   * @brief Sequential mixed problem assembly.
+   */
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class Sequential<
       LinearSystem,
@@ -727,6 +825,7 @@ namespace Rodin::Assembly
           LinearSystemType,
           Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
       /// @brief Assembled operator type.
@@ -741,6 +840,11 @@ namespace Rodin::Assembly
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /**
+       * @brief Executes full mixed problem assembly.
+       * @param axb Output linear system.
+       * @param input Mixed problem input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         auto& A = axb.getOperator();
@@ -1217,6 +1321,12 @@ namespace Rodin::Assembly
       // assemble the full system into a scratch object and expose only the
       // requested side, leaving the other operand untouched (the targeted
       // contract). Keeps the block BC-elimination logic in one code path.
+      /**
+       * @brief Executes targeted mixed problem assembly.
+       * @param axb Output linear system.
+       * @param input Mixed problem input.
+       * @param target Side of the system to assemble.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -1230,12 +1340,19 @@ namespace Rodin::Assembly
           axb.getVector() = std::move(scratch.getVector());
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
         {
           return new Sequential(*this);
         }
     };
 
+  /**
+   * @brief Sequential single-field problem assembly.
+   */
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class Sequential<
     LinearSystem,
@@ -1254,6 +1371,7 @@ namespace Rodin::Assembly
           LinearSystemType,
           Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
       /// @brief Assembled operator type.
@@ -1268,6 +1386,7 @@ namespace Rodin::Assembly
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Bilinear form type assembled into the operator.
       using BilinearFormType =
         Variational::BilinearForm<
           typename FormLanguage::Traits<TrialFunction>::SolutionType,
@@ -1275,16 +1394,28 @@ namespace Rodin::Assembly
           typename FormLanguage::Traits<TestFunction>::FESType,
           OperatorType>;
 
+      /// @brief Linear form type assembled into the vector.
       using LinearFormType =
         Variational::LinearForm<
           typename FormLanguage::Traits<TestFunction>::FESType,
           VectorType>;
 
+      /**
+       * @brief Executes full problem assembly.
+       * @param axb Output linear system.
+       * @param input Problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Executes targeted problem assembly.
+       * @param axb Output linear system.
+       * @param input Problem assembly input.
+       * @param target Side of the system to assemble.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -1733,12 +1864,19 @@ namespace Rodin::Assembly
       }
 
     public:
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
       }
   };
 
+  /**
+   * @brief Sequential value Dirichlet boundary condition assembly.
+   */
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class Sequential<
     IndexMap<Scalar>,
@@ -1753,29 +1891,42 @@ namespace Rodin::Assembly
       /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Trial function type constrained by the boundary condition.
       using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
 
+      /// @brief Boundary value function type.
       using ValueType = Variational::FunctionBase<ValueDerived>;
 
+      /// @brief Dirichlet condition type.
       using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
 
+      /// @brief Range type of the finite element space.
       using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Executes value Dirichlet boundary condition assembly.
+       * @param res Output map from constrained DOFs to values.
+       * @param input Boundary condition input.
+       */
       void execute(IndexMap<Scalar>& res, const InputType& input) const override
       {
         const auto& u = input.getOperand();
@@ -1810,6 +1961,10 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);
@@ -1848,30 +2003,43 @@ namespace Rodin::Assembly
           Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
+      /// @brief Output map type for slave-to-master identifications.
       using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
 
+      /// @brief Slave trial function type.
       using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
 
+      /// @brief Shape-function expression type on the right-hand side.
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
 
+      /// @brief Dirichlet condition type.
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       Sequential() = default;
 
+      /// @brief Copy constructor.
       Sequential(const Sequential& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       Sequential(Sequential&& other)
         : Parent(std::move(other))
       {}
 
+      /**
+       * @brief Executes identification Dirichlet boundary condition assembly.
+       * @param res Output map from slave DOFs to master DOF coefficients.
+       * @param input Boundary condition input.
+       */
       void execute(OutputType& res, const InputType& input) const override
       {
         const auto& u = input.getOperand();
@@ -1965,6 +2133,10 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       Sequential* copy() const noexcept override
       {
         return new Sequential(*this);

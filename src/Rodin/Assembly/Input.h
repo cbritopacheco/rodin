@@ -485,20 +485,43 @@ namespace Rodin::Assembly
     public:
       /// @brief Operand type.
       using OperandType = Variational::TrialFunction<Sol1, FES1>;
+
+      /// @brief Shape-function expression type on the right-hand side.
       using ValueType   = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+
+      /// @brief Dirichlet condition represented by this input.
       using DirichletBCType =
         Variational::DirichletBC<OperandType, ValueType>;
 
+      /**
+       * @brief Constructs identification Dirichlet BC assembly input.
+       *
+       * @param u Slave trial function to constrain.
+       * @param v Shape-function expression used as the master value.
+       * @param essBdr Boundary attributes where the condition applies.
+       */
       DirichletBCShapeFunctionAssemblyInput(
           const OperandType& u, const ValueType& v,
           const FlatSet<Geometry::Attribute>& essBdr)
         : m_u(u), m_v(v), m_essBdr(essBdr)
       {}
 
+      /**
+       * @brief Gets the slave trial function operand.
+       * @return Reference to the constrained trial function.
+       */
       const OperandType& getOperand() const { return m_u.get(); }
 
+      /**
+       * @brief Gets the shape-function expression on the right-hand side.
+       * @return Reference to the master expression.
+       */
       const ValueType& getShapeFunction() const { return m_v.get(); }
 
+      /**
+       * @brief Gets the essential boundary attributes.
+       * @return Boundary attributes where the condition applies.
+       */
       const FlatSet<Geometry::Attribute>& getEssentialBoundary() const
       {
         return m_essBdr.get();
@@ -586,9 +609,18 @@ namespace Rodin::Assembly
       std::reference_wrapper<const TestFunction> m_testFunction;            ///< Test function reference
   };
 
+  /**
+   * @brief Input data for mixed problem assembly with several trial/test
+   *        functions.
+   *
+   * Stores the split trial and test tuples, their block offsets, UUID-to-block
+   * maps, and the total trial/test sizes used to assemble a mixed linear
+   * system.
+   */
   template <class ProblemBody, class U1, class U2, class U3, class ... Us>
   class ProblemAssemblyInput<ProblemBody, U1, U2, U3, Us...>
   {
+    /// @brief Problem body type.
     using ProblemBodyType = ProblemBody;
 
     private:
@@ -663,6 +695,19 @@ namespace Rodin::Assembly
                  .template filter<IsTestFunctionReferenceWrapper>());
 
       public:
+        /**
+         * @brief Constructs mixed problem assembly input.
+         *
+         * @param body Problem body containing forms and boundary conditions.
+         * @param us Trial function tuple.
+         * @param vs Test function tuple.
+         * @param trialOffsets Block offsets for trial functions.
+         * @param testOffsets Block offsets for test functions.
+         * @param trialUUIDMap Map from trial function UUIDs to block indices.
+         * @param testUUIDMap Map from test function UUIDs to block indices.
+         * @param totalTrial Total number of trial DOFs.
+         * @param totalTest Total number of test DOFs.
+         */
         ProblemAssemblyInput(
             ProblemBodyType& body,
             TrialFunctionTuple& us,
@@ -683,46 +728,82 @@ namespace Rodin::Assembly
             m_totalTest(totalTest)
         {}
 
+        /**
+         * @brief Gets the problem body.
+         * @return Reference to the problem body.
+         */
         ProblemBodyType& getProblemBody() const
         {
           return m_pb;
         }
 
+        /**
+         * @brief Gets the trial function tuple.
+         * @return Reference to the trial function tuple.
+         */
         TrialFunctionTuple& getTrialFunctions() const
         {
           return m_us;
         }
 
+        /**
+         * @brief Gets the test function tuple.
+         * @return Reference to the test function tuple.
+         */
         TestFunctionTuple& getTestFunctions() const
         {
           return m_vs;
         }
 
+        /**
+         * @brief Gets trial block offsets.
+         * @return Reference to the trial offset array.
+         */
         auto& getTrialOffsets() const
         {
           return m_trialOffsets;
         }
 
+        /**
+         * @brief Gets test block offsets.
+         * @return Reference to the test offset array.
+         */
         auto& getTestOffsets()  const
         {
           return m_testOffsets;
         }
 
+        /**
+         * @brief Gets the trial UUID-to-block map.
+         * @return Reference to the trial UUID map.
+         */
         auto& getTrialUUIDMap() const
         {
           return m_trialUUIDMap;
         }
 
+        /**
+         * @brief Gets the test UUID-to-block map.
+         * @return Reference to the test UUID map.
+         */
         auto& getTestUUIDMap()  const
         {
           return m_testUUIDMap;
         }
 
+        /**
+         * @brief Gets the total number of trial DOFs.
+         * @return Total trial size.
+         */
         size_t getTotalTrialSize() const
         {
           return m_totalTrial;
         }
 
+        /**
+         * @brief Gets the total number of test DOFs.
+         * @return Total test size.
+         */
         size_t getTotalTestSize()  const
         {
           return m_totalTest;
