@@ -47,6 +47,7 @@
 
 #include "Problem.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class ... Parameters>
@@ -89,5 +90,5 @@ namespace Rodin::Variational
           U, V>;
 }
 
+/// @endcond
 #endif
-

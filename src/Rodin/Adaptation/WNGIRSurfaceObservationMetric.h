@@ -160,6 +160,7 @@ namespace Rodin::Adaptation::Detail
           return Geometry::Region::Faces;
         }
 
+        /// @brief Polymorphically copies this surface-observation metric.
         WNGIRSurfaceObservationMetric* copy() const noexcept final override
         {
           return new WNGIRSurfaceObservationMetric(*this);

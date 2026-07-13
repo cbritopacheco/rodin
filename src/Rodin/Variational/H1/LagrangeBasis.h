@@ -14,6 +14,7 @@
 #include "Rodin/Math/Vector.h"
 #include "GLL.h" // GLL<K>, GLL01<K>
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   //==========================================================================
@@ -779,4 +780,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

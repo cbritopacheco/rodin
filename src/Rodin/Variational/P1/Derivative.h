@@ -29,6 +29,7 @@
 #include "Rodin/Variational/Derivative.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
@@ -212,4 +213,5 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<P1<Range, Mesh>, Data>>;
 }
 
+/// @endcond
 #endif

@@ -15,6 +15,7 @@
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/Identifier.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   class TrialFunctionMismatchException : public Alert::Exception
@@ -49,8 +50,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif
-
-
-
-

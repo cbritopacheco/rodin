@@ -43,10 +43,10 @@
 
   We need the following Rodin modules:
   - @ref Rodin::Geometry "Geometry" — for the @ref Rodin::Geometry::Mesh "Mesh" class
-  - @ref Rodin::Variational "Variational" — for @ref Rodin::Variational::P1 "P1",
-    @ref Rodin::Variational::TrialFunction "TrialFunction",
-    @ref Rodin::Variational::TestFunction "TestFunction", and the
-    @ref Rodin::Variational::Problem "Problem" class
+  - @ref Rodin::Variational "Variational" — for `P1`,
+    `TrialFunction`,
+    `TestFunction`, and the
+    `Problem` class
   - @ref Rodin::Solver "Solver" — for the @ref Rodin::Solver::CG "CG" iterative solver
   - @ref Rodin::IO::XDMF "IO::XDMF" — for exporting results to ParaView
 
@@ -83,10 +83,10 @@
 
   @section examples-pdes-poisson-space Finite Element Space
 
-  We define a @ref Rodin::Variational::P1 "P1" (piecewise linear, continuous)
+  We define a `P1` (piecewise linear, continuous)
   finite element space on the mesh, and create the
-  @ref Rodin::Variational::TrialFunction "TrialFunction" and
-  @ref Rodin::Variational::TestFunction "TestFunction":
+  `TrialFunction` and
+  `TestFunction`:
 
   @code{.cpp}
   P1 vh(mesh);
@@ -98,12 +98,12 @@
   The trial function @f$ u @f$ represents the unknown solution, and the test
   function @f$ v @f$ is used to express the weak formulation. After solving,
   the computed solution coefficients are accessible via
-  @ref Rodin::Variational::TrialFunction::getSolution "u.getSolution()".
+  `u.getSolution()`.
 
   @section examples-pdes-poisson-problem Problem Formulation
 
   The variational problem is assembled using Rodin's form language through
-  the @ref Rodin::Variational::Problem "Problem" class. The code closely
+  the `Problem` class. The code closely
   mirrors the mathematical notation:
 
   @code{.cpp}

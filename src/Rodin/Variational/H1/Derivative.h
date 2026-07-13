@@ -34,6 +34,7 @@
 #include "ForwardDecls.h"
 #include "H1Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Scalar, class Mesh, class Data>
@@ -257,4 +258,5 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>;
 }
 
+/// @endcond
 #endif

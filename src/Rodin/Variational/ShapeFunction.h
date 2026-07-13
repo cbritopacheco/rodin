@@ -26,6 +26,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -396,4 +397,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

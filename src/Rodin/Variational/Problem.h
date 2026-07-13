@@ -45,6 +45,7 @@
 #include "ForwardDecls.h"
 #include "ProblemBody.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /// @brief Form-language traits for a problem base.
@@ -1101,4 +1102,5 @@ namespace Rodin::Variational
         U1, U2, U3, Us...>;
 }
 
+/// @endcond
 #endif

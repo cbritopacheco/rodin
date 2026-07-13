@@ -36,22 +36,22 @@
 | @f$ L^2(\Omega) @f$       | The space of square-integrable functions on @f$ \Omega @f$. |
 | @f$ H^1(\Omega) @f$       | The Sobolev space of functions in @f$ L^2(\Omega) @f$ whose gradient is also in @f$ L^2(\Omega) @f$. |
 | @f$ H^1_0(\Omega) @f$     | The subspace of @f$ H^1(\Omega) @f$ with zero trace on @f$ \partial \Omega @f$ (homogeneous Dirichlet). |
-| @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. In Rodin, created by instantiating @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::P1 "P1", or @ref Rodin::Variational::H1 "H1". |
+| @f$ V_h @f$               | A finite element space built on the mesh @f$ \mathcal{T}_h @f$. Subscript @f$ h @f$ indicates discrete. In Rodin, created by instantiating `P0`, `P1`, or `H1`. |
 | @f$ \mathbb{P}_k @f$      | The space of polynomials of total degree at most @f$ k @f$. |
-| @f$ P_0 @f$               | Piecewise constant functions on each cell. In Rodin: @ref Rodin::Variational::P0 "P0". One DOF per cell, discontinuous across cell boundaries. |
-| @f$ P_1 @f$               | Piecewise linear, globally continuous functions. In Rodin: @ref Rodin::Variational::P1 "P1". One DOF per vertex, @f$ H^1 @f$-conforming. |
-| @f$ H^1_k @f$             | Continuous piecewise polynomials of degree @f$ k @f$. In Rodin: @ref Rodin::Variational::H1 "H1<k>". DOFs on vertices, edges, and cell interiors. |
+| @f$ P_0 @f$               | Piecewise constant functions on each cell. In Rodin: `P0`. One DOF per cell, discontinuous across cell boundaries. |
+| @f$ P_1 @f$               | Piecewise linear, globally continuous functions. In Rodin: `P1`. One DOF per vertex, @f$ H^1 @f$-conforming. |
+| @f$ H^1_k @f$             | Continuous piecewise polynomials of degree @f$ k @f$. In Rodin: `H1<k>`. DOFs on vertices, edges, and cell interiors. |
 
   @section notation-variational Notation regarding variational methods
 
 | Notation          | Description                                            |
 | ----------------- | ------------------------------------------------------ |
-| @f$ u @f$         | The trial function (unknown, sought solution). Corresponds to @ref Rodin::Variational::TrialFunction "TrialFunction" in Rodin. |
-| @f$ v @f$         | The test function (weighting function). Corresponds to @ref Rodin::Variational::TestFunction "TestFunction" in Rodin. |
-| @f$ u_h @f$       | The discrete (finite element) approximation of @f$ u @f$. After solving, its coefficients are stored in the @ref Rodin::Variational::GridFunction "GridFunction" associated with the trial function. |
+| @f$ u @f$         | The trial function (unknown, sought solution). Corresponds to `TrialFunction` in Rodin. |
+| @f$ v @f$         | The test function (weighting function). Corresponds to `TestFunction` in Rodin. |
+| @f$ u_h @f$       | The discrete (finite element) approximation of @f$ u @f$. After solving, its coefficients are stored in the `GridFunction` associated with the trial function. |
 | @f$ a(u, v) @f$   | A bilinear form: linear in both @f$ u @f$ and @f$ v @f$. Built from `Integral` expressions involving both trial and test functions. Assembled into the system matrix @f$ A @f$. |
 | @f$ \ell(v) @f$   | A linear form: linear in @f$ v @f$ only. Built from `Integral` expressions involving only the test function. Assembled into the right-hand side vector @f$ \mathbf{b} @f$. |
-| @f$ f @f$         | A source term or right-hand-side function. In Rodin, represented as a @ref Rodin::Variational::RealFunction "RealFunction" or a lambda. |
+| @f$ f @f$         | A source term or right-hand-side function. In Rodin, represented as a `RealFunction` or a lambda. |
 | @f$ g @f$         | A boundary data function (Dirichlet or Neumann data). |
 
   @section notation-operators Notation regarding differential operators

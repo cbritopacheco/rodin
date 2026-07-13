@@ -300,6 +300,7 @@ namespace Rodin::Solid
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this tangent integrator.
       InternalVirtualWorkTangent* copy() const noexcept final override
       {
         return new InternalVirtualWorkTangent(*this);

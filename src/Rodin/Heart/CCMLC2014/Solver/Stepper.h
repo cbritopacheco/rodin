@@ -95,11 +95,13 @@ namespace Rodin::Heart::CCMLC2014::Solver
             m_system.getSolution().resize(Model::NumberOfVariables);
           }
 
+          /// @brief Problem bodies are not assigned into this specialized problem.
           Parent& operator=(const ProblemBodyType&) override
           {
             return *this;
           }
 
+          /// @brief Assembles the dense linear system for one step.
           Problem& assemble() override
           {
             assert(m_xCurrent);
@@ -129,11 +131,14 @@ namespace Rodin::Heart::CCMLC2014::Solver
             solver.solve(m_system);
           }
 
+          /// @brief Gets the mutable linear system.
           DenseLinearSystem& getLinearSystem() override { return m_system; }
+          /// @brief Gets the linear system.
           const DenseLinearSystem& getLinearSystem() const override
           {
             return m_system;
           }
+          /// @brief Polymorphically copies this stepper problem.
           Problem* copy() const noexcept override { return new Problem(*this); }
 
           /**

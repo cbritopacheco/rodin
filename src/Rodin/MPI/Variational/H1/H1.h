@@ -11,7 +11,7 @@
  * @file
  * @brief Distributed H1 finite element space specializations on MPI meshes.
  *
- * Provides @ref Rodin::Variational::H1 specializations for
+ * Provides `Rodin::Variational::H1` specializations for
  * @ref Rodin::Geometry::Mesh<Rodin::Context::MPI> for both scalar and
  * vector-valued ranges. Each specialization wraps a rank-local H1 space on
  * the mesh shard and maintains local/global degree-of-freedom mappings

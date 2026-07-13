@@ -20,6 +20,7 @@
 #include "ForwardDecls.h"
 #include "P0Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Number, class Mesh>
@@ -408,4 +409,5 @@ namespace Rodin::Variational
   using ComplexP0 = P0<Complex, Mesh>;
 }
 
+/// @endcond
 #endif

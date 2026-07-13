@@ -16,6 +16,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Utility/ForConstexpr.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -2619,4 +2620,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif // RODIN_VARIATIONAL_H1_H1_HPP

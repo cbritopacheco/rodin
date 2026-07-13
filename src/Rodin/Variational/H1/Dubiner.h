@@ -20,6 +20,7 @@
 
 #define RODIN_VARIATIONAL_H1_DUBINER_TOLERANCE 1e-14
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -423,4 +424,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

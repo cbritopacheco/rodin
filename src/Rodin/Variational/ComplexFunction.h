@@ -19,6 +19,7 @@
 
 #include "ScalarFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -649,4 +650,5 @@ namespace Rodin::Variational
   ComplexFunction(const FReal&, const FImag&) -> ComplexFunction<FReal, FImag>;
 }
 
+/// @endcond
 #endif

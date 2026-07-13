@@ -20,6 +20,7 @@
 #include "ForwardDecls.h"
 #include "P1Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Mesh>
@@ -750,4 +751,5 @@ namespace Rodin::Variational
   using VectorP1 = P1<Math::SpatialVector<Real>, Mesh>;
 }
 
+/// @endcond
 #endif

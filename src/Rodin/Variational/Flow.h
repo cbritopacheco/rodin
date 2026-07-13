@@ -8,7 +8,7 @@
  * @file Flow.h
  * @brief Flow map operators for shape functions and grid functions.
  *
- * This file defines the @ref Rodin::Variational::Flow class, which implements
+ * This file defines the `Rodin::Variational::Flow` class, which implements
  * the flow map (push-forward) of functions along a vector field. Flow maps are
  * used in advection problems, level set methods, and semi-Lagrangian time
  * integration schemes.

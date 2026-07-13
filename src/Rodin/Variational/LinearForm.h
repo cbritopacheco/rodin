@@ -28,6 +28,7 @@
 #include "TestFunction.h"
 #include "LinearFormIntegrator.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Vector>
@@ -459,4 +460,5 @@ namespace Rodin::Variational
     -> LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 }
 
+/// @endcond
 #endif

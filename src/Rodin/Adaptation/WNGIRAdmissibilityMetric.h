@@ -222,6 +222,7 @@ namespace Rodin::Adaptation::Detail
           return Geometry::Region::Cells;
         }
 
+        /// @brief Polymorphically copies this admissibility metric.
         WNGIRAdmissibilityMetric* copy() const noexcept final override
         {
           return new WNGIRAdmissibilityMetric(*this);

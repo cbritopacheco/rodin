@@ -33,6 +33,7 @@
 
 #include "Rodin/Utility/DependentValue.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Scalar, class Mesh>
@@ -842,4 +843,5 @@ namespace Rodin::Variational
 
 #include "H1.hpp"
 
+/// @endcond
 #endif

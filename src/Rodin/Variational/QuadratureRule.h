@@ -8,7 +8,7 @@
  * @file QuadratureRule.h
  * @brief Quadrature rule classes for numerical integration.
  *
- * This file defines specializations of @ref Rodin::Variational::QuadratureRule
+ * This file defines specializations of `Rodin::Variational::QuadratureRule`
  * for integrating functions and shape-function expressions over mesh
  * polytopes.
  *
@@ -57,6 +57,7 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -829,4 +830,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

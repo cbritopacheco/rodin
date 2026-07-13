@@ -21,9 +21,9 @@ namespace Rodin::Variational
   /**
    * @brief Represents a finite element space defined on a distributed mesh.
    *
-   * This CRTP base specializes @ref Rodin::Variational::FiniteElementSpace for
+   * This CRTP base specializes `Rodin::Variational::FiniteElementSpace` for
    * @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>. Concrete distributed spaces
-   * (such as MPI @ref Rodin::Variational::P1) provide the implementation for
+   * (such as MPI `Rodin::Variational::P1`) provide the implementation for
    * local-to-global index translation, local finite elements, and geometric
    * mappings.
    *

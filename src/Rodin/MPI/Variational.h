@@ -13,12 +13,12 @@
  *
  * This header provides distributed finite element-space abstractions for MPI
  * meshes, including:
- * - @ref Rodin::Variational::FiniteElementSpace specializations on
+ * - `Rodin::Variational::FiniteElementSpace` specializations on
  *   @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>
- * - Distributed @ref Rodin::Variational::P0 spaces.
- * - Distributed @ref Rodin::Variational::P0g spaces.
- * - Distributed @ref Rodin::Variational::P1 spaces.
- * - Distributed @ref Rodin::Variational::H1 spaces.
+ * - Distributed `Rodin::Variational::P0` spaces.
+ * - Distributed `Rodin::Variational::P0g` spaces.
+ * - Distributed `Rodin::Variational::P1` spaces.
+ * - Distributed `Rodin::Variational::H1` spaces.
  */
 
 #include "Variational/P0.h"

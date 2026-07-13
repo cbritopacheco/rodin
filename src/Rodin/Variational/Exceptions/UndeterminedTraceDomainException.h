@@ -17,6 +17,7 @@
 
 #include "Rodin/Alert/MemberFunctionException.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class T, class FuncName>
@@ -46,7 +47,5 @@ namespace Rodin::Variational
 
 }
 
+/// @endcond
 #endif
-
-
-

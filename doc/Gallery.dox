@@ -23,7 +23,7 @@
   The @ref examples-pdes-poisson "Poisson equation" example solves the
   classic scalar PDE @f$ -\Delta u = f @f$ on the unit square with
   homogeneous Dirichlet boundary conditions, using
-  @ref Rodin::Variational::P1 "P1" finite elements and the
+  `P1` finite elements and the
   @ref Rodin::Solver::CG "CG" solver.
 
   @subsection gallery-pdes-elasticity Linear Elasticity
@@ -33,7 +33,7 @@
   The @ref examples-pdes-elasticity "elasticity" example solves the
   linearized elasticity system @f$ -\nabla \cdot \sigma(u) = 0 @f$
   with mixed Dirichlet/Neumann boundary conditions. It demonstrates
-  vector-valued @ref Rodin::Variational::P1 "P1" spaces and the
+  vector-valued `P1` spaces and the
   `LinearElasticityIntegral` bilinear form.
 
   @subsection gallery-pdes-helmholtz Helmholtz Equation
@@ -42,7 +42,7 @@
 
   The @ref examples-pdes-helmholtz "Helmholtz equation" example solves
   the complex-valued PDE @f$ -\Delta u - k^2 u = f @f$ using
-  @ref Rodin::Variational::P1 "P1<Complex>" finite element spaces.
+  `P1<Complex>` finite element spaces.
   This demonstrates Rodin's support for complex-valued computations.
 
   @subsection gallery-pdes-navierstokes Navier–Stokes Equations
@@ -51,7 +51,7 @@
 
   The @ref examples-pdes-navierstokes "Navier–Stokes" tutorial covers the
   transient incompressible Navier–Stokes equations using Taylor–Hood elements
-  (@ref Rodin::Variational::H1 "H1" order 2 for velocity, order 1 for
+  (`H1` order 2 for velocity, order 1 for
   pressure) with PETSc SNES.
 
   @subsection gallery-pdes-periodic Periodic Poisson Equation

@@ -163,6 +163,7 @@ namespace Rodin::Adaptation
       getOrder(const Geometry::Polytope&) const noexcept
       { return std::nullopt; }
 
+      /// @brief Polymorphically copies this analytic matrix function.
       AnalyticMatrixFunction* copy() const noexcept override
       { return new AnalyticMatrixFunction(*this); }
 

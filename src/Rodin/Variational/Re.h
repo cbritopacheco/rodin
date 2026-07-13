@@ -15,6 +15,7 @@
 #include "ForwardDecls.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -120,4 +121,5 @@ namespace Rodin::Variational
   Re(const FunctionBase<NestedDerived>&) -> Re<FunctionBase<NestedDerived>>;
 }
 
+/// @endcond
 #endif

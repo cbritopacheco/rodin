@@ -14,7 +14,7 @@
  * With attributes, this also includes tagged interior facets such as FSI
  * interfaces. Two flavours share
  * the same template name and the same abstract base
- * @ref Rodin::Variational::DirichletBCBase, separated only by the type of the
+ * `Rodin::Variational::DirichletBCBase`, separated only by the type of the
  * second argument:
  *
  * 1. **Value-prescribing BC** — `DirichletBC(u, g)` with `g` a
@@ -63,7 +63,7 @@
  *   \ell_s^u(u) \;=\; \ell_s^u(g) \quad\Longleftrightarrow\quad u_s = g_s,
  * @f]
  * where @f$ g_s := \ell_s^u(g) @f$. The assembled object is a map
- * @f$ s \mapsto g_s @f$ (the @ref Rodin::Variational::DirichletBCBase::ValueDOFs
+ * @f$ s \mapsto g_s @f$ (the `Rodin::Variational::DirichletBCBase::ValueDOFs`
  * alternative).
  *
  * **Identification.** For each slave DOF @f$ s @f$ on @f$ \Gamma_D @f$ and
@@ -82,7 +82,7 @@
  * @f]
  * The assembled object is a map @f$ s \mapsto (\{j_k\}, \{C_{s,j_k}\}) @f$
  * over the non-zero coefficients (the
- * @ref Rodin::Variational::DirichletBCBase::IdentifiedDOFs alternative), plus
+ * `Rodin::Variational::DirichletBCBase::IdentifiedDOFs` alternative), plus
  * an optional defect map for the known @f$ d_s @f$ values. The two-argument
  * spelling is exactly the homogeneous case @f$ d\equiv 0 @f$.
  *
@@ -184,7 +184,7 @@
  * Both slave and master DOFs are read from the *same* face polytopes — the
  * assembler never matches DOFs across distinct faces (no geometric pairing).
  * For a
- * cross-face periodic relation use @ref Rodin::Variational::PeriodicBC,
+ * cross-face periodic relation use `Rodin::Variational::PeriodicBC`,
  * which takes an explicit DOF adjacency map.
  *
  * # Usage examples
@@ -229,6 +229,7 @@
 #include "ShapeFunction.h"
 #include "VectorFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -735,7 +736,7 @@ namespace Rodin::Variational
    * @f$ \varepsilon @f$ anywhere. Coefficient pruning uses strict
    * @c "c != 0" so that exact zeros from Lagrange duality (or from
    * component projections) are eliminated bit-for-bit. For a cross-face
-   * periodic relation use @ref Rodin::Variational::PeriodicBC, which
+   * periodic relation use `Rodin::Variational::PeriodicBC`, which
    * takes an explicit DOF adjacency map.
    *
    * # Linear-system effect
@@ -1123,4 +1124,5 @@ namespace Rodin::Variational
                    ShapeFunctionBase<Derived2, FES2, Sp>>;
 }
 
+/// @endcond
 #endif

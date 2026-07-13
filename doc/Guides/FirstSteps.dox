@@ -51,7 +51,7 @@
   | Module | Header | Purpose | Key classes |
   |--------|--------|---------|-------------|
   | @ref Rodin::Geometry "Geometry" | `<Rodin/Geometry.h>` | Meshes, polytopes, connectivity | @ref Rodin::Geometry::Mesh "Mesh", @ref Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Connectivity "Connectivity" |
-  | @ref Rodin::Variational "Variational" | `<Rodin/Variational.h>` | Finite element spaces, forms, problems | @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::H1 "H1", @ref Rodin::Variational::TrialFunction "TrialFunction", @ref Rodin::Variational::TestFunction "TestFunction", @ref Rodin::Variational::GridFunction "GridFunction" |
+  | @ref Rodin::Variational "Variational" | `<Rodin/Variational.h>` | Finite element spaces, forms, problems | `P1`, `P0`, `H1`, `TrialFunction`, `TestFunction`, `GridFunction` |
   | @ref Rodin::Solver "Solver" | `<Rodin/Solver.h>` | Linear system solvers | @ref Rodin::Solver::CG "CG", @ref Rodin::Solver::SparseLU "SparseLU", `UMFPack` |
   | @ref Rodin::IO "IO" | `<Rodin/IO/XDMF.h>` | Input/output and visualization | @ref Rodin::IO::XDMF "XDMF" |
   | @ref Rodin::Assembly "Assembly" | (used internally) | Matrix and vector assembly | Assemblers (not used directly) |
@@ -211,7 +211,7 @@
   @endcode
 
   - The **trial function** `u` is the unknown we solve for. Its solution is
-    a @ref Rodin::Variational::GridFunction "GridFunction" accessible via
+    a `GridFunction` accessible via
     `u.getSolution()`.
   - The **test function** `v` is used to construct the equations: for each
     basis function of @f$ V_h @f$, one equation of the linear system is

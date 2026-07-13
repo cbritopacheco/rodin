@@ -23,6 +23,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Derived>
@@ -249,4 +250,5 @@ namespace Rodin::Variational
     -> MatrixFunction<Math::Matrix<Scalar>>;
 }
 
+/// @endcond
 #endif

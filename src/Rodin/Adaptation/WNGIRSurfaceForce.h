@@ -136,6 +136,7 @@ namespace Rodin::Adaptation::Detail
           return Geometry::Region::Faces;
         }
 
+        /// @brief Polymorphically copies this surface-force integrand.
         WNGIRSurfaceForce* copy() const noexcept final override
         {
           return new WNGIRSurfaceForce(*this);

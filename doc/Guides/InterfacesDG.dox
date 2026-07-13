@@ -17,14 +17,14 @@
 
   | Class | Ranges over | Typical use |
   |-------|-------------|-------------|
-  | @ref Rodin::Variational::BoundaryIntegral "BoundaryIntegral" | Exterior (codimension-1 boundary) facets | Neumann/Robin terms |
-  | @ref Rodin::Variational::InterfaceIntegral "InterfaceIntegral" | Interior facets | DG coupling, transmission terms |
-  | @ref Rodin::Variational::FaceIntegral "FaceIntegral" | All facets | Terms defined uniformly on faces |
+  | `BoundaryIntegral` | Exterior (codimension-1 boundary) facets | Neumann/Robin terms |
+  | `InterfaceIntegral` | Interior facets | DG coupling, transmission terms |
+  | `FaceIntegral` | All facets | Terms defined uniformly on faces |
 
   All accept attribute restriction via `.over(attr, ...)`, so a term can
   target a *tagged* subset of facets. Normals are provided by
-  @ref Rodin::Variational::BoundaryNormal "BoundaryNormal" (outward on the
-  boundary) and @ref Rodin::Variational::FaceNormal "FaceNormal" (a fixed
+  `BoundaryNormal` (outward on the
+  boundary) and `FaceNormal` (a fixed
   orientation convention on interior faces — sign-sensitive terms must use
   it consistently on both sides).
 
@@ -40,8 +40,7 @@
     coefficient jumps across a material interface;
   - if evaluation on an interior facet is attempted without a
     determined side, the library raises
-    @ref Rodin::Variational::UndeterminedTraceDomainException
-    "UndeterminedTraceDomainException" — this exception almost always
+    `UndeterminedTraceDomainException` — this exception almost always
     means a missing `traceOf` on a coefficient in an interface term.
 
   Interfaces themselves are just *tagged facets*: use
@@ -58,8 +57,8 @@
     [\![ w ]\!] = w^+ - w^-, \qquad \{ w \} = \tfrac12 (w^+ + w^-),
   @f]
 
-  available as @ref Rodin::Variational::Jump "Jump" and
-  @ref Rodin::Variational::Average "Average":
+  available as `Jump` and
+  `Average`:
 
   @code{.cpp}
   auto jf = Jump(f);       // f: any function with facet traces

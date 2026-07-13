@@ -14,9 +14,9 @@
 
   - @subpage guides-getting-started-first-steps — Learn the basic Rodin
     classes (@ref Rodin::Geometry::Mesh "Mesh",
-    @ref Rodin::Variational::P1 "P1",
-    @ref Rodin::Variational::TrialFunction "TrialFunction",
-    @ref Rodin::Variational::TestFunction "TestFunction") and write your first
+    `P1`,
+    `TrialFunction`,
+    `TestFunction`) and write your first
     program
 
   - @subpage guides-getting-started-first-problem — Solve a complete PDE
@@ -56,7 +56,7 @@
 
   - @subpage fem-spaces — Available finite element spaces (P0, P0g, P1, H1),
     vector-valued and complex-valued variants, and the
-    @ref Rodin::Variational::GridFunction "GridFunction" class
+    `GridFunction` class
 
   @section guides-variational-index Weak formulations and variational problems
 

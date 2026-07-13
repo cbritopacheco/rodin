@@ -47,6 +47,7 @@
 #include "MatrixFunction.h"
 #include "IntegrationPoint.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -279,4 +280,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

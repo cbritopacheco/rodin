@@ -11,8 +11,8 @@
  * @file TestFunction.h
  * @brief PETSc-aware test function wrappers.
  *
- * Provides the @ref Rodin::PETSc::Variational::TestFunction class, a thin
- * wrapper around @ref Rodin::Variational::TestFunction that lives in the
+ * Provides the `Rodin::PETSc::Variational`::TestFunction class, a thin
+ * wrapper around `Rodin::Variational::TestFunction` that lives in the
  * PETSc namespace and triggers PETSc-specific template argument deduction
  * for linear forms, bilinear forms, and problems.
  *
@@ -30,7 +30,7 @@ namespace Rodin::PETSc::Variational
   /**
    * @brief PETSc-aware test function wrapper.
    *
-   * Inherits all functionality from @ref Rodin::Variational::TestFunction
+   * Inherits all functionality from `Rodin::Variational::TestFunction`
    * and triggers PETSc-specific CTAD so that constructing a
    * `PETSc::Variational::TestFunction` from a finite element space
    * automatically selects the PETSc-backed linear form, bilinear form,
@@ -48,7 +48,7 @@ namespace Rodin::PETSc::Variational
       using FESType =
         FES;
 
-      /// @brief Parent class type (@ref Rodin::Variational::TestFunction).
+      /// @brief Parent class type (`Rodin::Variational::TestFunction`).
       using Parent =
         Rodin::Variational::TestFunction<FESType>;
 

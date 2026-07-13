@@ -332,6 +332,7 @@ namespace Rodin::Variational
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this linear-elasticity integrator.
       LinearElasticityIntegrator* copy() const noexcept override
       {
         return new LinearElasticityIntegrator(*this);

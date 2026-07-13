@@ -180,6 +180,7 @@ namespace Rodin::Adaptation::Detail
           return Geometry::Region::Cells;
         }
 
+        /// @brief Polymorphically copies this admissibility-gradient integrand.
         WNGIRAdmissibilityGradient* copy() const noexcept final override
         {
           return new WNGIRAdmissibilityGradient(*this);

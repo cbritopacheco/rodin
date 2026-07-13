@@ -126,7 +126,7 @@
 
   @section examples-index-integral Integral Equations
 
-  The @ref Rodin::Variational::Potential "Potential" operator enables integral
+  The `Potential` operator enables integral
   equation formulations (boundary element methods). The kernel
   @f$ K(\mathbf{x}, \mathbf{y}) @f$ is convolved with the solution on the mesh:
 

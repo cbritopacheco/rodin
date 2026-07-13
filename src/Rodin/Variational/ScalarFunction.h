@@ -19,6 +19,7 @@
 
 #include "Function.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Derived>
@@ -129,4 +130,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

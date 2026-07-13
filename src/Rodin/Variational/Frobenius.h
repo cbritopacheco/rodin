@@ -23,6 +23,7 @@
 #include "RealFunction.h"
 #include "Function.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -147,4 +148,5 @@ namespace Rodin::Variational
   Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;
 }
 
+/// @endcond
 #endif

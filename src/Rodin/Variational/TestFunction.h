@@ -18,6 +18,7 @@
 #include "Component.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class FES>
@@ -179,4 +180,5 @@ namespace Rodin::Variational
   TestFunction(const FES&) -> TestFunction<FES>;
 }
 
+/// @endcond
 #endif

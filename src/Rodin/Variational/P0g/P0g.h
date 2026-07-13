@@ -27,6 +27,7 @@
 
 #include "P0gElement.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Number, class Mesh>
@@ -438,4 +439,5 @@ namespace Rodin::Variational
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }
 
+/// @endcond
 #endif

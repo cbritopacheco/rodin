@@ -18,6 +18,7 @@
 #define RODIN_VARIATIONAL_H1_GLL_TAYLOR_TERMS 14
 #define RODIN_VARIATIONAL_H1_GLL_MAX_ITERATIONS 25
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -193,4 +194,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

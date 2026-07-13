@@ -269,6 +269,7 @@ namespace Rodin::Solid
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this residual integrator.
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);

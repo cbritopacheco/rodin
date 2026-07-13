@@ -517,6 +517,7 @@ namespace Rodin::Variational
         this->release();
       }
 
+      /// @brief Sets every entry of the PETSc vector to a scalar value.
       GridFunction& operator=(const ScalarType& value)
       {
         static_cast<const GridFunction&>(*this).flush();

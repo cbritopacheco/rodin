@@ -59,6 +59,7 @@
 #include "LinearFormIntegrator.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -526,4 +527,5 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>;
 }
 
+/// @endcond
 #endif

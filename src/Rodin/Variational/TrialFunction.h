@@ -23,6 +23,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Solution, class FES>
@@ -412,5 +413,5 @@ namespace Rodin::Variational
         GridFunction<FES, Math::Vector<
           typename FormLanguage::Traits<FES>::ScalarType>>, FES>;
 }
+/// @endcond
 #endif
-

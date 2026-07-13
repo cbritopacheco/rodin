@@ -1,11 +1,16 @@
 /**
-  @dir rodin/src/
+  Directory src/
   @brief Source directory for Rodin.
  */
 
 /**
-  @dir rodin/src/Rodin
+  Directory src/Rodin
   @brief Namespace @ref Rodin
+ */
+
+/**
+  @defgroup RodinVariational Variational module
+  @brief Finite element spaces, form-language nodes, and variational problems.
  */
 
 /**
@@ -223,7 +228,7 @@
  */
 
 /**
-  @dir Rodin/Threads
+  Directory Rodin/Threads
   @brief Namespace @ref Rodin::Threads
  */
 
@@ -296,7 +301,7 @@
  */
 
 /**
-  @dir Rodin/Plot
+  Directory Rodin/Plot
   @brief Namespace @ref Rodin::Plot
  */
 
@@ -306,7 +311,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist
+  Directory Rodin/Plot/Artist
   @brief Namespace @ref Rodin::Plot::Artist
  */
 
@@ -316,7 +321,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist/Axes
+  Directory Rodin/Plot/Artist/Axes
   @brief Namespace @ref Rodin::Plot::Artist::Axes
  */
 
@@ -326,7 +331,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist/Axis
+  Directory Rodin/Plot/Artist/Axis
   @brief Namespace @ref Rodin::Plot::Artist::Axis
  */
 
@@ -336,7 +341,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist/Lines
+  Directory Rodin/Plot/Artist/Lines
   @brief Namespace @ref Rodin::Plot::Artist::Lines
  */
 
@@ -346,7 +351,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend
+  Directory Rodin/Plot/Backend
   @brief Namespace @ref Rodin::Plot::Backend
  */
 
@@ -356,7 +361,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Bases
+  Directory Rodin/Plot/Backend/Bases
   @brief Namespace @ref Rodin::Plot::Backend::Bases
  */
 
@@ -366,7 +371,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Renderer
+  Directory Rodin/Plot/Backend/Renderer
   @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
@@ -376,7 +381,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Renderer/Drawables
+  Directory Rodin/Plot/Backend/Renderer/Drawables
   @brief Namespace @ref Rodin::Plot::Backend::Renderer::Drawables
  */
 
@@ -386,7 +391,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Event
+  Directory Rodin/Plot/Backend/Event
   @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
@@ -396,7 +401,7 @@
  */
 
 /**
-  @dir Rodin/Plot/GUI
+  Directory Rodin/Plot/GUI
   @brief Namespace @ref Rodin::Plot::GUI
  */
 
@@ -422,21 +427,21 @@
 
   ## Finite Element Spaces
 
-  - @ref Rodin::Variational::P0 "P0" — Piecewise constant (discontinuous)
+  - `P0` — Piecewise constant (discontinuous)
     finite element space
-  - @ref Rodin::Variational::P0g "P0g" — Global constant space (1 DOF for scalar, vdim for vector)
-  - @ref Rodin::Variational::P1 "P1" — Piecewise linear (continuous)
+  - `P0g` — Global constant space (1 DOF for scalar, vdim for vector)
+  - `P1` — Piecewise linear (continuous)
     finite element space
-  - @ref Rodin::Variational::H1 "H1" — Higher-order @f$ H^1 @f$-conforming
+  - `H1` — Higher-order @f$ H^1 @f$-conforming
     finite element space (arbitrary polynomial order)
 
   ## Functions
 
-  - @ref Rodin::Variational::TrialFunction "TrialFunction" — Represents the
+  - `TrialFunction` — Represents the
     unknown solution @f$ u @f$ in a variational formulation
-  - @ref Rodin::Variational::TestFunction "TestFunction" — Represents the
+  - `TestFunction` — Represents the
     weighting function @f$ v @f$
-  - @ref Rodin::Variational::GridFunction "GridFunction" — A concrete function
+  - `GridFunction` — A concrete function
     storing DOF values in a finite element space
 
   ## Variational Forms
@@ -496,7 +501,7 @@
 
   ## Problem
 
-  The @ref Rodin::Variational::Problem "Problem" class assembles all forms
+  The `Problem` class assembles all forms
   and boundary conditions into a solvable linear system.
 
   @code{.cpp}
@@ -709,7 +714,7 @@
 
   @note The module is header-only (`Rodin::Advection` INTERFACE library).
 
-  @see @ref Rodin::Variational::Flow "Flow" for the characteristic tracer.
+  @see `Flow` for the characteristic tracer.
  */
 
 /**
@@ -766,7 +771,7 @@
  */
 
 /**
-  @dir Rodin/Elasticity
+  Directory Rodin/Elasticity
   @brief Namespace @ref Rodin::Elasticity
  */
 
@@ -776,7 +781,7 @@
 
   This module implements the linearized elasticity bilinear form for small
   deformations. The primary class is
-  @ref Rodin::Variational::LinearElasticityIntegrator "LinearElasticityIntegral",
+  `LinearElasticityIntegral`,
   which assembles:
   @f[
     a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[\lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
@@ -1218,7 +1223,7 @@
  */
 
 /**
-  @dir Rodin/Traits
+  Directory Rodin/Traits
   @brief Namespace @ref Rodin::Traits
  */
 
@@ -1466,44 +1471,8 @@
   Krylov solvers, and nonlinear solver frameworks within Rodin's finite element
   pipeline.
 
-  ## Key Components
-
-  **Math types** (`PETSc::Math`):
-  - `PETSc::Math`::LinearSystem "LinearSystem" — Couples a PETSc
-    `Mat` (operator @f$ A @f$), right-hand side `Vec` (@f$ \mathbf{b} @f$), and
-    solution `Vec` (@f$ \mathbf{x} @f$).  Supports Dirichlet elimination via
-    `eliminate()` and block-preconditioner field splits via `setFieldSplits()`.
-  - `Vector` (`::Vec`) and `Matrix` (`::Mat`) — PETSc handle aliases.
-
-  **Solvers** (`PETSc::Solver`):
-  - @ref Rodin::Solver::KSP "KSP" — Wraps the PETSc KSP (Krylov subspace)
-    context.  Configurable via `setType()`, `setTolerances()`,
-    `setPreconditioner()`, and PETSc command-line options (`-ksp_type`,
-    `-ksp_rtol`, `-ksp_monitor`, etc.).
-  - @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG" — CG specialization
-    setting `KSPCG`.  For symmetric positive-definite systems.
-  - @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES" — GMRES
-    specialization setting `KSPGMRES`.  For non-symmetric/indefinite systems.
-  - @ref Rodin::Solver::SNES "SNES" — Wraps the PETSc SNES (Scalable Nonlinear
-    Equations Solvers) for Newton-type methods.  The inner linear solve uses
-    `KSP`.
-
-  **Variational** (`PETSc::Variational`):
-  - `PETSc::Variational::TrialFunction` / `TestFunction` — Thin wrappers
-    that trigger PETSc-specific CTAD so that `Problem`, `BilinearForm`, and
-    `LinearForm` automatically use PETSc storage.
-  - `PETSc::Variational::GridFunction` — Stores DOF coefficients in a PETSc
-    `Vec`.  In MPI mode, the vector is created with `VecMPISetGhost` for
-    transparent ghost-layer synchronization.
-  - `Problem` — Assembles into a PETSc `LinearSystem`.  Supports both
-    single-field (`Problem(u, v)`) and multi-field block systems
-    (`Problem(u, p, l, v, q, m)`) with field-split preconditioning.
-  - `BilinearForm` / `LinearForm` — Assemble into PETSc `Mat` / `Vec`.
-
-  **Assembly** (@ref Rodin::PETSc::Assembly):
-  - `Sequential` — Single-rank assembly into PETSc objects.
-  - `MPI` — Distributed assembly where each rank contributes owned elements.
-  - `OpenMP` — Shared-memory parallel assembly on a single rank.
+  PETSc-specific linear algebra, solver, variational, and assembly adapters
+  are documented in their corresponding headers.
 
   ## Typical Usage (Sequential)
 
@@ -1605,12 +1574,27 @@
  */
 
 /**
+  @namespace Rodin::PETSc::Math
+  @brief PETSc-backed linear algebra adapters.
+ */
+
+/**
+  @namespace Rodin::PETSc::Solver
+  @brief PETSc-backed linear and nonlinear solver adapters.
+ */
+
+/**
+  @namespace Rodin::PETSc::Variational
+  @brief PETSc-backed variational form adapters.
+ */
+
+/**
   @namespace Rodin::Tests
   @brief %Tests of the Rodin library
  */
 
 /**
-  @dir Rodin/tests
+  Directory Rodin/tests
   @brief Namespace @ref Rodin::Tests
  */
 
@@ -1620,7 +1604,7 @@
  */
 
 /**
-  @dir Rodin/tests/unit
+  Directory Rodin/tests/unit
   @brief Namespace @ref Rodin::Tests::Unit
  */
 
@@ -1630,7 +1614,7 @@
  */
 
 /**
-  @dir Rodin/tests/manufactured
+  Directory Rodin/tests/manufactured
   @brief Namespace @ref Rodin::Tests::Manufactured
  */
 
@@ -1640,7 +1624,7 @@
  */
 
 /**
-  @dir Rodin/tests/benchmarks
+  Directory Rodin/tests/benchmarks
   @brief Namespace @ref Rodin::Tests::Benchmarks
  */
 
@@ -1710,7 +1694,7 @@
  */
 
 /**
-  @dir Rodin/Location
+  Directory Rodin/Location
   @brief Namespace @ref Rodin::Location
  */
 
