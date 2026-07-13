@@ -26,13 +26,18 @@
 
 namespace Rodin::Adaptation
 {
+  /// @brief Sampled geometric admissibility diagnostics.
   struct WNGIRAdmissibilityReport
   {
+    /// @brief Minimum sampled Jacobian determinant.
     Real minJ = std::numeric_limits<Real>::infinity();
+    /// @brief Number of sampled points below the admissibility floor.
     std::size_t inadmissibleCount = 0;
+    /// @brief Maximum sampled relative distortion.
     Real maxQRel = Real(0);
   };
 
+  /// @brief Returns the sampled admissibility quadrature order for FE order.
   inline std::size_t wngirAdmissibilityQuadratureOrder(
       std::size_t feOrder)
   {
@@ -40,6 +45,7 @@ namespace Rodin::Adaptation
   }
 
   template <class Displacement>
+  /// @brief Evaluates sampled Jacobian and relative-distortion admissibility.
   WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(
       Displacement& u,
       const Math::Vector<Real>& uData,

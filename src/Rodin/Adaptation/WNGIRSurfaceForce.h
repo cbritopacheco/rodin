@@ -17,6 +17,9 @@
 
 namespace Rodin::Adaptation::Detail
 {
+    /**
+     * @brief Linear-form integrator for the WNGIR surface force.
+     */
     template <class PhiDerived, class GradDerived,
               class TestFunction, class Displacement>
     class WNGIRSurfaceForce final
@@ -28,9 +31,12 @@ namespace Rodin::Adaptation::Detail
         using ScalarType = typename TestFunction::ScalarType;
         /// @brief Parent class type.
         using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+        /// @brief Level-set function type.
         using PhiType = Variational::RealFunctionBase<PhiDerived>;
+        /// @brief Level-set gradient function type.
         using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
+        /// @brief Constructs the surface-force integrator.
         WNGIRSurfaceForce(
             const PhiType& phi,
             const GradType& grad,
@@ -47,6 +53,7 @@ namespace Rodin::Adaptation::Detail
             m_sigma2(sigma2)
         {}
 
+        /// @brief Copy constructor.
         WNGIRSurfaceForce(const WNGIRSurfaceForce& other)
           : Parent(other),
             m_phi(other.m_phi ? other.m_phi->copy() : nullptr),
@@ -58,12 +65,14 @@ namespace Rodin::Adaptation::Detail
             m_polytope(other.m_polytope)
         {}
 
+        /// @brief Returns the current polytope.
         const Geometry::Polytope& getPolytope() const final override
         {
           assert(m_polytope);
           return *m_polytope;
         }
 
+        /// @brief Sets the current face and assembles the local vector.
         WNGIRSurfaceForce& setPolytope(
             const Geometry::Polytope& polytope) final override
         {
@@ -115,11 +124,13 @@ namespace Rodin::Adaptation::Detail
           return *this;
         }
 
+        /// @brief Returns an entry of the current face vector.
         ScalarType integrate(std::size_t local) final override
         {
           return m_vector(static_cast<Eigen::Index>(local));
         }
 
+        /// @brief Returns the integration region.
         Geometry::Region getRegion() const final override
         {
           return Geometry::Region::Faces;
