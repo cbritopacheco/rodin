@@ -33,6 +33,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Traits for bilinear form bases.
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
@@ -40,12 +41,15 @@ namespace Rodin::FormLanguage
       using OperatorType = Operator;
   };
 
+  /// @brief Traits for bilinear forms.
   template <class Solution, class TrialFES, class TestFES, class Operator>
   struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
   {
     /// @brief Solution vector type.
       using SolutionType = Solution;
+    /// @brief Trial finite element space type.
       using TrialFESType = TrialFES;
+    /// @brief Test finite element space type.
       using TestFESType = TestFES;
     /// @brief Assembled operator type.
       using OperatorType = Operator;
@@ -95,15 +99,19 @@ namespace Rodin::Variational
       using Parent =
         FormLanguage::Base;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType =
         GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief List of local bilinear form integrators.
       using LocalBilinearFormIntegratorBaseListType =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief List of global bilinear form integrators.
       using GlobalBilinearFormIntegratorBaseListType =
         FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
@@ -140,6 +148,11 @@ namespace Rodin::Variational
           m_gbfis(std::move(other.m_gbfis))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Bilinear form to copy
+       * @returns Reference to this bilinear form
+       */
       constexpr
       BilinearFormBase& operator=(const BilinearFormBase& other)
       {
@@ -151,6 +164,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Bilinear form to move from
+       * @returns Reference to this bilinear form
+       */
       constexpr
       BilinearFormBase& operator=(BilinearFormBase&& other) noexcept
       {
@@ -222,6 +240,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Replaces the local integrator list.
+       * @param[in] bfi List of local bilinear integrators
+       * @returns Reference to this bilinear form
+       */
       BilinearFormBase& operator=(const LocalBilinearFormIntegratorBaseListType& bfi)
       {
         m_lbfis.clear();
@@ -243,6 +266,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Adds local bilinear integrators to the bilinear form.
+       * @param[in] bfis Local bilinear integrators to add
+       * @returns Reference to this bilinear form
+       */
       BilinearFormBase& operator+=(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.add(bfis);
@@ -263,6 +291,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Adds global bilinear integrators to the bilinear form.
+       * @param[in] bfis Global bilinear integrators to add
+       * @returns Reference to this bilinear form
+       */
       BilinearFormBase& operator+=(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         m_gbfis.add(bfis);
@@ -283,6 +316,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts local bilinear integrators from the bilinear form.
+       * @param[in] bfis Local bilinear integrators to subtract
+       * @returns Reference to this bilinear form
+       */
       BilinearFormBase& operator-=(const LocalBilinearFormIntegratorBaseListType& bfis)
       {
         m_lbfis.add(UnaryMinus(bfis));
@@ -303,6 +341,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts global bilinear integrators from the bilinear form.
+       * @param[in] bfis Global bilinear integrators to subtract
+       * @returns Reference to this bilinear form
+       */
       BilinearFormBase& operator-=(const GlobalBilinearFormIntegratorBaseListType& bfis)
       {
         m_gbfis.add(UnaryMinus(bfis));
@@ -383,18 +426,20 @@ namespace Rodin::Variational
       using ScalarType =
         Scalar;
 
-      /// Type of operator associated to the bilinear form
+      /// @brief Type of operator associated to the bilinear form.
       using OperatorType =
         Math::SparseMatrix<ScalarType>;
 
+      /// @brief Default assembly backend selected from the trial/test contexts.
       using DefaultAssemblyType =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
           ::template Type<OperatorType, BilinearForm>;
 
+      /// @brief Assembly backend used by this bilinear form.
       using AssemblyType =
         DefaultAssemblyType;
 
-      /// Parent class
+      /// @brief Parent class type.
       using Parent = BilinearFormBase<OperatorType>;
 
       using Parent::operator=;
@@ -404,8 +449,8 @@ namespace Rodin::Variational
       using Parent::operator-=;
 
       /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * a default constructed vector owned by the LinearForm instance.
+       * @brief Constructs a sparse bilinear form from trial and test functions.
+       * @param[in] u Trial function
        * @param[in] v Reference to a TestFunction
        */
       constexpr
@@ -413,6 +458,10 @@ namespace Rodin::Variational
         : m_u(u), m_v(v)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Bilinear form to copy
+       */
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
@@ -421,6 +470,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Bilinear form to move from
+       */
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
@@ -429,6 +482,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Bilinear form to copy
+       * @returns Reference to this bilinear form
+       */
       BilinearForm& operator=(const BilinearForm& other)
       {
         if (this != &other)
@@ -441,6 +499,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Bilinear form to move from
+       * @returns Reference to this bilinear form
+       */
       BilinearForm& operator=(BilinearForm&& other) noexcept
       {
         if (this != &other)
@@ -471,11 +534,19 @@ namespace Rodin::Variational
         return (this->getOperator() * v.getData()).dot(u.getData());
       }
 
+      /**
+       * @brief Gets the assembled sparse operator.
+       * @returns Mutable reference to the assembled matrix
+       */
       OperatorType& getOperator() override
       {
         return m_operator;
       }
 
+      /**
+       * @brief Gets the assembled sparse operator.
+       * @returns Const reference to the assembled matrix
+       */
       const OperatorType& getOperator() const override
       {
         return m_operator;
@@ -511,6 +582,7 @@ namespace Rodin::Variational
       AssemblyType m_assembly;
   };
 
+  /// @brief Deduces the default sparse bilinear form type.
   template <class Solution, class TrialFES, class TestFES>
   BilinearForm(const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
     -> BilinearForm<
@@ -522,6 +594,10 @@ namespace Rodin::Variational
           ::Type>>;
 
 
+  /**
+   * @ingroup BilinearFormSpecializations
+   * @brief Specialization of BilinearForm for a dense matrix operator.
+   */
   template <class Solution, class TrialFES, class TestFES, class Scalar>
   class BilinearForm<Solution, TrialFES, TestFES, Math::Matrix<Scalar>> final
     : public BilinearFormBase<Math::Matrix<Scalar>>
@@ -537,11 +613,11 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = Scalar;
 
-      /// Type of operator associated to the bilinear form
+      /// @brief Type of operator associated to the bilinear form.
       using OperatorType =
         Math::Matrix<ScalarType>;
 
-      /// Parent class
+      /// @brief Parent class type.
       using Parent =
         BilinearFormBase<OperatorType>;
 
@@ -551,15 +627,17 @@ namespace Rodin::Variational
 
       using Parent::operator-=;
 
+      /// @brief Default assembly backend selected from the trial/test contexts.
       using DefaultAssemblyType =
         typename Assembly::Default<TrialFESContextType, TestFESContextType>
           ::template Type<OperatorType, BilinearForm>;
 
+      /// @brief Assembly backend used by this bilinear form.
       using AssemblyType = DefaultAssemblyType;
 
       /**
-       * @brief Constructs a LinearForm with a reference to a TestFunction and
-       * a default constructed vector owned by the LinearForm instance.
+       * @brief Constructs a dense bilinear form from trial and test functions.
+       * @param[in] u Trial function
        * @param[in] v Reference to a TestFunction
        */
       constexpr
@@ -567,6 +645,10 @@ namespace Rodin::Variational
         : m_u(u), m_v(v)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Bilinear form to copy
+       */
       constexpr
       BilinearForm(const BilinearForm& other)
         : Parent(other),
@@ -575,6 +657,10 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Bilinear form to move from
+       */
       constexpr
       BilinearForm(BilinearForm&& other)
         : Parent(std::move(other)),
@@ -583,6 +669,11 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Bilinear form to copy
+       * @returns Reference to this bilinear form
+       */
       BilinearForm& operator=(const BilinearForm& other)
       {
         if (this != &other)
@@ -595,6 +686,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Bilinear form to move from
+       * @returns Reference to this bilinear form
+       */
       BilinearForm& operator=(BilinearForm&& other) noexcept
       {
         if (this != &other)
@@ -625,11 +721,19 @@ namespace Rodin::Variational
         return (this->getOperator() * v.getData()).dot(u.getData());
       }
 
+      /**
+       * @brief Gets the assembled dense operator.
+       * @returns Mutable reference to the assembled matrix
+       */
       OperatorType& getOperator() override
       {
         return m_operator;
       }
 
+      /**
+       * @brief Gets the assembled dense operator.
+       * @returns Const reference to the assembled matrix
+       */
       const OperatorType& getOperator() const override
       {
         return m_operator;
@@ -667,4 +771,3 @@ namespace Rodin::Variational
 }
 
 #endif
-

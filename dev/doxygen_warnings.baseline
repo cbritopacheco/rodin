@@ -37,63 +37,6 @@ src/Rodin/Variational/Average.h: warning: Member Average(const Average &other) (
 src/Rodin/Variational/Average.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Average< FunctionBase< FunctionDerived > > is not documented.
 src/Rodin/Variational/Average.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Average< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
 src/Rodin/Variational/Average.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::Average< FunctionBase< FunctionDerived > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Compound Rodin::FormLanguage::Traits< Variational::BilinearForm< Solution, TrialFES, TestFES, Operator > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Compound Rodin::FormLanguage::Traits< Variational::BilinearFormBase< Operator > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Compound Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member AssemblyType (typedef) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member AssemblyType (typedef) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member BilinearForm(BilinearForm &&other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member BilinearForm(BilinearForm &&other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member BilinearForm(const BilinearForm &other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member BilinearForm(const BilinearForm &other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member BilinearForm(const TrialFunction< Solution, TrialFES > &u, const TestFunction< TestFES > &v) -> BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< typename FormLanguage::Mult< typename FormLanguage::Traits< TrialFES >::ScalarType, typename FormLanguage::Traits< TestFES >::ScalarType > ::Type > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member DefaultAssemblyType (typedef) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member DefaultAssemblyType (typedef) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::BilinearFormBase< Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::BilinearFormBase< Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::BilinearFormBase< Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::BilinearFormBase< Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::BilinearFormBase< Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::BilinearFormBase< Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::BilinearFormBase< Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::BilinearFormBase< Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member TestFESType (typedef) of struct Rodin::FormLanguage::Traits< Variational::BilinearForm< Solution, TrialFES, TestFES, Operator > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member TrialFESType (typedef) of struct Rodin::FormLanguage::Traits< Variational::BilinearForm< Solution, TrialFES, TestFES, Operator > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member getOperator() const override (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member getOperator() const override (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator+=(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator+=(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator+=(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator+=(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator+=(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator+=(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator-=(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator-=(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator-=(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator-=(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator-=(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator-=(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(BilinearForm &&other) noexcept (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(BilinearForm &&other) noexcept (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(BilinearFormBase &&other) noexcept (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(BilinearFormBase &&other) noexcept (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(BilinearFormBase &&other) noexcept (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearForm &other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearForm &other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearFormBase &other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearFormBase &other) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearFormBase &other) (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearFormBase &other) (function) of class Rodin::Variational::BilinearFormBase< Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const BilinearFormBase &other) (function) of class Rodin::Variational::BilinearFormBase< Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const LocalBilinearFormIntegratorBaseListType &bfi) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const LocalBilinearFormIntegratorBaseListType &bfi) (function) of class Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > > is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: Member operator=(const LocalBilinearFormIntegratorBaseListType &bfi) (function) of class Rodin::Variational::BilinearFormBase is not documented.
-src/Rodin/Variational/BilinearForm.h: warning: The following parameter of Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::Matrix< Scalar > >::BilinearForm(const TrialFunction< Solution, TrialFES > &u, const TestFunction< TestFES > &v) is not documented:
-src/Rodin/Variational/BilinearForm.h: warning: The following parameter of Rodin::Variational::BilinearForm< Solution, TrialFES, TestFES, Math::SparseMatrix< Scalar > >::BilinearForm(const TrialFunction< Solution, TrialFES > &u, const TestFunction< TestFES > &v) is not documented:
 src/Rodin/Variational/BilinearFormIntegrator.h: warning: Compound Rodin::Variational::GlobalBilinearFormIntegratorBase is not documented.
 src/Rodin/Variational/BilinearFormIntegrator.h: warning: Compound Rodin::Variational::LocalBilinearFormIntegratorBase is not documented.
 src/Rodin/Variational/BilinearFormIntegrator.h: warning: Member GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase< OtherNumber > &other) (function) of class Rodin::Variational::GlobalBilinearFormIntegratorBase is not documented.
@@ -309,7 +252,6 @@ src/Rodin/Variational/Flow.h: warning: Member getLeaf() const (function) of clas
 src/Rodin/Variational/Flow.h: warning: Member getOrder(const Geometry::Polytope &) const (function) of class Rodin::Variational::Flow< FunctionBase< Derived >, VectorField, Step, BoundaryPolicy > is not documented.
 src/Rodin/Variational/ForwardDecls.h: warning: Compound Rodin::Variational::GlobalBilinearFormIntegratorBase is not documented.
 src/Rodin/Variational/ForwardDecls.h: warning: Compound Rodin::Variational::LocalBilinearFormIntegratorBase is not documented.
-src/Rodin/Variational/ForwardDecls.h: warning: Compound Rodin::Variational::ProblemBody is not documented.
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'DotSpecializations' for \ref command
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'MultSpecializations' for \ref command
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'SumSpecializations' for \ref command
@@ -1287,69 +1229,6 @@ src/Rodin/Variational/Problem.h: warning: Member getTrialOffsets() const (functi
 src/Rodin/Variational/Problem.h: warning: Member getTrialOffsets() const (function) of class Rodin::Variational::ProblemUsBase< LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/Variational/Problem.h: warning: Member operator=(Problem &&other) noexcept (function) of class Rodin::Variational::Problem< LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/Variational/Problem.h: warning: Member operator=(const Problem &other) (function) of class Rodin::Variational::Problem< LinearSystem, U1, U2, U3, Us... > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Compound Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member BilinearFormBaseListType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member BilinearFormBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member BilinearFormBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member BilinearFormBaseType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member BilinearFormBaseType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member BilinearFormBaseType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member GlobalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormBaseListType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormBaseListType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormBaseType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormBaseType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormBaseType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseListType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member LocalBilinearFormIntegratorBaseType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member OperatorScalarType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member OperatorScalarType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member OperatorScalarType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member OperatorScalarType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(ProblemBody &&other) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const BilinearFormBaseType &bf) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const GlobalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const GlobalBilinearFormIntegratorBaseType &bfi) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const LocalBilinearFormIntegratorBase< Scalar > &) -> ProblemBody< void, void, Scalar > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const LocalBilinearFormIntegratorBaseListType &bfis) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const LocalBilinearFormIntegratorBaseType &bfi) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const ProblemBody &other) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const ProblemBody< OperatorType, void, Scalar > &pbo) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const ProblemBody< void, VectorType, Scalar > &pbv) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member ProblemBody(const ProblemBody< void, void, Scalar > &parent) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member VectorScalarType (typedef) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member VectorScalarType (typedef) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member VectorScalarType (typedef) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member VectorScalarType (typedef) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getBFs() (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getBFs() (function) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getBFs() (function) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getBFs() const (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getLFs() (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getLFs() (function) of class Rodin::Variational::ProblemBody< Operator, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getLFs() (function) of class Rodin::Variational::ProblemBody< void, void, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getLFs() const (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member getLFs() const (function) of class Rodin::Variational::ProblemBody< void, Vector, Scalar > is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member operator=(ProblemBody &&other) (function) of class Rodin::Variational::ProblemBody is not documented.
-src/Rodin/Variational/ProblemBody.h: warning: Member operator=(const ProblemBody &other) (function) of class Rodin::Variational::ProblemBody is not documented.
 src/Rodin/Variational/QuadratureRule.h: warning: Member IntegrandRangeType (typedef) of class Rodin::Variational::QuadratureRule< FunctionBase< FunctionDerived > > is not documented.
 src/Rodin/Variational/Re.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Re< FunctionBase< NestedDerived > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Compound Rodin::FormLanguage::Traits< Variational::ScalarFunctionBase< Scalar, Derived > > is not documented.
@@ -4358,4 +4237,4 @@ warning: Include graph for 'Variational.h' not generated, too many nodes (71), t
 warning: Included by graph for 'ForwardDecls.h' not generated, too many nodes (103), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
 warning: Included by graph for 'Types.h' not generated, too many nodes (88), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
 warning: Included by graph for 'Vector.h' not generated, too many nodes (52), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
-warning: Inheritance graph for 'Rodin::FormLanguage::Base' not generated, too many nodes (150), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
+warning: Inheritance graph for 'Rodin::FormLanguage::Base' not generated, too many nodes (147), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
