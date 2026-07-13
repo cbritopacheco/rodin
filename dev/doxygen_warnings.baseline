@@ -340,40 +340,6 @@ src/Rodin/IO/XDMF.h: warning: Member spaceDimension (variable) of struct Rodin::
 src/Rodin/IO/XDMF.h: warning: Member topologicalDimension (variable) of struct Rodin::IO::XDMF::SnapshotRecord::MeshAttributeRecord is not documented.
 src/Rodin/IO/XDMF.h: warning: Member topologySize (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
 src/Rodin/IO/XDMF.h: warning: Member vertexCount (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
-src/Rodin/MMG/Configure.h.in: warning: Member ADVECTION_EXECUTABLE (variable) of namespace Rodin::MMG is not documented.
-src/Rodin/MMG/Configure.h.in: warning: Member MSHDIST_EXECUTABLE (variable) of namespace Rodin::MMG is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member copyMesh(const MMG5_pMesh src, MMG5_pMesh dst) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member copySolution(const MMG5_pSol src, MMG5_pSol dst) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member copySolution(const MMG5_pSol src, MMG::GridFunction< Range > &dst) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member copySolution(const MMG::GridFunction< Range > &src, MMG5_pSol dst) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member createMesh(size_t version, size_t dim, Optional< size_t > spaceDim={}) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member createSolution(MMG5_pMesh mesh, size_t vdim) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member destroyMesh(MMG5_pMesh) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member destroySolution(MMG5_pSol sol) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member isSurfaceMesh(const MMG5_pMesh mesh) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/MMG5.h: warning: Member swapSolution(MMG5_pSol a, MMG5_pSol b) (function) of class Rodin::MMG::MMG5 is not documented.
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::attribute' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::initialize' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::nodes' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::polytope(Polytope::Type, IndexArray&&)' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::polytope(Polytope::Type, const IndexArray&)' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::polytope(Polytope::Type, std::initializer_list<Index>)' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::reserve' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::vertex(const Math::SpatialPoint&)' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::vertex(const Real (&)[Size])' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::vertex(const Real*)' not found
-src/Rodin/MMG/Mesh.h: warning: @copybrief or @copydoc target 'Parent::Builder::vertex(std::initializer_list<Real>)' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::attribute' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::initialize' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::nodes' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::polytope(Polytope::Type, IndexArray&&)' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::polytope(Polytope::Type, const IndexArray&)' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::polytope(Polytope::Type, std::initializer_list<Index>)' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::reserve' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::vertex(const Math::SpatialPoint&)' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::vertex(const Real (&)[Size])' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::vertex(const Real*)' not found
-src/Rodin/MMG/Mesh.h: warning: @copydetails or @copydoc target 'Parent::Builder::vertex(std::initializer_list<Real>)' not found
 src/Rodin/MPI/Assembly/MPI.h: warning: Compound Rodin::Assembly::MPI< IndexMap< Scalar >, Variational::DirichletBC< Variational::TrialFunction< Solution, FES >, Variational::FunctionBase< ValueDerived > > > is not documented.
 src/Rodin/MPI/Assembly/MPI.h: warning: Member DirichletBCType (typedef) of class Rodin::Assembly::MPI< IndexMap< std::pair< IndexArray, Math::Vector< Scalar > > >, Variational::DirichletBC< Variational::TrialFunction< Sol1, FES1 >, Variational::ShapeFunctionBase< Derived2, FES2, Sp > > > is not documented.
 src/Rodin/MPI/Assembly/MPI.h: warning: Member InputType (typedef) of class Rodin::Assembly::MPI< IndexMap< std::pair< IndexArray, Math::Vector< Scalar > > >, Variational::DirichletBC< Variational::TrialFunction< Sol1, FES1 >, Variational::ShapeFunctionBase< Derived2, FES2, Sp > > > is not documented.

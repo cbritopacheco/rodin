@@ -76,7 +76,6 @@ namespace Rodin::MMG
 
       // ---- Mesh methods ---------------------------------------------------
       /**
-       * @internal
        * @brief Allocates and initializes an MMG mesh object.
        * @param[in] version MMG mesh version.
        * @param[in] dim Topological mesh dimension.
@@ -86,7 +85,6 @@ namespace Rodin::MMG
       static MMG5_pMesh createMesh(size_t version, size_t dim, Optional<size_t> spaceDim = {});
 
       /**
-       * @internal
        * @brief Copies source mesh to a destination mesh.
        * @param[in] src Source MMG mesh.
        * @param[out] dst Destination MMG mesh.
@@ -96,7 +94,6 @@ namespace Rodin::MMG
       static void copyMesh(const MMG5_pMesh src, MMG5_pMesh dst);
 
       /**
-       * @internal
        * @brief Determines if a mesh is surface or not.
        * @param[in] mesh Mesh handle.
        * @returns `true` if the mesh is a surface manifold.
@@ -104,11 +101,10 @@ namespace Rodin::MMG
       static bool isSurfaceMesh(const MMG5_pMesh mesh);
 
       /**
-       * @internal
        * @brief Destroys the mesh object and frees the allocated memory.
        * @param[in] mesh Pointer to mesh.
        */
-      static void destroyMesh(MMG5_pMesh);
+      static void destroyMesh(MMG5_pMesh mesh);
 
       /**
        * @brief Converts a Rodin local mesh to a native MMG mesh.
@@ -130,7 +126,6 @@ namespace Rodin::MMG
       // ---- Solution methods -----------------------------------------------
 
       /**
-       * @internal
        * @brief Constructs a solution and allocates space for it.
        * @param[in] mesh Owning MMG mesh.
        * @param[in] vdim Value dimension (`1` for scalar, `>1` for vector).
@@ -139,7 +134,6 @@ namespace Rodin::MMG
       static MMG5_pSol createSolution(MMG5_pMesh mesh, size_t vdim);
 
       /**
-       * @internal
        * @brief Deep-copies an MMG solution.
        * @param[in] src Source solution.
        * @param[out] dst Destination solution.
@@ -147,7 +141,6 @@ namespace Rodin::MMG
       static void copySolution(const MMG5_pSol src, MMG5_pSol dst);
 
       /**
-       * @internal
        * @brief Copies values from MMG solution to Rodin MMG grid function.
        * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
        * @param[in] src Source MMG solution.
@@ -191,7 +184,6 @@ namespace Rodin::MMG
       }
 
       /**
-       * @internal
        * @brief Copies values from Rodin MMG grid function to MMG solution.
        * @tparam Range Grid function range type (`Real` or `Math::Vector<Real>`).
        * @param[in] src Source grid function.
@@ -273,7 +265,6 @@ namespace Rodin::MMG
       }
 
       /**
-       * @internal
        * @brief Swaps the data between two instances of type MMG5_pSol.
        * @param[in, out] a First solution.
        * @param[in, out] b Second solution.
@@ -281,7 +272,6 @@ namespace Rodin::MMG
       static void swapSolution(MMG5_pSol a, MMG5_pSol b);
 
       /**
-       * @internal
        * @brief Destroys and frees the allocated memory for a MMG5_pSol object.
        * @param[in] sol MMG solution pointer.
        */

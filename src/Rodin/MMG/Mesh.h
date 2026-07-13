@@ -112,49 +112,79 @@ namespace Rodin::MMG
           // any inherited builder method.
           // ----------------------------------------------------------------
 
-          /** @copydoc Parent::Builder::reserve */
+          /**
+           * @brief Reserves storage for entities of a given dimension.
+           * @param d Entity dimension.
+           * @param count Number of entities to reserve.
+           * @returns Reference to this builder.
+           */
           Builder& reserve(size_t d, size_t count)
           {
             Parent::Builder::reserve(d, count);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::initialize */
+          /**
+           * @brief Initializes the builder for a space dimension.
+           * @param sdim Space dimension.
+           * @returns Reference to this builder.
+           */
           Builder& initialize(size_t sdim)
           {
             Parent::Builder::initialize(sdim);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::nodes */
+          /**
+           * @brief Sets the number of mesh nodes.
+           * @param n Number of nodes.
+           * @returns Reference to this builder.
+           */
           Builder& nodes(size_t n)
           {
             Parent::Builder::nodes(n);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(std::initializer_list<Real>) */
+          /**
+           * @brief Adds a vertex from an initializer list.
+           * @param l Vertex coordinates.
+           * @returns Reference to this builder.
+           */
           Builder& vertex(std::initializer_list<Real> l)
           {
             Parent::Builder::vertex(l);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(const Real*) */
+          /**
+           * @brief Adds a vertex from a coordinate pointer.
+           * @param data Pointer to vertex coordinates.
+           * @returns Reference to this builder.
+           */
           Builder& vertex(const Real* data)
           {
             Parent::Builder::vertex(data);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(const Math::SpatialPoint&) */
+          /**
+           * @brief Adds a vertex from a spatial point.
+           * @param x Vertex coordinates.
+           * @returns Reference to this builder.
+           */
           Builder& vertex(const Math::SpatialPoint& x)
           {
             Parent::Builder::vertex(x);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(const Real (&)[Size]) */
+          /**
+           * @brief Adds a vertex from a fixed-size coordinate array.
+           * @tparam Size Number of coordinates in the array.
+           * @param data Vertex coordinates.
+           * @returns Reference to this builder.
+           */
           template <size_t Size>
           Builder& vertex(const Real (&data)[Size])
           {
@@ -162,7 +192,12 @@ namespace Rodin::MMG
             return *this;
           }
 
-          /** @copydoc Parent::Builder::attribute */
+          /**
+           * @brief Assigns an attribute to a mesh entity.
+           * @param p Pair containing entity dimension and index.
+           * @param attr Optional attribute value.
+           * @returns Reference to this builder.
+           */
           Builder& attribute(
               const std::pair<size_t, Index>& p,
               const Optional<Geometry::Attribute>& attr)
@@ -171,21 +206,36 @@ namespace Rodin::MMG
             return *this;
           }
 
-          /** @copydoc Parent::Builder::polytope(Polytope::Type, std::initializer_list<Index>) */
+          /**
+           * @brief Adds a polytope from an initializer list of vertex indices.
+           * @param t Polytope type.
+           * @param vs Vertex indices.
+           * @returns Reference to this builder.
+           */
           Builder& polytope(Geometry::Polytope::Type t, std::initializer_list<Index> vs)
           {
             Parent::Builder::polytope(t, vs);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::polytope(Polytope::Type, const IndexArray&) */
+          /**
+           * @brief Adds a polytope from an index array.
+           * @param t Polytope type.
+           * @param vs Vertex indices.
+           * @returns Reference to this builder.
+           */
           Builder& polytope(Geometry::Polytope::Type t, const IndexArray& vs)
           {
             Parent::Builder::polytope(t, vs);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::polytope(Polytope::Type, IndexArray&&) */
+          /**
+           * @brief Adds a polytope from a moved index array.
+           * @param t Polytope type.
+           * @param vs Vertex indices.
+           * @returns Reference to this builder.
+           */
           Builder& polytope(Geometry::Polytope::Type t, IndexArray&& vs)
           {
             Parent::Builder::polytope(t, std::move(vs));
