@@ -304,7 +304,9 @@ namespace Rodin::IO
       class Grid
       {
         public:
+          /// @brief Copy constructor.
           Grid(const Grid&) = default;
+          /// @brief Copy assignment operator.
           Grid& operator=(const Grid&) = default;
 
           /**
@@ -629,6 +631,7 @@ namespace Rodin::IO
        */
       size_t getRootRank() const noexcept;
 
+      /// @brief Flushes the XDMF XML document without closing the writer.
       void flush() const;
 
     private:
@@ -647,30 +650,32 @@ namespace Rodin::IO
       /// @brief Internal record for one temporal snapshot.
       struct SnapshotRecord
       {
+        /// @brief Attribute metadata recorded for one snapshot.
         struct AttributeRecord
         {
-          std::string name;
-          Center center = Center::Node;
-          size_t dimension = 1;
-          boost::filesystem::path file;
+          std::string name;                 ///< Attribute display name.
+          Center center = Center::Node;     ///< Attribute centering.
+          size_t dimension = 1;             ///< Attribute vector dimension.
+          boost::filesystem::path file;     ///< Attribute HDF5 file path.
           bool isStatic = false;  ///< True when the attribute uses a static (once-written) HDF5 file.
         };
 
+        /// @brief Mesh-attached attribute metadata recorded for one snapshot.
         struct MeshAttributeRecord
         {
-          std::string name;
-          Center center = Center::Cell;
-          size_t topologicalDimension = 0;
+          std::string name;                 ///< Attribute display name.
+          Center center = Center::Cell;     ///< Attribute centering.
+          size_t topologicalDimension = 0;  ///< Mesh topological dimension.
         };
 
         /// @brief Per-rank mesh metadata cached during write().
         struct PieceMeta
         {
-          std::uint64_t vertexCount = 0;
-          std::uint64_t cellCount = 0;
-          std::uint64_t meshDimension = 0;
-          std::uint64_t spaceDimension = 0;
-          std::uint64_t topologySize = 0;
+          std::uint64_t vertexCount = 0;    ///< Number of visualization vertices.
+          std::uint64_t cellCount = 0;      ///< Number of visualization cells.
+          std::uint64_t meshDimension = 0;  ///< Topological mesh dimension.
+          std::uint64_t spaceDimension = 0; ///< Spatial embedding dimension.
+          std::uint64_t topologySize = 0;   ///< Number of topology entries.
         };
 
         Real time = 0;

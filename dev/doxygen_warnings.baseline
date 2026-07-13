@@ -124,49 +124,6 @@ src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getPolytop
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member integrate(std::size_t tr, std::size_t te) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/IO/GridFunctionLoader.h: warning: Compound Rodin::IO::GridFunctionLoaderBase is not documented.
-src/Rodin/IO/GridFunctionLoader.h: warning: Member GridFunctionLoader(ObjectType &gf) (function) of class Rodin::IO::GridFunctionLoader is not documented.
-src/Rodin/IO/GridFunctionLoader.h: warning: Member ObjectType (typedef) of class Rodin::IO::GridFunctionLoader is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Compound Rodin::IO::GridFunctionPrinterBase is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinter(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinter is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinter(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinter< FileFormat::MEDIT, FES, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinter(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinter< FileFormat::MEDIT, FES, Math::Vector< typename FormLanguage::Traits< FES >::ScalarType > > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::HDF5, FES, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::HDF5, FES, Math::Vector< Scalar > > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MEDIT, FES, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MEDIT, FES, Math::Vector< FormLanguage::Traits< FES >::ScalarType > > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MFEM, FES, Math::Vector< Scalar > > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MFEM, Variational::H1< K, Range, Geometry::Mesh< Context::Local > >, Math::Vector< Scalar > > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MFEM, Variational::H1< K, Range, Geometry::Mesh< Ctx > >, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MFEM, Variational::P0< Range, Geometry::Mesh< Ctx > >, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member GridFunctionPrinterBase(const ObjectType &gf) (function) of class Rodin::IO::GridFunctionPrinterBase< FileFormat::MFEM, Variational::P1< Range, Geometry::Mesh< Ctx > >, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member ObjectType (typedef) of class Rodin::IO::GridFunctionPrinter is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member ObjectType (typedef) of class Rodin::IO::GridFunctionPrinter< FileFormat::MEDIT, FES, ::Vec > is not documented.
-src/Rodin/IO/GridFunctionPrinter.h: warning: Member ObjectType (typedef) of class Rodin::IO::GridFunctionPrinter< FileFormat::MEDIT, FES, Math::Vector< typename FormLanguage::Traits< FES >::ScalarType > > is not documented.
-src/Rodin/IO/HDF5.h: warning: Compound Rodin::IO::HDF5::XDMFTopologyLayout is not documented.
-src/Rodin/IO/HDF5.h: warning: Member Handle(Handle &&other) noexcept (function) of class Rodin::IO::HDF5::Handle is not documented.
-src/Rodin/IO/HDF5.h: warning: Member columnCount (variable) of struct Rodin::IO::HDF5::XDMFTopologyLayout is not documented.
-src/Rodin/IO/HDF5.h: warning: Member entryCount (variable) of struct Rodin::IO::HDF5::XDMFTopologyLayout is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getNativeType< F64 >() (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getNativeType< I32 >() (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getNativeType< U64 >() (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getNativeType< U8 >() (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getXDMFQuadraticTopologyName(Geometry::Polytope::Type t) (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getXDMFTopologyLayout(const Geometry::MeshBase &mesh, bool allowUniformCurvedTopology=true) (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member getXDMFVisualizationVertexCount(const Geometry::MeshBase &mesh) (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member hasCurvedXDMFGeometry(const Geometry::MeshBase &mesh) (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member isUniform (variable) of struct Rodin::IO::HDF5::XDMFTopologyLayout is not documented.
-src/Rodin/IO/HDF5.h: warning: Member operator=(Handle &&other) noexcept (function) of class Rodin::IO::HDF5::Handle is not documented.
-src/Rodin/IO/HDF5.h: warning: Member rowCount (variable) of struct Rodin::IO::HDF5::XDMFTopologyLayout is not documented.
-src/Rodin/IO/HDF5.h: warning: Member topologyType (variable) of struct Rodin::IO::HDF5::XDMFTopologyLayout is not documented.
-src/Rodin/IO/HDF5.h: warning: Member writeXDMFCellAttribute(const GridFunctionType &gf, const boost::filesystem::path &filename) (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: Member xdmfReferencePoint(std::initializer_list< Real > values) (function) of namespace Rodin::IO::HDF5 is not documented.
-src/Rodin/IO/HDF5.h: warning: The following parameter of Rodin::IO::HDF5::writeXDMFMesh(const boost::filesystem::path &filename, const Geometry::MeshBase &mesh, bool allowUniformCurvedTopology=true) is not documented:
-src/Rodin/IO/HDF5.h: warning: The following parameter of Rodin::IO::HDF5::writeXDMFTopology(const boost::filesystem::path &filename, const Geometry::MeshBase &mesh, bool allowUniformCurvedTopology=true) is not documented:
-src/Rodin/IO/HDF5.h: warning: The following parameter of Rodin::IO::HDF5::writeXDMFTopology(hid_t file, const Geometry::MeshBase &mesh, bool allowUniformCurvedTopology=true) is not documented:
-src/Rodin/IO/HDF5.h: warning: argument filename from the argument list of Rodin::IO::HDF5::writeXDMFCellAttribute has multiple @param documentation sections
-src/Rodin/IO/HDF5.h: warning: argument gf from the argument list of Rodin::IO::HDF5::writeXDMFCellAttribute has multiple @param documentation sections
 src/Rodin/IO/MEDIT.cpp: warning: no matching class member found for 
 src/Rodin/IO/MEDIT.cpp: warning: no uniquely matching class member found for 
 src/Rodin/IO/MEDIT.h: warning: Compound Rodin::IO::GridFunctionLoader< FileFormat::MEDIT, Variational::H1< K, Range, Geometry::Mesh< Context::Local > >, Math::Vector< typename FormLanguage::Traits< Range >::ScalarType > > is not documented.
@@ -262,27 +219,9 @@ src/Rodin/IO/MFEM.h: warning: Member getNodes() (function) of class Rodin::IO::M
 src/Rodin/IO/MFEM.h: warning: Member index (variable) of struct Rodin::IO::MFEM::FaceOrderEntry is not documented.
 src/Rodin/IO/MFEM.h: warning: Member printData(std::ostream &os) override (function) of class Rodin::IO::GridFunctionPrinter< FileFormat::MFEM, Variational::H1< K, Range, Geometry::Mesh< Context::Local > >, Math::Vector< Scalar > > is not documented.
 src/Rodin/IO/MFEM.h: warning: Member vertices (variable) of struct Rodin::IO::MFEM::FaceOrderEntry is not documented.
-src/Rodin/IO/Printer.h: warning: Member print(const boost::filesystem::path &filename) (function) of class Rodin::IO::Printer is not documented.
-src/Rodin/IO/XDMF.h: warning: Compound Rodin::IO::XDMF::SnapshotRecord::AttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Compound Rodin::IO::XDMF::SnapshotRecord::MeshAttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member Grid(const Grid &)=default (function) of class Rodin::IO::XDMF::Grid is not documented.
 src/Rodin/IO/XDMF.h: warning: Member add(const GridFunctionType &gf, Center center, AttributePolicy policy) (function) of class Rodin::IO::XDMF::Grid is not documented.
 src/Rodin/IO/XDMF.h: warning: Member add(const std::string &name, const GridFunctionType &gf, Center center, AttributePolicy policy) (function) of class Rodin::IO::XDMF::Grid is not documented.
-src/Rodin/IO/XDMF.h: warning: Member cellCount (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
-src/Rodin/IO/XDMF.h: warning: Member center (variable) of struct Rodin::IO::XDMF::SnapshotRecord::AttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member center (variable) of struct Rodin::IO::XDMF::SnapshotRecord::MeshAttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member dimension (variable) of struct Rodin::IO::XDMF::SnapshotRecord::AttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member file (variable) of struct Rodin::IO::XDMF::SnapshotRecord::AttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member flush() const (function) of class Rodin::IO::XDMF is not documented.
-src/Rodin/IO/XDMF.h: warning: Member meshDimension (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
-src/Rodin/IO/XDMF.h: warning: Member name (variable) of struct Rodin::IO::XDMF::SnapshotRecord::AttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member name (variable) of struct Rodin::IO::XDMF::SnapshotRecord::MeshAttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member operator=(const Grid &)=default (function) of class Rodin::IO::XDMF::Grid is not documented.
 src/Rodin/IO/XDMF.h: warning: Member setMesh(const MeshType &mesh, MeshPolicy policy) (function) of class Rodin::IO::XDMF::Grid is not documented.
-src/Rodin/IO/XDMF.h: warning: Member spaceDimension (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
-src/Rodin/IO/XDMF.h: warning: Member topologicalDimension (variable) of struct Rodin::IO::XDMF::SnapshotRecord::MeshAttributeRecord is not documented.
-src/Rodin/IO/XDMF.h: warning: Member topologySize (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
-src/Rodin/IO/XDMF.h: warning: Member vertexCount (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
 src/Rodin/Solid/Constitutive/ActiveContraction.h: warning: Compound Rodin::Solid::ActiveContraction::Cache is not documented.
 src/Rodin/Solid/Constitutive/ActiveContraction.h: warning: Member ActiveContraction(const PassiveLaw &passiveLaw, const ActiveLaw &activeLaw=ActiveLaw()) (function) of class Rodin::Solid::ActiveContraction is not documented.
 src/Rodin/Solid/Constitutive/ActiveContraction.h: warning: Member active (variable) of struct Rodin::Solid::ActiveContraction::Cache is not documented.

@@ -247,6 +247,10 @@ namespace Rodin::IO
         Handle(const Handle&) = delete;
         Handle& operator=(const Handle&) = delete;
 
+        /**
+         * @brief Move constructor.
+         * @param[in,out] other Handle whose identifier is transferred.
+         */
         Handle(Handle&& other) noexcept
           : m_id(other.m_id),
             m_close(other.m_close)
@@ -255,6 +259,11 @@ namespace Rodin::IO
           other.m_close = nullptr;
         }
 
+        /**
+         * @brief Move assignment operator.
+         * @param[in,out] other Handle whose identifier is transferred.
+         * @returns Reference to this handle.
+         */
         Handle& operator=(Handle&& other) noexcept
         {
           if (this != &other)
@@ -355,6 +364,7 @@ namespace Rodin::IO
 
     template <>
     inline
+    /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
     hid_t getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
@@ -362,6 +372,7 @@ namespace Rodin::IO
 
     template <>
     inline
+    /// @brief Returns the native HDF5 type for signed 32-bit integers.
     hid_t getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
@@ -369,6 +380,7 @@ namespace Rodin::IO
 
     template <>
     inline
+    /// @brief Returns the native HDF5 type for 64-bit floating point values.
     hid_t getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
@@ -376,6 +388,7 @@ namespace Rodin::IO
 
     template <>
     inline
+    /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
     hid_t getNativeType<U8>()
     {
       return H5T_NATIVE_UCHAR;
@@ -651,6 +664,11 @@ namespace Rodin::IO
       return std::numeric_limits<U64>::max();
     }
 
+    /**
+     * @brief Returns the XDMF uniform topology name for a quadratic cell type.
+     * @param[in] t Polytope geometry type.
+     * @returns XDMF topology name string.
+     */
     inline
     const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
     {
@@ -675,15 +693,31 @@ namespace Rodin::IO
       return nullptr;
     }
 
+    /**
+     * @brief Layout metadata for XDMF topology dataset emission.
+     *
+     * Uniform topologies are written as a dense node table; mixed topologies
+     * are written as the flat XDMF mixed stream.
+     */
     struct XDMFTopologyLayout
     {
+      /// @brief Whether the topology can be written as a uniform XDMF topology.
       bool isUniform = false;
+      /// @brief XDMF topology type name.
       std::string topologyType = "Mixed";
+      /// @brief Number of rows for uniform topology datasets.
       size_t rowCount = 0;
+      /// @brief Number of columns for uniform topology datasets.
       size_t columnCount = 0;
+      /// @brief Total number of entries in the topology dataset.
       size_t entryCount = 0;
     };
 
+    /**
+     * @brief Builds a spatial reference point from coordinate values.
+     * @param[in] values Coordinate values in reference-cell coordinates.
+     * @returns Spatial point with the same dimension as @p values.
+     */
     inline
     Math::SpatialPoint xdmfReferencePoint(std::initializer_list<Real> values)
     {
@@ -875,6 +909,11 @@ namespace Rodin::IO
       return {};
     }
 
+    /**
+     * @brief Tests whether the mesh needs curved XDMF visualization geometry.
+     * @param[in] mesh Mesh to inspect.
+     * @returns True when at least one exported cell has order greater than one.
+     */
     inline
     bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
     {
@@ -936,6 +975,11 @@ namespace Rodin::IO
       return count;
     }
 
+    /**
+     * @brief Counts visualization vertices emitted for XDMF geometry.
+     * @param[in] mesh Mesh to inspect.
+     * @returns Vertex count for the XDMF geometry dataset.
+     */
     inline
     size_t getXDMFVisualizationVertexCount(const Geometry::MeshBase& mesh)
     {
@@ -1009,6 +1053,12 @@ namespace Rodin::IO
       return size;
     }
 
+    /**
+     * @brief Computes the XDMF topology dataset layout for a mesh.
+     * @param[in] mesh Mesh whose cells define the topology.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
+     * @returns Topology layout metadata.
+     */
     inline
     XDMFTopologyLayout getXDMFTopologyLayout(
         const Geometry::MeshBase& mesh,
@@ -1361,6 +1411,7 @@ namespace Rodin::IO
      *
      * @param[in] file  Open HDF5 file identifier with write access.
      * @param[in] mesh  Local mesh whose cells provide the topology data.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
     inline
     void writeXDMFTopology(
@@ -1472,6 +1523,7 @@ namespace Rodin::IO
      *
      * @param[in] filename  Path to an existing HDF5 mesh file.
      * @param[in] mesh      Local mesh whose cells provide the topology data.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
     inline
     void writeXDMFTopology(
@@ -1650,6 +1702,7 @@ namespace Rodin::IO
      *
      * @param[in] filename  Output HDF5 file path.
      * @param[in] mesh      Local mesh to export for visualization.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      *
      * @see writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute,
      *      MeshPrinter<FileFormat::HDF5, Context::Local>
@@ -1685,12 +1738,14 @@ namespace Rodin::IO
       writeXDMFRegionAttribute(file.get(), mesh);
     }
 
+    /// @cond
     // Forward declaration of the explicit-mesh overload, defined below.
     template <class GridFunctionType>
     void writeXDMFNodeAttribute(
         const GridFunctionType& gf,
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename);
+    /// @endcond
 
     /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
@@ -1745,6 +1800,7 @@ namespace Rodin::IO
       writeXDMFNodeAttribute(gf, *localMesh, filename);
     }
 
+    /// @cond
     /**
      * @brief Writes a grid function as cell-centered data to an HDF5 file
      *        for XDMF visualization.
@@ -1774,7 +1830,14 @@ namespace Rodin::IO
         const GridFunctionType& gf,
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename);
+    /// @endcond
 
+    /**
+     * @brief Writes a grid function as cell-centered data using its own mesh.
+     * @tparam GridFunctionType Concrete grid function type.
+     * @param[in] gf Grid function to export.
+     * @param[in] filename Output HDF5 file path.
+     */
     template <class GridFunctionType>
     void writeXDMFCellAttribute(
         const GridFunctionType& gf, const boost::filesystem::path& filename)
