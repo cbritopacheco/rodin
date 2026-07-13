@@ -16,6 +16,8 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for a Math::LinearSystem: exposes the operator,
+  /// vector, and scalar types.
   template <class Operator, class Vector>
   struct Traits<Math::LinearSystem<Operator, Vector>>
   {
@@ -112,6 +114,7 @@ namespace Rodin::Math
        * @brief Gets the matrix operator @f$ A @f$ of the linear system.
        * @return Reference to the matrix operator
        */
+      /// @brief Returns the system operator matrix @f$ A @f$.
       constexpr
       MatrixType& getOperator()
       {
@@ -122,6 +125,7 @@ namespace Rodin::Math
        * @brief Gets the matrix operator @f$ A @f$ of the linear system.
        * @return Const reference to the matrix operator
        */
+      /// @brief Returns the system operator matrix @f$ A @f$.
       constexpr
       const MatrixType& getOperator() const
       {
@@ -132,6 +136,7 @@ namespace Rodin::Math
        * @brief Gets the right-hand side vector @f$ b @f$ of the linear system.
        * @return Reference to the right-hand side vector
        */
+      /// @brief Returns the right-hand side vector @f$ b @f$.
       constexpr
       VectorType& getVector()
       {
@@ -142,6 +147,7 @@ namespace Rodin::Math
        * @brief Gets the right-hand side vector @f$ b @f$ of the linear system.
        * @return Const reference to the right-hand side vector
        */
+      /// @brief Returns the right-hand side vector @f$ b @f$.
       constexpr
       const VectorType& getVector() const
       {
@@ -152,6 +158,7 @@ namespace Rodin::Math
        * @brief Gets the solution vector @f$ x @f$ of the linear system.
        * @return Reference to the solution vector
        */
+      /// @brief Returns the solution vector @f$ x @f$.
       constexpr
       VectorType& getSolution()
       {
@@ -162,6 +169,7 @@ namespace Rodin::Math
        * @brief Gets the solution vector @f$ x @f$ of the linear system.
        * @return Const reference to the solution vector
        */
+      /// @brief Returns the solution vector @f$ x @f$.
       constexpr
       const VectorType& getSolution() const
       {
@@ -454,36 +462,42 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// @brief Returns the system operator matrix @f$ A @f$.
       constexpr
       MatrixType& getOperator()
       {
         return m_operator;
       }
 
+      /// @brief Returns the system operator matrix @f$ A @f$.
       constexpr
       const MatrixType& getOperator() const
       {
         return m_operator;
       }
 
+      /// @brief Returns the right-hand side vector @f$ b @f$.
       constexpr
       VectorType& getVector()
       {
         return m_vector;
       }
 
+      /// @brief Returns the right-hand side vector @f$ b @f$.
       constexpr
       const VectorType& getVector() const
       {
         return m_vector;
       }
 
+      /// @brief Returns the solution vector @f$ x @f$.
       constexpr
       VectorType& getSolution()
       {
         return m_solution;
       }
 
+      /// @brief Returns the solution vector @f$ x @f$.
       constexpr
       const VectorType& getSolution() const
       {
@@ -548,6 +562,7 @@ namespace Rodin::Math
       /// Virtual destructor
       virtual ~LinearSystem() = default;
 
+      /// @brief Copy assignment operator.
       constexpr
       LinearSystem& operator=(const LinearSystem& other)
       {
@@ -561,6 +576,7 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// @brief Move assignment operator.
       constexpr
       LinearSystem& operator=(LinearSystem&& other) noexcept
       {
@@ -613,6 +629,17 @@ namespace Rodin::Math
         return *this;
       }
 
+      /**
+       * @brief Merges dependent degrees of freedom in the dense linear system.
+       *
+       * Eliminates dependent DOFs by expressing them as linear combinations
+       * of independent DOFs, modifying both the operator and RHS vector.
+       *
+       * @tparam DOFScalar Scalar type for DOF values
+       * @param[in] dofs Map from DOF index to (dependent indices, coefficients) pairs
+       * @param[in] offset Index offset applied to DOF indices (default: 0)
+       * @return Reference to @f$ *this @f$
+       */
       template <class DOFScalar>
       LinearSystem& merge(const IndexMap<std::pair<IndexArray, Math::Vector<DOFScalar>>>& dofs, size_t offset = 0)
       {
@@ -744,36 +771,42 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// @brief Returns the system operator matrix @f$ A @f$.
       constexpr
       MatrixType& getOperator()
       {
         return m_operator;
       }
 
+      /// @brief Returns the system operator matrix @f$ A @f$.
       constexpr
       const MatrixType& getOperator() const
       {
         return m_operator;
       }
 
+      /// @brief Returns the right-hand side vector @f$ b @f$.
       constexpr
       VectorType& getVector()
       {
         return m_vector;
       }
 
+      /// @brief Returns the right-hand side vector @f$ b @f$.
       constexpr
       const VectorType& getVector() const
       {
         return m_vector;
       }
 
+      /// @brief Returns the solution vector @f$ x @f$.
       constexpr
       VectorType& getSolution()
       {
         return m_solution;
       }
 
+      /// @brief Returns the solution vector @f$ x @f$.
       constexpr
       const VectorType& getSolution() const
       {
@@ -793,27 +826,35 @@ namespace std
   struct tuple_size<Rodin::Math::LinearSystem<Matrix, Vector>>
     : std::integral_constant<std::size_t, 3> {};
 
+  /// @brief Structured-binding element 0 of a LinearSystem: the operator @f$ A @f$.
   template <class Matrix, class Vector>
   struct tuple_element<0, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-    using type = Matrix;
+    /// @brief Type of element 0 (the operator matrix).
+      using type = Matrix;
   };
 
+  /// @brief Structured-binding element 1 of a LinearSystem: the solution @f$ x @f$.
   template <class Matrix, class Vector>
   struct tuple_element<1, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-    using type = Vector;
+    /// @brief Type of element 1 (the solution vector).
+      using type = Vector;
   };
 
+  /// @brief Structured-binding element 2 of a LinearSystem: the right-hand side @f$ b @f$.
   template <class Matrix, class Vector>
   struct tuple_element<2, Rodin::Math::LinearSystem<Matrix, Vector>>
   {
-    using type = Vector;
+      /// @brief Type of element 2 (the right-hand side vector).
+      using type = Vector;
   };
 }
 
 namespace Rodin::Math
 {
+  /// @brief Structured-binding accessor: element @p I of @p ls
+  /// (0 = operator @f$ A @f$, 1 = solution @f$ x @f$, 2 = right-hand side @f$ b @f$).
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(LinearSystem<Matrix, Vector>& ls)
   {
@@ -823,6 +864,7 @@ namespace Rodin::Math
     else return (ls.getVector());
   }
 
+  /// @brief Structured-binding accessor (const overload); see get(LinearSystem&).
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(const LinearSystem<Matrix, Vector>& ls)
   {
@@ -832,6 +874,7 @@ namespace Rodin::Math
     else return (ls.getVector());
   }
 
+  /// @brief Structured-binding accessor (rvalue overload); moves out element @p I.
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(LinearSystem<Matrix, Vector>&& ls)
   {
@@ -841,6 +884,7 @@ namespace Rodin::Math
     else return std::move(ls.getVector());
   }
 
+  /// @brief Structured-binding accessor (const rvalue overload); see get(LinearSystem&&).
   template <std::size_t I, class Matrix, class Vector>
   decltype(auto) get(const LinearSystem<Matrix, Vector>&& ls)
   {

@@ -821,32 +821,6 @@ src/Rodin/MPI/Variational/P1/P1.h: warning: Member CallablePullback(const Callab
 src/Rodin/MPI/Variational/P1/P1.h: warning: Member CallablePullback(const Geometry::Polytope &polytope, Callable &&v) (function) of class Rodin::Variational::P1< Range, Geometry::Mesh< Context::MPI > >::CallablePullback is not documented.
 src/Rodin/MPI/Variational/P1/P1.h: warning: Member operator()(T &res, const Math::SpatialVector< Real > &r) const (function) of class Rodin::Variational::P1< Range, Geometry::Mesh< Context::MPI > >::CallablePullback is not documented.
 src/Rodin/MPI/Variational/P1/P1.h: warning: Member operator()(const Math::SpatialVector< Real > &r) const (function) of class Rodin::Variational::P1< Range, Geometry::Mesh< Context::MPI > >::CallablePullback is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Compound Rodin::FormLanguage::Traits< Math::LinearSystem< Operator, Vector > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Compound std::tuple_element< 0, Rodin::Math::LinearSystem< Matrix, Vector > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Compound std::tuple_element< 1, Rodin::Math::LinearSystem< Matrix, Vector > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Compound std::tuple_element< 2, Rodin::Math::LinearSystem< Matrix, Vector > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member get(LinearSystem< Matrix, Vector > &&ls) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member get(LinearSystem< Matrix, Vector > &ls) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member get(const LinearSystem< Matrix, Vector > &&ls) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member get(const LinearSystem< Matrix, Vector > &ls) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getOperator() (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getOperator() (function) of class Rodin::Math::LinearSystem< Math::SparseMatrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getOperator() const (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getOperator() const (function) of class Rodin::Math::LinearSystem< Math::SparseMatrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getSolution() (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getSolution() (function) of class Rodin::Math::LinearSystem< Math::SparseMatrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getSolution() const (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getSolution() const (function) of class Rodin::Math::LinearSystem< Math::SparseMatrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getVector() (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getVector() (function) of class Rodin::Math::LinearSystem< Math::SparseMatrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getVector() const (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member getVector() const (function) of class Rodin::Math::LinearSystem< Math::SparseMatrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member merge(const IndexMap< std::pair< IndexArray, Math::Vector< DOFScalar > > > &dofs, size_t offset=0) (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member operator=(LinearSystem &&other) noexcept (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member operator=(const LinearSystem &other) (function) of class Rodin::Math::LinearSystem< Math::Matrix< MatrixScalar >, Math::Vector< VectorScalar > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member type (typedef) of struct std::tuple_element< 0, Rodin::Math::LinearSystem< Matrix, Vector > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member type (typedef) of struct std::tuple_element< 1, Rodin::Math::LinearSystem< Matrix, Vector > > is not documented.
-src/Rodin/Math/LinearSystem.h: warning: Member type (typedef) of struct std::tuple_element< 2, Rodin::Math::LinearSystem< Matrix, Vector > > is not documented.
 src/Rodin/Math/Matrix.h: warning: Compound Rodin::FormLanguage::Traits< Math::Matrix< Number > > is not documented.
 src/Rodin/Math/RungeKutta/RK4.h: warning: Member step(T &q, Real t, Real dt, const T &p, const F &f) const (function) of struct Rodin::Math::RungeKutta::RK4 is not documented.
 src/Rodin/Math/SparseMatrix.h: warning: Compound Rodin::FormLanguage::Traits< Math::SparseMatrix< Number > > is not documented.
@@ -1340,98 +1314,17 @@ src/Rodin/Solid/Local/Input.h: warning: Member operator=(const Input &)=default 
 src/Rodin/Solver/BiCGSTAB.h: warning: Compound Rodin::FormLanguage::Traits< Solver::BiCGSTAB< LinearSystem > > is not documented.
 src/Rodin/Solver/CG.h: warning: Compound Rodin::FormLanguage::Traits< Solver::CG< LinearSystem > > is not documented.
 src/Rodin/Solver/DGMRES.h: warning: Compound Rodin::FormLanguage::Traits< Solver::DGMRES< LinearSystem > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member DGMRES(DGMRES &&other) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member DGMRES(DGMRES &&other) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member DGMRES(ProblemBaseType &pb) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member DGMRES(ProblemType &pb) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member DGMRES(const DGMRES &other) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member DGMRES(const DGMRES &other) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member ProblemType (typedef) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/DGMRES.h: warning: Member setDeflationSize(size_t d) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member setRestart(size_t restart) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member success() const (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/DGMRES.h: warning: Member success() const (function) of class Rodin::Solver::DGMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/GMRES.h: warning: Compound Rodin::FormLanguage::Traits< Solver::GMRES< LinearSystem > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member GMRES(GMRES &&other) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member GMRES(GMRES &&other) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member GMRES(ProblemBaseType &pb) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member GMRES(ProblemType &pb) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member GMRES(const GMRES &other) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member GMRES(const GMRES &other) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member ProblemType (typedef) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member setRestart(size_t restart) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member success() const (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/GMRES.h: warning: Member success() const (function) of class Rodin::Solver::GMRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/HouseholderQR.h: warning: Compound Rodin::FormLanguage::Traits< Solver::HouseholderQR< LinearSystem > > is not documented.
-src/Rodin/Solver/HouseholderQR.h: warning: Member HouseholderQR(HouseholderQR &&other) (function) of class Rodin::Solver::HouseholderQR< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/HouseholderQR.h: warning: Member HouseholderQR(ProblemBaseType &pb) (function) of class Rodin::Solver::HouseholderQR< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/HouseholderQR.h: warning: Member HouseholderQR(const HouseholderQR &other) (function) of class Rodin::Solver::HouseholderQR< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/HouseholderQR.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::HouseholderQR< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/IDRS.h: warning: Compound Rodin::FormLanguage::Traits< Solver::IDRS< LinearSystem > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member IDRS(IDRS &&other) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member IDRS(IDRS &&other) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member IDRS(ProblemBaseType &pb) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member IDRS(ProblemType &pb) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member IDRS(const IDRS &other) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member IDRS(const IDRS &other) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member ProblemType (typedef) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/IDRS.h: warning: Member setS(size_t s) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member success() const (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRS.h: warning: Member success() const (function) of class Rodin::Solver::IDRS< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/IDRSTABL.h: warning: Compound Rodin::FormLanguage::Traits< Solver::IDRSTABL< LinearSystem > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member IDRSTABL(IDRSTABL &&other) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member IDRSTABL(IDRSTABL &&other) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member IDRSTABL(ProblemBaseType &pb) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member IDRSTABL(ProblemType &pb) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member IDRSTABL(const IDRSTABL &other) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member IDRSTABL(const IDRSTABL &other) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member ProblemType (typedef) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/IDRSTABL.h: warning: Member setL(size_t l) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member success() const (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/IDRSTABL.h: warning: Member success() const (function) of class Rodin::Solver::IDRSTABL< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/LDLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::LDLT< LinearSystem > > is not documented.
 src/Rodin/Solver/LeastSquaresCG.h: warning: Compound Rodin::FormLanguage::Traits< Solver::LeastSquaresCG< LinearSystem > > is not documented.
 src/Rodin/Solver/LinearSolver.h: warning: Compound Rodin::FormLanguage::Traits< Solver::LinearSolverBase< LinearSystem > > is not documented.
 src/Rodin/Solver/MINRES.h: warning: Compound Rodin::FormLanguage::Traits< Solver::MINRES< LinearSystem > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member MINRES(MINRES &&other) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member MINRES(MINRES &&other) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member MINRES(ProblemBaseType &pb) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member MINRES(ProblemType &pb) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member MINRES(const MINRES &other) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member MINRES(const MINRES &other) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member ProblemType (typedef) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member setMaxIterations(size_t maxIt) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member setTolerance(const Real &tol) (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member success() const (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/MINRES.h: warning: Member success() const (function) of class Rodin::Solver::MINRES< Math::LinearSystem< Math::SparseMatrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/NewtonSolver.h: warning: Member LinearSolverType (typedef) of class Rodin::Solver::NewtonSolver is not documented.
 src/Rodin/Solver/NewtonSolver.h: warning: Member LinearSolverType (typedef) of class Rodin::Solver::NewtonSolverBase is not documented.
 src/Rodin/Solver/NewtonSolver.h: warning: Member LinearSolverType (typedef) of class Rodin::Solver::NewtonSolverBase< KSP > is not documented.
@@ -1446,10 +1339,6 @@ src/Rodin/Solver/NewtonSolver.h: warning: Member getStepPolicy() const noexcept 
 src/Rodin/Solver/NewtonSolver.h: warning: Member setStepPolicy(Optional< StepPolicy > policy) (function) of class Rodin::Solver::NewtonSolver is not documented.
 src/Rodin/Solver/NewtonSolver.h: warning: Member stepNorm (variable) of struct Rodin::Solver::NewtonSolver::StepResult is not documented.
 src/Rodin/Solver/PartialPivLU.h: warning: Compound Rodin::FormLanguage::Traits< Solver::PartialPivLU< LinearSystem > > is not documented.
-src/Rodin/Solver/PartialPivLU.h: warning: Member PartialPivLU(PartialPivLU &&other) (function) of class Rodin::Solver::PartialPivLU< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/PartialPivLU.h: warning: Member PartialPivLU(ProblemBaseType &pb) (function) of class Rodin::Solver::PartialPivLU< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/PartialPivLU.h: warning: Member PartialPivLU(const PartialPivLU &other) (function) of class Rodin::Solver::PartialPivLU< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
-src/Rodin/Solver/PartialPivLU.h: warning: Member solve(LinearSystemType &axb) override (function) of class Rodin::Solver::PartialPivLU< Math::LinearSystem< Math::Matrix< Scalar >, Math::Vector< Scalar > > > is not documented.
 src/Rodin/Solver/SimplicialLDLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SimplicialLDLT< LinearSystem > > is not documented.
 src/Rodin/Solver/SimplicialLLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SimplicialLLT< LinearSystem > > is not documented.
 src/Rodin/Solver/SparseLU.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SparseLU< LinearSystem > > is not documented.
