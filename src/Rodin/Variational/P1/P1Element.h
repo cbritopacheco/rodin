@@ -36,6 +36,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -1187,4 +1188,5 @@ namespace Rodin::Variational
 
 #include "P1Element.hpp"
 
+/// @endcond
 #endif

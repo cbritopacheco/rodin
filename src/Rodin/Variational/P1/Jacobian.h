@@ -36,6 +36,7 @@
 #include "Rodin/Variational/Mult.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
@@ -558,4 +559,5 @@ namespace Rodin::Variational
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

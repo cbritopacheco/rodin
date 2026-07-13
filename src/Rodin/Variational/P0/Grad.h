@@ -23,6 +23,7 @@
 
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
@@ -284,6 +285,5 @@ namespace Rodin::Variational
     -> Grad<ShapeFunction<NestedDerived, P0<Range, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif
-
-

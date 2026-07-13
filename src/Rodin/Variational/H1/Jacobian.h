@@ -35,6 +35,7 @@
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Range, class Data, class Mesh>
@@ -509,4 +510,5 @@ namespace Rodin::Variational
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

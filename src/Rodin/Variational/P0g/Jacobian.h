@@ -25,6 +25,7 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
@@ -253,4 +254,5 @@ namespace Rodin::Variational
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

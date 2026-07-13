@@ -35,6 +35,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range>
@@ -385,4 +386,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

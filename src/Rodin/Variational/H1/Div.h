@@ -27,6 +27,7 @@
 #include "Rodin/Variational/Div.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Scalar, class Data, class Mesh>
@@ -490,4 +491,5 @@ namespace Rodin::Variational
     -> Div<ShapeFunction<NestedDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

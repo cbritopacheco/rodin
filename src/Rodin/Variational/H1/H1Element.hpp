@@ -38,6 +38,7 @@
 #include "GLL.h"
 #include "LegendrePolynomial.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <size_t K>
@@ -1049,4 +1050,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

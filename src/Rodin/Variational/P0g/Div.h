@@ -26,6 +26,7 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Data, class Mesh>
@@ -227,4 +228,5 @@ namespace Rodin::Variational
     -> Div<ShapeFunction<NestedDerived, P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

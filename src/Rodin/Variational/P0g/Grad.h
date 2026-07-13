@@ -24,6 +24,7 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Operand, class Derived>
@@ -201,4 +202,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

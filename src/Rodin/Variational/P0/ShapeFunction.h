@@ -19,6 +19,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
@@ -194,6 +195,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif
-
-
