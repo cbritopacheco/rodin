@@ -177,19 +177,38 @@ namespace Rodin::Variational
         : public FiniteElementSpacePullbackBase<CallablePullback<CallableType>>
       {
         public:
+          /**
+           * @brief Constructs a pullback for a pointwise callable.
+           * @tparam Callable Callable type accepted by the wrapper.
+           * @param polytope Physical polytope.
+           * @param v Callable evaluated on physical points.
+           */
           template <class Callable>
           CallablePullback(const Geometry::Polytope& polytope, Callable&& v)
             : m_polytope(polytope), m_v(std::forward<Callable>(v))
           {}
 
+          /// @brief Copy constructor.
           CallablePullback(const CallablePullback&) = default;
 
+          /**
+           * @brief Evaluates the pulled-back callable.
+           * @param r Reference coordinates.
+           * @return Callable value at the mapped physical point.
+           */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
           }
 
+          /**
+           * @brief Evaluates the pulled-back callable into storage.
+           * @tparam T Result storage type.
+           * @param res Result storage.
+           * @param r Reference coordinates.
+           * @return Value returned by the wrapped callable.
+           */
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {

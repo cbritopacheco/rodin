@@ -109,21 +109,41 @@ namespace Rodin::Variational
         : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /**
+           * @brief Constructs a pullback on a physical polytope.
+           * @tparam Function Callable type accepted by the wrapper.
+           * @param polytope Physical polytope.
+           * @param v Callable evaluated on physical points.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pullback(const Pullback&) = default;
 
+          /**
+           * @brief Evaluates the pulled-back callable.
+           * @param r Reference coordinates.
+           * @return Callable value at the mapped physical point.
+           */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
           }
 
+          /**
+           * @brief Evaluates the pulled-back callable into storage.
+           * @tparam T Result storage type.
+           * @param res Result storage.
+           * @param r Reference coordinates.
+           * @return Value returned by the wrapped callable.
+           */
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
@@ -144,26 +164,48 @@ namespace Rodin::Variational
         : public FiniteElementSpacePushforwardBase<Pushforward<CallableType>>
       {
         public:
+          /// @brief Callable type evaluated on reference coordinates.
           using FunctionType = CallableType;
 
+          /**
+           * @brief Constructs a pushforward from a reference-space callable.
+           * @param v Callable evaluated on reference coordinates.
+           */
           Pushforward(const FunctionType& v)
             : m_v(v)
           {}
 
+          /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
+          /**
+           * @brief Evaluates the pushed-forward callable.
+           * @param p Physical point.
+           * @return Callable value at the point reference coordinates.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
           }
 
+          /**
+           * @brief Evaluates the pushed-forward callable into storage.
+           * @tparam T Result storage type.
+           * @param res Result storage.
+           * @param p Physical point.
+           * @return Value returned by the wrapped callable.
+           */
           template <class T>
           auto operator()(T& res, const Geometry::Point& p) const
           {
             return getFunction()(res, p.getReferenceCoordinates());
           }
 
+          /**
+           * @brief Returns the wrapped reference-space callable.
+           * @return Callable reference.
+           */
           constexpr
           const FunctionType& getFunction() const
           {
@@ -190,8 +232,11 @@ namespace Rodin::Variational
         build(mesh);
       }
 
+      /// @brief Copy constructor.
       H1(const H1&) = default;
+      /// @brief Move constructor.
       H1(H1&&) = default;
+      /// @brief Move assignment operator.
       H1& operator=(H1&&) = default;
 
       /**
@@ -921,7 +966,9 @@ namespace Rodin::Variational
        */
       struct IndexBimap
       {
+        /// @brief Local-to-global vector DOF map.
         std::vector<Index> left;
+        /// @brief Global-to-local vector DOF map.
         FlatMap<Index, Index> right;
       };
 
@@ -932,6 +979,7 @@ namespace Rodin::Variational
       using FESType =
           H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>;
 
+      /// @brief Scalar distributed H1 space used for component-wise numbering.
       using ScalarFESType = H1<K, Scalar, Geometry::Mesh<Context::MPI>>;
 
       /// @brief Scalar value type.
@@ -960,21 +1008,41 @@ namespace Rodin::Variational
         : public FiniteElementSpacePullbackBase<Pullback<Callable>>
       {
         public:
+          /// @brief Callable type evaluated on physical points.
           using CallableType = Callable;
 
+          /**
+           * @brief Constructs a pullback on a physical polytope.
+           * @tparam Function Callable type accepted by the wrapper.
+           * @param polytope Physical polytope.
+           * @param v Callable evaluated on physical points.
+           */
           template <class Function>
           Pullback(const Geometry::Polytope& polytope, Function&& v)
             : m_polytope(polytope), m_v(std::forward<Function>(v))
           {}
 
+          /// @brief Copy constructor.
           Pullback(const Pullback&) = default;
 
+          /**
+           * @brief Evaluates the pulled-back callable.
+           * @param r Reference coordinates.
+           * @return Callable value at the mapped physical point.
+           */
           auto operator()(const Math::SpatialVector<Real>& r) const
           {
             const Geometry::Point p(m_polytope, r);
             return m_v(p);
           }
 
+          /**
+           * @brief Evaluates the pulled-back callable into storage.
+           * @tparam T Result storage type.
+           * @param res Result storage.
+           * @param r Reference coordinates.
+           * @return Value returned by the wrapped callable.
+           */
           template <class T>
           auto operator()(T& res, const Math::SpatialVector<Real>& r) const
           {
@@ -995,26 +1063,48 @@ namespace Rodin::Variational
         : public FiniteElementSpacePushforwardBase<Pushforward<CallableType>>
       {
         public:
+          /// @brief Callable type evaluated on reference coordinates.
           using FunctionType = CallableType;
 
+          /**
+           * @brief Constructs a pushforward from a reference-space callable.
+           * @param v Callable evaluated on reference coordinates.
+           */
           Pushforward(const FunctionType& v)
             : m_v(v)
           {}
 
+          /// @brief Copy constructor.
           Pushforward(const Pushforward&) = default;
 
+          /**
+           * @brief Evaluates the pushed-forward callable.
+           * @param p Physical point.
+           * @return Callable value at the point reference coordinates.
+           */
           constexpr
           auto operator()(const Geometry::Point& p) const
           {
             return getFunction()(p.getReferenceCoordinates());
           }
 
+          /**
+           * @brief Evaluates the pushed-forward callable into storage.
+           * @tparam T Result storage type.
+           * @param res Result storage.
+           * @param p Physical point.
+           * @return Value returned by the wrapped callable.
+           */
           template <class T>
           auto operator()(T& res, const Geometry::Point& p) const
           {
             return getFunction()(res, p.getReferenceCoordinates());
           }
 
+          /**
+           * @brief Returns the wrapped reference-space callable.
+           * @return Callable reference.
+           */
           constexpr
           const FunctionType& getFunction() const
           {
@@ -1098,8 +1188,11 @@ namespace Rodin::Variational
         }
       }
 
+      /// @brief Copy constructor.
       H1(const H1&) = default;
+      /// @brief Move constructor.
       H1(H1&&) = default;
+      /// @brief Move assignment operator.
       H1& operator=(H1&&) = default;
 
       /**

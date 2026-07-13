@@ -39,6 +39,12 @@ namespace Rodin::Geometry
    */
   using MPIMesh = Mesh<Context::MPI>;
 
+  /**
+   * @brief Distributed mesh specialization for MPI contexts.
+   *
+   * Stores the rank-local shard of a partitioned mesh together with the MPI
+   * context and global/local index mappings needed for distributed assembly.
+   */
   template <>
   class Mesh<Context::MPI> : public MeshBase
   {
@@ -84,6 +90,13 @@ namespace Rodin::Geometry
           Context::MPI m_context;
       };
 
+      /**
+       * @brief Builds a distributed uniform grid from an initializer-list shape.
+       * @param context MPI context used for distribution.
+       * @param g Polytope type used by the grid.
+       * @param l Grid shape along each coordinate direction.
+       * @return Distributed uniform grid.
+       */
       static Mesh UniformGrid(
           const Context::MPI& context, Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -874,6 +887,10 @@ namespace Rodin::Geometry
       mutable PolytopeQuadratureIndex m_quadratures;
   };
 
+  /**
+   * @brief Deduction guide for MPI meshes.
+   * @param context MPI context associated with the mesh.
+   */
   Mesh(const Context::MPI& context) -> Mesh<Context::MPI>;
 }
 

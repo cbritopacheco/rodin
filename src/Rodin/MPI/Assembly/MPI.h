@@ -74,6 +74,12 @@ namespace Rodin::Assembly
   class MPI;
 
   template <class Scalar, class Solution, class FES, class ValueDerived>
+  /**
+   * @brief MPI assembler for scalar-valued Dirichlet boundary data.
+   *
+   * Produces the distributed map of constrained indices and their prescribed
+   * values for a trial function on an MPI mesh shard.
+   */
   class MPI<
     IndexMap<Scalar>,
     Variational::DirichletBC<
@@ -240,19 +246,32 @@ namespace Rodin::Assembly
           Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
+      /// @brief Output map containing slave DOF indices and master coefficients.
       using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+      /// @brief Trial function type receiving the Dirichlet constraint.
       using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
+      /// @brief Shape-function expression used as the boundary value.
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+      /// @brief Concrete Dirichlet boundary-condition type.
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
       /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
+      /// @brief Input payload type consumed by execute().
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       MPI() = default;
+      /// @brief Copy constructor.
       MPI(const MPI& other) : Parent(other) {}
+      /// @brief Move constructor.
       MPI(MPI&& other) : Parent(std::move(other)) {}
 
+      /**
+       * @brief Assembles distributed identification constraints.
+       * @param[out] res Target map from slave DOFs to master DOFs and weights.
+       * @param[in] input Assembly input wrapper carrying operand and boundary data.
+       */
       void execute(OutputType& res, const InputType& input) const override
       {
         const auto& u = input.getOperand();
@@ -342,6 +361,7 @@ namespace Rodin::Assembly
         }
       }
 
+      /// @brief Creates a polymorphic copy of this assembler.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);

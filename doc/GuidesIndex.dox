@@ -103,7 +103,7 @@
 
   - @subpage guides-mpi — Distributed mesh partitioning, sharding, and
     reconciliation with @ref Rodin::Context::MPI "Context::MPI",
-    @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>",
+    @ref Rodin::Geometry::MPIMesh "Mesh\<Context::MPI\>",
     and @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder"
 
   - @subpage guides-petsc — PETSc-backed variational forms, distributed
@@ -123,4 +123,3 @@
     symbols used in the documentation
 
   */
-

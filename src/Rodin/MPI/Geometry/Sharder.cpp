@@ -18,6 +18,7 @@
 
 namespace Rodin::Geometry
 {
+  /// @cond
   Sharder<Context::MPI>::Sharder(const Context::MPI& context)
     : Parent(context)
   {}
@@ -46,7 +47,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPIMesh Sharder<Context::MPI>::gather(int root)
+  Mesh<Context::MPI> Sharder<Context::MPI>::gather(int root)
   {
     const auto& ctx = this->getContext();
     const auto& comm = ctx.getCommunicator();
@@ -66,4 +67,5 @@ namespace Rodin::Geometry
       return build.finalize();
     }
   }
+  /// @endcond
 }
