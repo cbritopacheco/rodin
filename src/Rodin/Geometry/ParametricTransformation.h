@@ -51,6 +51,9 @@ namespace Rodin::Geometry
       using Parent::jacobian;
       using Parent::inverse;
 
+      /// @brief Constructs the transformation from a control-point cloud and
+      /// a finite element (the control-point count must match the element's
+      /// node count).
       ParametricTransformation(Geometry::PointCloud&& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
@@ -59,6 +62,8 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /// @brief Constructs the transformation from a control-point cloud and
+      /// a finite element.
       ParametricTransformation(const Geometry::PointCloud& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
@@ -67,6 +72,8 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /// @brief Constructs the transformation from a control-point cloud and
+      /// a finite element.
       ParametricTransformation(Geometry::PointCloud&& pm, const FE& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(std::move(pm)),
@@ -75,6 +82,8 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /// @brief Constructs the transformation from a control-point cloud and
+      /// a finite element.
       ParametricTransformation(const PointCloud& pm, FE&& fe)
         : Parent(Polytope::Traits(fe.getGeometry()).getDimension(), pm.rows()),
           m_pm(pm),
@@ -83,6 +92,7 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /// @brief Copy constructor.
       ParametricTransformation(const ParametricTransformation& other)
         : Parent(other),
           m_pm(other.m_pm),
@@ -91,6 +101,7 @@ namespace Rodin::Geometry
         assert(static_cast<size_t>(m_pm.cols()) == m_fe.getCount());
       }
 
+      /// @brief Move constructor.
       ParametricTransformation(ParametricTransformation&& other)
         : Parent(std::move(other)),
           m_pm(std::move(other.m_pm)),
@@ -140,11 +151,13 @@ namespace Rodin::Geometry
         }
       }
 
+      /// @brief Gets the control-point coordinate matrix.
       const PointCloud& getPointMatrix() const
       {
         return m_pm;
       }
 
+      /// @brief Serializes the transformation (for boost::serialization).
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {

@@ -385,27 +385,8 @@ src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member yIntercept() const (funct
 src/Rodin/Geometry/Euclidean/Point2D.hpp: warning: no matching class member found for 
 src/Rodin/Geometry/Mesh.cpp: warning: no matching class member found for 
 src/Rodin/Geometry/Mesh.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/Mesh.h: warning: Member getConnectivity() (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member getConnectivity() const (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member hexahedron(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member polytope(Polytope::Type t, std::initializer_list< Index > vs, Index &index) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member pyramid(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member quadrilateral(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member segment(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member serialize(Archive &ar, const unsigned int) (function) of class Rodin::Geometry::MeshBase is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member tetrahedron(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member triangle(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
-src/Rodin/Geometry/Mesh.h: warning: Member wedge(T &&vs) (function) of class Rodin::Geometry::Mesh< Context::Local >::Builder is not documented.
 src/Rodin/Geometry/MeshBuilder.cpp: warning: no matching class member found for 
 src/Rodin/Geometry/MeshBuilder.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(Geometry::PointCloud &&pm, FE &&fe) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(Geometry::PointCloud &&pm, const FE &fe) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(ParametricTransformation &&other) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(const Geometry::PointCloud &pm, const FE &fe) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(const ParametricTransformation &other) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member ParametricTransformation(const PointCloud &pm, FE &&fe) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member getPointMatrix() const (function) of class Rodin::Geometry::ParametricTransformation is not documented.
-src/Rodin/Geometry/ParametricTransformation.h: warning: Member serialize(Archive &ar, const unsigned int) (function) of class Rodin::Geometry::ParametricTransformation is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator+(const Geometry::Point &p, const Math::SpatialVector< Scalar > &v) (function) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator+(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator-(const Geometry::Point &p, const Math::SpatialVector< Scalar > &v) (function) of namespace Rodin::Geometry is not documented.
