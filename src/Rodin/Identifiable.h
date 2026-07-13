@@ -41,10 +41,18 @@ namespace Rodin
         : m_uuid(s_id++)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param other Object whose identifier is copied.
+       */
       Identifiable(const Identifiable& other)
         : m_uuid(other.m_uuid)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param other Object whose identifier is moved.
+       */
       Identifiable(Identifiable&& other) noexcept
         : m_uuid(std::move(other.m_uuid))
       {}
@@ -73,5 +81,4 @@ namespace Rodin
 }
 
 #endif
-
 

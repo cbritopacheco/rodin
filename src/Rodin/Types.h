@@ -135,6 +135,8 @@ namespace Rodin
   template <class T>
   using Optional = std::optional<T>;
 
+  /// Standard string view type.
+  /// @ingroup RodinTypes
   using StringView = std::string_view;
 
 #if __cpp_size_t_suffix < 202011L

@@ -41,8 +41,17 @@ namespace Rodin
    */
   using IndexArray = Array<Index>;
 
+  /**
+   * @brief Functor for lexicographically ordering index arrays.
+   */
   struct IndexArrayCompare
   {
+    /**
+     * @brief Compares two index arrays lexicographically.
+     * @param lhs The left-hand side index array.
+     * @param rhs The right-hand side index array.
+     * @return true if @p lhs is lexicographically before @p rhs.
+     */
     bool operator()(const IndexArray& lhs, const IndexArray& rhs) const
     {
       return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
@@ -85,4 +94,3 @@ namespace Rodin
 }
 
 #endif
-

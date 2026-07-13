@@ -124,20 +124,6 @@ src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getPolytop
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member getRegion() const final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member integrate(std::size_t tr, std::size_t te) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
-src/Rodin/Advection/Lagrangian.h: warning: Member TaylorBoundaryShiftPolicy(Real dt, const Geometry::Mesh< Context::Local > &mesh, const Field &phi, Real eps_in_phys=Real(1e-12)) (function) of class Rodin::Advection::TaylorBoundaryShiftPolicy is not documented.
-src/Rodin/Advection/Lagrangian.h: warning: Member operator()(const Variational::BoundaryHit &hit) const (function) of class Rodin::Advection::TaylorBoundaryShiftPolicy is not documented.
-src/Rodin/Array.h: warning: Compound Rodin::IndexArrayCompare is not documented.
-src/Rodin/Array.h: warning: Member operator()(const IndexArray &lhs, const IndexArray &rhs) const (function) of struct Rodin::IndexArrayCompare is not documented.
-src/Rodin/CMakeLists.txt: warning: Reached end of file while still inside a (nested) comment. Nesting level 2 (possible line reference(s): 94, 41)
-src/Rodin/Configure.h.in: warning: Member RODIN_CONFIGURE_H (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Configure.h.in: warning: Member RODIN_MAXIMUM_POLYTOPE_VERTICES (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Configure.h.in: warning: Member RODIN_VERSION (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Configure.h.in: warning: Member RODIN_VERSION_CODE (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Configure.h.in: warning: Member RODIN_VERSION_MAJOR (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Configure.h.in: warning: Member RODIN_VERSION_MINOR (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Configure.h.in: warning: Member RODIN_VERSION_PATCH (macro definition) of file Configure.h.in is not documented.
-src/Rodin/Context/Local.h: warning: Member serialize(Archive &ar, const unsigned int version) (function) of class Rodin::Context::Local is not documented.
-src/Rodin/FormLanguage/Base.h: warning: Invalid list item found
 src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member HolzapfelReducedLaw(const Parameters &params=Parameters()) (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
 src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member getParameters() const noexcept (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
 src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member distalLength (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.
@@ -354,8 +340,6 @@ src/Rodin/IO/XDMF.h: warning: Member spaceDimension (variable) of struct Rodin::
 src/Rodin/IO/XDMF.h: warning: Member topologicalDimension (variable) of struct Rodin::IO::XDMF::SnapshotRecord::MeshAttributeRecord is not documented.
 src/Rodin/IO/XDMF.h: warning: Member topologySize (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
 src/Rodin/IO/XDMF.h: warning: Member vertexCount (variable) of struct Rodin::IO::XDMF::SnapshotRecord::PieceMeta is not documented.
-src/Rodin/Identifiable.h: warning: Member Identifiable(Identifiable &&other) noexcept (function) of class Rodin::Identifiable is not documented.
-src/Rodin/Identifiable.h: warning: Member Identifiable(const Identifiable &other) (function) of class Rodin::Identifiable is not documented.
 src/Rodin/MMG/Configure.h.in: warning: Member ADVECTION_EXECUTABLE (variable) of namespace Rodin::MMG is not documented.
 src/Rodin/MMG/Configure.h.in: warning: Member MSHDIST_EXECUTABLE (variable) of namespace Rodin::MMG is not documented.
 src/Rodin/MMG/MMG5.h: warning: Member copyMesh(const MMG5_pMesh src, MMG5_pMesh dst) (function) of class Rodin::MMG::MMG5 is not documented.
@@ -556,12 +540,6 @@ src/Rodin/PETSc/Variational/Problem.h: warning: Member assemble(AssemblyTarget t
 src/Rodin/PETSc/Variational/Problem.h: warning: Member assemble(AssemblyTarget target) override (function) of class Rodin::Variational::Problem< PETSc::Math::LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/PETSc/Variational/TestFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTestFunction< PETSc::Variational::TestFunction< FES > > is not documented.
 src/Rodin/PETSc/Variational/TrialFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTrialFunction< PETSc::Variational::TrialFunction< Solution, FES > > is not documented.
-src/Rodin/Scotch/Exception.h: warning: Compound Rodin::Scotch::Exception is not documented.
-src/Rodin/Scotch/Exception.h: warning: The following parameter of Rodin::Scotch::Exception::Exception(const char *msg, const T &cls, const FuncName &funcName) is not documented:
-src/Rodin/Scotch/MeshPartitioner.h: warning: Compound Rodin::Scotch::Partitioner is not documented.
-src/Rodin/Scotch/MeshPartitioner.h: warning: Member Partitioner(const MeshType &mesh) (function) of class Rodin::Scotch::Partitioner is not documented.
-src/Rodin/Scotch/MeshPartitioner.h: warning: Member partition(size_t count) (function) of class Rodin::Scotch::Partitioner is not documented.
-src/Rodin/Scotch/MeshPartitioner.h: warning: Member setStrategy(const SCOTCH_Strat &strat) (function) of class Rodin::Scotch::Partitioner is not documented.
 src/Rodin/Serialization/Array.h: warning: Member load(Archive &ar, Rodin::Array< ScalarType > &arr, const unsigned int) (function) of namespace boost::serialization is not documented.
 src/Rodin/Serialization/Array.h: warning: Member save(Archive &ar, const Rodin::Array< ScalarType > &arr, const unsigned int) (function) of namespace boost::serialization is not documented.
 src/Rodin/Serialization/Array.h: warning: Member serialize(Archive &ar, Rodin::Array< ScalarType > &arr, const unsigned int version) (function) of namespace boost::serialization is not documented.
@@ -816,10 +794,6 @@ src/Rodin/Test/Random/RandomInteger.h: warning: Member setSeed(unsigned int seed
 src/Rodin/Test/Random/RandomInteger.h: warning: Member type (typedef) of struct Rodin::Test::Random::detail::UniformIntDistType is not documented.
 src/Rodin/Test/Random/RandomPointOnTriangle.h: warning: Compound Rodin::Test::Random::PointOnTriangle is not documented.
 src/Rodin/Test/Random/RandomPointOnTriangle.h: warning: Member operator()() (function) of class Rodin::Test::Random::PointOnTriangle is not documented.
-src/Rodin/Tuple.h: warning: Member Tuple() -> Tuple<> (function) of namespace Rodin is not documented.
-src/Rodin/Tuple.h: warning: Member Tuple(Params...) -> Tuple< Params... > (function) of namespace Rodin is not documented.
-src/Rodin/Tuple.h: warning: Member serialize(Archive &ar, const unsigned int version) (function) of class Rodin::Tuple< T, Ts... > is not documented.
-src/Rodin/Types.h: warning: Member StringView (typedef) of namespace Rodin is not documented.
 src/Rodin/Variational/AND.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
 src/Rodin/Variational/Abs.h: warning: Member Abs(const FunctionBase< NestedDerived > &) -> Abs< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Abs.h: warning: Member abs(const FunctionBase< NestedDerived > &op) (function) of namespace Rodin::Variational is not documented.

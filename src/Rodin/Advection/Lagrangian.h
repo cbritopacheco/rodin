@@ -276,6 +276,13 @@ namespace Rodin::Advection
   class TaylorBoundaryShiftPolicy
   {
     public:
+      /**
+       * @brief Constructs the boundary policy.
+       * @param dt Signed time step used by the tracer.
+       * @param mesh Mesh on which tracing occurs.
+       * @param phi Scalar field used for the Taylor correction.
+       * @param eps_in_phys Inward physical offset used after a boundary hit.
+       */
       TaylorBoundaryShiftPolicy(
           Real dt,
           const Geometry::Mesh<Context::Local>& mesh,
@@ -287,6 +294,11 @@ namespace Rodin::Advection
           m_eps_in_phys(eps_in_phys)
       {}
 
+      /**
+       * @brief Handles a boundary hit and accumulates the Taylor correction.
+       * @param hit Boundary hit record updated in place.
+       * @return Always returns @c true after handling the hit.
+       */
       bool operator()(const Variational::BoundaryHit& hit) const
       {
         if (!(hit.tau > Real(0)))
