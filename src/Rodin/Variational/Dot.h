@@ -31,6 +31,7 @@
 #include "ShapeFunction.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class LHSDerived, class RHSDerived>
@@ -833,4 +834,5 @@ namespace Rodin::Variational
 
 }
 
+/// @endcond
 #endif
