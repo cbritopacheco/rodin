@@ -39,8 +39,10 @@ namespace Rodin::Variational
   class IdentityMatrix : public MatrixFunctionBase<Real, IdentityMatrix>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Parent class type.
       using Parent = MatrixFunctionBase<ScalarType, IdentityMatrix>;
 
       /**

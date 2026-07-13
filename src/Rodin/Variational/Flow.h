@@ -74,13 +74,15 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
       VectorField, Step, BoundaryPolicy>>
   {
-    using FESType = FES;
+    /// @brief Finite element space type.
+      using FESType = FES;
 
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType =
-      Variational::TestSpace;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType =
+        Variational::TestSpace;
 
-    using OperandType =
-      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
+    /// @brief Operand type.
+      using OperandType =
+        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
   };
 }
 
@@ -153,6 +155,7 @@ namespace Rodin::Variational
       /// @brief Boundary policy type.
       using BoundaryPolicyType = BoundaryPolicy;
 
+      /// @brief Parent class type.
       using Parent =
         FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>;
 

@@ -14,7 +14,7 @@
  * Provides the `LinearSystem<::Mat, ::Vec>` specialization that stores
  * the system matrix @f$ A @f$, right-hand side vector @f$ \mathbf{b} @f$,
  * and solution vector @f$ \mathbf{x} @f$ as PETSc handles.  Also defines
- * the @ref Rodin::Math::LinearSystem<::Mat,::Vec>::FieldSplits inner
+ * the @c FieldSplits inner
  * class for block-preconditioner support.
  *
  * ## Usage

@@ -925,21 +925,28 @@ namespace Rodin::Variational
         FlatMap<Index, Index> right;
       };
 
+      /// @brief Execution context type.
       using ContextType = Context::MPI;
 
+      /// @brief Finite element space type.
       using FESType =
           H1<K, Math::SpatialVector<Scalar>, Geometry::Mesh<Context::Local>>;
 
       using ScalarFESType = H1<K, Scalar, Geometry::Mesh<Context::MPI>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Mesh type.
       using MeshType = Geometry::Mesh<ContextType>;
 
+      /// @brief Finite element type.
       using ElementType = H1Element<K, RangeType>;
 
+      /// @brief Parent class type.
       using Parent =
           FiniteElementSpace<MeshType, H1<K, Math::SpatialVector<Scalar>, MeshType>>;
 

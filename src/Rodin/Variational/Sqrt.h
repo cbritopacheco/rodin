@@ -48,8 +48,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
 
       /**

@@ -36,7 +36,7 @@
  * // Displacement gradient for elasticity
  * P1 Vh(mesh, mesh.getSpaceDimension());
  * GridFunction<P1> u(Vh);
- * auto F = Jacobian(u);  // Deformation gradient F = \nablau
+ * auto F = Jacobian(u);  // Deformation gradient F = \nabla u
  * ```
  */
 #ifndef RODIN_VARIATIONAL_JACOBIAN_H
@@ -78,16 +78,21 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FES>::ScalarType, JacobianBase<GridFunction<FES, Data>, Derived>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent =
         MatrixFunctionBase<ScalarType, JacobianBase<OperandType, Derived>>;
 

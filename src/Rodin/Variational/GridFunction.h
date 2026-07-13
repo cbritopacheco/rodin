@@ -81,16 +81,20 @@ namespace Rodin::FormLanguage
   template <class Derived, class FES, class Data>
   struct Traits<Variational::GridFunctionBase<Derived, FES, Data>>
   {
-    using FESType = FES;
-    using DataType = Data;
+    /// @brief Finite element space type.
+      using FESType = FES;
+    /// @brief Coefficient data storage type.
+      using DataType = Data;
   };
 
   /// @brief Traits for GridFunction: exposes the space and data types.
   template <class FES, class Data>
   struct Traits<Variational::GridFunction<FES, Data>>
   {
-    using FESType = FES;
-    using DataType = Data;
+    /// @brief Finite element space type.
+      using FESType = FES;
+    /// @brief Coefficient data storage type.
+      using DataType = Data;
   };
 }
 
@@ -133,6 +137,7 @@ namespace Rodin::Variational
     : public FunctionBase<GridFunctionBaseReference<Derived>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = FunctionBase<GridFunctionBaseReference<Derived>>;
 
       /**
@@ -307,13 +312,16 @@ namespace Rodin::Variational
     : public GridFunctionBaseReference<Derived>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Coefficient data storage type.
       using DataType = Data;
 
       /// Range type of value
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       /// Type of mesh on which the finite element space is built
@@ -1063,14 +1071,19 @@ namespace Rodin::Variational
         GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = GridFunctionBase<GridFunction<FESType, DataType>>;
 
       using Parent::operator=;

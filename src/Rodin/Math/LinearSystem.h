@@ -19,11 +19,14 @@ namespace Rodin::FormLanguage
   template <class Operator, class Vector>
   struct Traits<Math::LinearSystem<Operator, Vector>>
   {
-    using OperatorType = Operator;
+    /// @brief Assembled operator type.
+      using OperatorType = Operator;
 
-    using VectorType = Vector;
+    /// @brief Vector type of the linear system.
+      using VectorType = Vector;
 
-    using ScalarType = typename Traits<OperatorType>::ScalarType;
+    /// @brief Scalar value type.
+      using ScalarType = typename Traits<OperatorType>::ScalarType;
   };
 }
 

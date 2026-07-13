@@ -66,10 +66,13 @@ namespace Rodin::Variational
     : public ScalarFunctionBase<typename FormLanguage::Traits<FES>::ScalarType, DivBase<GridFunction<FES, Data>, Derived>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FES, Data>;
 
       /// Parent class

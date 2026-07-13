@@ -33,14 +33,17 @@ namespace Rodin::FormLanguage
   template <class Vector>
   struct Traits<Variational::LinearFormBase<Vector>>
   {
-    using VectorType = Vector;
+    /// @brief Vector type of the linear system.
+      using VectorType = Vector;
   };
 
   template <class FES, class Vector>
   struct Traits<Variational::LinearForm<FES, Vector>>
   {
-    using FESType = FES;
-    using VectorType = Vector;
+    /// @brief Finite element space type.
+      using FESType = FES;
+    /// @brief Vector type of the linear system.
+      using VectorType = Vector;
   };
 }
 
@@ -311,12 +314,15 @@ namespace Rodin::Variational
     : public LinearFormBase<Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType =
         FES;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         Math::Vector<ScalarType>;
 
@@ -332,6 +338,7 @@ namespace Rodin::Variational
       using AssemblyType =
         DefaultAssemblyType;
 
+      /// @brief Parent class type.
       using Parent =
         LinearFormBase<VectorType>;
 

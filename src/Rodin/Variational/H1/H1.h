@@ -38,19 +38,27 @@ namespace Rodin::FormLanguage
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Scalar, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Scalar;
-    using RangeType = ScalarType;
-    using ElementType = Variational::H1Element<K, RangeType>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = ScalarType;
+    /// @brief Finite element type.
+      using ElementType = Variational::H1Element<K, RangeType>;
   };
 
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Scalar;
-    using RangeType = Math::SpatialVector<ScalarType>;
-    using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+    /// @brief Finite element type.
+      using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -121,6 +129,7 @@ namespace Rodin::Variational
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Range type of value
@@ -552,6 +561,7 @@ namespace Rodin::Variational
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Range type of value

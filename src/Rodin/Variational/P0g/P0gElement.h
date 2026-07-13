@@ -40,8 +40,10 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P0gElement<Range>>
   {
-    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    using RangeType = Range;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -56,8 +58,11 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
   public:
+    /// @brief Parent class type.
     using Parent = FiniteElementBase<P0gElement<Scalar>>;
+    /// @brief Scalar value type.
     using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
     using RangeType = Scalar;
 
     class LinearForm
@@ -211,8 +216,11 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
   public:
+    /// @brief Parent class type.
     using Parent = FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>;
+    /// @brief Scalar value type.
     using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
     using RangeType = Math::SpatialVector<Scalar>;
 
     class LinearForm

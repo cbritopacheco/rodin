@@ -144,7 +144,7 @@
 
   - **Body-fitted discretization.** Cut the zero set into the mesh so
     that @f$ \Gamma @f$ becomes a set of interface facets:
-    @ref Rodin::External::MMG "MMG"'s `LevelSetDiscretizer` produces the
+    MMG's `LevelSetDiscretizer` produces the
     body-fitted mesh, `MMG::Adapt` and `MMG::MeshOptimizer` maintain
     metric conformity and element quality across iterations. Accurate
     domain and interface integrals; the cost is remeshing every
@@ -186,6 +186,6 @@
   - @ref Rodin::Hilbert "Hilbert" — extension-regularization
   - @ref Rodin::Distance "Distance", @ref Rodin::Eikonal "Eikonal" —
     redistancing
-  - @ref Rodin::External::MMG "MMG" — remeshing and implicit-domain
+  - MMG — remeshing and implicit-domain
     discretization
 */

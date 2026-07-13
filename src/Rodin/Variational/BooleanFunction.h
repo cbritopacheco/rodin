@@ -133,6 +133,7 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<BooleanFunction<Boolean>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
       BooleanFunction(Boolean v)

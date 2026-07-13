@@ -32,11 +32,14 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::FunctionBase<Derived>>
   {
-    using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
+    /// @brief Result type of the evaluation.
+      using ResultType = typename ResultOf<Variational::FunctionBase<Derived>>::Type;
 
-    using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
+    /// @brief Range (evaluation value) type.
+      using RangeType = typename RangeOf<Variational::FunctionBase<Derived>>::Type;
 
-    using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 }
 

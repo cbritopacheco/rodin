@@ -24,8 +24,9 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::ScalarFunctionBase<Scalar, Derived>>
   {
-    using ScalarType = Scalar;
-    using DerivedType = Derived;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+      using DerivedType = Derived;
   };
 }
 

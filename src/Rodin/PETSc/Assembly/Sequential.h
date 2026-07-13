@@ -39,7 +39,7 @@ namespace Rodin::Assembly
    * @brief Sequential assembly of a PETSc vector from a linear form.
    *
    * Iterates over mesh polytopes on a single thread, evaluates
-   * @ref Rodin::Variational::LinearFormIntegrator instances, and inserts
+   * @c Rodin::Variational::LinearFormIntegrator instances, and inserts
    * entries into the PETSc vector with `VecSetValue`.
    *
    * @tparam FES Finite element space type.
@@ -512,6 +512,7 @@ namespace Rodin::Assembly
         };
 
         // Local BFIs
+        /// @brief Mesh type.
         using MeshType = std::decay_t<decltype(mesh)>;
 
         if (doMatrix)

@@ -21,11 +21,11 @@ using namespace Rodin::Solver;
  * 3D manufactured tests for the Helmholtz equation (sign convention used here):
  *
  * Strong form:
- *   -Δu - κ² u = f   in \Omega
- *            u = g   on \partial\Omega
+ *   -Δu - κ² u = f   in Ω
+ *            u = g   on ∂Ω
  *
  * Weak form:
- *   \int\Omega \nablau\cdot\nablav dx - κ² \int\Omega u v dx = \int\Omega f v dx
+ *   ∫_Ω ∇ u·∇ v dx - κ² ∫_Ω u v dx = ∫_Ω f v dx
  *
  * IMPORTANT (geometry):
  *   Rodin's UniformGrid({M,M,M}) produces coordinates {0,...,M-1}.
@@ -33,7 +33,7 @@ using namespace Rodin::Solver;
  *   manufactured expressions (sin(pi*x), x(1-x), etc.).
  *
  * NOTE (solver):
- *   With the sign "- κ² \int u v", the operator may be symmetric indefinite for
+ *   With the sign "- κ² ∫ u v", the operator may be symmetric indefinite for
  *   larger κ. These tests keep your current CG usage, but mathematically CG
  *   requires SPD. If you hit solver issues, switch to MINRES/GMRES or change
  *   the PDE to -Δu + κ² u (screened Poisson) to get SPD.
@@ -107,7 +107,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // u = sin(pi x) sin(pi y) sin(pi z)
   // Δu = -3 pi^2 u
   // f = -Δu - κ^2 u = (3 pi^2 - κ^2) u
-  // Dirichlet: u=0 on \partial\Omega (sine vanishes on x,y,z=0 or 1)
+  // Dirichlet: u=0 on ∂Ω (sine vanishes on x,y,z=0 or 1)
   // ---------------------------------------------------------------------------
   TEST_P(Helmholtz3DTest16, SimpleSine)
   {
@@ -140,7 +140,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // u = sin(ω1 pi x) sin(ω2 pi y) sin(ω3 pi z)
   // Δu = -(ω1^2 + ω2^2 + ω3^2) pi^2 u
   // f = -Δu - κ^2 u = ( (ω1^2+ω2^2+ω3^2) pi^2 - κ^2 ) u
-  // Dirichlet: u=0 on \partial\Omega for integer ωi (still vanishes at x,y,z=0 or 1)
+  // Dirichlet: u=0 on ∂Ω for integer ωi (still vanishes at x,y,z=0 or 1)
   // ---------------------------------------------------------------------------
   TEST_P(Helmholtz3DTest32, VariableFrequency)
   {
@@ -178,12 +178,12 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
 
   // ---------------------------------------------------------------------------
   // u = x(1-x) sin(pi y) sin(pi z)
-  // \partialxx u = -2 sin(pi y) sin(pi z)
-  // \partialyy u = -pi^2 x(1-x) sin(pi y) sin(pi z)
-  // \partialzz u = -pi^2 x(1-x) sin(pi y) sin(pi z)
+  // ∂xx u = -2 sin(pi y) sin(pi z)
+  // ∂yy u = -pi^2 x(1-x) sin(pi y) sin(pi z)
+  // ∂zz u = -pi^2 x(1-x) sin(pi y) sin(pi z)
   // Δu = -2 s - 2 pi^2 x(1-x) s, where s = sin(pi y) sin(pi z)
   // f = -Δu - κ^2 u
-  // Dirichlet: u=0 on \partial\Omega (x=0,1 or y=0,1 or z=0,1)
+  // Dirichlet: u=0 on ∂Ω (x=0,1 or y=0,1 or z=0,1)
   // ---------------------------------------------------------------------------
   TEST_P(Helmholtz3DTest16, MixedPolynomialTrig)
   {
@@ -219,12 +219,12 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
 
   // ---------------------------------------------------------------------------
   // u = sin(pi x) sin(pi y) e^z
-  // \partialxx u = -pi^2 u
-  // \partialyy u = -pi^2 u
-  // \partialzz u = u
+  // ∂xx u = -pi^2 u
+  // ∂yy u = -pi^2 u
+  // ∂zz u = u
   // Δu = (1 - 2 pi^2) u
   // f = -Δu - κ^2 u = (2 pi^2 - 1 - κ^2) u
-  // Dirichlet: here we impose u=g on \partial\Omega (nonzero on many faces)
+  // Dirichlet: here we impose u=g on ∂Ω (nonzero on many faces)
   // ---------------------------------------------------------------------------
   TEST_P(Helmholtz3DTest16, Exponential)
   {

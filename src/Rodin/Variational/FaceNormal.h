@@ -135,9 +135,12 @@ namespace Rodin::Variational
   class FaceNormal : public VectorFunctionBase<Real, FaceNormal>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, FaceNormal>;
 
       using Parent::traceOf;

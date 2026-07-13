@@ -23,7 +23,9 @@ namespace Rodin::Adaptation::Detail
           typename TrialFunction::ScalarType>
     {
       public:
+        /// @brief Scalar value type.
         using ScalarType = typename TrialFunction::ScalarType;
+        /// @brief Parent class type.
         using Parent =
           Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 

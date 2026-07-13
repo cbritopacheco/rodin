@@ -51,8 +51,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<Sin<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Sin<FunctionBase<NestedDerived>>>;
 
       /**

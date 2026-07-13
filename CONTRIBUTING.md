@@ -9,7 +9,7 @@ existing code, and the tooling is configured to match it.
 | Layer | What | Enforced by |
 |-------|------|-------------|
 | 1. Formatting | Indentation, braces, wrapping | [`.clang-format`](.clang-format) — CI checks **changed lines only** |
-| 2. Naming | Identifier conventions | [`.clang-tidy`](.clang-tidy) — CI checks touched files |
+| 2. Naming | Identifier conventions | [`.clang-tidy`](.clang-tidy) + [`dev/check_clang_tidy.py`](dev/check_clang_tidy.py) — ratchet against a findings baseline |
 | 3. House rules | Include guards, license blocks, header docs, PETSc containment | [`dev/style_lint.py`](dev/style_lint.py) |
 | 4. Documentation | No new Doxygen warnings | [`dev/check_doxygen_warnings.py`](dev/check_doxygen_warnings.py) |
 | 5. Design | The semantic style | Review, guided by [`doc/agents/philosophy.md`](doc/agents/philosophy.md) |
@@ -55,10 +55,9 @@ line, offending source, and suggested fix.
 python3 dev/check_format.py --base origin/master
 git clang-format origin/master        # applies the fixes in place
 
-# 2. Naming — analyze the whole header surface in one TU:
-clang-tidy dev/TidyTU.cpp -- -std=c++20 -Isrc -Ibuild/src \
-    -Ithird-party/termcolor/include \
-    $(pkg-config --cflags-only-I eigen3 2>/dev/null)
+# 2. Naming — full-tree ratchet over the aggregate TU:
+python3 dev/check_clang_tidy.py --flags "-std=c++20 -Isrc -Ibuild/src \
+    -Ithird-party/termcolor/include -isystem /usr/include/eigen3"
 
 # 3. House rules:
 python3 dev/style_lint.py                       # full tree
@@ -78,7 +77,8 @@ are deliberately avoided (they poison `git blame` and conflict with every
 open branch). Instead every check is a **ratchet**:
 
 - clang-format applies to **changed lines only**;
-- clang-tidy applies to the **files a change touches**;
+- clang-tidy compares against `dev/clang_tidy.baseline` — new naming
+  violations fail, old ones are tracked until fixed;
 - `dev/style_lint.baseline` records pre-existing house-rule violations —
   new ones fail, old ones are reported dimmed. Fixing files shrinks the
   baseline (`--update-baseline`); growing it to silence a finding is not

@@ -56,9 +56,12 @@ namespace Rodin::Adaptation
     : public Variational::VectorFunctionBase<Real, AnalyticVectorFunction<F>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      /// @brief Range (evaluation value) type.
       using RangeType = SpatialVectorType;
+      /// @brief Parent class type.
       using Parent =
         Variational::VectorFunctionBase<ScalarType, AnalyticVectorFunction<F>>;
 
@@ -108,9 +111,12 @@ namespace Rodin::Adaptation
     : public Variational::MatrixFunctionBase<Real, AnalyticMatrixFunction<F>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Range (evaluation value) type.
       using RangeType = SpatialMatrixType;
+      /// @brief Parent class type.
       using Parent =
         Variational::MatrixFunctionBase<ScalarType, AnalyticMatrixFunction<F>>;
 

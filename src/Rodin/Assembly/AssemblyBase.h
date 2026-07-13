@@ -172,6 +172,7 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       using ValueType = Variational::FunctionBase<ValueDerived>;
@@ -209,6 +210,7 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
@@ -236,12 +238,15 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
@@ -251,6 +256,7 @@ namespace Rodin::Assembly
       using InputType =
         ProblemAssemblyInput<ProblemBodyType, TrialFunction, TestFunction>;
 
+      /// @brief Parent class type.
       using Parent =
         FormLanguage::Base;
 
@@ -276,12 +282,15 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
@@ -291,6 +300,7 @@ namespace Rodin::Assembly
       using InputType =
         ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
+      /// @brief Parent class type.
       using Parent =
         FormLanguage::Base;
 

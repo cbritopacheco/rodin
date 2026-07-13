@@ -29,12 +29,15 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,
@@ -190,12 +193,15 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType; // == Scalar
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;  // == Math::Vector<Scalar>
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,

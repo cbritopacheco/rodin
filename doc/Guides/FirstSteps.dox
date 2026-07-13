@@ -52,7 +52,7 @@
   |--------|--------|---------|-------------|
   | @ref Rodin::Geometry "Geometry" | `<Rodin/Geometry.h>` | Meshes, polytopes, connectivity | @ref Rodin::Geometry::Mesh "Mesh", @ref Rodin::Geometry::Polytope "Polytope", @ref Rodin::Geometry::Connectivity "Connectivity" |
   | @ref Rodin::Variational "Variational" | `<Rodin/Variational.h>` | Finite element spaces, forms, problems | @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::H1 "H1", @ref Rodin::Variational::TrialFunction "TrialFunction", @ref Rodin::Variational::TestFunction "TestFunction", @ref Rodin::Variational::GridFunction "GridFunction" |
-  | @ref Rodin::Solver "Solver" | `<Rodin/Solver.h>` | Linear system solvers | @ref Rodin::Solver::CG "CG", @ref Rodin::Solver::SparseLU "SparseLU", @ref Rodin::Solver::UMFPack "UMFPack" |
+  | @ref Rodin::Solver "Solver" | `<Rodin/Solver.h>` | Linear system solvers | @ref Rodin::Solver::CG "CG", @ref Rodin::Solver::SparseLU "SparseLU", `UMFPack` |
   | @ref Rodin::IO "IO" | `<Rodin/IO/XDMF.h>` | Input/output and visualization | @ref Rodin::IO::XDMF "XDMF" |
   | @ref Rodin::Assembly "Assembly" | (used internally) | Matrix and vector assembly | Assemblers (not used directly) |
 

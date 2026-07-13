@@ -34,13 +34,13 @@
  *
  * ## Usage Examples
  * ```cpp
- * // Stiffness matrix: \int \nablau\cdot\nablav dx
+ * // Stiffness matrix: \int \nabla u\cdot\nabla v dx
  * auto stiffness = Integral(Grad(u), Grad(v));
  * 
- * // Mass matrix: \int u\cdotv dx
+ * // Mass matrix: \int u\cdot v dx
  * auto mass = Integral(u, v);
  * 
- * // Load vector: \int f\cdotv dx
+ * // Load vector: \int f\cdot v dx
  * auto load = Integral(f, v);
  * ```
  */
@@ -194,8 +194,10 @@ namespace Rodin::Variational
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
+      /// @brief Integrand expression type.
       using IntegrandType = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
 
+      /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>

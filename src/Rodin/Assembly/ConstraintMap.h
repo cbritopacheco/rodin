@@ -22,7 +22,7 @@ namespace Rodin::Assembly
    *
    * Identification constraints are stored as rows of the expansion map
    * @f$ x_s = \sum_k c_k x_{m_k} + d_s @f$. For unconstrained DOFs,
-   * @ref expand returns the identity row `{ { i, 1 } }`.
+   * expand() returns the identity row `{ { i, 1 } }`.
    *
    * The map supports canonicalization of identification constraints:
    * - duplicate masters are merged;

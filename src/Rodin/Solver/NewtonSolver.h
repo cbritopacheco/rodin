@@ -46,10 +46,14 @@ namespace Rodin::Solver
   {
     public:
       using LinearSolverType = LinearSolver;
+      /// @brief Linear system type.
       using LinearSystemType = typename FormLanguage::Traits<LinearSolver>::LinearSystemType;
+      /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Solution vector type.
       using SolutionType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Parent class type.
       using Parent = Copyable;
 
       virtual ~NewtonSolverBase() = default;
@@ -356,9 +360,13 @@ namespace Rodin::Solver
        */
       using Monitor = std::function<void(const Report&)>;
 
+      /// @brief Parent class type.
       using Parent = NewtonSolverBase<LinearSolver>;
+      /// @brief Linear system type.
       using LinearSystemType = typename Parent::LinearSystemType;
+      /// @brief Associated problem base type.
       using ProblemBaseType = typename Parent::ProblemBaseType;
+      /// @brief Solution vector type.
       using SolutionType = typename Parent::SolutionType;
       using LinearSolverType = LinearSolver;
 

@@ -86,15 +86,19 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
 
+      /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -259,30 +263,38 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType =
         P1<Range, Mesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, TestSpace>, FESType, TestSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType =
         typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType =
         typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LinearFormIntegratorBase<ScalarType>;
 
@@ -487,23 +499,30 @@ namespace Rodin::Variational
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType =
         typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType =
         typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -781,12 +800,15 @@ namespace Rodin::Variational
       using MultiplicandType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
       using CoefficientRangeType =
@@ -795,15 +817,19 @@ namespace Rodin::Variational
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType =
         typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType =
         typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -1053,6 +1079,7 @@ namespace Rodin::Variational
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
@@ -1062,6 +1089,7 @@ namespace Rodin::Variational
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
@@ -1071,10 +1099,13 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSOperandRangeType, ScalarType>);
@@ -1312,12 +1343,14 @@ namespace Rodin::Variational
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
       using MultiplicandOperandRangeType =
         typename FormLanguage::Traits<MultiplicandOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
@@ -1328,10 +1361,13 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<MultiplicandOperandRangeType, ScalarType>);
@@ -1631,19 +1667,25 @@ namespace Rodin::Variational
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
       using InnerIntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
       using ScalarType   = typename FormLanguage::Traits<InnerIntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
@@ -1848,19 +1890,24 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
       using TestFESType  = P1<Real, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<
         Div<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
         TrialFESType, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<
         ShapeFunction<RHSDerived, TestFESType, TestSpace>,
         TestFESType, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -2069,19 +2116,24 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Real, LHSMesh>;
       using TestFESType  = P1<Math::SpatialVector<Real>, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<
         ShapeFunction<LHSDerived, TrialFESType, TrialSpace>,
         TrialFESType, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<
         Div<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
         TestFESType, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -2304,6 +2356,7 @@ namespace Rodin::Variational
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
@@ -2314,6 +2367,7 @@ namespace Rodin::Variational
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
@@ -2324,14 +2378,17 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2610,6 +2667,7 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
@@ -2619,6 +2677,7 @@ namespace Rodin::Variational
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>;
@@ -2629,14 +2688,17 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2901,7 +2963,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup QuadratureRuleSpecializations
-   * @brief Specialization for \int (\nablau \cdot f)\cdotv in the case of P1 shape functions
+   * @brief Specialization for @f$ \int (\nabla u \cdot f) \cdot v @f$ in the case of P1 shape functions
    *
    * This class represents the CTAD for the expression:
    * @f[
@@ -2965,19 +3027,24 @@ namespace Rodin::Variational
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<
           Mult<TrialSFType, CoefficientType>,
           TrialFESType, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           ShapeFunction<RHSDerived, TestFESType, TestSpace>,
           TestFESType, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -3233,6 +3300,7 @@ namespace Rodin::Variational
     : public GlobalBilinearFormIntegratorBase<typename FormLanguage::Traits<Range>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
       using KernelType = Kernel;
@@ -3241,18 +3309,24 @@ namespace Rodin::Variational
 
       using TestFESType = P1<Range, Mesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFESType, TrialSpace>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<RHSDerived, TestFESType, TestSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Parent class type.
       using Parent = GlobalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);

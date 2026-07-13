@@ -41,8 +41,10 @@ namespace Rodin::Variational
   class Im<FunctionBase<NestedDerived>> : public RealFunctionBase<Im<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Im<FunctionBase<NestedDerived>>>;
 
       /**

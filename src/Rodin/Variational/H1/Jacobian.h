@@ -43,8 +43,10 @@ namespace Rodin::FormLanguage
       Variational::GridFunction<
         Variational::H1<K, Range, Mesh>, Data>>>
   {
-    using FESType = Variational::H1<K, Range, Mesh>;
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::H1<K, Range, Mesh>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   template <size_t K, class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -52,9 +54,11 @@ namespace Rodin::FormLanguage
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
   {
-    using FESType = Variational::H1<K, Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+      using FESType = Variational::H1<K, Range, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -89,14 +93,19 @@ namespace Rodin::Variational
         Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<Scalar>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
@@ -277,9 +286,11 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
       using Parent      =

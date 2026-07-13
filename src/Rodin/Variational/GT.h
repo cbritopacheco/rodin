@@ -54,10 +54,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<GT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent = BooleanFunctionBase<GT<LHSType, RHSType>>;
 
       GT(const LHSType& lhs, const RHSType& rhs)

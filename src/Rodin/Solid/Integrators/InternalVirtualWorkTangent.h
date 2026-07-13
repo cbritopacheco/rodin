@@ -80,7 +80,9 @@ namespace Rodin::Solid
     : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
       using LawType = LawDerived;
       using TrialType = TrialFunctionType;

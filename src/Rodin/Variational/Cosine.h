@@ -52,8 +52,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<Cos<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
       /**

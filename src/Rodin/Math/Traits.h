@@ -64,7 +64,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Boolean>
   {
-    using ScalarType = Boolean;  ///< Scalar type is Boolean itself
+    /// @brief Scalar value type.
+      using ScalarType = Boolean;  ///< Scalar type is Boolean itself
   };
 
   /**
@@ -73,7 +74,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Integer>
   {
-    using ScalarType = Integer;  ///< Scalar type is Integer itself
+    /// @brief Scalar value type.
+      using ScalarType = Integer;  ///< Scalar type is Integer itself
   };
 
   /**
@@ -82,7 +84,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Real>
   {
-    using ScalarType = Real;  ///< Scalar type is Real itself
+    /// @brief Scalar value type.
+      using ScalarType = Real;  ///< Scalar type is Real itself
   };
 
   /**
@@ -91,7 +94,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Complex>
   {
-    using ScalarType = Complex;  ///< Scalar type is Complex itself
+    /// @brief Scalar value type.
+      using ScalarType = Complex;  ///< Scalar type is Complex itself
   };
 
   /**

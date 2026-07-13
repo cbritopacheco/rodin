@@ -466,7 +466,7 @@ namespace Rodin::Assembly
    *        (`u = A(v)`).
    *
    * Encapsulates the slave trial function @f$ u @f$, the right-hand-side
-   * shape-function expression @f$ A(v) @f$ (a @ref ShapeFunctionBase whose
+   * shape-function expression @f$ A(v) @f$ (a @c ShapeFunctionBase whose
    * leaf is some master trial function), and the essential boundary
    * attributes set.
    *
@@ -483,6 +483,7 @@ namespace Rodin::Assembly
   class DirichletBCShapeFunctionAssemblyInput
   {
     public:
+      /// @brief Operand type.
       using OperandType = Variational::TrialFunction<Sol1, FES1>;
       using ValueType   = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
       using DirichletBCType =

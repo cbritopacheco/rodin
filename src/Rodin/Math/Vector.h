@@ -139,14 +139,16 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::Vector<Number>>
   {
-    using ScalarType = Number;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
   };
 
   template <class Number, size_t S>
   struct Traits<Math::FixedSizeVector<Number, S>>
   {
-    using ScalarType = Number;
-    static constexpr size_t Size = S;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
+      static constexpr size_t Size = S;
   };
 }
 

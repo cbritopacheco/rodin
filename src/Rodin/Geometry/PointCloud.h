@@ -432,7 +432,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Rodin::Geometry::PointCloud>
   {
-    using ScalarType = Rodin::Real;
+      /// @brief Scalar value type.
+      using ScalarType = Rodin::Real;
   };
 }
 

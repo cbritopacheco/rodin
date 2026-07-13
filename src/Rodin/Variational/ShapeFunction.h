@@ -33,15 +33,19 @@ namespace Rodin::FormLanguage
   {
     using DerivedType = Derived;
 
+    /// @brief Finite element space type.
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    /// @brief Result type of the evaluation.
     using ResultType =
       typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    /// @brief Range (evaluation value) type.
     using RangeType =
       typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
@@ -50,19 +54,23 @@ namespace Rodin::FormLanguage
   {
     using DerivedType = Derived;
 
+    /// @brief Finite element space type.
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    /// @brief Result type of the evaluation.
     using ResultType =
       typename ResultOf<
         Variational::ShapeFunctionBase<
           Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
+    /// @brief Range (evaluation value) type.
     using RangeType =
       typename RangeOf<
         Variational::ShapeFunctionBase<
           Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }

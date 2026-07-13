@@ -44,8 +44,10 @@ namespace Rodin::FormLanguage
       Variational::GridFunction<
         Variational::P1<Range, Mesh>, Data>>>
   {
-    using FESType = Variational::P1<Range, Mesh>;
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Range, Mesh>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -53,9 +55,11 @@ namespace Rodin::FormLanguage
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-    using FESType = Variational::P1<Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Range, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -89,16 +93,21 @@ namespace Rodin::Variational
         Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<Scalar>;
 
+      /// @brief Finite element space type.
       using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
       Jacobian(const OperandType& u)
@@ -258,17 +267,22 @@ namespace Rodin::Variational
                   "Jacobian<P1> specialization is intended for vector-valued P1.");
 
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Jacobian<OperandType>, FESType, SpaceType>;
 
       struct Cache

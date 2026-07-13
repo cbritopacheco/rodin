@@ -33,7 +33,7 @@
  * ```cpp
  * // Normal derivative on boundary
  * auto n = BoundaryNormal();
- * auto normal_deriv = Derivative(u, n);  // \partialu/\partialn = \nablau\cdotn
+ * auto normal_deriv = Derivative(u, n);  // \partialu/\partialn = \nabla u\cdotn
  * ```
  */
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H
@@ -52,11 +52,20 @@ namespace Rodin::FormLanguage
   struct Traits<Variational::Derivative<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
     using FESType = FES;
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+    /// @brief Operand type.
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
+
+/**
+ * @defgroup DerivativeSpecializations Derivative Template Specializations
+ * @brief Template specializations of the Derivative class.
+ * @see Derivative
+ */
 
 namespace Rodin::Variational
 {
@@ -82,12 +91,16 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FES>::ScalarType, DerivativeBase<GridFunction<FES, Data>, Derived>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
       DerivativeBase(const OperandType& u)
@@ -236,6 +249,7 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Operand type

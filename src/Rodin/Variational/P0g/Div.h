@@ -31,9 +31,12 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-    using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
-    using ScalarType = Scalar;
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -41,11 +44,13 @@ namespace Rodin::FormLanguage
     Variational::Div<
       Variational::ShapeFunction<NestedDerived, Variational::P0g<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-    using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using ScalarType = Scalar;
-    using OperandType =
-      Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P0g<Math::SpatialVector<Scalar>, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -65,10 +70,14 @@ namespace Rodin::Variational
         Div<GridFunction<P0g<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
+      /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
       explicit Div(const OperandType& u)
@@ -115,13 +124,17 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P0g<Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
       explicit Div(const OperandType& u)

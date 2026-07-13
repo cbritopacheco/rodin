@@ -1059,7 +1059,8 @@ namespace Rodin::FormLanguage
   template <class Number>
   struct Traits<Math::SpatialVector<Number>>
   {
-    using ScalarType = Number;
+      /// @brief Scalar value type.
+      using ScalarType = Number;
   };
 }
 

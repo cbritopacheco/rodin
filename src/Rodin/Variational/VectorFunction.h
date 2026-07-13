@@ -33,8 +33,9 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::VectorFunctionBase<Scalar, Derived>>
   {
-    using ScalarType = Scalar;
-    using DerivedType = Derived;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+      using DerivedType = Derived;
   };
 }
 
@@ -197,11 +198,14 @@ namespace Rodin::Variational
     : public VectorFunctionBase<Scalar, VectorFunction<Math::Vector<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<VectorType>>;
 
       /**
@@ -285,11 +289,14 @@ namespace Rodin::Variational
     : public VectorFunctionBase<Real, VectorFunction<V, Values...>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
       static constexpr size_t Dimension = 1 + sizeof...(Values);
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      /// @brief Range (evaluation value) type.
       using RangeType =
         std::conditional_t<
           Dimension <= Math::SpatialVector<ScalarType>::MaxSize,
@@ -298,6 +305,7 @@ namespace Rodin::Variational
 
       using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, Dimension>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<V, Values...>>;
       /**
        * @brief Constructs a vector with the given values.
@@ -424,10 +432,13 @@ namespace Rodin::Variational
   class VectorFunction<F> final : public VectorFunctionBase<Real, VectorFunction<F>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<F>>;
 
       using Parent::traceOf;

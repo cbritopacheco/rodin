@@ -68,6 +68,7 @@ namespace Rodin::Heart::CCMLC2014::Solver
       class Problem final : public Variational::ProblemBase<DenseLinearSystem>
       {
         public:
+          /// @brief Parent class type.
           using Parent = Variational::ProblemBase<DenseLinearSystem>;
           using ProblemBodyType = typename Parent::ProblemBodyType;
 

@@ -51,10 +51,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<LEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent = BooleanFunctionBase<LEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       LEQ(const LHSType& lhs, const RHSType& rhs)

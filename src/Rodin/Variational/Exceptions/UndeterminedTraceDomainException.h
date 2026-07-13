@@ -23,6 +23,7 @@ namespace Rodin::Variational
   class UndeterminedTraceDomainException : public Alert::MemberFunctionException<T, FuncName>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Alert::MemberFunctionException<T, FuncName>;
 
       template <class Iterator>

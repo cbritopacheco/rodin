@@ -47,11 +47,16 @@ namespace Rodin::Variational
         Grad<GridFunction<H1<K, Scalar, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
+      /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       Grad(const OperandType& u) : Parent(u) {}
@@ -186,12 +191,16 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, H1<K, Scalar, Mesh>, SpaceType>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using RangeType  = Math::SpatialVector<ScalarType>;
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;

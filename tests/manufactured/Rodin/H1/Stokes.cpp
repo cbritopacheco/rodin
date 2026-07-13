@@ -28,7 +28,7 @@ using namespace Rodin::Test::Random;
  * @f[
  * \left\{
  * \begin{aligned}
- *   -\Delta \mathbf{u} + \nabla p &= \mathbf{f} \quad \text{in } \Omega,\\
+ *   -\Delta \mathbf{u} + ∇p &= \mathbf{f} \quad \text{in } \Omega,\\
  *   \nabla \cdot \mathbf{u} &= 0 \quad \text{in } \Omega,\\
  *   \mathbf{u} &= \mathbf{g} \quad \text{on } \partial\Omega.
  * \end{aligned}
@@ -193,7 +193,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -\cos(\pi x) \sin(\pi y)
    *  \end{pmatrix}
    * @f]
-   * Note: \nabla\cdotu = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
+   * Note: ∇·u = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
    *
    * Manufactured pressure:
    * @f[
@@ -207,7 +207,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -2\pi^2 \cos(\pi x) \sin(\pi y) + \pi \cos(\pi x) \cos(\pi y)
    *  \end{pmatrix}
    * @f]
-   * Computed as f = -Δu + \nablap
+   * Computed as f = -Δu + ∇p
    *
    * Boundary conditions:
    * @f[
@@ -228,7 +228,7 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     // Manufactured velocity solution (divergence-free)
     // u = (sin(πx)cos(πy), -cos(πx)sin(πy))
-    // \nabla\cdotu = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
+    // ∇·u = π cos(πx)cos(πy) - π cos(πx)cos(πy) = 0 ✓
     VectorFunction u_exact{
       sin(pi * F::x) * cos(pi * F::y),
       -cos(pi * F::x) * sin(pi * F::y)
@@ -249,7 +249,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     TestFunction  q(ph); // Pressure test function
 
     // Assemble the weak form:
-    // \int \nablau : \nablav - \int p div(v) - \int q div(u) = \int f \cdot v
+    // \int \nabla u : \nabla v - \int p div(v) - \int q div(u) = \int f \cdot v
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
@@ -299,7 +299,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -x(1-x)
    *  \end{pmatrix}
    * @f]
-   * Note: \nabla\cdotu = 0 ✓
+   * Note: ∇·u = 0 ✓
    *
    * Manufactured pressure:
    * @f[
@@ -313,7 +313,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *    -1
    *  \end{pmatrix}
    * @f]
-   * Computed as f = -Δu + \nablap = (2, -2) + (1, 1) = (3, -1)
+   * Computed as f = -Δu + ∇p = (2, -2) + (1, 1) = (3, -1)
    */
   TEST_P(Manufactured_Stokes_Test_32x32, Stokes_Polynomial)
   {
@@ -326,8 +326,8 @@ namespace Rodin::Tests::Manufactured::Stokes
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
     // Manufactured velocity solution (divergence-free)
-    // Using u = (y(1-y), -x(1-x)) 
-    // \nabla\cdotu = \partial(y(1-y))/\partialx + \partial(-x(1-x))/\partialy = 0 + 0 = 0 ✓
+    // Using u = (y(1-y), -x(1-x))
+    // ∇·u = \partial(y(1-y))/\partialx + \partial(-x(1-x))/\partialy = 0 + 0 = 0 ✓
     VectorFunction u_exact{
       F::y * (1 - F::y),
       -F::x * (1 - F::x)
@@ -336,10 +336,10 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Manufactured pressure solution
     auto p_exact = F::x + F::y - 1;
 
-    // Forcing function: f = -Δu + \nablap
+    // Forcing function: f = -Δu + ∇p
     // -Δ(y(1-y)) = -\partial²/\partialy²[y(1-y)] = -(-2) = 2
     // -Δ(-x(1-x)) = -\partial²/\partialx²[-x(1-x)] = -(-(-2)) = -2
-    // \nablap = (1, 1)
+    // ∇p = (1, 1)
     // Therefore f = (2+1, -2+1) = (3, -1)
     VectorFunction f{ 3.0, -1.0 };
 
@@ -509,9 +509,9 @@ namespace Rodin::Tests::Manufactured::Stokes
    *  p(x, y) = x^2 - y^2
    * @f]
    *
-   * Forcing function (computed from -Δu + \nablap):
+   * Forcing function (computed from -Δu + ∇p):
    * @f[
-   *  \mathbf{f}(x, y) = -\Delta\mathbf{u} + \nabla p
+   *  \mathbf{f}(x, y) = -\Delta\mathbf{u} + ∇p
    * @f]
    *
    * Boundary conditions:
@@ -533,7 +533,7 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     // Manufactured velocity solution (divergence-free)
     // Using stream function ψ = x²(1-x)² y²(1-y)²
-    // u₁ = \partialψ/\partialy, u₂ = -\partialψ/\partialx ensures \nabla\cdotu = 0
+    // u₁ = \partialψ/\partialy, u₂ = -\partialψ/\partialx ensures ∇·u = 0
 
     // \partialψ/\partialy = x²(1-x)² \cdot [2y(1-y)² - 2y²(1-y)]
     //       = 2x²(1-x)² y(1-y) [1-y-y]
@@ -583,7 +583,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     auto grad_p_x = 2 * F::x;
     auto grad_p_y = -2 * F::y;
 
-    // Forcing function: f = -Δu + \nablap
+    // Forcing function: f = -Δu + ∇p
     VectorFunction f{
       -laplace_u1 + grad_p_x,
       -laplace_u2 + grad_p_y

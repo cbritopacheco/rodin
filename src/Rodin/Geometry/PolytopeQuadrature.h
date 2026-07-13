@@ -68,7 +68,7 @@
  * @f]
  *
  * This design assumes that callers obtain quadrature formulas from a canonical
- * source such as @ref Rodin::QF::PolytopeQuadratureFormula::get, so that the
+ * source such as @ref Rodin::QF::PolytopeQuadratureFormula, so that the
  * same logical formula has a stable object identity.
  */
 

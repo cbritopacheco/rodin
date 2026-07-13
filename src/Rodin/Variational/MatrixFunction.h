@@ -28,8 +28,9 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Derived>
   struct Traits<Variational::MatrixFunctionBase<Scalar, Derived>>
   {
-    using ScalarType = Scalar;
-    using DerivedType = Derived;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+      using DerivedType = Derived;
   };
 }
 
@@ -181,10 +182,13 @@ namespace Rodin::Variational
     : public MatrixFunctionBase<Scalar, MatrixFunction<Math::Matrix<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Matrix (operator) type of the linear system.
       using MatrixType = Math::Matrix<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = MatrixFunctionBase<Scalar, MatrixFunction<MatrixType>>;
 
       using Parent::traceOf;

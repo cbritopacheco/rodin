@@ -23,17 +23,18 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::FunctionBase<RHSDerived>>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    using LHSType =
-      Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
+    /// @brief Left-hand side operand type.
+      using LHSType = Variational::ShapeFunctionBase<LHSDerived, FES, Space>;
 
-    using RHSType =
-      Variational::FunctionBase<RHSDerived>;
+    /// @brief Right-hand side operand type.
+      using RHSType = Variational::FunctionBase<RHSDerived>;
 
-    using RangeType =
-      typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = typename FormLanguage::Traits<LHSType>::RangeType;
   };
 }
 
@@ -66,14 +67,19 @@ namespace Rodin::Variational
     : public FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         FunctionBase<Division<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
@@ -234,12 +240,16 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, FES, Space>;
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<Division<LHSType, RHSType>, FES, Space>;
 

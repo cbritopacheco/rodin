@@ -22,6 +22,7 @@ namespace Rodin::Geometry
   class SharderBase
   {
     public:
+      /// @brief Execution context type.
       using ContextType = Context;
 
       /**

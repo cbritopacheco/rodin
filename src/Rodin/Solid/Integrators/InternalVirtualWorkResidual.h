@@ -78,7 +78,9 @@ namespace Rodin::Solid
     : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
       using LawType = LawDerived;
       using TestType = TestFunctionType;

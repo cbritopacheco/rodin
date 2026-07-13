@@ -25,6 +25,7 @@ namespace Rodin::Scotch
   class Partitioner : public Geometry::Partitioner
   {
     public:
+      /// @brief Mesh type.
       using MeshType = Geometry::Mesh<Context::Local>;
 
       Partitioner(const MeshType& mesh);

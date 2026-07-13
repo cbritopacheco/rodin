@@ -230,6 +230,6 @@
 
   - @ref guides-meshes "Meshes overview"
   - @ref Rodin::Geometry::Mesh "Mesh class reference"
-  - Example: @ref examples/Geometry/Volume.cpp
+  - Example: `examples/Geometry/Volume.cpp`
 
   */

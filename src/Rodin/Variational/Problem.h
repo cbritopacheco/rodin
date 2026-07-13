@@ -50,15 +50,17 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Variational::ProblemBase<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 
   template <class LinearSystem, class TrialFunction, class TestFunction>
   struct Traits<Variational::Problem<TrialFunction, TestFunction, LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
-    using TrialFunctionType = TrialFunction;
-    using TestFunctionType = TestFunction;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
+      using TrialFunctionType = TrialFunction;
+      using TestFunctionType = TestFunction;
   };
 
 }
@@ -220,12 +222,14 @@ namespace Rodin::Variational
       using TestFunctionType =
         V;
 
+      /// @brief Linear system type.
       using LinearSystemType =
         LinearSystem;
 
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystem>;
 
+      /// @brief Solution vector type.
       using SolutionType =
         typename FormLanguage::Traits<TrialFunctionType>::SolutionType;
 
@@ -235,12 +239,15 @@ namespace Rodin::Variational
       using TestFESType =
         typename FormLanguage::Traits<V>::FESType;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
@@ -250,12 +257,14 @@ namespace Rodin::Variational
       using TestFESScalarType =
         typename FormLanguage::Traits<TestFESType>::ScalarType;
 
+      /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType =
         LinearFormIntegratorBase<TestFESScalarType>;
 
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Parent class type.
       using Parent =
         ProblemBase<LinearSystemType>;
 
@@ -356,18 +365,22 @@ namespace Rodin::Variational
       typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
+      /// @brief Linear system type.
       using LinearSystemType =
         LinearSystem;
 
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystemType>;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
@@ -384,6 +397,7 @@ namespace Rodin::Variational
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<LinearSystem, Problem>;
 
+      /// @brief Parent class type.
       using Parent =
         ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
 
@@ -525,20 +539,25 @@ namespace Rodin::Variational
         Utility::ParameterPack<U1, U2, U3, Us...>::template All<IsTrialOrTestFunction>::Value);
 
     public:
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = ProblemBase<LinearSystemType>;
 
       using AssemblyInput =
@@ -938,20 +957,25 @@ namespace Rodin::Variational
     : public ProblemUsBase<LinearSystem, U1, U2, U3, Us...>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = ProblemUsBase<LinearSystem, U1, U2, U3, Us...>;
 
       Problem(U1& u1, U2& u2, U3& u3, Us&... us)

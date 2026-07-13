@@ -9,8 +9,8 @@
  *
  * These tests distribute a mesh across MPI ranks and exercise:
  *   - GridFunction projection onto distributed P0 and P0g.
- *   - Linear form assembly (\int f\cdotv d\Omega) with distributed P0 and P0g.
- *   - Bilinear form assembly (\int u\cdotv d\Omega) with distributed P0 and P0g.
+ *   - Linear form assembly (\int f\cdot v d\Omega) with distributed P0 and P0g.
+ *   - Bilinear form assembly (\int u\cdot v d\Omega) with distributed P0 and P0g.
  *   - Solving the L2 projection problem with distributed P0 via PETSc GMRES.
  *   - Solving the L2 projection problem with distributed P0g via PETSc GMRES.
  *
@@ -185,7 +185,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble \int 1\cdotv d\Omega on distributed P0 and verify the global
+   * @brief Assemble \int 1\cdot v d\Omega on distributed P0 and verify the global
    *        vector size equals the number of cells.
    *
    * For P0 each entry corresponds to one cell, so the vector size must equal
@@ -217,7 +217,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief Sum of \int 1\cdotv d\Omega over all P0 test functions equals domain area.
+   * @brief Sum of \int 1\cdot v d\Omega over all P0 test functions equals domain area.
    *
    * For f = 1 and P0, each entry b_K = |K| (cell measure).
    * ∑_K b_K = |\Omega|.
@@ -252,7 +252,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble the P0 mass matrix \int u\cdotv d\Omega and check global dimensions.
+   * @brief Assemble the P0 mass matrix \int u\cdot v d\Omega and check global dimensions.
    *
    * For P0 the global matrix size is (N_cells × N_cells).
    */
@@ -436,7 +436,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief \int 1\cdotv d\Omega with P0g has global size 1.
+   * @brief \int 1\cdot v d\Omega with P0g has global size 1.
    */
   TEST(PETSc_MPI_P0g, LinearForm_GlobalVectorSizeIsOne_Triangle)
   {
@@ -462,7 +462,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief \int 1\cdotv d\Omega with P0g: the single entry equals |\Omega|.
+   * @brief \int 1\cdot v d\Omega with P0g: the single entry equals |\Omega|.
    *
    * For f = 1 the single P0g DOF entry accumulates contributions from all
    * cells: ∑_K |K| = |\Omega|.
@@ -497,7 +497,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble \int u\cdotv d\Omega with P0g: global matrix is 1×1.
+   * @brief Assemble \int u\cdot v d\Omega with P0g: global matrix is 1×1.
    *
    * For scalar P0g the system is 1×1 with the single entry equal to |\Omega|.
    */

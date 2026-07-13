@@ -227,10 +227,13 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Average<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Average<OperandType>, FES, Space>;
 
       /**

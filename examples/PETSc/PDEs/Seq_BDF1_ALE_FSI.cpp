@@ -994,15 +994,10 @@ int main(int argc, char** argv)
             << " atol=" << absoluteTolerance
             << Alert::Raise;
 
-          solidSolver.setMonitor(
-              [](const auto& rep)
-              {
-                Alert::Info()
-                  << "    it=" << rep.iterations
-                  << " r=" << rep.finalResidual
-                  << " dx=" << rep.finalStepNorm
-                  << Alert::Raise;
-              });
+          solidSolver.setMonitor([](const auto& rep) {
+            Alert::Info() << "    it=" << rep.iterations << " r=" << rep.finalResidual
+                          << " dx=" << rep.finalStepNorm << Alert::Raise;
+          });
 
           solidSolver.solve(solidDisplacement);
 

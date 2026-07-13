@@ -175,8 +175,10 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Parent class type.
       using Parent = BilinearFormIntegratorBase<ScalarType, LocalBilinearFormIntegratorBase>;
 
       using Parent::Parent;
@@ -259,8 +261,10 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Parent class type.
       using Parent = BilinearFormIntegratorBase<ScalarType, GlobalBilinearFormIntegratorBase<ScalarType>>;
 
       using Parent::Parent;

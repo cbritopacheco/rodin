@@ -26,13 +26,16 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<ShapeFunction<Derived, P0<Range, Mesh>, Space>, P0<Range, Mesh>, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P0<Range, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,

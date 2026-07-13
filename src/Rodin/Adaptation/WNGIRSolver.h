@@ -49,6 +49,7 @@ namespace Rodin::Adaptation
   {
       using Displacement = std::remove_reference_t<
         decltype(std::declval<TrialFunctionType&>().getSolution())>;
+      /// @brief Finite element space type.
       using FESType = std::remove_reference_t<
         decltype(std::declval<Displacement&>().getFiniteElementSpace())>;
       using ProblemType = std::decay_t<decltype(Variational::Problem(

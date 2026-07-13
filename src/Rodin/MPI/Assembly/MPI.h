@@ -245,6 +245,7 @@ namespace Rodin::Assembly
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
       using InputType = typename Parent::InputType;
 

@@ -63,8 +63,10 @@ namespace Rodin::Variational
     public:
       using ScalarType  = Real;
       using RangeType   = ScalarType;
+      /// @brief Execution context type.
       using ContextType = Context::MPI;
       using MeshType    = Geometry::Mesh<ContextType>;
+      /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
 
       /// Underlying local shard finite element space type.
@@ -273,8 +275,10 @@ namespace Rodin::Variational
     public:
       using ScalarType  = Real;
       using RangeType   = Math::SpatialVector<Real>;
+      /// @brief Execution context type.
       using ContextType = Context::MPI;
       using MeshType    = Geometry::Mesh<ContextType>;
+      /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
 
       /// Underlying local shard finite element space type.

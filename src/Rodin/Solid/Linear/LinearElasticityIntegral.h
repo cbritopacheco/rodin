@@ -23,6 +23,11 @@
 
 #include "ForwardDecls.h"
 
+/**
+ * @defgroup LinearElasticitySpecializations LinearElasticityIntegral Template Specializations
+ * @brief Template specializations of the linear elasticity integrators.
+ */
+
 namespace Rodin::Variational
 {
   /**

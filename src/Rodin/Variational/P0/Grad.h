@@ -28,8 +28,10 @@ namespace Rodin::FormLanguage
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Grad<Variational::GridFunction<Variational::P0<Range, Mesh>, Data>>>
   {
-    using FESType = Variational::P0<Range, Mesh>;
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P0<Range, Mesh>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -37,9 +39,11 @@ namespace Rodin::FormLanguage
     Variational::Grad<
       Variational::ShapeFunction<NestedDerived, Variational::P0<Range, Mesh>, Space>>>
   {
-    using FESType = Variational::P0<Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P0<Range, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
   };
 }
 
@@ -57,14 +61,19 @@ namespace Rodin::Variational
     : public GradBase<GridFunction<P0<Range, Mesh>, Data>, Grad<GridFunction<P0<Range, Mesh>, Data>>>
   {
     public:
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
 
+      /// @brief Mesh type.
       using MeshType = Mesh;
 
+      /// @brief Finite element space type.
       using FESType = P0<RangeType, MeshType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
@@ -189,18 +198,24 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0<Scalar, Mesh>, SpaceType>>>
   {
     public:
+      /// @brief Range (evaluation value) type.
       using RangeType = Scalar;
 
+      /// @brief Mesh type.
       using MeshType = Mesh;
 
+      /// @brief Finite element space type.
       using FESType = P0<RangeType, MeshType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
       Grad(const OperandType& u)

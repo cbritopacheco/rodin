@@ -514,8 +514,8 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Self-identification `DirichletBC(u, u).on(\Gamma)` produces, for each
-   * slave DOF on \Gamma, the same DOF as master with coefficient 1 — a row
+   * @brief Self-identification `DirichletBC(u, u).on(Γ)` produces, for each
+   * slave DOF on Γ, the same DOF as master with coefficient 1 — a row
    * @f$ u_s - u_s = 0 @f$ which is algebraically vacuous (singular slave
    * row) but assembled correctly.
    *

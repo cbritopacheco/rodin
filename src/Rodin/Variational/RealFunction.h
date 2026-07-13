@@ -26,8 +26,9 @@ namespace Rodin::FormLanguage
   template <class Derived>
   struct Traits<Variational::RealFunctionBase<Derived>>
   {
-    using ScalarType = Real;
-    using DerivedType = Derived;
+    /// @brief Scalar value type.
+      using ScalarType = Real;
+      using DerivedType = Derived;
   };
 }
 
@@ -154,8 +155,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<FunctionBase<NestedDerived>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<FunctionBase<NestedDerived>>;
 
       RealFunction(const RealFunctionBase<NestedDerived>& nested)
@@ -214,8 +217,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<RealFunction<Real>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<RealFunction<Real>>;
 
       /**
@@ -273,8 +278,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<RealFunction<Integer>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<RealFunction<Integer>>;
 
       /**
@@ -334,8 +341,10 @@ namespace Rodin::Variational
     static_assert(std::is_invocable_r_v<Real, F, const Geometry::Point&>);
 
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<RealFunction<F>>;
 
       RealFunction(F f)

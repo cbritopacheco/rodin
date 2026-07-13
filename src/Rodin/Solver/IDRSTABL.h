@@ -45,7 +45,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::IDRSTABL<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -75,11 +76,17 @@ namespace Rodin::Solver
     : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+      /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
+      /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
@@ -153,11 +160,16 @@ namespace Rodin::Solver
     : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+      /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
+      /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;

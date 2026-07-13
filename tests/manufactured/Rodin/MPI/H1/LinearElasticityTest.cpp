@@ -495,7 +495,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
    * @brief Distributed 2D linear elasticity with H1 of degree K.
    *
    * Mesh: 16×16 uniform grid (h = 1/15).
-   * Solution: sin(πx)sin(πy)\cdot(1,1)^T.
+   * Solution: sin(πx)sin(πy)·(1,1)^T.
    * Tolerance: @ref RODIN_FUZZY_CONSTANT.
    */
   TEST_P(H1LinearElasticity2D, SineSolution)

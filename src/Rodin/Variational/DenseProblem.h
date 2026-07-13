@@ -68,6 +68,7 @@ namespace Rodin::Variational
   class DenseProblem<LinearSystem, U, V> : public Problem<LinearSystem, U, V>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Problem<LinearSystem, U, V>;
       using Parent::Parent;
       using Parent::operator=;

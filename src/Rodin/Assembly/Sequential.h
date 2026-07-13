@@ -107,14 +107,18 @@ namespace Rodin::Assembly
         Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
 
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<VectorType, LinearFormType>;
 
       using InputType = typename Parent::InputType;
@@ -195,11 +199,13 @@ namespace Rodin::Assembly
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Dot<
             typename FormLanguage::Traits<TrialFES>::ScalarType,
             typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
+      /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
 
       using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
@@ -208,6 +214,7 @@ namespace Rodin::Assembly
 
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
       using InputType = typename Parent::InputType;
@@ -319,15 +326,18 @@ namespace Rodin::Assembly
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
+      /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
       using InputType = typename Parent::InputType;
@@ -390,11 +400,13 @@ namespace Rodin::Assembly
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
+      /// @brief Assembled operator type.
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using BilinearFormType =
@@ -406,6 +418,7 @@ namespace Rodin::Assembly
       using GlobalBilinearFormIntegratorBaseType =
         Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
       using InputType = typename Parent::InputType;
@@ -510,8 +523,10 @@ namespace Rodin::Assembly
           Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<Real>>>...>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Assembled operator type.
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
       using TupleType =
@@ -521,6 +536,7 @@ namespace Rodin::Assembly
 
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, TupleType>;
 
       using InputType = typename Parent::InputType;
@@ -590,6 +606,7 @@ namespace Rodin::Assembly
           Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, Math::SparseMatrix<Real>>...>>
     {
       public:
+        /// @brief Parent class type.
         using Parent =
           AssemblyBase<
             Math::SparseMatrix<Real>,
@@ -597,6 +614,7 @@ namespace Rodin::Assembly
 
         using InputType = typename Parent::InputType;
 
+        /// @brief Assembled operator type.
         using OperatorType = Math::SparseMatrix<Real>;
 
         Sequential() = default;
@@ -637,6 +655,7 @@ namespace Rodin::Assembly
           Tuple<Variational::LinearForm<FES, Math::Vector<Real>>...>>
     {
       public:
+        /// @brief Parent class type.
         using Parent =
           AssemblyBase<
             Math::Vector<Real>,
@@ -644,6 +663,7 @@ namespace Rodin::Assembly
 
         using InputType = typename Parent::InputType;
 
+        /// @brief Vector type of the linear system.
         using VectorType = Math::Vector<Real>;
 
         Sequential() = default;
@@ -698,8 +718,10 @@ namespace Rodin::Assembly
         Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
+      /// @brief Parent class type.
       using Parent =
         AssemblyBase<
           LinearSystemType,
@@ -707,12 +729,15 @@ namespace Rodin::Assembly
 
       using InputType = typename Parent::InputType;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
@@ -1227,8 +1252,10 @@ namespace Rodin::Assembly
         Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
+      /// @brief Parent class type.
       using Parent =
         AssemblyBase<
           LinearSystemType,
@@ -1236,12 +1263,15 @@ namespace Rodin::Assembly
 
       using InputType = typename Parent::InputType;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
@@ -1729,6 +1759,7 @@ namespace Rodin::Assembly
           Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
       using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
@@ -1737,6 +1768,7 @@ namespace Rodin::Assembly
 
       using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
 
       using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
@@ -1834,6 +1866,7 @@ namespace Rodin::Assembly
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
 
       using InputType = typename Parent::InputType;

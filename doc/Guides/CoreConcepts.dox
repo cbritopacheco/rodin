@@ -212,7 +212,7 @@
   auto grad_v = Grad(v);
 
   // Used in integrals: the dot product is taken implicitly
-  auto stiffness = Integral(Grad(u), Grad(v));  // \int \nablau \cdot \nablav dx
+  auto stiffness = Integral(Grad(u), Grad(v));  // \int \nabla u \cdot \nabla v dx
   @endcode
 
   @subsection guides-getting-started-core-concepts-integrals Integrals
@@ -220,7 +220,7 @@
   The `Integral` function represents integration over the domain or boundary:
 
   @code{.cpp}
-  // Domain integral: \int_\Omega \nablau \cdot \nablav dx
+  // Domain integral: \int_\Omega \nabla u \cdot \nabla v dx
   auto stiffness = Integral(Grad(u), Grad(v));
 
   // Domain integral with function: \int_\Omega f v dx

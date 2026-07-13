@@ -26,16 +26,22 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Component<Variational::ShapeFunctionBase<OperandDerived, FES, Space>>>
   {
-    using FESType = FES;
-    static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    using OperandType = Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
+    /// @brief Operand type.
+      using OperandType =
+        Variational::ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
 
-    using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
+    /// @brief Range type of the operand.
+      using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
-    using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
-    using RangeType = ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = ScalarType;
   };
 }
 
@@ -59,14 +65,19 @@ namespace Rodin::Variational
     : public RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<OperandDerived>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t>>;
 
 
@@ -165,14 +176,19 @@ namespace Rodin::Variational
     : public RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<OperandDerived>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Component<FunctionBase<OperandDerived>, size_t, size_t>>;
 
       /**
@@ -263,14 +279,19 @@ namespace Rodin::Variational
     : public RealFunctionBase<Component<GridFunction<FES, Data>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = GridFunction<FES, Data>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Component<OperandType>>;
 
       /**
@@ -366,17 +387,23 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Component<ShapeFunctionBase<OperandDerived, FES, Space>>, FES, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr const ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<OperandDerived, FESType, SpaceType>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandRangeType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = ScalarType;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Component<OperandType>, FES, Space>;
 
       static_assert(FormLanguage::IsVectorRange<OperandRangeType>::Value);

@@ -36,16 +36,19 @@ namespace Rodin::FormLanguage
   template <class Operator>
   struct Traits<Variational::BilinearFormBase<Operator>>
   {
-    using OperatorType = Operator;
+    /// @brief Assembled operator type.
+      using OperatorType = Operator;
   };
 
   template <class Solution, class TrialFES, class TestFES, class Operator>
   struct Traits<Variational::BilinearForm<Solution, TrialFES, TestFES, Operator>>
   {
-    using SolutionType = Solution;
-    using TrialFESType = TrialFES;
-    using TestFESType = TestFES;
-    using OperatorType = Operator;
+    /// @brief Solution vector type.
+      using SolutionType = Solution;
+      using TrialFESType = TrialFES;
+      using TestFESType = TestFES;
+    /// @brief Assembled operator type.
+      using OperatorType = Operator;
   };
 }
 
@@ -88,6 +91,7 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<OperatorType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         FormLanguage::Base;
 
@@ -371,9 +375,11 @@ namespace Rodin::Variational
       typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
     public:
+      /// @brief Solution vector type.
       using SolutionType =
         Solution;
 
+      /// @brief Scalar value type.
       using ScalarType =
         Scalar;
 
@@ -525,8 +531,10 @@ namespace Rodin::Variational
     using TestFESContextType = typename FormLanguage::Traits<TestFES>::ContextType;
 
     public:
+      /// @brief Solution vector type.
       using SolutionType = Solution;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of operator associated to the bilinear form

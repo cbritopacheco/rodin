@@ -1147,12 +1147,12 @@
 
   **Direct solvers** (exact up to floating-point precision):
   - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
-  - @ref Rodin::Solver::UMFPack "UMFPack" — SuiteSparse UMFPACK solver
-  - @ref Rodin::Solver::CHOLMOD "CHOLMOD" — SuiteSparse Cholesky for SPD systems
+  - `UMFPack` — SuiteSparse UMFPACK solver
+  - `CHOLMOD` — SuiteSparse Cholesky for SPD systems
   - @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" — Simplicial @f$ LL^T @f$
   - @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" — Simplicial @f$ LDL^T @f$
   - @ref Rodin::Solver::SparseQR "SparseQR" — Sparse QR factorization
-  - @ref Rodin::Solver::SPQR "SPQR" — SuiteSparse sparse QR
+  - `SPQR` — SuiteSparse sparse QR
   - @ref Rodin::Solver::HouseholderQR "HouseholderQR" — Dense Householder QR
   - @ref Rodin::Solver::LDLT "LDLT" — Dense @f$ LDL^T @f$
 
@@ -1468,14 +1468,14 @@
 
   ## Key Components
 
-  **Math types** (@ref Rodin::PETSc::Math):
-  - @ref Rodin::PETSc::Math::LinearSystem "LinearSystem" — Couples a PETSc
+  **Math types** (`PETSc::Math`):
+  - `PETSc::Math`::LinearSystem "LinearSystem" — Couples a PETSc
     `Mat` (operator @f$ A @f$), right-hand side `Vec` (@f$ \mathbf{b} @f$), and
     solution `Vec` (@f$ \mathbf{x} @f$).  Supports Dirichlet elimination via
     `eliminate()` and block-preconditioner field splits via `setFieldSplits()`.
   - `Vector` (`::Vec`) and `Matrix` (`::Mat`) — PETSc handle aliases.
 
-  **Solvers** (@ref Rodin::PETSc::Solver):
+  **Solvers** (`PETSc::Solver`):
   - @ref Rodin::Solver::KSP "KSP" — Wraps the PETSc KSP (Krylov subspace)
     context.  Configurable via `setType()`, `setTolerances()`,
     `setPreconditioner()`, and PETSc command-line options (`-ksp_type`,
@@ -1488,7 +1488,7 @@
     Equations Solvers) for Newton-type methods.  The inner linear solve uses
     `KSP`.
 
-  **Variational** (@ref Rodin::PETSc::Variational):
+  **Variational** (`PETSc::Variational`):
   - `PETSc::Variational::TrialFunction` / `TestFunction` — Thin wrappers
     that trigger PETSc-specific CTAD so that `Problem`, `BilinearForm`, and
     `LinearForm` automatically use PETSc storage.

@@ -26,8 +26,9 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Conjugate<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -60,8 +61,10 @@ namespace Rodin::Variational
     : public FunctionBase<Conjugate<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Conjugate<OperandType>>;
 
       /**
@@ -146,15 +149,19 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Operand type.
       using OperandType =
         ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType =
         typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>>;
 

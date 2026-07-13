@@ -142,7 +142,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Stiffness matrix: \int \nablau \cdot \nablav dx
+    // Stiffness matrix: \int \nabla u \cdot \nabla v dx
     bf = Integral(Grad(u), Grad(v));
     bf.assemble();
 
@@ -237,7 +237,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Combine mass and stiffness: \int (u v + \nablau \cdot \nablav) dx
+    // Combine mass and stiffness: \int (u v + \nabla u \cdot \nabla v) dx
     bf = Integral(u, v) + Integral(Grad(u), Grad(v));
     bf.assemble();
 

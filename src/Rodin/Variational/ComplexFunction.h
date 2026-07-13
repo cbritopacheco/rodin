@@ -44,8 +44,10 @@ namespace Rodin::Variational
   class ComplexFunctionBase : public ScalarFunctionBase<Complex, ComplexFunctionBase<Derived>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Complex;
 
+      /// @brief Parent class type.
       using Parent = ScalarFunctionBase<ScalarType, ComplexFunctionBase<Derived>>;
 
       using Parent::traceOf;
@@ -92,6 +94,7 @@ namespace Rodin::Variational
     : public ComplexFunctionBase<ComplexFunction<Integer>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = ComplexFunctionBase<ComplexFunction<Integer>>;
 
       using Parent::traceOf;
@@ -149,6 +152,7 @@ namespace Rodin::Variational
     : public ComplexFunctionBase<ComplexFunction<Real>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = ComplexFunctionBase<ComplexFunction<Real>>;
 
       using Parent::traceOf;
@@ -210,6 +214,7 @@ namespace Rodin::Variational
     : public ComplexFunctionBase<ComplexFunction<Complex>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = ComplexFunctionBase<ComplexFunction<Complex>>;
 
       using Parent::traceOf;
@@ -273,8 +278,10 @@ namespace Rodin::Variational
     : public ComplexFunctionBase<ComplexFunction<NestedDerived>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Complex;
 
+      /// @brief Parent class type.
       using Parent = ComplexFunctionBase<ComplexFunction<NestedDerived>>;
 
       using Parent::traceOf;
@@ -355,6 +362,7 @@ namespace Rodin::Variational
       using ImagFunctionRangeType =
         typename FormLanguage::Traits<ImagFunctionType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ComplexFunctionBase<
           ComplexFunction<
@@ -452,6 +460,7 @@ namespace Rodin::Variational
     static_assert(std::is_invocable_r_v<Complex, F, const Geometry::Point&>);
 
     public:
+      /// @brief Parent class type.
       using Parent = ComplexFunctionBase<ComplexFunction<F>>;
 
       using Parent::traceOf;
@@ -516,6 +525,7 @@ namespace Rodin::Variational
     static_assert(std::is_invocable_v<FImag, const Geometry::Point&>);
 
     public:
+      /// @brief Parent class type.
       using Parent = ComplexFunctionBase<ComplexFunction<FReal, FImag>>;
 
       using Parent::traceOf;

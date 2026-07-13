@@ -125,6 +125,11 @@ namespace Rodin::FormLanguage
   };
 }
 
+/**
+ * @defgroup RodinGeometry Geometry Module
+ * @brief Meshes, polytopes, connectivity, and geometric transformations.
+ */
+
 namespace Rodin::Geometry
 {
   /**
@@ -839,6 +844,7 @@ namespace Rodin::Geometry
       using Context =
         Context::Local;
 
+      /// @brief Parent class type.
       using Parent =
         MeshBase;
 

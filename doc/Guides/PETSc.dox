@@ -56,7 +56,7 @@
 
   @subsection guides-petsc-gridfunction Grid Functions
 
-  @ref Rodin::PETSc::Variational::GridFunction "PETSc::Variational::GridFunction"
+  `PETSc::Variational`::GridFunction "PETSc::Variational::GridFunction"
   stores DOF coefficients in a PETSc `Vec`.  It supports:
 
   | Feature | Description |
@@ -98,7 +98,7 @@
   @subsection guides-petsc-problem Problem
 
   The PETSc `Problem` assembles into a
-  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" containing
+  `PETSc::Math`::LinearSystem "PETSc::Math::LinearSystem" containing
   the system matrix @f$ A @f$, right-hand side @f$ \mathbf{b} @f$, and
   solution @f$ \mathbf{x} @f$:
 
@@ -184,7 +184,7 @@
 
   @section guides-petsc-linearsystem Linear System
 
-  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" couples
+  `PETSc::Math`::LinearSystem "PETSc::Math::LinearSystem" couples
   the PETSc matrix, RHS vector, and solution vector:
 
   @code{.cpp}

@@ -65,10 +65,10 @@
   @section examples-pdes-poisson-mesh Creating the Mesh
 
   We create a triangular mesh on the unit square using
-  @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()" with a
+  @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" with a
   @f$ 16 \times 16 @f$ grid. We also compute the face-to-cell connectivity
   (dimension 1 to dimension 2) via
-  @ref Rodin::Geometry::Connectivity::compute "Connectivity::compute()",
+  @ref Rodin::Geometry::Connectivity "Connectivity::compute()",
   which is needed to identify boundary faces for imposing Dirichlet
   conditions:
 

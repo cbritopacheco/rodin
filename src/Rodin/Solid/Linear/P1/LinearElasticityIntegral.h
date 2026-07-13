@@ -70,6 +70,7 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType;
 
       using TrialFESType = P1<Range, Mesh>;
@@ -78,6 +79,7 @@ namespace Rodin::Variational
       using MuType     = FunctionBase<MuDerived>;
       using LambdaType = FunctionBase<LambdaDerived>;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 

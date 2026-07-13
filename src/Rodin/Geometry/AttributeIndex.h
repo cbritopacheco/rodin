@@ -33,7 +33,7 @@ namespace Rodin::Geometry
    * Data layout
    * -----------
    * The storage is organized by dimension:
-   * - For each @c d in @c [0, meshDim], a @ref Dimension stores:
+   * - For each @c d in @c [0, meshDim], a @c Dimension stores:
    *   - @c slots: a vector of @c Optional<Attribute>, indexed by polytope index.
    *   - @c mutex: a @c std::shared_mutex protecting accesses to @c slots.
    *
@@ -48,8 +48,8 @@ namespace Rodin::Geometry
    * After initialization, concurrent calls to the following methods are safe
    * w.r.t. each other (subject to each method's preconditions):
    * - @ref resize(size_t,size_t)
-   * - @ref set(const std::pair<size_t,Index>&,Attribute)
-   * - @ref set(const std::pair<size_t,Index>&,size_t,Attribute)
+   * - @c set(const std::pair<size_t,Index>&, Attribute)
+   * - @c set(const std::pair<size_t,Index>&, size_t, Attribute)
    * - @ref unset(const std::pair<size_t,Index>&,size_t)
    * - @ref get(const std::pair<size_t,Index>&,size_t) const
    * - @ref getAttributes(size_t) const
@@ -84,7 +84,7 @@ namespace Rodin::Geometry
    *
    * Usage Contract
    * --------------
-   * 1. Call @ref initialize(meshDim) exactly once (or idempotently with the same
+   * 1. Call initialize() exactly once (or idempotently with the same
    *    value) before any concurrent use.
    * 2. Do not change the mesh dimension after initialization.
    * 3. Ensure storage exists (via @ref resize() or via @ref set()) before relying

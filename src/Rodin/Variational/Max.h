@@ -52,10 +52,13 @@ namespace Rodin::Variational
     : public FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Max<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       /**
@@ -171,10 +174,13 @@ namespace Rodin::Variational
     : public RealFunctionBase<Max<FunctionBase<NestedDerived>, Real>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<NestedDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = Real;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Max<FunctionBase<NestedDerived>, RHSType>>;
 
       /**
@@ -286,10 +292,13 @@ namespace Rodin::Variational
     : public Max<FunctionBase<NestedDerived>, Real>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = Real;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = Max<FunctionBase<NestedDerived>, Real>;
 
       constexpr

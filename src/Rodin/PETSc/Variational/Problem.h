@@ -12,7 +12,7 @@
  * @brief PETSc specialization of variational problems.
  *
  * Provides two partial specializations of @ref Rodin::Variational::Problem
- * that assemble into a @ref Rodin::PETSc::Math::LinearSystem:
+ * that assemble into a @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem":
  *
  * 1. **Two-field** (`Problem<LinearSystem, U, V>`): A single trial / test
  *    function pair producing a scalar linear system @f$ A\mathbf{x} = \mathbf{b} @f$.
@@ -839,6 +839,7 @@ namespace Rodin::Variational
             const auto& fes  = uref.get().getFiniteElementSpace();
             const auto& mesh = fes.getMesh();
 
+            /// @brief Mesh type.
             using MeshType = std::decay_t<decltype(mesh)>;
             using Ctx      = typename FormLanguage::Traits<MeshType>::ContextType;
 

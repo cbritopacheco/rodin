@@ -8,7 +8,7 @@
  * @file DirichletBC.h
  * @brief Essential (Dirichlet) boundary conditions, in two flavours.
  *
- * Rodin's @ref DirichletBC encodes a strongly-imposed essential constraint on
+ * Rodin's @c DirichletBC encodes a strongly-imposed essential constraint on
  * a slave trial function @f$ u\in V_h^u @f$ over selected codimension-one
  * mesh facets. With no `.on(...)` selector, this means the exterior boundary.
  * With attributes, this also includes tagged interior facets such as FSI
@@ -18,7 +18,7 @@
  * second argument:
  *
  * 1. **Value-prescribing BC** — `DirichletBC(u, g)` with `g` a
- *    @ref FunctionBase (scalar, vector, or matrix-valued):
+ *    @c FunctionBase (scalar, vector, or matrix-valued):
  *    @f[
  *      u(x) \;=\; g(x), \qquad x \in \Gamma_D.
  *    @f]
@@ -26,7 +26,7 @@
  *    homogeneous case @f$ g\equiv 0 @f$.
  *
  * 2. **Identification BC** — `DirichletBC(u, A(v))` with `A(v)` a
- *    @ref ShapeFunctionBase expression linear in another (trial) shape
+ *    @c ShapeFunctionBase expression linear in another (trial) shape
  *    function @f$ v\in V_h^v @f$:
  *    @f[
  *      u(x) \;=\; A(v)(x), \qquad x \in \Gamma_D,
@@ -105,21 +105,21 @@
  * Lagrange-dual-induced sparsity is preserved bit-for-bit.
  *
  * The identification assembler constructs a pointwise
- * @ref IntegrationPoint from each @ref Geometry::Point and passes it to
- * @ref ShapeFunctionBase::setIntegrationPoint before querying
- * @ref ShapeFunctionBase::getBasis. The pointwise integration point has
+ * @c IntegrationPoint from each @c Geometry::Point and passes it to
+ * ShapeFunctionBase::setIntegrationPoint() before querying
+ * ShapeFunctionBase::getBasis(). The pointwise integration point has
  * `getQuadratureFormula() == nullptr`, which selects direct reference-point
  * evaluation without inventing a single-point quadrature rule. During
- * integration, @ref ShapeFunctionBase::setIntegrationPoint remains the
+ * integration, ShapeFunctionBase::setIntegrationPoint() remains the
  * preferred path with a non-null quadrature formula pointer and quadrature
  * index so cached basis tabulations remain available.
  *
  * # Linear-system effect
  *
  * Problem assembly handles the two flavours differently by visiting the
- * variant returned from @ref DirichletBCBase::getDOFs:
+ * variant returned from DirichletBCBase::getDOFs():
  *
- * - For @ref DirichletBCBase::ValueDOFs at slave global index @f$ g_s @f$:
+ * - For @c DirichletBCBase::ValueDOFs at slave global index @f$ g_s @f$:
  *   @f[
  *     A_{g_s,g_s} \leftarrow 1, \quad
  *     A_{g_s,k}   \leftarrow 0 \;\forall k\neq g_s, \quad
@@ -129,7 +129,7 @@
  *   @f$ b_{r} \mathrel{-}= A_{r,g_s}\cdot g_{s} @f$ before being zeroed
  *   according to the current backend's classical essential-BC convention.
  *
- * - For @ref DirichletBCBase::IdentifiedDOFs at slave global index
+ * - For @c DirichletBCBase::IdentifiedDOFs at slave global index
  *   @f$ g_s @f$ with masters @f$ \{g_{m_k}\} @f$ and coefficients
  *   @f$ \{c_k\} @f$:
  *   define an expansion map
@@ -256,7 +256,7 @@ namespace Rodin::Variational
    *
    * The right-hand side of @f$ \ell_s^u(\text{Value}) @f$ has two
    * representations, exposed through a discriminated union via
-   * @ref getDOFs:
+   * getDOFs():
    *
    * - **Value-prescribing** @f$ (\text{Value}=g) @f$: a scalar
    *   @f$ g_s := \ell_s^u(g) @f$ — known at assembly time.
@@ -275,6 +275,7 @@ namespace Rodin::Variational
   class DirichletBCBase : public FormLanguage::Base
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /**
@@ -403,7 +404,7 @@ namespace Rodin::Variational
    * where @f$ \ell_s^u @f$ is the slave finite element's DOF functional —
    * point evaluation @f$ g(x_s) @f$ for Lagrange, an integral / moment
    * pairing for non-nodal elements. The assembler streams these scalars
-   * into the @ref DirichletBCBase::ValueDOFs alternative of the variant
+   * into the @c DirichletBCBase::ValueDOFs alternative of the variant
    * returned by @ref getDOFs.
    *
    * In the global linear system the slave row is replaced by an identity
@@ -431,6 +432,7 @@ namespace Rodin::Variational
     : public DirichletBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType =
         FES;
 
@@ -632,7 +634,7 @@ namespace Rodin::Variational
    * @f]
    * with @f$ d\equiv 0 @f$ in the two-argument constructor. Here
    * @f$ v\in V_h^v @f$ is another (trial) shape function and
-   * @f$ A @f$ is any operator producing a @ref ShapeFunctionBase
+   * @f$ A @f$ is any operator producing a @c ShapeFunctionBase
    * (e.g. the identity @f$ A=\mathrm{id} @f$, a component @f$ A(v)=v_x @f$,
    * a left product @f$ A(v)=f\,v @f$, a matrix product @f$ A(v)=R\,v @f$,
    * sums of these, …).
@@ -662,7 +664,7 @@ namespace Rodin::Variational
    * @f]
    *
    * The assembler stores the per-slave linear row as the
-   * @ref DirichletBCBase::IdentifiedDOFs alternative — a sparse list of
+   * @c DirichletBCBase::IdentifiedDOFs alternative — a sparse list of
    * `(master DOF index, coefficient)` pairs, with strict @f$ C_{sj}=0 @f$
    * pruning so that Lagrange-dual sparsity (e.g. @f$ \delta_{sj} @f$ for
    * @f$ A=\mathrm{id} @f$ on the same FES) is preserved bit-for-bit. If a
@@ -708,13 +710,13 @@ namespace Rodin::Variational
    * @f]
    * via the slave-FES pullback, and then asking
    * @c fe_u.getLinearForm(s) to apply *its own* DOF functional to it. The
-   * callable in turn constructs a pointwise @ref IntegrationPoint from
-   * @f$ p @f$, passes it to @ref ShapeFunctionBase::setIntegrationPoint on
-   * @f$ A(v) @f$, and queries @ref ShapeFunctionBase::getBasis for the
+   * callable in turn constructs a pointwise @c IntegrationPoint from
+   * @f$ p @f$, passes it to ShapeFunctionBase::setIntegrationPoint() on
+   * @f$ A(v) @f$, and queries ShapeFunctionBase::getBasis() for the
    * selected master basis. That pointwise integration point carries a null
    * quadrature-formula pointer, so no synthetic single-point quadrature rule
    * is needed. During quadrature integration, callers should continue to use
-   * @ref ShapeFunctionBase::setIntegrationPoint with the active quadrature
+   * ShapeFunctionBase::setIntegrationPoint() with the active quadrature
    * formula and quadrature index so quadrature metadata remains available.
    *
    * The slave FE decides where to sample the callable — point evaluation
@@ -777,6 +779,7 @@ namespace Rodin::Variational
     : public DirichletBCBase<typename FormLanguage::Traits<FES1>::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES1;
 
       /// Operand type (the slave trial function)
@@ -973,15 +976,15 @@ namespace Rodin::Variational
        * @f$ p\mapsto A(\varphi_j^{v,K})(p) @f$ via the slave-FES
        * pullback and asking @c fe_u.getLinearForm(s) to apply its DOF
        * functional to it. The callable builds a pointwise
-       * @ref IntegrationPoint with a null quadrature-formula pointer, passes
-       * it to @ref ShapeFunctionBase::setIntegrationPoint on @f$ A(v) @f$,
-       * and then queries @ref ShapeFunctionBase::getBasis. Quadrature
+       * @c IntegrationPoint with a null quadrature-formula pointer, passes
+       * it to ShapeFunctionBase::setIntegrationPoint() on @f$ A(v) @f$,
+       * and then queries ShapeFunctionBase::getBasis(). Quadrature
        * integration code should continue to use
-       * @ref ShapeFunctionBase::setIntegrationPoint with the active
+       * ShapeFunctionBase::setIntegrationPoint() with the active
        * quadrature formula and quadrature index.
        *
        * Strict @f$ C_{sj}\neq 0 @f$ pruning is applied; the linear part is the
-       * @ref DirichletBCBase::IdentifiedDOFs alternative of the variant
+       * @c DirichletBCBase::IdentifiedDOFs alternative of the variant
        * returned by @ref getDOFs. If the three-argument constructor was used,
        * the same slave linear form is applied to the known defect and exposed
        * through @ref getIdentificationValues.
@@ -1056,7 +1059,7 @@ namespace Rodin::Variational
 
       /**
        * @returns The variant DOFs map; this specialization writes the
-       *          @ref DirichletBCBase::IdentifiedDOFs alternative.
+       *          @c DirichletBCBase::IdentifiedDOFs alternative.
        */
       const DOFs& getDOFs() const override
       {

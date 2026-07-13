@@ -43,18 +43,21 @@ namespace Rodin::Assembly
     : public AssemblyBase<::Vec, Variational::LinearForm<FES, ::Vec>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
       static_assert(
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar for PETSc Vec assembly"
       );
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         ::Vec;
 
       using LinearFormType =
         Variational::LinearForm<FES, VectorType>;
 
+      /// @brief Parent class type.
       using Parent =
         AssemblyBase<VectorType, LinearFormType>;
 
@@ -218,6 +221,7 @@ namespace Rodin::Assembly
         "FES ScalarTypes must yield PetscScalar for PETSc Mat assembly"
       );
 
+      /// @brief Assembled operator type.
       using OperatorType =
         ::Mat;
 
@@ -227,6 +231,7 @@ namespace Rodin::Assembly
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<PetscScalar>;
 
+      /// @brief Parent class type.
       using Parent =
         AssemblyBase<OperatorType, BilinearFormType>;
 
@@ -492,11 +497,13 @@ namespace Rodin::Assembly
         Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U, V>>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
       using ProblemType      = Rodin::Variational::Problem<LinearSystemType, U, V>;
       using Parent           = AssemblyBase<LinearSystemType, ProblemType>;
       using InputType        = typename Parent::InputType;
 
+      /// @brief Assembled operator type.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
       using ScalarType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
@@ -1289,6 +1296,7 @@ namespace Rodin::Assembly
         Rodin::Variational::Problem<Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...>>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = Rodin::PETSc::Math::LinearSystem;
 
       using ProblemType =
@@ -1297,6 +1305,7 @@ namespace Rodin::Assembly
       using Parent    = AssemblyBase<LinearSystemType, ProblemType>;
       using InputType = typename Parent::InputType;
 
+      /// @brief Assembled operator type.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 

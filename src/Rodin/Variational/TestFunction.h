@@ -23,8 +23,10 @@ namespace Rodin::FormLanguage
   template <class FES>
   struct Traits<Variational::TestFunction<FES>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Variational::TestSpace;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType =
+        Variational::TestSpace;
   };
 }
 

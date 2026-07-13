@@ -1824,8 +1824,11 @@ namespace Rodin::IO
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename)
     {
+      /// @brief Finite element space type.
       using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       const size_t nv = getXDMFVisualizationVertexCount(visMesh);
@@ -2019,8 +2022,11 @@ namespace Rodin::IO
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename)
     {
+      /// @brief Finite element space type.
       using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       // In distributed mode `visMesh` is the per-rank shard; emit only

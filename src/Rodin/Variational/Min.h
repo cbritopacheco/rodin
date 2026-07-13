@@ -53,10 +53,13 @@ namespace Rodin::Variational
     : public FunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Min<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       /**
@@ -168,12 +171,16 @@ namespace Rodin::Variational
     : public RealFunctionBase<Min<FunctionBase<NestedDerived>, Real>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<NestedDerived>;
 
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ScalarType;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Min<FunctionBase<NestedDerived>, RHSType>>;
 
       /**
@@ -284,10 +291,13 @@ namespace Rodin::Variational
     : public Min<FunctionBase<NestedDerived>, Real>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = Real;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = Min<FunctionBase<NestedDerived>, Real>;
 
       constexpr

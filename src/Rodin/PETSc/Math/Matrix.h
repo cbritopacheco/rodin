@@ -48,7 +48,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<::Mat>
   {
-    using ScalarType = PetscScalar;
+    /// @brief Scalar value type.
+      using ScalarType = PetscScalar;
   };
 }
 

@@ -54,7 +54,8 @@ namespace Rodin::FormLanguage
   template <class LinearSystem>
   struct Traits<Solver::SimplicialLLT<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 

@@ -20,6 +20,7 @@ namespace Rodin::Variational
   class TestFunctionMismatchException : public Alert::Exception
   {
     public:
+      /// @brief Parent class type.
       using Parent = Alert::Exception;
 
       template <class UPb>

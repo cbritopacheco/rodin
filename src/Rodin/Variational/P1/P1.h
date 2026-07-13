@@ -25,19 +25,27 @@ namespace Rodin::FormLanguage
   template <class Scalar, class Mesh>
   struct Traits<Variational::P1<Scalar, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Scalar;
-    using RangeType = ScalarType;
-    using ElementType = Variational::P1Element<RangeType>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = ScalarType;
+    /// @brief Finite element type.
+      using ElementType = Variational::P1Element<RangeType>;
   };
 
   template <class Scalar, class Mesh>
   struct Traits<Variational::P1<Math::SpatialVector<Scalar>, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Scalar;
-    using RangeType = Math::SpatialVector<ScalarType>;
-    using ElementType = Variational::P1Element<Math::SpatialVector<ScalarType>>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+    /// @brief Finite element type.
+      using ElementType = Variational::P1Element<Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -71,6 +79,7 @@ namespace Rodin::Variational
         Geometry::Mesh<Context::Local>, P1<Scalar, Geometry::Mesh<Context::Local>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Range type of value
@@ -435,6 +444,7 @@ namespace Rodin::Variational
     using IndexMap = FlatMap<Index, Index>;
 
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Range type of value

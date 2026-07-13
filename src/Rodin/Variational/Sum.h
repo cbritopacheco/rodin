@@ -32,8 +32,10 @@ namespace Rodin::FormLanguage
   struct Traits<
     Variational::Sum<Variational::FunctionBase<LHSDerived>, Variational::FunctionBase<RHSDerived>>>
   {
-    using LHSType = Variational::FunctionBase<LHSDerived>;
-    using RHSType = Variational::FunctionBase<RHSDerived>;
+    /// @brief Left-hand side operand type.
+      using LHSType = Variational::FunctionBase<LHSDerived>;
+    /// @brief Right-hand side operand type.
+      using RHSType = Variational::FunctionBase<RHSDerived>;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -42,10 +44,13 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    using FESType = FES;
-    using LHSType = Variational::FunctionBase<LHSDerived>;
-    using RHSType = Variational::FunctionBase<RHSDerived>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+    /// @brief Left-hand side operand type.
+      using LHSType = Variational::FunctionBase<LHSDerived>;
+    /// @brief Right-hand side operand type.
+      using RHSType = Variational::FunctionBase<RHSDerived>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 
   template <class LHSNumber, class RHSNumber>
@@ -54,16 +59,20 @@ namespace Rodin::FormLanguage
       Variational::LinearFormIntegratorBase<LHSNumber>,
       Variational::LinearFormIntegratorBase<RHSNumber>>>
   {
-    using LHSScalarType = LHSNumber;
+    /// @brief Scalar type of the left-hand side operand.
+      using LHSScalarType = LHSNumber;
 
-    using RHSScalarType = RHSNumber;
+    /// @brief Scalar type of the right-hand side operand.
+      using RHSScalarType = RHSNumber;
 
-    using LHSType = Variational::LinearFormIntegratorBase<LHSScalarType>;
+    /// @brief Left-hand side operand type.
+      using LHSType = Variational::LinearFormIntegratorBase<LHSScalarType>;
 
-    using RHSType = Variational::LinearFormIntegratorBase<RHSScalarType>;
+    /// @brief Right-hand side operand type.
+      using RHSType = Variational::LinearFormIntegratorBase<RHSScalarType>;
 
-    using ScalarType =
-      typename FormLanguage::Sum<LHSScalarType, RHSScalarType>::Type;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Sum<LHSScalarType, RHSScalarType>::Type;
   };
 
 }
@@ -95,12 +104,17 @@ namespace Rodin::Variational
     : public FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Sum<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
@@ -300,17 +314,23 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Sum<ShapeFunctionBase<LHSDerived, FES, Space>, ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, FES, Space>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, FES, Space>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Sum<LHSType, RHSType>, FES, Space>;
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
 
@@ -428,16 +448,22 @@ namespace Rodin::Variational
         LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = LinearFormIntegratorBase<LHSScalarType>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = LinearFormIntegratorBase<RHSScalarType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -475,16 +501,22 @@ namespace Rodin::Variational
               LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = LinearFormIntegratorBase<LHSScalarType>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -523,16 +555,22 @@ namespace Rodin::Variational
               LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = LinearFormIntegratorBase<RHSScalarType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -573,16 +611,22 @@ namespace Rodin::Variational
           LinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = FormLanguage::List<LinearFormIntegratorBase<LHSNumber>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FormLanguage::List<LinearFormIntegratorBase<RHSNumber>>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -623,16 +667,22 @@ namespace Rodin::Variational
               LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = LocalBilinearFormIntegratorBase<LHSScalarType>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = LocalBilinearFormIntegratorBase<RHSScalarType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -671,16 +721,22 @@ namespace Rodin::Variational
               LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = LocalBilinearFormIntegratorBase<LHSScalarType>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -722,16 +778,22 @@ namespace Rodin::Variational
               LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<LHSNumber>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = LocalBilinearFormIntegratorBase<RHSScalarType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -774,16 +836,22 @@ namespace Rodin::Variational
           LocalBilinearFormIntegratorBase<typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type>>
   {
     public:
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = LHSNumber;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = RHSNumber;
 
+      /// @brief Left-hand side operand type.
       using LHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FormLanguage::List<LocalBilinearFormIntegratorBase<RHSNumber>>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Sum<LHSNumber, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LocalBilinearFormIntegratorBase<ScalarType>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)
@@ -823,10 +891,13 @@ namespace Rodin::Variational
     : public FormLanguage::List<BilinearFormBase<Operator>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = BilinearFormBase<Operator>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = BilinearFormBase<Operator>;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<BilinearFormBase<Operator>>;
 
       Sum(const LHSType& lhs, const RHSType& rhs)

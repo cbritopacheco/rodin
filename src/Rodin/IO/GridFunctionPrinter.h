@@ -58,8 +58,10 @@ namespace Rodin::IO
   class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Coefficient data storage type.
       using DataType = Data;
 
       /**

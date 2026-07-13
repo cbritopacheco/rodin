@@ -227,7 +227,7 @@ namespace Rodin::MMG
        * @brief Gets the configured material split map.
        * @returns Immutable split policy map.
        *
-       * This is the user-provided map set by @ref setSplit/@ref split/@ref noSplit.
+       * This is the user-provided map set by setSplit() / split() / noSplit().
        * Internally, the implementation may derive temporary unique labels, but
        * those are not exposed here.
        */

@@ -24,7 +24,7 @@
  *     (rho / dt) (u^{n+1}, v)
  *   + rho ((u^n \cdot \nabla) u^{n+1}, v)
  *   + (rho / 2) ((\nabla \cdot u^n) u^{n+1}, v)
- *   + mu (\nablau^{n+1}, \nablav)
+ *   + mu (\nabla u^{n+1}, \nabla v)
  *   - (p^{n+1}, \nabla \cdot v)
  *   + (\nabla \cdot u^{n+1}, q)
  *   + eps_p (p^{n+1}, q)
@@ -36,7 +36,7 @@
  *   - mu is the viscosity,
  *   - dt is the time step,
  *   - the convective velocity is frozen at the previous time step u^n,
- *   - the additional (\nabla\cdotu^n) term yields the skew-symmetric Oseen form,
+ *   - the additional (\nabla\cdot u^n) term yields the skew-symmetric Oseen form,
  *   - eps_p is a tiny pressure-block diagonal filler used only to improve
  *     robustness of sparse direct factorization for the mixed system.
  *
@@ -292,8 +292,8 @@ int main(int argc, char** argv)
       flow =
           // Backward Euler time derivative:
           //   (rho / dt) (u - u_old, v)
-          (rho / dt) * Integral(u, v)
-        - (rho / dt) * Integral(u_old, v)
+        (rho / dt) * Integral(u, v) -
+        (rho / dt) * Integral(u_old, v)
 
           // Linearized convection:
           //   rho ((u_old \cdot \nabla)u, v)
@@ -304,7 +304,7 @@ int main(int argc, char** argv)
         + 0.5 * rho * Integral(div_u_old * Dot(u, v))
 
           // Viscous term:
-          //   mu (\nablau, \nablav)
+          //   mu (\nabla u, \nabla v)
         + mu * Integral(Jacobian(u), Jacobian(v))
 
           // Pressure-velocity coupling:
@@ -317,16 +317,15 @@ int main(int argc, char** argv)
 
           // Tiny pressure-block diagonal filler.
           //
-          // This is not pressure stabilization in the inf-sup sense. It is only a
-          // numerical aid for sparse direct factorization of the mixed system.
+        // This is not pressure stabilization in the inf-sup sense. It is only a
+        // numerical aid for sparse direct factorization of the mixed system.
         + 1e-12 * Integral(p, q)
 
-          // No-slip boundary conditions on the cavity walls.
-        + DirichletBC(u, Zero(dim)).on(left)
-        + DirichletBC(u, Zero(dim)).on(right)
-        + DirichletBC(u, Zero(dim)).on(bottom)
+        // No-slip boundary conditions on the cavity walls.
+        + DirichletBC(u, Zero(dim)).on(left) + DirichletBC(u, Zero(dim)).on(right) +
+        DirichletBC(u, Zero(dim)).on(bottom)
 
-          // Moving lid on the top boundary.
+        // Moving lid on the top boundary.
         + DirichletBC(u, lidVelocity).on(top);
 
       Alert::Info() << "Assembling time step " << k + 1 << " / " << Nt << "..."

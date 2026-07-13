@@ -45,6 +45,7 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
+      /// @brief Parent class type.
       using Parent = PolytopeTransformation;
       using Parent::transform;
       using Parent::jacobian;
