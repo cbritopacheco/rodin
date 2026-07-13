@@ -28,7 +28,7 @@ using namespace Rodin::Test::Random;
  * @f[
  * \left\{
  * \begin{aligned}
- *   -\Delta \mathbf{u} + ∇p &= \mathbf{f} \quad \text{in } \Omega,\\
+ *   -\Delta \mathbf{u} + \nabla p &= \mathbf{f} \quad \text{in } \Omega,\\
  *   \nabla \cdot \mathbf{u} &= 0 \quad \text{in } \Omega,\\
  *   \mathbf{u} &= \mathbf{g} \quad \text{on } \partial\Omega.
  * \end{aligned}
@@ -511,7 +511,7 @@ namespace Rodin::Tests::Manufactured::Stokes
    *
    * Forcing function (computed from -Δu + ∇p):
    * @f[
-   *  \mathbf{f}(x, y) = -\Delta\mathbf{u} + ∇p
+   *  \mathbf{f}(x, y) = -\Delta\mathbf{u} + \nabla p
    * @f]
    *
    * Boundary conditions:
