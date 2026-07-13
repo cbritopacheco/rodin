@@ -136,6 +136,7 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for a dynamic Math::Vector: exposes the scalar type.
   template <class Number>
   struct Traits<Math::Vector<Number>>
   {
@@ -143,11 +144,14 @@ namespace Rodin::FormLanguage
       using ScalarType = Number;
   };
 
+  /// @brief Type traits for a Math::FixedSizeVector: exposes the scalar type
+  /// and the compile-time size.
   template <class Number, size_t S>
   struct Traits<Math::FixedSizeVector<Number, S>>
   {
     /// @brief Scalar value type.
       using ScalarType = Number;
+      /// @brief Compile-time number of elements.
       static constexpr size_t Size = S;
   };
 }

@@ -80,6 +80,7 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for a dense Math::Matrix: exposes the scalar type.
   template <class Number>
   struct Traits<Math::Matrix<Number>>
   {
