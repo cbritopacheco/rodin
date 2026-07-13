@@ -190,7 +190,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * VectorFunction class, please see @ref VectorFunctionSpecializations.
+   * VectorFunction class, please see `Vec`torFunctionSpecializations.
    *
    * @see VectorFunctionSpecializations
    */
@@ -205,7 +205,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * MatrixFunction class, please see @ref MatrixFunctionSpecializations.
+   * MatrixFunction class, please see `Mat`rixFunctionSpecializations.
    *
    * @see MatrixFunctionSpecializations
    */

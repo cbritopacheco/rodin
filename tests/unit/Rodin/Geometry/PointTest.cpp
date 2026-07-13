@@ -16,6 +16,7 @@ using namespace Rodin::Geometry;
 
 // ==================== Basic Construction Tests ====================
 
+/// @brief Verifies basic construction 2 D triangle for geometry point by checking exact expected values.
 TEST(Geometry_Point, BasicConstruction_2D_Triangle)
 {
   // Create a simple 2D triangular mesh
@@ -48,6 +49,7 @@ TEST(Geometry_Point, BasicConstruction_2D_Triangle)
   EXPECT_EQ(p.getDimension(PointBase::Coordinates::Reference), 2);
 }
 
+/// @brief Verifies basic construction 3 D tetrahedron for geometry point by checking exact expected values.
 TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 {
   // Create a simple 3D tetrahedral mesh
@@ -83,6 +85,7 @@ TEST(Geometry_Point, BasicConstruction_3D_Tetrahedron)
 
 // ==================== Copy and Move Semantics Tests ====================
 
+/// @brief Verifies copy construction for geometry point by checking tolerance-based numerical results, exact expected values, copy semantics.
 TEST(Geometry_Point, CopyConstruction)
 {
   Mesh mesh;
@@ -113,6 +116,7 @@ TEST(Geometry_Point, CopyConstruction)
   EXPECT_NEAR(p1.y(), p2.y(), 1e-10);
 }
 
+/// @brief Verifies move construction for geometry point by checking tolerance-based numerical results, move semantics.
 TEST(Geometry_Point, MoveConstruction)
 {
   Mesh mesh;
@@ -146,6 +150,7 @@ TEST(Geometry_Point, MoveConstruction)
 
 // ==================== Coordinate Access Tests ====================
 
+/// @brief Verifies coordinate access XYZ for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, CoordinateAccess_XYZ)
 {
   Mesh mesh;
@@ -182,6 +187,7 @@ TEST(Geometry_Point, CoordinateAccess_XYZ)
   EXPECT_NEAR(p(2), 0.25, 1e-10);
 }
 
+/// @brief Verifies coordinate access as vector for geometry point by checking tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, CoordinateAccess_AsVector)
 {
   Mesh mesh;
@@ -211,6 +217,7 @@ TEST(Geometry_Point, CoordinateAccess_AsVector)
   EXPECT_NEAR(vec(1), 1.0, 1e-10);
 }
 
+/// @brief Verifies get physical coordinates for geometry point by checking tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetPhysicalCoordinates)
 {
   Mesh mesh;
@@ -240,6 +247,7 @@ TEST(Geometry_Point, GetPhysicalCoordinates)
   EXPECT_NEAR(pc(1), 1.0, 1e-10);
 }
 
+/// @brief Verifies get reference coordinates for geometry point by checking tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetReferenceCoordinates)
 {
   Mesh mesh;
@@ -271,6 +279,7 @@ TEST(Geometry_Point, GetReferenceCoordinates)
 
 // ==================== Norm Tests ====================
 
+/// @brief Verifies norm calculations for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, NormCalculations)
 {
   Mesh mesh;
@@ -302,6 +311,7 @@ TEST(Geometry_Point, NormCalculations)
   EXPECT_NEAR(sqNorm, 9.0, 1e-10);
 }
 
+/// @brief Verifies norm 3 D for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, Norm_3D)
 {
   Mesh mesh;
@@ -333,6 +343,7 @@ TEST(Geometry_Point, Norm_3D)
 
 // ==================== Jacobian Tests ====================
 
+/// @brief Verifies get jacobian 2 D for geometry point by checking tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetJacobian_2D)
 {
   Mesh mesh;
@@ -365,6 +376,7 @@ TEST(Geometry_Point, GetJacobian_2D)
   EXPECT_NEAR(jac(1, 1), 1.0, 1e-10);
 }
 
+/// @brief Verifies get jacobian determinant 2 D for geometry point.
 TEST(Geometry_Point, GetJacobianDeterminant_2D)
 {
   Mesh mesh;
@@ -392,6 +404,7 @@ TEST(Geometry_Point, GetJacobianDeterminant_2D)
   EXPECT_GT(det, 0.0);  // Should be positive for proper orientation
 }
 
+/// @brief Verifies get jacobian inverse 2 D for geometry point by checking tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, GetJacobianInverse_2D)
 {
   Mesh mesh;
@@ -431,6 +444,7 @@ TEST(Geometry_Point, GetJacobianInverse_2D)
 
 // ==================== Distortion Tests ====================
 
+/// @brief Verifies get distortion 2 D for geometry point.
 TEST(Geometry_Point, GetDistortion_2D)
 {
   Mesh mesh;
@@ -460,6 +474,7 @@ TEST(Geometry_Point, GetDistortion_2D)
 
 // ==================== Comparison Tests ====================
 
+/// @brief Verifies lexicographical comparison for geometry point by checking true predicates.
 TEST(Geometry_Point, LexicographicalComparison)
 {
   Mesh mesh;
@@ -493,6 +508,7 @@ TEST(Geometry_Point, LexicographicalComparison)
 
 // ==================== SetPolytope Tests ====================
 
+/// @brief Verifies set polytope for geometry point by checking exact expected values.
 TEST(Geometry_Point, SetPolytope)
 {
   Mesh mesh;
@@ -525,6 +541,7 @@ TEST(Geometry_Point, SetPolytope)
 
 // ==================== Arithmetic Operations Tests ====================
 
+/// @brief Verifies addition with vector for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, AdditionWithVector)
 {
   Mesh mesh;
@@ -557,6 +574,7 @@ TEST(Geometry_Point, AdditionWithVector)
   EXPECT_NEAR(result(1), p.y() + 2.0, 1e-10);
 }
 
+/// @brief Verifies subtraction with vector for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, SubtractionWithVector)
 {
   Mesh mesh;
@@ -589,6 +607,7 @@ TEST(Geometry_Point, SubtractionWithVector)
   EXPECT_NEAR(result(1), p.y() - 0.2, 1e-10);
 }
 
+/// @brief Verifies addition of points for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, AdditionOfPoints)
 {
   Mesh mesh;
@@ -621,6 +640,7 @@ TEST(Geometry_Point, AdditionOfPoints)
   EXPECT_NEAR(result(1), p1.y() + p2.y(), 1e-10);
 }
 
+/// @brief Verifies subtraction of points for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, SubtractionOfPoints)
 {
   Mesh mesh;
@@ -653,6 +673,7 @@ TEST(Geometry_Point, SubtractionOfPoints)
   EXPECT_NEAR(result(1), p1.y() - p2.y(), 1e-10);
 }
 
+/// @brief Verifies scalar multiplication for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, ScalarMultiplication)
 {
   Mesh mesh;
@@ -688,6 +709,7 @@ TEST(Geometry_Point, ScalarMultiplication)
 
 // ==================== Edge Case Tests ====================
 
+/// @brief Verifies edge case point at vertex for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, EdgeCase_PointAtVertex)
 {
   Mesh mesh;
@@ -715,6 +737,7 @@ TEST(Geometry_Point, EdgeCase_PointAtVertex)
   EXPECT_NEAR(p.y(), 0.0, 1e-10);
 }
 
+/// @brief Verifies edge case point on edge for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, EdgeCase_PointOnEdge)
 {
   Mesh mesh;
@@ -744,6 +767,7 @@ TEST(Geometry_Point, EdgeCase_PointOnEdge)
 
 // ==================== 3D Specific Tests ====================
 
+/// @brief Verifies 3 D jacobian determinant for geometry point.
 TEST(Geometry_Point, 3D_JacobianDeterminant)
 {
   Mesh mesh;
@@ -773,6 +797,7 @@ TEST(Geometry_Point, 3D_JacobianDeterminant)
   EXPECT_GT(det, 0.0);  // Should be positive
 }
 
+/// @brief Verifies 3 D jacobian inverse for geometry point by checking tolerance-based numerical results, exact expected values.
 TEST(Geometry_Point, 3D_JacobianInverse)
 {
   Mesh mesh;
@@ -818,6 +843,7 @@ TEST(Geometry_Point, 3D_JacobianInverse)
 
 // ==================== Construction with Physical Coordinates ====================
 
+/// @brief Verifies construction with physical coordinates for geometry point by checking tolerance-based numerical results.
 TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 {
   Mesh mesh;
@@ -852,6 +878,7 @@ TEST(Geometry_Point, ConstructionWithPhysicalCoordinates)
 
 // ==================== GetPolytope Tests ====================
 
+/// @brief Verifies get polytope valid reference for geometry point by checking exact expected values.
 TEST(Geometry_Point, GetPolytope_ValidReference)
 {
   Mesh mesh;

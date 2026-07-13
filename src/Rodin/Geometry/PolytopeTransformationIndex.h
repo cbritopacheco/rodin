@@ -65,7 +65,8 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization save method.
        * @param[in,out] ar Archive object
-       * @param[in] version Serialization version (unused)
+       *
+       * The serialization version argument is ignored.
        */
       template <class Archive>
       void save(Archive& ar, const unsigned int) const
@@ -76,9 +77,9 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization load method.
        * @param[in,out] ar Archive object
-       * @param[in] version Serialization version (unused)
        *
-       * Restores both the unique_ptr and synchronizes the atomic pointer.
+       * Restores both the unique_ptr and synchronizes the atomic pointer. The
+       * serialization version argument is ignored.
        */
       template <class Archive>
       void load(Archive& ar, const unsigned int)
@@ -134,7 +135,8 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization method.
        * @param[in,out] ar Archive object
-       * @param[in] version Serialization version (unused)
+       *
+       * The serialization version argument is ignored.
        *
        * @note The mutex is not serialized.
        */

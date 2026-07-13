@@ -29,8 +29,7 @@ namespace Rodin::Utility
    *
    * Example usage:
    * @code{.cpp}
-   * using ThreeInts = Repeat<3, int>::Type;
-   * // ThreeInts is Tuple<int, int, int>
+   * // Repeat<3, int> exposes the tuple containing three int entries.
    * @endcode
    */
   template <size_t N, class T>
@@ -68,7 +67,7 @@ namespace Rodin::Utility
    * @tparam N The number of repetitions (N > 1).
    * @tparam T The type to repeat.
    *
-   * Recursively concatenates Tuple<T> with Repeat<N-1, T>::Type.
+   * Recursively concatenates the one-element tuple with the repeated tail.
    */
   template <size_t N, class T>
   struct Repeat

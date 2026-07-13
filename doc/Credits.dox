@@ -80,7 +80,6 @@
 
   @section References
 
-  See the @link citelist full reference list @endlink  to the scientific papers which have been
+  See the @ref citelist "full reference list" to the scientific papers which have been
   used or provide sources of inspiration for the library.
 */
-

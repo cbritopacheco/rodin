@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Dense matrix manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Dense Matrix manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the Newton solver residual/Jacobian path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 #include <functional>
 #include <cmath>
@@ -20,6 +28,7 @@ using namespace Rodin;
 
 namespace Rodin::Tests::Manufactured
 {
+  /// @brief Helper used by the tests to Dense Linear System.
   using DenseLinearSystem = Math::LinearSystem<Math::Matrix<Real>, Math::Vector<Real>>;
 
   class DenseLinearSolver final : public Solver::LinearSolverBase<DenseLinearSystem>
@@ -185,6 +194,7 @@ namespace Rodin::Tests::Manufactured
       DenseLinearSystem m_system;
   };
 
+  /// @brief Verifies recovers manufactured root for manufactured newton solver dense matrix by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST(ManufacturedNewtonSolverDenseMatrix, RecoversManufacturedRoot)
   {
     Math::Vector<Real> xStar(2);
@@ -211,6 +221,7 @@ namespace Rodin::Tests::Manufactured
     EXPECT_NEAR(x(1), xStar(1), 1e-10);
   }
 
+  /// @brief Verifies solves strong nonlinear system for manufactured newton solver dense matrix by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST(ManufacturedNewtonSolverDenseMatrix, SolvesStrongNonlinearSystem)
   {
     Math::Vector<Real> x(2);

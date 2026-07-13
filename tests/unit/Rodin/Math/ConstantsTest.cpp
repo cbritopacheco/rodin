@@ -20,6 +20,7 @@ class ConstantsTest : public ::testing::Test
 };
 
 // Test pi() function
+/// @brief Test that pi() returns the correct value.
 TEST_F(ConstantsTest, PiFunction)
 {
   // Test that pi() returns the correct value
@@ -39,6 +40,7 @@ TEST_F(ConstantsTest, PiFunction)
 }
 
 // Test epsilon() function
+/// @brief Test that epsilon returns machine epsilon for Real type.
 TEST_F(ConstantsTest, EpsilonFunction)
 {
   // Test that epsilon returns machine epsilon for Real type
@@ -57,6 +59,7 @@ TEST_F(ConstantsTest, EpsilonFunction)
 }
 
 // Test zero() function
+/// @brief Test that zero() returns exactly 0.0.
 TEST_F(ConstantsTest, ZeroFunction)
 {
   // Test that zero() returns exactly 0.0
@@ -74,6 +77,7 @@ TEST_F(ConstantsTest, ZeroFunction)
 }
 
 // Test one() function
+/// @brief Test that one() returns exactly 1.0.
 TEST_F(ConstantsTest, OneFunction)
 {
   // Test that one() returns exactly 1.0
@@ -92,6 +96,7 @@ TEST_F(ConstantsTest, OneFunction)
 }
 
 // Test isZero() function
+/// @brief Test with actual zero.
 TEST_F(ConstantsTest, IsZeroFunction)
 {
   // Test with actual zero
@@ -115,6 +120,7 @@ TEST_F(ConstantsTest, IsZeroFunction)
 }
 
 // Test isOne() function
+/// @brief Test with actual one.
 TEST_F(ConstantsTest, IsOneFunction)
 {
   // Test with actual one
@@ -138,6 +144,7 @@ TEST_F(ConstantsTest, IsOneFunction)
 }
 
 // Test mathematical relationships between constants
+/// @brief Test zero and one relationship.
 TEST_F(ConstantsTest, MathematicalRelationships)
 {
   // Test zero and one relationship
@@ -161,6 +168,7 @@ TEST_F(ConstantsTest, MathematicalRelationships)
 }
 
 // Test usage in practical computations
+/// @brief Test circle area computation: A = π * r².
 TEST_F(ConstantsTest, PracticalUsage)
 {
   // Test circle area computation: A = π * r²
@@ -183,6 +191,7 @@ TEST_F(ConstantsTest, PracticalUsage)
 }
 
 // Test type consistency
+/// @brief Test that all functions return Real type.
 TEST_F(ConstantsTest, TypeConsistency)
 {
   // Test that all functions return Real type
@@ -197,6 +206,7 @@ TEST_F(ConstantsTest, TypeConsistency)
 }
 
 // Test constexpr evaluation
+/// @brief Test that all constant functions can be evaluated at compile time.
 TEST_F(ConstantsTest, ConstexprEvaluation)
 {
   // Test that all constant functions can be evaluated at compile time
@@ -224,6 +234,7 @@ TEST_F(ConstantsTest, ConstexprEvaluation)
 }
 
 // Test precision and numerical stability
+/// @brief Test that pi() is stable across multiple calls.
 TEST_F(ConstantsTest, PrecisionAndStability)
 {
   // Test that pi() is stable across multiple calls

@@ -51,7 +51,7 @@ namespace Rodin::IO
     public:
       /// @brief Finite element space type.
       using FESType    = Variational::P0<Range, Geometry::Mesh<Ctx>>;
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType   = ::Vec;
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
@@ -139,7 +139,7 @@ namespace Rodin::IO
     public:
       /// @brief Finite element space type.
       using FESType    = Variational::P1<Range, Geometry::Mesh<Ctx>>;
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType   = ::Vec;
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
@@ -231,7 +231,7 @@ namespace Rodin::IO
     public:
       /// @brief Finite element space type.
       using FESType    = Variational::H1<K, Range, Geometry::Mesh<Ctx>>;
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType   = ::Vec;
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;

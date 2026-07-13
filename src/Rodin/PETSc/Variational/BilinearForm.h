@@ -13,7 +13,7 @@
  *
  * Provides the partial specialization of
  * @ref Rodin::Variational::BilinearForm that assembles bilinear-form
- * contributions into a PETSc `Mat`.  The resulting matrix represents
+ * contributions into a PETSc @c Mat.  The resulting matrix represents
  * the stiffness (or system) matrix @f$ A @f$ of a discrete finite
  * element system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
@@ -49,7 +49,7 @@ namespace Rodin::Variational
   /**
    * @brief Bilinear form specialization that assembles into a PETSc matrix.
    *
-   * Owns a PETSc `Mat` representing the system matrix @f$ A @f$.  The
+   * Owns a PETSc @c Mat representing the system matrix @f$ A @f$.  The
    * matrix is created in the constructor (using an MPI communicator
    * deduced from the trial and test meshes) and destroyed in the
    * destructor.
@@ -98,7 +98,7 @@ namespace Rodin::Variational
       ///        function.
       using SolutionType = Solution;
 
-      /// @brief PETSc matrix type (`::Mat`) used to store the system
+      /// @brief PETSc matrix type (@c Mat) used to store the system
       ///        matrix @f$ A @f$.
       using OperatorType = ::Mat;
 

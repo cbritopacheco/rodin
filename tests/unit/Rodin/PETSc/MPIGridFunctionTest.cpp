@@ -55,6 +55,7 @@ namespace
     return sharder.gather(0);
   }
 
+  /// @brief Verifies rank filtered const read does not deadlock for PET sc MPI grid function by checking tolerance-based numerical results, MPI behavior.
   TEST(PETSc_MPI_GridFunction, RankFilteredConstReadDoesNotDeadlock)
   {
     auto& world = *g_world;
@@ -81,6 +82,7 @@ namespace
     SUCCEED();
   }
 
+  /// @brief Verifies rank filtered mutable access does not deadlock for PET sc MPI grid function by checking MPI behavior.
   TEST(PETSc_MPI_GridFunction, RankFilteredMutableAccessDoesNotDeadlock)
   {
     auto& world = *g_world;

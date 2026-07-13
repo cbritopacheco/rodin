@@ -41,8 +41,8 @@ namespace Rodin::Adaptation
    * the ordinary Rodin form-language deduction path for the step
    * @ref Rodin::Variational::Problem, the metric @ref Rodin::Variational::BilinearForm,
    * and @ref Rodin::Solver::CG. Every global quantity is a backend-matched
-   * GridFunction; only element-local geometry uses @ref Math::SpatialVector /
-   * @ref Math::SpatialMatrix. WNGIR contains no backend-specific code.
+   * GridFunction; only element-local geometry uses `Mat`h::SpatialVector /
+   * `Mat`h::SpatialMatrix. WNGIR contains no backend-specific code.
    */
   template <class TrialFunctionType, class TestFunctionType>
   class WNGIR

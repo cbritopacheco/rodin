@@ -11,11 +11,11 @@
  * @file TrialFunction.h
  * @brief PETSc-aware trial function wrappers.
  *
- * Provides the `Rodin::PETSc::Variational`::TrialFunction class, a thin
- * wrapper around `Rodin::Variational::TrialFunction` that lives in the
+ * Provides the PETSc-aware trial-function wrapper class, a thin
+ * wrapper around the core variational trial function that lives in the
  * PETSc namespace.  Its CTAD deduction guide automatically associates the
  * trial function with a PETSc-backed
- * `Rodin::PETSc::Variational`::GridFunction as its solution type.
+ * PETSc-backed grid function as its solution type.
  *
  * @see Rodin::PETSc::Variational::TestFunction,
  *      Rodin::PETSc::Variational::GridFunction,
@@ -37,7 +37,7 @@ namespace Rodin::PETSc::Variational
    * and triggers PETSc-specific CTAD.  The CTAD deduction guide
    * automatically sets the `Solution` template parameter to
    * `PETSc::Variational::GridFunction<FES>`, ensuring that the discrete
-   * solution is stored in a PETSc `Vec`.
+   * solution is stored in a PETSc @c Vec.
    *
    * @tparam Solution Solution type (typically
    *         `PETSc::Variational::GridFunction<FES>`).

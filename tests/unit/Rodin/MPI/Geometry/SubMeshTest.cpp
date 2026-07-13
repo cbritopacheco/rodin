@@ -79,6 +79,7 @@ namespace
 
 // ---------------------------------------------------------------------------
 
+/// @brief Verifies is sub mesh for MPI geometry sub mesh by checking true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, IsSubMesh)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -94,6 +95,7 @@ TEST(MPI_Geometry_SubMesh, IsSubMesh)
   EXPECT_TRUE(boundary.isSubMesh());
 }
 
+/// @brief Verifies get parent for MPI geometry sub mesh by checking exact expected values, MPI behavior.
 TEST(MPI_Geometry_SubMesh, GetParent)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -109,6 +111,7 @@ TEST(MPI_Geometry_SubMesh, GetParent)
   EXPECT_EQ(&boundary.getParent(), &mesh);
 }
 
+/// @brief Verifies ancestor chain for MPI geometry sub mesh by checking exact expected values, MPI behavior.
 TEST(MPI_Geometry_SubMesh, AncestorChain)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -126,6 +129,7 @@ TEST(MPI_Geometry_SubMesh, AncestorChain)
   EXPECT_EQ(&ancestors.front().get(), &mesh);
 }
 
+/// @brief Verifies boundary polytope map consistency for MPI geometry sub mesh by checking exact expected values, MPI behavior.
 TEST(MPI_Geometry_SubMesh, BoundaryPolytopeMapConsistency)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -153,6 +157,7 @@ TEST(MPI_Geometry_SubMesh, BoundaryPolytopeMapConsistency)
   }
 }
 
+/// @brief Verifies vertex polytope map consistency for MPI geometry sub mesh by checking exact expected values, MPI behavior.
 TEST(MPI_Geometry_SubMesh, VertexPolytopeMapConsistency)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -178,6 +183,7 @@ TEST(MPI_Geometry_SubMesh, VertexPolytopeMapConsistency)
   }
 }
 
+/// @brief Verifies global boundary cell count for MPI geometry sub mesh by checking exact expected values, MPI behavior.
 TEST(MPI_Geometry_SubMesh, GlobalBoundaryCellCount)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -207,6 +213,7 @@ TEST(MPI_Geometry_SubMesh, GlobalBoundaryCellCount)
   EXPECT_EQ(globalCount, expectedCount);
 }
 
+/// @brief Verifies sparse boundary selection dimension consistent on empty ranks for MPI geometry sub mesh by checking exact expected values, MPI behavior.
 TEST(MPI_Geometry_SubMesh, SparseBoundarySelection_DimensionConsistentOnEmptyRanks)
 {
   const auto& world = *g_world;
@@ -262,6 +269,7 @@ TEST(MPI_Geometry_SubMesh, SparseBoundarySelection_DimensionConsistentOnEmptyRan
   EXPECT_GT(emptyRanks, 0u);
 }
 
+/// @brief Verifies cell submesh by dimension for MPI geometry sub mesh by checking exact expected values, true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, CellSubmeshByDimension)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -290,6 +298,7 @@ TEST(MPI_Geometry_SubMesh, CellSubmeshByDimension)
   EXPECT_EQ(subGlobalCells, parentGlobalCells);
 }
 
+/// @brief Verifies restriction boundary point for MPI geometry sub mesh by checking true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, RestrictionBoundaryPoint)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -328,6 +337,7 @@ TEST(MPI_Geometry_SubMesh, RestrictionBoundaryPoint)
   }
 }
 
+/// @brief Verifies parent inclusion of sub mesh boundary point for MPI geometry sub mesh by checking exact expected values, true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, ParentInclusionOfSubMeshBoundaryPoint)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -358,6 +368,7 @@ TEST(MPI_Geometry_SubMesh, ParentInclusionOfSubMeshBoundaryPoint)
   EXPECT_EQ(parentPoint->getPolytope().getMesh(), mesh);
 }
 
+/// @brief Verifies restriction of parent quadrature point for MPI geometry sub mesh by checking exact expected values, true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, RestrictionOfParentQuadraturePoint)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -390,6 +401,7 @@ TEST(MPI_Geometry_SubMesh, RestrictionOfParentQuadraturePoint)
   EXPECT_EQ(subPoint->getPolytope().getMesh(), static_cast<const MeshBase&>(boundary));
 }
 
+/// @brief Verifies restriction rejects parent cell point on boundary sub mesh for MPI geometry sub mesh by checking false predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, RestrictionRejectsParentCellPointOnBoundarySubMesh)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -414,6 +426,7 @@ TEST(MPI_Geometry_SubMesh, RestrictionRejectsParentCellPointOnBoundarySubMesh)
     << "Boundary SubMesh should reject parent cell points outside its selected dimension.";
 }
 
+/// @brief Verifies quadrature points use MPI parent mesh identity for MPI geometry sub mesh by checking exact expected values, true predicates, false predicates.
 TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -441,6 +454,7 @@ TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
   EXPECT_EQ(p.getPolytope().getIndex(), localIdx);
 }
 
+/// @brief Verifies quadrature points use MPI sub mesh identity for MPI geometry sub mesh by checking exact expected values, true predicates, false predicates.
 TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPISubMeshIdentity)
 {
   Context::MPI ctx(*g_env, *g_world);
@@ -477,6 +491,7 @@ TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPISubMeshIdentity)
   EXPECT_EQ(p.getPolytope().getIndex(), localIdx);
 }
 
+/// @brief Verifies quadrature cache separates parent and sub mesh identities for MPI geometry sub mesh by checking exact expected values, true predicates, MPI behavior.
 TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
 {
   Context::MPI ctx(*g_env, *g_world);

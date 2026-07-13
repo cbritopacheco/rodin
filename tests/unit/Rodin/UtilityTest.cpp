@@ -34,6 +34,7 @@ class UtilityOverloadedTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies variant visitation for utility overloaded test by checking exact expected values.
 TEST_F(UtilityOverloadedTest, VariantVisitation)
 {
   std::variant<int, std::string, double> var1 = 42;
@@ -51,6 +52,7 @@ TEST_F(UtilityOverloadedTest, VariantVisitation)
   EXPECT_EQ(std::visit(visitor, var3), "double: 3.140000");
 }
 
+/// @brief Verifies multiple argument types for utility overloaded test by checking tolerance-based numerical results, exact expected values.
 TEST_F(UtilityOverloadedTest, MultipleArgumentTypes)
 {
   auto visitor = Overloaded {
@@ -64,6 +66,7 @@ TEST_F(UtilityOverloadedTest, MultipleArgumentTypes)
   EXPECT_EQ(visitor(std::string("test")), "testtest");
 }
 
+/// @brief Verifies nested overloads for utility overloaded test by checking exact expected values.
 TEST_F(UtilityOverloadedTest, NestedOverloads)
 {
   using NestedVariant = std::variant<int, std::variant<std::string, double>>;
@@ -97,6 +100,7 @@ class UtilityIsSpecializationTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies vector specialization for utility is specialization test by checking true predicates, false predicates.
 TEST_F(UtilityIsSpecializationTest, VectorSpecialization)
 {
   EXPECT_TRUE((IsSpecialization<std::vector<int>, std::vector>::Value));
@@ -107,6 +111,7 @@ TEST_F(UtilityIsSpecializationTest, VectorSpecialization)
   EXPECT_FALSE((IsSpecialization<std::string, std::vector>::Value));
 }
 
+/// @brief Verifies variant specialization for utility is specialization test by checking true predicates, false predicates.
 TEST_F(UtilityIsSpecializationTest, VariantSpecialization)
 {
   EXPECT_TRUE((IsSpecialization<std::variant<int>, std::variant>::Value));
@@ -121,6 +126,7 @@ TEST_F(UtilityIsSpecializationTest, VariantSpecialization)
 template<typename T, typename U = int>
 struct CustomTemplate {};
 
+/// @brief Verifies custom template specialization for utility is specialization test by checking true predicates, false predicates.
 TEST_F(UtilityIsSpecializationTest, CustomTemplateSpecialization)
 {
   EXPECT_TRUE((IsSpecialization<CustomTemplate<int>, CustomTemplate>::Value));
@@ -131,6 +137,7 @@ TEST_F(UtilityIsSpecializationTest, CustomTemplateSpecialization)
   EXPECT_FALSE((IsSpecialization<std::vector<int>, CustomTemplate>::Value));
 }
 
+/// @brief Verifies nested template specialization for utility is specialization test by checking true predicates, false predicates.
 TEST_F(UtilityIsSpecializationTest, NestedTemplateSpecialization)
 {
   EXPECT_TRUE((IsSpecialization<std::vector<std::vector<int>>, std::vector>::Value));
@@ -150,6 +157,7 @@ class UtilityFalseTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies basic false behavior for utility false test by checking false predicates.
 TEST_F(UtilityFalseTest, BasicFalseBehavior)
 {
   EXPECT_FALSE(False<>);
@@ -158,6 +166,7 @@ TEST_F(UtilityFalseTest, BasicFalseBehavior)
   EXPECT_FALSE((False<std::string>));
 }
 
+/// @brief Verifies multiple types false for utility false test by checking false predicates.
 TEST_F(UtilityFalseTest, MultipleTypesFalse)
 {
   EXPECT_FALSE((False<int, double>));
@@ -165,6 +174,7 @@ TEST_F(UtilityFalseTest, MultipleTypesFalse)
   EXPECT_FALSE((False<std::vector<int>, CustomTemplate<double>>));
 }
 
+/// @brief Verifies compile time constant for utility false test by checking false predicates.
 TEST_F(UtilityFalseTest, CompileTimeConstant)
 {
   static_assert(False<> == false);
@@ -188,6 +198,7 @@ constexpr bool always_false_helper()
   return False<T>;
 }
 
+/// @brief Verifies template metaprogramming usage for utility false test by checking false predicates.
 TEST_F(UtilityFalseTest, TemplateMetaprogrammingUsage)
 {
   EXPECT_FALSE(always_false_helper<int>());
@@ -203,6 +214,7 @@ class UtilityIntegrationTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Use IsSpecialization to detect vector types and False for default case.
 TEST_F(UtilityIntegrationTest, CombinedUtilities)
 {
   // Use IsSpecialization to detect vector types and False for default case
@@ -233,6 +245,7 @@ TEST_F(UtilityIntegrationTest, CombinedUtilities)
   EXPECT_EQ(typeChecker(text), "other type");
 }
 
+/// @brief Verifies variant with specialization detection for utility integration test by checking exact expected values, true predicates.
 TEST_F(UtilityIntegrationTest, VariantWithSpecializationDetection)
 {
   using TestVariant = std::variant<std::vector<int>, int, std::string>;
@@ -269,6 +282,7 @@ class UtilityZipTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies zip two single element tuples for utility zip test by checking true predicates.
 TEST_F(UtilityZipTest, ZipTwoSingleElementTuples)
 {
   using T1 = Rodin::Tuple<int>;
@@ -279,6 +293,7 @@ TEST_F(UtilityZipTest, ZipTwoSingleElementTuples)
   EXPECT_TRUE((std::is_same_v<ZippedType, Rodin::Tuple<std::pair<int, double>>>));
 }
 
+/// @brief Verifies zip two tuples for utility zip test by checking true predicates.
 TEST_F(UtilityZipTest, ZipTwoTuples)
 {
   using T1 = Rodin::Tuple<int, float>;
@@ -292,6 +307,7 @@ TEST_F(UtilityZipTest, ZipTwoTuples)
   >));
 }
 
+/// @brief Verifies zip three element tuples for utility zip test by checking true predicates.
 TEST_F(UtilityZipTest, ZipThreeElementTuples)
 {
   using T1 = Rodin::Tuple<int, float, char>;
@@ -307,6 +323,7 @@ TEST_F(UtilityZipTest, ZipThreeElementTuples)
   EXPECT_TRUE((std::is_same_v<ZippedType, ExpectedType>));
 }
 
+/// @brief Verifies zip with rodin pair for utility zip test by checking true predicates.
 TEST_F(UtilityZipTest, ZipWithRodinPair)
 {
   using T1 = Rodin::Tuple<int, float>;
@@ -330,6 +347,7 @@ class UtilityProductTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies product single elements for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductSingleElements)
 {
   using T1 = Rodin::Tuple<int>;
@@ -340,6 +358,7 @@ TEST_F(UtilityProductTest, ProductSingleElements)
   EXPECT_TRUE((std::is_same_v<ProductType, Rodin::Tuple<std::pair<int, double>>>));
 }
 
+/// @brief Verifies product one by two for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductOneByTwo)
 {
   using T1 = Rodin::Tuple<int>;
@@ -351,6 +370,7 @@ TEST_F(UtilityProductTest, ProductOneByTwo)
   EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
 }
 
+/// @brief Verifies product two by two for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductTwoByTwo)
 {
   using T1 = Rodin::Tuple<int, float>;
@@ -368,6 +388,7 @@ TEST_F(UtilityProductTest, ProductTwoByTwo)
   EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
 }
 
+/// @brief Verifies product two by three for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductTwoByThree)
 {
   using T1 = Rodin::Tuple<int, float>;
@@ -381,6 +402,7 @@ TEST_F(UtilityProductTest, ProductTwoByThree)
   EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
 }
 
+/// @brief Verifies product three by two for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductThreeByTwo)
 {
   using T1 = Rodin::Tuple<int, float, char>;
@@ -396,6 +418,7 @@ TEST_F(UtilityProductTest, ProductThreeByTwo)
 }
 
 
+/// @brief Verifies product with rodin pair for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductWithRodinPair)
 {
   using T1 = Rodin::Tuple<int, float>;
@@ -419,30 +442,35 @@ class UtilityRepeatTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies repeat zero times for utility repeat test by checking true predicates.
 TEST_F(UtilityRepeatTest, RepeatZeroTimes)
 {
   using ResultType = Repeat<0, int>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<>>));
 }
 
+/// @brief Verifies repeat once for utility repeat test by checking true predicates.
 TEST_F(UtilityRepeatTest, RepeatOnce)
 {
   using ResultType = Repeat<1, int>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<int>>));
 }
 
+/// @brief Verifies repeat twice for utility repeat test by checking true predicates.
 TEST_F(UtilityRepeatTest, RepeatTwice)
 {
   using ResultType = Repeat<2, double>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<double, double>>));
 }
 
+/// @brief Verifies repeat three times for utility repeat test by checking true predicates.
 TEST_F(UtilityRepeatTest, RepeatThreeTimes)
 {
   using ResultType = Repeat<3, char>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<char, char, char>>));
 }
 
+/// @brief Verifies repeat five times for utility repeat test by checking true predicates.
 TEST_F(UtilityRepeatTest, RepeatFiveTimes)
 {
   using ResultType = Repeat<5, bool>::Type;
@@ -450,6 +478,7 @@ TEST_F(UtilityRepeatTest, RepeatFiveTimes)
   EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
 }
 
+/// @brief Verifies repeat with complex type for utility repeat test by checking true predicates.
 TEST_F(UtilityRepeatTest, RepeatWithComplexType)
 {
   using ResultType = Repeat<3, std::string>::Type;
@@ -467,42 +496,49 @@ class UtilityUnwrapReferenceTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies non reference wrapper for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, NonReferenceWrapper)
 {
   using ResultType = UnwrapReference<int>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, int>));
 }
 
+/// @brief Verifies unwrap reference wrapper for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, UnwrapReferenceWrapper)
 {
   using ResultType = UnwrapReference<std::reference_wrapper<int>>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, int&>));
 }
 
+/// @brief Verifies unwrap const reference wrapper for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, UnwrapConstReferenceWrapper)
 {
   using ResultType = UnwrapReference<std::reference_wrapper<const int>>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, const int&>));
 }
 
+/// @brief Verifies const type no wrapper for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, ConstTypeNoWrapper)
 {
   using ResultType = UnwrapReference<const double>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, const double>));
 }
 
+/// @brief Verifies unwrap ref decay for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecay)
 {
   using ResultType = UnwrapRefDecay<std::reference_wrapper<int>>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, int&>));
 }
 
+/// @brief Verifies unwrap ref decay with const for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecayWithConst)
 {
   using ResultType = UnwrapRefDecay<const std::reference_wrapper<int>>::Type;
   EXPECT_TRUE((std::is_same_v<ResultType, int&>));
 }
 
+/// @brief Verifies unwrap ref decay plain type for utility unwrap reference test by checking true predicates.
 TEST_F(UtilityUnwrapReferenceTest, UnwrapRefDecayPlainType)
 {
   using ResultType = UnwrapRefDecay<const int&>::Type;
@@ -523,27 +559,32 @@ class UtilityHasTypeMemberTest : public ::testing::Test
     struct WithNestedType { using Type = std::string; };
 };
 
+/// @brief Verifies type with type member for utility has type member test by checking true predicates.
 TEST_F(UtilityHasTypeMemberTest, TypeWithTypeMember)
 {
   EXPECT_TRUE((HasTypeMember<WithType>::Value));
 }
 
+/// @brief Verifies type without type member for utility has type member test by checking false predicates.
 TEST_F(UtilityHasTypeMemberTest, TypeWithoutTypeMember)
 {
   EXPECT_FALSE((HasTypeMember<WithoutType>::Value));
 }
 
+/// @brief Verifies primitive type for utility has type member test by checking false predicates.
 TEST_F(UtilityHasTypeMemberTest, PrimitiveType)
 {
   EXPECT_FALSE((HasTypeMember<int>::Value));
   EXPECT_FALSE((HasTypeMember<double>::Value));
 }
 
+/// @brief Verifies type with nested type for utility has type member test by checking true predicates.
 TEST_F(UtilityHasTypeMemberTest, TypeWithNestedType)
 {
   EXPECT_TRUE((HasTypeMember<WithNestedType>::Value));
 }
 
+/// @brief Verifies std types for utility has type member test by checking false predicates.
 TEST_F(UtilityHasTypeMemberTest, StdTypes)
 {
   EXPECT_FALSE((HasTypeMember<std::string>::Value));
@@ -564,22 +605,26 @@ class UtilityHasValueMemberTest : public ::testing::Test
     struct WithStaticValue { static constexpr int Value = 42; };
 };
 
+/// @brief Verifies type with value member for utility has value member test by checking true predicates.
 TEST_F(UtilityHasValueMemberTest, TypeWithValueMember)
 {
   EXPECT_TRUE((HasValueMember<WithValue>::Value));
 }
 
+/// @brief Verifies type without value member for utility has value member test by checking false predicates.
 TEST_F(UtilityHasValueMemberTest, TypeWithoutValueMember)
 {
   EXPECT_FALSE((HasValueMember<WithoutValue>::Value));
 }
 
+/// @brief Verifies primitive type for utility has value member test by checking false predicates.
 TEST_F(UtilityHasValueMemberTest, PrimitiveType)
 {
   EXPECT_FALSE((HasValueMember<int>::Value));
   EXPECT_FALSE((HasValueMember<double>::Value));
 }
 
+/// @brief HasValueMember checks for a type member, not a static value.
 TEST_F(UtilityHasValueMemberTest, TypeWithStaticValue)
 {
   // HasValueMember checks for a type member, not a static value
@@ -587,6 +632,7 @@ TEST_F(UtilityHasValueMemberTest, TypeWithStaticValue)
   EXPECT_FALSE((HasValueMember<WithStaticValue>::Value));
 }
 
+/// @brief Verifies std types for utility has value member test by checking false predicates.
 TEST_F(UtilityHasValueMemberTest, StdTypes)
 {
   EXPECT_FALSE((HasValueMember<std::string>::Value));
@@ -612,6 +658,7 @@ class UtilityExtractTest : public ::testing::Test
     struct Identity { using Type = T; };
 };
 
+/// @brief Verifies extract with identity for utility extract test by checking true predicates.
 TEST_F(UtilityExtractTest, ExtractWithIdentity)
 {
   using OriginalTuple = Rodin::Tuple<int, double, char>;
@@ -619,6 +666,7 @@ TEST_F(UtilityExtractTest, ExtractWithIdentity)
   EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<int, double, char>>));
 }
 
+/// @brief Verifies extract with add const for utility extract test by checking true predicates.
 TEST_F(UtilityExtractTest, ExtractWithAddConst)
 {
   using OriginalTuple = Rodin::Tuple<int, double, char>;
@@ -627,6 +675,7 @@ TEST_F(UtilityExtractTest, ExtractWithAddConst)
   EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
 }
 
+/// @brief Verifies extract with add pointer for utility extract test by checking true predicates.
 TEST_F(UtilityExtractTest, ExtractWithAddPointer)
 {
   using OriginalTuple = Rodin::Tuple<int, double, char>;
@@ -635,6 +684,7 @@ TEST_F(UtilityExtractTest, ExtractWithAddPointer)
   EXPECT_TRUE((std::is_same_v<ResultType, ExpectedType>));
 }
 
+/// @brief Verifies extract single element for utility extract test by checking true predicates.
 TEST_F(UtilityExtractTest, ExtractSingleElement)
 {
   using OriginalTuple = Rodin::Tuple<int>;
@@ -642,6 +692,7 @@ TEST_F(UtilityExtractTest, ExtractSingleElement)
   EXPECT_TRUE((std::is_same_v<ResultType, Rodin::Tuple<const int>>));
 }
 
+/// @brief Verifies extract multiple elements for utility extract test by checking true predicates.
 TEST_F(UtilityExtractTest, ExtractMultipleElements)
 {
   using OriginalTuple = Rodin::Tuple<int, float, double, char, bool>;

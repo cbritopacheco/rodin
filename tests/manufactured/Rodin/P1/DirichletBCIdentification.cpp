@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Dirichlet b c identification manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Dirichlet B C Identification manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -61,8 +69,10 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
       }
   };
 
+  /// @brief Helper used by the tests to Test 16 x 16.
   using Test_16x16 =
     Manufactured_DirichletBCIdentification_Test<16>;
+  /// @brief Helper used by the tests to Test 32 x 32.
   using Test_32x32 =
     Manufactured_DirichletBCIdentification_Test<32>;
 
@@ -263,6 +273,7 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     EXPECT_EQ(*dbc.getValueUUID(), v.getUUID());
   }
 
+  /// @brief Verifies cross field vector master matches value reference for test 16 x 16 by checking tolerance-based numerical results, exact expected values, solver behavior.
   TEST_P(Test_16x16, CrossFieldVectorMasterMatchesValueReference)
   {
     const auto etaX = 1.0 + F::x;
@@ -316,11 +327,13 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
       EXPECT_NEAR(etaRefData(i), etaIdData(i), 1e-10) << "eta dof " << i;
   }
 
+  /// @brief Instantiates Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Test_16x16,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral));
 
+  /// @brief Instantiates Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Test_32x32,

@@ -175,6 +175,7 @@ namespace
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies empty ranks construct P0 P1 H1 triangle boundary for MPI sub mesh sparse selection by checking exact expected values, MPI behavior.
   TEST(MPISubMeshSparseSelection, EmptyRanks_ConstructP0P1H1_TriangleBoundary)
   {
     const auto& world = *g_world;
@@ -208,6 +209,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(globalOwned, h1.getSize());
   }
 
+  /// @brief Verifies boundary sub mesh scalar global constant DO fs triangle for MPI sub mesh P0 g by checking exact expected values, MPI behavior.
   TEST(MPISubMeshP0g, BoundarySubMesh_ScalarGlobalConstantDOFs_Triangle)
   {
     const auto& world = *g_world;
@@ -247,6 +249,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies cell sub mesh vector global constant DO fs triangle for MPI sub mesh P0 g by checking exact expected values, MPI behavior.
   TEST(MPISubMeshP0g, CellSubMesh_VectorGlobalConstantDOFs_Triangle)
   {
     const auto& world = *g_world;
@@ -291,6 +294,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sparse boundary sub mesh constructs on empty ranks for MPI sub mesh P0 g by checking exact expected values, MPI behavior.
   TEST(MPISubMeshP0g, SparseBoundarySubMesh_ConstructsOnEmptyRanks)
   {
     const auto& world = *g_world;
@@ -318,6 +322,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies boundary sub mesh quadratic H1 all 3 D for MPI sub mesh H1 by checking exact expected values, MPI behavior.
   TEST(MPISubMeshH1, BoundarySubMesh_QuadraticH1_All3D)
   {
     const auto& world = *g_world;

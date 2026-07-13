@@ -17,6 +17,7 @@ namespace Rodin::Tests::Unit
   // Comprehensive Polytope Class Tests
   // ============================================================================
 
+  /// @brief Verifies basic polytope access for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, BasicPolytopeAccess)
   {
     constexpr const size_t mdim = 2;
@@ -41,6 +42,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(edge.getDimension(), 1);
   }
 
+  /// @brief Verifies polytope index access for geometry polytope by checking false predicates.
   TEST(Geometry_Polytope, PolytopeIndexAccess)
   {
     constexpr const size_t mdim = 2;
@@ -66,6 +68,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(idx, 0);
   }
 
+  /// @brief Verifies polytope attribute access for geometry polytope by checking false predicates.
   TEST(Geometry_Polytope, PolytopeAttributeAccess)
   {
     constexpr const size_t mdim = 2;
@@ -91,6 +94,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(attr.has_value());
   }
 
+  /// @brief Verifies polytope dimension for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeDimension)
   {
     constexpr const size_t mdim = 2;
@@ -115,6 +119,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope mesh reference for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeMeshReference)
   {
     constexpr const size_t mdim = 2;
@@ -140,6 +145,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&edgeMesh, &mesh);
   }
 
+  /// @brief Verifies polytope copy construction for geometry polytope by checking exact expected values, false predicates, copy semantics.
   TEST(Geometry_Polytope, PolytopeCopyConstruction)
   {
     constexpr const size_t mdim = 2;
@@ -166,6 +172,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p1.getDimension(), p2.getDimension());
   }
 
+  /// @brief Verifies polytope copy assignment for geometry polytope by checking exact expected values, false predicates, copy semantics.
   TEST(Geometry_Polytope, PolytopeCopyAssignment)
   {
     constexpr const size_t mdim = 2;
@@ -199,6 +206,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope move construction for geometry polytope by checking exact expected values, false predicates, move semantics.
   TEST(Geometry_Polytope, PolytopeMoveConstruction)
   {
     constexpr const size_t mdim = 2;
@@ -225,6 +233,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p2.getIndex(), idx);
   }
 
+  /// @brief Verifies polytope move assignment for geometry polytope by checking exact expected values, false predicates, move semantics.
   TEST(Geometry_Polytope, PolytopeMoveAssignment)
   {
     constexpr const size_t mdim = 2;
@@ -259,6 +268,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope equality for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeEquality)
   {
     constexpr const size_t mdim = 2;
@@ -293,6 +303,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope inequality for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeInequality)
   {
     constexpr const size_t mdim = 2;
@@ -327,6 +338,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope 3 D boundary for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, Polytope3D_Boundary)
   {
     constexpr const size_t mdim = 3;
@@ -356,6 +368,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 4);  // Tetrahedron has 4 faces
   }
 
+  /// @brief Verifies polytope 3 D interface for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, Polytope3D_Interface)
   {
     constexpr const size_t mdim = 3;
@@ -388,6 +401,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 1);  // One shared face
   }
 
+  /// @brief Verifies polytope boundary count triangle for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeBoundaryCount_Triangle)
   {
     constexpr const size_t mdim = 2;
@@ -413,6 +427,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 3);  // Triangle has 3 edges
   }
 
+  /// @brief Verifies polytope boundary count quadrilateral for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeBoundaryCount_Quadrilateral)
   {
     constexpr const size_t mdim = 2;
@@ -439,6 +454,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 4);  // Quadrilateral has 4 edges
   }
 
+  /// @brief Verifies polytope interface count two triangles for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeInterfaceCount_TwoTriangles)
   {
     constexpr const size_t mdim = 2;
@@ -466,6 +482,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 1);  // One shared edge
   }
 
+  /// @brief Verifies polytope consistent dimension boundary vs interface for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeConsistentDimension_BoundaryVsInterface)
   {
     constexpr const size_t mdim = 2;
@@ -496,6 +513,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope index uniqueness for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeIndexUniqueness)
   {
     constexpr const size_t mdim = 2;
@@ -522,6 +540,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(indices.size(), 3);  // All indices should be unique
   }
 
+  /// @brief Verifies polytope complex mesh for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeComplexMesh)
   {
     constexpr const size_t mdim = 2;
@@ -564,6 +583,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(interface_count, 0);
   }
 
+  /// @brief Verifies polytope access multiple times for geometry polytope by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeAccessMultipleTimes)
   {
     constexpr const size_t mdim = 2;
@@ -598,6 +618,7 @@ namespace Rodin::Tests::Unit
   // Additional Comprehensive Polytope Tests
   // ============================================================================
 
+  /// @brief Verifies polytope get geometry triangle for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetGeometry_Triangle)
   {
     constexpr const size_t mdim = 2;
@@ -620,6 +641,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(triangle.getGeometry(), Polytope::Type::Triangle);
   }
 
+  /// @brief Verifies polytope get geometry quadrilateral for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetGeometry_Quadrilateral)
   {
     constexpr const size_t mdim = 2;
@@ -642,6 +664,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(quad.getGeometry(), Polytope::Type::Quadrilateral);
   }
 
+  /// @brief Verifies polytope get geometry tetrahedron for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetGeometry_Tetrahedron)
   {
     constexpr const size_t mdim = 3;
@@ -664,6 +687,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(tet.getGeometry(), Polytope::Type::Tetrahedron);
   }
 
+  /// @brief Verifies polytope is cell true for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeIsCell_True)
   {
     constexpr const size_t mdim = 2;
@@ -687,6 +711,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(triangle.isVertex());
   }
 
+  /// @brief Verifies polytope is face true for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeIsFace_True)
   {
     constexpr const size_t mdim = 2;
@@ -712,6 +737,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(edge.isVertex());
   }
 
+  /// @brief Verifies polytope is vertex true for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeIsVertex_True)
   {
     constexpr const size_t mdim = 2;
@@ -738,6 +764,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(vertex.isVertex());
   }
 
+  /// @brief Verifies polytope get vertices triangle for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetVertices_Triangle)
   {
     constexpr const size_t mdim = 2;
@@ -766,6 +793,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vertices[2], 2);
   }
 
+  /// @brief Verifies polytope get vertices quadrilateral for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetVertices_Quadrilateral)
   {
     constexpr const size_t mdim = 2;
@@ -796,6 +824,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vertices[3], 3);
   }
 
+  /// @brief Verifies polytope get vertices tetrahedron for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetVertices_Tetrahedron)
   {
     constexpr const size_t mdim = 3;
@@ -826,6 +855,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vertices[3], 3);
   }
 
+  /// @brief Verifies polytope get vertex iterator for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetVertexIterator)
   {
     constexpr const size_t mdim = 2;
@@ -858,6 +888,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 3);
   }
 
+  /// @brief Verifies polytope get measure triangle for geometry polytope by checking tolerance-based numerical results, false predicates.
   TEST(Geometry_Polytope, PolytopeGetMeasure_Triangle)
   {
     constexpr const size_t mdim = 2;
@@ -882,6 +913,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(measure, 0.5, 1e-10);
   }
 
+  /// @brief Verifies polytope get measure quadrilateral for geometry polytope by checking tolerance-based numerical results, false predicates.
   TEST(Geometry_Polytope, PolytopeGetMeasure_Quadrilateral)
   {
     constexpr const size_t mdim = 2;
@@ -907,6 +939,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(measure, 1.0, 1e-10);
   }
 
+  /// @brief Verifies polytope get measure segment for geometry polytope by checking false predicates.
   TEST(Geometry_Polytope, PolytopeGetMeasure_Segment)
   {
     constexpr const size_t mdim = 2;
@@ -933,6 +966,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(measure, 0.0);
   }
 
+  /// @brief Verifies polytope get transformation for geometry polytope by checking false predicates.
   TEST(Geometry_Polytope, PolytopeGetTransformation)
   {
     constexpr const size_t mdim = 2;
@@ -957,6 +991,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(trans.getOrder(), 0);
   }
 
+  /// @brief Verifies polytope comparison less than for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, PolytopeComparison_LessThan)
   {
     constexpr const size_t mdim = 2;
@@ -1002,6 +1037,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies polytope get adjacent for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeGetAdjacent)
   {
     constexpr const size_t mdim = 2;
@@ -1038,6 +1074,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(count, 0);
   }
 
+  /// @brief Verifies polytope multiple cells boundary count for geometry polytope.
   TEST(Geometry_Polytope, PolytopeMultipleCells_BoundaryCount)
   {
     constexpr const size_t mdim = 2;
@@ -1080,6 +1117,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(interface_count, 0);
   }
 
+  /// @brief Verifies polytope 3 D get vertices tetrahedron for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, Polytope3D_GetVertices_Tetrahedron)
   {
     constexpr const size_t mdim = 3;
@@ -1112,6 +1150,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vertex_indices.size(), 4);
   }
 
+  /// @brief Verifies polytope multiple geometry types for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, PolytopeMultipleGeometryTypes)
   {
     constexpr const size_t mdim = 2;
@@ -1151,6 +1190,7 @@ namespace Rodin::Tests::Unit
   // Additional Comprehensive Tests - Cell, Face, Vertex subclasses
   // ============================================================================
 
+  /// @brief Verifies cell class basic construction for geometry polytope by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_Polytope, CellClass_BasicConstruction)
   {
     constexpr const size_t mdim = 2;
@@ -1175,6 +1215,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cell.isVertex());
   }
 
+  /// @brief Verifies cell class copy and move for geometry polytope by checking exact expected values, false predicates, copy semantics.
   TEST(Geometry_Polytope, CellClass_CopyAndMove)
   {
     constexpr const size_t mdim = 2;
@@ -1204,6 +1245,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(cell1.getIndex(), cell3.getIndex());
   }
 
+  /// @brief Verifies face class boundary vs interface for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, FaceClass_BoundaryVsInterface)
   {
     constexpr const size_t mdim = 2;
@@ -1249,6 +1291,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(interface_count, 0);
   }
 
+  /// @brief Verifies face class copy and move for geometry polytope by checking exact expected values, false predicates, copy semantics.
   TEST(Geometry_Polytope, FaceClass_CopyAndMove)
   {
     constexpr const size_t mdim = 2;
@@ -1280,6 +1323,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(face1.getIndex(), face3.getIndex());
   }
 
+  /// @brief Verifies vertex class basic for geometry polytope by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_Polytope, VertexClass_Basic)
   {
     constexpr const size_t mdim = 2;
@@ -1309,6 +1353,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(vertex.isCell());
   }
 
+  /// @brief Verifies vertex class copy and move for geometry polytope by checking exact expected values, false predicates, copy semantics.
   TEST(Geometry_Polytope, VertexClass_CopyAndMove)
   {
     constexpr const size_t mdim = 2;
@@ -1346,6 +1391,7 @@ namespace Rodin::Tests::Unit
   // Edge Cases and Stress Tests
   // ============================================================================
 
+  /// @brief Verifies large mesh index uniqueness for geometry polytope by checking exact expected values, true predicates.
   TEST(Geometry_Polytope, LargeMesh_IndexUniqueness)
   {
     constexpr const size_t mdim = 2;
@@ -1395,6 +1441,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(indices.size(), 2 * n_rows * n_cols);
   }
 
+  /// @brief Verifies boundary polytopes all edges for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, BoundaryPolytopes_AllEdges)
   {
     constexpr const size_t mdim = 2;
@@ -1426,6 +1473,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(edge_count, 3);
   }
 
+  /// @brief Verifies 3 D wedge geometry for geometry polytope by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_Polytope, 3D_Wedge_Geometry)
   {
     constexpr const size_t mdim = 3;
@@ -1457,6 +1505,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vertices.size(), 6);
   }
 
+  /// @brief Verifies polytope iterator increment for geometry polytope by checking exact expected values.
   TEST(Geometry_Polytope, PolytopeIterator_Increment)
   {
     constexpr const size_t mdim = 2;
@@ -1487,6 +1536,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 3);
   }
 
+  /// @brief Verifies measure consistency multiple accessess for geometry polytope by checking tolerance-based numerical results, false predicates.
   TEST(Geometry_Polytope, MeasureConsistency_MultipleAccessess)
   {
     constexpr const size_t mdim = 2;
@@ -1516,6 +1566,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(measure1, 0.5, 1e-10); // Right triangle area = 0.5
   }
 
+  /// @brief Verifies vertex iterator all vertices for geometry polytope by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_Polytope, VertexIterator_AllVertices)
   {
     constexpr const size_t mdim = 2;
@@ -1548,6 +1599,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vertex_indices.size(), 4);
   }
 
+  /// @brief Verifies comparison self equality for geometry polytope by checking true predicates, false predicates.
   TEST(Geometry_Polytope, Comparison_SelfEquality)
   {
     constexpr const size_t mdim = 2;
@@ -1574,6 +1626,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(p1 < p1);
   }
 
+  /// @brief Verifies get vertices array access for geometry polytope by checking exact expected values, false predicates.
   TEST(Geometry_Polytope, GetVertices_ArrayAccess)
   {
     constexpr const size_t mdim = 2;
@@ -1604,6 +1657,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies transformation access not null for geometry polytope by checking false predicates.
   TEST(Geometry_Polytope, TransformationAccess_NotNull)
   {
     constexpr const size_t mdim = 2;
@@ -1631,6 +1685,7 @@ namespace Rodin::Tests::Unit
     SUCCEED();
   }
 
+  /// @brief Verifies 3 D multiple tets boundary faces for geometry polytope by checking exact expected values, true predicates.
   TEST(Geometry_Polytope, 3D_MultipleTets_BoundaryFaces)
   {
     constexpr const size_t mdim = 3;

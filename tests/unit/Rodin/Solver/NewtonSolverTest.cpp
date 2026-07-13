@@ -150,6 +150,7 @@ namespace Rodin::FormLanguage
 
 using namespace Rodin::Tests::Unit::NewtonSolverTestHelpers;
 
+/// @brief Verifies solves scalar problem using problem assembly for newton solver test by checking tolerance-based numerical results, solver behavior.
 TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
 {
   Math::Vector<Real> u(1);
@@ -167,6 +168,7 @@ TEST(NewtonSolverTest, SolvesScalarProblemUsingProblemAssembly)
   EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-10);
 }
 
+/// @brief Verifies scalar residual shows quadratic convergence rate for newton solver test by checking tolerance-based numerical results, true predicates, solver behavior.
 TEST(NewtonSolverTest, ScalarResidualShowsQuadraticConvergenceRate)
 {
   Math::Vector<Real> u(1);
@@ -202,6 +204,7 @@ TEST(NewtonSolverTest, ScalarResidualShowsQuadraticConvergenceRate)
   EXPECT_NEAR(u(0), std::sqrt(2.0), 1e-12);
 }
 
+/// @brief Verifies single template parameter deduces linear system for newton solver test by checking solver behavior.
 TEST(NewtonSolverTest, SingleTemplateParameterDeducesLinearSystem)
 {
   using SolverType = Solver::NewtonSolver<DenseLinearSolver>;
@@ -209,6 +212,7 @@ TEST(NewtonSolverTest, SingleTemplateParameterDeducesLinearSystem)
   SUCCEED();
 }
 
+/// @brief Verifies propagates assembly failure for newton solver test by checking exception behavior, solver behavior.
 TEST(NewtonSolverTest, PropagatesAssemblyFailure)
 {
   FailingAssembleProblem pb;

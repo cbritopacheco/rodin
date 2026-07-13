@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Targeted assembly test manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Targeted Assembly Test manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the PETSc-backed MPI assembly and solve path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <cassert>
 
 #include <gtest/gtest.h>
@@ -177,6 +185,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 {
   namespace PETSc = ::Rodin::PETSc;
 
+  /// @brief Verifies assembles LHS and RHS for PET sc MPI targeted assembly by checking form assembly, MPI behavior.
   TEST(PETSc_MPI_TargetedAssembly, AssemblesLHSAndRHS)
   {
     const auto& world = *g_world;
@@ -216,6 +225,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   // Re-assembling the identical problem into the same distributed matrix must
   // reuse the nonzero pattern on every rank: identical dimensions, identical
   // per-rank nonzero count and no extra mallocs (SAME_NONZERO_PATTERN).
+  /// @brief Verifies reassembly keeps nonzero pattern for PET sc MPI targeted assembly by checking exact expected values, form assembly, MPI behavior.
   TEST(PETSc_MPI_TargetedAssembly, ReassemblyKeepsNonzeroPattern)
   {
     const auto& world = *g_world;
@@ -255,6 +265,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   // pattern, then explicitly allowing new nonzero allocations before
   // reassembly must let PETSc grow the pattern instead of being overridden by
   // the MPI MatrixSetup path.
+  /// @brief Verifies honors new nonzero option before reassembly for PET sc MPI targeted assembly by checking exact expected values, form assembly, MPI behavior.
   TEST(PETSc_MPI_TargetedAssembly, HonorsNewNonzeroOptionBeforeReassembly)
   {
     const auto& world = *g_world;
@@ -290,6 +301,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   // assembly and must be zeroed on reuse. The distributed solution vector is a
   // solver iterate and must not be zeroed when the same Problem is assembled
   // again.
+  /// @brief Verifies reuses vectors correctly for PET sc MPI targeted assembly by checking exact expected values, form assembly, MPI behavior.
   TEST(PETSc_MPI_TargetedAssembly, ReusesVectorsCorrectly)
   {
     const auto& world = *g_world;
@@ -332,6 +344,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   // pattern. Each distinct-size problem uses its own distributed mesh and
   // matrix (the production path for a different mesh); the two patterns must
   // differ in both global dimension and total stored nonzero count.
+  /// @brief Verifies reassembly changes nonzero pattern for PET sc MPI targeted assembly by checking exact expected values, form assembly, MPI behavior.
   TEST(PETSc_MPI_TargetedAssembly, ReassemblyChangesNonzeroPattern)
   {
     const auto& world = *g_world;
@@ -373,6 +386,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
   }
 }
 
+/// @brief Initializes the test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);

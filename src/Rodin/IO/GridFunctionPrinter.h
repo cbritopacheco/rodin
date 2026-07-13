@@ -91,6 +91,9 @@ namespace Rodin::IO
         : m_gf(gf)
       {}
 
+      /**
+       * @brief Returns the grid function bound to this printer.
+       */
       const ObjectType& getObject() const override
       {
         return m_gf.get();

@@ -83,6 +83,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies triangular uniform grid 2 for variational real P1 sanity test by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -102,6 +103,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(std::get<IndexMap<Real>>(dbc.getDOFs()).size(), 4);
   }
 
+  /// @brief Verifies triangular uniform grid 16 for variational real P1 sanity test by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Real_P1_SanityTest, TriangularUniformGrid16)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
@@ -128,6 +130,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(std::get<IndexMap<Real>>(dbc.getDOFs()).size(), 60);
   }
 
+  /// @brief Verifies dirichlet BC shape function identity for variational real P1 sanity test by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_Real_P1_SanityTest, DirichletBCShapeFunctionIdentity)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -168,6 +171,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies dirichlet BC shape function point evaluation for variational real P1 sanity test by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_Real_P1_SanityTest, DirichletBCShapeFunctionPointEvaluation)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -208,6 +212,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies H1 matches basis for variational point integration point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_PointIntegrationPoint, H1MatchesBasis)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -232,6 +237,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(v.getBasis(local), fe.getBasis(local)(rc), 1e-14);
   }
 
+  /// @brief Verifies H1 grad matches basis gradient for variational point integration point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_PointIntegrationPoint, H1GradMatchesBasisGradient)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -267,6 +273,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies value API and boundary selection for variational dirichlet BC by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_DirichletBC, ValueAPIAndBoundarySelection)
   {
     Mesh mesh = makeUnitSquareMesh(4);
@@ -309,6 +316,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(std::get<IndexMap<Real>>(copy->getDOFs()).size(), dofs.size());
   }
 
+  /// @brief Verifies value flat set selection for variational dirichlet BC by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_DirichletBC, ValueFlatSetSelection)
   {
     Mesh mesh = makeUnitSquareMesh(4);
@@ -335,6 +343,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies identification API and scaled rows for variational dirichlet BC by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_DirichletBC, IdentificationAPIAndScaledRows)
   {
     Mesh mesh = makeUnitSquareMesh(4);
@@ -385,6 +394,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(std::get<IdentifiedDOFs>(copy->getDOFs()).size(), dofs.size());
   }
 
+  /// @brief Verifies identification component selection for variational dirichlet BC by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_DirichletBC, IdentificationComponentSelection)
   {
     Mesh mesh = makeUnitSquareMesh(4);
@@ -630,6 +640,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs.size(), expectedVertices.size());
   }
 
+  /// @brief Verifies identification on tagged interior face for variational dirichlet BC by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Variational_DirichletBC, IdentificationOnTaggedInteriorFace)
   {
     constexpr Attribute InterfaceAttribute = 9;
@@ -837,6 +848,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(bothSize, leftSize);
   }
 
+  /// @brief Verifies H1 matches basis for variational shape function set point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_ShapeFunctionSetPoint, H1MatchesBasis)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -860,6 +872,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(v.getBasis(local), fe.getBasis(local)(rc), 1e-14);
   }
 
+  /// @brief Verifies H1 grad matches basis gradient for variational shape function set point by checking tolerance-based numerical results.
   TEST(Rodin_Variational_ShapeFunctionSetPoint, H1GradMatchesBasisGradient)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

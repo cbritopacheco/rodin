@@ -44,9 +44,9 @@ namespace Rodin::Solver
   class GMRES<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
-      /// @brief PETSc matrix type (`::Mat`) for the system operator.
+      /// @brief PETSc matrix type (@c Mat) for the system operator.
       using OperatorType = ::Mat;
-      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the RHS and solution.
       using VectorType = ::Vec;
       /// @brief Scalar type (`PetscScalar`).
       using ScalarType = PetscScalar;

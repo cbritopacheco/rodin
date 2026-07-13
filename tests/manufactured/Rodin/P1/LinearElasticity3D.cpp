@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Linear-elasticity manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a linear-elasticity manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -82,10 +90,14 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the tests to Elasticity 3 D Test 8.
   using Elasticity3DTest8  = Elasticity3DFixture<8>;
+  /// @brief Helper used by the tests to Elasticity 3 D Test 16.
   using Elasticity3DTest16 = Elasticity3DFixture<16>;
+  /// @brief Helper used by the tests to Elasticity 3 D Test 32.
   using Elasticity3DTest32 = Elasticity3DFixture<32>;
 
+  /// @brief Verifies linear elasticity 3 D P1 exact residual for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Elasticity3DTest8, LinearElasticity3D_P1ExactResidual)
   {
     const Real lambda = 1.0, mu = 1.0;
@@ -128,6 +140,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   // These are "exact" PDE solutions with f = 0.
   // ------------------------------------------------------------
 
+  /// @brief Verifies affine exact identity for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Elasticity3DTest8, AffineExact_Identity)
   {
     const Real lambda = 1.0, mu = 1.0;
@@ -152,6 +165,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_NEAR(rel, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies affine exact identity alt material for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Elasticity3DTest8, AffineExact_IdentityAltMaterial)
   {
     const Real lambda = 1.5, mu = 0.5;
@@ -175,6 +189,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_NEAR(rel, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies general affine for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Elasticity3DTest8, GeneralAffine)
   {
     const Real lambda = 1.5, mu = 0.5;
@@ -214,6 +229,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   // on a fixed mesh, so we use a relaxed bound.
   // ------------------------------------------------------------
 
+  /// @brief Verifies polynomial for elasticity 3 D test 8 by checking solver behavior.
   TEST_P(Elasticity3DTest8, Polynomial)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -249,6 +265,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_LT(rel, RODIN_FUZZY_CONSTANT); // relaxed fixed-mesh check
   }
 
+  /// @brief Verifies mixed components for elasticity 3 D test 32 by checking solver behavior.
   TEST_P(Elasticity3DTest32, MixedComponents)
   {
     const Real lambda = 1.0, mu = 1.0;
@@ -283,6 +300,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_LT(0.1 * rel, RODIN_FUZZY_CONSTANT); // relaxed fixed-mesh check
   }
 
+  /// @brief Verifies polynomial refined for elasticity 3 D test 16 by checking solver behavior.
   TEST_P(Elasticity3DTest16, Polynomial_Refined)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -314,6 +332,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_LT(rel, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Elasticity 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Elasticity3DTest8,
@@ -324,6 +343,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Elasticity 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Elasticity3DTest16,
@@ -334,6 +354,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Elasticity 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Elasticity3DTest32,

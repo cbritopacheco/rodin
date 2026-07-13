@@ -28,6 +28,7 @@ namespace Rodin::Tests::Unit
     };
   }
 
+  /// @brief Verifies constant real construction for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, ConstantReal_Construction)
   {
     RealFunction f(3.14);
@@ -40,6 +41,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f.getValue(p), 3.14, 1e-10);
   }
 
+  /// @brief Verifies constant integer construction for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, ConstantInteger_Construction)
   {
     RealFunction f(42);
@@ -52,6 +54,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f.getValue(p), 42.0, 1e-10);
   }
 
+  /// @brief Verifies copy constructor real for variational real function by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_RealFunction, CopyConstructor_Real)
   {
     RealFunction f(2.718);
@@ -65,6 +68,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f_copy.getValue(p), f.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies move constructor real for variational real function by checking tolerance-based numerical results, move semantics.
   TEST(Rodin_Variational_RealFunction, MoveConstructor_Real)
   {
     RealFunction f(1.414);
@@ -85,6 +89,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f_moved.getValue(p), original_value, 1e-10);
   }
 
+  /// @brief Verifies copy real for variational real function by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_RealFunction, Copy_Real)
   {
     RealFunction f(123.456);
@@ -100,6 +105,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies copy integer for variational real function by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_RealFunction, Copy_Integer)
   {
     RealFunction f(789);
@@ -115,6 +121,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies zero value for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, ZeroValue)
   {
     RealFunction f(0.0);
@@ -127,6 +134,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies negative value for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, NegativeValue)
   {
     RealFunction f(-99.99);
@@ -139,6 +147,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f.getValue(p), -99.99, 1e-10);
   }
 
+  /// @brief Verifies constant function traced to boundary for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, ConstantFunction_TracedToBoundary)
   {
     const Attribute interior_attr = 1;
@@ -157,6 +166,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(traced_f.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies callable uses integration point fast path for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, Callable_UsesIntegrationPointFastPath)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -172,6 +182,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(f.getValue(ip), 17.0, 1e-10);
   }
 
+  /// @brief Verifies expression propagates integration point fast path for variational real function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealFunction, Expression_PropagatesIntegrationPointFastPath)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

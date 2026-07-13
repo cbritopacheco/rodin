@@ -13,7 +13,7 @@
  *
  * Provides the partial specialization of
  * @ref Rodin::Variational::LinearForm that assembles linear-form
- * contributions into a PETSc `Vec`.  The resulting vector represents
+ * contributions into a PETSc @c Vec.  The resulting vector represents
  * the right-hand side @f$ \mathbf{b} @f$ of a discrete finite element
  * system @f$ A\mathbf{x} = \mathbf{b} @f$.
  *
@@ -27,7 +27,7 @@
  *   b_i = L(\phi_i), \quad i = 1,\ldots,N
  * @f]
  *
- * This specialization stores @f$ \mathbf{b} @f$ in a PETSc `Vec` and
+ * This specialization stores @f$ \mathbf{b} @f$ in a PETSc @c Vec and
  * evaluates @f$ L(u_h) = \mathbf{b}^\top \mathbf{u} @f$ via `VecDot`.
  *
  * @see Rodin::PETSc::Variational::TestFunction,
@@ -47,7 +47,7 @@ namespace Rodin::Variational
   /**
    * @brief Linear form specialization that assembles into a PETSc vector.
    *
-   * Owns a PETSc `Vec` representing the load vector @f$ \mathbf{b} @f$
+   * Owns a PETSc @c Vec representing the load vector @f$ \mathbf{b} @f$
    * of the finite element system.  The vector is created in the
    * constructor and destroyed in the destructor.
    *
@@ -70,7 +70,7 @@ namespace Rodin::Variational
       /// @brief Scalar type of the DOF coefficients (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      /// @brief PETSc vector type (`::Vec`) used to store the load vector @f$ \mathbf{b} @f$.
+      /// @brief PETSc vector type (@c Vec) used to store the load vector @f$ \mathbf{b} @f$.
       using VectorType = ::Vec;
 
       /// @brief Context type (either @ref Rodin::Context::Local or

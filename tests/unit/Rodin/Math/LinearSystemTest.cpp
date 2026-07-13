@@ -23,6 +23,7 @@ class LinearSystemTest : public ::testing::Test
 };
 
 // Test LinearSystem with SparseMatrix
+/// @brief Verifies sparse matrix linear system for linear system test by checking exact expected values.
 TEST_F(LinearSystemTest, SparseMatrixLinearSystem)
 {
   using LSType = LinearSystem<SparseMatrix<Real>, Vector<Real>>;
@@ -43,6 +44,7 @@ TEST_F(LinearSystemTest, SparseMatrixLinearSystem)
 }
 
 // Test LinearSystem with dense Matrix
+/// @brief Verifies dense matrix linear system for linear system test by checking exact expected values.
 TEST_F(LinearSystemTest, DenseMatrixLinearSystem)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -63,6 +65,7 @@ TEST_F(LinearSystemTest, DenseMatrixLinearSystem)
 }
 
 // Test LinearSystem copy semantics
+/// @brief Verifies copy semantics for linear system test by checking exact expected values, copy semantics.
 TEST_F(LinearSystemTest, CopySemantics)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -96,6 +99,7 @@ TEST_F(LinearSystemTest, CopySemantics)
 }
 
 // Test LinearSystem move semantics
+/// @brief Verifies move semantics for linear system test by checking exact expected values, move semantics.
 TEST_F(LinearSystemTest, MoveSemantics)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -129,6 +133,7 @@ TEST_F(LinearSystemTest, MoveSemantics)
 }
 
 // Test const access to LinearSystem components
+/// @brief Verifies const access for linear system test by checking exact expected values.
 TEST_F(LinearSystemTest, ConstAccess)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -151,6 +156,7 @@ TEST_F(LinearSystemTest, ConstAccess)
 }
 
 // Test LinearSystem eliminate function for dense matrices
+/// @brief Verifies dense matrix eliminate for linear system test by checking tolerance-based numerical results.
 TEST_F(LinearSystemTest, DenseMatrixEliminate)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -188,6 +194,7 @@ TEST_F(LinearSystemTest, DenseMatrixEliminate)
 }
 
 // Test LinearSystem with complex numbers
+/// @brief Verifies complex linear system for linear system test by checking exact expected values.
 TEST_F(LinearSystemTest, ComplexLinearSystem)
 {
   using LSType = LinearSystem<Matrix<Complex>, Vector<Complex>>;
@@ -215,6 +222,7 @@ TEST_F(LinearSystemTest, ComplexLinearSystem)
 }
 
 // Test tuple-like interface
+/// @brief Verifies tuple interface for linear system test by checking exact expected values.
 TEST_F(LinearSystemTest, TupleInterface)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -243,6 +251,7 @@ TEST_F(LinearSystemTest, TupleInterface)
 }
 
 // Test Math::get interface
+/// @brief Verifies math get interface for linear system test by checking exact expected values.
 TEST_F(LinearSystemTest, MathGetInterface)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -277,6 +286,7 @@ TEST_F(LinearSystemTest, MathGetInterface)
 }
 
 // Test FormLanguage::Traits for LinearSystem
+/// @brief Verifies form language traits for linear system test.
 TEST_F(LinearSystemTest, FormLanguageTraits)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -289,6 +299,7 @@ TEST_F(LinearSystemTest, FormLanguageTraits)
 }
 
 // Test LinearSystem type properties
+/// @brief Verifies type properties for linear system test.
 TEST_F(LinearSystemTest, TypeProperties)
 {
   using DenseLSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -309,6 +320,7 @@ TEST_F(LinearSystemTest, TypeProperties)
 }
 
 // Test sparse matrix eliminate
+/// @brief Verifies sparse matrix eliminate for linear system test by checking tolerance-based numerical results.
 TEST_F(LinearSystemTest, SparseMatrixEliminate)
 {
   using LSType = LinearSystem<SparseMatrix<Real>, Vector<Real>>;
@@ -351,6 +363,7 @@ TEST_F(LinearSystemTest, SparseMatrixEliminate)
 }
 
 // Test multiple DOF elimination
+/// @brief Verifies multiple DOF elimination for linear system test by checking tolerance-based numerical results.
 TEST_F(LinearSystemTest, MultipleDOFElimination)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;
@@ -394,6 +407,7 @@ TEST_F(LinearSystemTest, MultipleDOFElimination)
 }
 
 // Test sparse eliminate with offset
+/// @brief Verifies sparse eliminate with offset for linear system test by checking tolerance-based numerical results.
 TEST_F(LinearSystemTest, SparseEliminateWithOffset)
 {
   using LSType = LinearSystem<SparseMatrix<Real>, Vector<Real>>;
@@ -427,6 +441,7 @@ TEST_F(LinearSystemTest, SparseEliminateWithOffset)
 }
 
 // Test dense end-to-end: eliminate then solve
+/// @brief Verifies dense eliminate then solve for linear system test by checking tolerance-based numerical results.
 TEST_F(LinearSystemTest, DenseEliminateThenSolve)
 {
   using LSType = LinearSystem<Matrix<Real>, Vector<Real>>;

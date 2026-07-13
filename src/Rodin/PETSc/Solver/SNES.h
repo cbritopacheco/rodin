@@ -11,7 +11,7 @@
  * @file SNES.h
  * @brief PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper for Rodin.
  *
- * Wraps the PETSc `SNES` context for solving nonlinear systems
+ * Wraps the PETSc @c SNES context for solving nonlinear systems
  * @f$ F(x) = 0 @f$ using Newton-type methods.  At each Newton iteration
  * the Jacobian system is solved by the associated
  * @ref Rodin::Solver::KSP linear solver.
@@ -54,7 +54,7 @@ namespace Rodin::Solver
   /**
    * @brief PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper.
    *
-   * Wraps the PETSc `SNES` context for solving nonlinear systems
+   * Wraps the PETSc @c SNES context for solving nonlinear systems
    * @f$ F(x) = 0 @f$ using Newton-type methods.  Inherits
    * @ref Rodin::Solver::NewtonSolverBase<KSP> so that the linear
    * sub-problems arising at each Newton step are solved by the
@@ -72,13 +72,13 @@ namespace Rodin::Solver
     : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>
   {
     public:
-      /// @brief Handle type for the raw PETSc `SNES` context pointer.
+      /// @brief Handle type for the raw PETSc @c SNES context pointer.
       using HandleType = ::SNES;
 
       /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
 
-      /// @brief PETSc vector type (`::Vec`) for the nonlinear residual and solution.
+      /// @brief PETSc vector type (@c Vec) for the nonlinear residual and solution.
       using VectorType = ::Vec;
 
       /**
@@ -86,7 +86,7 @@ namespace Rodin::Solver
        *        state-dependent Rodin fields from the current SNES iterate.
        *
        * The argument is the current iterate expressed as a Rodin
-       * @ref Rodin::PETSc::Math::Vector (a PETSc `Vec`).  Typical usage:
+       * @ref Rodin::PETSc::Math::Vector (a PETSc @c Vec).  Typical usage:
        * @code
        * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
        *   uState.setData(x, 0);

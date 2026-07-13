@@ -61,10 +61,13 @@ namespace Rodin::Variational
         P0g<Real, Geometry::Mesh<Context::MPI>>>
   {
     public:
+      /// @brief Scalar coefficient type.
       using ScalarType  = Real;
+      /// @brief Value type represented by the finite element space.
       using RangeType   = ScalarType;
       /// @brief Execution context type.
       using ContextType = Context::MPI;
+      /// @brief Distributed mesh type.
       using MeshType    = Geometry::Mesh<ContextType>;
       /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
@@ -77,10 +80,11 @@ namespace Rodin::Variational
 
       using Parent::getGlobalIndex;
 
-      // Reuse the local shard Pullback and Pushforward directly.
+      /// @brief Pullback type reused from the local shard finite element space.
       template <class Callable>
       using Pullback = typename FESType::template Pullback<Callable>;
 
+      /// @brief Pushforward type reused from the local shard finite element space.
       template <class Callable>
       using Pushforward = typename FESType::template Pushforward<Callable>;
 
@@ -97,18 +101,21 @@ namespace Rodin::Variational
           m_fes(mesh.getShard())
       {}
 
+      /// @brief Copy-constructs the distributed scalar P0g space.
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh),
           m_fes(other.m_fes)
       {}
 
+      /// @brief Move-constructs the distributed scalar P0g space.
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(other.m_mesh),
           m_fes(std::move(other.m_fes))
       {}
 
+      /// @brief Copy-assigns the distributed scalar P0g space.
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -120,6 +127,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move-assigns the distributed scalar P0g space.
       P0g& operator=(P0g&& other)
       {
         if (this != &other)
@@ -211,9 +219,8 @@ namespace Rodin::Variational
        * @brief Returns the global DOF index for local shard DOF @p localIdx.
        *
        * For scalar P0g there is only 1 global DOF (index 0), so this always
-       * returns 0 regardless of @p localIdx.
+       * returns 0 regardless of the local shard DOF index.
        *
-       * @param[in] localIdx Local shard DOF index (must be 0 for scalar P0g).
        * @return Global distributed DOF index (always 0).
        */
       Index getGlobalIndex(Index) const
@@ -273,10 +280,13 @@ namespace Rodin::Variational
         P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::MPI>>>
   {
     public:
+      /// @brief Scalar coefficient type.
       using ScalarType  = Real;
+      /// @brief Vector value type represented by the finite element space.
       using RangeType   = Math::SpatialVector<Real>;
       /// @brief Execution context type.
       using ContextType = Context::MPI;
+      /// @brief Distributed mesh type.
       using MeshType    = Geometry::Mesh<ContextType>;
       /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
@@ -289,9 +299,11 @@ namespace Rodin::Variational
 
       using Parent::getGlobalIndex;
 
+      /// @brief Pullback type reused from the local shard finite element space.
       template <class Callable>
       using Pullback = typename FESType::template Pullback<Callable>;
 
+      /// @brief Pushforward type reused from the local shard finite element space.
       template <class Callable>
       using Pushforward = typename FESType::template Pushforward<Callable>;
 
@@ -319,18 +331,21 @@ namespace Rodin::Variational
         : P0g(mesh, VDim)
       {}
 
+      /// @brief Copy-constructs the distributed vector P0g space.
       P0g(const P0g& other)
         : Parent(other),
           m_mesh(other.m_mesh),
           m_fes(other.m_fes)
       {}
 
+      /// @brief Move-constructs the distributed vector P0g space.
       P0g(P0g&& other)
         : Parent(std::move(other)),
           m_mesh(other.m_mesh),
           m_fes(std::move(other.m_fes))
       {}
 
+      /// @brief Copy-assigns the distributed vector P0g space.
       P0g& operator=(const P0g& other)
       {
         if (this != &other)
@@ -342,6 +357,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move-assigns the distributed vector P0g space.
       P0g& operator=(P0g&& other)
       {
         if (this != &other)

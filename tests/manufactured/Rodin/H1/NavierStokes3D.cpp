@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Navier-stokes manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Navier-Stokes manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <limits>
 #include <gtest/gtest.h>
@@ -37,9 +45,11 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
       }
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Navier Stokes 3 D Test 8.
   using Manufactured_NavierStokes3D_Test_8 =
     Manufactured_NavierStokes3D_Test<8, 8, 8>;
 
+  /// @brief Verifies navier stokes 3 D picard polynomial vortex for manufactured navier stokes 3 D test 8 by checking tolerance-based numerical results, true predicates, solver behavior.
   TEST_P(Manufactured_NavierStokes3D_Test_8, NavierStokes3D_Picard_PolynomialVortex)
   {
     constexpr size_t maxPicardIters = 8;
@@ -109,6 +119,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     EXPECT_NEAR(error_p, 0, 1e-5);
   }
 
+  /// @brief Verifies navier stokes 3 D picard taylor green for manufactured navier stokes 3 D test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_NavierStokes3D_Test_8, NavierStokes3D_Picard_TaylorGreen)
   {
     constexpr Real nu = 1.0;
@@ -255,6 +266,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes3D
     EXPECT_LT(fixedPointPressureDefect, 1e-6);
   }
 
+  /// @brief Instantiates Manufactured Navier Stokes 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_NavierStokes3D_Test_8,

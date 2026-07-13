@@ -332,7 +332,7 @@
   When Rodin is built with PETSc support (`RODIN_USE_PETSC=ON`), additional
   solvers become available that support both sequential and MPI-distributed
   linear systems.  PETSc solvers work with
-  `PETSc::Math`::LinearSystem "PETSc::Math::LinearSystem" and are
+  `PETSc::Math::LinearSystem` and are
   activated by using `PETSc::Variational::TrialFunction` /
   `PETSc::Variational::TestFunction` instead of the standard trial/test
   functions.

@@ -19,6 +19,7 @@ namespace Rodin::Tests::Unit
   // DubinerTriangle Collapsed Coordinate Tests
   //==========================================================================
 
+  /// @brief (x,y) = (0,0) -> (r,s) = (-1,-1).
   TEST(DubinerTriangle, CollapsedCoords_Vertex_Origin)
   {
     // (x,y) = (0,0) -> (r,s) = (-1,-1)
@@ -28,6 +29,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(s, -1.0, 1e-14);
   }
 
+  /// @brief (x,y) = (1,0) -> (r,s) = (1,-1).
   TEST(DubinerTriangle, CollapsedCoords_Vertex_X1)
   {
     // (x,y) = (1,0) -> (r,s) = (1,-1)
@@ -37,6 +39,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(s, -1.0, 1e-14);
   }
 
+  /// @brief (x,y) = (0,1) -> (r,s) = (-1, 1) (collapsed at top).
   TEST(DubinerTriangle, CollapsedCoords_Vertex_Y1)
   {
     // (x,y) = (0,1) -> (r,s) = (-1, 1) (collapsed at top)
@@ -46,6 +49,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(s, 1.0, 1e-14);
   }
 
+  /// @brief (x,y) = (1/3, 1/3) -> midpoint of triangle.
   TEST(DubinerTriangle, CollapsedCoords_Center)
   {
     // (x,y) = (1/3, 1/3) -> midpoint of triangle
@@ -62,6 +66,7 @@ namespace Rodin::Tests::Unit
   // DubinerTriangle Basis Function Tests
   //==========================================================================
 
+  /// @brief Ψ_{0,0} = P_0^{0,0}(a) * P_0^{1,0}(b) * 1 = 1 * 1 * 1 = 1.
   TEST(DubinerTriangle, Basis_P0Q0)
   {
     // ψ_{0,0} = P_0^{0,0}(a) * P_0^{1,0}(b) * 1 = 1 * 1 * 1 = 1
@@ -73,6 +78,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(basis, 1.0, 1e-14);
   }
 
+  /// @brief Ψ_{1,0} involves P_1^{0,0}(a) = a.
   TEST(DubinerTriangle, Basis_P1Q0)
   {
     // ψ_{1,0} involves P_1^{0,0}(a) = a
@@ -84,6 +90,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Ψ_{0,1} involves P_0^{0,0}(a) * P_1^{1,0}(b).
   TEST(DubinerTriangle, Basis_P0Q1)
   {
     // ψ_{0,1} involves P_0^{0,0}(a) * P_1^{1,0}(b)
@@ -99,6 +106,7 @@ namespace Rodin::Tests::Unit
   // DubinerTriangle Gradient Tests
   //==========================================================================
 
+  /// @brief Verifies @f$ \Psi_{0,0}=1 @f$ has zero reference gradient.
   TEST(DubinerTriangle, Gradient_P0Q0)
   {
     // ψ_{0,0} = 1, so \nablaψ = (0, 0)
@@ -108,6 +116,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dpsi_ds, 0.0, 1e-14);
   }
 
+  /// @brief Verifies gradient P1 Q 0 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Gradient_P1Q0_NoNaN)
   {
     Real dpsi_dr, dpsi_ds;
@@ -116,6 +125,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isnan(dpsi_ds));
   }
 
+  /// @brief At s = 1 (top of triangle), there's a singularity.
   TEST(DubinerTriangle, Gradient_AtSingularity)
   {
     // At s = 1 (top of triangle), there's a singularity
@@ -130,6 +140,7 @@ namespace Rodin::Tests::Unit
   // VandermondeTriangle Tests
   //==========================================================================
 
+  /// @brief Verifies matrix size K 1 for vandermonde triangle by checking exact expected values.
   TEST(VandermondeTriangle, MatrixSize_K1)
   {
     const auto& V = VandermondeTriangle<1>::getMatrix();
@@ -137,6 +148,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.cols(), FeketeTriangle<1>::Count);
   }
 
+  /// @brief Verifies matrix size K 2 for vandermonde triangle by checking exact expected values.
   TEST(VandermondeTriangle, MatrixSize_K2)
   {
     const auto& V = VandermondeTriangle<2>::getMatrix();
@@ -144,6 +156,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.cols(), FeketeTriangle<2>::Count);
   }
 
+  /// @brief Verifies matrix size K 5 for vandermonde triangle by checking exact expected values.
   TEST(VandermondeTriangle, MatrixSize_K5)
   {
     const auto& V = VandermondeTriangle<5>::getMatrix();
@@ -151,6 +164,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.cols(), FeketeTriangle<5>::Count);
   }
 
+  /// @brief Verifies inverse size K 2 for vandermonde triangle by checking exact expected values.
   TEST(VandermondeTriangle, InverseSize_K2)
   {
     const auto& Vinv = VandermondeTriangle<2>::getInverse();
@@ -158,6 +172,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Vinv.cols(), FeketeTriangle<2>::Count);
   }
 
+  /// @brief Verifies inverse is inverse K 2 for vandermonde triangle by checking tolerance-based numerical results.
   TEST(VandermondeTriangle, InverseIsInverse_K2)
   {
     const auto& V = VandermondeTriangle<2>::getMatrix();
@@ -175,6 +190,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies inverse is inverse K 5 for vandermonde triangle by checking tolerance-based numerical results.
   TEST(VandermondeTriangle, InverseIsInverse_K5)
   {
     const auto& V = VandermondeTriangle<5>::getMatrix();
@@ -196,6 +212,7 @@ namespace Rodin::Tests::Unit
   // DubinerTetrahedron Collapsed Coordinate Tests
   //==========================================================================
 
+  /// @brief (x,y,z) = (0,0,0) -> (a,b,c) = (-1,-1,-1).
   TEST(DubinerTetrahedron, CollapsedCoords_Vertex_Origin)
   {
     // (x,y,z) = (0,0,0) -> (a,b,c) = (-1,-1,-1)
@@ -206,6 +223,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c, -1.0, 1e-14);
   }
 
+  /// @brief (x,y,z) = (1,0,0) -> (a,b,c) = (1,-1,-1).
   TEST(DubinerTetrahedron, CollapsedCoords_Vertex_X1)
   {
     // (x,y,z) = (1,0,0) -> (a,b,c) = (1,-1,-1)
@@ -216,6 +234,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c, -1.0, 1e-14);
   }
 
+  /// @brief (x,y,z) = (0,1,0) -> (a,b,c).
   TEST(DubinerTetrahedron, CollapsedCoords_Vertex_Y1)
   {
     // (x,y,z) = (0,1,0) -> (a,b,c)
@@ -229,6 +248,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(a, -1.0, 1e-14);  // collapsed
   }
 
+  /// @brief (x,y,z) = (0,0,1) -> (a,b,c).
   TEST(DubinerTetrahedron, CollapsedCoords_Vertex_Z1)
   {
     // (x,y,z) = (0,0,1) -> (a,b,c)
@@ -246,6 +266,7 @@ namespace Rodin::Tests::Unit
   // DubinerTetrahedron Basis Function Tests
   //==========================================================================
 
+  /// @brief Ψ_{0,0,0} = 1.
   TEST(DubinerTetrahedron, Basis_P0Q0R0)
   {
     // ψ_{0,0,0} = 1
@@ -257,6 +278,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(basis, 1.0, 1e-14);
   }
 
+  /// @brief Verifies basis P1 Q 0 R 0 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Basis_P1Q0R0_NoNaN)
   {
     Real basis;
@@ -269,6 +291,7 @@ namespace Rodin::Tests::Unit
   // DubinerTetrahedron Gradient Tests
   //==========================================================================
 
+  /// @brief Verifies @f$ \Psi_{0,0,0}=1 @f$ has zero reference gradient.
   TEST(DubinerTetrahedron, Gradient_P0Q0R0)
   {
     // ψ_{0,0,0} = 1, so \nablaψ = (0, 0, 0)
@@ -279,6 +302,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dpsi_dc, 0.0, 1e-14);
   }
 
+  /// @brief Verifies gradient P1 Q 0 R 0 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Gradient_P1Q0R0_NoNaN)
   {
     Real dpsi_da, dpsi_db, dpsi_dc;
@@ -292,6 +316,7 @@ namespace Rodin::Tests::Unit
   // VandermondeTetrahedron Tests
   //==========================================================================
 
+  /// @brief Verifies matrix size K 1 for vandermonde tetrahedron by checking exact expected values.
   TEST(VandermondeTetrahedron, MatrixSize_K1)
   {
     const auto& V = VandermondeTetrahedron<1>::getMatrix();
@@ -299,6 +324,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.cols(), FeketeTetrahedron<1>::Count);
   }
 
+  /// @brief Verifies matrix size K 2 for vandermonde tetrahedron by checking exact expected values.
   TEST(VandermondeTetrahedron, MatrixSize_K2)
   {
     const auto& V = VandermondeTetrahedron<2>::getMatrix();
@@ -306,6 +332,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.cols(), FeketeTetrahedron<2>::Count);
   }
 
+  /// @brief Verifies inverse size K 2 for vandermonde tetrahedron by checking exact expected values.
   TEST(VandermondeTetrahedron, InverseSize_K2)
   {
     const auto& Vinv = VandermondeTetrahedron<2>::getInverse();
@@ -313,6 +340,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Vinv.cols(), FeketeTetrahedron<2>::Count);
   }
 
+  /// @brief Verifies inverse is inverse K 2 for vandermonde tetrahedron by checking tolerance-based numerical results.
   TEST(VandermondeTetrahedron, InverseIsInverse_K2)
   {
     const auto& V = VandermondeTetrahedron<2>::getMatrix();
@@ -334,6 +362,7 @@ namespace Rodin::Tests::Unit
   // Higher Order Tests (K = 5, 6)
   //==========================================================================
 
+  /// @brief Verifies basis P 2 Q 1 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Basis_P2Q1_NoNaN)
   {
     Real basis;
@@ -344,6 +373,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies basis P 3 Q 2 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Basis_P3Q2_NoNaN)
   {
     Real basis;
@@ -354,6 +384,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies gradient P 2 Q 1 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Gradient_P2Q1_NoNaN)
   {
     Real dpsi_dr, dpsi_ds;
@@ -364,6 +395,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(dpsi_ds));
   }
 
+  /// @brief Verifies inverse is inverse K 6 for vandermonde triangle by checking tolerance-based numerical results.
   TEST(VandermondeTriangle, InverseIsInverse_K6)
   {
     const auto& V = VandermondeTriangle<6>::getMatrix();
@@ -381,6 +413,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies matrix size K 6 for vandermonde triangle by checking exact expected values.
   TEST(VandermondeTriangle, MatrixSize_K6)
   {
     const auto& V = VandermondeTriangle<6>::getMatrix();
@@ -388,6 +421,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(V.cols(), FeketeTriangle<6>::Count);
   }
 
+  /// @brief Verifies basis P1 Q 1 R 0 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Basis_P1Q1R0_NoNaN)
   {
     Real basis;
@@ -396,6 +430,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies basis P 2 Q 1 R 1 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Basis_P2Q1R1_NoNaN)
   {
     Real basis;
@@ -404,6 +439,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies gradient P1 Q 1 R 0 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Gradient_P1Q1R0_NoNaN)
   {
     Real dpsi_da, dpsi_db, dpsi_dc;
@@ -413,6 +449,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isnan(dpsi_dc));
   }
 
+  /// @brief Verifies inverse is inverse K 5 for vandermonde tetrahedron by checking tolerance-based numerical results.
   TEST(VandermondeTetrahedron, InverseIsInverse_K5)
   {
     const auto& V = VandermondeTetrahedron<5>::getMatrix();
@@ -430,6 +467,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies matrix size K 5 for vandermonde tetrahedron by checking exact expected values.
   TEST(VandermondeTetrahedron, MatrixSize_K5)
   {
     const auto& V = VandermondeTetrahedron<5>::getMatrix();
@@ -441,6 +479,7 @@ namespace Rodin::Tests::Unit
   // Very High Order Tests (K = 15)
   //==========================================================================
 
+  /// @brief Verifies basis P 5 Q 5 K 15 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Basis_P5Q5_K15_NoNaN)
   {
     Real basis;
@@ -451,6 +490,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies basis P 7 Q 3 K 15 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Basis_P7Q3_K15_NoNaN)
   {
     Real basis;
@@ -461,6 +501,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies gradient P 5 Q 5 K 15 no na N for dubiner triangle by checking false predicates.
   TEST(DubinerTriangle, Gradient_P5Q5_K15_NoNaN)
   {
     Real dpsi_dr, dpsi_ds;
@@ -471,6 +512,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(dpsi_ds));
   }
 
+  /// @brief Verifies matrix size K 15 for vandermonde triangle by checking exact expected values.
   TEST(VandermondeTriangle, MatrixSize_K15)
   {
     const auto& V = VandermondeTriangle<15>::getMatrix();
@@ -481,6 +523,7 @@ namespace Rodin::Tests::Unit
   // Note: VandermondeTriangle InverseIsInverse_K15 is skipped due to
   // ill-conditioning at high polynomial orders (numerical precision issues)
 
+  /// @brief Verifies basis P 3 Q 3 R 3 K 15 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Basis_P3Q3R3_K15_NoNaN)
   {
     Real basis;
@@ -489,6 +532,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies basis P 5 Q 2 R 2 K 15 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Basis_P5Q2R2_K15_NoNaN)
   {
     Real basis;
@@ -497,6 +541,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(basis));
   }
 
+  /// @brief Verifies gradient P 3 Q 3 R 3 K 15 no na N for dubiner tetrahedron by checking false predicates.
   TEST(DubinerTetrahedron, Gradient_P3Q3R3_K15_NoNaN)
   {
     Real dpsi_da, dpsi_db, dpsi_dc;
@@ -506,6 +551,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isnan(dpsi_dc));
   }
 
+  /// @brief Verifies matrix size K 15 for vandermonde tetrahedron by checking exact expected values.
   TEST(VandermondeTetrahedron, MatrixSize_K15)
   {
     const auto& V = VandermondeTetrahedron<15>::getMatrix();

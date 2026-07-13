@@ -21,6 +21,7 @@ class SparseMatrixTest : public ::testing::Test
 };
 
 // Test basic sparse matrix type aliases
+/// @brief Test SparseMatrix type alias.
 TEST_F(SparseMatrixTest, TypeAliases)
 {
   // Test SparseMatrix type alias
@@ -29,6 +30,7 @@ TEST_F(SparseMatrixTest, TypeAliases)
 }
 
 // Test sparse matrix construction and basic properties
+/// @brief Test default construction.
 TEST_F(SparseMatrixTest, Construction)
 {
   // Test default construction
@@ -51,6 +53,7 @@ TEST_F(SparseMatrixTest, Construction)
 }
 
 // Test sparse matrix element insertion and access
+/// @brief Verifies element insertion and access for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, ElementInsertionAndAccess)
 {
   SparseMatrix<Real> sm(3, 3);
@@ -81,6 +84,7 @@ TEST_F(SparseMatrixTest, ElementInsertionAndAccess)
 }
 
 // Test sparse matrix arithmetic operations
+/// @brief Verifies arithmetic operations for sparse matrix test by checking tolerance-based numerical results.
 TEST_F(SparseMatrixTest, ArithmeticOperations)
 {
   SparseMatrix<Real> sm1(3, 3);
@@ -122,6 +126,7 @@ TEST_F(SparseMatrixTest, ArithmeticOperations)
 }
 
 // Test sparse matrix-vector multiplication
+/// @brief Verifies matrix vector multiplication for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, MatrixVectorMultiplication)
 {
   SparseMatrix<Real> sm(3, 3);
@@ -148,6 +153,7 @@ TEST_F(SparseMatrixTest, MatrixVectorMultiplication)
 }
 
 // Test sparse matrix-matrix multiplication
+/// @brief Verifies matrix matrix multiplication for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, MatrixMatrixMultiplication)
 {
   SparseMatrix<Real> sm1(2, 3);
@@ -181,6 +187,7 @@ TEST_F(SparseMatrixTest, MatrixMatrixMultiplication)
 }
 
 // Test axpy function (y = alpha * x + y)
+/// @brief Verifies axpy operation for sparse matrix test by checking tolerance-based numerical results.
 TEST_F(SparseMatrixTest, AxpyOperation)
 {
   SparseMatrix<Real> x(3, 3);
@@ -212,6 +219,7 @@ TEST_F(SparseMatrixTest, AxpyOperation)
 }
 
 // Test sparse matrix transpose
+/// @brief Verifies transpose for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, Transpose)
 {
   SparseMatrix<Real> sm(2, 3);
@@ -236,6 +244,7 @@ TEST_F(SparseMatrixTest, Transpose)
 }
 
 // Test sparse matrix properties and operations
+/// @brief Verifies matrix properties for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, MatrixProperties)
 {
   SparseMatrix<Real> sm(3, 3);
@@ -264,6 +273,7 @@ TEST_F(SparseMatrixTest, MatrixProperties)
 }
 
 // Test sparse matrix resizing and reserve
+/// @brief Verifies resizing and reserve for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, ResizingAndReserve)
 {
   SparseMatrix<Real> sm(2, 2);
@@ -291,6 +301,7 @@ TEST_F(SparseMatrixTest, ResizingAndReserve)
 }
 
 // Test complex sparse matrix
+/// @brief Verifies complex sparse matrix for sparse matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(SparseMatrixTest, ComplexSparseMatrix)
 {
   SparseMatrix<Complex> csm(2, 2);
@@ -316,6 +327,7 @@ TEST_F(SparseMatrixTest, ComplexSparseMatrix)
 }
 
 // Test sparse matrix iterators
+/// @brief Verifies iterators for sparse matrix test by checking tolerance-based numerical results.
 TEST_F(SparseMatrixTest, Iterators)
 {
   SparseMatrix<Real> sm(3, 3);

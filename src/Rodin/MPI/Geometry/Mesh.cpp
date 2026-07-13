@@ -24,6 +24,7 @@
 
 namespace Rodin::Geometry
 {
+  /// @cond
   MPIMesh::Builder::Builder(const Context::MPI& context)
     : m_context(context)
   {}
@@ -41,6 +42,7 @@ namespace Rodin::Geometry
     mesh.m_quadratures.initialize(mesh.getSpaceDimension());
     return mesh;
   }
+  /// @endcond
 
   MPIMesh::Mesh(const Mesh& other)
     : MeshBase(other),

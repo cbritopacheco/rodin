@@ -52,7 +52,7 @@ namespace Rodin::Assembly
     public:
       /// @brief Scalar type of the DOF coefficients (`PetscScalar`).
       using ScalarType = typename FormLanguage::Traits<FES>::ScalarType;
-      /// @brief PETSc vector type (`::Vec`).
+      /// @brief PETSc vector type (@c Vec).
       using VectorType = ::Vec;
       /// @brief Linear form type being assembled.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
@@ -152,7 +152,7 @@ namespace Rodin::Assembly
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
-      /// @brief PETSc matrix type (`::Mat`).
+      /// @brief PETSc matrix type (@c Mat).
       using OperatorType = ::Mat;
       /// @brief Bilinear form type being assembled.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
@@ -306,9 +306,9 @@ namespace Rodin::Assembly
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
-      /// @brief PETSc matrix type (`::Mat`) for the system operator.
+      /// @brief PETSc matrix type (@c Mat) for the system operator.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
-      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
       /// @brief Scalar type (`PetscScalar`).
       using ScalarType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::ScalarType;   // PetscScalar
@@ -895,9 +895,9 @@ namespace Rodin::Assembly
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
-      /// @brief PETSc matrix type (`::Mat`) for the block system operator.
+      /// @brief PETSc matrix type (@c Mat) for the block system operator.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
-      /// @brief PETSc vector type (`::Vec`) for the block RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the block RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
       /**

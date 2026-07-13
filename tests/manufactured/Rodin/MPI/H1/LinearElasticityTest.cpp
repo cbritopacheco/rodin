@@ -79,6 +79,7 @@
 #  define RODIN_GETPID _getpid
 #else
 #  include <unistd.h>
+/// @brief Compatibility macro used by MPI manufactured tests to query the current process id.
 #  define RODIN_GETPID getpid
 #endif
 
@@ -483,6 +484,7 @@ namespace
 // ---------------------------------------------------------------------------
 namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
 {
+  /// @brief Helper used by the tests to Param.
   using Param = std::tuple<Polytope::Type, size_t>;
 
   // =========================================================================
@@ -514,6 +516,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
         << " K=" << K;
   }
 
+  /// @brief Instantiates H1 Linear Elasticity 2 D over the All Geometries And Degrees parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
     H1LinearElasticity2D,
@@ -557,6 +560,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
         << " K=" << K;
   }
 
+  /// @brief Instantiates H1 Linear Elasticity 3 D over the All Geometries And Degrees parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
     H1LinearElasticity3D,
@@ -575,6 +579,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
 // ---------------------------------------------------------------------------
 // main() — initializes MPI and PETSc before running all tests.
 // ---------------------------------------------------------------------------
+/// @brief Initializes the parallel test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);

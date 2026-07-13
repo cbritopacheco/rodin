@@ -11,7 +11,7 @@
  * @file
  * @brief PETSc vector type alias and form-language traits.
  *
- * Introduces @ref Rodin::PETSc::Math::Vector as an alias for `::Vec` and
+ * Introduces @ref Rodin::PETSc::Math::Vector as an alias for @c Vec and
  * provides the @ref Rodin::FormLanguage::Traits specialization so that
  * Rodin's type-trait machinery recognises PETSc vectors.
  *
@@ -45,7 +45,7 @@ namespace Rodin::FormLanguage
   /**
    * @brief Traits specialization for PETSc vectors.
    *
-   * Allows the form language to deduce the scalar type of a `::Vec`.
+   * Allows the form language to deduce the scalar type of a @c Vec.
    */
   template <>
   struct Traits<::Vec>

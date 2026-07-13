@@ -596,39 +596,75 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::Local>
   {
     public:
+      /// @brief Mesh type loaded by this specialization.
       using ObjectType = Rodin::Geometry::Mesh<Context::Local>;
 
       /// @brief Parent class type.
       using Parent = MeshLoaderBase<Context::Local>;
 
+      /**
+       * @brief Constructs a MEDIT loader bound to a local mesh.
+       * @param[in,out] mesh Mesh object populated by load().
+       */
       MeshLoader(ObjectType& mesh)
         : Parent(mesh),
           m_currentLineNumber(0)
       {}
 
+      /**
+       * @brief Loads a local mesh from a MEDIT input stream.
+       * @param[in,out] is Input stream containing MEDIT data.
+       */
       void load(std::istream& is) override;
 
+      /**
+       * @brief Reads one logical line while tracking line numbers.
+       */
       std::istream& getline(std::istream& is, std::string& line);
+      /**
+       * @brief Skips blank lines and returns the next non-empty line.
+       */
       std::string skipEmptyLines(std::istream& is);
+      /**
+       * @brief Reads and validates the MEDIT version section.
+       */
       void readVersion(std::istream& is);
+      /**
+       * @brief Reads and validates the MEDIT dimension section.
+       */
       void readDimension(std::istream& is);
+      /**
+       * @brief Reads vertex and element entities from the MEDIT stream.
+       */
       void readEntities(std::istream& is);
 
+      /**
+       * @brief Returns mutable counts collected for each MEDIT keyword.
+       */
       std::unordered_map<MEDIT::Keyword, size_t>& getCountMap()
       {
         return m_count;
       }
 
+      /**
+       * @brief Returns counts collected for each MEDIT keyword.
+       */
       const std::unordered_map<MEDIT::Keyword, size_t>& getCountMap() const
       {
         return m_count;
       }
 
+      /**
+       * @brief Returns mutable stream positions for parsed MEDIT sections.
+       */
       std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap()
       {
         return m_pos;
       }
 
+      /**
+       * @brief Returns stream positions for parsed MEDIT sections.
+       */
       const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap() const
       {
         return m_pos;

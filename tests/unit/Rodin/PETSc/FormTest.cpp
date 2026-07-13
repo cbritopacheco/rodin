@@ -669,6 +669,7 @@ namespace
 #endif
 }
 
+  /// @brief Verifies sequential linear form uses self communicator and assembles for PET sc form by checking exact expected values, form assembly.
   TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -700,6 +701,7 @@ namespace
     EXPECT_EQ(globalSize, static_cast<PetscInt>(fes.getSize()));
   }
 
+  /// @brief Verifies sequential bilinear form uses self communicator and assembles for PET sc form by checking exact expected values, form assembly.
   TEST(PETSc_Form, SequentialBilinearFormUsesSelfCommunicatorAndAssembles)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -736,6 +738,7 @@ namespace
     EXPECT_EQ(globalCols, static_cast<PetscInt>(fes.getSize()));
   }
 
+  /// @brief Verifies sequential identification projects matrix and vector for PET sc form by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(PETSc_Form, SequentialIdentificationProjectsMatrixAndVector)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -837,47 +840,56 @@ namespace
     EXPECT_NEAR(value, gamma * 11.0, 1e-14);
   }
 
+  /// @brief Verifies sequential vector master identification projects matrix and vector for PET sc form.
   TEST(PETSc_Form, SequentialVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential affine identification has defect for PET sc form.
   TEST(PETSc_Form, SequentialAffineIdentificationHasDefect)
   {
     checkPETScAffineIdentificationDefect<PETSc::Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential self identification matches zero value constraint for PET sc form.
   TEST(PETSc_Form, SequentialSelfIdentificationMatchesZeroValueConstraint)
   {
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential reassembly keeps explicit zero structural entries for PET sc form.
   TEST(PETSc_Form, SequentialReassemblyKeepsExplicitZeroStructuralEntries)
   {
     checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::Sequential>();
   }
 
 #ifdef RODIN_USE_OPENMP
+  /// @brief Verifies open MP standalone forms match sequential for PET sc form.
   TEST(PETSc_Form, OpenMPStandaloneFormsMatchSequential)
   {
     checkPETScStandaloneOpenMPFormsMatchSequential();
   }
 
+  /// @brief Verifies open MP vector master identification projects matrix and vector for PET sc form.
   TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
   {
     checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP affine identification has defect for PET sc form.
   TEST(PETSc_Form, OpenMPAffineIdentificationHasDefect)
   {
     checkPETScAffineIdentificationDefect<PETSc::Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP self identification matches zero value constraint for PET sc form.
   TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
   {
     checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP reassembly keeps explicit zero structural entries for PET sc form.
   TEST(PETSc_Form, OpenMPReassemblyKeepsExplicitZeroStructuralEntries)
   {
     checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::OpenMP>();

@@ -28,6 +28,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies mesh round trip for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, MeshRoundTrip)
   {
     const std::string meshFile = "/tmp/rodin_hdf5_mesh_rt.h5";
@@ -71,6 +72,7 @@ namespace Rodin::Tests::Unit
     std::remove(meshFile.c_str());
   }
 
+  /// @brief The HDF5 persistence path (mesh.save) must NOT write /Mesh/XDMF datasets.
   TEST(Rodin_IO_HDF5, MeshPersistenceNoXDMF)
   {
     // The HDF5 persistence path (mesh.save) must NOT write /Mesh/XDMF datasets.
@@ -104,6 +106,7 @@ namespace Rodin::Tests::Unit
     std::remove(meshFile.c_str());
   }
 
+  /// @brief The HDF5 persistence path (gf.save) must write raw DOF vector data,.
   TEST(Rodin_IO_HDF5, GridFunctionPersistenceRawDOFs)
   {
     // The HDF5 persistence path (gf.save) must write raw DOF vector data,
@@ -159,6 +162,7 @@ namespace Rodin::Tests::Unit
     std::remove(gfFile.c_str());
   }
 
+  /// @brief The XDMF visualization path must write only minimal visualization data.
   TEST(Rodin_IO_HDF5, XDMFVisualizationTopology)
   {
     // The XDMF visualization path must write only minimal visualization data
@@ -202,6 +206,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
+  /// @brief Verifies XDMF quadratic triangle visualization topology for IO HDF 5 by checking exact expected values, true predicates.
   TEST(Rodin_IO_HDF5, XDMFQuadraticTriangleVisualizationTopology)
   {
     const boost::filesystem::path testDir = "/tmp/rodin_xdmf_p2_triangle_test";
@@ -361,6 +366,7 @@ namespace Rodin::Tests::Unit
     : public testing::TestWithParam<QuadraticXDMFCase>
   {};
 
+  /// @brief Verifies supported quadratic topology for IO HDF 5 quadratic XDMF by checking exact expected values, true predicates, false predicates.
   TEST_P(Rodin_IO_HDF5_QuadraticXDMF, SupportedQuadraticTopology)
   {
     const auto c = GetParam();
@@ -422,6 +428,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
+  /// @brief Verifies forced mixed quadratic topology uses XDMF ids for IO HDF 5 quadratic XDMF by checking exact expected values.
   TEST_P(Rodin_IO_HDF5_QuadraticXDMF, ForcedMixedQuadraticTopologyUsesXDMFIds)
   {
     const auto c = GetParam();
@@ -473,6 +480,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove(meshH5);
   }
 
+  /// @brief Verifies XDMF mixed linear and curved cells uses mixed topology for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, XDMFMixedLinearAndCurvedCellsUsesMixedTopology)
   {
     const boost::filesystem::path meshH5 =
@@ -533,6 +541,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove(meshH5);
   }
 
+  /// @brief Verifies XDMF curved attributes evaluate on visualization points for IO HDF 5 by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_HDF5, XDMFCurvedAttributesEvaluateOnVisualizationPoints)
   {
     const boost::filesystem::path nodeH5 =
@@ -610,6 +619,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove(cellH5);
   }
 
+  /// @brief Verifies XDMF shard writes owned curved cells only for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, XDMFShardWritesOwnedCurvedCellsOnly)
   {
     auto mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -668,6 +678,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove(meshH5);
   }
 
+  /// @brief Instantiates IO HDF 5 Quadratic XDMF over the IO HDF 5 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       Rodin_IO_HDF5,
       Rodin_IO_HDF5_QuadraticXDMF,
@@ -680,6 +691,7 @@ namespace Rodin::Tests::Unit
         QuadraticXDMFCase{Polytope::Type::Wedge,         41u, 18u},
         QuadraticXDMFCase{Polytope::Type::Hexahedron,    50u, 27u}));
 
+  /// @brief The XDMF visualization path must write evaluated vertex data,.
   TEST(Rodin_IO_HDF5, XDMFVisualizationEvaluatedAttributes)
   {
     // The XDMF visualization path must write evaluated vertex data,
@@ -734,6 +746,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove_all(testDir);
   }
 
+  /// @brief Verifies grid function standalone for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, GridFunctionStandalone)
   {
     const std::string gfFile = "/tmp/rodin_hdf5_gf_sa.h5";
@@ -769,6 +782,7 @@ namespace Rodin::Tests::Unit
     std::remove(gfFile.c_str());
   }
 
+  /// @brief Use a dedicated subdirectory for test output.
   TEST(Rodin_IO_HDF5, XDMFWriteAndClose)
   {
     // Use a dedicated subdirectory for test output
@@ -975,6 +989,7 @@ namespace
 
   // --- Mesh round-trip persistence across dimensions -------------------------
 
+  /// @brief Verifies mesh round trip for HDF 5 multi dim by checking exact expected values.
   TEST_P(HDF5MultiDim, MeshRoundTrip)
   {
     const auto type = GetParam();
@@ -1017,6 +1032,7 @@ namespace
     std::remove(meshFile.c_str());
   }
 
+  /// @brief Verifies mesh round trip preserves dimension attributes for HDF 5 attribute regression.
   TEST_P(HDF5AttributeRegression, MeshRoundTripPreservesDimensionAttributes)
   {
     const size_t dim = GetParam();
@@ -1036,6 +1052,7 @@ namespace
 
   // --- Mesh persistence must NOT contain XDMF datasets -----------------------
 
+  /// @brief Verifies mesh persistence no XDMF for HDF 5 multi dim by checking exact expected values.
   TEST_P(HDF5MultiDim, MeshPersistenceNoXDMF)
   {
     const auto type = GetParam();
@@ -1071,6 +1088,7 @@ namespace
 
   // --- GridFunction persistence writes raw DOFs across dimensions ------------
 
+  /// @brief Verifies grid function persistence raw DO fs for HDF 5 multi dim by checking tolerance-based numerical results, exact expected values.
   TEST_P(HDF5MultiDim, GridFunctionPersistenceRawDOFs)
   {
     const auto type = GetParam();
@@ -1152,6 +1170,7 @@ namespace
 
   // --- GridFunction standalone field file across dimensions -------------------
 
+  /// @brief Verifies grid function standalone for HDF 5 multi dim by checking exact expected values.
   TEST_P(HDF5MultiDim, GridFunctionStandalone)
   {
     const auto type = GetParam();
@@ -1226,6 +1245,7 @@ namespace
 
   // --- XDMF visualization topology across dimensions -------------------------
 
+  /// @brief Verifies XDMF visualization topology for HDF 5 multi dim by checking exact expected values, true predicates.
   TEST_P(HDF5MultiDim, XDMFVisualizationTopology)
   {
     const auto type = GetParam();
@@ -1280,6 +1300,7 @@ namespace
 
   // --- XDMF visualization evaluated attributes across dimensions -------------
 
+  /// @brief Verifies XDMF visualization evaluated attributes for HDF 5 multi dim by checking exact expected values, true predicates, false predicates.
   TEST_P(HDF5MultiDim, XDMFVisualizationEvaluatedAttributes)
   {
     const auto type = GetParam();
@@ -1354,6 +1375,7 @@ namespace
 
   // --- XDMF write-and-close across dimensions (full workflow) ----------------
 
+  /// @brief Verifies XDMF write and close for HDF 5 multi dim by checking exact expected values, true predicates.
   TEST_P(HDF5MultiDim, XDMFWriteAndClose)
   {
     const auto type = GetParam();

@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Eikonal/fmm manufactured distance regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Eikonal/FMM manufactured distance regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the Eikonal finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -34,6 +42,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   {};
 
   // Test 1: Point source with constant speed - 2D Euclidean distance
+  /// @brief Verifies point source constant speed 2 D euclidean distance for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, PointSource_ConstantSpeed_2D_EuclideanDistance)
   {
     const size_t n = 33;
@@ -92,6 +101,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 2: Point source with variable speed - 2D radial speed function
+  /// @brief Verifies point source radial speed 2 D for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, PointSource_RadialSpeed_2D)
   {
     // Create 2D mesh
@@ -157,6 +167,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 3: Surface mesh test - Box surface with point source
+  /// @brief Verifies box surface point source for FMM manufactured test by checking exact expected values, false predicates, solver behavior.
   TEST_F(FMMManufacturedTest, BoxSurface_PointSource)
   {
     // Create surface mesh
@@ -225,6 +236,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 4: Sphere mapping test - Map cube to sphere and test geodesic distances
+  /// @brief Verifies sphere mapping test geodesic distance for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, SphereMappingTest_GeodesicDistance)
   {
     // Create cube mesh
@@ -309,6 +321,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 5: 3D volumetric manufactured test - Constant speed in cube
+  /// @brief Verifies volume 3 D constant speed cube center for FMM manufactured 3 D test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_P(FMMManufactured3DTest, Volume3D_ConstantSpeed_CubeCenter)
   {
     constexpr size_t n = 10;
@@ -372,6 +385,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     }
   }
 
+  /// @brief Instantiates FMM Manufactured 3 D Test over the All Geometries 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries3D,
     FMMManufactured3DTest,
@@ -383,6 +397,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   );
 
   // Test 6: Anisotropic speed function test
+  /// @brief Verifies anisotropic speed 2 D for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, AnisotropicSpeed_2D)
   {
     // Create 2D mesh
@@ -445,6 +460,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 7: Line source with constant speed - 2D 
+  /// @brief Verifies line source constant speed 2 D for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, LineSource_ConstantSpeed_2D)
   {
     // Create 2D mesh
@@ -521,6 +537,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 8: Circular ring source with constant speed
+  /// @brief Verifies circular ring source constant speed 2 D for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, CircularRingSource_ConstantSpeed_2D)
   {
     // Create 2D mesh
@@ -615,6 +632,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 9: Boundary-based initial conditions with analytical solution
+  /// @brief Verifies boundary initial condition square domain for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, BoundaryInitialCondition_SquareDomain)
   {
     // Create 2D mesh on [0,1] x [0,1]
@@ -688,6 +706,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 10: Interior interface with known analytical solution
+  /// @brief Verifies interior interface analytical validation for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, InteriorInterface_AnalyticalValidation)
   {
     // Create 2D mesh
@@ -781,6 +800,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   }
 
   // Test 11: Mixed speed function with validation
+  /// @brief Verifies mixed speed function layered medium for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, MixedSpeedFunction_LayeredMedium)
   {
     // Create 2D mesh

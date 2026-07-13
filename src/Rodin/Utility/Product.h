@@ -20,8 +20,8 @@ namespace Rodin::Utility
    * @brief Metafunction to compute the Cartesian product of two Tuple type-lists.
    * @ingroup UtilityModule
    *
-   * Given two `Tuple<...>` types, `A = Tuple<A1, A2, ...>` and `B = Tuple<B1, B2, ...>`,
-   * `Product<A, B>::Type<Pair>` will be `Tuple< Pair<Ai,Bj>... >` for all i,j.
+   * Given two tuple type lists, this metafunction builds the tuple of
+   * pairwise combinations for all input entries.
    *
    * @tparam ... Primary template (undefined). Specializations below implement the logic.
    */
@@ -40,7 +40,7 @@ namespace Rodin::Utility
    * @tparam Hs Remaining types of the first Tuple.
    * @tparam Gs All types of the second Tuple.
    *
-   * @note This relies on `Tuple<...>::concatenate(Tuple<...>)` to stitch the pieces together.
+   * @note This relies on tuple concatenation to stitch the pieces together.
    */
   template <class H1, class H2, class ... Hs, class ... Gs>
   struct Product<Tuple<H1, H2, Hs...>, Tuple<Gs...>>

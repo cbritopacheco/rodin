@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function simple division for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_SimpleDivision)
   {
     RealFunction f1(8.0);
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies real function division by one for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_DivisionByOne)
   {
     RealFunction f1(42.0);
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 42.0, 1e-10);
   }
 
+  /// @brief Verifies real function fractional result for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_FractionalResult)
   {
     RealFunction f1(3.0);
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 0.75, 1e-10);
   }
 
+  /// @brief Verifies real function large numerator for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_LargeNumerator)
   {
     RealFunction f1(1000.0);
@@ -75,6 +79,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 100.0, 1e-10);
   }
 
+  /// @brief Verifies real function small numerator for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_SmallNumerator)
   {
     RealFunction f1(0.5);
@@ -91,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 0.25, 1e-10);
   }
 
+  /// @brief Verifies real function negative values for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_NegativeValues)
   {
     RealFunction f1(-6.0);
@@ -107,6 +113,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), -2.0, 1e-10);
   }
 
+  /// @brief Verifies real function both negative for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, RealFunction_BothNegative)
   {
     RealFunction f1(-12.0);
@@ -123,6 +130,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Verifies grid function division for variational division by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Division, GridFunction_Division)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -147,6 +155,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies chained division for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, ChainedDivision)
   {
     RealFunction f1(24.0);
@@ -164,6 +173,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies division with multiplication for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DivisionWithMultiplication)
   {
     RealFunction f1(12.0);
@@ -184,6 +194,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(mult_first.getValue(p), 8.0, 1e-10);
   }
 
+  /// @brief Verifies division of sum for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DivisionOfSum)
   {
     RealFunction f1(5.0);
@@ -202,6 +213,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies reciprocal property for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, ReciprocalProperty)
   {
     RealFunction f1(7.0);
@@ -221,6 +233,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies division by itself for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DivisionByItself)
   {
     RealFunction f(15.0);
@@ -237,6 +250,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies large division for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, LargeDivision)
   {
     RealFunction f1(1e6);
@@ -253,6 +267,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 1e3, 1e-6);
   }
 
+  /// @brief Verifies small division for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, SmallDivision)
   {
     RealFunction f1(1e-6);
@@ -269,6 +284,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 1e-3, 1e-15);
   }
 
+  /// @brief Verifies division with sqrt for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DivisionWithSqrt)
   {
     RealFunction f1(16.0);
@@ -286,6 +302,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies division with abs for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DivisionWithAbs)
   {
     RealFunction f1(-8.0);
@@ -303,6 +320,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies distributive property for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DistributiveProperty)
   {
     RealFunction f1(6.0);
@@ -328,6 +346,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_sum.getValue(p), 4.5, 1e-10);
   }
 
+  /// @brief Verifies division order for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, DivisionOrder)
   {
     RealFunction f1(12.0);
@@ -349,6 +368,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div1.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies fractional division for variational division by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Division, FractionalDivision)
   {
     RealFunction f1(0.75);

@@ -30,7 +30,7 @@
  */
 
 /**
-  @dir Rodin/Context
+  Directory src/Rodin/Context
   @brief Namespace @ref Rodin::Context
  */
 
@@ -50,7 +50,7 @@
  */
 
 /**
-  @dir Rodin/Alert
+  Directory src/Rodin/Alert
   @brief Namespace @ref Rodin::Alert
  */
 
@@ -96,7 +96,7 @@
  */
 
 /**
-  @dir Rodin/Geometry
+  Directory src/Rodin/Geometry
   @brief Namespace @ref Rodin::Geometry
  */
 
@@ -168,7 +168,7 @@
  */
 
 /**
-  @dir Rodin/Assembly
+  Directory src/Rodin/Assembly
   @brief Namespace @ref Rodin::Assembly
  */
 
@@ -238,7 +238,7 @@
  */
 
 /**
-  @dir Rodin/Geometry/Euclidean
+  Directory src/Rodin/Geometry/Euclidean
   @brief Namespace @ref Rodin::Geometry::Euclidean
  */
 
@@ -248,7 +248,7 @@
  */
 
 /**
-  @dir Rodin/IO
+  Directory src/Rodin/IO
   @brief Namespace @ref Rodin::IO
  */
 
@@ -412,7 +412,7 @@
 
 
 /**
-  @dir Rodin/Variational
+  Directory src/Rodin/Variational
   @brief Namespace @ref Rodin::Variational
  */
 
@@ -521,7 +521,7 @@
  */
 
 /**
-  @dir Rodin/Distance
+  Directory src/Rodin/Distance
   @brief Namespace @ref Rodin::Distance
  */
 
@@ -604,7 +604,7 @@
  */
 
 /**
-  @dir Rodin/Hilbert
+  Directory src/Rodin/Hilbert
   @brief Namespace @ref Rodin::Hilbert
  */
 
@@ -642,7 +642,7 @@
  */
 
 /**
-  @dir Rodin/Advection
+  Directory src/Rodin/Advection
   @brief Namespace @ref Rodin::Advection
  */
 
@@ -718,7 +718,7 @@
  */
 
 /**
-  @dir Rodin/Eikonal
+  Directory src/Rodin/Eikonal
   @brief Namespace @ref Rodin::Eikonal
  */
 
@@ -966,7 +966,7 @@
  */
 
 /**
-  @dir Rodin/QF
+  Directory src/Rodin/QF
   @brief Namespace @ref Rodin::QF
  */
 
@@ -1015,7 +1015,7 @@
  */
 
 /**
-  @dir Rodin/FormLanguage
+  Directory src/Rodin/FormLanguage
   @brief Namespace @ref Rodin::FormLanguage
  */
 
@@ -1068,7 +1068,7 @@
  */
 
 /**
-  @dir Rodin/Math
+  Directory src/Rodin/Math
   @brief Namespace @ref Rodin::Math
  */
 
@@ -1138,7 +1138,7 @@
 
 
 /**
-  @dir Rodin/Solver
+  Directory src/Rodin/Solver
   @brief Namespace @ref Rodin::Solver
  */
 
@@ -1202,7 +1202,7 @@
  */
 
 /**
-  @dir Rodin/Test
+  Directory src/Rodin/Test
   @brief Namespace @ref Rodin::Test
  */
 
@@ -1213,7 +1213,7 @@
  */
 
 /**
-  @dir Rodin/Utility
+  Directory src/Rodin/Utility
   @brief Namespace @ref Rodin::Utility
  */
 
@@ -1228,7 +1228,7 @@
  */
 
 /**
-  @dir Rodin/MMG
+  Directory src/Rodin/MMG
   @brief Namespace @ref Rodin::MMG
  */
 
@@ -1629,7 +1629,7 @@
  */
 
 /**
-  @dir Rodin/Adaptation
+  Directory src/Rodin/Adaptation
   @brief Namespace @ref Rodin::Adaptation
  */
 
@@ -1672,7 +1672,7 @@
  */
 
 /**
-  @dir Rodin/Heart
+  Directory src/Rodin/Heart
   @brief Namespace @ref Rodin::Heart
  */
 
@@ -1709,7 +1709,7 @@
  */
 
 /**
-  @dir Rodin/Serialization
+  Directory src/Rodin/Serialization
   @brief Namespace support for serialization of Rodin types.
  */
 

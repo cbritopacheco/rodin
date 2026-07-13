@@ -56,6 +56,7 @@ namespace
   };
 }
 
+/// @brief Verifies integer constant for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, IntegerConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -70,6 +71,7 @@ TEST(Rodin_Variational_ComplexFunction, IntegerConstant)
   EXPECT_NEAR(val.imag(), 0.0, 1e-10);
 }
 
+/// @brief Verifies real constant for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, RealConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -84,6 +86,7 @@ TEST(Rodin_Variational_ComplexFunction, RealConstant)
   EXPECT_NEAR(val.imag(), 0.0, 1e-10);
 }
 
+/// @brief Verifies complex constant for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, ComplexConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -98,6 +101,7 @@ TEST(Rodin_Variational_ComplexFunction, ComplexConstant)
   EXPECT_NEAR(val.imag(), 3.0, 1e-10);
 }
 
+/// @brief Verifies from real and imag parts for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, FromRealAndImagParts)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -114,6 +118,7 @@ TEST(Rodin_Variational_ComplexFunction, FromRealAndImagParts)
   EXPECT_NEAR(val.imag(), 5.0, 1e-10);
 }
 
+/// @brief Verifies callable for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, Callable)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -129,6 +134,7 @@ TEST(Rodin_Variational_ComplexFunction, Callable)
   EXPECT_NEAR(val.imag(), 2.0, 1e-10);
 }
 
+/// @brief Verifies callable pair for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, CallablePair)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -145,6 +151,7 @@ TEST(Rodin_Variational_ComplexFunction, CallablePair)
   EXPECT_NEAR(val.imag(), 20.0, 1e-10);
 }
 
+/// @brief Verifies copy constant for variational complex function by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_ComplexFunction, CopyConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -160,6 +167,7 @@ TEST(Rodin_Variational_ComplexFunction, CopyConstant)
   EXPECT_NEAR(val.imag(), 8.0, 1e-10);
 }
 
+/// @brief Verifies copy composite for variational complex function by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_ComplexFunction, CopyComposite)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -177,6 +185,7 @@ TEST(Rodin_Variational_ComplexFunction, CopyComposite)
   EXPECT_NEAR(val.imag(), 2.0, 1e-10);
 }
 
+/// @brief Verifies get order constant for variational complex function by checking exact expected values, true predicates.
 TEST(Rodin_Variational_ComplexFunction, GetOrderConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -188,6 +197,7 @@ TEST(Rodin_Variational_ComplexFunction, GetOrderConstant)
   EXPECT_EQ(*order, 0u);
 }
 
+/// @brief Verifies get order callable for variational complex function by checking false predicates.
 TEST(Rodin_Variational_ComplexFunction, GetOrderCallable)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -199,6 +209,7 @@ TEST(Rodin_Variational_ComplexFunction, GetOrderCallable)
   EXPECT_FALSE(order.has_value());
 }
 
+/// @brief Verifies callable uses integration point fast path for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -216,6 +227,7 @@ TEST(Rodin_Variational_ComplexFunction, Callable_UsesIntegrationPointFastPath)
   EXPECT_NEAR(f.getValue(ip).imag(), 23.0, 1e-10);
 }
 
+/// @brief Verifies real and imag parts use integration point fast path for variational complex function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_ComplexFunction, RealAndImagParts_UseIntegrationPointFastPath)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

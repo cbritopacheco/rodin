@@ -105,6 +105,13 @@ namespace Rodin::Geometry
         return UniformGrid(context, g, shape);
       }
 
+      /**
+       * @brief Builds a distributed uniform grid from an array shape.
+       * @param[in] context MPI context used for distribution.
+       * @param[in] g Polytope type used by the grid.
+       * @param[in] shape Grid shape along each coordinate direction.
+       * @return Distributed uniform grid.
+       */
       static Mesh UniformGrid(
           const Context::MPI& context, Polytope::Type g, const Array<size_t>& shape);
 
@@ -826,6 +833,11 @@ namespace Rodin::Geometry
         bool strictRoundCap = false;
       };
 
+      /**
+       * @brief Reconciles entities of dimension @p d with default options.
+       * @param[in] d Topological dimension of the entities to reconcile.
+       * @return Reference to the mesh.
+       */
       Mesh& reconcile(size_t d)
       {
         return this->reconcile(d, ReconcileOptions());
@@ -862,11 +874,10 @@ namespace Rodin::Geometry
        * Only shard metadata is modified; the local mesh topology is unchanged.
        *
        * @param[in] d Topological dimension of the entities to reconcile.
-       * @param[in] maxRounds Optional upper bound on the number of
-       *   convergence rounds for iterative owner resolution and distributed
-       *   ID propagation.  When absent (the default), the loops iterate
-       *   until global convergence.  When present, each convergence loop
-       *   executes at most @p maxRounds iterations.
+       * @param[in] options Reconciliation controls. When
+       *   ReconcileOptions::maxRounds is absent, the loops iterate until
+       *   global convergence. When present, each convergence loop executes at
+       *   most that many iterations.
        *
        *   For codimension-1 entities (e.g. faces in 3D, edges in 2D), each
        *   entity is shared by at most 2 cells, so 1 round after the initial

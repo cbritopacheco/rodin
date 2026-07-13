@@ -11,6 +11,14 @@
  * BilinearForm or LinearForm in a mixed Problem produces identical numerical
  * results to the integral-only formulation.
  */
+
+/**
+ * @file
+ * @brief Mixed-space manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a mixed-space manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the PreassembledMixed finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -47,6 +55,7 @@ namespace Rodin::Tests::Manufactured::PreassembledMixed
     Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Preassembled Mixed 10 x 10.
   using PreassembledMixed_10x10 = PreassembledMixed_Test<10, 10>;
 
   // -----------------------------------------------------------------------
@@ -61,6 +70,7 @@ namespace Rodin::Tests::Manufactured::PreassembledMixed
   // With exact_solution = 2, the exact discrete solution is (u, p) =
   // (exact, exact).
   // -----------------------------------------------------------------------
+  /// @brief Verifies preassembled mixed 10 x 10 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(PreassembledMixed_10x10,
     P0P1_PreassembledBF_ConstantExactSolution)
   {
@@ -133,6 +143,7 @@ namespace Rodin::Tests::Manufactured::PreassembledMixed
   // where [L_p0] is the load vector \int f\cdotq supplied as a preassembled
   // LinearForm instead of Integral(f, q).
   // -----------------------------------------------------------------------
+  /// @brief Verifies preassembled mixed 10 x 10 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(PreassembledMixed_10x10,
     P0P1_PreassembledLF_ConstantExactSolution)
   {
@@ -184,6 +195,7 @@ namespace Rodin::Tests::Manufactured::PreassembledMixed
   // -----------------------------------------------------------------------
   // Test 3: Both BF and LF preassembled simultaneously.
   // -----------------------------------------------------------------------
+  /// @brief Verifies preassembled mixed 10 x 10 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(PreassembledMixed_10x10,
     P0P1_PreassembledBFAndLF_ConstantExactSolution)
   {
@@ -227,6 +239,7 @@ namespace Rodin::Tests::Manufactured::PreassembledMixed
     EXPECT_NEAR(Integral(diff_p).compute(), 0, 1e-12);
   }
 
+  /// @brief Instantiates Preassembled Mixed 10 x 10 over the Polytope Coverage 2 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage2D,
     PreassembledMixed_10x10,

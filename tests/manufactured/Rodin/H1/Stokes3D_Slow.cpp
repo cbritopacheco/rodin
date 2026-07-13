@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Stokes manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Stokes manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -40,6 +48,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
   using Manufactured_Stokes3D_Test_12 =
     Manufactured_Stokes3D_Test<12, 12, 12>;
 
+  /// @brief Verifies stokes 3 D trigonometric for manufactured stokes 3 D test 12 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_Trigonometric)
   {
     auto pi = Rodin::Math::Constants::pi();

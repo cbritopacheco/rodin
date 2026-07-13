@@ -30,6 +30,7 @@ class InfoTest : public ::testing::Test
 };
 
 // Test Info class functionality
+/// @brief Test default construction.
 TEST_F(InfoTest, InfoConstruction)
 {
   // Test default construction
@@ -48,6 +49,7 @@ TEST_F(InfoTest, InfoConstruction)
   EXPECT_NO_THROW(Info());
 }
 
+/// @brief Verifies info message for info test by checking true predicates.
 TEST_F(InfoTest, InfoMessage)
 {
   Info info(infoStream);
@@ -61,6 +63,7 @@ TEST_F(InfoTest, InfoMessage)
   EXPECT_TRUE(output.find("This is an informational message") != std::string::npos);
 }
 
+/// @brief Verifies info stream operator for info test by checking true predicates.
 TEST_F(InfoTest, InfoStreamOperator)
 {
   Info info(infoStream);
@@ -77,6 +80,7 @@ TEST_F(InfoTest, InfoStreamOperator)
 }
 
 // Test multiple raises
+/// @brief Verifies multiple raises for info test by checking true predicates.
 TEST_F(InfoTest, MultipleRaises)
 {
   Info info(infoStream);
@@ -99,6 +103,7 @@ TEST_F(InfoTest, MultipleRaises)
 }
 
 // Test info prefix type
+/// @brief Verifies info prefix type for info test by checking no-throw behavior.
 TEST_F(InfoTest, InfoPrefixType)
 {
   InfoPrefix infoPrefix;

@@ -8,6 +8,7 @@ namespace Rodin::Tests::Unit
 {
   //=== Variant Constructor ==================================================
 
+  /// @brief Using deduction guide.
   TEST(Rodin_Pair, VariantConstructor)
   {
     // Using deduction guide.
@@ -18,6 +19,7 @@ namespace Rodin::Tests::Unit
 
   //=== Construction =========================================================
 
+  /// @brief Verifies construction for pair by checking exact expected values.
   TEST(Rodin_Pair, Construction)
   {
     Pair<int, std::string> p(42, "Answer");
@@ -27,6 +29,7 @@ namespace Rodin::Tests::Unit
 
   //=== Copy and Move Semantics ==============================================
 
+  /// @brief Verifies copy construction for pair by checking exact expected values, copy semantics.
   TEST(Rodin_Pair, CopyConstruction)
   {
     Pair<int, std::string> p1(1, "one");
@@ -35,6 +38,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p2.second(), "one");
   }
 
+  /// @brief Verifies move construction for pair by checking exact expected values, move semantics.
   TEST(Rodin_Pair, MoveConstruction)
   {
     Pair<int, std::string> p1(2, "two");
@@ -43,6 +47,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p2.second(), "two");
   }
 
+  /// @brief Verifies copy assignment for pair by checking exact expected values, copy semantics.
   TEST(Rodin_Pair, CopyAssignment)
   {
     Pair<int, char> p1(3, 'c');
@@ -52,6 +57,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p2.second(), 'c');
   }
 
+  /// @brief Verifies move assignment for pair by checking exact expected values, move semantics.
   TEST(Rodin_Pair, MoveAssignment)
   {
     Pair<int, char> p1(7, 'x');
@@ -63,6 +69,7 @@ namespace Rodin::Tests::Unit
 
   //=== Accessors ============================================================
 
+  /// @brief Verifies get accessors for pair by checking exact expected values.
   TEST(Rodin_Pair, GetAccessors)
   {
     Pair<int, double> p(5, 3.14);
@@ -71,6 +78,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p.get<1>(), 3.14);
   }
 
+  /// @brief Verifies first second const for pair by checking exact expected values.
   TEST(Rodin_Pair, FirstSecondConst)
   {
     const Pair<int, char> p(9, 'q');

@@ -15,6 +15,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- IdentityTransformation basic properties ----
 
+  /// @brief Verifies construction for geometry identity transformation by checking exact expected values.
   TEST(Geometry_IdentityTransformation, Construction)
   {
     IdentityTransformation t(2);
@@ -23,6 +24,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(t.getOrder(), 1);
   }
 
+  /// @brief Verifies construction 3 D for geometry identity transformation by checking exact expected values.
   TEST(Geometry_IdentityTransformation, Construction3D)
   {
     IdentityTransformation t(3);
@@ -30,6 +32,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(t.getPhysicalDimension(), 3);
   }
 
+  /// @brief Verifies transform 2 D for geometry identity transformation by checking tolerance-based numerical results.
   TEST(Geometry_IdentityTransformation, Transform2D)
   {
     IdentityTransformation t(2);
@@ -40,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pc(1), 0.7, 1e-14);
   }
 
+  /// @brief Verifies transform 3 D for geometry identity transformation by checking tolerance-based numerical results.
   TEST(Geometry_IdentityTransformation, Transform3D)
   {
     IdentityTransformation t(3);
@@ -51,6 +55,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pc(2), 0.3, 1e-14);
   }
 
+  /// @brief Verifies jacobian 2 D for geometry identity transformation by checking tolerance-based numerical results.
   TEST(Geometry_IdentityTransformation, Jacobian2D)
   {
     IdentityTransformation t(2);
@@ -64,6 +69,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(jac(1, 1), 1.0, 1e-14);
   }
 
+  /// @brief Verifies jacobian 3 D for geometry identity transformation by checking tolerance-based numerical results.
   TEST(Geometry_IdentityTransformation, Jacobian3D)
   {
     IdentityTransformation t(3);
@@ -75,6 +81,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(jac(i, j), (i == j) ? 1.0 : 0.0, 1e-14);
   }
 
+  /// @brief Verifies copy for geometry identity transformation by checking tolerance-based numerical results, exact expected values, copy semantics.
   TEST(Geometry_IdentityTransformation, Copy)
   {
     IdentityTransformation t(2);
@@ -91,6 +98,7 @@ namespace Rodin::Tests::Unit
     delete c;
   }
 
+  /// @brief Verifies move construction for geometry identity transformation by checking exact expected values, move semantics.
   TEST(Geometry_IdentityTransformation, MoveConstruction)
   {
     IdentityTransformation t(3);
@@ -99,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(moved.getPhysicalDimension(), 3);
   }
 
+  /// @brief Verifies copy construction for geometry identity transformation by checking exact expected values, copy semantics.
   TEST(Geometry_IdentityTransformation, CopyConstruction)
   {
     IdentityTransformation t(2);

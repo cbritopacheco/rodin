@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function subtraction for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, RealFunction_Subtraction)
   {
     RealFunction f1(7.0);
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies real function zero result for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, RealFunction_ZeroResult)
   {
     RealFunction f1(5.0);
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative result for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, RealFunction_NegativeResult)
   {
     RealFunction f1(2.0);
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), -6.0, 1e-10);
   }
 
+  /// @brief Verifies real function subtract zero for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, RealFunction_SubtractZero)
   {
     RealFunction f1(42.0);
@@ -75,6 +79,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 42.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative numbers for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, RealFunction_NegativeNumbers)
   {
     RealFunction f1(-3.0);
@@ -91,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies real function mixed signs for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, RealFunction_MixedSigns)
   {
     RealFunction f1(10.0);
@@ -107,6 +113,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 14.0, 1e-10);
   }
 
+  /// @brief Verifies vector function subtraction for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, VectorFunction_Subtraction)
   {
     VectorFunction vf1{5.0, 8.0};
@@ -125,6 +132,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(1), 5.0, 1e-10);
   }
 
+  /// @brief Verifies vector function zero vector for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, VectorFunction_ZeroVector)
   {
     VectorFunction vf1{3.0, -2.0, 7.0};
@@ -144,6 +152,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(2), 7.0, 1e-10);
   }
 
+  /// @brief Verifies grid function subtraction for variational minus by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Minus, GridFunction_Subtraction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -168,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies chained subtraction for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, ChainedSubtraction)
   {
     RealFunction f1(20.0);
@@ -185,6 +195,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 7.0, 1e-10);
   }
 
+  /// @brief Verifies subtraction with addition for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionWithAddition)
   {
     RealFunction f1(12.0);
@@ -205,6 +216,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result1.getValue(p), 10.0, 1e-10);
   }
 
+  /// @brief Verifies subtraction self inverse for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionSelfInverse)
   {
     RealFunction f1(15.0);
@@ -224,6 +236,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(plus_back.getValue(p), f1.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies subtraction non commutative for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionNonCommutative)
   {
     RealFunction f1(10.0);
@@ -245,6 +258,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus1.getValue(p), -minus2.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies subtraction with multiplication for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionWithMultiplication)
   {
     RealFunction f1(8.0);
@@ -266,6 +280,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result1.getValue(p), 10.0, 1e-10);
   }
 
+  /// @brief Verifies subtraction with division for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionWithDivision)
   {
     RealFunction f1(15.0);
@@ -287,6 +302,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result1.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies large values for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, LargeValues)
   {
     RealFunction f1(1e6);
@@ -303,6 +319,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 7e5, 1e-3);
   }
 
+  /// @brief Verifies small values for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SmallValues)
   {
     RealFunction f1(1e-3);
@@ -319,6 +336,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 5e-4, 1e-15);
   }
 
+  /// @brief Verifies subtract from self for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractFromSelf)
   {
     RealFunction f(25.0);
@@ -335,6 +353,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies subtraction with sqrt for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionWithSqrt)
   {
     RealFunction f1(25.0);
@@ -353,6 +372,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies subtraction with abs for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionWithAbs)
   {
     RealFunction f1(3.0);
@@ -370,6 +390,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(minus_result.getValue(p), -4.0, 1e-10);
   }
 
+  /// @brief Verifies vector component subtraction for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, VectorComponentSubtraction)
   {
     VectorFunction vf1{10.0, 15.0, 20.0};
@@ -391,6 +412,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(z_diff.getValue(p), 12.0, 1e-10);
   }
 
+  /// @brief Verifies subtraction fractional values for variational minus by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Minus, SubtractionFractionalValues)
   {
     RealFunction f1(2.75);

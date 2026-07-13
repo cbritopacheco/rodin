@@ -14,6 +14,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies shape function construction for variational H1 div.
   TEST(Rodin_Variational_H1_Div, ShapeFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -31,6 +32,7 @@ namespace Rodin::Tests::Unit
     // Divergence of a vector function should be a scalar function
   }
 
+  /// @brief Verifies grid function construction for variational H1 div by checking exact expected values.
   TEST(Rodin_Variational_H1_Div, GridFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -47,6 +49,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&div_gf.getOperand(), &gf);
   }
 
+  /// @brief Verifies grid function constant vector field for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, GridFunction_ConstantVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -72,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies copy for variational H1 div by checking copy semantics.
   TEST(Rodin_Variational_H1_Div, Copy)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -90,6 +94,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies grid function linear vector field H1 2 for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, GridFunction_LinearVectorField_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -119,6 +124,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 2.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function divergence free field H1 2 for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, GridFunction_DivergenceFreeField_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -161,6 +167,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies grid function quadratic vector field H1 2 for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, GridFunction_QuadraticVectorField_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -207,6 +214,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies grid function quadratic vector field H1 3 for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, GridFunction_QuadraticVectorField_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -253,6 +261,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies multiple random evaluations for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, MultipleRandomEvaluations)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -296,6 +305,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies different polynomial degrees for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, DifferentPolynomialDegrees)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -363,6 +373,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies usage in bilinear form for variational H1 div by checking false predicates, form assembly.
   TEST(Rodin_Variational_H1_Div, UsageInBilinearForm)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -387,6 +398,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.cols(), 0);
   }
 
+  /// @brief Verifies zero vector field for variational H1 div by checking tolerance-based numerical results.
   TEST(Rodin_Variational_H1_Div, ZeroVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -416,6 +428,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies random coordinates on multiple cells for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, RandomCoordinatesOnMultipleCells)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
@@ -456,6 +469,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies random coordinates quartic vector field H1 5 for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, RandomCoordinates_QuarticVectorField_H1_5)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -512,6 +526,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies project div onto grid function linear vector field for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, ProjectDivOntoGridFunction_LinearVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -563,6 +578,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies project div onto grid function quadratic vector field for variational H1 div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div, ProjectDivOntoGridFunction_QuadraticVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -620,6 +636,7 @@ namespace Rodin::Tests::Unit
   // Tetrahedron tests
   // ============================================================================
 
+  /// @brief Verifies shape function construction for variational H1 div tet.
   TEST(Rodin_Variational_H1_Div_Tet, ShapeFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
@@ -638,6 +655,7 @@ namespace Rodin::Tests::Unit
     // Divergence of a vector function should be a scalar function
   }
 
+  /// @brief Verifies grid function construction for variational H1 div tet by checking exact expected values.
   TEST(Rodin_Variational_H1_Div_Tet, GridFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
@@ -655,6 +673,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&div_gf.getOperand(), &gf);
   }
 
+  /// @brief Verifies grid function constant function for variational H1 div tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div_Tet, GridFunction_ConstantFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
@@ -681,6 +700,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function linear vector field H1 2 for variational H1 div tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div_Tet, GridFunction_LinearVectorField_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
@@ -712,6 +732,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 3.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function quadratic vector field H1 2 for variational H1 div tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div_Tet, GridFunction_QuadraticVectorField_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
@@ -748,6 +769,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, expected_div, 1e-10);
   }
 
+  /// @brief Verifies random coordinates linear vector field for variational H1 div tet by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div_Tet, RandomCoordinates_LinearVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });
@@ -800,6 +822,7 @@ namespace Rodin::Tests::Unit
   // Quadrilateral tests
   // ============================================================================
 
+  /// @brief Verifies shape function construction for variational H1 div quad.
   TEST(Rodin_Variational_H1_Div_Quad, ShapeFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -817,6 +840,7 @@ namespace Rodin::Tests::Unit
     // Divergence of a vector function should be a scalar function
   }
 
+  /// @brief Verifies grid function construction for variational H1 div quad by checking exact expected values.
   TEST(Rodin_Variational_H1_Div_Quad, GridFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -833,6 +857,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&div_gf.getOperand(), &gf);
   }
 
+  /// @brief Verifies grid function linear vector field H1 2 for variational H1 div quad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div_Quad, GridFunction_LinearVectorField_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -862,6 +887,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 2.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies random coordinates linear vector field for variational H1 div quad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Div_Quad, RandomCoordinates_LinearVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -901,6 +927,7 @@ namespace Rodin::Tests::Unit
   }
 }
 
+/// @brief Verifies shape function get DO fs triangle H1 2 for H1 div by checking exact expected values.
 TEST(H1Div, ShapeFunction_getDOFs_Triangle_H1_2)
 {
   Mesh mesh;
@@ -917,6 +944,7 @@ TEST(H1Div, ShapeFunction_getDOFs_Triangle_H1_2)
   EXPECT_EQ(div_u.getDOFs(*cellIt), 12);
 }
 
+/// @brief Verifies shape function get DO fs tetrahedron H1 2 for H1 div by checking exact expected values.
 TEST(H1Div, ShapeFunction_getDOFs_Tetrahedron_H1_2)
 {
   Mesh mesh;

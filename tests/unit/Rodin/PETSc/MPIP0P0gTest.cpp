@@ -154,7 +154,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
    * @brief The global integral of the projected constant function equals
    *        the constant times the domain area.
    *
-   * \int u_h d\Omega = c \cdot |\Omega|.
+   * @f$ \int_\Omega u_h\,d\Omega = c \cdot |\Omega| @f$.
    */
   TEST(PETSc_MPI_P0, Integral_ProjectedConstant_EqualsArea_Triangle)
   {
@@ -185,7 +185,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble \int 1\cdot v d\Omega on distributed P0 and verify the global
+   * @brief Assemble @f$ \int_\Omega 1\cdot v\,d\Omega @f$ on distributed P0 and verify the global
    *        vector size equals the number of cells.
    *
    * For P0 each entry corresponds to one cell, so the vector size must equal
@@ -217,10 +217,10 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief Sum of \int 1\cdot v d\Omega over all P0 test functions equals domain area.
+   * @brief Sum of @f$ \int_\Omega 1\cdot v\,d\Omega @f$ over all P0 test functions equals domain area.
    *
    * For f = 1 and P0, each entry b_K = |K| (cell measure).
-   * ∑_K b_K = |\Omega|.
+   * @f$ \sum_K b_K = |\Omega| @f$.
    */
   TEST(PETSc_MPI_P0, LinearForm_SumEqualsDomainArea_Triangle)
   {
@@ -252,7 +252,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble the P0 mass matrix \int u\cdot v d\Omega and check global dimensions.
+   * @brief Assemble the P0 mass matrix @f$ \int_\Omega u\cdot v\,d\Omega @f$ and check global dimensions.
    *
    * For P0 the global matrix size is (N_cells × N_cells).
    */
@@ -291,7 +291,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   /**
    * @brief Solve the L2 projection of a constant onto P0 via PETSc GMRES.
    *
-   * Problem: find u_h ∈ P0 s.t. \int u_h v d\Omega = \int c v d\Omega for all v ∈ P0.
+   * Problem: find @f$ u_h \in P0 @f$ such that @f$ \int_\Omega u_h v\,d\Omega = \int_\Omega c v\,d\Omega @f$ for all @f$ v \in P0 @f$.
    * Solution: u_h = c on every cell.  L2 error = 0.
    */
   TEST(PETSc_MPI_P0, SolveL2Projection_Constant_Triangle)
@@ -405,9 +405,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
 
   /**
    * @brief Project a constant onto distributed P0g and verify the projection
-   *        by checking \int u_h d\Omega = c \cdot |\Omega|.
+   *        by checking @f$ \int_\Omega u_h\,d\Omega = c \cdot |\Omega| @f$.
    *
-   * The test uses a [0,1]×[0,1] mesh (area = 1), so \int u_h d\Omega = c.
+   * The test uses a @f$ [0,1]\times[0,1] @f$ mesh with area 1, so @f$ \int_\Omega u_h\,d\Omega = c @f$.
    */
   TEST(PETSc_MPI_P0g, GridFunctionProjection_ConstantFunction_Triangle)
   {
@@ -436,7 +436,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief \int 1\cdot v d\Omega with P0g has global size 1.
+   * @brief @f$ \int_\Omega 1\cdot v\,d\Omega @f$ with P0g has global size 1.
    */
   TEST(PETSc_MPI_P0g, LinearForm_GlobalVectorSizeIsOne_Triangle)
   {
@@ -462,10 +462,10 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   }
 
   /**
-   * @brief \int 1\cdot v d\Omega with P0g: the single entry equals |\Omega|.
+   * @brief @f$ \int_\Omega 1\cdot v\,d\Omega @f$ with P0g has a single entry equal to @f$ |\Omega| @f$.
    *
-   * For f = 1 the single P0g DOF entry accumulates contributions from all
-   * cells: ∑_K |K| = |\Omega|.
+   * For @f$ f = 1 @f$ the single P0g DOF entry accumulates contributions
+   * from all cells: @f$ \sum_K |K| = |\Omega| @f$.
    */
   TEST(PETSc_MPI_P0g, LinearForm_SingleEntry_EqualsDomainArea_Triangle)
   {
@@ -497,9 +497,9 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   // =========================================================================
 
   /**
-   * @brief Assemble \int u\cdot v d\Omega with P0g: global matrix is 1×1.
+   * @brief Assemble @f$ \int_\Omega u\cdot v\,d\Omega @f$ with P0g: global matrix is 1 by 1.
    *
-   * For scalar P0g the system is 1×1 with the single entry equal to |\Omega|.
+   * For scalar P0g the system is 1 by 1 with the single entry equal to @f$ |\Omega| @f$.
    */
   TEST(PETSc_MPI_P0g, BilinearForm_MassMatrix_1x1_Triangle)
   {
@@ -570,7 +570,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
   /**
    * @brief Solve the L2 projection of a constant onto P0g via PETSc GMRES.
    *
-   * Problem: find c ∈ P0g s.t. \int c v d\Omega = \int const v d\Omega for all v ∈ P0g.
+   * Problem: find @f$ c \in P0g @f$ such that @f$ \int_\Omega c v\,d\Omega = \int_\Omega \mathrm{const}\, v\,d\Omega @f$ for all @f$ v \in P0g @f$.
    * Solution: c = const.  L2 error = 0.
    */
   TEST(PETSc_MPI_P0g, SolveL2Projection_Constant_Triangle)
@@ -646,7 +646,7 @@ namespace Rodin::Tests::Unit::PETSc::MPI
    * @brief P0g L2 projection of f(x,y) = x + y on [0,1]x[0,1].
    *
    * The global average of f(x,y) = x + y over [0,1]^2 is 1/2 + 1/2 = 1.
-   * The L2 error \int (c_h - f)^2 d\Omega = \int (1 - x - y)^2 d\Omega = 1/6.
+   * The L2 error is @f$ \int_\Omega (c_h - f)^2\,d\Omega = \int_\Omega (1 - x - y)^2\,d\Omega = 1/6 @f$.
    */
   TEST(PETSc_MPI_P0g, SolveL2Projection_LinearF_GlobalAverageIsOne_Triangle)
   {

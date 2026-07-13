@@ -203,6 +203,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies save load round trip pyramid for IO MFEM P1 grid function by checking tolerance-based numerical results, exact expected values, grid-function projection.
   TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Pyramid)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 3, 3, 3 });
@@ -459,6 +460,7 @@ namespace Rodin::Tests::Unit
   class P1MEDITGridFunctionCoverage : public ::testing::TestWithParam<Polytope::Type>
   {};
 
+  /// @brief Verifies scalar round trip for P1 MEDIT grid function coverage by checking tolerance-based numerical results, exact expected values.
   TEST_P(P1MEDITGridFunctionCoverage, ScalarRoundTrip)
   {
     Mesh mesh = makeMeditCoverageMesh(GetParam());
@@ -481,6 +483,7 @@ namespace Rodin::Tests::Unit
       EXPECT_DOUBLE_EQ(loaded[i], gf[i]) << "dof " << i;
   }
 
+  /// @brief Instantiates P1 MEDIT Grid Function Coverage over the All Supported Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       AllSupportedGeometries,
       P1MEDITGridFunctionCoverage,
@@ -498,6 +501,7 @@ namespace Rodin::Tests::Unit
         return meditGeometryName(info.param);
       });
 
+  /// @brief Verifies vector 3 D round trip for IO MEDIT P1 grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_MEDIT_P1_GridFunction, Vector3DRoundTrip)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });

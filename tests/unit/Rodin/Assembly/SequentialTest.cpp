@@ -526,6 +526,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((b1 - b2).norm(), 0.0, 1e-12);
   }
 
+  /// @brief Verifies preassembled forms project rows columns and vector for assembly problem identification by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_Problem_Identification, PreassembledFormsProjectRowsColumnsAndVector)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -575,6 +576,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(b.coeff(n + 1), gamma * 11.0, 1e-14);
   }
 
+  /// @brief Verifies affine identification writes defect rows for assembly problem identification by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_Problem_Identification, AffineIdentificationWritesDefectRows)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -630,6 +632,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sequential vector master projects multiple finite spaces for assembly problem identification by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Assembly_Problem_Identification, SequentialVectorMasterProjectsMultipleFiniteSpaces)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -799,6 +802,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies self identification matches zero value constraint for assembly problem identification by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_Problem_Identification, SelfIdentificationMatchesZeroValueConstraint)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -837,6 +841,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((bRef - bId).norm(), 0.0, 1e-12);
   }
 
+  /// @brief Verifies overlapping value and identification throws for assembly problem identification by checking exception behavior, form assembly.
   TEST(Assembly_Problem_Identification, OverlappingValueAndIdentificationThrows)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -1043,6 +1048,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(b.minCoeff(), 0.0);
   }
 
+  /// @brief Instantiates Assembly Sequential All Geometries over the All Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries,
     Assembly_Sequential_AllGeometries,

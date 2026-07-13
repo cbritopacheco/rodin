@@ -760,8 +760,10 @@ namespace Rodin::Variational
       /**
        * @brief Projects a function on one mesh entity.
        * @tparam Function Function or expression accepted by the FE pullback
-       * @param[in] p Pair containing the entity dimension and index
-       * @param[in] fn Function to interpolate on the entity
+       *
+       * The source function @p fn is interpolated on the entity identified by
+       * the `(dimension, index)` pair @p p.
+       *
        * @returns Reference to this grid function
        */
       template <class Function>
@@ -781,8 +783,10 @@ namespace Rodin::Variational
 
       /**
        * @brief Sets all DOFs attached to one mesh entity from a constant value.
-       * @param[in] p Pair containing the entity dimension and index
-       * @param[in] v Value to interpolate on the entity
+       *
+       * The constant value @p v is interpolated on the entity identified by
+       * the `(dimension, index)` pair @p p.
+       *
        * @returns Reference to this grid function
        */
       Derived& project(const std::pair<size_t, Index>& p, const RangeType& v)
@@ -794,7 +798,9 @@ namespace Rodin::Variational
       /**
        * @brief Assigns this grid function from a function or expression.
        * @tparam T Function, expression, or constant accepted by project()
-       * @param[in] v Source object to interpolate
+       *
+       * The source object @p v is forwarded to project().
+       *
        * @returns Reference to this grid function
        */
       template <class T>
@@ -806,7 +812,9 @@ namespace Rodin::Variational
       /**
        * @brief Projects a source on all cells.
        * @tparam T Function, expression, or constant source type
-       * @param[in] fn Source to interpolate
+       *
+       * The source object @p fn is interpolated on every cell.
+       *
        * @returns Reference to this grid function
        */
       template <class T>
@@ -819,8 +827,9 @@ namespace Rodin::Variational
       /**
        * @brief Projects a source on a geometric region.
        * @tparam T Function, expression, or constant source type
-       * @param[in] region Region over which to interpolate
-       * @param[in] fn Source to interpolate
+       *
+       * The source object @p fn is interpolated over @p region.
+       *
        * @returns Reference to this grid function
        */
       template <class T>
@@ -833,9 +842,10 @@ namespace Rodin::Variational
       /**
        * @brief Projects a source on entities of a region with one attribute.
        * @tparam T Function, expression, or constant source type
-       * @param[in] region Region over which to interpolate
-       * @param[in] fn Source to interpolate
-       * @param[in] attr Attribute selecting entities in the region
+       *
+       * The source object @p fn is interpolated over entities of @p region
+       * whose attribute equals @p attr.
+       *
        * @returns Reference to this grid function
        */
       template <class T>
@@ -850,9 +860,11 @@ namespace Rodin::Variational
       /**
        * @brief Projects a source on entities of a region with selected attributes.
        * @tparam T Function, expression, or constant source type
-       * @param[in] region Region over which to interpolate
-       * @param[in] fn Source to interpolate
-       * @param[in] attrs Accepted entity attributes; an empty set accepts all
+       *
+       * The source object @p fn is interpolated over entities of @p region
+       * whose attribute belongs to @p attrs. An empty attribute set accepts all
+       * entities in the region.
+       *
        * @returns Reference to this grid function
        */
       template <class T>
@@ -868,9 +880,10 @@ namespace Rodin::Variational
       /**
        * @brief Projects a constant value over a filtered region.
        * @tparam Pred Predicate type selecting mesh entities
-       * @param[in] region Region over which to interpolate
-       * @param[in] fn Constant value to interpolate
-       * @param[in] pred Predicate deciding whether an entity is included
+       *
+       * The constant value @p fn is interpolated over entities of @p region
+       * accepted by @p pred.
+       *
        * @returns Reference to this grid function
        */
       template <class Pred>

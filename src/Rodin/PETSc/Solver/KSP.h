@@ -11,7 +11,7 @@
  * @file KSP.h
  * @brief PETSc KSP (Krylov subspace) linear solver wrapper for Rodin.
  *
- * Wraps the PETSc `KSP` context and implements the Rodin
+ * Wraps the PETSc @c KSP context and implements the Rodin
  * @ref Rodin::Solver::LinearSolverBase interface so that any PETSc
  * Krylov solver (CG, GMRES, BiCGStab, …) can be used to solve the
  * linear system @f$ A\mathbf{x} = \mathbf{b} @f$ assembled by a
@@ -41,7 +41,7 @@ namespace Rodin::Solver
   /**
    * @brief PETSc KSP (Krylov subspace) linear solver wrapper.
    *
-   * Wraps the PETSc `KSP` context and inherits both
+   * Wraps the PETSc @c KSP context and inherits both
    * @ref Rodin::Solver::LinearSolverBase (for the generic solver interface)
    * and @ref Rodin::PETSc::Object (for automatic handle cleanup).
    *
@@ -56,13 +56,13 @@ namespace Rodin::Solver
     : public LinearSolverBase<PETSc::Math::LinearSystem>, public PETSc::Object<::KSP>
   {
     public:
-      /// @brief Handle type for the raw PETSc `KSP` context pointer.
+      /// @brief Handle type for the raw PETSc @c KSP context pointer.
       using HandleType = ::KSP;
       /// @brief Scalar type (`PetscScalar`) used for residual norms and tolerances.
       using ScalarType   = PetscScalar;
-      /// @brief PETSc matrix type (`::Mat`) for the system operator and preconditioner.
+      /// @brief PETSc matrix type (@c Mat) for the system operator and preconditioner.
       using OperatorType = ::Mat;
-      /// @brief PETSc vector type (`::Vec`) for the right-hand side and solution.
+      /// @brief PETSc vector type (@c Vec) for the right-hand side and solution.
       using VectorType   = ::Vec;
       /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;

@@ -14,6 +14,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test reference triangle for geometry parametric transformation by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_ReferenceTriangle)
   {
     constexpr const size_t sdim = 2;
@@ -38,6 +39,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sanity test triangle 1 for geometry parametric transformation by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_ParametricTransformation, SanityTest_Triangle_1)
   {
     constexpr const size_t rdim = 2;
@@ -173,6 +175,7 @@ namespace Rodin::Tests::Unit
     return pm;
   }
 
+  /// @brief Verifies P 2 curves interface edge for geometry parametric transformation by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_ParametricTransformation, P2CurvesInterfaceEdge)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
@@ -188,6 +191,7 @@ namespace Rodin::Tests::Unit
               std::abs(x.norm() - Real(1)));
   }
 
+  /// @brief Verifies P 3 curved edge improves fit for geometry parametric transformation.
   TEST(Rodin_Geometry_ParametricTransformation, P3CurvedEdgeImprovesFit)
   {
     Variational::RealH1Element<3> fe(Polytope::Type::Triangle);
@@ -206,6 +210,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(maxError, std::abs(linearMidpoint.norm() - Real(1)));
   }
 
+  /// @brief Verifies curved triangle jacobian stays positive for geometry parametric transformation.
   TEST(Rodin_Geometry_ParametricTransformation, CurvedTriangleJacobianStaysPositive)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);

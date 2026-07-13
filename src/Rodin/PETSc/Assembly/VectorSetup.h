@@ -17,7 +17,7 @@ namespace Rodin::PETSc::Assembly
    * @brief Sets up a PETSc vector for assembly while reusing compatible
    *        existing structure.
    *
-   * The @c Vec counterpart of @ref MatrixSetup. A @c LinearSystem is bound to
+   * The @c Vec counterpart of @c MatrixSetup. A @c LinearSystem is bound to
    * fixed finite element spaces, so its right-hand side @f$ \mathbf{b} @f$ and
    * solution @f$ \mathbf{x} @f$ keep their sizes for the whole lifetime. The
    * first call lays the vector out (sizes, type, options); subsequent calls

@@ -76,7 +76,8 @@ namespace Rodin
       /**
        * @brief Computes the Cartesian product of two empty tuples.
        *
-       * @param other The other empty tuple.
+       * The ignored argument is the other empty tuple.
+       *
        * @return An empty Tuple.
        */
       constexpr
@@ -139,8 +140,9 @@ namespace Rodin
       /**
        * @brief Serializes the empty tuple.
        * @tparam Archive Serialization archive type.
-       * @param ar Archive used for serialization.
-       * @param version Serialization version.
+       *
+       * The archive and version arguments are ignored because an empty tuple
+       * has no state.
        */
       template<class Archive>
       void serialize(Archive&, const unsigned int)
@@ -670,4 +672,3 @@ namespace Rodin
 #include "Pair.h"
 
 #endif
-

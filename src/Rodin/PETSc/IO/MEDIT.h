@@ -42,7 +42,7 @@ namespace Rodin::IO
     public:
       /// @brief Finite element space type.
       using FESType   = FES;
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType  = ::Vec;
       /// @brief Parent printer base class.
       using Parent    = GridFunctionPrinterBase<FileFormat::MEDIT, FES, DataType>;

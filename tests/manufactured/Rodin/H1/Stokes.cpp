@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Stokes manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Stokes manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -67,13 +75,17 @@ namespace Rodin::Tests::Manufactured::Stokes
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Stokes Test 16 x 16.
   using Manufactured_Stokes_Test_16x16 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<16>;
+  /// @brief Helper used by the tests to Manufactured Stokes Test 32 x 32.
   using Manufactured_Stokes_Test_32x32 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<32>;
+  /// @brief Helper used by the tests to Manufactured Stokes Test 64 x 64.
   using Manufactured_Stokes_Test_64x64 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<64>;
 
+  /// @brief Verifies stokes P1 exact residual for manufactured stokes test 16 x 16 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Manufactured_Stokes_Test_16x16, Stokes_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -637,6 +649,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     EXPECT_NEAR(error_p, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies navier stokes picard taylor green for manufactured stokes test 32 x 32 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Manufactured_Stokes_Test_32x32, NavierStokes_Picard_TaylorGreen)
   {
     const Real pi = Rodin::Math::Constants::pi();
@@ -821,18 +834,21 @@ namespace Rodin::Tests::Manufactured::Stokes
     EXPECT_LT(fixedPointPressureDefect, 1e-6);
   }
 
+  /// @brief Instantiates Manufactured Stokes Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Manufactured_Stokes_Test_16x16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Stokes Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Manufactured_Stokes_Test_32x32,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Stokes Test 64 x 64 over the Mesh Params 64 x 64 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
     Manufactured_Stokes_Test_64x64,

@@ -11,8 +11,8 @@
  * @file TestFunction.h
  * @brief PETSc-aware test function wrappers.
  *
- * Provides the `Rodin::PETSc::Variational`::TestFunction class, a thin
- * wrapper around `Rodin::Variational::TestFunction` that lives in the
+ * Provides the PETSc-aware test-function wrapper class, a thin
+ * wrapper around the core variational test function that lives in the
  * PETSc namespace and triggers PETSc-specific template argument deduction
  * for linear forms, bilinear forms, and problems.
  *
