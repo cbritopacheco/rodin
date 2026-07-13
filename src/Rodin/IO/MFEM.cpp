@@ -9,6 +9,7 @@
 
 namespace Rodin::IO::MFEM
 {
+  /// @cond
   std::istream& getline(std::istream& is, std::string& line, size_t& currentLineNumber)
   {
     currentLineNumber++;
@@ -26,10 +27,12 @@ namespace Rodin::IO::MFEM
     }
     return line;
   }
+  /// @endcond
 }
 
 namespace Rodin::IO
 {
+  /// @cond
   void MeshLoader<FileFormat::MFEM, Context::Local>::readHeader(std::istream& is)
   {
     auto line = MFEM::skipEmptyLinesAndComments(is, m_currentLineNumber);
@@ -411,4 +414,5 @@ namespace Rodin::IO
       os << '\n';
     }
   }
+  /// @endcond
 }

@@ -739,6 +739,7 @@ namespace Rodin::IO
 
   // ---- template method implementations ------------------------------------
 
+  /// @copydoc XDMF::Grid::setMesh
   template <class MeshType>
   XDMF::Grid& XDMF::Grid::setMesh(const MeshType& mesh, MeshPolicy policy)
   {
@@ -757,6 +758,7 @@ namespace Rodin::IO
     return *this;
   }
 
+  /// @copydoc XDMF::Grid::add(const GridFunctionType&, Center, AttributePolicy)
   template <class GridFunctionType>
   XDMF::Grid& XDMF::Grid::add(const GridFunctionType& gf, Center center, AttributePolicy policy)
   {
@@ -770,6 +772,7 @@ namespace Rodin::IO
     return add(std::string(name->data(), name->size()), gf, center, policy);
   }
 
+  /// @copydoc XDMF::Grid::add(const std::string&, const GridFunctionType&, Center, AttributePolicy)
   template <class GridFunctionType>
   XDMF::Grid& XDMF::Grid::add(
       const std::string& name,

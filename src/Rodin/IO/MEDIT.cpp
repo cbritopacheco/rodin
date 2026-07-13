@@ -11,6 +11,7 @@
 
 namespace Rodin::IO
 {
+  /// @cond
   std::istream& MeshLoader<FileFormat::MEDIT, Context::Local>::getline(std::istream& is, std::string& line)
   {
     m_currentLineNumber++;
@@ -464,4 +465,5 @@ namespace Rodin::IO
     printEntities(os);
     if (pEnd) printEnd(os);
   }
+  /// @endcond
 }

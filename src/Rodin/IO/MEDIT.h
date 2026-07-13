@@ -337,6 +337,7 @@ namespace Rodin::IO::MEDIT
       size_t m_n;
   };
 
+  /// @cond
   class ParseVertex
   {
     public:
@@ -577,6 +578,7 @@ namespace Rodin::IO::MEDIT
       return {};
     }
   };
+  /// @endcond
 }
 
 namespace Rodin::IO
@@ -643,6 +645,9 @@ namespace Rodin::IO
       std::unordered_map<MEDIT::Keyword, size_t> m_count;
   };
 
+  /**
+   * @brief MEDIT mesh printer for local meshes.
+   */
   template <>
   class MeshPrinter<FileFormat::MEDIT, Context::Local>
     : public MeshPrinterBase<Context::Local>
@@ -651,11 +656,16 @@ namespace Rodin::IO
       /// @brief Execution context type.
       using ContextType = Context::Local;
 
+      /// @brief Mesh type being printed.
       using ObjectType = Geometry::Mesh<ContextType>;
 
       /// @brief Parent class type.
       using Parent = MeshPrinterBase<ContextType>;
 
+      /**
+       * @brief Constructs a MEDIT mesh printer.
+       * @param[in] mesh Mesh to print.
+       */
       MeshPrinter(const ObjectType& mesh)
         : MeshPrinterBase(mesh)
       {}
@@ -665,13 +675,21 @@ namespace Rodin::IO
         printMesh(os, true);
       }
 
+      /// @brief Prints the full MEDIT mesh body.
       void printMesh(std::ostream& os, bool printEnd);
+      /// @brief Prints the MEDIT file version section.
       void printVersion(std::ostream& os);
+      /// @brief Prints the MEDIT dimension section.
       void printDimension(std::ostream& os);
+      /// @brief Prints all supported mesh entity sections.
       void printEntities(std::ostream& os);
+      /// @brief Prints the MEDIT end marker.
       void printEnd(std::ostream& os);
   };
 
+  /**
+   * @brief MEDIT grid-function loader for local P1 finite element spaces.
+   */
   template <class Range>
   class GridFunctionLoader<
     FileFormat::MEDIT,
@@ -691,11 +709,16 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       /// @brief Parent class type.
       using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
+      /**
+       * @brief Constructs a MEDIT P1 grid-function loader.
+       * @param[in,out] gf Grid function to populate.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf),
           m_currentLineNumber(0)
@@ -708,12 +731,14 @@ namespace Rodin::IO
         readData(is);
       }
 
+      /// @brief Reads one input line and advances the line counter.
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
         return std::getline(is, line);
       }
 
+      /// @brief Skips blank lines and returns the first nonblank line.
       std::string skipEmptyLines(std::istream& is)
       {
         std::string line;
@@ -725,6 +750,7 @@ namespace Rodin::IO
         return line;
       }
 
+      /// @brief Reads the MEDIT solution-file version section.
       void readVersion(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -745,6 +771,7 @@ namespace Rodin::IO
         }
       }
 
+      /// @brief Reads the MEDIT solution-file dimension section.
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -762,6 +789,7 @@ namespace Rodin::IO
         }
       }
 
+      /// @brief Reads the MEDIT SolAtVertices data section.
       void readData(std::istream& is)
       {
         auto& gf = this->getObject();
@@ -836,6 +864,9 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
+  /**
+   * @brief MEDIT grid-function loader for local H1 finite element spaces.
+   */
   template <size_t K, class Range>
   class GridFunctionLoader<
     FileFormat::MEDIT,
@@ -846,13 +877,21 @@ namespace Rodin::IO
         Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+      /// @brief Coefficient data storage type.
       using DataType   = Math::Vector<ScalarType>;
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent loader base type.
       using Parent     = GridFunctionLoaderBase<FESType, DataType>;
 
+      /**
+       * @brief Constructs a MEDIT H1 grid-function loader.
+       * @param[in,out] gf Grid function to populate.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf),
           m_version(0),
@@ -1287,6 +1326,12 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
+  /**
+   * @brief Base class for MEDIT grid-function printers.
+   *
+   * Emits the common MEDIT solution-file header and footer and delegates the
+   * actual coefficient stream to @ref printData().
+   */
   template <class FES, class Data>
   class GridFunctionPrinterBase<FileFormat::MEDIT, FES, Data>
     : public Printer<Variational::GridFunction<FES, Data>>
@@ -1295,6 +1340,7 @@ namespace Rodin::IO
       /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief File format handled by this printer base.
       static constexpr FileFormat Format = FileFormat::MEDIT;
 
       /// @brief Range (evaluation value) type.
@@ -1306,11 +1352,16 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Data;
 
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       /// @brief Parent class type.
       using Parent = Printer<ObjectType>;
 
+      /**
+       * @brief Constructs a MEDIT grid-function printer base.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinterBase(const ObjectType& gf)
         : m_gf(gf)
       {}
@@ -1338,11 +1389,13 @@ namespace Rodin::IO
         printEnd(os);
       }
 
+      /// @brief Prints the MEDIT solution-file version section.
       void printVersion(std::ostream& os)
       {
         os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
       }
 
+      /// @brief Prints the MEDIT solution-file dimension section.
       void printDimension(std::ostream& os)
       {
         const auto& gf = this->getObject();
@@ -1351,6 +1404,7 @@ namespace Rodin::IO
         os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
       }
 
+      /// @brief Prints the MEDIT end marker.
       void printEnd(std::ostream& os)
       {
         os << '\n' << IO::MEDIT::Keyword::End;
@@ -1361,12 +1415,16 @@ namespace Rodin::IO
         return m_gf.get();
       }
 
+      /// @brief Prints the concrete grid-function coefficient data.
       virtual void printData(std::ostream& os) = 0;
 
     private:
       std::reference_wrapper<const ObjectType> m_gf;
   };
 
+  /**
+   * @brief MEDIT grid-function printer for vector-backed grid functions.
+   */
   template <class FES>
   class GridFunctionPrinter<
     FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
@@ -1377,6 +1435,7 @@ namespace Rodin::IO
       /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief File format handled by this printer.
       static constexpr FileFormat Format = FileFormat::MEDIT;
 
       /// @brief Range (evaluation value) type.
@@ -1393,6 +1452,7 @@ namespace Rodin::IO
 
       using Parent::Parent;
 
+      /// @brief Prints one value per mesh vertex in MEDIT solution order.
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();

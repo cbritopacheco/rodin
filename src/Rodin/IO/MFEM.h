@@ -235,10 +235,11 @@ namespace Rodin::IO::MFEM
     Ordering ordering;   ///< Data ordering (Nodes or VectorDimension)
   };
 
+  /// @brief Face index and vertex ordering used when emitting MFEM face DOFs.
   struct FaceOrderEntry
   {
-    Index index;
-    std::vector<Index> vertices;
+    Index index;                 ///< Face index in Rodin connectivity ordering.
+    std::vector<Index> vertices; ///< Face vertices in MFEM local ordering.
   };
 
   inline
@@ -1078,8 +1079,10 @@ namespace Rodin::IO::MFEM
   class TriangleNodes
   {
     public:
+      /// @brief Number of MFEM H1 nodes on a triangle of order @p K.
       static constexpr size_t Count = (K + 1) * (K + 2) / 2;
 
+      /// @brief Returns the MFEM reference nodes for the triangle.
       static const std::vector<Math::SpatialPoint>& getNodes()
       {
         static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -1144,6 +1147,7 @@ namespace Rodin::IO::MFEM
   class VandermondeTriangle
   {
     public:
+      /// @brief Returns the Dubiner Vandermonde matrix evaluated at MFEM triangle nodes.
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
@@ -1180,6 +1184,7 @@ namespace Rodin::IO::MFEM
         return s_vandermonde;
       }
 
+      /// @brief Returns the inverse of @ref getMatrix().
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> s_inv;
@@ -1217,8 +1222,10 @@ namespace Rodin::IO::MFEM
   class TetrahedronNodes
   {
     public:
+      /// @brief Number of MFEM H1 nodes on a tetrahedron of order @p K.
       static constexpr size_t Count = (K + 1) * (K + 2) * (K + 3) / 6;
 
+      /// @brief Returns the MFEM reference nodes for the tetrahedron.
       static const std::vector<Math::SpatialPoint>& getNodes()
       {
         static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -1375,6 +1382,7 @@ namespace Rodin::IO::MFEM
   class VandermondeTetrahedron
   {
     public:
+      /// @brief Returns the Dubiner Vandermonde matrix evaluated at MFEM tetrahedron nodes.
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_vandermonde;
@@ -1415,6 +1423,7 @@ namespace Rodin::IO::MFEM
         return s_vandermonde;
       }
 
+      /// @brief Returns the inverse of @ref getMatrix().
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> s_inv;
@@ -1443,9 +1452,12 @@ namespace Rodin::IO::MFEM
   class WedgeNodes
   {
     public:
+      /// @brief Number of triangular nodes per wedge layer.
       static constexpr size_t TriangleCount = TriangleNodes<K>::Count;
+      /// @brief Number of MFEM H1 nodes on a wedge of order @p K.
       static constexpr size_t Count = TriangleCount * (K + 1);
 
+      /// @brief Returns the MFEM reference nodes for the wedge.
       static const std::vector<Math::SpatialPoint>& getNodes()
       {
         static thread_local std::vector<Math::SpatialPoint> s_nodes;
@@ -1572,6 +1584,7 @@ namespace Rodin::IO::MFEM
   class WedgeChange
   {
     public:
+      /// @brief Returns the change-of-nodes matrix from Rodin to MFEM wedge nodes.
       static const Math::Matrix<Real>& getMatrix()
       {
         static thread_local Math::Matrix<Real> s_change;
@@ -1594,6 +1607,7 @@ namespace Rodin::IO::MFEM
         return s_change;
       }
 
+      /// @brief Returns the inverse of @ref getMatrix().
       static const Math::Matrix<Real>& getInverse()
       {
         static thread_local Math::Matrix<Real> s_inv;
@@ -1646,6 +1660,7 @@ namespace Rodin::IO
       /// @brief Execution context type.
       using ContextType = Context::Local;
 
+      /// @brief Mesh type being loaded.
       using ObjectType = Geometry::Mesh<ContextType>;
 
       /// @brief Parent class type.
@@ -1725,6 +1740,7 @@ namespace Rodin::IO
       /// @brief Execution context type.
       using ContextType = Context::Local;
 
+      /// @brief Mesh type being printed.
       using ObjectType = Geometry::Mesh<ContextType>;
 
       /// @brief Parent class type.
@@ -1811,6 +1827,7 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       /// @brief Parent class type.
@@ -1958,17 +1975,30 @@ namespace Rodin::IO
         Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+      /// @brief Coefficient data storage type.
       using DataType   = Math::Vector<ScalarType>;
+      /// @brief Grid function type being loaded.
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent loader base type.
       using Parent     = GridFunctionLoaderBase<FESType, DataType>;
 
+      /**
+       * @brief Constructs an MFEM H1 grid-function loader.
+       * @param[in,out] gf Grid function to populate.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Loads H1 coefficient data from an MFEM grid-function stream.
+       * @param[in,out] is Input stream containing MFEM grid-function data.
+       */
       void load(std::istream& is) override
       {
         using boost::spirit::x3::space;
@@ -2746,7 +2776,7 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
-      using ObjectType = Variational::GridFunction<FESType, DataType>;
+      using ObjectType = Variational::GridFunction<FESType, DataType>; ///< Grid function type being loaded.
 
       /// @brief Parent class type.
       using Parent = GridFunctionLoaderBase<FESType, DataType>;
@@ -2900,8 +2930,10 @@ namespace Rodin::IO
       /// @brief Finite element space type.
       using FESType = Variational::P0<Range, MeshType>;
 
+      /// @brief File format handled by this printer base.
       static constexpr FileFormat Format = FileFormat::MFEM;
 
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       /// @brief Parent class type.
@@ -2982,8 +3014,10 @@ namespace Rodin::IO
       /// @brief Finite element space type.
       using FESType = Variational::P1<Range, MeshType>;
 
+      /// @brief File format handled by this printer base.
       static constexpr FileFormat Format = FileFormat::MFEM;
 
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       /// @brief Parent class type.
@@ -3064,8 +3098,10 @@ namespace Rodin::IO
       /// @brief Finite element space type.
       using FESType = Variational::H1<K, Range, MeshType>;
 
+      /// @brief File format handled by this printer base.
       static constexpr FileFormat Format = FileFormat::MFEM;
 
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
       /// @brief Parent class type.
@@ -3140,6 +3176,7 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Math::Vector<Scalar>;
 
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
 
       /// @brief Parent class type.
@@ -3191,15 +3228,27 @@ namespace Rodin::IO
           Math::Vector<Scalar>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      /// @brief Coefficient data storage type.
       using DataType   = Math::Vector<Scalar>;
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent printer base type.
       using Parent     = GridFunctionPrinterBase<FileFormat::MFEM, FESType, DataType>;
 
+      /**
+       * @brief Constructs an MFEM H1 grid-function printer.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : Parent(gf)
       {}
 
+      /**
+       * @brief Prints H1 coefficient data in MFEM node ordering.
+       * @param[in,out] os Output stream receiving coefficient data.
+       */
       void printData(std::ostream& os) override
       {
         // Set maximum precision for floating-point output to avoid precision loss
