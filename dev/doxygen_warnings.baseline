@@ -429,54 +429,6 @@ src/Rodin/Geometry/Point.h: warning: Member operator+(const Geometry::Point &p, 
 src/Rodin/Geometry/Point.h: warning: Member operator+(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator-(const Geometry::Point &p, const Math::SpatialVector< Scalar > &v) (function) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Point.h: warning: Member operator-(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Compound Rodin::FormLanguage::Traits< Rodin::Geometry::PointCloud > is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member ConstMapType3xN (typedef) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member Data (typedef) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member MapType3xN (typedef) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member MaxRows (variable) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member PointCloud(PointCloud &&)=default (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member PointCloud(const PointCloud &)=default (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member PointCloud(std::uint8_t rows, size_t n) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member Scalar (typedef) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member StrideType (typedef) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member clear() noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member col(size_t j) const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member cols() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member dot(const Eigen::MatrixBase< EigenDerived > &other) const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member dot(const PointCloud &other) const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member getCount() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member getDimension() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member getMatrix() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member getPackedMatrix() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member getPoints() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member getPoints() noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator()(std::uint8_t i, size_t j) const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator()(std::uint8_t i, size_t j) noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator*(const Eigen::MatrixBase< EigenDerived > &A, const PointCloud &B) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator*(const PointCloud &A, const Eigen::MatrixBase< EigenDerived > &B) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator*(const PointCloud &A, const Real &s) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator*(const Real &s, const PointCloud &A) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator*=(const Scalar &s) noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator+(const PointCloud &A, const PointCloud &B) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator-(const PointCloud &A, const PointCloud &B) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator<<(std::ostream &os, const PointCloud &P) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator=(PointCloud &&)=default (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator=(const PointCloud &)=default (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member operator[](size_t j) const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member point3(size_t j) const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member point3(size_t j) noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member push_back(const Math::SpatialPoint &p) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member push_back(const std::array< Real, 2 > &p) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member push_back(const std::array< Scalar, 1 > &p) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member push_back(const std::array< Scalar, 3 > &p) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member reserve(size_t n) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member resize(std::uint8_t r, size_t n) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member rows() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member serialize(Archive &ar, const unsigned int) (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member setConstant(const Scalar &v) noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member setDimension(std::uint8_t r) noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member setZero() noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
-src/Rodin/Geometry/PointCloud.h: warning: Member squaredNorm() const noexcept (function) of class Rodin::Geometry::PointCloud is not documented.
 src/Rodin/Geometry/Polytope.h: warning: Member Key(std::initializer_list< Index > vertices) (function) of class Rodin::Geometry::Polytope::Key is not documented.
 src/Rodin/Geometry/Polytope.h: warning: Member Key(std::uint8_t n) (function) of class Rodin::Geometry::Polytope::Key is not documented.
 src/Rodin/Geometry/Polytope.h: warning: Member Vertices (typedef) of class Rodin::Geometry::Polytope::Key is not documented.
