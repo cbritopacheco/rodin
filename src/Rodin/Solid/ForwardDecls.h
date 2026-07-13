@@ -50,12 +50,22 @@ namespace Rodin::Solid
   template <class PassiveLaw, class ActiveLaw>
   class ActiveContraction;
 
-  template <class LawDerived, class TestFunctionType, class DisplacementType>
+  template <class... Args>
   class InternalVirtualWorkResidual;
 
-  template <class LawDerived, class TrialFunctionType,
-            class TestFunctionType, class DisplacementType>
+  template <class TestPressFunctionType, class DisplacementType>
+  class InternalVirtualWorkResidualP;
+
+  template <class... Args>
   class InternalVirtualWorkTangent;
+
+  template <class TrialPressFunctionType, class TestFunctionType,
+            class DisplacementType>
+  class InternalVirtualWorkTangentUP;
+
+  template <class TrialFunctionType, class TestPressFunctionType,
+            class DisplacementType>
+  class InternalVirtualWorkTangentPU;
 
   template <class Law, class State>
   class InternalVirtualWork;

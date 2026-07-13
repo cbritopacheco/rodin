@@ -276,6 +276,7 @@ int main(int, char **) {
   // ---- Finite-element space -----------------------------------------------
   const size_t dim = mesh.getSpaceDimension();
   P1 Vh(mesh, dim);
+  P1 Qh(mesh);
   // Laplacian problem
   P1 V_lh(mesh);
   // Fe functions
@@ -302,7 +303,10 @@ int main(int, char **) {
   const Real nu = 0.3;
   const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
   const Real mu = E / (2.0 * (1.0 + nu));
-  Solid::NeoHookean law(lambda, mu);
+  (void) lambda;
+  // u-p mixed formulation: the law carries only the isochoric part
+  // (lambda = 0); the volumetric response is carried by the pressure field.
+  Solid::NeoHookean law(0.0, mu);
 
   // ---- dynamics parameters ------------------------------------------------
   const Real rho = 1060.;
@@ -321,9 +325,13 @@ int main(int, char **) {
   GridFunction vel(Vh); // velocity
   GridFunction acc(Vh); // acceleration
 
+  //pressure field
+  GridFunction p(Qh);
+
   u.setName("Displacement");
   vel.setName("Velocity");
   acc.setName("Acceleration");
+  p.setName("Pressure");
 
   auto zero = VectorFunction{Zero(), Zero(), Zero()};
   u = zero;
@@ -345,11 +353,15 @@ int main(int, char **) {
   grid.add(u);
   grid.add(vel);
   grid.add(acc);
+  grid.add(p);
 
   xdmf.write(0.0);
 
   TrialFunction du(Vh);
   TestFunction w(Vh);
+
+  TrialFunction dp(Qh);
+  TestFunction q(Qh);
 
   for (size_t step = 1; step <= nSteps; ++step) {
 
@@ -393,10 +405,19 @@ int main(int, char **) {
     // Use predictor as initial guess for u^{n+1}
     u = uPred;
 
-    // ---- nonlinear solid operators ----------------------------------------
-    Solid::InternalVirtualWorkTangent tangent(law, du, w, u);
+    // ---- nonlinear solid operators (mixed u-p) -----------------------------
+    // K_uu : (A : grad du) : grad w + p J [ (F^{-T}:grad du)(F^{-T}:grad w)
+    //                                       - (F^{-T} (grad du)^T F^{-T}):grad w ]
+    Solid::InternalVirtualWorkTangent tangent(law, du, w, u, p);
+    // K_up : dp J F^{-T} : grad w
+    Solid::InternalVirtualWorkTangentUP tangentUP(dp, w, u);
+    // K_pu : q J F^{-T} : grad du
+    Solid::InternalVirtualWorkTangentPU tangentPU(du, q, u);
 
-    Solid::InternalVirtualWorkResidual internal(law, w, u);
+    // R_u : (P_iso + p J F^{-T}) : grad w
+    Solid::InternalVirtualWorkResidual internal(law, w, u, p);
+    // R_p : (J - 1) q
+    Solid::InternalVirtualWorkResidualP incompressibility(q, u);
 
     // Effective nonlinear problem:
     //
@@ -410,21 +431,35 @@ int main(int, char **) {
     //
     //   J(u^k)[du] + R(u^k) = 0
     //
-    Problem newton(du, w);
-    newton = tangent + aMass * Integral(du, w) + internal +
-             aMass * Integral(u, w) -
+    // Brezzi-Pitkaranta stabilization (P1/P1 is not inf-sup stable), tau ~ h^2/mu
+    const Real tau = 1e-6;
+
+    Problem newton(du, dp, w, q);
+    newton = tangent + tangentUP + tangentPU + aMass * Integral(du, w) + internal +
+             aMass * Integral(u, w)
              + k * BoundaryIntegral(Dot(du, normal), Dot(w,normal)).over(Gamma1,Gamma2)
              + k * BoundaryIntegral(Dot(u, normal), Dot(w,normal)).over(Gamma1,Gamma2)
              - k * BoundaryIntegral(disp_0D, Dot(w,normal)).over(Gamma1,Gamma2)
-             - aMass * Integral(uPred, w) + DirichletBC(du, zero).on(GammaRing);
+             - aMass * Integral(uPred, w) + DirichletBC(du, zero).on(GammaRing)
+             + incompressibility
+             - tau * Integral(Grad(dp), Grad(q))
+             - tau * Integral(Dot(Grad(p), Grad(q)));
 
     SparseLU linearSolver(newton);
-    NewtonSolver solver(linearSolver);
-    solver.setMaxIterations(50)
-        .setDampingFactor(1.0)
-        .setAbsoluteTolerance(1e-10)
-        .setRelativeTolerance(1e-8);
-    solver.solve(u);
+
+    // Newton loop on the block system: K [du; dp] = -[R_u; R_p]
+    Real r0 = 0;
+    for (size_t it = 0; it < 50; ++it) {
+      newton.assemble();
+      const Real r = newton.getLinearSystem().getVector().norm();
+      if (it == 0)
+        r0 = r;
+      if (r <= 1e-10 || r <= 1e-8 * r0)
+        break;
+      newton.solve(linearSolver);
+      u.getData() += du.getSolution().getData();
+      p.getData() += dp.getSolution().getData();
+    }
 
     std::cout << "Step " << step << ", time " << t << std::endl;
 
