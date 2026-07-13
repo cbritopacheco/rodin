@@ -10,6 +10,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Rodin/Alert/MemberFunctionException.h"
 
+/// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
 namespace Rodin::Geometry
 {
   Connectivity<Context::Local>::Connectivity()
@@ -876,3 +877,4 @@ namespace Rodin::Geometry
     return m_maximalDimension;
   }
 }
+/// @endcond

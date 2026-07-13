@@ -373,14 +373,6 @@ src/Rodin/Configure.h.in: warning: Member RODIN_VERSION_MINOR (macro definition)
 src/Rodin/Configure.h.in: warning: Member RODIN_VERSION_PATCH (macro definition) of file Configure.h.in is not documented.
 src/Rodin/Context/Local.h: warning: Member serialize(Archive &ar, const unsigned int version) (function) of class Rodin::Context::Local is not documented.
 src/Rodin/FormLanguage/Base.h: warning: Invalid list item found
-src/Rodin/Geometry/BalancedCompactPartitioner.cpp: warning: Member MeshType (typedef) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/Connectivity.cpp: warning: no matching class member found for 
-src/Rodin/Geometry/Connectivity.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/Euclidean/Point2D.hpp: warning: no matching class member found for 
-src/Rodin/Geometry/Mesh.cpp: warning: no matching class member found for 
-src/Rodin/Geometry/Mesh.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/MeshBuilder.cpp: warning: no matching class member found for 
-src/Rodin/Geometry/MeshBuilder.cpp: warning: no uniquely matching class member found for 
 src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member HolzapfelReducedLaw(const Parameters &params=Parameters()) (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
 src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member getParameters() const noexcept (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
 src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member distalLength (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.

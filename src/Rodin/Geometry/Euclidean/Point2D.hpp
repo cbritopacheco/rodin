@@ -21,7 +21,7 @@ namespace Rodin::Geometry::Euclidean
 {
   template <class T>
   constexpr
-  Optional<LineSegment2D<T>> Point2D<T>::connect(const Point2D<T>& other) const
+  Optional<LineSegment2D<T>> Point2D<T>::connect(const Point2D& other) const
   {
     if (*this == other)
       return {};

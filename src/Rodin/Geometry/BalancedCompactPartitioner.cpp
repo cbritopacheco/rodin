@@ -14,6 +14,7 @@
 
 namespace Rodin::Geometry
 {
+  /// @brief Local mesh type partitioned by BalancedCompactPartitioner.
   using MeshType = Mesh<Context::Local>;
 
   BalancedCompactPartitioner::BalancedCompactPartitioner(const MeshType& mesh)
