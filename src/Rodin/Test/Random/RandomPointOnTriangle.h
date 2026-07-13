@@ -17,6 +17,9 @@
 
 namespace Rodin::Test::Random
 {
+  /**
+   * @brief Random point generator on the reference triangle.
+   */
   class PointOnTriangle
   {
     public:
@@ -27,6 +30,10 @@ namespace Rodin::Test::Random
           m_gen(0, 1)
       {}
 
+      /**
+       * @brief Generates a random point.
+       * @return Point sampled on the reference triangle.
+       */
       Math::Vector2<Real> operator()()
       {
         auto x = m_gen();

@@ -760,23 +760,6 @@ src/Rodin/Solver/SimplicialLDLT.h: warning: Compound Rodin::FormLanguage::Traits
 src/Rodin/Solver/SimplicialLLT.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SimplicialLLT< LinearSystem > > is not documented.
 src/Rodin/Solver/SparseLU.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SparseLU< LinearSystem > > is not documented.
 src/Rodin/Solver/SparseQR.h: warning: Compound Rodin::FormLanguage::Traits< Solver::SparseQR< LinearSystem > > is not documented.
-src/Rodin/Test/Random/RandomFloat.h: warning: Compound Rodin::Test::Random::RandomFloat is not documented.
-src/Rodin/Test/Random/RandomFloat.h: warning: Member RandomFloat(T a=std::numeric_limits< T >::min(), T b=std::numeric_limits< T >::max(), unsigned int seed=std::random_device()()) (function) of class Rodin::Test::Random::RandomFloat is not documented.
-src/Rodin/Test/Random/RandomFloat.h: warning: Member RandomReal (typedef) of namespace Rodin::Test::Random is not documented.
-src/Rodin/Test/Random/RandomFloat.h: warning: Member getSeed() const (function) of class Rodin::Test::Random::RandomFloat is not documented.
-src/Rodin/Test/Random/RandomFloat.h: warning: Member operator()() (function) of class Rodin::Test::Random::RandomFloat is not documented.
-src/Rodin/Test/Random/RandomFloat.h: warning: Member setSeed(unsigned int seed) (function) of class Rodin::Test::Random::RandomFloat is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Compound Rodin::Test::Random::RandomInteger is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Compound Rodin::Test::Random::detail::UniformIntDistType is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member RandomInteger(T a=std::numeric_limits< T >::min(), T b=std::numeric_limits< T >::max(), unsigned int seed=std::random_device()()) (function) of class Rodin::Test::Random::RandomInteger is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member UniformIntDistTypeT (typedef) of namespace Rodin::Test::Random::detail is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member dist_type (typedef) of class Rodin::Test::Random::RandomInteger is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member getSeed() const (function) of class Rodin::Test::Random::RandomInteger is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member operator()() (function) of class Rodin::Test::Random::RandomInteger is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member setSeed(unsigned int seed) (function) of class Rodin::Test::Random::RandomInteger is not documented.
-src/Rodin/Test/Random/RandomInteger.h: warning: Member type (typedef) of struct Rodin::Test::Random::detail::UniformIntDistType is not documented.
-src/Rodin/Test/Random/RandomPointOnTriangle.h: warning: Compound Rodin::Test::Random::PointOnTriangle is not documented.
-src/Rodin/Test/Random/RandomPointOnTriangle.h: warning: Member operator()() (function) of class Rodin::Test::Random::PointOnTriangle is not documented.
 src/Rodin/Variational/AND.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
 src/Rodin/Variational/Abs.h: warning: Member Abs(const FunctionBase< NestedDerived > &) -> Abs< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Abs.h: warning: Member abs(const FunctionBase< NestedDerived > &op) (function) of namespace Rodin::Variational is not documented.
