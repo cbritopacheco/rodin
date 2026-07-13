@@ -12,6 +12,9 @@
 
 namespace Rodin::Adaptation::Detail
 {
+    /**
+     * @brief Bilinear-form integrator for WNGIR admissibility and quality metrics.
+     */
     template <class TrialFunction, class TestFunction, class Displacement>
     class WNGIRAdmissibilityMetric final
       : public Variational::LocalBilinearFormIntegratorBase<
@@ -22,6 +25,7 @@ namespace Rodin::Adaptation::Detail
         using Parent =
           Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+        /// @brief Constructs the admissibility-metric integrator.
         WNGIRAdmissibilityMetric(
             const TrialFunction& du,
             const TestFunction& v,
@@ -34,15 +38,18 @@ namespace Rodin::Adaptation::Detail
             m_parameters(parameters)
         {}
 
+        /// @brief Copy constructor.
         WNGIRAdmissibilityMetric(
             const WNGIRAdmissibilityMetric&) = default;
 
+        /// @brief Returns the current polytope.
         const Geometry::Polytope& getPolytope() const final override
         {
           assert(m_polytope);
           return *m_polytope;
         }
 
+        /// @brief Sets the current polytope and assembles the local matrix.
         WNGIRAdmissibilityMetric& setPolytope(
             const Geometry::Polytope& polytope) final override
         {
@@ -236,6 +243,7 @@ namespace Rodin::Adaptation::Detail
           return *this;
         }
 
+        /// @brief Returns an entry of the current element matrix.
         ScalarType integrate(std::size_t tr, std::size_t te) final override
         {
           return m_matrix(
@@ -243,6 +251,7 @@ namespace Rodin::Adaptation::Detail
               static_cast<Eigen::Index>(tr));
         }
 
+        /// @brief Returns the integration region.
         Geometry::Region getRegion() const final override
         {
           return Geometry::Region::Cells;

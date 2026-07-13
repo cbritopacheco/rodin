@@ -57,33 +57,40 @@ namespace Rodin::Adaptation
   {
     public:
       using ScalarType = Real;
+      /// @brief Spatial vector value type returned by the callable.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
       using RangeType = SpatialVectorType;
       using Parent =
         Variational::VectorFunctionBase<ScalarType, AnalyticVectorFunction<F>>;
 
+      /// @brief Constructs the adapter from a callable and vector dimension.
       AnalyticVectorFunction(F f, std::size_t dimension)
         : m_f(std::move(f)), m_dimension(dimension)
       {}
 
+      /// @brief Copy constructor.
       AnalyticVectorFunction(const AnalyticVectorFunction& other)
         : Parent(other), m_f(other.m_f), m_dimension(other.m_dimension)
       {}
 
+      /// @brief Move constructor.
       AnalyticVectorFunction(AnalyticVectorFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f)),
           m_dimension(other.m_dimension)
       {}
 
+      /// @brief Evaluates the wrapped vector-valued callable.
       RangeType getValue(const Geometry::Point& p) const
       {
         return m_f(p);
       }
 
+      /// @brief Returns the vector dimension.
       std::size_t getDimension() const noexcept
       { return m_dimension; }
 
+      /// @brief Returns no intrinsic polynomial order for analytic callables.
       Optional<std::size_t>
       getOrder(const Geometry::Polytope&) const noexcept
       { return std::nullopt; }
@@ -97,6 +104,7 @@ namespace Rodin::Adaptation
   };
 
   template <class F>
+  /// @brief Deduction guide for analytic vector functions.
   AnalyticVectorFunction(F, std::size_t) -> AnalyticVectorFunction<F>;
 
   /**
@@ -109,34 +117,42 @@ namespace Rodin::Adaptation
   {
     public:
       using ScalarType = Real;
+      /// @brief Spatial matrix value type returned by the callable.
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
       using RangeType = SpatialMatrixType;
       using Parent =
         Variational::MatrixFunctionBase<ScalarType, AnalyticMatrixFunction<F>>;
 
+      /// @brief Constructs the adapter from a callable and matrix dimensions.
       AnalyticMatrixFunction(F f, std::size_t rows, std::size_t cols)
         : m_f(std::move(f)), m_rows(rows), m_cols(cols)
       {}
 
+      /// @brief Copy constructor.
       AnalyticMatrixFunction(const AnalyticMatrixFunction& other)
         : Parent(other),
           m_f(other.m_f), m_rows(other.m_rows), m_cols(other.m_cols)
       {}
 
+      /// @brief Move constructor.
       AnalyticMatrixFunction(AnalyticMatrixFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f)),
           m_rows(other.m_rows), m_cols(other.m_cols)
       {}
 
+      /// @brief Evaluates the wrapped matrix-valued callable.
       RangeType getValue(const Geometry::Point& p) const
       {
         return m_f(p);
       }
 
+      /// @brief Returns the row count.
       std::size_t getRows() const noexcept { return m_rows; }
+      /// @brief Returns the column count.
       std::size_t getColumns() const noexcept { return m_cols; }
 
+      /// @brief Returns no intrinsic polynomial order for analytic callables.
       Optional<std::size_t>
       getOrder(const Geometry::Polytope&) const noexcept
       { return std::nullopt; }
@@ -151,6 +167,7 @@ namespace Rodin::Adaptation
   };
 
   template <class F>
+  /// @brief Deduction guide for analytic matrix functions.
   AnalyticMatrixFunction(F, std::size_t, std::size_t)
     -> AnalyticMatrixFunction<F>;
 }
