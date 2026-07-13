@@ -126,27 +126,6 @@ src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member integrate(
 src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h: warning: Member setPolytope(const Geometry::Polytope &polytope) final override (function) of class Rodin::Adaptation::Detail::WNGIRSurfaceObservationMetric is not documented.
 src/Rodin/Advection/Lagrangian.h: warning: Member TaylorBoundaryShiftPolicy(Real dt, const Geometry::Mesh< Context::Local > &mesh, const Field &phi, Real eps_in_phys=Real(1e-12)) (function) of class Rodin::Advection::TaylorBoundaryShiftPolicy is not documented.
 src/Rodin/Advection/Lagrangian.h: warning: Member operator()(const Variational::BoundaryHit &hit) const (function) of class Rodin::Advection::TaylorBoundaryShiftPolicy is not documented.
-src/Rodin/Alert/Color.h: warning: Member Color(Color &&)=default (function) of class Rodin::Alert::Color is not documented.
-src/Rodin/Alert/Color.h: warning: Member Color(const Color &)=default (function) of class Rodin::Alert::Color is not documented.
-src/Rodin/Alert/Color.h: warning: Member NoColorT(NoColorT &&)=default (function) of struct Rodin::Alert::NoColorT is not documented.
-src/Rodin/Alert/Color.h: warning: Member NoColorT(const NoColorT &)=default (function) of struct Rodin::Alert::NoColorT is not documented.
-src/Rodin/Alert/Color.h: warning: Member RGB(RGB &&)=default (function) of struct Rodin::Alert::RGB is not documented.
-src/Rodin/Alert/Color.h: warning: Member RGB(const RGB &)=default (function) of struct Rodin::Alert::RGB is not documented.
-src/Rodin/Alert/Color.h: warning: Member operator=(Color &&)=default (function) of class Rodin::Alert::Color is not documented.
-src/Rodin/Alert/Color.h: warning: Member operator=(RGB &&)=default (function) of struct Rodin::Alert::RGB is not documented.
-src/Rodin/Alert/Color.h: warning: Member operator=(const Color &)=default (function) of class Rodin::Alert::Color is not documented.
-src/Rodin/Alert/Color.h: warning: Member operator=(const RGB &)=default (function) of struct Rodin::Alert::RGB is not documented.
-src/Rodin/Alert/Reset.h: warning: Member ResetT(ResetT &&)=default (function) of struct Rodin::Alert::ResetT is not documented.
-src/Rodin/Alert/Reset.h: warning: Member ResetT(const ResetT &)=default (function) of struct Rodin::Alert::ResetT is not documented.
-src/Rodin/Alert/Reset.h: warning: Member operator=(ResetT &&)=default (function) of struct Rodin::Alert::ResetT is not documented.
-src/Rodin/Alert/Reset.h: warning: Member operator=(const ResetT &)=default (function) of struct Rodin::Alert::ResetT is not documented.
-src/Rodin/Alert/Text.h: warning: Member Text(const std::string &) -> Text< NoColorT, NoColorT > (function) of namespace Rodin::Alert is not documented.
-src/Rodin/Alert/Text.h: warning: Member Text(const std::string &, const F &) -> Text< F, NoColorT > (function) of namespace Rodin::Alert is not documented.
-src/Rodin/Alert/Text.h: warning: Member Text(const std::string &, const F &, const B &) -> Text< F, B > (function) of namespace Rodin::Alert is not documented.
-src/Rodin/Alert/Text.h: warning: Member operator<<(std::ostream &os, const Text< Foreground, Background > &text) (function) of namespace Rodin::Alert is not documented.
-src/Rodin/Alert/Text.h: warning: Member operator<<(std::ostream &os, const Text< Foreground, NoColorT > &text) (function) of namespace Rodin::Alert is not documented.
-src/Rodin/Alert/Text.h: warning: Member operator<<(std::ostream &os, const Text< NoColorT, Background > &text) (function) of namespace Rodin::Alert is not documented.
-src/Rodin/Alert/Text.h: warning: Member operator<<(std::ostream &os, const Text< NoColorT, NoColorT > &text) (function) of namespace Rodin::Alert is not documented.
 src/Rodin/Array.h: warning: Compound Rodin::IndexArrayCompare is not documented.
 src/Rodin/Array.h: warning: Member operator()(const IndexArray &lhs, const IndexArray &rhs) const (function) of struct Rodin::IndexArrayCompare is not documented.
 src/Rodin/CMakeLists.txt: warning: Reached end of file while still inside a (nested) comment. Nesting level 2 (possible line reference(s): 94, 41)
