@@ -593,7 +593,6 @@ namespace Rodin::Variational
             typename FormLanguage::Traits<TestFES>::ScalarType>
           ::Type>>;
 
-
   /**
    * @ingroup BilinearFormSpecializations
    * @brief Specialization of BilinearForm for a dense matrix operator.

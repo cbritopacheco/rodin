@@ -137,6 +137,3 @@ namespace Rodin::Solver
 }
 
 #endif
-
-
-

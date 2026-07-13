@@ -397,7 +397,6 @@ namespace Rodin::Tests::Unit
     TrialFunction v(fes);
   }
 
-
   /// @brief Verifies fuzzy test uniform grid 4 x 4 for variational real P1 linear form by checking form assembly.
   TEST(Rodin_Variational_Real_P1_LinearForm, FuzzyTest_UniformGrid_4x4)
   {

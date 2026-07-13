@@ -64,17 +64,17 @@ namespace Rodin::PETSc::Assembly
       struct Options
       {
         /// @brief Local row count owned by this MPI rank, or @c PETSC_DECIDE.
-        PetscInt localRows;
-        /// @brief Local column count owned by this MPI rank, or @c PETSC_DECIDE.
-        PetscInt localCols;
-        /// @brief Global row count of the matrix.
-        PetscInt globalRows;
-        /// @brief Global column count of the matrix.
-        PetscInt globalCols;
-        /// @brief Optional PETSc matrix type to set during initial setup.
-        MatType type = nullptr;
-        /// @brief Whether to call @c MatSetFromOptions during initial setup.
-        bool setFromOptions = false;
+          PetscInt localRows;
+          /// @brief Local column count owned by this MPI rank, or @c PETSC_DECIDE.
+          PetscInt localCols;
+          /// @brief Global row count of the matrix.
+          PetscInt globalRows;
+          /// @brief Global column count of the matrix.
+          PetscInt globalCols;
+          /// @brief Optional PETSc matrix type to set during initial setup.
+          MatType type = nullptr;
+          /// @brief Whether to call @c MatSetFromOptions during initial setup.
+          bool setFromOptions = false;
       };
 
       /**

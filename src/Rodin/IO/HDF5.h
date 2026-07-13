@@ -364,32 +364,36 @@ namespace Rodin::IO
 
     template <>
     inline
-    /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
-    hid_t getNativeType<U64>()
+      /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
+      hid_t
+      getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
     }
 
     template <>
     inline
-    /// @brief Returns the native HDF5 type for signed 32-bit integers.
-    hid_t getNativeType<I32>()
+      /// @brief Returns the native HDF5 type for signed 32-bit integers.
+      hid_t
+      getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
     }
 
     template <>
     inline
-    /// @brief Returns the native HDF5 type for 64-bit floating point values.
-    hid_t getNativeType<F64>()
+      /// @brief Returns the native HDF5 type for 64-bit floating point values.
+      hid_t
+      getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
     }
 
     template <>
     inline
-    /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
-    hid_t getNativeType<U8>()
+      /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
+      hid_t
+      getNativeType<U8>()
     {
       return H5T_NATIVE_UCHAR;
     }
@@ -701,16 +705,16 @@ namespace Rodin::IO
      */
     struct XDMFTopologyLayout
     {
-      /// @brief Whether the topology can be written as a uniform XDMF topology.
-      bool isUniform = false;
-      /// @brief XDMF topology type name.
-      std::string topologyType = "Mixed";
-      /// @brief Number of rows for uniform topology datasets.
-      size_t rowCount = 0;
-      /// @brief Number of columns for uniform topology datasets.
-      size_t columnCount = 0;
-      /// @brief Total number of entries in the topology dataset.
-      size_t entryCount = 0;
+        /// @brief Whether the topology can be written as a uniform XDMF topology.
+        bool isUniform = false;
+        /// @brief XDMF topology type name.
+        std::string topologyType = "Mixed";
+        /// @brief Number of rows for uniform topology datasets.
+        size_t rowCount = 0;
+        /// @brief Number of columns for uniform topology datasets.
+        size_t columnCount = 0;
+        /// @brief Total number of entries in the topology dataset.
+        size_t entryCount = 0;
     };
 
     /**

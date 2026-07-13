@@ -75,7 +75,7 @@ namespace Rodin::Variational
   struct IsTrialFunction<PETSc::Variational::TrialFunction<Solution, FES>>
   {
     /// @brief True because the PETSc wrapper models a trial function.
-    static constexpr Boolean Value = true;
+      static constexpr Boolean Value = true;
   };
 }
 

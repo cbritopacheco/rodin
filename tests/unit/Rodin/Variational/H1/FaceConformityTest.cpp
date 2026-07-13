@@ -222,9 +222,7 @@ namespace Rodin::Tests::Unit
   template <size_t K>
   /// @brief Helper used by the tests to Extract Tetrahedron Triangle Face Nodes.
   std::vector<std::pair<Real, Real>> extractTetrahedronTriangleFaceNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1,
-      Real x2, Real y2, Real z2)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1, Real x2, Real y2, Real z2)
   {
     std::vector<std::pair<Real, Real>> coords;
     const auto& nodes = FeketeTetrahedron<K>::getNodes();
@@ -251,9 +249,7 @@ namespace Rodin::Tests::Unit
   template <size_t K>
   /// @brief Helper used by the tests to Extract Wedge Triangle Face Nodes.
   std::vector<std::pair<Real, Real>> extractWedgeTriangleFaceNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1,
-      Real x2, Real y2, Real z2)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1, Real x2, Real y2, Real z2)
   {
     std::vector<std::pair<Real, Real>> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);
@@ -294,11 +290,11 @@ namespace Rodin::Tests::Unit
   // Returns vector of (s, t) in reference quadrilateral coordinates [0,1]x[0,1]
   template <size_t K>
   /// @brief Helper used by the tests to Extract Wedge Quad Face Nodes.
-  std::vector<std::pair<Real, Real>> extractWedgeQuadFaceNodes(
-      Real x0, Real y0, Real z0,  // (0,0)
-      Real x1, Real y1, Real z1,  // (1,0)
-      Real x2, Real y2, Real z2,  // (1,1)
-      Real x3, Real y3, Real z3)  // (0,1)
+  std::vector<std::pair<Real, Real>> extractWedgeQuadFaceNodes(Real x0, Real y0,
+    Real z0,  // (0,0)
+    Real x1, Real y1, Real z1,  // (1,0)
+    Real x2, Real y2, Real z2,  // (1,1)
+    Real x3, Real y3, Real z3)  // (0,1)
   {
     std::vector<std::pair<Real, Real>> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);

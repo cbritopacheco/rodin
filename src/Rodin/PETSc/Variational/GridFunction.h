@@ -1372,7 +1372,8 @@ namespace Rodin::Variational
       }
 
     private:
-      DataType m_data;          ///< Underlying PETSc @c Vec storing the DOF coefficient vector @f$ \mathbf{u} @f$.
+      DataType
+        m_data; ///< Underlying PETSc @c Vec storing the DOF coefficient vector @f$ \mathbf{u} @f$.
       size_t m_begin, m_end;    ///< Owned DOF range @f$[\texttt{m\_begin}, \texttt{m\_end})@f$ (MPI mode); unused in Local mode.
       GhostBimap m_ghosts;      ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
 

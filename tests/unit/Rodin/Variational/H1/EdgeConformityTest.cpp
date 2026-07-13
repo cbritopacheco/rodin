@@ -178,8 +178,7 @@ namespace Rodin::Tests::Unit
   template <size_t K>
   /// @brief Helper used by the tests to Extract Tetrahedron Edge Nodes.
   std::vector<Real> extractTetrahedronEdgeNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1)
   {
     std::vector<Real> coords;
     const auto& nodes = FeketeTetrahedron<K>::getNodes();
@@ -201,8 +200,7 @@ namespace Rodin::Tests::Unit
   template <size_t K>
   /// @brief Helper used by the tests to Extract Wedge Edge Nodes.
   std::vector<Real> extractWedgeEdgeNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1)
   {
     std::vector<Real> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);

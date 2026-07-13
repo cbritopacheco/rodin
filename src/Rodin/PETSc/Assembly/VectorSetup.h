@@ -47,16 +47,16 @@ namespace Rodin::PETSc::Assembly
        */
       struct Options
       {
-        /// @brief Local vector size owned by this MPI rank, or @c PETSC_DECIDE.
-        PetscInt localSize;
-        /// @brief Global vector size.
-        PetscInt globalSize;
-        /// @brief Optional PETSc vector type to set during initial setup.
-        VecType type = nullptr;
-        /// @brief Whether to call @c VecSetFromOptions during initial setup.
-        bool setFromOptions = false;
-        /// @brief Whether compatible reused vectors are zeroed before assembly.
-        bool zeroOnReuse = true;
+          /// @brief Local vector size owned by this MPI rank, or @c PETSC_DECIDE.
+          PetscInt localSize;
+          /// @brief Global vector size.
+          PetscInt globalSize;
+          /// @brief Optional PETSc vector type to set during initial setup.
+          VecType type = nullptr;
+          /// @brief Whether to call @c VecSetFromOptions during initial setup.
+          bool setFromOptions = false;
+          /// @brief Whether compatible reused vectors are zeroed before assembly.
+          bool zeroOnReuse = true;
       };
 
       /**

@@ -128,7 +128,7 @@ namespace Rodin::FormLanguage
   struct IsSpatialVector : std::false_type
   {
     /// @brief False for non-spatial-vector types.
-    static constexpr bool Value = false;
+      static constexpr bool Value = false;
   };
 
   /// @brief Type trait specialization for Math::SpatialVector.
@@ -136,7 +136,7 @@ namespace Rodin::FormLanguage
   struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type
   {
     /// @brief True for Math::SpatialVector specializations.
-    static constexpr bool Value = true;
+      static constexpr bool Value = true;
   };
 
   /// @brief Type trait: whether @c T is a Math::SpatialMatrix.
@@ -144,7 +144,7 @@ namespace Rodin::FormLanguage
   struct IsSpatialMatrix : std::false_type
   {
     /// @brief False for non-spatial-matrix types.
-    static constexpr bool Value = false;
+      static constexpr bool Value = false;
   };
 
   /// @brief Type trait specialization for Math::SpatialMatrix.
@@ -152,7 +152,7 @@ namespace Rodin::FormLanguage
   struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type
   {
     /// @brief True for Math::SpatialMatrix specializations.
-    static constexpr bool Value = true;
+      static constexpr bool Value = true;
   };
 
   /// @brief Type trait: whether @c T has vector range (a spatial vector or a

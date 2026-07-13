@@ -223,4 +223,3 @@ namespace Rodin::Solver
 }
 
 #endif
-

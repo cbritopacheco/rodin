@@ -198,8 +198,6 @@ namespace Rodin::Tests::Unit
     }
   }
 
-
-
   // Test P3 element on Segment
   /// @brief Verifies sanity test P 3 1 D reference segment for variational real H1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealH1Element, SanityTest_P3_1D_Reference_Segment)

@@ -32,10 +32,9 @@ namespace boost::serialization
   void serialize(
       Archive & ar, const Rodin::Geometry::Polytope::Type& t, const unsigned int version)
   {
-    (void) version;
+    (void)version;
     ar & static_cast<std::underlying_type_t<Rodin::Geometry::Polytope::Type>>(t);
   }
 }
 
 #endif
-

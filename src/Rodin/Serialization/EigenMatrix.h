@@ -30,12 +30,13 @@ namespace boost::serialization
    * @param matrix Matrix to save.
    * @param version Serialization version.
    */
-  template <class Archive, typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
-  void save(Archive & ar,
-            const Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
-            const unsigned int version)
+  template <class Archive, typename Scalar, int Rows, int Cols, int Options, int MaxRows,
+    int MaxCols>
+  void save(Archive& ar,
+    const Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
+    const unsigned int version)
   {
-    (void) version;
+    (void)version;
     Eigen::Index rows = matrix.rows();
     Eigen::Index cols = matrix.cols();
     ar & rows;
@@ -56,12 +57,13 @@ namespace boost::serialization
    * @param matrix Matrix to load.
    * @param version Serialization version.
    */
-  template <class Archive, typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
-  void load(Archive & ar,
-            Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
-            const unsigned int version)
+  template <class Archive, typename Scalar, int Rows, int Cols, int Options, int MaxRows,
+    int MaxCols>
+  void load(Archive& ar,
+    Eigen::Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols>& matrix,
+    const unsigned int version)
   {
-    (void) version;
+    (void)version;
     Eigen::Index rows, cols;
     ar & rows;
     ar & cols;

@@ -638,7 +638,7 @@ namespace Rodin
    * @tparam Params Element types.
    * @param params Tuple element values.
    */
-  template <class ... Params>
+  template <class... Params>
   Tuple(Params... params) -> Tuple<Params...>;
 
   /**

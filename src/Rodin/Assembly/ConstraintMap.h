@@ -44,10 +44,10 @@ namespace Rodin::Assembly
       struct Entry
       {
         /// @brief Master DOF index.
-        Index index;
+          Index index;
 
         /// @brief Coefficient multiplying the master DOF.
-        Scalar coefficient;
+          Scalar coefficient;
       };
 
       /// @brief Expansion row for a constrained DOF.

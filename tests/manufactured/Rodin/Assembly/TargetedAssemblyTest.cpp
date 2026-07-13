@@ -76,8 +76,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -------------------------------------------------------------------------
   template <template <class, class> class Assembler>
   /// @brief Helper used by the manufactured tests to Assemble Single Field.
-  LinearSystemType assembleSingleField(
-      Variational::AssemblyTarget target, bool targeted)
+  LinearSystemType assembleSingleField(Variational::AssemblyTarget target, bool targeted)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -143,8 +142,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -------------------------------------------------------------------------
   template <template <class, class> class Assembler>
   /// @brief Helper used by the manufactured tests to Assemble Block.
-  LinearSystemType assembleBlock(
-      Variational::AssemblyTarget target, bool targeted)
+  LinearSystemType assembleBlock(Variational::AssemblyTarget target, bool targeted)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });

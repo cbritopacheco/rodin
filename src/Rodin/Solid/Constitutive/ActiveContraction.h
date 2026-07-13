@@ -41,21 +41,21 @@ namespace Rodin::Solid
       struct Cache
       {
         /// @brief Passive law cache.
-        typename PassiveLaw::Cache passive;
+          typename PassiveLaw::Cache passive;
         /// @brief Fiber kinematics built from the constitutive point.
-        FiberKinematics fiber;
+          FiberKinematics fiber;
         /// @brief Fiber strain driving the active branch.
-        Real strain = 0.0;
+          Real strain = 0.0;
         /// @brief Current active extension.
-        Real activeExtension = 0.0;
+          Real activeExtension = 0.0;
         /// @brief Active branch response.
-        typename ActiveLaw::Response active;
+          typename ActiveLaw::Response active;
         /// @brief Updated active branch internal state.
-        typename ActiveLaw::State newState;
+          typename ActiveLaw::State newState;
         /// @brief Whether the dynamic active update was used.
-        bool dynamic = false;
+          bool dynamic = false;
         /// @brief Number of local Newton iterations used.
-        size_t localIterations = 0;
+          size_t localIterations = 0;
       };
 
       /// @brief Constructs the coupled active contraction law.

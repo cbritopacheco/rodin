@@ -966,10 +966,10 @@ namespace Rodin::Variational
        */
       struct IndexBimap
       {
-        /// @brief Local-to-global vector DOF map.
-        std::vector<Index> left;
-        /// @brief Global-to-local vector DOF map.
-        FlatMap<Index, Index> right;
+          /// @brief Local-to-global vector DOF map.
+          std::vector<Index> left;
+          /// @brief Global-to-local vector DOF map.
+          FlatMap<Index, Index> right;
       };
 
       /// @brief Execution context type.

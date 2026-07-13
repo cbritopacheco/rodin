@@ -32,63 +32,63 @@ namespace Rodin::Solid
       struct Parameters
       {
         /// @brief Initial active extension, stiffness, and stress data.
-        struct Initial
-        {
+          struct Initial
+          {
           /// @brief Initial active extension.
-          Real extension = 0.0;
+              Real extension = 0.0;
           /// @brief Initial active branch stiffness.
-          Real stiffness = 0.0;
+              Real stiffness = 0.0;
           /// @brief Initial active branch stress.
-          Real stress = 0.0;
-        };
+              Real stress = 0.0;
+          };
 
         /// @brief Passive serial stiffness in the active branch.
-        Real stiffness = 1.0;
+          Real stiffness = 1.0;
         /// @brief Viscous damping coefficient for dynamic active extension.
-        Real damping = 0.0;
+          Real damping = 0.0;
         /// @brief Cross-bridge destruction rate.
-        Real destructionRate = 0.0;
+          Real destructionRate = 0.0;
         /// @brief Cross-bridge stiffness coefficient.
-        Real crossBridgeStiffness = 0.0;
+          Real crossBridgeStiffness = 0.0;
         /// @brief Activation-dependent contractility coefficient.
-        Real contractility = 0.0;
+          Real contractility = 0.0;
 
         /// @brief Initial active branch state parameters.
-        Initial initial;
+          Initial initial;
       };
 
       /// @brief Internal active-fiber state.
       struct State
       {
         /// @brief Square-root stiffness-like internal variable.
-        Real gamma = 0.0;
+          Real gamma = 0.0;
         /// @brief Stress-like internal variable.
-        Real beta = 0.0;
+          Real beta = 0.0;
 
         /// @brief Returns the active stress @f$\gamma\beta@f$.
-        Real activeStress() const
-        {
-          return gamma * beta;
-        }
+          Real activeStress() const
+          {
+            return gamma * beta;
+          }
       };
 
       /// @brief Local response and tangent data for a fiber update.
       struct Response
       {
         /// @brief Active fiber stress.
-        Real stress = 0.0;
+          Real stress = 0.0;
         /// @brief Partial derivative of stress with respect to fiber strain.
-        Real dStressDe = 0.0;
-        /// @brief Partial derivative of stress with respect to active extension.
-        Real dStressDc = 0.0;
-        /// @brief Scaled local residual used as the Newton update.
-        Real residual = 0.0;
-        /// @brief Mixed derivative of the local residual with respect to strain.
-        Real kce = 0.0;
-        /// @brief Derivative of the local residual with respect to active extension.
-        Real kcc = 1.0;
-        /// @brief Condensed tangent after eliminating the active extension.
-        Real tangent = 0.0;
+          Real dStressDe = 0.0;
+          /// @brief Partial derivative of stress with respect to active extension.
+          Real dStressDc = 0.0;
+          /// @brief Scaled local residual used as the Newton update.
+          Real residual = 0.0;
+          /// @brief Mixed derivative of the local residual with respect to strain.
+          Real kce = 0.0;
+          /// @brief Derivative of the local residual with respect to active extension.
+          Real kcc = 1.0;
+          /// @brief Condensed tangent after eliminating the active extension.
+          Real tangent = 0.0;
       };
 
       /// @brief Constructs the active law with default parameters.

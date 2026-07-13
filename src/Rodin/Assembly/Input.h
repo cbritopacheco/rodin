@@ -620,8 +620,8 @@ namespace Rodin::Assembly
   template <class ProblemBody, class U1, class U2, class U3, class ... Us>
   class ProblemAssemblyInput<ProblemBody, U1, U2, U3, Us...>
   {
-    /// @brief Problem body type.
-    using ProblemBodyType = ProblemBody;
+      /// @brief Problem body type.
+      using ProblemBodyType = ProblemBody;
 
     private:
       template <class T>

@@ -73,9 +73,8 @@ namespace Rodin::Utility
   struct Repeat
   {
     /// @brief Tuple containing @c N copies of @c T.
-    using Type =
-      decltype(
-        std::declval<Tuple<T>>().concatenate(std::declval<typename Repeat<N - 1, T>::Type>()));
+      using Type = decltype(std::declval<Tuple<T>>().concatenate(
+        std::declval<typename Repeat<N - 1, T>::Type>()));
   };
 }
 

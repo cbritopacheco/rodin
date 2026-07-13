@@ -386,11 +386,11 @@ namespace Rodin::Solver
       struct StepResult
       {
         /// @brief Whether the step was accepted by the policy.
-        bool accepted = true;
+          bool accepted = true;
         /// @brief Whether the policy declares convergence.
-        bool converged = false;
+          bool converged = false;
         /// @brief Norm reported for the accepted or rejected step.
-        Real stepNorm = 0.0;
+          Real stepNorm = 0.0;
       };
 
       /// @brief Callback type for custom Newton step acceptance and updates.

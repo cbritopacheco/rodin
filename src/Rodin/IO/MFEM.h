@@ -238,8 +238,8 @@ namespace Rodin::IO::MFEM
   /// @brief Face index and vertex ordering used when emitting MFEM face DOFs.
   struct FaceOrderEntry
   {
-    Index index;                 ///< Face index in Rodin connectivity ordering.
-    std::vector<Index> vertices; ///< Face vertices in MFEM local ordering.
+      Index index; ///< Face index in Rodin connectivity ordering.
+      std::vector<Index> vertices; ///< Face vertices in MFEM local ordering.
   };
 
   inline
@@ -2776,7 +2776,8 @@ namespace Rodin::IO
       /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
-      using ObjectType = Variational::GridFunction<FESType, DataType>; ///< Grid function type being loaded.
+      using ObjectType = Variational::GridFunction<FESType,
+        DataType>; ///< Grid function type being loaded.
 
       /// @brief Parent class type.
       using Parent = GridFunctionLoaderBase<FESType, DataType>;

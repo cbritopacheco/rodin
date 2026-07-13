@@ -119,22 +119,22 @@ namespace Rodin::Heart::CCMLC2014::Model
 
     Scalar proximalRadius = 0.0; ///< Proximal branch radius.
     Scalar proximalLength = 0.0; ///< Proximal branch length.
-    Scalar distalRadius = 0.0;   ///< Distal branch radius.
-    Scalar distalLength = 0.0;   ///< Distal branch length.
+    Scalar distalRadius = 0.0; ///< Distal branch radius.
+    Scalar distalLength = 0.0; ///< Distal branch length.
 
     Scalar m = 0.0; ///< Power-law consistency coefficient.
     Scalar n = 0.0; ///< Power-law, Cross, or Carreau-Yasuda exponent.
 
-    Scalar mu_0    = 0.0; ///< Zero-shear viscosity.
-    Scalar mu_Inf  = 0.0; ///< Infinite-shear viscosity.
-    Scalar lambda = 0.0;  ///< Rheology time-scale parameter.
-    Scalar yasuda = 0.0;  ///< Carreau-Yasuda transition parameter.
+    Scalar mu_0 = 0.0; ///< Zero-shear viscosity.
+    Scalar mu_Inf = 0.0; ///< Infinite-shear viscosity.
+    Scalar lambda = 0.0; ///< Rheology time-scale parameter.
+    Scalar yasuda = 0.0; ///< Carreau-Yasuda transition parameter.
 
-    Scalar k_0 = 0.0;           ///< Quemada low-shear coefficient.
-    Scalar k_Inf = 0.0;         ///< Quemada high-shear coefficient.
-    Scalar phi_quemada = 0.0;   ///< Quemada hematocrit volume fraction.
-    Scalar mu_plasma = 0.0;     ///< Plasma viscosity for Quemada rheology.
-    Scalar gamma_c = 0.0;       ///< Critical shear rate for Quemada rheology.
+    Scalar k_0 = 0.0; ///< Quemada low-shear coefficient.
+    Scalar k_Inf = 0.0; ///< Quemada high-shear coefficient.
+    Scalar phi_quemada = 0.0; ///< Quemada hematocrit volume fraction.
+    Scalar mu_plasma = 0.0; ///< Plasma viscosity for Quemada rheology.
+    Scalar gamma_c = 0.0; ///< Critical shear rate for Quemada rheology.
 
     Scalar Kat = 0.0;     ///< Atrioventricular (mitral) conductance.
     Scalar Kp = 0.0;      ///< Valve leakage conductance.

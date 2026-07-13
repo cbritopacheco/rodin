@@ -319,4 +319,3 @@ namespace Rodin::Solver
 }
 
 #endif
-

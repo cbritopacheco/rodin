@@ -64,84 +64,84 @@ namespace Rodin::Solid
     struct FiberDirection
     {
       /// @brief Stored value type for this tag.
-      using Type = Math::SpatialVector<Real>;
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet direction vector.
     struct SheetDirection
     {
       /// @brief Stored value type for this tag.
-      using Type = Math::SpatialVector<Real>;
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet-normal direction vector.
     struct SheetNormalDirection
     {
       /// @brief Stored value type for this tag.
-      using Type = Math::SpatialVector<Real>;
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the activation parameter.
     struct Activation
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for the active fiber extension @f$e_c^{n+1}@f$.
     struct ActiveExtension
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for the previous active fiber extension @f$e_c^n@f$.
     struct PreviousActiveExtension
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for the active-law time step.
     struct TimeStep
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for the scalar electrical/chemical activation input.
     struct ElectricalActivation
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for previous active variable @f$\gamma^n@f$.
     struct PreviousActiveGamma
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for previous active variable @f$\beta^n@f$.
     struct PreviousActiveBeta
     {
       /// @brief Stored value type for this tag.
-      using Type = Real;
+        using Type = Real;
     };
 
     /// @brief Tag for the index of the current cell (polytope) being assembled.
     struct CellIndex
     {
       /// @brief Stored value type for this tag.
-      using Type = Index;
+        using Type = Index;
     };
 
     /// @brief Tag for the index of the current quadrature point within the cell.
     struct QuadraturePointIndex
     {
       /// @brief Stored value type for this tag.
-      using Type = std::size_t;
+        using Type = std::size_t;
     };
   }
 

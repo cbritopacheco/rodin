@@ -29,12 +29,11 @@ namespace boost::serialization
    * @param version Serialization version.
    */
   template <class Archive, typename Key, typename T, typename Compare, typename Allocator>
-  void save(
-      Archive& ar,
-      const boost::container::flat_map<Key, T, Compare, Allocator>& map,
-      const unsigned int version)
+  void save(Archive& ar,
+    const boost::container::flat_map<Key, T, Compare, Allocator>& map,
+    const unsigned int version)
   {
-    (void) version;
+    (void)version;
     std::size_t size = map.size();
     ar & size;
     for (const auto& pair : map)
@@ -55,12 +54,10 @@ namespace boost::serialization
    * @param version Serialization version.
    */
   template <class Archive, typename Key, typename T, typename Compare, typename Allocator>
-  void load(
-      Archive& ar,
-      boost::container::flat_map<Key, T, Compare, Allocator>& map,
-      const unsigned int version)
+  void load(Archive& ar, boost::container::flat_map<Key, T, Compare, Allocator>& map,
+    const unsigned int version)
   {
-    (void) version;
+    (void)version;
     std::size_t size;
     ar & size;
     map.clear();

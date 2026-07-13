@@ -417,7 +417,6 @@ TEST_F(UtilityProductTest, ProductThreeByTwo)
   EXPECT_TRUE((std::is_same_v<ProductType, ExpectedType>));
 }
 
-
 /// @brief Verifies product with rodin pair for utility product test by checking true predicates.
 TEST_F(UtilityProductTest, ProductWithRodinPair)
 {

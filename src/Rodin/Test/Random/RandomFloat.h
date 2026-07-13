@@ -35,45 +35,42 @@ namespace Rodin::Test::Random
      * @param b Upper bound of the distribution.
      * @param seed Seed for the underlying generator.
      */
-    constexpr
-    RandomFloat(
-       T a = std::numeric_limits<T>::min(),
-       T b = std::numeric_limits<T>::max(),
-       unsigned int seed = std::random_device()())
-      : m_distrib(a, b), m_seed(seed)
-    {
-      assert(a <= b);
-    }
+     constexpr RandomFloat(T a = std::numeric_limits<T>::min(),
+       T b = std::numeric_limits<T>::max(), unsigned int seed = std::random_device()())
+       : m_distrib(a, b),
+         m_seed(seed)
+     {
+       assert(a <= b);
+     }
 
     /**
      * @brief Sets the generator seed.
      * @param seed Seed for the underlying generator.
      * @return Reference to this generator.
      */
-    RandomFloat& setSeed(unsigned int seed)
-    {
-      m_gen.seed(seed);
-      return *this;
-    }
+     RandomFloat& setSeed(unsigned int seed)
+     {
+       m_gen.seed(seed);
+       return *this;
+     }
 
     /**
      * @brief Gets the seed recorded by this generator.
      * @return Seed value.
      */
-    constexpr
-    unsigned int getSeed() const
-    {
-      return m_seed;
-    }
+     constexpr unsigned int getSeed() const
+     {
+       return m_seed;
+     }
 
     /**
      * @brief Generates the next random value.
      * @return Random value sampled from the distribution.
      */
-    T operator()()
-    {
-      return m_distrib(m_gen);
-    }
+     T operator()()
+     {
+       return m_distrib(m_gen);
+     }
 
    private:
     std::mt19937 m_gen;

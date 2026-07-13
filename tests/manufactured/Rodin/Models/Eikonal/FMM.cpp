@@ -459,7 +459,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
       << "Travel in y-direction should take longer due to slower speed";
   }
 
-  // Test 7: Line source with constant speed - 2D 
+  // Test 7: Line source with constant speed - 2D
   /// @brief Verifies line source constant speed 2 D for FMM manufactured test by checking false predicates, solver behavior, manufactured-solution convergence.
   TEST_F(FMMManufacturedTest, LineSource_ConstantSpeed_2D)
   {

@@ -42,4 +42,3 @@ namespace Rodin::Context
 }
 
 #endif
-

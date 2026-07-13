@@ -27,11 +27,9 @@ namespace boost::serialization
    * @param version Serialization version.
    */
   template <class Archive, typename ScalarType>
-  void save(Archive & ar,
-            const Rodin::Array<ScalarType>& arr,
-            const unsigned int version)
+  void save(Archive& ar, const Rodin::Array<ScalarType>& arr, const unsigned int version)
   {
-    (void) version;
+    (void)version;
     const size_t sz = arr.size();
     ar & sz;
     ar & boost::serialization::make_array(arr.data(), sz);
@@ -46,11 +44,9 @@ namespace boost::serialization
    * @param version Serialization version.
    */
   template <class Archive, typename ScalarType>
-  void load(Archive & ar,
-            Rodin::Array<ScalarType>& arr,
-            const unsigned int version)
+  void load(Archive& ar, Rodin::Array<ScalarType>& arr, const unsigned int version)
   {
-    (void) version;
+    (void)version;
     size_t sz;
     ar & sz;
     arr.resize(sz);

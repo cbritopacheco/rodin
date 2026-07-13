@@ -80,14 +80,12 @@ namespace Rodin::Assembly
    * Produces the distributed map of constrained indices and their prescribed
    * values for a trial function on an MPI mesh shard.
    */
-  class MPI<
-    IndexMap<Scalar>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>> final
-    : public AssemblyBase<
-        IndexMap<Scalar>,
-        Variational::DirichletBC<
-          Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
+  class MPI<IndexMap<Scalar>,
+    Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
+      Variational::FunctionBase<ValueDerived>>>
+    final : public AssemblyBase<IndexMap<Scalar>,
+              Variational::DirichletBC<Variational::TrialFunction<Solution, FES>,
+                Variational::FunctionBase<ValueDerived>>>
   {
     public:
       /**

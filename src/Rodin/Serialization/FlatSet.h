@@ -30,13 +30,12 @@ namespace boost::serialization
    * @param version Serialization version.
    */
   template <class Archive, typename T, typename Compare, typename Allocator>
-  void save(Archive & ar,
-            const boost::container::flat_set<T, Compare, Allocator>& s,
-            const unsigned int version)
+  void save(Archive& ar, const boost::container::flat_set<T, Compare, Allocator>& s,
+    const unsigned int version)
   {
-     (void) version;
-     std::size_t sz = s.size();
-     ar & BOOST_SERIALIZATION_NVP(sz);
+    (void)version;
+    std::size_t sz = s.size();
+    ar& BOOST_SERIALIZATION_NVP(sz);
 #if BOOST_VERSION >= 108100
      if(sz > 0)
      {
@@ -60,14 +59,13 @@ namespace boost::serialization
    * @param version Serialization version.
    */
   template <class Archive, typename T, typename Compare, typename Allocator>
-  void load(Archive & ar,
-            boost::container::flat_set<T, Compare, Allocator>& s,
-            const unsigned int version)
+  void load(Archive& ar, boost::container::flat_set<T, Compare, Allocator>& s,
+    const unsigned int version)
   {
-     (void) version;
-     std::size_t sz;
-     ar & BOOST_SERIALIZATION_NVP(sz);
-     s.clear();
+    (void)version;
+    std::size_t sz;
+    ar& BOOST_SERIALIZATION_NVP(sz);
+    s.clear();
 #if BOOST_VERSION >= 108100
      if(sz > 0)
      {
