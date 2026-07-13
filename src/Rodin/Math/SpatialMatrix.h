@@ -42,11 +42,15 @@ namespace Rodin::Math
   class SpatialMatrix
   {
     public:
+      /// @brief The element scalar type.
       using Scalar = ScalarType;
+      /// @brief Underlying fixed-capacity Eigen storage type.
       using Data = Eigen::Matrix3<ScalarType>;
+      /// @brief Maximum storable dimension (RODIN_MAXIMAL_SPACE_DIMENSION, fixed at 3).
       static constexpr std::uint8_t MaxSize = RODIN_MAXIMAL_SPACE_DIMENSION;
       static_assert(MaxSize == 3, "MaxSize must be equal to 3.");
 
+      /// @brief Constructs an empty (0-by-0) spatial matrix.
       constexpr
       SpatialMatrix() noexcept
         : m_rows(0), m_cols(0)
@@ -54,6 +58,7 @@ namespace Rodin::Math
         zeroStorage();
       }
 
+      /// @brief Constructs a zero-initialized spatial matrix of the given dimensions.
       constexpr
       SpatialMatrix(std::uint8_t rows, std::uint8_t cols)
         : m_rows(rows), m_cols(cols)
@@ -62,6 +67,7 @@ namespace Rodin::Math
         zeroStorage();
       }
 
+      /// @brief Constructs a single-column matrix from a spatial vector.
       constexpr
       SpatialMatrix(const SpatialVector<Scalar>& vec)
         : m_rows(static_cast<std::uint8_t>(vec.size())),
@@ -86,18 +92,23 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Copy constructor.
       constexpr
       SpatialMatrix(const SpatialMatrix&) = default;
 
+      /// @brief Move constructor.
       constexpr
       SpatialMatrix(SpatialMatrix&&) = default;
 
+      /// @brief Copy assignment operator.
       constexpr
       SpatialMatrix& operator=(const SpatialMatrix&) = default;
 
+      /// @brief Move assignment operator.
       constexpr
       SpatialMatrix& operator=(SpatialMatrix&&) = default;
 
+      /// @brief Constructs a spatial matrix from an Eigen matrix expression.
       template <class EigenDerived>
       constexpr
       SpatialMatrix(const Eigen::MatrixBase<EigenDerived>& other)
@@ -108,6 +119,7 @@ namespace Rodin::Math
         *this = other;
       }
 
+      /// @brief Returns an identity matrix of the given dimensions.
       static constexpr SpatialMatrix Identity(std::uint8_t rows, std::uint8_t cols)
       {
         assert(rows <= MaxSize && cols <= MaxSize);
@@ -137,6 +149,7 @@ namespace Rodin::Math
         return I;
       }
 
+      /// @brief Assigns from an Eigen array expression, resizing to match.
       template <class EigenDerived>
       constexpr
       SpatialMatrix& operator=(const Eigen::ArrayBase<EigenDerived>& other)
@@ -211,6 +224,7 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// @brief Assigns from an Eigen matrix expression, resizing to match.
       template <class EigenDerived>
       constexpr
       SpatialMatrix& operator=(const Eigen::MatrixBase<EigenDerived>& other)
@@ -285,6 +299,7 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// @brief Adds another spatial matrix componentwise in place.
       constexpr
       SpatialMatrix& operator+=(const SpatialMatrix& other)
       {
@@ -367,18 +382,21 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the number of rows.
       constexpr
       std::uint8_t rows() const noexcept
       {
         return m_rows;
       }
 
+      /// @brief Returns the number of columns.
       constexpr
       std::uint8_t cols() const noexcept
       {
         return m_cols;
       }
 
+      /// @brief Sets the logical dimensions (each must not exceed MaxSize).
       constexpr
       void resize(std::uint8_t r, std::uint8_t c)
       {
@@ -387,6 +405,7 @@ namespace Rodin::Math
         m_cols = c;
       }
 
+      /// @brief Returns a reference to entry (i, j).
       constexpr
       ScalarType& operator()(std::uint8_t i, std::uint8_t j)
       {
@@ -394,6 +413,7 @@ namespace Rodin::Math
         return m_data(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(j));
       }
 
+      /// @brief Returns a const reference to entry (i, j).
       constexpr
       const ScalarType& operator()(std::uint8_t i, std::uint8_t j) const
       {
@@ -401,24 +421,28 @@ namespace Rodin::Math
         return m_data(static_cast<Eigen::Index>(i), static_cast<Eigen::Index>(j));
       }
 
+      /// @brief Sets all entries to zero.
       constexpr
       void setZero() noexcept
       {
         m_data.setZero();
       }
 
+      /// @brief Sets all entries to the given value.
       constexpr
       void setConstant(const ScalarType& value) noexcept
       {
         m_data.setConstant(value);
       }
 
+      /// @brief Sets this matrix to the identity.
       constexpr
       void setIdentity() noexcept
       {
         m_data.setIdentity();
       }
 
+      /// @brief Returns the squared Frobenius norm.
       [[nodiscard]] constexpr
       ScalarType squaredNorm() const noexcept
       {
@@ -477,12 +501,14 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the Frobenius norm.
       [[nodiscard]] constexpr
       ScalarType norm() const noexcept
       {
         return Math::sqrt(this->squaredNorm());
       }
 
+      /// @brief Returns the Frobenius inner product with another spatial matrix.
       constexpr
       ScalarType dot(const SpatialMatrix& other) const noexcept
       {
@@ -581,6 +607,7 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the Frobenius inner product with an Eigen matrix expression.
       template <class EigenDerived>
       constexpr
       ScalarType dot(const Eigen::MatrixBase<EigenDerived>& other) const noexcept
@@ -650,6 +677,7 @@ namespace Rodin::Math
         return s;
       }
 
+      /// @brief Returns the transpose.
       constexpr
       SpatialMatrix<ScalarType> transpose() const noexcept
       {
@@ -718,6 +746,7 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the elementwise complex conjugate.
       constexpr
       SpatialMatrix<ScalarType> conjugate() const noexcept
       {
@@ -786,6 +815,7 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the conjugate transpose (adjoint).
       constexpr
       SpatialMatrix<ScalarType> adjoint() const noexcept
       {
@@ -853,6 +883,7 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the trace (sum of the diagonal entries; requires a square matrix).
       constexpr
       ScalarType trace() const noexcept
       {
@@ -873,6 +904,7 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the (0, 0) entry (for 1-by-1 matrices used as scalars).
       constexpr
       ScalarType value() const noexcept
       {
@@ -960,6 +992,7 @@ namespace Rodin::Math
       }
 
       // Determinant specialized for 1x1, 2x2, 3x3 (+ generic fallback).
+      /// @brief Returns the determinant (specialized for 1x1, 2x2 and 3x3).
       constexpr
       ScalarType determinant() const noexcept
       {
@@ -1007,6 +1040,7 @@ namespace Rodin::Math
 
       // Inverse specialized for 1x1, 2x2, 3x3 (+ generic fallback).
       // Returns a SpatialMatrix (same runtime size).
+      /// @brief Returns the matrix inverse (specialized for 1x1, 2x2 and 3x3).
       constexpr
       SpatialMatrix<ScalarType> inverse() const noexcept
       {
@@ -1492,12 +1526,14 @@ namespace Rodin::Math
         return *this;
       }
 
+      /// @brief Returns a reference to the underlying Eigen storage.
       constexpr
       auto& getData() noexcept
       {
         return m_data;
       }
 
+      /// @brief Returns a const reference to the underlying Eigen storage.
       constexpr
       const auto& getData() const noexcept
       {
@@ -1516,6 +1552,7 @@ namespace Rodin::Math
       Data m_data;
   };
 
+  /// @brief Scalar-times-matrix product.
   template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -1570,6 +1607,7 @@ namespace Rodin::Math
     }
   }
 
+  /// @brief Matrix-times-vector product, returned as a single-column matrix.
   template <class LHSScalar, class RHSScalar>
   [[nodiscard]] inline
   SpatialMatrix<typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type>
@@ -1692,6 +1730,7 @@ namespace Rodin::Math
     }
   }
 
+  /// @brief Matrix-times-scalar product.
   template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -1764,6 +1803,7 @@ namespace Rodin::Math
     }
   }
 
+  /// @brief Matrix-matrix product.
   template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -2122,6 +2162,7 @@ namespace Rodin::Math
     }
   }
 
+  /// @brief Matrix-times-vector product.
   template <class LHSScalar, class RHSScalar>
   [[nodiscard]] inline
   SpatialVector<typename FormLanguage::Mult<LHSScalar, RHSScalar>::Type>
@@ -2230,6 +2271,7 @@ namespace Rodin::Math
     }
   }
 
+  /// @brief Row-vector-times-matrix product, returned as a single-row matrix.
   template <class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -2296,7 +2338,7 @@ namespace Rodin::Math
     return result;
   }
 
-
+  /// @brief Product of an Eigen matrix expression and a spatial matrix.
   template <class EigenDerived, class Scalar>
   [[nodiscard]] inline
   auto operator*(
@@ -2315,6 +2357,7 @@ namespace Rodin::Math
     return result;
   }
 
+  /// @brief Product of a spatial matrix and an Eigen matrix expression.
   template <class Scalar, class EigenDerived>
   [[nodiscard]] inline
   auto operator*(
@@ -2333,6 +2376,7 @@ namespace Rodin::Math
     return result;
   }
 
+  /// @brief Matrix-times-(dynamic)-vector product.
   template <class Scalar>
   [[nodiscard]] inline
   auto operator*(const SpatialMatrix<Scalar>& m, const Math::Vector<Scalar>& v)
@@ -2348,6 +2392,7 @@ namespace Rodin::Math
     return result;
   }
 
+  /// @brief Componentwise sum of a spatial matrix and an Eigen matrix expression.
   template <class Scalar, class EigenDerived>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -2367,6 +2412,7 @@ namespace Rodin::Math
     return C;
   }
 
+  /// @brief Componentwise sum of an Eigen matrix expression and a spatial matrix.
   template <class EigenDerived, class Scalar>
   [[nodiscard]] inline
   SpatialMatrix<Scalar>
@@ -2377,6 +2423,7 @@ namespace Rodin::Math
     return B + A;
   }
 
+  /// @brief Streams the matrix's active block to an output stream.
   template <class Scalar>
   std::ostream& operator<<(std::ostream& os, const SpatialMatrix<Scalar>& m)
   {
@@ -2389,10 +2436,11 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for a Math::SpatialMatrix: exposes the scalar type.
   template <class Number>
   struct Traits<Math::SpatialMatrix<Number>>
   {
-    /// @brief Scalar value type.
+      /// @brief Scalar value type.
       using ScalarType = Number;
   };
 }

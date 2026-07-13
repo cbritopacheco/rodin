@@ -824,55 +824,7 @@ src/Rodin/MPI/Variational/P1/P1.h: warning: Member operator()(const Math::Spatia
 src/Rodin/Math/Matrix.h: warning: Compound Rodin::FormLanguage::Traits< Math::Matrix< Number > > is not documented.
 src/Rodin/Math/RungeKutta/RK4.h: warning: Member step(T &q, Real t, Real dt, const T &p, const F &f) const (function) of struct Rodin::Math::RungeKutta::RK4 is not documented.
 src/Rodin/Math/SparseMatrix.h: warning: Compound Rodin::FormLanguage::Traits< Math::SparseMatrix< Number > > is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Compound Rodin::FormLanguage::Traits< Math::SpatialMatrix< Number > > is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member Data (typedef) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member Identity(std::uint8_t rows, std::uint8_t cols) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member MaxSize (variable) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member Scalar (typedef) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member SpatialMatrix(SpatialMatrix &&)=default (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member SpatialMatrix(const Eigen::MatrixBase< EigenDerived > &other) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member SpatialMatrix(const SpatialMatrix &)=default (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member SpatialMatrix(const SpatialVector< Scalar > &vec) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member SpatialMatrix(std::uint8_t rows, std::uint8_t cols) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member adjoint() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member cols() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member conjugate() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member determinant() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member dot(const Eigen::MatrixBase< EigenDerived > &other) const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member dot(const SpatialMatrix &other) const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member getData() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member getData() noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member inverse() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member norm() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator()(std::uint8_t i, std::uint8_t j) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator()(std::uint8_t i, std::uint8_t j) const (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const Eigen::MatrixBase< EigenDerived > &s, const SpatialMatrix< Scalar > &m) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const Scalar &s, const SpatialMatrix< Scalar > &A) noexcept (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialMatrix< LHSScalar > &A, const Math::Vector< RHSScalar > &s) noexcept (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialMatrix< LHSScalar > &A, const SpatialVector< RHSScalar > &x) noexcept (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialMatrix< Scalar > &A, const Scalar &s) noexcept (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialMatrix< Scalar > &A, const SpatialMatrix< Scalar > &B) noexcept (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialMatrix< Scalar > &m, const Eigen::MatrixBase< EigenDerived > &s) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialMatrix< Scalar > &m, const Math::Vector< Scalar > &v) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator*(const SpatialVector< Scalar > &v, const SpatialMatrix< Scalar > &m) noexcept (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator+(const Eigen::MatrixBase< EigenDerived > &A, const SpatialMatrix< Scalar > &B) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator+(const SpatialMatrix< Scalar > &A, const Eigen::MatrixBase< EigenDerived > &B) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator+=(const SpatialMatrix &other) (function) of class Rodin::Math::SpatialMatrix is not documented.
 src/Rodin/Math/SpatialMatrix.h: warning: Member operator-() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator<<(std::ostream &os, const SpatialMatrix< Scalar > &m) (function) of namespace Rodin::Math is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator=(SpatialMatrix &&)=default (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator=(const Eigen::ArrayBase< EigenDerived > &other) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator=(const Eigen::MatrixBase< EigenDerived > &other) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator=(const SpatialMatrix &)=default (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member resize(std::uint8_t r, std::uint8_t c) (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member rows() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member setConstant(const ScalarType &value) noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member setIdentity() noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member setZero() noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member squaredNorm() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member trace() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member transpose() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member value() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
 src/Rodin/Math/Traits.h: warning: Compound Rodin::FormLanguage::ColsAtCompileTime is not documented.
 src/Rodin/Math/Traits.h: warning: Compound Rodin::FormLanguage::ColsAtCompileTime< T, std::void_t< decltype(std::decay_t< T >::ColsAtCompileTime)> > is not documented.
 src/Rodin/Math/Traits.h: warning: Compound Rodin::FormLanguage::IsMatrixRange is not documented.
