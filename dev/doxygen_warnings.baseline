@@ -540,23 +540,6 @@ src/Rodin/PETSc/Variational/Problem.h: warning: Member assemble(AssemblyTarget t
 src/Rodin/PETSc/Variational/Problem.h: warning: Member assemble(AssemblyTarget target) override (function) of class Rodin::Variational::Problem< PETSc::Math::LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/PETSc/Variational/TestFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTestFunction< PETSc::Variational::TestFunction< FES > > is not documented.
 src/Rodin/PETSc/Variational/TrialFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTrialFunction< PETSc::Variational::TrialFunction< Solution, FES > > is not documented.
-src/Rodin/Serialization/Array.h: warning: Member load(Archive &ar, Rodin::Array< ScalarType > &arr, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/Array.h: warning: Member save(Archive &ar, const Rodin::Array< ScalarType > &arr, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/Array.h: warning: Member serialize(Archive &ar, Rodin::Array< ScalarType > &arr, const unsigned int version) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/EigenMatrix.h: warning: Member load(Archive &ar, Eigen::Matrix< Scalar, Rows, Cols, Options, MaxRows, MaxCols > &matrix, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/EigenMatrix.h: warning: Member save(Archive &ar, const Eigen::Matrix< Scalar, Rows, Cols, Options, MaxRows, MaxCols > &matrix, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/EigenMatrix.h: warning: Member serialize(Archive &ar, Eigen::Matrix< Scalar, Rows, Cols, Options, MaxRows, MaxCols > &matrix, const unsigned int version) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/Export.h: warning: Member BOOST_CLASS_EXPORT(Rodin::Geometry::ParametricTransformation< Rodin::Variational::RealP1Element >) (function) of file Export.h is not documented.
-src/Rodin/Serialization/FlatMap.h: warning: Member load(Archive &ar, boost::container::flat_map< Key, T, Compare, Allocator > &map, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/FlatMap.h: warning: Member save(Archive &ar, const boost::container::flat_map< Key, T, Compare, Allocator > &map, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/FlatMap.h: warning: Member serialize(Archive &ar, boost::container::flat_map< Key, T, Compare, Allocator > &map, const unsigned int version) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/FlatSet.h: warning: Member load(Archive &ar, boost::container::flat_set< T, Compare, Allocator > &s, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/FlatSet.h: warning: Member save(Archive &ar, const boost::container::flat_set< T, Compare, Allocator > &s, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/FlatSet.h: warning: Member serialize(Archive &ar, boost::container::flat_set< T, Compare, Allocator > &s, const unsigned int version) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/Optional.h: warning: Member load(Archive &ar, std::optional< T > &opt, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/Optional.h: warning: Member save(Archive &ar, const std::optional< T > &opt, const unsigned int) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/Optional.h: warning: Member serialize(Archive &ar, std::optional< T > &opt, const unsigned int version) (function) of namespace boost::serialization is not documented.
-src/Rodin/Serialization/PolytopeType.h: warning: Member serialize(Archive &ar, const Rodin::Geometry::Polytope::Type &t, const unsigned int version) (function) of namespace boost::serialization is not documented.
 src/Rodin/Solid/Constitutive/ActiveContraction.h: warning: Compound Rodin::Solid::ActiveContraction::Cache is not documented.
 src/Rodin/Solid/Constitutive/ActiveContraction.h: warning: Member ActiveContraction(const PassiveLaw &passiveLaw, const ActiveLaw &activeLaw=ActiveLaw()) (function) of class Rodin::Solid::ActiveContraction is not documented.
 src/Rodin/Solid/Constitutive/ActiveContraction.h: warning: Member active (variable) of struct Rodin::Solid::ActiveContraction::Cache is not documented.

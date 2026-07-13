@@ -24,6 +24,7 @@
 // instantiation; the previous Complex/Vector registrations could never
 // compile (and VectorP1Element is an alias template usable only with an
 // explicit scalar argument).
+/// @brief Registers the real P1 parametric transformation for Boost export.
 BOOST_CLASS_EXPORT(
   Rodin::Geometry::ParametricTransformation<Rodin::Variational::RealP1Element>);
 

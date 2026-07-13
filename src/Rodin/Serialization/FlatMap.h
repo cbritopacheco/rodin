@@ -17,10 +17,24 @@
 
 namespace boost::serialization
 {
+  /**
+   * @brief Saves a flat map to an archive.
+   * @tparam Archive Archive type.
+   * @tparam Key Map key type.
+   * @tparam T Map mapped value type.
+   * @tparam Compare Key comparison type.
+   * @tparam Allocator Allocator type.
+   * @param ar Archive used for serialization.
+   * @param map Flat map to save.
+   * @param version Serialization version.
+   */
   template <class Archive, typename Key, typename T, typename Compare, typename Allocator>
   void save(
-      Archive& ar, const boost::container::flat_map<Key, T, Compare, Allocator>& map, const unsigned int)
+      Archive& ar,
+      const boost::container::flat_map<Key, T, Compare, Allocator>& map,
+      const unsigned int version)
   {
+    (void) version;
     std::size_t size = map.size();
     ar & size;
     for (const auto& pair : map)
@@ -29,10 +43,24 @@ namespace boost::serialization
     }
   }
 
+  /**
+   * @brief Loads a flat map from an archive.
+   * @tparam Archive Archive type.
+   * @tparam Key Map key type.
+   * @tparam T Map mapped value type.
+   * @tparam Compare Key comparison type.
+   * @tparam Allocator Allocator type.
+   * @param ar Archive used for serialization.
+   * @param map Flat map to load.
+   * @param version Serialization version.
+   */
   template <class Archive, typename Key, typename T, typename Compare, typename Allocator>
   void load(
-      Archive& ar, boost::container::flat_map<Key, T, Compare, Allocator>& map, const unsigned int)
+      Archive& ar,
+      boost::container::flat_map<Key, T, Compare, Allocator>& map,
+      const unsigned int version)
   {
+    (void) version;
     std::size_t size;
     ar & size;
     map.clear();
@@ -44,6 +72,17 @@ namespace boost::serialization
     }
   }
 
+  /**
+   * @brief Serializes a flat map through split save/load functions.
+   * @tparam Archive Archive type.
+   * @tparam Key Map key type.
+   * @tparam T Map mapped value type.
+   * @tparam Compare Key comparison type.
+   * @tparam Allocator Allocator type.
+   * @param ar Archive used for serialization.
+   * @param map Flat map to serialize.
+   * @param version Serialization version.
+   */
   template <class Archive, typename Key, typename T, typename Compare, typename Allocator>
   void serialize(
       Archive& ar, boost::container::flat_map<Key, T, Compare, Allocator>& map, const unsigned int version)

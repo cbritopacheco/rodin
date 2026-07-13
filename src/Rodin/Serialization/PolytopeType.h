@@ -20,14 +20,22 @@
 
 namespace boost::serialization
 {
+  /**
+   * @brief Serializes a polytope type enum value.
+   * @tparam Archive Archive type.
+   * @tparam ScalarType Unused scalar tag kept for compatibility.
+   * @param ar Archive used for serialization.
+   * @param t Polytope type to serialize.
+   * @param version Serialization version.
+   */
   template <class Archive, class ScalarType>
   void serialize(
       Archive & ar, const Rodin::Geometry::Polytope::Type& t, const unsigned int version)
   {
+    (void) version;
     ar & static_cast<std::underlying_type_t<Rodin::Geometry::Polytope::Type>>(t);
   }
 }
 
 #endif
-
 
