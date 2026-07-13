@@ -1340,55 +1340,6 @@ src/Rodin/Variational/TrialFunction.h: warning: Member getName() const override 
 src/Rodin/Variational/TrialFunction.h: warning: Member getName() const override (function) of class Rodin::Variational::TrialFunctionReference is not documented.
 src/Rodin/Variational/TrialFunction.h: warning: Member setName(const std::string &name) (function) of class Rodin::Variational::TrialFunction is not documented.
 src/Rodin/Variational/TrialFunction.h: warning: Member setName(const std::string &name) (function) of class Rodin::Variational::TrialFunctionReference is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Compound Rodin::FormLanguage::Traits< Variational::VectorFunctionBase< Scalar, Derived > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Compound Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Compound Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member DerivedType (typedef) of struct Rodin::FormLanguage::Traits< Variational::VectorFunctionBase< Scalar, Derived > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member Dimension (variable) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member FixedSizeVectorType (typedef) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member SpatialVectorType (typedef) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member SpatialVectorType (typedef) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(VectorFunction &&other) (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(VectorFunction &&other) (function) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(VectorFunction &&other) (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(const Math::Vector< Scalar > &) -> VectorFunction< Math::Vector< Scalar > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(const V &, const Values &...) -> VectorFunction< V, Values... > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(const VectorFunction &other) (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(const VectorFunction &other) (function) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(const VectorFunction &other) (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(size_t vdim, F f) (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member VectorFunction(size_t, F) -> VectorFunction< F > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getDimension() const (function) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getDimension() const (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &) const noexcept (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &) const noexcept (function) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< FormLanguage::Traits< FES >::ScalarType, GradBase< GridFunction< FES, Data >, Derived > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< Real, AnalyticVectorFunction< F > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< Real, BoundaryNormal > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< Real, FaceNormal > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< Real, VectorFunction< F > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< Real, VectorFunction< V, Values... > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::VectorFunctionBase< Scalar, VectorFunction< Math::Vector< Scalar > > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &) const (function) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< FormLanguage::Traits< FES >::ScalarType, GradBase< GridFunction< FES, Data >, Derived > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< Real, AnalyticVectorFunction< F > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< Real, BoundaryNormal > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< Real, FaceNormal > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< Real, VectorFunction< F > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< Real, VectorFunction< V, Values... > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::VectorFunctionBase< Scalar, VectorFunction< Math::Vector< Scalar > > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::VectorFunctionBase is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member traceOf(const Args &... attrs) (function) of class Rodin::Variational::VectorFunction< V, Values... > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member traceOf(const FlatSet< Geometry::Attribute > &attr) (function) of class Rodin::Variational::VectorFunction< F > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: Member traceOf(const FlatSet< Geometry::Attribute > &attr) (function) of class Rodin::Variational::VectorFunction< Math::Vector< Scalar > > is not documented.
-src/Rodin/Variational/VectorFunction.h: warning: The following parameter of Rodin::Variational::VectorFunction< V, Values... >::VectorFunction(const V &v, const Values &... values) is not documented:
 src/Rodin/Variational/Zero.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::Zero< Scalar > is not documented.
 tests/benchmarks/Connectivity.cpp: warning: Compound Rodin::Tests::Benchmarks::ConnectivityBenchmark is not documented.
 tests/benchmarks/Connectivity.cpp: warning: Compound Rodin::Tests::Benchmarks::ConnectivityBenchmark::MeshSpec is not documented.
