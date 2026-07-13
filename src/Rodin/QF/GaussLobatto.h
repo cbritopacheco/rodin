@@ -119,6 +119,10 @@ namespace Rodin::QF
         : m_geometry(g), m_nx(2), m_ny(2), m_nz(2)
       { build(); }
 
+      /**
+       * @brief Gets the polytope geometry of this Gauss-Lobatto rule.
+       * @return Polytope geometry type.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

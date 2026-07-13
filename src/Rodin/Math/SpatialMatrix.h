@@ -1269,6 +1269,7 @@ namespace Rodin::Math
         }
       }
 
+      /// @brief Returns the componentwise additive inverse of this matrix.
       constexpr
       SpatialMatrix operator-() const noexcept
       {

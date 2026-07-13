@@ -126,6 +126,10 @@ namespace Rodin::QF
         build();
       }
 
+      /**
+       * @brief Gets the polytope geometry of this Gauss-Legendre rule.
+       * @return Polytope geometry type.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

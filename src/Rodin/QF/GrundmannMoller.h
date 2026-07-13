@@ -134,6 +134,10 @@ namespace Rodin::QF
         return m_order;
       }
 
+      /**
+       * @brief Gets the simplex geometry of this Grundmann-Moller rule.
+       * @return Polytope geometry type.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

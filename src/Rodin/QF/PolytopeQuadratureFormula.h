@@ -65,8 +65,20 @@ namespace Rodin::QF
       /// Parent class type
       using Parent = QuadratureFormulaBase;
 
+      /**
+       * @brief Gets a cached quadrature formula for a polytope geometry.
+       * @param order Polynomial degree of exactness.
+       * @param g Polytope geometry type.
+       * @return Reference to a cached quadrature formula.
+       */
       static const QuadratureFormulaBase& get(size_t order, Geometry::Polytope::Type g);
 
+      /**
+       * @brief Builds a quadrature formula for a polytope geometry.
+       * @param order Polynomial degree of exactness.
+       * @param g Polytope geometry type.
+       * @return Owning pointer to the selected quadrature formula.
+       */
       static std::unique_ptr<const QuadratureFormulaBase> build(size_t order, Geometry::Polytope::Type g);
 
       /**
@@ -113,6 +125,10 @@ namespace Rodin::QF
           m_geometry(other.m_geometry)
       {}
 
+      /**
+       * @brief Gets the polytope geometry of the delegated quadrature formula.
+       * @return Polytope geometry type.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

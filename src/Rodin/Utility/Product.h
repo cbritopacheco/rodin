@@ -81,6 +81,7 @@ namespace Rodin::Utility
   template <class H, class ... Gs>
   struct Product<Tuple<H>, Tuple<Gs...>>
   {
+    /// @brief Tuple containing @c Pair<H,G> for every type @c G in the second tuple.
     template <template <class, class> class Pair>
     using Type = Tuple<Pair<H, Gs>...>;
   };
@@ -93,6 +94,7 @@ namespace Rodin::Utility
   template <class ... Gs>
   struct Product<Tuple<>, Tuple<Gs...>>
   {
+    /// @brief Empty product when the first input tuple is empty.
     template <template <class, class> class Pair>
     using Type = Tuple<>;
   };
@@ -105,6 +107,7 @@ namespace Rodin::Utility
   template <class ... Gs>
   struct Product<Tuple<Gs...>, Tuple<>>
   {
+    /// @brief Empty product when the second input tuple is empty.
     template <template <class, class> class Pair>
     using Type = Tuple<>;
   };

@@ -466,11 +466,6 @@ src/Rodin/MPI/Variational/P1/P1.h: warning: Member CallablePullback(const Callab
 src/Rodin/MPI/Variational/P1/P1.h: warning: Member CallablePullback(const Geometry::Polytope &polytope, Callable &&v) (function) of class Rodin::Variational::P1< Range, Geometry::Mesh< Context::MPI > >::CallablePullback is not documented.
 src/Rodin/MPI/Variational/P1/P1.h: warning: Member operator()(T &res, const Math::SpatialVector< Real > &r) const (function) of class Rodin::Variational::P1< Range, Geometry::Mesh< Context::MPI > >::CallablePullback is not documented.
 src/Rodin/MPI/Variational/P1/P1.h: warning: Member operator()(const Math::SpatialVector< Real > &r) const (function) of class Rodin::Variational::P1< Range, Geometry::Mesh< Context::MPI > >::CallablePullback is not documented.
-src/Rodin/Math/SpatialMatrix.h: warning: Member operator-() const noexcept (function) of class Rodin::Math::SpatialMatrix is not documented.
-src/Rodin/Math/Traits.h: warning: Member Value (variable) of struct Rodin::FormLanguage::IsSpatialMatrix is not documented.
-src/Rodin/Math/Traits.h: warning: Member Value (variable) of struct Rodin::FormLanguage::IsSpatialMatrix< Math::SpatialMatrix< Scalar > > is not documented.
-src/Rodin/Math/Traits.h: warning: Member Value (variable) of struct Rodin::FormLanguage::IsSpatialVector is not documented.
-src/Rodin/Math/Traits.h: warning: Member Value (variable) of struct Rodin::FormLanguage::IsSpatialVector< Math::SpatialVector< Scalar > > is not documented.
 src/Rodin/PETSc/Assembly/MPI.h: warning: Member MPI (typedef) of namespace Rodin::PETSc::Math::Assembly is not documented.
 src/Rodin/PETSc/Assembly/MPI.h: warning: Member copy() const noexcept override (function) of class Rodin::Assembly::MPI< Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem< Rodin::PETSc::Math::LinearSystem, U, V > > is not documented.
 src/Rodin/PETSc/Assembly/MPI.h: warning: Member copy() const noexcept override (function) of class Rodin::Assembly::MPI< Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem< Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us... > > is not documented.
@@ -582,13 +577,6 @@ src/Rodin/PETSc/Variational/Problem.h: warning: Member assemble(AssemblyTarget t
 src/Rodin/PETSc/Variational/Problem.h: warning: Member assemble(AssemblyTarget target) override (function) of class Rodin::Variational::Problem< PETSc::Math::LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/PETSc/Variational/TestFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTestFunction< PETSc::Variational::TestFunction< FES > > is not documented.
 src/Rodin/PETSc/Variational/TrialFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTrialFunction< PETSc::Variational::TrialFunction< Solution, FES > > is not documented.
-src/Rodin/QF/Centroid.h: warning: Member getGeometry() const (function) of class Rodin::QF::Centroid is not documented.
-src/Rodin/QF/GaussLegendre.h: warning: Member getGeometry() const (function) of class Rodin::QF::GaussLegendre is not documented.
-src/Rodin/QF/GaussLobatto.h: warning: Member getGeometry() const (function) of class Rodin::QF::GaussLobatto is not documented.
-src/Rodin/QF/GrundmannMoller.h: warning: Member getGeometry() const (function) of class Rodin::QF::GrundmannMoller is not documented.
-src/Rodin/QF/PolytopeQuadratureFormula.h: warning: Member build(size_t order, Geometry::Polytope::Type g) (function) of class Rodin::QF::PolytopeQuadratureFormula is not documented.
-src/Rodin/QF/PolytopeQuadratureFormula.h: warning: Member get(size_t order, Geometry::Polytope::Type g) (function) of class Rodin::QF::PolytopeQuadratureFormula is not documented.
-src/Rodin/QF/PolytopeQuadratureFormula.h: warning: Member getGeometry() const (function) of class Rodin::QF::PolytopeQuadratureFormula is not documented.
 src/Rodin/Scotch/Exception.h: warning: Compound Rodin::Scotch::Exception is not documented.
 src/Rodin/Scotch/Exception.h: warning: The following parameter of Rodin::Scotch::Exception::Exception(const char *msg, const T &cls, const FuncName &funcName) is not documented:
 src/Rodin/Scotch/MeshPartitioner.h: warning: Compound Rodin::Scotch::Partitioner is not documented.
@@ -853,12 +841,6 @@ src/Rodin/Tuple.h: warning: Member Tuple() -> Tuple<> (function) of namespace Ro
 src/Rodin/Tuple.h: warning: Member Tuple(Params...) -> Tuple< Params... > (function) of namespace Rodin is not documented.
 src/Rodin/Tuple.h: warning: Member serialize(Archive &ar, const unsigned int version) (function) of class Rodin::Tuple< T, Ts... > is not documented.
 src/Rodin/Types.h: warning: Member StringView (typedef) of namespace Rodin is not documented.
-src/Rodin/Utility/ForConstexpr.h: warning: Member ForIndexImpl(F &&f, std::index_sequence< Is... >) (function) of namespace Rodin::Utility::Internal is not documented.
-src/Rodin/Utility/Product.h: warning: Member Type (typedef) of struct Rodin::Utility::Product< Tuple< Gs... >, Tuple<> > is not documented.
-src/Rodin/Utility/Product.h: warning: Member Type (typedef) of struct Rodin::Utility::Product< Tuple< H >, Tuple< Gs... > > is not documented.
-src/Rodin/Utility/Product.h: warning: Member Type (typedef) of struct Rodin::Utility::Product< Tuple<>, Tuple< Gs... > > is not documented.
-src/Rodin/Utility/Repeat.h: warning: Member Type (typedef) of struct Rodin::Utility::Repeat is not documented.
-src/Rodin/Utility/UnwrapReference.h: warning: end of comment block while expecting command </u> (Probable start 'src/Rodin/Utility/UnwrapReference.h' at line 27)
 src/Rodin/Variational/AND.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
 src/Rodin/Variational/Abs.h: warning: Member Abs(const FunctionBase< NestedDerived > &) -> Abs< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Abs.h: warning: Member abs(const FunctionBase< NestedDerived > &op) (function) of namespace Rodin::Variational is not documented.

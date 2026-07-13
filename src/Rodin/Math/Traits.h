@@ -125,19 +125,35 @@ namespace Rodin::FormLanguage
 
   /// @brief Type trait: whether @c T is a Math::SpatialVector.
   template <class T>
-  struct IsSpatialVector : std::false_type { static constexpr bool Value = false; };
+  struct IsSpatialVector : std::false_type
+  {
+    /// @brief False for non-spatial-vector types.
+    static constexpr bool Value = false;
+  };
 
   /// @brief Type trait specialization for Math::SpatialVector.
   template <class Scalar>
-  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type { static constexpr bool Value = true; };
+  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type
+  {
+    /// @brief True for Math::SpatialVector specializations.
+    static constexpr bool Value = true;
+  };
 
   /// @brief Type trait: whether @c T is a Math::SpatialMatrix.
   template <class T>
-  struct IsSpatialMatrix : std::false_type { static constexpr bool Value = false; };
+  struct IsSpatialMatrix : std::false_type
+  {
+    /// @brief False for non-spatial-matrix types.
+    static constexpr bool Value = false;
+  };
 
   /// @brief Type trait specialization for Math::SpatialMatrix.
   template <class Scalar>
-  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type { static constexpr bool Value = true; };
+  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type
+  {
+    /// @brief True for Math::SpatialMatrix specializations.
+    static constexpr bool Value = true;
+  };
 
   /// @brief Type trait: whether @c T has vector range (a spatial vector or a
   /// single-column Eigen object).
