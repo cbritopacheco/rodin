@@ -108,44 +108,53 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       MINRES(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       MINRES(const MINRES& other)
         : Parent(other),
           m_solver(other.m_solver)
       {}
 
+      /// @brief Move constructor.
       MINRES(MINRES&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
       {}
 
+      /// @brief Destructor.
       ~MINRES() = default;
 
+      /// @brief Sets the convergence tolerance; returns a reference to this solver.
       MINRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
+      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
       MINRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
+      /// @brief Returns whether the most recent solve converged successfully.
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       MINRES* copy() const noexcept override
       {
         return new MINRES(*this);
@@ -174,50 +183,60 @@ namespace Rodin::Solver
       using OperatorType = Math::Matrix<ScalarType>;
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      /// @brief Problem type solved by this solver.
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       MINRES(ProblemType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       MINRES(const MINRES& other)
         : Parent(other),
           m_solver(other.m_solver)
       {}
 
+      /// @brief Move constructor.
       MINRES(MINRES&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
       {}
 
+      /// @brief Destructor.
       ~MINRES() = default;
 
+      /// @brief Sets the convergence tolerance; returns a reference to this solver.
       MINRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
+      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
       MINRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
+      /// @brief Returns whether the most recent solve converged successfully.
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       MINRES* copy() const noexcept override
       {
         return new MINRES(*this);

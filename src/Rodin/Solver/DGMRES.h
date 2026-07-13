@@ -93,27 +93,33 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       DGMRES(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       DGMRES(const DGMRES& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       DGMRES(DGMRES&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
       {}
 
+      /// @brief Destructor.
       ~DGMRES() = default;
 
+      /// @brief Sets the convergence tolerance; returns a reference to this solver.
       DGMRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
+      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
       DGMRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
@@ -140,16 +146,19 @@ namespace Rodin::Solver
         return *this;
       }
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
+      /// @brief Returns whether the most recent solve converged successfully.
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       DGMRES* copy() const noexcept override
       {
         return new DGMRES(*this);
@@ -178,40 +187,48 @@ namespace Rodin::Solver
       using OperatorType = Math::Matrix<ScalarType>;
       /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      /// @brief Problem type solved by this solver.
       using ProblemType = Variational::ProblemBase<LinearSystemType>;
       /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       DGMRES(ProblemType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       DGMRES(const DGMRES& other)
         : Parent(other),
           m_solver(other.m_solver)
       {}
 
+      /// @brief Move constructor.
       DGMRES(DGMRES&& other)
         : Parent(std::move(other)),
           m_solver(std::move(other.m_solver))
       {}
 
+      /// @brief Destructor.
       ~DGMRES() = default;
 
+      /// @brief Sets the convergence tolerance; returns a reference to this solver.
       DGMRES& setTolerance(const Real& tol)
       {
         m_solver.setTolerance(tol);
         return *this;
       }
 
+      /// @brief Sets the maximum number of iterations; returns a reference to this solver.
       DGMRES& setMaxIterations(size_t maxIt)
       {
         m_solver.setMaxIterations(maxIt);
         return *this;
       }
 
+      /// @brief Sets the Krylov restart dimension; returns a reference to this solver.
       DGMRES& setRestart(size_t restart)
       {
         m_solver.set_restart(restart);
@@ -224,16 +241,19 @@ namespace Rodin::Solver
         return *this;
       }
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
+      /// @brief Returns whether the most recent solve converged successfully.
       Boolean success() const
       {
         return m_solver.info() == Eigen::Success;
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       DGMRES* copy() const noexcept override
       {
         return new DGMRES(*this);

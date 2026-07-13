@@ -103,23 +103,28 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       HouseholderQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       HouseholderQR(const HouseholderQR& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       HouseholderQR(HouseholderQR&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       HouseholderQR* copy() const noexcept override
       {
         return new HouseholderQR(*this);

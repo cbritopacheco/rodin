@@ -91,18 +91,22 @@ namespace Rodin::Solver
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       PartialPivLU(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       PartialPivLU(const PartialPivLU& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       PartialPivLU(PartialPivLU&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         const auto& A = axb.getOperator();
@@ -118,6 +122,7 @@ namespace Rodin::Solver
         axb.getSolution() = m_solver.solve(b);
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       PartialPivLU* copy() const noexcept override
       {
         return new PartialPivLU(*this);
