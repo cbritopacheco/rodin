@@ -376,33 +376,11 @@ src/Rodin/FormLanguage/Base.h: warning: Invalid list item found
 src/Rodin/Geometry/BalancedCompactPartitioner.cpp: warning: Member MeshType (typedef) of namespace Rodin::Geometry is not documented.
 src/Rodin/Geometry/Connectivity.cpp: warning: no matching class member found for 
 src/Rodin/Geometry/Connectivity.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member Line2D(const LineSegment2D< T > &ls) (function) of class Rodin::Geometry::Euclidean::Line2D is not documented.
-src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member Line2D(std::initializer_list< T > list) (function) of class Rodin::Geometry::Euclidean::Line2D is not documented.
-src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member isHorizontal() const (function) of class Rodin::Geometry::Euclidean::Line2D is not documented.
-src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member isVertical() const (function) of class Rodin::Geometry::Euclidean::Line2D is not documented.
-src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member xIntercept() const (function) of class Rodin::Geometry::Euclidean::Line2D is not documented.
-src/Rodin/Geometry/Euclidean/Line2D.h: warning: Member yIntercept() const (function) of class Rodin::Geometry::Euclidean::Line2D is not documented.
 src/Rodin/Geometry/Euclidean/Point2D.hpp: warning: no matching class member found for 
 src/Rodin/Geometry/Mesh.cpp: warning: no matching class member found for 
 src/Rodin/Geometry/Mesh.cpp: warning: no uniquely matching class member found for 
 src/Rodin/Geometry/MeshBuilder.cpp: warning: no matching class member found for 
 src/Rodin/Geometry/MeshBuilder.cpp: warning: no uniquely matching class member found for 
-src/Rodin/Geometry/Point.h: warning: Member operator+(const Geometry::Point &p, const Math::SpatialVector< Scalar > &v) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/Point.h: warning: Member operator+(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/Point.h: warning: Member operator-(const Geometry::Point &p, const Math::SpatialVector< Scalar > &v) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/Point.h: warning: Member operator-(const Math::SpatialVector< Scalar > &v, const Geometry::Point &p) (function) of namespace Rodin::Geometry is not documented.
-src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase is not documented.
-src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase< Cell, CellIterator > is not documented.
-src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase< Face, FaceIterator > is not documented.
-src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase< Polytope, PolytopeIterator > is not documented.
-src/Rodin/Geometry/PolytopeIterator.h: warning: Member key() const (function) of class Rodin::Geometry::PolytopeIteratorBase< Vertex, VertexIterator > is not documented.
-src/Rodin/Geometry/Shard.h: warning: Member Mode (enumeration) of class Rodin::Geometry::Shard::Builder is not documented.
-src/Rodin/Geometry/Shard.h: warning: Member serialize(Archive &ar, const unsigned int version) (function) of struct Rodin::Geometry::Shard::PolytopeMap is not documented.
-src/Rodin/Geometry/Sharder.h: warning: Compound Rodin::Geometry::SharderBase is not documented.
-src/Rodin/Geometry/Sharder.h: warning: Member getContext() const (function) of class Rodin::Geometry::SharderBase is not documented.
-src/Rodin/Geometry/Sharder.h: warning: Member getShards() (function) of class Rodin::Geometry::SharderBase is not documented.
-src/Rodin/Geometry/Sharder.h: warning: Member getShards() const (function) of class Rodin::Geometry::SharderBase is not documented.
-src/Rodin/Geometry/Sharder.h: warning: Member shard(Partitioner &partitioner) (function) of class Rodin::Geometry::SharderBase is not documented.
 src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member HolzapfelReducedLaw(const Parameters &params=Parameters()) (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
 src/Rodin/Heart/CCMLC2014/HolzapfelReducedLaw.h: warning: Member getParameters() const noexcept (function) of class Rodin::Heart::HolzapfelReducedLaw is not documented.
 src/Rodin/Heart/CCMLC2014/Model/State.h: warning: Member distalLength (variable) of struct Rodin::Heart::CCMLC2014::Model::InputT is not documented.

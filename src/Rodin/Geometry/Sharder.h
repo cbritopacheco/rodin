@@ -18,6 +18,15 @@
 
 namespace Rodin::Geometry
 {
+  /**
+   * @brief Base implementation for decomposing a partitioned mesh into shards.
+   *
+   * Given a mesh partitioner, this class constructs one local Shard per
+   * partition, including owned entities, shared entities, ghosts, owners, and
+   * halo metadata.
+   *
+   * @tparam Context Execution context associated with the produced shards.
+   */
   template <class Context>
   class SharderBase
   {
@@ -33,6 +42,11 @@ namespace Rodin::Geometry
         : m_context(context)
       {};
 
+      /**
+       * @brief Builds shards from a mesh partitioner.
+       * @param[in] partitioner Partitioner assigning each cell to a shard.
+       * @returns Reference to this sharder.
+       */
       SharderBase& shard(Partitioner& partitioner)
       {
         m_shards.clear();
@@ -162,16 +176,28 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /**
+       * @brief Gets the generated shards.
+       * @returns Mutable reference to the shard collection.
+       */
       auto& getShards()
       {
         return m_shards;
       }
 
+      /**
+       * @brief Gets the generated shards.
+       * @returns Const reference to the shard collection.
+       */
       const auto& getShards() const
       {
         return m_shards;
       }
 
+      /**
+       * @brief Gets the execution context.
+       * @returns Const reference to the sharder context.
+       */
       const ContextType& getContext() const
       {
         return m_context;
