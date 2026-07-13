@@ -132,6 +132,7 @@ namespace Rodin::Variational
    * - **Space Association**: Strong association with underlying finite element space
    */
 
+  /// @cond RODIN_DOXYGEN_INTERNAL
   template <class Derived>
   class GridFunctionBaseReference
     : public FunctionBase<GridFunctionBaseReference<Derived>>
@@ -265,6 +266,7 @@ namespace Rodin::Variational
     private:
       std::reference_wrapper<const Derived> m_ref;
   };
+  /// @endcond
 
   /**
    * @brief Abstract base class for GridFunction objects.
@@ -318,22 +320,22 @@ namespace Rodin::Variational
       /// @brief Coefficient data storage type.
       using DataType = Data;
 
-      /// Range type of value
+      /// @brief Range type returned by point evaluation.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      /// Type of mesh on which the finite element space is built
+      /// @brief Type of mesh on which the finite element space is built.
       using MeshType = Geometry::Mesh<Context::Local>;
 
-      /// Represents the Context of the P1 space
+      /// @brief Execution context type for local grid functions.
       using ContextType = Context::Local;
 
-      /// Type of finite element
+      /// @brief Finite element type used by the finite element space.
       using ElementType = typename FormLanguage::Traits<FESType>::ElementType;
 
-      /// Parent class
+      /// @brief Parent CRTP reference type.
       using Parent = GridFunctionBaseReference<Derived>;
 
       static_assert(
@@ -579,6 +581,11 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Saves grid function data to a file.
+       * @param[in] filename Path to the output file
+       * @param[in] fmt File format to write
+       */
       void save(
           const boost::filesystem::path& filename,
           IO::FileFormat fmt) const
@@ -632,7 +639,9 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Gets the interpolated value at the point.
+       * @brief Gets the interpolated value at a geometric point.
+       * @param[in] p Point at which to evaluate the grid function
+       * @returns Interpolated value @f$ u_h(p) @f$
        */
       RangeType getValue(const Geometry::Point& p) const
       {
@@ -673,6 +682,11 @@ namespace Rodin::Variational
         return out;
       }
 
+      /**
+       * @brief Gets the interpolated value at an integration point.
+       * @param[in] ip Integration point carrying a physical point and quadrature context
+       * @returns Interpolated value @f$ u_h(x_q) @f$
+       */
       RangeType getValue(const IntegrationPoint& ip) const
       {
         RangeType out{};
@@ -691,6 +705,11 @@ namespace Rodin::Variational
         return out;
       }
 
+      /**
+       * @brief Interpolates the grid function at a geometric point.
+       * @param[out] res Storage for the interpolated value
+       * @param[in] p Point at which to evaluate the basis expansion
+       */
       constexpr
       void interpolate(RangeType& res, const Geometry::Point& p) const
       {
@@ -713,6 +732,11 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Interpolates the grid function at an integration point.
+       * @param[out] res Storage for the interpolated value
+       * @param[in] ip Integration point used for cached basis evaluation
+       */
       constexpr
       void interpolate(RangeType& res, const IntegrationPoint& ip) const
       {
@@ -733,6 +757,13 @@ namespace Rodin::Variational
         }
       }
 
+      /**
+       * @brief Projects a function on one mesh entity.
+       * @tparam Function Function or expression accepted by the FE pullback
+       * @param[in] p Pair containing the entity dimension and index
+       * @param[in] fn Function to interpolate on the entity
+       * @returns Reference to this grid function
+       */
       template <class Function>
       Derived& project(const std::pair<size_t, Index>& p, const Function& fn)
       {
@@ -748,18 +779,36 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this);
       }
 
+      /**
+       * @brief Sets all DOFs attached to one mesh entity from a constant value.
+       * @param[in] p Pair containing the entity dimension and index
+       * @param[in] v Value to interpolate on the entity
+       * @returns Reference to this grid function
+       */
       Derived& project(const std::pair<size_t, Index>& p, const RangeType& v)
       {
         return static_cast<Derived&>(*this).project(
             p, [&](RangeType& out, const Geometry::Point&){ out = v; });
       }
 
+      /**
+       * @brief Assigns this grid function from a function or expression.
+       * @tparam T Function, expression, or constant accepted by project()
+       * @param[in] v Source object to interpolate
+       * @returns Reference to this grid function
+       */
       template <class T>
       Derived& operator=(const T& v)
       {
         return static_cast<Derived&>(*this).project(v);
       }
 
+      /**
+       * @brief Projects a source on all cells.
+       * @tparam T Function, expression, or constant source type
+       * @param[in] fn Source to interpolate
+       * @returns Reference to this grid function
+       */
       template <class T>
       Derived& project(const T& fn)
       {
@@ -767,6 +816,13 @@ namespace Rodin::Variational
             Geometry::Region::Cells, fn, [](const Geometry::Polytope&) { return true; });
       }
 
+      /**
+       * @brief Projects a source on a geometric region.
+       * @tparam T Function, expression, or constant source type
+       * @param[in] region Region over which to interpolate
+       * @param[in] fn Source to interpolate
+       * @returns Reference to this grid function
+       */
       template <class T>
       Derived& project(const Geometry::Region& region, const T& fn)
       {
@@ -774,6 +830,14 @@ namespace Rodin::Variational
             [](const Geometry::Polytope&) { return true; });
       }
 
+      /**
+       * @brief Projects a source on entities of a region with one attribute.
+       * @tparam T Function, expression, or constant source type
+       * @param[in] region Region over which to interpolate
+       * @param[in] fn Source to interpolate
+       * @param[in] attr Attribute selecting entities in the region
+       * @returns Reference to this grid function
+       */
       template <class T>
       Derived& project(
           const Geometry::Region& region, const T& fn, const Geometry::Attribute& attr)
@@ -783,6 +847,14 @@ namespace Rodin::Variational
             { return polytope.getAttribute() == attr; });
       }
 
+      /**
+       * @brief Projects a source on entities of a region with selected attributes.
+       * @tparam T Function, expression, or constant source type
+       * @param[in] region Region over which to interpolate
+       * @param[in] fn Source to interpolate
+       * @param[in] attrs Accepted entity attributes; an empty set accepts all
+       * @returns Reference to this grid function
+       */
       template <class T>
       Derived& project(
           const Geometry::Region& region,
@@ -793,6 +865,14 @@ namespace Rodin::Variational
             { return attrs.size() == 0 || attrs.count(polytope.getAttribute()); });
       }
 
+      /**
+       * @brief Projects a constant value over a filtered region.
+       * @tparam Pred Predicate type selecting mesh entities
+       * @param[in] region Region over which to interpolate
+       * @param[in] fn Constant value to interpolate
+       * @param[in] pred Predicate deciding whether an entity is included
+       * @returns Reference to this grid function
+       */
       template <class Pred>
       Derived& project(const Geometry::Region& region, const RangeType& fn, const Pred& pred)
       {
@@ -847,6 +927,10 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).max(unused);
       }
 
+      /**
+       * @brief Returns the index of the smallest coefficient.
+       * @returns Global DOF index attaining min()
+       */
       constexpr
       Index argmin() const
       {
@@ -855,6 +939,10 @@ namespace Rodin::Variational
         return idx;
       }
 
+      /**
+       * @brief Returns the index of the largest coefficient.
+       * @returns Global DOF index attaining max()
+       */
       constexpr
       Index argmax() const
       {
@@ -864,6 +952,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Computes the minimum coefficient and its index.
+       * @param[out] idx Global DOF index attaining the minimum
+       * @returns Minimum coefficient value
        * @note CRTP function to be overriden in Derived class.
        */
       constexpr
@@ -873,6 +964,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Computes the maximum coefficient and its index.
+       * @param[out] idx Global DOF index attaining the maximum
+       * @returns Maximum coefficient value
        * @note CRTP function to be overriden in Derived class.
        */
       constexpr
@@ -882,6 +976,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Accesses a coefficient by global DOF index.
+       * @param[in] global Global DOF index
+       * @returns Mutable reference to the coefficient
        * @note CRTP function to be overriden in Derived class.
        */
       ScalarType& operator[](Index global)
@@ -890,6 +987,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Accesses a coefficient by global DOF index.
+       * @param[in] global Global DOF index
+       * @returns Const reference to the coefficient
        * @note CRTP function to be overriden in Derived class.
        */
       const ScalarType& operator[](Index global) const
@@ -898,6 +998,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Adds a scalar to every scalar coefficient.
+       * @param[in] rhs Scalar increment
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator+=(const ScalarType& rhs)
@@ -906,6 +1009,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Subtracts a scalar from every scalar coefficient.
+       * @param[in] rhs Scalar decrement
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator-=(const ScalarType& rhs)
@@ -914,6 +1020,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Multiplies every coefficient by a scalar.
+       * @param[in] rhs Scalar factor
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator*=(const ScalarType& rhs)
@@ -922,6 +1031,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Divides every coefficient by a scalar.
+       * @param[in] rhs Scalar divisor
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator/=(const ScalarType& rhs)
@@ -930,6 +1042,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Adds another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator+=(const GridFunctionBase& rhs)
@@ -938,6 +1053,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Subtracts another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator-=(const GridFunctionBase& rhs)
@@ -946,6 +1064,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Multiplies by another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator*=(const GridFunctionBase& rhs)
@@ -954,6 +1075,9 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Divides by another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
        * @note CRTP function to be overriden in Derived class.
        */
       Derived& operator/=(const GridFunctionBase& rhs)
@@ -961,11 +1085,20 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).operator/=(rhs);
       }
 
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param[in] geom Entity whose finite element order is requested
+       * @returns Polynomial order when available
+       */
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const
       {
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
+      /**
+       * @brief Gets the optional display name.
+       * @returns Name when one has been assigned
+       */
       Optional<StringView> getName() const override
       {
         if (m_name)
@@ -974,6 +1107,11 @@ namespace Rodin::Variational
           return std::nullopt;
       }
 
+      /**
+       * @brief Sets the optional display name.
+       * @param[in] name New grid function name
+       * @returns Reference to this grid function base
+       */
       GridFunctionBase& setName(const std::string& name)
       {
         m_name = name;
@@ -1091,6 +1229,10 @@ namespace Rodin::Variational
       using Parent::min;
       using Parent::max;
 
+      /**
+       * @brief Constructs a zero grid function on a finite element space.
+       * @param[in] fes Finite element space that owns the DOF layout
+       */
       GridFunction(const FESType& fes)
         : Parent(fes)
       {
@@ -1099,16 +1241,29 @@ namespace Rodin::Variational
         data.setZero();
       }
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Grid function to copy
+       */
       GridFunction(const GridFunction& other)
         : Parent(other),
           m_data(other.m_data)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Grid function to move from
+       */
       GridFunction(GridFunction&& other)
         : Parent(std::move(other)),
           m_data(std::move(other.m_data))
       {}
 
+      /**
+       * @brief Move assignment operator.
+       * @param[in] other Grid function to move from
+       * @returns Reference to this grid function
+       */
       GridFunction& operator=(GridFunction&& other)
       {
         Parent::operator=(std::move(other));
@@ -1116,6 +1271,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Copy assignment operator.
+       * @param[in] other Grid function to copy
+       * @returns Reference to this grid function
+       */
       GridFunction& operator=(const GridFunction& other)
       {
         if (this != &other)
@@ -1128,28 +1288,53 @@ namespace Rodin::Variational
 
       virtual ~GridFunction() = default;
 
+      /**
+       * @brief Computes the minimum coefficient and its index.
+       * @param[out] idx Global DOF index attaining the minimum
+       * @returns Minimum coefficient value
+       */
       constexpr
       ScalarType min(Index& idx) const
       {
         return this->getData().minCoeff(&idx);
       }
 
+      /**
+       * @brief Computes the maximum coefficient and its index.
+       * @param[out] idx Global DOF index attaining the maximum
+       * @returns Maximum coefficient value
+       */
       constexpr
       ScalarType max(Index& idx) const
       {
         return this->getData().maxCoeff(&idx);
       }
 
+      /**
+       * @brief Accesses a coefficient by global DOF index.
+       * @param[in] global Global DOF index
+       * @returns Mutable reference to the coefficient
+       */
       ScalarType& operator[](Index global)
       {
         return this->getData()[global];
       }
 
+      /**
+       * @brief Accesses a coefficient by global DOF index.
+       * @param[in] global Global DOF index
+       * @returns Const reference to the coefficient
+       */
       const ScalarType& operator[](Index global) const
       {
         return this->getData()[global];
       }
 
+      /**
+       * @brief Adds a scalar to every scalar coefficient.
+       * @param[in] rhs Scalar increment
+       * @returns Reference to this grid function
+       */
       GridFunction& operator+=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
@@ -1157,6 +1342,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts a scalar from every scalar coefficient.
+       * @param[in] rhs Scalar decrement
+       * @returns Reference to this grid function
+       */
       GridFunction& operator-=(const ScalarType& rhs)
       {
         static_assert(std::is_same_v<RangeType, ScalarType>);
@@ -1164,12 +1354,22 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Multiplies every coefficient by a scalar.
+       * @param[in] rhs Scalar factor
+       * @returns Reference to this grid function
+       */
       GridFunction& operator*=(const ScalarType& rhs)
       {
         this->getData() *= rhs;
         return *this;
       }
 
+      /**
+       * @brief Divides every coefficient by a scalar.
+       * @param[in] rhs Scalar divisor
+       * @returns Reference to this grid function
+       */
       GridFunction& operator/=(const ScalarType& rhs)
       {
         auto& data = this->getData();
@@ -1177,6 +1377,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Adds another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
+       */
       GridFunction& operator+=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
@@ -1184,6 +1389,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Subtracts another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
+       */
       GridFunction& operator-=(const GridFunction& rhs)
       {
         assert(&this->getFiniteElementSpace() == &rhs.getFiniteElementSpace());
@@ -1191,18 +1401,37 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Multiplies by another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
+       */
       GridFunction& operator*=(const GridFunction& rhs)
       {
         this->getData().array() *= rhs.getData().array();
         return *this;
       }
 
+      /**
+       * @brief Divides by another grid function coefficient-wise.
+       * @param[in] rhs Grid function defined on the same finite element space
+       * @returns Reference to this grid function
+       */
       GridFunction& operator/=(const GridFunction& rhs)
       {
         this->getData().array() /= rhs.getData().array();
         return *this;
       }
 
+      /**
+       * @brief Projects a source over a filtered region.
+       * @tparam Function Function, expression, or constant source type
+       * @tparam Pred Predicate type selecting mesh entities
+       * @param[in] region Region over which to interpolate
+       * @param[in] v Source to interpolate
+       * @param[in] pred Predicate deciding whether an entity is included
+       * @returns Reference to this grid function
+       */
       template <class Function, class Pred>
       GridFunction& project(
           const Geometry::Region& region, const Function& v, const Pred& pred)
@@ -1246,6 +1475,12 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Copies DOF data from a coefficient vector.
+       * @param[in] data Source coefficient vector
+       * @param[in] offset Starting offset in the source vector
+       * @returns Reference to this grid function
+       */
       GridFunction& setData(const DataType& data, size_t offset = 0)
       {
         const auto sz = this->getFiniteElementSpace().getSize();
@@ -1254,18 +1489,31 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Gets the mutable coefficient vector.
+       * @returns Reference to the dense coefficient vector
+       */
       constexpr
       auto& getData()
       {
         return m_data;
       }
 
+      /**
+       * @brief Gets the coefficient vector.
+       * @returns Const reference to the dense coefficient vector
+       */
       constexpr
       const DataType& getData() const
       {
         return m_data;
       }
 
+      /**
+       * @brief Returns the polynomial order used on a mesh entity.
+       * @param[in] polytope Entity whose finite element order is requested
+       * @returns Polynomial order when available
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
@@ -1277,10 +1525,12 @@ namespace Rodin::Variational
       DataType m_data;
   };
 
+  /// @brief Deduces the default dense-vector grid function type.
   template <class FES>
   GridFunction(const FES& fes)
     -> GridFunction<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>;
 
+  /// @brief Deduces a grid function type from a finite element space and data object.
   template <class FES, class Data>
   GridFunction(const FES& fes, Data&& data)
     -> GridFunction<FES, Data>;

@@ -23,11 +23,13 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Traits for the CRTP base of real-valued functions.
   template <class Derived>
   struct Traits<Variational::RealFunctionBase<Derived>>
   {
     /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Derived CRTP function type.
       using DerivedType = Derived;
   };
 }
@@ -111,6 +113,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /**
+       * @brief Evaluates the function at an integration point.
+       * @param[in] ip Integration point at which to evaluate
+       * @returns Real value at the integration point
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -134,6 +141,11 @@ namespace Rodin::Variational
         return static_cast<Derived&>(*this).traceOf(args...);
       }
 
+      /**
+       * @brief Returns the polynomial order on a mesh entity.
+       * @param[in] geom Entity whose local polynomial order is requested
+       * @returns Polynomial order when known
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -149,6 +161,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup RealFunctionSpecializations
+   * @brief Real-valued function that wraps another real function expression.
    */
   template <class NestedDerived>
   class RealFunction<FunctionBase<NestedDerived>> final
@@ -161,32 +174,59 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = RealFunctionBase<FunctionBase<NestedDerived>>;
 
+      /**
+       * @brief Constructs a real function wrapper around an existing expression.
+       * @param[in] nested Real-valued expression to clone
+       */
       RealFunction(const RealFunctionBase<NestedDerived>& nested)
         : m_nested(nested.copy())
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       RealFunction(const RealFunction& other)
         : Parent(other),
           m_nested(other.m_nested->copy())
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       RealFunction(RealFunction&& other)
         : Parent(std::move(other)),
           m_nested(std::move(other.m_nested))
       {}
 
+      /**
+       * @brief Evaluates the wrapped function at a point.
+       * @param[in] v Point at which to evaluate
+       * @returns Wrapped function value
+       */
       constexpr
       auto getValue(const Geometry::Point& v) const
       {
         return m_nested->getValue(v);
       }
 
+      /**
+       * @brief Evaluates the wrapped function at an integration point.
+       * @param[in] ip Integration point at which to evaluate
+       * @returns Wrapped function value
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
         return m_nested->getValue(ip);
       }
 
+      /**
+       * @brief Returns the wrapped function order on a mesh entity.
+       * @param[in] geom Entity whose local polynomial order is requested
+       * @returns Polynomial order when known
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -231,28 +271,48 @@ namespace Rodin::Variational
         : m_x(x)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       RealFunction(const RealFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       RealFunction(RealFunction&& other)
         : Parent(std::move(other)),
           m_x(std::move(other.m_x))
       {}
 
+      /**
+       * @brief Evaluates the constant function at a point.
+       * @returns Constant real value
+       */
       constexpr
       Real getValue(const Geometry::Point&) const
       {
         return m_x;
       }
 
+      /**
+       * @brief Leaves constant functions unchanged on trace domains.
+       * @returns Reference to this function
+       */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
       }
 
+      /**
+       * @brief Returns the polynomial order of a constant function.
+       * @returns Zero polynomial order
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -273,6 +333,10 @@ namespace Rodin::Variational
    */
   RealFunction(Real) -> RealFunction<Real>;
 
+  /**
+   * @ingroup RealFunctionSpecializations
+   * @brief Represents a constant scalar function initialized from an Integer.
+   */
   template <>
   class RealFunction<Integer> final
     : public RealFunctionBase<RealFunction<Integer>>
@@ -292,28 +356,48 @@ namespace Rodin::Variational
         : m_x(x)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       RealFunction(const RealFunction& other)
         : Parent(other),
           m_x(other.m_x)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       RealFunction(RealFunction&& other)
         : Parent(std::move(other)),
           m_x(std::move(other.m_x))
       {}
 
+      /**
+       * @brief Evaluates the constant function at a point.
+       * @returns Constant value converted to Real
+       */
       constexpr
       Real getValue(const Geometry::Point&) const
       {
         return m_x;
       }
 
+      /**
+       * @brief Leaves constant functions unchanged on trace domains.
+       * @returns Reference to this function
+       */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
       }
 
+      /**
+       * @brief Returns the polynomial order of a constant function.
+       * @returns Zero polynomial order
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -329,6 +413,7 @@ namespace Rodin::Variational
       const Integer m_x;
   };
 
+  /// @brief CTAD for integer constants.
   RealFunction(Integer) -> RealFunction<Integer>;
 
   /**
@@ -347,26 +432,48 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = RealFunctionBase<RealFunction<F>>;
 
+      /**
+       * @brief Constructs a real function from a callable.
+       * @param[in] f Callable returning a Real from a Geometry::Point
+       */
       RealFunction(F f)
         : m_f(f)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       RealFunction(const RealFunction& other)
         : Parent(other),
           m_f(other.m_f)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       RealFunction(RealFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f))
       {}
 
+      /**
+       * @brief Evaluates the callable at a point.
+       * @param[in] v Point at which to evaluate
+       * @returns Callable value
+       */
       constexpr
       Real getValue(const Geometry::Point& v) const
       {
         return m_f(v);
       }
 
+      /**
+       * @brief Evaluates the callable at an integration point.
+       * @param[in] ip Integration point at which to evaluate
+       * @returns Callable value
+       */
       constexpr
       Real getValue(const IntegrationPoint& ip) const
       {
@@ -376,12 +483,20 @@ namespace Rodin::Variational
           return m_f(ip.getPoint());
       }
 
+      /**
+       * @brief Leaves callable functions unchanged on trace domains.
+       * @returns Reference to this function
+       */
       template <class ... Args>
       RealFunction& traceOf(Args&&... args) noexcept
       {
         return *this;
       }
 
+      /**
+       * @brief Returns the polynomial order of the callable.
+       * @returns std::nullopt because arbitrary callables have unknown order
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
