@@ -60,6 +60,7 @@
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <
@@ -1311,4 +1312,5 @@ namespace Rodin::Variational
     -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
+/// @endcond
 #endif

@@ -5,6 +5,8 @@
 # Shrink by fixing warnings, regenerate with
 #   python3 dev/check_doxygen_warnings.py --update-baseline
 # Never grow this file to silence a new warning.
+doc/Guides/InterfacesDG.dox: warning: unable to resolve reference to 'Rodin::Variational::BoundaryNormal' for \ref command
+doc/Guides/InterfacesDG.dox: warning: unable to resolve reference to 'Rodin::Variational::FaceNormal' for \ref command
 doc/Namespaces.dox: warning: No matching directory found for command \dir Rodin/Elasticity/
 doc/Namespaces.dox: warning: No matching directory found for command \dir Rodin/Location/
 doc/Namespaces.dox: warning: No matching directory found for command \dir Rodin/Plot/
@@ -29,14 +31,6 @@ doc/Namespaces.dox: warning: unable to resolve reference to 'Rodin::PETSc::Math'
 doc/Namespaces.dox: warning: unable to resolve reference to 'Rodin::PETSc::Solver' for \ref command
 doc/Namespaces.dox: warning: unable to resolve reference to 'Rodin::PETSc::Variational' for \ref command
 src/Rodin/Variational/AND.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::AND< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Abs.h: warning: Member Abs(const FunctionBase< NestedDerived > &) -> Abs< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Abs.h: warning: Member abs(const FunctionBase< NestedDerived > &op) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Abs.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Abs< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Average.h: warning: Member Average(Average &&other) (function) of class Rodin::Variational::Average< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Average.h: warning: Member Average(const Average &other) (function) of class Rodin::Variational::Average< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Average.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Average< FunctionBase< FunctionDerived > > is not documented.
-src/Rodin/Variational/Average.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Average< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Average.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::Average< FunctionBase< FunctionDerived > > is not documented.
 src/Rodin/Variational/BilinearFormIntegrator.h: warning: Compound Rodin::Variational::GlobalBilinearFormIntegratorBase is not documented.
 src/Rodin/Variational/BilinearFormIntegrator.h: warning: Compound Rodin::Variational::LocalBilinearFormIntegratorBase is not documented.
 src/Rodin/Variational/BilinearFormIntegrator.h: warning: Member GlobalBilinearFormIntegratorBase(const GlobalBilinearFormIntegratorBase< OtherNumber > &other) (function) of class Rodin::Variational::GlobalBilinearFormIntegratorBase is not documented.
@@ -58,74 +52,14 @@ src/Rodin/Variational/BooleanFunction.h: warning: Member BooleanFunction(const B
 src/Rodin/Variational/BooleanFunction.h: warning: Member getValue(const Geometry::Point &) const (function) of class Rodin::Variational::BooleanFunction< Boolean > is not documented.
 src/Rodin/Variational/BooleanFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::BooleanFunctionBase is not documented.
 src/Rodin/Variational/BooleanFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::BooleanFunctionBase< BooleanFunction< Boolean > > is not documented.
-src/Rodin/Variational/BooleanFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::BooleanFunctionBase< GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > > is not documented.
-src/Rodin/Variational/BooleanFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::BooleanFunctionBase< LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > > is not documented.
-src/Rodin/Variational/BooleanFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::BooleanFunctionBase< LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > > is not documented.
 src/Rodin/Variational/BooleanFunction.h: warning: Member traceOf(const Args &... args) (function) of class Rodin::Variational::BooleanFunction< Boolean > is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(BoundaryIntegral &&other) (function) of class Rodin::Variational::BoundaryIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const BoundaryIntegral &other) (function) of class Rodin::Variational::BoundaryIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > &) -> BoundaryIntegral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const FunctionBase< LHSDerived > &, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &) -> BoundaryIntegral< ShapeFunctionBase< Dot< FunctionBase< LHSDerived >, ShapeFunctionBase< RHSDerived, FES, TestSpace > >, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const FunctionBase< LHSDerived > &lhs, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &rhs) (function) of class Rodin::Variational::BoundaryIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const IntegrandType &integrand) (function) of class Rodin::Variational::BoundaryIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace > &, const ShapeFunctionBase< RHSDerived, TestFES, TestSpace > &) -> BoundaryIntegral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/BoundaryIntegral.h: warning: Member BoundaryIntegral(const ShapeFunctionBase< NestedDerived, FES, TestSpace > &) -> BoundaryIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member BoundaryNormal(BoundaryNormal &&other) (function) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member BoundaryNormal(const BoundaryNormal &other) (function) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member SpatialVectorType (typedef) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member getDimension() const (function) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member getOrder(const Geometry::Polytope &) const noexcept (function) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member interpolate(Math::SpatialVector< ScalarType > &res, const Geometry::Point &p) const (function) of class Rodin::Variational::BoundaryNormal is not documented.
-src/Rodin/Variational/BoundaryNormal.h: warning: Member interpolate(Math::Vector< ScalarType > &res, const Geometry::Point &p) const (function) of class Rodin::Variational::BoundaryNormal is not documented.
 src/Rodin/Variational/ComplexFunction.h: warning: Compound Rodin::Variational::ComplexFunction< Integer > is not documented.
 src/Rodin/Variational/ComplexFunction.h: warning: Compound Rodin::Variational::ComplexFunction< Real > is not documented.
-src/Rodin/Variational/Component.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Component< Variational::ShapeFunctionBase< OperandDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(Component &&other) (function) of class Rodin::Variational::Component< FunctionBase< OperandDerived >, size_t > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(Component &&other) (function) of class Rodin::Variational::Component< FunctionBase< OperandDerived >, size_t, size_t > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(Component &&other) (function) of class Rodin::Variational::Component< GridFunction< FES, Data > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(Component &&other) (function) of class Rodin::Variational::Component< ShapeFunctionBase< OperandDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(const Component &other) (function) of class Rodin::Variational::Component< FunctionBase< OperandDerived >, size_t > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(const Component &other) (function) of class Rodin::Variational::Component< FunctionBase< OperandDerived >, size_t, size_t > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(const Component &other) (function) of class Rodin::Variational::Component< GridFunction< FES, Data > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member Component(const Component &other) (function) of class Rodin::Variational::Component< ShapeFunctionBase< OperandDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member SpaceType (variable) of class Rodin::Variational::Component< ShapeFunctionBase< OperandDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Component< Variational::ShapeFunctionBase< OperandDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::Component< FunctionBase< OperandDerived >, size_t > is not documented.
-src/Rodin/Variational/Component.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::Component< FunctionBase< OperandDerived >, size_t, size_t > is not documented.
-src/Rodin/Variational/Component.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::Component< GridFunction< FES, Data > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::Component< ShapeFunctionBase< OperandDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Component.h: warning: Member setIntegrationPoint(const IntegrationPoint &ip) (function) of class Rodin::Variational::Component< ShapeFunctionBase< OperandDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Conjugate< Variational::ShapeFunctionBase< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Member Conjugate(Conjugate &&other) (function) of class Rodin::Variational::Conjugate< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Member Conjugate(const Conjugate &other) (function) of class Rodin::Variational::Conjugate< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Member SpaceType (variable) of class Rodin::Variational::Conjugate< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Conjugate< Variational::ShapeFunctionBase< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Member getOrder(const Geometry::Polytope &geometry) const noexcept (function) of class Rodin::Variational::Conjugate< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Conjugate.h: warning: Member getOrder(const Geometry::Polytope &geometry) const noexcept (function) of class Rodin::Variational::Conjugate< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
 src/Rodin/Variational/Cosh.h: warning: Member Cosh(const FunctionBase< NestedDerived > &) -> Cosh< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Cosh.h: warning: Member getOrder(const Geometry::Polytope &g) const (function) of class Rodin::Variational::Cosh< FunctionBase< NestedDerived > > is not documented.
 src/Rodin/Variational/Cosine.h: warning: Member Cos(const FunctionBase< NestedDerived > &) -> Cos< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Cosine.h: warning: Member getOrder(const Geometry::Polytope &g) const (function) of class Rodin::Variational::Cos< FunctionBase< NestedDerived > > is not documented.
 src/Rodin/Variational/DenseProblem.h: warning: Member DenseProblem(U &u, V &v) -> DenseProblem< Math::LinearSystem< Math::Matrix< typename FormLanguage::Traits< typename FormLanguage::Traits< U >::FESType > ::ScalarType >, Math::Vector< typename FormLanguage::Traits< typename FormLanguage::Traits< V >::FESType > ::ScalarType > >, U, V > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Derivative.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Derivative< Variational::ShapeFunction< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Compound Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Compound Rodin::Variational::DerivativeBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member Derivative(Derivative &&other) (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member Derivative(const Derivative &other) (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member Derivative(size_t i, const OperandType &u) (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member Derivative(size_t i, const ShapeFunction< NestedDerived, FES, SpaceType > &u) -> Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member DerivativeBase(const OperandType &u) (function) of class Rodin::Variational::DerivativeBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member Space (variable) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Derivative< Variational::ShapeFunction< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getBasis(size_t local) const (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getDOFs(const Geometry::Polytope &element) const (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getDimension() const (function) of class Rodin::Variational::DerivativeBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getIntegrationPoint() const (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getLeaf() const (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getOperand() const (function) of class Rodin::Variational::Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member getOperand() const (function) of class Rodin::Variational::DerivativeBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Derivative.h: warning: Member interpolate(ScalarType &out, const IntegrationPoint &ip) const (function) of class Rodin::Variational::DerivativeBase< GridFunction< FES, Data >, Derived > is not documented.
 src/Rodin/Variational/DirichletBC.h: warning: Compound Rodin::Variational::DirichletBC< TrialFunction< Solution, FES1 >, ShapeFunctionBase< Derived2, FES2, Sp > >::Defect is not documented.
 src/Rodin/Variational/DirichletBC.h: warning: Compound Rodin::Variational::DirichletBC< TrialFunction< Solution, FES1 >, ShapeFunctionBase< Derived2, FES2, Sp > >::DefectBase is not documented.
 src/Rodin/Variational/DirichletBC.h: warning: Member AssemblyType (typedef) of class Rodin::Variational::DirichletBC< TrialFunction< Solution, FES >, FunctionBase< ValueDerived > > is not documented.
@@ -152,38 +86,6 @@ src/Rodin/Variational/DirichletBC.h: warning: Member getValue(const Geometry::Po
 src/Rodin/Variational/DirichletBC.h: warning: Member on(A1 a1, A2 a2, As... as) (function) of class Rodin::Variational::DirichletBC< TrialFunction< Solution, FES >, FunctionBase< ValueDerived > > is not documented.
 src/Rodin/Variational/Div.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::DivBase< GridFunction< FES, Data >, Derived > is not documented.
 src/Rodin/Variational/Div.h: warning: Member interpolate(ScalarType &out, const IntegrationPoint &ip) const (function) of class Rodin::Variational::DivBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Division.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Division< Variational::ShapeFunctionBase< LHSDerived, FES, Space >, Variational::FunctionBase< RHSDerived > > > is not documented.
-src/Rodin/Variational/Division.h: warning: Compound Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member Division(Division &&other) (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member Division(const Division &other) (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member Division(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member Division(const ShapeFunctionBase< LHSDerived, FES, Space > &, const FunctionBase< RHSDerived > &) -> Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Division.h: warning: Member SpaceType (variable) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Division< Variational::ShapeFunctionBase< LHSDerived, FES, Space >, Variational::FunctionBase< RHSDerived > > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getBasis(size_t local) const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getDOFs(const Geometry::Polytope &element) const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getFiniteElementSpace() const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getIntegrationPoint() const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getLHS() const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getLeaf() const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getOrder(const Geometry::Polytope &polytope) const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Division< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member getRHS() const (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Division.h: warning: Member operator/(const ShapeFunctionBase< LHSDerived, FES, Space > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Division.h: warning: Member setIntegrationPoint(const IntegrationPoint &ip) (function) of class Rodin::Variational::Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member EQ(EQ &&other) (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member EQ(const EQ &other) (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member EQ(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > (variable) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/EQ.h: warning: Member getLHS() const (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member getRHS() const (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::EQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/EQ.h: warning: Member operator==(Boolean lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/EQ.h: warning: Member operator==(Number lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/EQ.h: warning: Member operator==(const FunctionBase< LHSDerived > &lhs, Boolean rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/EQ.h: warning: Member operator==(const FunctionBase< LHSDerived > &lhs, Number rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/EQ.h: warning: Member operator==(const FunctionBase< LHSDerived > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Exceptions/TestFunctionMismatchException.h: warning: Compound Rodin::Variational::TestFunctionMismatchException is not documented.
 src/Rodin/Variational/Exceptions/TestFunctionMismatchException.h: warning: Member TestFunctionMismatchException(const UPb &uPb) (function) of class Rodin::Variational::TestFunctionMismatchException is not documented.
 src/Rodin/Variational/Exceptions/TrialFunctionMismatchException.h: warning: Compound Rodin::Variational::TrialFunctionMismatchException is not documented.
@@ -191,26 +93,6 @@ src/Rodin/Variational/Exceptions/TrialFunctionMismatchException.h: warning: Memb
 src/Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h: warning: Compound Rodin::Variational::UndeterminedTraceDomainException is not documented.
 src/Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h: warning: Member UndeterminedTraceDomainException(const T &, const FuncName &, const std::pair< size_t, Index > &, Iterator, Iterator) -> UndeterminedTraceDomainException< T, FuncName > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h: warning: Member UndeterminedTraceDomainException(const T &cls, const FuncName &funcName, const std::pair< size_t, Index > &p, Iterator begin, Iterator end) (function) of class Rodin::Variational::UndeterminedTraceDomainException is not documented.
-src/Rodin/Variational/Exp.h: warning: Member Exp(const FunctionBase< NestedDerived > &) -> Exp< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Exp.h: warning: Member exp(const FunctionBase< NestedDerived > &op) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Exp.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Exp< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/F.h: warning: Member getOrder(const Geometry::Polytope &polytope) const (function) of class Rodin::Variational::F::X is not documented.
-src/Rodin/Variational/F.h: warning: Member getOrder(const Geometry::Polytope &polytope) const (function) of class Rodin::Variational::F::Y is not documented.
-src/Rodin/Variational/F.h: warning: Member getOrder(const Geometry::Polytope &polytope) const (function) of class Rodin::Variational::F::Z is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(FaceIntegral &&other) (function) of class Rodin::Variational::FaceIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > &) -> FaceIntegral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const FaceIntegral &other) (function) of class Rodin::Variational::FaceIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const FunctionBase< LHSDerived > &, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &) -> FaceIntegral< ShapeFunctionBase< Dot< FunctionBase< LHSDerived >, ShapeFunctionBase< RHSDerived, FES, TestSpace > >, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const FunctionBase< LHSDerived > &lhs, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &rhs) (function) of class Rodin::Variational::FaceIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const IntegrandType &integrand) (function) of class Rodin::Variational::FaceIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace > &, const ShapeFunctionBase< RHSDerived, TestFES, TestSpace > &) -> FaceIntegral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/FaceIntegral.h: warning: Member FaceIntegral(const ShapeFunctionBase< NestedDerived, FES, TestSpace > &) -> FaceIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/FaceNormal.h: warning: Member FaceNormal(FaceNormal &&other) (function) of class Rodin::Variational::FaceNormal is not documented.
-src/Rodin/Variational/FaceNormal.h: warning: Member FaceNormal(const FaceNormal &other) (function) of class Rodin::Variational::FaceNormal is not documented.
-src/Rodin/Variational/FaceNormal.h: warning: Member SpatialVectorType (typedef) of class Rodin::Variational::FaceNormal is not documented.
-src/Rodin/Variational/FaceNormal.h: warning: Member getDimension() const (function) of class Rodin::Variational::FaceNormal is not documented.
-src/Rodin/Variational/FaceNormal.h: warning: Member getOrder(const Geometry::Polytope &) const noexcept (function) of class Rodin::Variational::FaceNormal is not documented.
-src/Rodin/Variational/FaceNormal.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::FaceNormal is not documented.
 src/Rodin/Variational/FiniteElementSpace.h: warning: Member FiniteElementSpace(FiniteElementSpace &&)=default (function) of class Rodin::Variational::FiniteElementSpace is not documented.
 src/Rodin/Variational/FiniteElementSpace.h: warning: Member FiniteElementSpace(const FiniteElementSpace &)=default (function) of class Rodin::Variational::FiniteElementSpace is not documented.
 src/Rodin/Variational/FiniteElementSpace.h: warning: Member FiniteElementSpaceBase(FiniteElementSpaceBase &&)=default (function) of class Rodin::Variational::FiniteElementSpaceBase is not documented.
@@ -241,50 +123,31 @@ src/Rodin/Variational/FiniteElementSpace.h: warning: Member operator=(const Fini
 src/Rodin/Variational/FiniteElementSpace.h: warning: Member operator=(const FiniteElementSpacePullbackBase &)=default (function) of class Rodin::Variational::FiniteElementSpacePullbackBase is not documented.
 src/Rodin/Variational/FiniteElementSpace.h: warning: Member operator=(const FiniteElementSpacePushforwardBase &)=default (function) of class Rodin::Variational::FiniteElementSpacePushforwardBase is not documented.
 src/Rodin/Variational/FiniteElementSpace.h: warning: Member operator==(const FiniteElementSpaceBase &other) const (function) of class Rodin::Variational::FiniteElementSpaceBase is not documented.
-src/Rodin/Variational/Flow.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Flow< Variational::ShapeFunctionBase< Derived, FES, Variational::TestSpace >, VectorField, Step, BoundaryPolicy > > is not documented.
-src/Rodin/Variational/Flow.h: warning: Member Flow(Flow &&other) (function) of class Rodin::Variational::Flow< FunctionBase< Derived >, VectorField, Step, BoundaryPolicy > is not documented.
-src/Rodin/Variational/Flow.h: warning: Member Flow(const Flow &other) (function) of class Rodin::Variational::Flow< FunctionBase< Derived >, VectorField, Step, BoundaryPolicy > is not documented.
-src/Rodin/Variational/Flow.h: warning: Member Flow(const Real &, const FunctionBase< Derived > &, Velocity &&) -> Flow< FunctionBase< Derived >, Velocity, Math::RungeKutta::RK4, DefaultBoundaryPolicy > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Flow.h: warning: Member Flow(const Real &, const FunctionBase< Derived > &, Velocity &&, Step &&) -> Flow< FunctionBase< Derived >, Velocity, Step, DefaultBoundaryPolicy > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Flow.h: warning: Member Flow(const Real &, const FunctionBase< Derived > &, Velocity &&, Step &&, BBP &&) -> Flow< FunctionBase< Derived >, Velocity, Step, BBP > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Flow.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Flow< Variational::ShapeFunctionBase< Derived, FES, Variational::TestSpace >, VectorField, Step, BoundaryPolicy > > is not documented.
-src/Rodin/Variational/Flow.h: warning: Member getLeaf() const (function) of class Rodin::Variational::Flow< FunctionBase< Derived >, VectorField, Step, BoundaryPolicy > is not documented.
-src/Rodin/Variational/Flow.h: warning: Member getOrder(const Geometry::Polytope &) const (function) of class Rodin::Variational::Flow< FunctionBase< Derived >, VectorField, Step, BoundaryPolicy > is not documented.
 src/Rodin/Variational/ForwardDecls.h: warning: Compound Rodin::Variational::GlobalBilinearFormIntegratorBase is not documented.
 src/Rodin/Variational/ForwardDecls.h: warning: Compound Rodin::Variational::LocalBilinearFormIntegratorBase is not documented.
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'AbsSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'BoundaryIntegralSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'DivisionSpecializations' for \ref command
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'DotSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'EQSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'FaceIntegralSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'GEQSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'GTSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'GradSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'IntegralSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'InterfaceIntegralSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'LEQSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'LTSpecializations' for \ref command
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'MultSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'ORSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'PowSpecializations' for \ref command
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'SumSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'TraceSpecializations' for \ref command
+src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'TransposeSpecializations' for \ref command
 src/Rodin/Variational/ForwardDecls.h: warning: unable to resolve reference to 'UnaryMinusSpecializations' for \ref command
 src/Rodin/Variational/Frobenius.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Frobenius< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Compound Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member GEQ(GEQ &&other) (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member GEQ(const GEQ &other) (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member GEQ(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member getLHS() const (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member getRHS() const (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::GEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member operator>=(Number lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member operator>=(const FunctionBase< LHSDerived > &lhs, Number rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/GEQ.h: warning: Member operator>=(const FunctionBase< LHSDerived > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/GT.h: warning: Compound Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member GT(GT &&other) (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member GT(const GT &other) (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member GT(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member getLHS() const (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member getRHS() const (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::GT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/GT.h: warning: Member operator>(Number lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/GT.h: warning: Member operator>(const FunctionBase< LHSDerived > &lhs, Number rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/GT.h: warning: Member operator>(const FunctionBase< LHSDerived > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Grad.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Grad< Variational::GridFunction< FES, Data > > > is not documented.
-src/Rodin/Variational/Grad.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Grad< Variational::ShapeFunction< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Grad.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Grad< Variational::ShapeFunction< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Grad.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::GradBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Grad.h: warning: Member interpolate(SpatialVectorType &out, const IntegrationPoint &ip) const (function) of class Rodin::Variational::GradBase< GridFunction< FES, Data >, Derived > is not documented.
 src/Rodin/Variational/H1/Derivative.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Derivative< Variational::GridFunction< Variational::H1< K, Scalar, Mesh >, Data > > > is not documented.
+src/Rodin/Variational/H1/Derivative.h: warning: Found non-existing group 'DerivativeSpecializations' for the command '@ingroup', ignoring command
 src/Rodin/Variational/H1/Derivative.h: warning: Member SpatialVectorType (typedef) of class Rodin::Variational::Derivative< GridFunction< H1< K, Scalar, Mesh >, Data > > is not documented.
 src/Rodin/Variational/H1/Derivative.h: warning: Member copy() const noexcept override (function) of class Rodin::Variational::Derivative< GridFunction< H1< K, Scalar, Mesh >, Data > > is not documented.
 src/Rodin/Variational/H1/Derivative.h: warning: Member getOrder(const Geometry::Polytope &geom) const noexcept (function) of class Rodin::Variational::Derivative< GridFunction< H1< K, Scalar, Mesh >, Data > > is not documented.
@@ -340,52 +203,9 @@ src/Rodin/Variational/H1/WarpBlend.h: warning: Member getAlpha() (function) of c
 src/Rodin/Variational/H1/WarpBlend.h: warning: Member getAlpha() (function) of class Rodin::Variational::TriangleBlend is not documented.
 src/Rodin/Variational/IdentityMatrix.h: warning: Member getOrder(const Geometry::Polytope &) const noexcept (function) of class Rodin::Variational::IdentityMatrix is not documented.
 src/Rodin/Variational/Im.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Im< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(Integral &&other) (function) of class Rodin::Variational::Integral< GridFunction< FES, Data > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(Integral &&other) (function) of class Rodin::Variational::Integral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > &) -> Integral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const FunctionBase< LHSDerived > &, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &) -> Integral< ShapeFunctionBase< Dot< FunctionBase< LHSDerived >, ShapeFunctionBase< RHSDerived, FES, TestSpace > > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const FunctionBase< LHSDerived > &lhs, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &rhs) (function) of class Rodin::Variational::Integral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const GridFunction< FES, Data > &) -> Integral< GridFunction< FES, Data > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const Integral &other) (function) of class Rodin::Variational::Integral< GridFunction< FES, Data > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const Integral &other) (function) of class Rodin::Variational::Integral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const IntegrandType &integrand) (function) of class Rodin::Variational::Integral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace > &, const ShapeFunctionBase< RHSDerived, TestFES, TestSpace > &) -> Integral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Integral.h: warning: Member Integral(const ShapeFunctionBase< NestedDerived, FES, TestSpace > &) -> Integral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/IntegrationPoint.h: warning: Member IntegrationPoint(const Geometry::Point &p) (function) of class Rodin::Variational::IntegrationPoint is not documented.
-src/Rodin/Variational/InterfaceIntegral.h: warning: Member InterfaceIntegral(const Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > &) -> InterfaceIntegral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/InterfaceIntegral.h: warning: Member InterfaceIntegral(const FunctionBase< LHSDerived > &, const ShapeFunctionBase< RHSDerived, FES, TestSpace > &) -> InterfaceIntegral< ShapeFunctionBase< Dot< FunctionBase< LHSDerived >, ShapeFunctionBase< RHSDerived, FES, TestSpace > >, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/InterfaceIntegral.h: warning: Member InterfaceIntegral(const ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace > &, const ShapeFunctionBase< RHSDerived, TestFES, TestSpace > &) -> InterfaceIntegral< Dot< ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/InterfaceIntegral.h: warning: Member InterfaceIntegral(const ShapeFunctionBase< NestedDerived, FES, TestSpace > &) -> InterfaceIntegral< ShapeFunctionBase< NestedDerived, FES, TestSpace > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Jacobian.h: warning: Member SpatialMatrixType (typedef) of class Rodin::Variational::JacobianBase< GridFunction< FES, Data >, Derived > is not documented.
 src/Rodin/Variational/Jacobian.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::JacobianBase< GridFunction< FES, Data >, Derived > is not documented.
-src/Rodin/Variational/Jump.h: warning: Member Jump(Jump &&other) (function) of class Rodin::Variational::Jump< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Jump.h: warning: Member Jump(const Jump &other) (function) of class Rodin::Variational::Jump< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Jump.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Jump< FunctionBase< FunctionDerived > > is not documented.
-src/Rodin/Variational/Jump.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Jump< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Jump.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::Jump< FunctionBase< FunctionDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Compound Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member LEQ(LEQ &&other) (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member LEQ(const LEQ &other) (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member LEQ(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > (variable) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member getLHS() const (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member getRHS() const (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::LEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member operator<=(Number lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member operator<=(const FunctionBase< LHSDerived > &lhs, Number rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/LEQ.h: warning: Member operator<=(const FunctionBase< LHSDerived > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/LT.h: warning: Compound Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member LT(LT &&other) (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member LT(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member LT(const LT &other) (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member getLHS() const (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member getRHS() const (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::LT< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/LT.h: warning: Member operator<(Number lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/LT.h: warning: Member operator<(const FunctionBase< LHSDerived > &lhs, Number rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/LT.h: warning: Member operator<(const FunctionBase< LHSDerived > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/LinearForm.h: warning: Compound Rodin::FormLanguage::Traits< Variational::LinearForm< FES, Vector > > is not documented.
 src/Rodin/Variational/LinearForm.h: warning: Compound Rodin::FormLanguage::Traits< Variational::LinearFormBase< Vector > > is not documented.
 src/Rodin/Variational/LinearForm.h: warning: Member AssemblyType (typedef) of class Rodin::Variational::LinearForm< FES, Math::Vector< typename FormLanguage::Traits< FES >::ScalarType > > is not documented.
@@ -420,50 +240,6 @@ src/Rodin/Variational/MatrixFunction.h: warning: Member getOrder(const Geometry:
 src/Rodin/Variational/MatrixFunction.h: warning: Member getRows() const (function) of class Rodin::Variational::MatrixFunction< Math::Matrix< Scalar > > is not documented.
 src/Rodin/Variational/MatrixFunction.h: warning: Member getValue(const Geometry::Point &) const (function) of class Rodin::Variational::MatrixFunction< Math::Matrix< Scalar > > is not documented.
 src/Rodin/Variational/MatrixFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::MatrixFunctionBase is not documented.
-src/Rodin/Variational/Max.h: warning: Compound Rodin::Variational::Max< FunctionBase< NestedDerived >, Real > is not documented.
-src/Rodin/Variational/Max.h: warning: Compound Rodin::Variational::Max< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Max.h: warning: Member Max(Max &&other) (function) of class Rodin::Variational::Max< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Max.h: warning: Member Max(Real, const FunctionBase< NestedDerived > &) -> Max< Real, FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Max.h: warning: Member Max(const FunctionBase< LHSDerived > &, const FunctionBase< RHSDerived > &) -> Max< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Max.h: warning: Member Max(const FunctionBase< NestedDerived > &, Real) -> Max< FunctionBase< NestedDerived >, Real > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Max.h: warning: Member Max(const LHSType &a, const RHSType &b) (function) of class Rodin::Variational::Max< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Max.h: warning: Member Max(const Max &other) (function) of class Rodin::Variational::Max< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Max.h: warning: Member copy() const noexcept override (function) of class Rodin::Variational::Max< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Max.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Max< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Min.h: warning: Compound Rodin::Variational::Min< FunctionBase< NestedDerived >, Real > is not documented.
-src/Rodin/Variational/Min.h: warning: Compound Rodin::Variational::Min< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Min.h: warning: Member Min(Min &&other) (function) of class Rodin::Variational::Min< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Min.h: warning: Member Min(Real, const FunctionBase< NestedDerived > &) -> Min< Real, FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Min.h: warning: Member Min(const FunctionBase< LHSDerived > &, const FunctionBase< RHSDerived > &) -> Min< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Min.h: warning: Member Min(const FunctionBase< NestedDerived > &, Real) -> Min< FunctionBase< NestedDerived >, Real > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Min.h: warning: Member Min(const LHSType &a, const RHSType &b) (function) of class Rodin::Variational::Min< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Min.h: warning: Member Min(const Min &other) (function) of class Rodin::Variational::Min< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Min.h: warning: Member copy() const noexcept override (function) of class Rodin::Variational::Min< Real, FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Min.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Min< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member NEQ(NEQ &&other) (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member NEQ(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member NEQ(const NEQ &other) (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > (variable) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member getLHS() const (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member getRHS() const (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::NEQ< FunctionBase< LHSDerived >, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member operator!=(Boolean lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member operator!=(Number lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member operator!=(const FunctionBase< LHSDerived > &lhs, Boolean rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member operator!=(const FunctionBase< LHSDerived > &lhs, Number rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/NEQ.h: warning: Member operator!=(const FunctionBase< LHSDerived > &lhs, const FunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/OR.h: warning: Member OR(OR &&other) (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member OR(const LHSType &lhs, const RHSType &rhs) (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member OR(const OR &other) (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > (variable) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/OR.h: warning: Member getLHS() const (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member getRHS() const (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::OR< BooleanFunctionBase< LHSDerived >, BooleanFunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/OR.h: warning: Member operator||(Boolean lhs, const BooleanFunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/OR.h: warning: Member operator||(const BooleanFunctionBase< LHSDerived > &lhs, Boolean rhs) (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/OR.h: warning: Member operator||(const BooleanFunctionBase< LHSDerived > &lhs, const BooleanFunctionBase< RHSDerived > &rhs) (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/P0/P0.h: warning: Compound Rodin::FormLanguage::Traits< Variational::P0< Math::Vector< Number >, Mesh > > is not documented.
 src/Rodin/Variational/P0/P0.h: warning: Compound Rodin::FormLanguage::Traits< Variational::P0< Number, Mesh > > is not documented.
 src/Rodin/Variational/P0/P0.h: warning: Compound Rodin::Variational::P0< Real, Geometry::Mesh< Context::Local > >::Pullback is not documented.
@@ -507,6 +283,7 @@ src/Rodin/Variational/P0g/P0g.h: warning: Member operator()(const Math::SpatialP
 src/Rodin/Variational/P0g/P0g.h: warning: Member operator()(const Math::SpatialPoint &r) const (function) of class Rodin::Variational::P0g< Real, Geometry::Mesh< Context::Local > >::Pullback is not documented.
 src/Rodin/Variational/P1/Derivative.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Derivative< Variational::GridFunction< Variational::P1< Range, Mesh >, Data > > > is not documented.
 src/Rodin/Variational/P1/Derivative.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Derivative< Variational::ShapeFunction< NestedDerived, Variational::P1< Range, Mesh >, Space > > > is not documented.
+src/Rodin/Variational/P1/Derivative.h: warning: Found non-existing group 'DerivativeSpecializations' for the command '@ingroup', ignoring command
 src/Rodin/Variational/P1/Derivative.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Derivative< Variational::ShapeFunction< NestedDerived, Variational::P1< Range, Mesh >, Space > > > is not documented.
 src/Rodin/Variational/P1/Derivative.h: warning: Member SpatialVectorType (typedef) of class Rodin::Variational::Derivative< GridFunction< P1< Range, Mesh >, Data > > is not documented.
 src/Rodin/Variational/P1/Derivative.h: warning: Member copy() const noexcept override (function) of class Rodin::Variational::Derivative< GridFunction< P1< Range, Mesh >, Data > > is not documented.
@@ -577,11 +354,6 @@ src/Rodin/Variational/Potential.h: warning: Member getQuadratureFormula() const 
 src/Rodin/Variational/Potential.h: warning: Member getRegion() const (function) of class Rodin::Variational::Potential< LHS, ShapeFunctionBase< ShapeFunction< RHSDerived, FES, SpaceType >, FES, SpaceType > > is not documented.
 src/Rodin/Variational/Potential.h: warning: Member getTestRegion() const override (function) of class Rodin::Variational::Integral< Dot< Potential< Kernel, ShapeFunctionBase< LHSDerived, TrialFES, TrialSpace > >, ShapeFunctionBase< RHSDerived, TestFES, TestSpace > > > is not documented.
 src/Rodin/Variational/Potential.h: warning: Member getValue(const Geometry::Point &p) const (function) of class Rodin::Variational::Potential< LHS, FunctionBase< RHSDerived > > is not documented.
-src/Rodin/Variational/Pow.h: warning: Member Pow(const FunctionBase< BaseDerived > &, Number) -> Pow< FunctionBase< BaseDerived >, Number > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Pow.h: warning: Member getBase() const (function) of class Rodin::Variational::Pow< FunctionBase< BaseDerived >, Number > is not documented.
-src/Rodin/Variational/Pow.h: warning: Member getExponent() const (function) of class Rodin::Variational::Pow< FunctionBase< BaseDerived >, Number > is not documented.
-src/Rodin/Variational/Pow.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Pow< FunctionBase< BaseDerived >, Number > is not documented.
-src/Rodin/Variational/Pow.h: warning: Member pow(const FunctionBase< NestedDerived > &f, Number exponent) (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Problem.h: warning: Compound Rodin::Variational::Problem< LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/Variational/Problem.h: warning: Member Problem(Problem &&other) noexcept (function) of class Rodin::Variational::Problem< LinearSystem, U1, U2, U3, Us... > is not documented.
 src/Rodin/Variational/Problem.h: warning: Member Problem(U1 &u1, U2 &u2, U3 &u3, Us &... us) (function) of class Rodin::Variational::Problem< LinearSystem, U1, U2, U3, Us... > is not documented.
@@ -624,12 +396,8 @@ src/Rodin/Variational/ScalarFunction.h: warning: Compound Rodin::FormLanguage::T
 src/Rodin/Variational/ScalarFunction.h: warning: Member DerivedType (typedef) of struct Rodin::FormLanguage::Traits< Variational::ScalarFunctionBase< Scalar, Derived > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Complex, ComplexFunctionBase< Derived > > is not documented.
-src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< FormLanguage::Traits< FES >::ScalarType, DerivativeBase< GridFunction< FES, Data >, Derived > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< FormLanguage::Traits< FES >::ScalarType, DivBase< GridFunction< FES, Data >, Derived > > is not documented.
-src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Real, RealFunctionBase< Abs< FunctionBase< NestedDerived > > > > is not documented.
-src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Real, RealFunctionBase< Component< GridFunction< FES, Data > > > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Real, RealFunctionBase< Derived > > is not documented.
-src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Real, RealFunctionBase< Exp< FunctionBase< NestedDerived > > > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Real, RealFunctionBase< Frobenius< FunctionBase< NestedDerived > > > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getOrder(const Geometry::Polytope &poly) const noexcept (function) of class Rodin::Variational::ScalarFunctionBase< Scalar, Zero< Scalar > > is not documented.
 src/Rodin/Variational/ScalarFunction.h: warning: Member getValue(const IntegrationPoint &ip) const (function) of class Rodin::Variational::ScalarFunctionBase is not documented.
@@ -643,48 +411,11 @@ src/Rodin/Variational/ShapeFunction.h: warning: Member SpaceType (variable) of s
 src/Rodin/Variational/ShapeFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTestFunction< TestFunction< FES > > is not documented.
 src/Rodin/Variational/ShapeFunction.h: warning: Member Value (variable) of struct Rodin::Variational::IsTrialFunction< TrialFunction< Solution, FES > > is not documented.
 src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Average< ShapeFunctionBase< NestedDerived, FES, Space > >, FES, Space > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Component< ShapeFunctionBase< OperandDerived, FES, Space > >, FES, Space > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Conjugate< ShapeFunctionBase< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Derivative< ShapeFunction< NestedDerived, FES, SpaceType > > > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Division< ShapeFunctionBase< LHSDerived, FES, Space >, FunctionBase< RHSDerived > >, FES, Space > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Jump< ShapeFunctionBase< NestedDerived, FES, Space > >, FES, Space > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Trace< ShapeFunctionBase< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/ShapeFunction.h: warning: Member setPoint(const Geometry::Point &p) (function) of class Rodin::Variational::ShapeFunctionBase< Transpose< ShapeFunctionBase< NestedDerived, FES, Space > >, FES, Space > is not documented.
-src/Rodin/Variational/Sine.h: warning: Member Sin(const FunctionBase< NestedDerived > &) -> Sin< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Sine.h: warning: Member getOperand() const (function) of class Rodin::Variational::Sin< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Sine.h: warning: Member getOrder(const Geometry::Polytope &g) const (function) of class Rodin::Variational::Sin< FunctionBase< NestedDerived > > is not documented.
 src/Rodin/Variational/Sinh.h: warning: Member Sinh(const FunctionBase< NestedDerived > &) -> Sinh< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/Sinh.h: warning: Member getOrder(const Geometry::Polytope &g) const (function) of class Rodin::Variational::Sinh< FunctionBase< NestedDerived > > is not documented.
 src/Rodin/Variational/SparseProblem.h: warning: Member SparseProblem(U &u, V &v) -> SparseProblem< Math::LinearSystem< Math::SparseMatrix< typename FormLanguage::Mult< typename FormLanguage::Traits< typename FormLanguage::Traits< U >::FESType >::ScalarType, typename FormLanguage::Traits< typename FormLanguage::Traits< V >::FESType >::ScalarType >::Type >, Math::Vector< typename FormLanguage::Traits< typename FormLanguage::Traits< V >::FESType >::ScalarType > >, U, V > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Sqrt.h: warning: Member Sqrt(const FunctionBase< NestedDerived > &) -> Sqrt< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Sqrt.h: warning: Member getOrder(const Geometry::Polytope &polytope) const noexcept (function) of class Rodin::Variational::Sqrt< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Tangent.h: warning: Member Tan(const FunctionBase< NestedDerived > &) -> Tan< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Tangent.h: warning: Member getOrder(const Geometry::Polytope &g) const (function) of class Rodin::Variational::Tan< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Tangent.h: warning: Member tan(const FunctionBase< NestedDerived > &f) (function) of namespace Rodin::Variational is not documented.
 src/Rodin/Variational/TestFunction.h: warning: Compound Rodin::FormLanguage::Traits< Variational::TestFunction< FES > > is not documented.
 src/Rodin/Variational/TestFunction.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::TestFunction< FES > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Compound Rodin::FormLanguage::Traits< Variational::Trace< Variational::ShapeFunctionBase< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Compound Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member SpaceType (variable) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::Trace< Variational::ShapeFunctionBase< NestedDerived, FES, Space > > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member Trace(Trace &&other) (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member Trace(const FunctionBase< NestedDerived > &) -> Trace< FunctionBase< NestedDerived > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Trace.h: warning: Member Trace(const OperandType &operand) (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member Trace(const ShapeFunctionBase< NestedDerived, FES, Space > &) -> Trace< ShapeFunctionBase< NestedDerived, FES, Space > > (function) of namespace Rodin::Variational is not documented.
-src/Rodin/Variational/Trace.h: warning: Member Trace(const Trace &other) (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getBasis(size_t local) const (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getDOFs(const Geometry::Polytope &element) const (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getFiniteElementSpace() const (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getIntegrationPoint() const (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getLeaf() const (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getOperand() const (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Trace< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member getOrder(const Geometry::Polytope &p) const noexcept (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Trace.h: warning: Member setIntegrationPoint(const IntegrationPoint &ip) (function) of class Rodin::Variational::Trace< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/TraceOperator.h: warning: Member TraceOperator(TraceOperator &&other) (function) of class Rodin::Variational::TraceOperator< FunctionBase > is not documented.
-src/Rodin/Variational/TraceOperator.h: warning: Member TraceOperator(const FunctionBase &fn, Geometry::Attribute attr) (function) of class Rodin::Variational::TraceOperator< FunctionBase > is not documented.
-src/Rodin/Variational/TraceOperator.h: warning: Member TraceOperator(const TraceOperator &other) (function) of class Rodin::Variational::TraceOperator< FunctionBase > is not documented.
 src/Rodin/Variational/Traits.h: warning: Compound Rodin::FormLanguage::RangeOf< Math::SpatialMatrix< Scalar > > is not documented.
 src/Rodin/Variational/Traits.h: warning: Compound Rodin::FormLanguage::RangeOf< Math::SpatialVector< Scalar > > is not documented.
 src/Rodin/Variational/Traits.h: warning: Member Type (typedef) of struct Rodin::FormLanguage::RangeOf is not documented.
@@ -700,13 +431,6 @@ src/Rodin/Variational/Traits.h: warning: Member Type (typedef) of struct Rodin::
 src/Rodin/Variational/Traits.h: warning: Member Type (typedef) of struct Rodin::FormLanguage::RangeOf< Variational::ShapeFunctionBase< Derived, FES, Space > > is not documented.
 src/Rodin/Variational/Traits.h: warning: Member Type (typedef) of struct Rodin::FormLanguage::ResultOf< Variational::FunctionBase< Derived > > is not documented.
 src/Rodin/Variational/Traits.h: warning: Member Type (typedef) of struct Rodin::FormLanguage::ResultOf< Variational::ShapeFunctionBase< Derived, FES, Space > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member Transpose(Transpose &&other) (function) of class Rodin::Variational::Transpose< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member Transpose(Transpose &&other) (function) of class Rodin::Variational::Transpose< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member Transpose(const Transpose &other) (function) of class Rodin::Variational::Transpose< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member Transpose(const Transpose &other) (function) of class Rodin::Variational::Transpose< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member getOrder(const Geometry::Polytope &polytope) const (function) of class Rodin::Variational::Transpose< FunctionBase< NestedDerived > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member getOrder(const Geometry::Polytope &polytope) const (function) of class Rodin::Variational::Transpose< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
-src/Rodin/Variational/Transpose.h: warning: Member setIntegrationPoint(const IntegrationPoint &ip) (function) of class Rodin::Variational::Transpose< ShapeFunctionBase< NestedDerived, FES, Space > > is not documented.
 src/Rodin/Variational/TrialFunction.h: warning: Compound Rodin::FormLanguage::Traits< Variational::TrialFunction< Solution, FES > > is not documented.
 src/Rodin/Variational/TrialFunction.h: warning: Member SpaceType (variable) of struct Rodin::FormLanguage::Traits< Variational::TrialFunction< Solution, FES > > is not documented.
 src/Rodin/Variational/TrialFunction.h: warning: Member getIntegrationPoint() const (function) of class Rodin::Variational::TrialFunctionReference is not documented.
@@ -3562,4 +3286,4 @@ warning: Include graph for 'Variational.h' not generated, too many nodes (71), t
 warning: Included by graph for 'ForwardDecls.h' not generated, too many nodes (103), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
 warning: Included by graph for 'Types.h' not generated, too many nodes (88), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
 warning: Included by graph for 'Vector.h' not generated, too many nodes (52), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
-warning: Inheritance graph for 'Rodin::FormLanguage::Base' not generated, too many nodes (127), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.
+warning: Inheritance graph for 'Rodin::FormLanguage::Base' not generated, too many nodes (80), threshold is 50. Consider increasing DOT_GRAPH_MAX_NODES.

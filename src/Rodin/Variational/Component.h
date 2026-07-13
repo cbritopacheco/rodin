@@ -20,6 +20,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class OperandDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -526,4 +527,5 @@ namespace Rodin::Variational
     -> Component<ShapeFunctionBase<OperandDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

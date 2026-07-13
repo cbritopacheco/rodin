@@ -26,6 +26,7 @@
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -390,4 +391,5 @@ namespace Rodin::Variational
     -> Jump<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

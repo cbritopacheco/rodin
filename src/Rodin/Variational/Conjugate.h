@@ -20,6 +20,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -282,7 +283,5 @@ namespace Rodin::Variational
     -> Conjugate<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif
-
-
-

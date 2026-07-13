@@ -16,6 +16,7 @@
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -253,4 +254,5 @@ namespace Rodin::Variational
     -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

@@ -15,6 +15,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -352,4 +353,5 @@ namespace Rodin::Variational
     return Division(lhs, rhs);
   }
 }
+/// @endcond
 #endif

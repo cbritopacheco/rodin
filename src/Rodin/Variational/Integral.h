@@ -56,6 +56,7 @@
 #include "ForwardDecls.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
 
@@ -283,4 +284,5 @@ namespace Rodin::Variational
   Integral(const GridFunction<FES, Data>&) -> Integral<GridFunction<FES, Data>>;
 }
 
+/// @endcond
 #endif

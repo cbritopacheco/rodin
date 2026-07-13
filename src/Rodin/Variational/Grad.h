@@ -22,6 +22,7 @@
 #include "VectorFunction.h"
 #include "IntegrationPoint.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class FES, class Data>
@@ -312,4 +313,5 @@ namespace Rodin::Variational
     -> Grad<ShapeFunction<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

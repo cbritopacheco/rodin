@@ -16,6 +16,7 @@
 #include "Function.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -326,4 +327,5 @@ namespace Rodin::Variational
   Max(Real, const FunctionBase<NestedDerived>&) -> Max<Real, FunctionBase<NestedDerived>>;
 }
 
+/// @endcond
 #endif
