@@ -51,6 +51,7 @@
 
 namespace Rodin::Variational
 {
+  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Integration of a P1 ShapeFunction.
@@ -3804,6 +3805,7 @@ namespace Rodin::Variational
 
       Math::Matrix<ScalarType> m_matrix;
   };
+  /// @endcond
 }
 
 #endif

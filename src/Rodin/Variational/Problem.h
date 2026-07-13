@@ -47,6 +47,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for a problem base.
   template <class LinearSystem>
   struct Traits<Variational::ProblemBase<LinearSystem>>
   {
@@ -54,12 +55,15 @@ namespace Rodin::FormLanguage
       using LinearSystemType = LinearSystem;
   };
 
+  /// @brief Form-language traits for a two-field variational problem.
   template <class LinearSystem, class TrialFunction, class TestFunction>
   struct Traits<Variational::Problem<TrialFunction, TestFunction, LinearSystem>>
   {
     /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
+      /// @brief Trial function type.
       using TrialFunctionType = TrialFunction;
+      /// @brief Test function type.
       using TestFunctionType = TestFunction;
   };
 
@@ -177,6 +181,7 @@ namespace Rodin::Variational
        */
       virtual ProblemBase& assemble() = 0;
 
+      /// @brief Assembles only the requested target of the linear system.
       virtual ProblemBase& assemble(AssemblyTarget)
       {
         Alert::MemberFunctionException(*this, __func__)
@@ -268,23 +273,27 @@ namespace Rodin::Variational
       using Parent =
         ProblemBase<LinearSystemType>;
 
+      /// @brief Constructs a problem base from trial and test functions.
       constexpr
       ProblemUVBase(U& u, V& v)
         : m_trialFunction(u), m_testFunction(v)
       {}
 
+      /// @brief Copy constructor.
       ProblemUVBase(const ProblemUVBase& other)
         : Parent(other),
           m_trialFunction(other.m_trialFunction),
           m_testFunction(other.m_testFunction)
       {}
 
+      /// @brief Move constructor.
       ProblemUVBase(ProblemUVBase&& other)
         : Parent(std::move(other)),
           m_trialFunction(std::move(other.m_trialFunction)),
           m_testFunction(std::move(other.m_testFunction))
       {}
 
+      /// @brief Copy assignment operator.
       ProblemUVBase& operator=(const ProblemUVBase& other)
       {
         if (this != &other)
@@ -295,6 +304,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment operator.
       ProblemUVBase& operator=(ProblemUVBase&& other) noexcept
       {
         if (this != &other)
@@ -305,24 +315,28 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the trial function.
       constexpr
       TrialFunctionType& getTrialFunction()
       {
         return m_trialFunction;
       }
 
+      /// @brief Returns the test function.
       constexpr
       TestFunctionType& getTestFunction()
       {
         return m_testFunction;
       }
 
+      /// @brief Returns the trial function.
       constexpr
       const TrialFunctionType& getTrialFunction() const
       {
         return m_trialFunction.get();
       }
 
+      /// @brief Returns the test function.
       constexpr
       const TestFunctionType& getTestFunction() const
       {
@@ -342,6 +356,7 @@ namespace Rodin::Variational
       std::reference_wrapper<TestFunctionType> m_testFunction;
   };
 
+  /// @brief Two-field variational problem.
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class Problem<LinearSystem, TrialFunction, TestFunction>
     : public ProblemUVBase<LinearSystem, TrialFunction, TestFunction>
@@ -369,6 +384,7 @@ namespace Rodin::Variational
       using LinearSystemType =
         LinearSystem;
 
+      /// @brief Linear solver base type.
       using SolverBaseType =
         Solver::LinearSolverBase<LinearSystemType>;
 
@@ -384,15 +400,19 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Problem body type.
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Trial finite element mesh context type.
       using TrialFESMeshContextType =
         typename FormLanguage::Traits<TrialFESMeshType>::ContextType;
 
+      /// @brief Test finite element mesh context type.
       using TestFESMeshContextType =
         typename FormLanguage::Traits<TestFESMeshType>::ContextType;
 
+      /// @brief Assembly strategy type.
       using AssemblyType =
         typename Assembly::Default<TrialFESMeshContextType, TestFESMeshContextType>
           ::template Type<LinearSystem, Problem>;
@@ -401,12 +421,14 @@ namespace Rodin::Variational
       using Parent =
         ProblemUVBase<LinearSystem, TrialFunction, TestFunction>;
 
+      /// @brief Constructs a two-field problem from trial and test functions.
       constexpr
       Problem(TrialFunction& u, TestFunction& v)
         : Parent(u, v),
           m_assembled(false)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Problem(const Problem& other)
         : Parent(other),
@@ -415,6 +437,7 @@ namespace Rodin::Variational
           m_axb(other.m_axb)
       {}
 
+      /// @brief Move constructor.
       constexpr
       Problem(Problem&& other) noexcept
         : Parent(std::move(other)),
@@ -424,6 +447,7 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /// @brief Copy assignment operator.
       Problem& operator=(const Problem& other)
       {
         if (this != &other)
@@ -437,6 +461,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment operator.
       Problem& operator=(Problem&& other) noexcept
       {
         if (this != &other)
@@ -450,6 +475,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles the whole linear system.
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
@@ -457,6 +483,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles only the requested target of the linear system.
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(
@@ -482,6 +509,7 @@ namespace Rodin::Variational
          this->getTrialFunction().getSolution().setData(axb.getSolution());
       }
 
+      /// @brief Assigns a problem body and marks the assembly stale.
       Problem& operator=(const ProblemBodyType& rhs) override
       {
         m_pb = rhs;
@@ -489,16 +517,19 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns the assembled linear system.
       LinearSystemType& getLinearSystem() override
       {
         return m_axb;
       }
 
+      /// @brief Returns the assembled linear system.
       const LinearSystemType& getLinearSystem() const override
       {
         return m_axb;
       }
 
+      /// @brief Polymorphically copies this problem.
       Problem* copy() const noexcept override
       {
         return new Problem(*this);
@@ -514,6 +545,7 @@ namespace Rodin::Variational
   /**
    * @ingroup RodinCTAD
    */
+  /// @brief Deduction guide for a two-field sparse variational problem.
   template <class U, class V>
   Problem(U& u, V& v)
     -> Problem<
@@ -526,6 +558,7 @@ namespace Rodin::Variational
               typename FormLanguage::Traits<typename FormLanguage::Traits<V>::FESType>::ScalarType>>,
           U, V>;
 
+  /// @brief Base for mixed variational problems with three or more functions.
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class ProblemUsBase : public ProblemBase<LinearSystem>
   {
@@ -554,27 +587,39 @@ namespace Rodin::Variational
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Problem body type.
       using ProblemBodyType =
         ProblemBody<OperatorType, VectorType, ScalarType>;
 
       /// @brief Parent class type.
       using Parent = ProblemBase<LinearSystemType>;
 
+      /// @brief Assembly input type.
       using AssemblyInput =
         Assembly::ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
+      /// @brief First function finite element space type.
       using U1FESType = typename FormLanguage::Traits<U1>::FESType;
+      /// @brief Second function finite element space type.
       using U2FESType = typename FormLanguage::Traits<U2>::FESType;
+      /// @brief Third function finite element space type.
       using U3FESType = typename FormLanguage::Traits<U3>::FESType;
 
+      /// @brief First function mesh type.
       using U1FESMeshType = typename FormLanguage::Traits<U1FESType>::MeshType;
+      /// @brief Second function mesh type.
       using U2FESMeshType = typename FormLanguage::Traits<U2FESType>::MeshType;
+      /// @brief Third function mesh type.
       using U3FESMeshType = typename FormLanguage::Traits<U3FESType>::MeshType;
 
+      /// @brief First function mesh context type.
       using U1FESMeshContextType = typename FormLanguage::Traits<U1FESMeshType>::ContextType;
+      /// @brief Second function mesh context type.
       using U2FESMeshContextType = typename FormLanguage::Traits<U2FESMeshType>::ContextType;
+      /// @brief Third function mesh context type.
       using U3FESMeshContextType = typename FormLanguage::Traits<U3FESMeshType>::ContextType;
 
+      /// @brief Assembly strategy type.
       using AssemblyType =
         typename Assembly::Default<U1FESMeshContextType, U2FESMeshContextType>
           ::template Type<LinearSystemType, Problem<LinearSystemType, U1, U2, U3, Us...>>;
@@ -677,6 +722,7 @@ namespace Rodin::Variational
         Assembly::Sequential<VectorType, LinearFormTuple>;
 
     public:
+      /// @brief Constructs a mixed problem from trial and test functions.
       ProblemUsBase(U1& u1, U2& u2, U3& u3, Us&... us)
         : m_assembled(false),
           m_us(
@@ -706,6 +752,7 @@ namespace Rodin::Variational
             { m_testUUIDMap.right.insert({ i, v.get().getUUID() }); });
       }
 
+      /// @brief Copy constructor.
       ProblemUsBase(const ProblemUsBase& other)
         : Parent(other),
           m_assembled(other.m_assembled),
@@ -722,6 +769,7 @@ namespace Rodin::Variational
           m_assembly(other.m_assembly)
       {}
 
+      /// @brief Move constructor.
       ProblemUsBase(ProblemUsBase&& other) noexcept
         : Parent(std::move(other)),
           m_assembled(std::exchange(other.m_assembled, false)),
@@ -738,6 +786,7 @@ namespace Rodin::Variational
           m_assembly(std::move(other.m_assembly))
       {}
 
+      /// @brief Copy assignment operator.
       ProblemUsBase& operator=(const ProblemUsBase& other)
       {
         if (this != &other)
@@ -758,6 +807,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment operator.
       ProblemUsBase& operator=(ProblemUsBase&& other)
       {
         if (this != &other)
@@ -778,6 +828,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles the whole mixed linear system.
       virtual ProblemUsBase& assemble() override
       {
         auto& axb = getLinearSystem();

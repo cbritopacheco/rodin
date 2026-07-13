@@ -70,25 +70,34 @@ namespace Rodin::Variational
       /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType = GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Linear form integrator list type.
       using LinearFormIntegratorBaseListType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
+      /// @brief Local bilinear form integrator list type.
       using LocalBilinearFormIntegratorBaseListType = FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief Global bilinear form integrator list type.
       using GlobalBilinearFormIntegratorBaseListType = FormLanguage::List<GlobalBilinearFormIntegratorBaseType>;
 
+      /// @brief Essential boundary condition collection type.
       using EssentialBoundaryType = EssentialBoundary<ScalarType>;
 
+      /// @brief Periodic boundary condition collection type.
       using PeriodicBoundaryType = PeriodicBoundary<ScalarType>;
 
       /// @brief Parent class type.
       using Parent = FormLanguage::Base;
 
+      /// @brief Default constructor.
       ProblemBodyBase() = default;
 
+      /// @brief Copy constructor.
       ProblemBodyBase(const ProblemBodyBase& other)
         : Parent(other),
           m_lfis(other.m_lfis),
@@ -98,6 +107,7 @@ namespace Rodin::Variational
           m_periodicBdr(other.m_periodicBdr)
       {}
 
+      /// @brief Copy assignment operator.
       ProblemBodyBase& operator=(const ProblemBodyBase& other)
       {
         if (this != &other)
@@ -111,6 +121,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move constructor.
       ProblemBodyBase(ProblemBodyBase&& other)
         : Parent(std::move(other)),
           m_lfis(std::move(other.m_lfis)),
@@ -120,6 +131,7 @@ namespace Rodin::Variational
           m_periodicBdr(std::move(other.m_periodicBdr))
       {}
 
+      /// @brief Move assignment operator.
       ProblemBodyBase& operator=(ProblemBodyBase&& other)
       {
         m_lfis = std::move(other.m_lfis);
@@ -130,56 +142,67 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns periodic boundary conditions.
       PeriodicBoundaryType& getPBCs()
       {
         return m_periodicBdr;
       }
 
+      /// @brief Returns essential boundary conditions.
       EssentialBoundaryType& getDBCs()
       {
         return m_essBdr;
       }
 
+      /// @brief Returns local bilinear form integrators.
       LocalBilinearFormIntegratorBaseListType& getLocalBFIs()
       {
         return m_lbfis;
       }
 
+      /// @brief Returns global bilinear form integrators.
       GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs()
       {
         return m_gbfis;
       }
 
+      /// @brief Returns linear form integrators.
       LinearFormIntegratorBaseListType& getLFIs()
       {
         return m_lfis;
       }
 
+      /// @brief Returns periodic boundary conditions.
       const PeriodicBoundaryType& getPBCs() const
       {
         return m_periodicBdr;
       }
 
+      /// @brief Returns essential boundary conditions.
       const EssentialBoundaryType& getDBCs() const
       {
         return m_essBdr;
       }
 
+      /// @brief Returns linear form integrators.
       const LinearFormIntegratorBaseListType& getLFIs() const
       {
         return m_lfis;
       }
 
+      /// @brief Returns local bilinear form integrators.
       const LocalBilinearFormIntegratorBaseListType& getLocalBFIs() const
       {
         return m_lbfis;
       }
 
+      /// @brief Returns global bilinear form integrators.
       const GlobalBilinearFormIntegratorBaseListType& getGlobalBFIs() const
       {
         return m_gbfis;
       }
 
+      /// @brief Polymorphically copies this problem body base.
       virtual ProblemBodyBase* copy() const noexcept override
       {
         return new ProblemBodyBase(*this);
@@ -194,6 +217,7 @@ namespace Rodin::Variational
       PeriodicBoundaryType  m_periodicBdr;
   };
 
+  /// @brief Problem body containing only integrators and boundary conditions.
   template <class Scalar>
   class ProblemBody<void, void, Scalar>
     : public ProblemBodyBase<Scalar>
@@ -202,16 +226,20 @@ namespace Rodin::Variational
       /// @brief Parent class type.
       using Parent = ProblemBodyBase<Scalar>;
 
+      /// @brief Default constructor.
       ProblemBody() = default;
 
+      /// @brief Copy constructor.
       ProblemBody(const ProblemBody& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Copy assignment operator.
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -221,6 +249,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment operator.
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -230,12 +259,14 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Polymorphically copies this problem body.
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
       }
   };
 
+  /// @brief Problem body containing operator terms only.
   template <class Operator, class Scalar>
   class ProblemBody<Operator, void, Scalar>
     : public ProblemBodyBase<Scalar>
@@ -247,25 +278,31 @@ namespace Rodin::Variational
       /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperatorType>::ScalarType;
 
+      /// @brief Bilinear form base type.
       using BilinearFormBaseType = BilinearFormBase<OperatorType>;
 
+      /// @brief Bilinear form list type.
       using BilinearFormBaseListType = FormLanguage::List<BilinearFormBaseType>;
 
       /// @brief Parent class type.
       using Parent = ProblemBodyBase<Scalar>;
 
+      /// @brief Default constructor.
       ProblemBody() = default;
 
+      /// @brief Copy constructor.
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_bfs(other.m_bfs)
       {}
 
+      /// @brief Move constructor.
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_bfs(std::move(other.m_bfs))
       {}
 
+      /// @brief Copy assignment operator.
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -276,6 +313,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment operator.
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -286,16 +324,19 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns bilinear forms.
       BilinearFormBaseListType& getBFs()
       {
         return m_bfs;
       }
 
+      /// @brief Returns bilinear forms.
       const BilinearFormBaseListType& getBFs() const
       {
         return m_bfs;
       }
 
+      /// @brief Polymorphically copies this problem body.
       virtual ProblemBody* copy() const noexcept override
       {
         return new ProblemBody(*this);
@@ -305,6 +346,7 @@ namespace Rodin::Variational
       BilinearFormBaseListType m_bfs;
   };
 
+  /// @brief Problem body containing vector terms only.
   template <class Vector, class Scalar>
   class ProblemBody<void, Vector, Scalar> : public ProblemBodyBase<Scalar>
   {
@@ -312,25 +354,31 @@ namespace Rodin::Variational
       /// @brief Vector type of the linear system.
       using VectorType = Vector;
 
+      /// @brief Linear form base type.
       using LinearFormBaseType = LinearFormBase<VectorType>;
 
+      /// @brief Linear form list type.
       using LinearFormBaseListType = FormLanguage::List<LinearFormBaseType>;
 
       /// @brief Parent class type.
       using Parent = ProblemBodyBase<Scalar>;
 
+      /// @brief Default constructor.
       ProblemBody() = default;
 
+      /// @brief Copy constructor.
       ProblemBody(const ProblemBody& other)
         : Parent(other),
           m_lfs(other.m_lfs)
       {}
 
+      /// @brief Move constructor.
       ProblemBody(ProblemBody&& other)
         : Parent(std::move(other)),
           m_lfs(std::move(other.m_lfs))
       {}
 
+      /// @brief Copy assignment operator.
       ProblemBody& operator=(const ProblemBody& other)
       {
         if (this != &other)
@@ -341,6 +389,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Move assignment operator.
       ProblemBody& operator=(ProblemBody&& other)
       {
         if (this != &other)
@@ -351,6 +400,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns linear forms.
       LinearFormBaseListType& getLFs()
       {
         return m_lfs;

@@ -20,6 +20,7 @@
 
 namespace Rodin::Variational
 {
+  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Specialization for @f$\int v \ dx@f$ with an H1 test shape function.
@@ -3512,6 +3513,7 @@ namespace Rodin::Variational
            ShapeFunctionBase<
              ShapeFunction<RHSDerived, H1<KTest, Scalar, Mesh>, TestSpace>,
              H1<KTest, Scalar, Mesh>, TestSpace>>>;
+  /// @endcond
 }
 
 #endif

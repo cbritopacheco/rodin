@@ -29,6 +29,7 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for variational functions.
   template <class Derived>
   struct Traits<Variational::FunctionBase<Derived>>
   {
@@ -98,6 +99,7 @@ namespace Rodin::Variational
       /// @brief Virtual destructor
       virtual ~FunctionBase() = default;
 
+      /// @brief Move assignment operator.
       FunctionBase& operator=(FunctionBase&& other)
       {
         m_traceDomain = std::move(other.m_traceDomain);
@@ -119,6 +121,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /// @brief Evaluates the function at an integration point.
       constexpr
       auto operator()(const IntegrationPoint& ip) const
       {
@@ -272,6 +275,7 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /// @brief Evaluates the function at an integration point.
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -302,16 +306,19 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getOrder(geom);
       }
 
+      /// @brief Returns this object as the CRTP-derived type.
       Derived& getDerived() noexcept
       {
         return static_cast<Derived&>(*this);
       }
 
+      /// @brief Returns this object as the CRTP-derived type.
       const Derived& getDerived() const noexcept
       {
         return static_cast<const Derived&>(*this);
       }
 
+      /// @brief Polymorphically copies the derived function.
       virtual FunctionBase* copy() const noexcept override
       {
         return static_cast<const Derived&>(*this).copy();
@@ -321,6 +328,7 @@ namespace Rodin::Variational
       FlatSet<Geometry::Attribute> m_traceDomain;
   };
 
+  /// @brief Returns the order only when a function is elementwise constant.
   template <class Derived>
   inline Optional<size_t>
   GetOrderIfConstant(const FunctionBase<Derived>& f, const Geometry::Polytope& polytope) noexcept
