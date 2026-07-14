@@ -1,0 +1,7 @@
+coverage:
+  status:
+    patch:
+      default:
+        # Documentation and formatting PRs can touch executable headers without
+        # changing behavior. Keep patch coverage visible, but do not block on it.
+        informational: true
