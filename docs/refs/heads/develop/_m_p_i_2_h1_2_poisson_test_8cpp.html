@@ -80,17 +80,19 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md514">Mesh construction workflows under test</a></li>
-            <li><a href="#autotoc_md515">Manufactured solutions</a></li>
+            <li><a href="#autotoc_md424">Mesh construction workflows under test</a></li>
+            <li><a href="#autotoc_md425">Manufactured solutions</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#define-members">Defines</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Parametrized over (geometry, K) with K ∈ {1, 2, 3, 4, 6}.</p><p>Geometries: 2D — Triangle, Quadrilateral 3D — Tetrahedron, Hexahedron, Pyramid, Wedge</p><p>Each GTest parametrization is invoked by CTest with MPIEXEC_NUMPROC_FLAG set to 1, 2, 3, 4, and 6 ranks.</p><section id="autotoc_md514"><h4><a href="#autotoc_md514">Mesh construction workflows under test</a></h4><p><strong>Workflow 1 — Shard → Save → Load → Reconcile → Assemble → Solve</strong> Rank 0 builds a local uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>Sharder::scatter()</code>. Each rank saves its shard to an HDF5 file, reloads it, recomputes all connectivity, and reconciles intermediate entities before assembly.</p><p><strong>Workflow 2 — Construct → Shard → Distribute → Reconcile → Assemble → Solve</strong> Rank 0 builds a local uniform-grid mesh and calls <code>Sharder::distribute()</code>, which performs shard + scatter + gather in one step without any I/O round-trip. Connectivity and reconciliation are applied to the resulting distributed mesh.</p><p><strong>Workflow 3 — UniformGrid → Reconcile → Assemble → Solve</strong> Every rank constructs its portion of the mesh independently via <code>Mesh&lt;Context::MPI&gt;::UniformGrid()</code>, which builds ghost layers and ownership information without any inter-rank communication beyond what the constructor already performs. Connectivity and reconciliation are then applied before assembly.</p></section><section id="autotoc_md515"><h4><a href="#autotoc_md515">Manufactured solutions</a></h4><p><strong>2D:</strong> <svg class="m-math" style="width: 10.238em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.282514 11.955168">
+<p>Parametrized over (geometry, K) with K ∈ {1, 2, 3, 4, 6}.</p><p>Geometries: 2D — Triangle, Quadrilateral 3D — Tetrahedron, Hexahedron, Pyramid, Wedge</p><p>Each GTest parametrization is invoked by CTest with MPIEXEC_NUMPROC_FLAG set to 1, 2, 3, 4, and 6 ranks.</p><section id="autotoc_md424"><h4><a href="#autotoc_md424">Mesh construction workflows under test</a></h4><p><strong>Workflow 1 — Shard → Save → Load → Reconcile → Assemble → Solve</strong> Rank 0 builds a local uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>Sharder::scatter()</code>. Each rank saves its shard to an HDF5 file, reloads it, recomputes all connectivity, and reconciles intermediate entities before assembly.</p><p><strong>Workflow 2 — Construct → Shard → Distribute → Reconcile → Assemble → Solve</strong> Rank 0 builds a local uniform-grid mesh and calls <code>Sharder::distribute()</code>, which performs shard + scatter + gather in one step without any I/O round-trip. Connectivity and reconciliation are applied to the resulting distributed mesh.</p><p><strong>Workflow 3 — UniformGrid → Reconcile → Assemble → Solve</strong> Every rank constructs its portion of the mesh independently via the distributed uniform-grid factory, which builds ghost layers and ownership information without any inter-rank communication beyond what the constructor already performs. Connectivity and reconciliation are then applied before assembly.</p></section><section id="autotoc_md425"><h4><a href="#autotoc_md425">Manufactured solutions</a></h4><p><strong>2D:</strong> <svg class="m-math" style="width: 10.238em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.282514 11.955168">
 <title>
 $ u = \sin(\pi x)\sin(\pi y) $
 </title>
@@ -235,11 +237,30 @@ $ 10 \times $
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_tests.html" class="m-doc">Rodin::Tests</a></dt>
-            <dd>Tests of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library</dd>
+            <dd>Tests of the Rodin library</dd>
             <dt>namespace <a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Rodin::Tests::Manufactured</a></dt>
-            <dd>Manufactured solution test cases</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Unit</a>.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a3c04138a5bfe5d72780bb7e82a18e627">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c04138a5bfe5d72780bb7e82a18e627" class="m-doc-self">main</a>(</span><span class="m-doc-wrap">int argc,
+              char** argv) -&gt; int</span>
+            </dt>
+            <dd>Initializes the parallel test runtime and runs the GoogleTest suite.</dd>
+          </dl>
+        </section>
+        <section id="define-members">
+          <h2><a href="#define-members">Defines</a></h2>
+          <dl class="m-doc">
+            <dt id="a3144ce213c9f1f24a5633ea5ac43a9ee">
+              <span class="m-doc-wrap-bumper">#define <a href="#a3144ce213c9f1f24a5633ea5ac43a9ee" class="m-doc-self">RODIN_GETPID</a></span>
+            </dt>
+            <dd>Compatibility macro used by MPI manufactured tests to query the current process id.</dd>
           </dl>
         </section>
       </div>

@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>MPI&lt;::Mat, Variational::BilinearForm&lt;Solution, TrialFES, TestFES, ::Mat&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>MPI-parallel assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix from a bilinear form.</p>
+        <p>MPI-parallel assembly of a PETSc matrix from a bilinear form.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -94,7 +94,7 @@
             </tr>
             <tr>
               <td>TestFES</td>
-              <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> finite element space type.</td>
+              <td>Test finite element space type.</td>
             </tr>
           </tbody>
         </table>
@@ -106,11 +106,12 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Each <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> rank assembles contributions from its owned polytopes into the distributed <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix.</p>
+<p>Each MPI rank assembles contributions from its owned polytopes into the distributed PETSc matrix.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -131,9 +132,9 @@
             <dt id="a032f029f468e1154761b88b10b9baaf4">
               using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = ::Mat
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix type (<code>::Mat</code>).</dd>
+            <dd>PETSc matrix type (<code>Mat</code>).</dd>
             <dt id="a2585442b962060e46edfeb15e5aac87a">
-              using <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc-self">BilinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&gt;
+              using <a href="#a2585442b962060e46edfeb15e5aac87a" class="m-doc-self">BilinearFormType</a> = <a href="group___rodin_c_t_a_d.html#gadb6cc755fd112527cf92474e3e74ee24" class="m-doc">Variational::<wbr />BilinearForm</a>&lt;Solution, TrialFES, TestFES, <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&gt;
             </dt>
             <dd>Bilinear form type being assembled.</dd>
             <dt id="aac3bcbd70e6befccb25e723b6e3217af">
@@ -145,6 +146,48 @@
             </dt>
             <dd>Input data type for the assembly pipeline.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Assembles the bilinear form into a distributed PETSc matrix.</dd>
+            <dt id="a17227756ce7234f252e0f0612ed7b2e8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a17227756ce7234f252e0f0612ed7b2e8" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; MPI* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a heap-allocated copy of this assembly backend.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ad7224a3ca1dc16a2d63578186884071a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Solution, class TrialFES, class TestFES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />MPI&lt;::<wbr />Mat, Variational::<wbr />BilinearForm&lt;Solution, TrialFES, TestFES, ::<wbr />Mat&gt;&gt;&lt;Solution, TrialFES, TestFES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7224a3ca1dc16a2d63578186884071a" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc">OperatorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles the bilinear form into a distributed PETSc matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>PETSc matrix receiving accumulated entries.</td>
+                </tr>
+                <tr>
+                  <td>input&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Bilinear-form assembly input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

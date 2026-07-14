@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dependent_value_8h.html">&lt;Rodin/Utility/DependentValue.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class T, T Value_, class ... Args&gt;</div>
+          <div class="m-doc-template">template&lt;class T, T ValueParam, class... Args&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>DependentValue <span class="m-thin">struct</span>
         </h1>
         <p>Creates a type-dependent compile-time constant value.</p>
@@ -89,7 +89,7 @@
               <td>The type of the value.</td>
             </tr>
             <tr>
-              <td>Value_</td>
+              <td>ValueParam</td>
               <td>The compile-time constant value.</td>
             </tr>
             <tr>
@@ -109,7 +109,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="struct_rodin_1_1_utility_1_1_dependent_value.html" class="m-doc">DependentValue</a> provides a way to create compile-time constants that depend on template parameters, preventing premature evaluation during template parsing. This is useful in conditional compilation within template contexts.</p><p>Example usage:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<p>DependentValue provides a way to create compile-time constants that depend on template parameters, preventing premature evaluation during template parsing. This is useful in conditional compilation within template contexts.</p><p>Example usage:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
 <span class="kt">void</span><span class="w"> </span><span class="n">foo</span><span class="p">()</span>
 <span class="p">{</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="p">(</span><span class="n">DependentValue</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;::</span><span class="n">Value</span><span class="p">)</span>

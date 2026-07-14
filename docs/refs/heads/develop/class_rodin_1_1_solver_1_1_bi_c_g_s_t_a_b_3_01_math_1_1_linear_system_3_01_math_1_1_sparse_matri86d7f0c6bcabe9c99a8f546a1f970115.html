@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> (Bi-Conjugate Gradient Stabilized) method is an iterative solver for non-symmetric linear systems <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
+<p>The BiCGSTAB (Bi-Conjugate Gradient Stabilized) method is an iterative solver for non-symmetric linear systems <svg class="m-math" style="width: 3.766em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 36.150849 8.302191">
 <title>
 $ Ax = b $
 </title>
@@ -120,7 +120,7 @@ $ Ax = b $
 <use x='18.748263' y='0' xlink:href='#eq1-g1-61'/>
 <use x='31.173744' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg>. It combines ideas from the BiCG algorithm with stabilization to avoid the irregular convergence patterns often seen in the Bi-Conjugate Gradient method.</p><p><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> is particularly suitable for:</p><ul><li>Non-symmetric matrices</li><li>Large sparse systems</li><li>Problems where direct solvers are too expensive</li></ul><p><strong>Example usage:</strong></p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg>. It combines ideas from the BiCG algorithm with stabilization to avoid the irregular convergence patterns often seen in the Bi-Conjugate Gradient method.</p><p>BiCGSTAB is particularly suitable for:</p><ul><li>Non-symmetric matrices</li><li>Large sparse systems</li><li>Problems where direct solvers are too expensive</li></ul><p><strong>Example usage:</strong></p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">beta</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">BiCGSTAB</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
@@ -157,7 +157,7 @@ $ Ax = b $
             </dt>
             <dd>Type of linear system being solved.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Type of problem being solved.</dd>
             <dt id="a85385c6607a397925a213e9098256fdc">
@@ -172,7 +172,7 @@ $ Ax = b $
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa25ab93d234edf7c2d09114d126783c5" class="m-doc">BiCGSTAB</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> solver with default parameters.</dd>
+            <dd>Constructs a BiCGSTAB solver with default parameters.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a0af09a883a1732f999011d1a9cf87cd8" class="m-doc">BiCGSTAB</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a>&amp; other)</span>
             </dt>
@@ -201,7 +201,7 @@ $ Ax = b $
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Solves the linear system using the <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> method.</dd>
+            <dd>Solves the linear system using the BiCGSTAB method.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
             </dt>
@@ -229,7 +229,7 @@ $ Ax = b $
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />BiCGSTAB&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa25ab93d234edf7c2d09114d126783c5" class="m-doc-self">BiCGSTAB</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> solver with default parameters.</p>
+            <p>Constructs a BiCGSTAB solver with default parameters.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -258,7 +258,7 @@ $ Ax = b $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to copy from</td>
+                  <td>Solver to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -278,7 +278,7 @@ $ Ax = b $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to move from</td>
+                  <td>Solver to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -395,7 +395,7 @@ $ k $
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />BiCGSTAB&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Solves the linear system using the <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> method.</p>
+            <p>Solves the linear system using the BiCGSTAB method.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -437,7 +437,7 @@ $ k $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new <a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> instance</td>
+                  <td>Pointer to a new BiCGSTAB instance</td>
                 </tr>
               </tfoot>
             </table>

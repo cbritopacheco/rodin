@@ -80,9 +80,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md360">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md361">Features</a></li>
-            <li><a href="#autotoc_md362">Usage Examples</a></li>
+            <li><a href="#autotoc_md341">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md342">Features</a></li>
+            <li><a href="#autotoc_md343">Usage Examples</a></li>
             <li>
               Reference
               <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the GridFunction class, which represents functions defined on a finite element mesh by their degrees of freedom. Grid functions are the discrete representation of solutions in finite element analysis.</p><section id="autotoc_md360"><h3><a href="#autotoc_md360">Mathematical Foundation</a></h3><p>A grid function represents a function <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
+<p>This file defines the GridFunction class, which represents functions defined on a finite element mesh by their degrees of freedom. Grid functions are the discrete representation of solutions in finite element analysis.</p><section id="autotoc_md341"><h3><a href="#autotoc_md341">Mathematical Foundation</a></h3><p>A grid function represents a function <svg class="m-math" style="width: 3.995em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 38.356537 9.962629">
 <title>
 $ u_h \in V_h $
 </title>
@@ -183,7 +183,7 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the number of DOFs</li></ul></section><section id="autotoc_md361"><h3><a href="#autotoc_md361">Features</a></h3><ul><li><strong>Storage</strong>: Manages coefficient vector for FEM solutions</li><li><strong>Evaluation</strong>: Point-wise evaluation using basis function interpolation</li><li><strong>I/O</strong>: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)</li><li><strong>Operations</strong>: Arithmetic operations, norms, projections</li><li><strong>Assignment</strong>: Can be set from functions or expressions</li></ul></section><section id="autotoc_md362"><h3><a href="#autotoc_md362">Usage Examples</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg> is the number of DOFs</li></ul></section><section id="autotoc_md342"><h3><a href="#autotoc_md342">Features</a></h3><ul><li><strong>Storage</strong>: Manages coefficient vector for FEM solutions</li><li><strong>Evaluation</strong>: Point-wise evaluation using basis function interpolation</li><li><strong>I/O</strong>: Export to visualization formats (XDMF, HDF5, MEDIT, etc.)</li><li><strong>Operations</strong>: Arithmetic operations, norms, projections</li><li><strong>Assignment</strong>: Can be set from functions or expressions</li></ul></section><section id="autotoc_md343"><h3><a href="#autotoc_md343">Usage Examples</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">  </span><span class="c1">// Create grid function</span>
 
 <span class="c1">// Set from analytical function</span>
@@ -198,26 +198,36 @@ $ N $
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">Rodin::Variational::GridFunctionBaseReference</a>
+              <div class="m-doc-template">template&lt;class Derived, class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grid_function_base_3_01_derived_00_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::GridFunctionBase&lt;Derived, FES, Data&gt;&gt;</a>
+            </dt>
+            <dd>Traits for GridFunctionBase: exposes the space and data types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::GridFunction&lt;FES, Data&gt;&gt;</a>
+            </dt>
+            <dd>Traits for GridFunction: exposes the space and data types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, class Data = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aee60825459fdaf14377eb17bc437a934" class="m-doc">::<wbr />DataType</a>&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Rodin::Variational::GridFunctionBase</a>
             </dt>
             <dd>Base class for discrete finite element functions.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType, class Data = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::DataType&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Rodin::Variational::GridFunctionBase</a>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_fa803fb5fcea8b5a006f6ebef83f58418.html" class="m-doc">Rodin::Variational::GridFunction&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
             </dt>
-            <dd>Base class for grid function objects.</dd>
+            <dd>Grid function storing its degrees of freedom in a dense Math::Vector over the space&#x27;s scalar type (the standard local backend).</dd>
           </dl>
         </section>
       </div>

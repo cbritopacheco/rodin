@@ -78,6 +78,17 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshLoaderBase <span class="m-thin">class</span>
         </h1>
         <p>Base class for loading meshes from files or streams.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Context</td>
+              <td>Context type (e.g., Context::Local for sequential execution)</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,9 +104,9 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a> provides the foundation for loading mesh data in different file formats. It extends the generic <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class to handle mesh-specific operations and manages the mesh object being populated.</p><p>Specialized loaders for specific file formats should derive from this class and implement the <a href="class_rodin_1_1_i_o_1_1_loader.html#a4a361edaafdca57b230ccf5f8bc6479a" class="m-doc">load(std::<wbr />istream&amp;)</a> method to parse their respective formats.</p><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<p>MeshLoaderBase provides the foundation for loading mesh data in different file formats. It extends the generic Loader class to handle mesh-specific operations and manages the mesh object being populated.</p><p>Specialized loaders for specific file formats should derive from this class and implement the load(std::istream&amp;) method to parse their respective formats.</p><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a>, <a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a></p></aside></section>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>Loader, MeshPrinter</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -112,7 +123,7 @@
             <dt id="a6d47fa221a0d6476543bdda57927aeed">
               using <a href="#a6d47fa221a0d6476543bdda57927aeed" class="m-doc-self">ContextType</a> = Context
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type for the mesh (e.g., sequential or parallel).</dd>
+            <dd>Context type for the mesh (e.g., sequential or parallel).</dd>
             <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
               using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a6d47fa221a0d6476543bdda57927aeed" class="m-doc">ContextType</a>&gt;
             </dt>
@@ -120,7 +131,7 @@
             <dt id="af9494f24173605303862e0395041b453">
               using <a href="#af9494f24173605303862e0395041b453" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">IO::<wbr />Loader</a>&lt;<a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&gt;
             </dt>
-            <dd>Parent <a href="class_rodin_1_1_i_o_1_1_loader.html" class="m-doc">Loader</a> class type.</dd>
+            <dd>Parent Loader class type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">

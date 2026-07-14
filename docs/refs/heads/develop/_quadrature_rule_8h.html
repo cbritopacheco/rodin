@@ -80,18 +80,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md487">Mathematical foundation</a></li>
-            <li><a href="#autotoc_md488">Usage</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md403">Mathematical foundation</a></li>
+            <li><a href="#autotoc_md404">Usage</a></li>
           </ul>
         </nav>
-<p>This file defines specializations of <a href="class_rodin_1_1_variational_1_1_quadrature_rule.html" class="m-doc">Rodin::<wbr />Variational::<wbr />QuadratureRule</a> for integrating functions and shape-function expressions over mesh polytopes.</p><section id="autotoc_md487"><h3><a href="#autotoc_md487">Mathematical foundation</a></h3><p>A quadrature rule approximates an integral by a weighted sum:</p><div class="m-math"><svg style="width: 14.074em; height: 3.622em;" viewBox="126.714685 -35.965274 135.113609 34.76976">
+<p>This file defines specializations of <code>Rodin::Variational::QuadratureRule</code> for integrating functions and shape-function expressions over mesh polytopes.</p><section id="autotoc_md403"><h3><a href="#autotoc_md403">Mathematical foundation</a></h3><p>A quadrature rule approximates an integral by a weighted sum:</p><div class="m-math"><svg style="width: 14.074em; height: 3.622em;" viewBox="126.714685 -35.965274 135.113609 34.76976">
 <title>
 \[
   \int_K f(x)\,dx \approx \sum_{q=1}^{n_q} w_q\,f(x_q),
@@ -176,43 +169,9 @@ $ n_q $
 <use x='0' y='0' xlink:href='#eq4-g1-110'/>
 <use x='6.987606' y='1.793263' xlink:href='#eq4-g0-113'/>
 </g>
-</svg> is the number of quadrature points.</li></ul><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, the reference quadrature formula lives in the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module, while the mapped geometric points live in <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a>. This separation allows:</p><ul><li>canonical reuse of reference quadrature formulas,</li><li>mesh-owned caching of mapped geometric quadrature points,</li><li>simpler and more efficient integrator implementations.</li></ul></section><section id="autotoc_md488"><h3><a href="#autotoc_md488">Usage</a></h3><p>Typical usage is:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
+</svg> is the number of quadrature points.</li></ul><p>In Rodin, the reference quadrature formula lives in the <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a> module, while the mapped geometric points live in <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a>. This separation allows:</p><ul><li>canonical reuse of reference quadrature formulas,</li><li>mesh-owned caching of mapped geometric quadrature points,</li><li>simpler and more efficient integrator implementations.</li></ul></section><section id="autotoc_md404"><h3><a href="#autotoc_md404">Usage</a></h3><p>Typical usage is:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">qr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QuadratureRule</span><span class="p">(</span><span class="n">integrand</span><span class="p">);</span>
 <span class="n">qr</span><span class="p">.</span><span class="n">setPolytope</span><span class="p">(</span><span class="n">cell</span><span class="p">);</span>
-<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qr</span><span class="p">.</span><span class="n">compute</span><span class="p">();</span></pre><p>For local element integrators, setPolytope binds the integrator to a concrete polytope, selects an appropriate quadrature formula, and retrieves the corresponding cached <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a> from the mesh.</p></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FunctionDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_function_base_3_01_function_derived_01_4_01_4.html" class="m-doc">Rodin::Variational::QuadratureRule&lt;FunctionBase&lt;FunctionDerived&gt;&gt;</a>
-            </dt>
-            <dd>Quadrature rule for integrating general functions on mesh polytopes.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_grid_function_3_01_f_e_s_00_01_data_01_4_01_4.html" class="m-doc">Rodin::Variational::QuadratureRule&lt;GridFunction&lt;FES, Data&gt;&gt;</a>
-            </dt>
-            <dd>Integration of a scalar grid function over a mesh region.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class TrialFES, class RHSDerived, class TestFES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_dot_3_01_shape_function_base_3_01_l_h_s_der8743a0969982d5f08c8d9ce16c0376b5.html" class="m-doc">Rodin::Variational::QuadratureRule&lt;Dot&lt;ShapeFunctionBase&lt;LHSDerived, TrialFES, TrialSpace&gt;, ShapeFunctionBase&lt;RHSDerived, TestFES, TestSpace&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Local bilinear-form quadrature for the dot product of a trial and a test shape function.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class NestedDerived, class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_quadrature_rule_3_01_shape_function_base_3_01_nested_derived_00_098b200335f11a538dc0d8b3a17a60f0.html" class="m-doc">Rodin::Variational::QuadratureRule&lt;ShapeFunctionBase&lt;NestedDerived, FES, TestSpace&gt;&gt;</a>
-            </dt>
-            <dd>Local linear-form quadrature for a test shape function expression.</dd>
-          </dl>
-        </section>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qr</span><span class="p">.</span><span class="n">compute</span><span class="p">();</span></pre><p>For local element integrators, setPolytope() binds the integrator to a concrete polytope, selects an appropriate quadrature formula, and retrieves the corresponding cached <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeQuadrature</a> from the mesh.</p></section>
       </div>
     </div>
   </div>

@@ -76,13 +76,14 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests_1_1_manufactured.html">Manufactured</a>::<wbr/></span>DirichletBCIdentification <span class="m-thin">namespace</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Manufactured</a> solutions for the identification Dirichlet BC <code>DirichletBC(u, A(v))</code>, where <code>A(v)</code> is a linear shape-function expression.</p>
+        <p>Manufactured solutions for the identification Dirichlet BC <code>DirichletBC(u, A(v))</code>, where <code>A(v)</code> is a linear shape-function expression.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
@@ -140,7 +141,7 @@ $ u_s = 0 $
 <use x='14.397319' y='0' xlink:href='#eq3-g2-61'/>
 <use x='26.8228' y='0' xlink:href='#eq3-g2-48'/>
 </g>
-</svg>.</li><li><code>DirichletBC(u, c\cdotu).on(\Gamma)</code> with <svg class="m-math" style="width: 2.775em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302203 26.637289 10.626798">
+</svg>.</li><li><code>DirichletBC(u, c\cdot u).on(\Gamma)</code> with <svg class="m-math" style="width: 2.775em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302203 26.637289 10.626798">
 <title>
 $ c \neq 1 $
 </title>
@@ -214,7 +215,7 @@ $ u_s = c\,u_s \;\Leftrightarrow\; (1-c)\,u_s = 0 $
 <use x='121.165567' y='0' xlink:href='#eq7-g3-61'/>
 <use x='133.591048' y='0' xlink:href='#eq7-g3-48'/>
 </g>
-</svg>.</li><li><code>DirichletBC(u, f\cdotv).on(\Gamma)</code> with <code>v</code> itself constrained to a known function <code>g_v</code> via a value-prescribing BC produces an effective Dirichlet of value <svg class="m-math" style="width: 6.031em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 57.900898 11.955168">
+</svg>.</li><li><code>DirichletBC(u, f\cdot v).on(\Gamma)</code> with <code>v</code> itself constrained to a known function <code>g_v</code> via a value-prescribing BC produces an effective Dirichlet of value <svg class="m-math" style="width: 6.031em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 57.900898 11.955168">
 <title>
 $ f(x_s) g_v(x_s) $
 </title>
@@ -252,20 +253,33 @@ $ x_s $
 <use x='0' y='0' xlink:href='#eq9-g1-120'/>
 <use x='6.652087' y='1.793263' xlink:href='#eq9-g0-115'/>
 </g>
-</svg> (Lagrange same-FES). Comparing solutions confirms the constraint coefficients are computed exactly.</li></ul><p>Each test compares two <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> solves: a <em>reference</em> solve using a plain value-prescribing <code>DirichletBC(u, g)</code>, and an <em>identification</em> solve using <code>DirichletBC(u, A(u))</code> (or <code>A(v)</code> for the cross-block case). The two resulting solutions must agree at the FE-discretization level (ideally bitwise on Lagrange-exact data, otherwise within numerical roundoff / iterative-solver tolerance).</p>
+</svg> (Lagrange same-FES). Comparing solutions confirms the constraint coefficients are computed exactly.</li></ul><p>Each test compares two Poisson solves: a <em>reference</em> solve using a plain value-prescribing <code>DirichletBC(u, g)</code>, and an <em>identification</em> solve using <code>DirichletBC(u, A(u))</code> (or <code>A(v)</code> for the cross-block case). The two resulting solutions must agree at the FE-discretization level (ideally bitwise on Lagrange-exact data, otherwise within numerical roundoff / iterative-solver tolerance).</p>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_16x16</a> = Manufactured_DirichletBCIdentification_Test&lt;16&gt;
+            </dt>
+            <dd>Helper used by the tests to Test 16 x 16.</dd>
+            <dt>
+              using <a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_32x32</a> = Manufactured_DirichletBCIdentification_Test&lt;32&gt;
+            </dt>
+            <dd>Helper used by the tests to Test 32 x 32.</dd>
+          </dl>
+        </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a0922ffecba6860ebcd1ac8f5a76b60bf" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"><a href="#a0922ffecba6860ebcd1ac8f5a76b60bf" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_<wbr />32x32</a>,
               NegativeSelfIdentificationEquivalentToZero)</span>
             </dt>
-            <dd><code>DirichletBC(u, -u).on(\Gamma)</code> is algebraically equivalent to <code>DirichletBC(u, 0).on(\Gamma)</code> for the <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> problem.</dd>
+            <dd><code>DirichletBC(u, -u).on(\Gamma)</code> is algebraically equivalent to <code>DirichletBC(u, 0).on(\Gamma)</code> for the Poisson problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a048b00cc27132bfb3bf40e03a079b63b" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"><a href="#a048b00cc27132bfb3bf40e03a079b63b" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_<wbr />32x32</a>,
               ScalarSelfIdentificationEquivalentToZero)</span>
             </dt>
-            <dd><code>DirichletBC(u, c\cdotu).on(\Gamma)</code> with <svg class="m-math" style="width: 2.775em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302203 26.637289 10.626798">
+            <dd><code>DirichletBC(u, c\cdot u).on(\Gamma)</code> with <svg class="m-math" style="width: 2.775em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302203 26.637289 10.626798">
 <title>
 $ c \neq 1 $
 </title>
@@ -321,32 +335,67 @@ $ \Gamma $
 <g id='eq14-page1'>
 <use x='0' y='0' xlink:href='#eq14-g0-0'/>
 </g>
-</svg> for the <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> problem.</dd>
+</svg> for the Poisson problem.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a86a17d1f1079348bf1a1431affc82e7f" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />16x16</a>,
+              <span class="m-doc-wrap-bumper"><a href="#a86a17d1f1079348bf1a1431affc82e7f" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
               NegativeSelfIdentificationFEError)</span>
             </dt>
             <dd>Verifies that the L2 error of the manufactured solution under <code>DirichletBC(u, -u)</code> is the same as under <code>DirichletBC(u, 0)</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae781e497561e2e4dc311a1221f65f16b" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />16x16</a>,
+              <span class="m-doc-wrap-bumper"><a href="#ae781e497561e2e4dc311a1221f65f16b" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
               ScalarSelfIdentificationP1Exact)</span>
             </dt>
             <dd>P1-exact solution test: <code>u = 1 + x + 2y</code>, harmonic, with <code>DirichletBC(u, A(u))</code> reducing the value of u on the boundary.</dd>
-            <dt id="a0ef912fca0edcb4988adb090507d6d21">
-              <span class="m-doc-wrap-bumper"><a href="#a0ef912fca0edcb4988adb090507d6d21" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />16x16</a>,
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0ef912fca0edcb4988adb090507d6d21" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
               IdentificationAlternativeIsActive)</span>
             </dt>
-            <dd>The identification BC produces the documented DirichletBCBase::IdentifiedDOFs variant alternative, never the DirichletBCBase::ValueDOFs alternative — used as a runtime invariant during the manufactured tests.</dd>
+            <dd>The identification BC produces the documented <code>DirichletBCBase::IdentifiedDOFs</code> variant alternative, never the <code>DirichletBCBase::ValueDOFs</code> alternative — used as a runtime invariant during the manufactured tests.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a73108f663047bcd8d26c8ce109b97a0d" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
+              CrossFieldVectorMasterMatchesValueReference)</span>
+            </dt>
+            <dd>Verifies cross field vector master matches value reference for test 16 x 16 by checking tolerance-based numerical results, exact expected values, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ab97499b4eed6017b49c72cea20098b3c" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams16x16,
+              <a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
+              ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral))</span>
+            </dt>
+            <dd>Instantiates Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ae1de56e19d4fa656da36578a03f10f84" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams32x32,
+              <a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_<wbr />32x32</a>,
+              ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral))</span>
+            </dt>
+            <dd>Instantiates Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a35805425d3e9a837da1261902c4dbc0b"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc-self">Test_16x16</a> = Manufactured_DirichletBCIdentification_Test&lt;16&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Test 16 x 16.</p>
+          </div></section>
+          <section class="m-doc-details" id="a976ef47a223b27e4bd21a9a67691bded"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /><a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc-self">Test_32x32</a> = Manufactured_DirichletBCIdentification_Test&lt;32&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Test 32 x 32.</p>
+          </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a0922ffecba6860ebcd1ac8f5a76b60bf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0922ffecba6860ebcd1ac8f5a76b60bf" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0922ffecba6860ebcd1ac8f5a76b60bf" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_<wbr />32x32</a>,
               NegativeSelfIdentificationEquivalentToZero)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
             </h3>
-            <p><code>DirichletBC(u, -u).on(\Gamma)</code> is algebraically equivalent to <code>DirichletBC(u, 0).on(\Gamma)</code> for the <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> problem.</p>
+            <p><code>DirichletBC(u, -u).on(\Gamma)</code> is algebraically equivalent to <code>DirichletBC(u, 0).on(\Gamma)</code> for the Poisson problem.</p>
 <p>Solves</p><div class="m-math"><svg style="width: 27.704em; height: 1.361em;" viewBox="61.291139 -13.06128 265.960731 13.06128">
 <title>
 \[
@@ -415,10 +464,11 @@ $ \Gamma $
           </div></section>
           <section class="m-doc-details" id="a048b00cc27132bfb3bf40e03a079b63b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a048b00cc27132bfb3bf40e03a079b63b" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a048b00cc27132bfb3bf40e03a079b63b" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_<wbr />32x32</a>,
               ScalarSelfIdentificationEquivalentToZero)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
             </h3>
-            <p><code>DirichletBC(u, c\cdotu).on(\Gamma)</code> with <svg class="m-math" style="width: 2.775em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302203 26.637289 10.626798">
+            <p><code>DirichletBC(u, c\cdot u).on(\Gamma)</code> with <svg class="m-math" style="width: 2.775em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302203 26.637289 10.626798">
 <title>
 $ c \neq 1 $
 </title>
@@ -474,7 +524,7 @@ $ \Gamma $
 <g id='eq14-page1'>
 <use x='0' y='0' xlink:href='#eq14-g0-0'/>
 </g>
-</svg> for the <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> problem.</p>
+</svg> for the Poisson problem.</p>
 <p>For each <svg class="m-math" style="width: 10.255em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.451083 11.955168">
 <title>
 $ c \in \{ -1, -2, 0.5, 3 \} $
@@ -526,23 +576,59 @@ $ u_s = u_s $
 <use x='26.8228' y='0' xlink:href='#eq16-g1-117'/>
 <use x='33.48524' y='1.793263' xlink:href='#eq16-g0-115'/>
 </g>
-</svg> is vacuous (singular row). <code>c = 0</code> is excluded because the assembler&#x27;s strict-zero pruning drops the empty constraint row entirely; to pin DOFs to zero use <code>DirichletBC(u, Zero())</code>, not <code>DirichletBC(u, 0\cdotv)</code>.</p></aside>
+</svg> is vacuous (singular row). <code>c = 0</code> is excluded because the assembler&#x27;s strict-zero pruning drops the empty constraint row entirely; to pin DOFs to zero use <code>DirichletBC(u, Zero())</code>, not <code>DirichletBC(u, 0\cdot v)</code>.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a86a17d1f1079348bf1a1431affc82e7f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a86a17d1f1079348bf1a1431affc82e7f" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />16x16</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a86a17d1f1079348bf1a1431affc82e7f" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
               NegativeSelfIdentificationFEError)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
             </h3>
             <p>Verifies that the L2 error of the manufactured solution under <code>DirichletBC(u, -u)</code> is the same as under <code>DirichletBC(u, 0)</code>.</p>
 <p>Same as above but expressed as an integral comparison rather than vertex-wise comparison — guards against any silent rescaling of the solution vector.</p>
           </div></section>
           <section class="m-doc-details" id="ae781e497561e2e4dc311a1221f65f16b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae781e497561e2e4dc311a1221f65f16b" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_dirichlet_b_c_identification_1_1_manufactured___dirichlet_b_c_identification___test.html" class="m-doc">Test_<wbr />16x16</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae781e497561e2e4dc311a1221f65f16b" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
               ScalarSelfIdentificationP1Exact)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
             </h3>
             <p>P1-exact solution test: <code>u = 1 + x + 2y</code>, harmonic, with <code>DirichletBC(u, A(u))</code> reducing the value of u on the boundary.</p>
-<p>For an affine solution the FE solution is exact at the nodes. Using <code>DirichletBC(u, 2*u + Zero())</code> does not type-check (mixed types), so we test <code>DirichletBC(u, 2*u)</code> and verify the boundary collapses to 0 (since (1-2) u_s = 0 ⇒ u_s = 0). This means the solution under this BC is the same as <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> with homogeneous boundary, which can be computed independently and compared.</p>
+<p>For an affine solution the FE solution is exact at the nodes. Using <code>DirichletBC(u, 2*u + Zero())</code> does not type-check (mixed types), so we test <code>DirichletBC(u, 2*u)</code> and verify the boundary collapses to 0 (since (1-2) u_s = 0 ⇒ u_s = 0). This means the solution under this BC is the same as Poisson with homogeneous boundary, which can be computed independently and compared.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0ef912fca0edcb4988adb090507d6d21"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ef912fca0edcb4988adb090507d6d21" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
+              IdentificationAlternativeIsActive)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
+            </h3>
+            <p>The identification BC produces the documented <code>DirichletBCBase::IdentifiedDOFs</code> variant alternative, never the <code>DirichletBCBase::ValueDOFs</code> alternative — used as a runtime invariant during the manufactured tests.</p>
+          </div></section>
+          <section class="m-doc-details" id="a73108f663047bcd8d26c8ce109b97a0d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73108f663047bcd8d26c8ce109b97a0d" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
+              CrossFieldVectorMasterMatchesValueReference)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies cross field vector master matches value reference for test 16 x 16 by checking tolerance-based numerical results, exact expected values, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab97499b4eed6017b49c72cea20098b3c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab97499b4eed6017b49c72cea20098b3c" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams16x16,
+              <a href="#a35805425d3e9a837da1261902c4dbc0b" class="m-doc">Test_<wbr />16x16</a>,
+              ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae1de56e19d4fa656da36578a03f10f84"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DirichletBCIdentification::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae1de56e19d4fa656da36578a03f10f84" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams32x32,
+              <a href="#a976ef47a223b27e4bd21a9a67691bded" class="m-doc">Test_<wbr />32x32</a>,
+              ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_dirichlet_b_c_identification_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DirichletBCIdentification.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.</p>
           </div></section>
         </section>
       </div>

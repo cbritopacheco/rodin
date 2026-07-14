@@ -86,7 +86,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">T</td>
-              <td>Element type (must be derived from or compatible with <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>)</td>
+              <td>Element type (must be derived from or compatible with Base)</td>
             </tr>
           </tbody>
         </table>
@@ -107,8 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>Polymorphic container for form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a></p></aside>
-<p><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> provides a dynamic container for storing polymorphic form language objects with value semantics. The container manages object lifetimes through unique pointers and provides deep copying capabilities.</p><section id="autotoc_md41"><h3><a href="#autotoc_md41">Features</a></h3><ul><li><strong>Polymorphic Storage</strong>: Stores derived types through base class pointers</li><li><strong>Value Semantics</strong>: Copy constructor and assignment perform deep copies</li><li><strong><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> Support</strong>: Provides standard forward iterators</li><li><strong>Type Safety</strong>: Elements are accessed through their stored type T</li></ul></section><section id="autotoc_md42"><h3><a href="#autotoc_md42">Memory Management</a></h3><ul><li>Elements are stored as std::unique_ptr&lt;T&gt;</li><li>Copy operations use the polymorphic <a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc">copy()</a> method</li><li>Automatic cleanup on destruction</li></ul></section><section id="autotoc_md43"><h3><a href="#autotoc_md43">Complexity</a></h3><ul><li>Access: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
+<p>Polymorphic container for form language objects.</p><aside class="m-note m-default"><h4>See also</h4><p>List</p></aside><p>List provides a dynamic container for storing polymorphic form language objects with value semantics. The container manages object lifetimes through unique pointers and provides deep copying capabilities.</p><section id="autotoc_md41"><h3><a href="#autotoc_md41">Features</a></h3><ul><li><strong>Polymorphic Storage</strong>: Stores derived types through base class pointers</li><li><strong>Value Semantics</strong>: Copy constructor and assignment perform deep copies</li><li><strong>Iterator Support</strong>: Provides standard forward iterators</li><li><strong>Type Safety</strong>: Elements are accessed through their stored type T</li></ul></section><section id="autotoc_md42"><h3><a href="#autotoc_md42">Memory Management</a></h3><ul><li>Elements are stored as std::unique_ptr&lt;T&gt;</li><li>Copy operations use the polymorphic copy() method</li><li>Automatic cleanup on destruction</li></ul></section><section id="autotoc_md43"><h3><a href="#autotoc_md43">Complexity</a></h3><ul><li>Access: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
 <title>
 $ O(1) $
 </title>
@@ -124,7 +123,7 @@ $ O(1) $
 <use x='13.823574' y='0' xlink:href='#eq1-g1-49'/>
 <use x='19.676564' y='0' xlink:href='#eq1-g1-41'/>
 </g>
-</svg> for <a href="#a8e67c7170162be7b113441f0886aaf69" class="m-doc">at()</a></li><li>Insertion: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
+</svg> for at()</li><li>Insertion: <svg class="m-math" style="width: 2.524em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.22889 11.955168">
 <title>
 $ O(1) $
 </title>
@@ -140,7 +139,7 @@ $ O(1) $
 <use x='13.823574' y='0' xlink:href='#eq2-g1-49'/>
 <use x='19.676564' y='0' xlink:href='#eq2-g1-41'/>
 </g>
-</svg> amortized for <a href="#a926520ac0969e39be6ae7617ead72699" class="m-doc">add()</a></li><li>Copy: <svg class="m-math" style="width: 2.642em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 25.363505 11.955168">
+</svg> amortized for add()</li><li>Copy: <svg class="m-math" style="width: 2.642em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 25.363505 11.955168">
 <title>
 $ O(n) $
 </title>
@@ -173,7 +172,7 @@ $ n $
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
             </dt>
-            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
+            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -182,11 +181,11 @@ $ n $
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_list_1_1_const_iterator.html" class="m-doc">ConstIterator</a>
             </dt>
-            <dd>Forward iterator for const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>.</dd>
+            <dd>Forward iterator for const List.</dd>
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a>
             </dt>
-            <dd>Forward iterator for non-const <a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a>.</dd>
+            <dd>Forward iterator for non-const List.</dd>
             <dt id="a0c5a1541ecf7ad17925583cf6abd2c65">
               using <a href="#a0c5a1541ecf7ad17925583cf6abd2c65" class="m-doc-self">reference</a> = T&amp;
             </dt>
@@ -304,11 +303,11 @@ $ n $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> to copy from</td>
+                  <td>List to copy from</td>
                 </tr>
               </tbody>
             </table>
-<p>Each element is copied using its polymorphic <a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc">copy()</a> method, ensuring proper copying of derived types.</p>
+<p>Each element is copied using its polymorphic copy() method, ensuring proper copying of derived types.</p>
           </div></section>
           <section class="m-doc-details" id="a7ab2e8e9ca635e95dd2d58c883778c17"><div>
             <h3>
@@ -325,7 +324,7 @@ $ n $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> to move from</td>
+                  <td>List to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -345,7 +344,7 @@ $ n $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> to copy from</td>
+                  <td>List to copy from</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -355,7 +354,7 @@ $ n $
                 </tr>
               </tfoot>
             </table>
-<p>Clears existing elements and performs a deep copy of all elements from other using polymorphic <a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc">copy()</a>.</p>
+<p>Clears existing elements and performs a deep copy of all elements from other using polymorphic copy().</p>
           </div></section>
           <section class="m-doc-details" id="ae7500a70e6d32b15247a6cffb15d1157"><div>
             <h3>
@@ -372,7 +371,7 @@ $ n $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> to move from</td>
+                  <td>List to move from</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -413,7 +412,7 @@ $ n $
               <tbody>
                 <tr>
                   <td>std::out_of_range</td>
-                  <td>if i &gt;= <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size()</a></td>
+                  <td>if i &gt;= size()</td>
                 </tr>
               </tbody>
             </table>
@@ -448,7 +447,7 @@ $ n $
               <tbody>
                 <tr>
                   <td>std::out_of_range</td>
-                  <td>if i &gt;= <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size()</a></td>
+                  <td>if i &gt;= size()</td>
                 </tr>
               </tbody>
             </table>
@@ -478,7 +477,7 @@ $ n $
                 </tr>
               </tfoot>
             </table>
-<p>Creates a polymorphic copy of the element using <a href="#a14c77fd551eec7aae97831ef36e8aac7" class="m-doc">copy()</a> and appends it to the list.</p>
+<p>Creates a polymorphic copy of the element using copy() and appends it to the list.</p>
           </div></section>
           <section class="m-doc-details" id="a45d5afe647057b51cc1a9823c9f03700"><div>
             <h3>
@@ -495,7 +494,7 @@ $ n $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list.html" class="m-doc">List</a> containing elements to add</td>
+                  <td>List containing elements to add</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -570,7 +569,7 @@ $ n $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> to the first element</td>
+                  <td>Iterator to the first element</td>
                 </tr>
               </tfoot>
             </table>
@@ -587,7 +586,7 @@ $ n $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_form_language_1_1_list_1_1_iterator.html" class="m-doc">Iterator</a> to the element following the last element</td>
+                  <td>Iterator to the element following the last element</td>
                 </tr>
               </tfoot>
             </table>
@@ -676,7 +675,7 @@ $ n $
                 </tr>
               </tfoot>
             </table>
-<p>Implements the <a href="class_rodin_1_1_copyable.html" class="m-doc">Copyable</a> interface, creating a deep copy of the list and all its elements.</p>
+<p>Implements the Copyable interface, creating a deep copy of the list and all its elements.</p>
           </div></section>
         </section>
       </div>

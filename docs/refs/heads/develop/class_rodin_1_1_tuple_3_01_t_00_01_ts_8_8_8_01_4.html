@@ -240,6 +240,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a09a7e63899626fe2d0e5e243e2de66c0" class="m-doc">concatenate</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&amp; other) const -&gt; <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;T, Ts..., Gs...&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Concatenates this tuple with another tuple.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
+            </dt>
+            <dd>Serializes each tuple element.</dd>
           </dl>
         </section>
         <section>
@@ -435,7 +441,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>An empty <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+                  <td>An empty Tuple.</td>
                 </tr>
               </tfoot>
             </table>
@@ -940,6 +946,41 @@
                   <td>A new tuple containing the elements of this tuple followed by those of the other tuple.</td>
                 </tr>
               </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class T, class ... Ts&gt;
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Tuple&lt;T, Ts...&gt;&lt;T, Ts&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
+            </h3>
+            <p>Serializes each tuple element.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Serialization archive type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ar</td>
+                  <td>Archive used for serialization.</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Serialization version.</td>
+                </tr>
+              </tbody>
             </table>
           </div></section>
         </section>

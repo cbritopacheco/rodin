@@ -99,7 +99,7 @@
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
             </dt>
-            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
+            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -114,6 +114,14 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a995d4f23bd7e599ba43fcfd769bb9020" class="m-doc">Identifiable</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3018b41311e5245443632b85ad652f33" class="m-doc">Identifiable</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
             <dt id="ad62fe6fa9627a72400a9b6e5e6e3ba5d">
               <span class="m-doc-wrap-bumper"><a href="#ad62fe6fa9627a72400a9b6e5e6e3ba5d" class="m-doc-self">~Identifiable</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
@@ -136,11 +144,45 @@
               using Rodin::<wbr />Identifiable::<wbr /><a href="#a36b32316c418ee977c27453e7e37658d" class="m-doc-self">UUID</a> = size_t
             </h3>
             <p>Type alias for unique object identifiers.</p>
-<p>UUID (Universally Unique Identifier) is used to uniquely identify each <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a> instance during its lifetime. The identifier is assigned during construction and remains constant.</p>
+<p>UUID (Universally Unique Identifier) is used to uniquely identify each Identifiable instance during its lifetime. The identifier is assigned during construction and remains constant.</p>
           </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a995d4f23bd7e599ba43fcfd769bb9020"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Identifiable::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a995d4f23bd7e599ba43fcfd769bb9020" class="m-doc-self">Identifiable</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a>&amp; other)</span></span>
+            </h3>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object whose identifier is copied.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3018b41311e5245443632b85ad652f33"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Identifiable::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3018b41311e5245443632b85ad652f33" class="m-doc-self">Identifiable</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>Object whose identifier is moved.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="af6bc2718108274fb930c8d16aef9e17f"><div>
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="#a36b32316c418ee977c27453e7e37658d" class="m-doc">UUID</a>&amp; Rodin::<wbr />Identifiable::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af6bc2718108274fb930c8d16aef9e17f" class="m-doc-self">getUUID</a>(</span><span class="m-doc-wrap">) const</span></span>
@@ -154,7 +196,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>Each <a href="class_rodin_1_1_identifiable.html" class="m-doc">Identifiable</a> instance receives a unique identifier during construction that persists for the lifetime of the object. This UUID can be used for object tracking, caching, and debugging purposes.</p>
+<p>Each Identifiable instance receives a unique identifier during construction that persists for the lifetime of the object. This UUID can be used for object tracking, caching, and debugging purposes.</p>
           </div></section>
         </section>
       </div>

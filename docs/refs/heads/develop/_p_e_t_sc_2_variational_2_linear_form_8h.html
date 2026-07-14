@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md200">Mathematical Background</a></li>
+            <li><a href="#autotoc_md199">Mathematical Background</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides the partial specialization of <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a> that assembles linear-form contributions into a PETSc <code>Vec</code>. The resulting vector represents the right-hand side <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
+<p>Provides the partial specialization of <a href="group___rodin_c_t_a_d.html#ga428b3bbd91b26401394cc611f7ec36f5" class="m-doc">Rodin::<wbr />Variational::<wbr />LinearForm</a> that assembles linear-form contributions into a PETSc <code>Vec</code>. The resulting vector represents the right-hand side <svg class="m-math" style="width: 0.778em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 7.47198 8.302191">
 <title>
 $ \mathbf{b} $
 </title>
@@ -116,7 +116,7 @@ $ A\mathbf{x} = \mathbf{b} $
 <use x='19.194557' y='0' xlink:href='#eq2-g2-61'/>
 <use x='31.620038' y='0' xlink:href='#eq2-g0-98'/>
 </g>
-</svg>.</p><section id="autotoc_md200"><h3><a href="#autotoc_md200">Mathematical Background</a></h3><p>A linear form <svg class="m-math" style="width: 5.968em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 57.291391 10.029041">
+</svg>.</p><section id="autotoc_md199"><h3><a href="#autotoc_md199">Mathematical Background</a></h3><p>A linear form <svg class="m-math" style="width: 5.968em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 57.291391 10.029041">
 <title>
 $ L : V_h \to \mathbb{R} $
 </title>
@@ -238,16 +238,18 @@ $ L(u_h) = \mathbf{b}^\top \mathbf{u} $
 <use x='52.327929' y='-4.338437' xlink:href='#eq8-g1-62'/>
 <use x='59.412567' y='0' xlink:href='#eq8-g0-117'/>
 </g>
-</svg> via <code>VecDot</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a>, Rodin::PETSc::Variational::BilinearForm, <a href="_p_e_t_sc_2_variational_2_problem_8h.html#ae1fbfa50d43bb3e1ed943e7de7f1fb73" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a></p></aside></section>
+</svg> via <code>VecDot</code>.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::TestFunction, Rodin::PETSc::Variational::BilinearForm, Rodin::PETSc::Variational::Problem</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> integration module for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>PETSc integration module for Rodin.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html" class="m-doc">Rodin::PETSc::Variational</a></dt>
+            <dd>PETSc-backed variational form adapters.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -257,7 +259,7 @@ $ L(u_h) = \mathbf{b}^\top \mathbf{u} $
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_linear_form_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::Variational::LinearForm&lt;FES, ::Vec&gt;</a>
             </dt>
-            <dd>Linear form specialization that assembles into a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</dd>
+            <dd>Linear form specialization that assembles into a PETSc vector.</dd>
           </dl>
         </section>
       </div>

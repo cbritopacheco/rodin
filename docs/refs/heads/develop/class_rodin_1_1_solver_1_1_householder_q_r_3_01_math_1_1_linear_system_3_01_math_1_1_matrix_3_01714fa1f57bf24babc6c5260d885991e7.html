@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>HouseholderQR&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>A direct sparse <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</p>
+        <p>A direct sparse HouseholderQR Cholesky factorizations without square root for use with Math::SparseMatrix and Math::Vector.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -86,6 +86,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -101,13 +103,63 @@
             <dd>Abstract base class for linear system solvers.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="a8676c7782d82e367b44ebb82e1e4b3a3">
+              using <a href="#a8676c7782d82e367b44ebb82e1e4b3a3" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Assembled operator type.</dd>
+            <dt id="a67d1c43c805caee8285834ec30abf729">
+              using <a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a>&lt;<a href="#a8676c7782d82e367b44ebb82e1e4b3a3" class="m-doc">OperatorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Associated problem base type.</dd>
+            <dt id="a85385c6607a397925a213e9098256fdc">
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ad1adcfc6a428d4b245f5e6c69a143cd5">
+              <span class="m-doc-wrap-bumper"><a href="#ad1adcfc6a428d4b245f5e6c69a143cd5" class="m-doc-self">HouseholderQR</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
+            </dt>
+            <dd>Constructs the solver from the problem to be solved.</dd>
+            <dt id="a78e5be754e215b9131b4bac6ec3ec123">
+              <span class="m-doc-wrap-bumper"><a href="#a78e5be754e215b9131b4bac6ec3ec123" class="m-doc-self">HouseholderQR</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a138e9f1f2209aa72a326a1dfae2c8433">
+              <span class="m-doc-wrap-bumper"><a href="#a138e9f1f2209aa72a326a1dfae2c8433" class="m-doc-self">HouseholderQR</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a874d8029304f081409c14ff952cf06c1" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a3c28e3be8d6ee14eb1c5e01d884f0cd9">
+              <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Solves the assembled linear system.</dd>
+            <dt id="a874d8029304f081409c14ff952cf06c1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a874d8029304f081409c14ff952cf06c1" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a polymorphic copy of this solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
@@ -120,24 +172,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a874d8029304f081409c14ff952cf06c1"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>* Rodin::<wbr />Solver::<wbr />HouseholderQR&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a874d8029304f081409c14ff952cf06c1" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of this object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
-          </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>
               <div class="m-doc-template">

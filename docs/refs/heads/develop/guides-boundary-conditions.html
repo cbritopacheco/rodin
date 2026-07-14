@@ -79,7 +79,7 @@
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
           Boundary Conditions
         </h1>
-        <p>Guide to applying boundary conditions in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>Guide to applying boundary conditions in Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -146,7 +146,7 @@ $ \Gamma_D $
 <use x='0' y='0' xlink:href='#eq3-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq3-g0-68'/>
 </g>
-</svg>. These are imposed by modifying the assembled linear system — the corresponding rows and columns of the system matrix are adjusted to enforce the prescribed values. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, this is handled by <a href="class_rodin_1_1_variational_1_1_dirichlet_b_c.html" class="m-doc">DirichletBC</a>.</li><li><strong>Natural (Neumann) conditions</strong>: Prescribe the flux or normal derivative of the solution: <svg class="m-math" style="width: 5.797em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 55.647637 11.955168">
+</svg>. These are imposed by modifying the assembled linear system — the corresponding rows and columns of the system matrix are adjusted to enforce the prescribed values. In Rodin, this is handled by <code>DirichletBC</code>.</li><li><strong>Natural (Neumann) conditions</strong>: Prescribe the flux or normal derivative of the solution: <svg class="m-math" style="width: 5.797em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 55.647637 11.955168">
 <title>
 $ \partial u / \partial n = h $
 </title>
@@ -179,7 +179,7 @@ $ \Gamma_N $
 <use x='0' y='0' xlink:href='#eq5-g1-0'/>
 <use x='7.314174' y='1.793263' xlink:href='#eq5-g0-78'/>
 </g>
-</svg>. These appear <strong>naturally</strong> in the weak formulation as boundary integrals after integration by parts. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, they are expressed as <code>BoundaryIntegral(h, v).over(GammaN)</code>.</li><li><strong>Periodic conditions</strong>: Tie degrees of freedom on opposite boundaries. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, handled by <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a> with an explicit DOF correspondence map.</li></ul><aside class="m-note m-info"><h4>Note</h4><p><strong>Homogeneous Neumann</strong> conditions ( <svg class="m-math" style="width: 5.704em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 54.762072 11.955168">
+</svg>. These appear <strong>naturally</strong> in the weak formulation as boundary integrals after integration by parts. In Rodin, they are expressed as <code>BoundaryIntegral(h, v).over(GammaN)</code>.</li><li><strong>Periodic conditions</strong>: Tie degrees of freedom on opposite boundaries. In Rodin, handled by <code>PeriodicBC</code> with an explicit DOF correspondence map.</li></ul><aside class="m-note m-info"><h4>Note</h4><p><strong>Homogeneous Neumann</strong> conditions ( <svg class="m-math" style="width: 5.704em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 54.762072 11.955168">
 <title>
 $ \partial u / \partial n = 0 $
 </title>
@@ -378,7 +378,7 @@ $ \mathbf{f} $
 <use x='280.582361' y='-2.988792' xlink:href='#eq11-g0-25'/>
 <use x='287.65163' y='-2.988792' xlink:href='#eq11-g1-41'/>
 </g>
-</svg></div><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, periodic conditions are imposed by building an <code>IndexMap</code> that pairs the DOF indices on opposite boundaries, then passing it to <a href="class_rodin_1_1_variational_1_1_periodic_b_c.html" class="m-doc">PeriodicBC</a>:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span>
+</svg></div><p>In Rodin, periodic conditions are imposed by building an <code>IndexMap</code> that pairs the DOF indices on opposite boundaries, then passing it to <code>PeriodicBC</code>:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">200</span><span class="p">;</span>
 <span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">n</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="p">});</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
@@ -443,7 +443,7 @@ $ \mathbf{f} $
 <span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-bc-summary"><h2><a href="#guides-bc-summary">Summary Table</a></h2><table class="m-table"><thead><tr><th>Type</th><th>Math</th><th><a href="namespace_rodin.html" class="m-doc">Rodin</a> Code</th><th>Appears In</th></tr></thead><tbody><tr><td>Dirichlet</td><td><svg class="m-math" style="width: 2.963em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 28.44301 7.47198">
+<span class="p">}</span></pre></section><section id="guides-bc-summary"><h2><a href="#guides-bc-summary">Summary Table</a></h2><table class="m-table"><thead><tr><th>Type</th><th>Math</th><th>Rodin Code</th><th>Appears In</th></tr></thead><tbody><tr><td>Dirichlet</td><td><svg class="m-math" style="width: 2.963em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 28.44301 7.47198">
 <title>
 $ u = g $
 </title>

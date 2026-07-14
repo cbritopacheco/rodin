@@ -79,7 +79,7 @@
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
           Weak Formulations
         </h1>
-        <p>Understanding and implementing weak formulations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>Understanding and implementing weak formulations in Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -507,7 +507,7 @@ $ v \in H^1_0(\Omega) $
 <use x='247.604287' y='-10.793007' xlink:href='#eq14-g2-100'/>
 <use x='253.686979' y='-10.793007' xlink:href='#eq14-g2-120'/>
 </g>
-</svg></div></section><section id="guides-weak-poisson-rodin"><h3><a href="#guides-weak-poisson-rodin">Implementation in Rodin</a></h3><p>The implementation in <a href="namespace_rodin.html" class="m-doc">Rodin</a> closely mirrors the mathematical notation:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+</svg></div></section><section id="guides-weak-poisson-rodin"><h3><a href="#guides-weak-poisson-rodin">Implementation in Rodin</a></h3><p>The implementation in Rodin closely mirrors the mathematical notation:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 
@@ -528,7 +528,7 @@ $ v \in H^1_0(\Omega) $
 <span class="w">  </span><span class="n">RealFunction</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 
 <span class="w">  </span><span class="n">Problem</span><span class="w"> </span><span class="n">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w">   </span><span class="c1">// \int \nablau \cdot \nablav dx</span>
+<span class="w">  </span><span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w">   </span><span class="c1">// \int \nabla u \cdot \nabla v dx</span>
 <span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w">               </span><span class="c1">// \int f v dx</span>
 <span class="w">          </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w">      </span><span class="c1">// u = 0 on \partial\Omega</span>
 
@@ -1006,7 +1006,7 @@ $ \Gamma_N $
 <use x='306.907846' y='-10.793007' xlink:href='#eq29-g4-100'/>
 <use x='312.990539' y='-10.793007' xlink:href='#eq29-g4-120'/>
 </g>
-</svg></div></section><section id="guides-weak-elasticity-rodin"><h3><a href="#guides-weak-elasticity-rodin">Implementation</a></h3><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> provides <code>LinearElasticityIntegral</code> (in <code>&lt;<a href="_solid_8h.html" class="m-doc">Rodin/<wbr />Solid.h</a>&gt;</code>) which assembles the bilinear form for the Hooke tensor. The helper class <code>LinearElasticityIntegral(u, v)</code> returns a callable that accepts the Lamé parameters — either as constants or spatially-varying functions:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+</svg></div></section><section id="guides-weak-elasticity-rodin"><h3><a href="#guides-weak-elasticity-rodin">Implementation</a></h3><p>Rodin provides <code>LinearElasticityIntegral</code> (in <code>&lt;Rodin/Solid.h&gt;</code>) which assembles the bilinear form for the Hooke tensor. The helper class <code>LinearElasticityIntegral(u, v)</code> returns a callable that accepts the Lamé parameters — either as constants or spatially-varying functions:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solid.h&gt;</span>
@@ -1147,7 +1147,7 @@ $ F_{\mathrm{int}} $
 
 <span class="n">SparseLU</span><span class="w"> </span><span class="nf">linearSolver</span><span class="p">(</span><span class="n">newton</span><span class="p">);</span>
 <span class="n">NewtonSolver</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">linearSolver</span><span class="p">);</span>
-<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// updates u in place</span></pre><p>See <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> for the full API.</p></section></section><section id="guides-weak-general"><h2><a href="#guides-weak-general">General Structure</a></h2><p>Most weak formulations in <a href="namespace_rodin.html" class="m-doc">Rodin</a> follow this pattern:</p><div class="m-math"><svg style="width: 21.292em; height: 1.245em;" viewBox="92.069975 -11.955168 204.403097 11.955168">
+<span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// updates u in place</span></pre><p>See <a href="namespace_rodin_1_1_solid.html" class="m-doc">Solid module</a> for the full API.</p></section></section><section id="guides-weak-general"><h2><a href="#guides-weak-general">General Structure</a></h2><p>Most weak formulations in Rodin follow this pattern:</p><div class="m-math"><svg style="width: 21.292em; height: 1.245em;" viewBox="92.069975 -11.955168 204.403097 11.955168">
 <title>
 \[
   \text{Find } u \in V \text{ s.t. } \forall v \in V: \quad
@@ -1270,7 +1270,7 @@ $ v $
 <g id='eq39-page1'>
 <use x='0' y='0' xlink:href='#eq39-g0-118'/>
 </g>
-</svg>)</li></ul><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, the problem is defined by moving everything to one side:</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg>)</li></ul><p>In Rodin, the problem is defined by moving everything to one side:</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">bilinear</span><span class="w"> </span><span class="n">terms</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">[</span><span class="n">linear</span><span class="w"> </span><span class="n">terms</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">[</span><span class="n">boundary</span><span class="w"> </span><span class="n">conditions</span><span class="p">];</span></pre></section><section id="guides-weak-bilinear"><h2><a href="#guides-weak-bilinear">Bilinear Forms</a></h2><p>A <strong>bilinear form</strong> <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
 <title>
 $ a(u, v) $
@@ -1321,7 +1321,7 @@ $ A $
 <g id='eq43-page1'>
 <use x='0' y='0' xlink:href='#eq43-g0-65'/>
 </g>
-</svg>.</p><p>Common examples:</p><table class="m-table"><thead><tr><th>Mathematical expression</th><th><a href="namespace_rodin.html" class="m-doc">Rodin</a> code</th><th>Name</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 7.322em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 70.289667 13.781784">
+</svg>.</p><p>Common examples:</p><table class="m-table"><thead><tr><th>Mathematical expression</th><th>Rodin code</th><th>Name</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 7.322em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 70.289667 13.781784">
 <title>
 $ \int_\Omega \nabla u \cdot \nabla v \, dx $
 </title>
@@ -1473,7 +1473,7 @@ $ \mathbf{b} $
 <g id='eq51-page1'>
 <use x='0' y='0' xlink:href='#eq51-g0-98'/>
 </g>
-</svg>.</p><p>Common examples:</p><table class="m-table"><thead><tr><th>Mathematical expression</th><th><a href="namespace_rodin.html" class="m-doc">Rodin</a> code</th><th>Name</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 4.594em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 44.106603 13.781784">
+</svg>.</p><p>Common examples:</p><table class="m-table"><thead><tr><th>Mathematical expression</th><th>Rodin code</th><th>Name</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 4.594em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 44.106603 13.781784">
 <title>
 $ \int_\Omega f \, v \, dx $
 </title>

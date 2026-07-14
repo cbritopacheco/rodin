@@ -77,11 +77,11 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>Hooke <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_hooke_8h.html">&lt;Rodin/Solid/Constitutive/Hooke.h&gt;</a></div>
         </h1>
-        <p>Isotropic <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&#x27;s law for linear elasticity.</p>
+        <p>Isotropic Hooke&#x27;s law for linear elasticity.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md218">Material parameter conversions</a></li>
+            <li><a href="#autotoc_md217">Material parameter conversions</a></li>
             <li>
               Reference
               <ul>
@@ -148,7 +148,7 @@ $ \mu $
 <use x='229.09956' y='-2.988792' xlink:href='#eq3-g2-22'/>
 <use x='236.14253' y='-2.988792' xlink:href='#eq3-g0-34'/>
 </g>
-</svg></div><section id="autotoc_md218"><h3><a href="#autotoc_md218">Material parameter conversions</a></h3><p>From Young&#x27;s modulus <svg class="m-math" style="width: 0.976em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.366198 8.169366">
+</svg></div><section id="autotoc_md217"><h3><a href="#autotoc_md217">Material parameter conversions</a></h3><p>From Young&#x27;s modulus <svg class="m-math" style="width: 0.976em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.366198 8.169366">
 <title>
 $ E $
 </title>
@@ -226,17 +226,25 @@ $ \nu $
               <span class="m-doc-wrap-bumper">static auto <a href="#ac243082133bd7d67e4d1ee2d8d5401d6" class="m-doc">YoungPoisson</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> E,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> nu) -&gt; <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a></span>
             </dt>
-            <dd>Constructs <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&#x27;s law from Young&#x27;s modulus and Poisson&#x27;s ratio.</dd>
+            <dd>Constructs Hooke&#x27;s law from Young&#x27;s modulus and Poisson&#x27;s ratio.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a2255d9e72e73a22cad21df73c30ac9d0">
-              <span class="m-doc-wrap-bumper"><a href="#a2255d9e72e73a22cad21df73c30ac9d0" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lameFirstParameter,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> shearModulus)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ada14ccb45c452c8e3df8e09bab773fbe" class="m-doc">Hooke</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span>
             </dt>
-            <dd>Constructs <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&#x27;s law with the given elastic parameters.</dd>
+            <dd>Constructs Hooke&#x27;s law with the given elastic parameters.</dd>
+            <dt id="a7613d99acc0bde4d0c394a86352f1dfa">
+              <span class="m-doc-wrap-bumper"><a href="#a7613d99acc0bde4d0c394a86352f1dfa" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="afd8e25c5c049764253c6e2656e2a1248">
+              <span class="m-doc-wrap-bumper"><a href="#afd8e25c5c049764253c6e2656e2a1248" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -264,7 +272,7 @@ $ \nu $
               <span class="m-doc-wrap-bumper">static <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a> Rodin::<wbr />Solid::<wbr />Hooke::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac243082133bd7d67e4d1ee2d8d5401d6" class="m-doc-self">YoungPoisson</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> E,
               <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> nu)</span></span>
             </h3>
-            <p>Constructs <a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a>&#x27;s law from Young&#x27;s modulus and Poisson&#x27;s ratio.</p>
+            <p>Constructs Hooke&#x27;s law from Young&#x27;s modulus and Poisson&#x27;s ratio.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -282,9 +290,51 @@ $ \nu $
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_solid_1_1_hooke.html" class="m-doc">Hooke</a> object with computed Lamé parameters</td>
+                  <td>Hooke object with computed Lamé parameters</td>
                 </tr>
               </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ada14ccb45c452c8e3df8e09bab773fbe"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />Hooke::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada14ccb45c452c8e3df8e09bab773fbe" class="m-doc-self">Hooke</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span></span>
+            </h3>
+            <p>Constructs Hooke&#x27;s law with the given elastic parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lambda</td>
+                  <td>First Lamé parameter <svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
+<title>
+$ \lambda $
+</title>
+<defs>
+<path id='eq7-g0-21' d='M3.694147-7.44807C3.395268-8.296887 2.450809-8.296887 2.295392-8.296887C2.223661-8.296887 2.092154-8.296887 2.092154-8.177335C2.092154-8.081694 2.163885-8.069738 2.223661-8.057783C2.402989-8.033873 2.546451-8.009963 2.737733-7.663263C2.857285-7.436115 4.088667-3.861519 4.088667-3.837609C4.088667-3.825654 4.076712-3.813699 3.981071-3.718057L.872727-.573848C.729265-.430386 .633624-.334745 .633624-.179328C.633624-.011955 .777086 .131507 .968369 .131507C1.016189 .131507 1.147696 .107597 1.219427 .035866C1.41071-.143462 3.120299-2.235616 4.208219-3.526775C4.519054-2.594271 4.901619-1.494396 5.272229-.490162C5.332005-.310834 5.391781-.143462 5.559153 .011955C5.678705 .119552 5.702615 .119552 6.03736 .119552H6.264508C6.312329 .119552 6.396015 .119552 6.396015 .02391C6.396015-.02391 6.38406-.035866 6.336239-.083686C6.228643-.215193 6.144956-.430386 6.097136-.573848L3.694147-7.44807Z'/>
+</defs>
+<g id='eq7-page1'>
+<use x='0' y='0' xlink:href='#eq7-g0-21'/>
+</g>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>mu</td>
+                  <td>Second Lamé parameter (shear modulus) <svg class="m-math" style="width: 0.734em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 7.042971 7.47198">
+<title>
+$ \mu $
+</title>
+<defs>
+<path id='eq8-g0-22' d='M1.721544-.263014C2.020423 .011955 2.462765 .119552 2.86924 .119552C3.634371 .119552 4.160399-.394521 4.435367-.765131C4.554919-.131507 5.057036 .119552 5.475467 .119552C5.834122 .119552 6.121046-.095641 6.336239-.526027C6.527522-.932503 6.694894-1.661768 6.694894-1.709589C6.694894-1.769365 6.647073-1.817186 6.575342-1.817186C6.467746-1.817186 6.455791-1.75741 6.40797-1.578082C6.228643-.872727 6.001494-.119552 5.511333-.119552C5.164633-.119552 5.140722-.430386 5.140722-.669489C5.140722-.944458 5.248319-1.374844 5.332005-1.733499L5.66675-3.024658C5.71457-3.251806 5.846077-3.789788 5.905853-4.004981C5.977584-4.291905 6.109091-4.805978 6.109091-4.853798C6.109091-5.033126 5.965629-5.152677 5.786301-5.152677C5.678705-5.152677 5.427646-5.104857 5.332005-4.746202L4.495143-1.422665C4.435367-1.183562 4.435367-1.159651 4.27995-.968369C4.136488-.765131 3.670237-.119552 2.917061-.119552C2.247572-.119552 2.032379-.609714 2.032379-1.171606C2.032379-1.518306 2.139975-1.936737 2.187796-2.139975L2.725778-4.291905C2.785554-4.519054 2.881196-4.901619 2.881196-4.97335C2.881196-5.164633 2.725778-5.272229 2.570361-5.272229C2.462765-5.272229 2.199751-5.236364 2.10411-4.853798L.37061 2.068244C.358655 2.12802 .334745 2.199751 .334745 2.271482C.334745 2.450809 .478207 2.570361 .657534 2.570361C1.004234 2.570361 1.075965 2.295392 1.159651 1.960648L1.721544-.263014Z'/>
+</defs>
+<g id='eq8-page1'>
+<use x='0' y='0' xlink:href='#eq8-g0-22'/>
+</g>
+</svg></td>
+                </tr>
+              </tbody>
             </table>
           </div></section>
           <section class="m-doc-details" id="ab20c2b8b85dc8e554a5b66c5ff8b941f"><div>

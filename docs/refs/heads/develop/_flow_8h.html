@@ -80,18 +80,11 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md346">Mathematical foundation</a></li>
-            <li><a href="#autotoc_md347">Applications</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md332">Mathematical foundation</a></li>
+            <li><a href="#autotoc_md333">Applications</a></li>
           </ul>
         </nav>
-<p>This file defines the <a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Flow</a> class, which implements the flow map (push-forward) of functions along a vector field. Flow maps are used in advection problems, level set methods, and semi-Lagrangian time integration schemes.</p><section id="autotoc_md346"><h3><a href="#autotoc_md346">Mathematical foundation</a></h3><p>Given a velocity field <svg class="m-math" style="width: 3.387em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 32.513238 11.955168">
+<p>This file defines the <code>Rodin::Variational::Flow</code> class, which implements the flow map (push-forward) of functions along a vector field. Flow maps are used in advection problems, level set methods, and semi-Lagrangian time integration schemes.</p><section id="autotoc_md332"><h3><a href="#autotoc_md332">Mathematical foundation</a></h3><p>Given a velocity field <svg class="m-math" style="width: 3.387em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 32.513238 11.955168">
 <title>
 $ \mathbf{v}(x,t) $
 </title>
@@ -210,7 +203,7 @@ $ u $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-117'/>
 </g>
-</svg> advected along the flow.</p></section><section id="autotoc_md347"><h3><a href="#autotoc_md347">Applications</a></h3><ul><li><strong>Advection-diffusion</strong>: <svg class="m-math" style="width: 8.974em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 86.153362 10.626798">
+</svg> advected along the flow.</p></section><section id="autotoc_md333"><h3><a href="#autotoc_md333">Applications</a></h3><ul><li><strong>Advection-diffusion</strong>: <svg class="m-math" style="width: 8.974em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 86.153362 10.626798">
 <title>
 $ \partial_t u + \mathbf{v}\cdot\nabla u = f $
 </title>
@@ -238,39 +231,6 @@ $ \partial_t u + \mathbf{v}\cdot\nabla u = f $
 <use x='79.106925' y='0' xlink:href='#eq6-g3-102'/>
 </g>
 </svg></li><li><strong>Semi-Lagrangian methods</strong>: characteristic tracking for transport equations</li><li><strong>Level set methods</strong>: interface evolution and tracking</li><li><strong>ALE formulations</strong>: arbitrary Lagrangian-Eulerian methods</li></ul></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              struct <a href="struct_rodin_1_1_variational_1_1_boundary_hit.html" class="m-doc">Rodin::Variational::BoundaryHit</a>
-            </dt>
-            <dd>Information passed to a boundary policy when a trajectory reaches the domain boundary.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_default_boundary_policy.html" class="m-doc">Rodin::Variational::DefaultBoundaryPolicy</a>
-            </dt>
-            <dd>Default boundary policy for flow maps.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived, class VectorField, class Step, class BoundaryPolicy&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_5d2fd22d75010fe7199e2c89726de56a.html" class="m-doc">Rodin::Variational::Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Flow</a> map operator for functions.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_flow_3_01_function_base_3_01_derived_01_4_00_01_vector_field_00_783a973c979ff18bfae34562f8910583.html" class="m-doc">Rodin::Variational::Flow&lt;FunctionBase&lt;Derived&gt;, VectorField, Step, BoundaryPolicy&gt;::Trace</a>
-            </dt>
-            <dd>Result of a characteristic trace.</dd>
-          </dl>
-        </section>
       </div>
     </div>
   </div>

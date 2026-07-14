@@ -90,7 +90,7 @@
             </tr>
             <tr>
               <td>Ctx</td>
-              <td>Mesh context type (Local or <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>).</td>
+              <td>Mesh context type (Local or MPI).</td>
             </tr>
           </tbody>
         </table>
@@ -100,11 +100,24 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MFEM, Variational::P1&lt;Range, Geometry::Mesh&lt;Ctx&gt;&gt;, ::Vec&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function printers.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -115,9 +128,9 @@
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
               using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector data type (<code>::Vec</code>).</dd>
+            <dd>PETSc vector data type (<code>Vec</code>).</dd>
             <dt id="ae90cfd8753b1d4f2541968ee8541b04b">
-              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#ae01731d30cfffee33f6ea676a2b9307f" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
+              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#ae01731d30cfffee33f6ea676a2b9307f" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being printed.</dd>
             <dt id="a093314a6411298f0f74dede080ed8b30">
@@ -131,8 +144,69 @@
             <dt id="a5321f506b96d3b70341ec359961f84ec">
               using <a href="#a5321f506b96d3b70341ec359961f84ec" class="m-doc-self">FESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;typename FESType::MeshType&gt;::ContextType
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (Local or <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) of the finite element space mesh.</dd>
+            <dd>Context type (Local or MPI) of the finite element space mesh.</dd>
           </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc">GridFunctionPrinter</a>(</span><span class="m-doc-wrap">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span>
+            </dt>
+            <dd>Constructs a PETSc-backed P1 MFEM printer.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Writes P1 coefficients in MFEM node ordering.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0a8311d43e66ddc5a8e681495d56aa56"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Ctx&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Ctx&gt;&gt;, ::<wbr />Vec&gt;&lt;Range, Ctx&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc-self">GridFunctionPrinter</a>(</span><span class="m-doc-wrap">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+            </h3>
+            <p>Constructs a PETSc-backed P1 MFEM printer.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">gf&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Grid function to print.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a19f24c6c7621a42c693c4c0b616ab387"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Range, class Ctx&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MFEM, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Ctx&gt;&gt;, ::<wbr />Vec&gt;&lt;Range, Ctx&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Writes P1 coefficients in MFEM node ordering.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream receiving coefficient data.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

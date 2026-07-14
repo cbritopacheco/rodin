@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md230">Usage with CRTP</a></li>
-            <li><a href="#autotoc_md231">Usage with lambda / std::function</a></li>
+            <li><a href="#autotoc_md229">Usage with CRTP</a></li>
+            <li><a href="#autotoc_md230">Usage with lambda / std::function</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>An Input populates a ConstitutivePoint with auxiliary data at each quadrature point during integration. This is the injection site for material-specific fields (fiber directions, activation parameters, region-wise material properties, etc.) without hard-coding them into the integrator or the constitutive law.</p><section id="autotoc_md230"><h3><a href="#autotoc_md230">Usage with CRTP</a></h3><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyInput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">Input</span><span class="o">&lt;</span><span class="n">MyInput</span><span class="o">&gt;</span>
+<p>An Input populates a ConstitutivePoint with auxiliary data at each quadrature point during integration. This is the injection site for material-specific fields (fiber directions, activation parameters, region-wise material properties, etc.) without hard-coding them into the integrator or the constitutive law.</p><section id="autotoc_md229"><h3><a href="#autotoc_md229">Usage with CRTP</a></h3><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyInput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">Input</span><span class="o">&lt;</span><span class="n">MyInput</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">populate</span><span class="p">(</span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
 <span class="w">  </span><span class="p">{</span>
@@ -102,14 +102,14 @@
 <span class="p">};</span>
 
 <span class="n">Solid</span><span class="o">::</span><span class="n">InternalVirtualWorkResidual</span><span class="w"> </span><span class="nf">force</span><span class="p">(</span><span class="n">law</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">displacement</span><span class="p">);</span>
-<span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">MyInput</span><span class="p">{});</span></pre></section><section id="autotoc_md231"><h3><a href="#autotoc_md231">Usage with lambda / std::function</a></h3><pre class="m-code"><span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">(</span><span class="n">MyInput</span><span class="p">{});</span></pre></section><section id="autotoc_md230"><h3><a href="#autotoc_md230">Usage with lambda / std::function</a></h3><pre class="m-code"><span class="n">force</span><span class="p">.</span><span class="n">setInput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="n">cp</span><span class="p">.</span><span class="n">set</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">Activation</span><span class="o">&gt;</span><span class="p">(</span><span class="n">activationValue</span><span class="p">);</span>
 <span class="p">});</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
             <dd>Hyperelastic solid mechanics module for large-deformation problems.</dd>
           </dl>

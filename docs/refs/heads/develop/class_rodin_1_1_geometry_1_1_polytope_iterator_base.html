@@ -86,7 +86,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">T</td>
-              <td>Type of polytope (<a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a>, <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a>, or <a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a>)</td>
+              <td>Type of polytope (Polytope, Cell, Face, or Vertex)</td>
             </tr>
             <tr>
               <td>Derived</td>
@@ -113,7 +113,7 @@
 <span class="p">{</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Cell</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="c1">// Process cell...</span>
-<span class="p">}</span></pre></section><section id="autotoc_md98"><h2><a href="#autotoc_md98">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> iterators are <strong>not</strong> thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>, <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>, <a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a>, <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md98"><h2><a href="#autotoc_md98">Thread Safety</a></h2><p>Polytope iterators are <strong>not</strong> thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p>PolytopeIterator, CellIterator, FaceIterator, VertexIterator</p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -185,6 +185,10 @@
             </dt>
             <dd>Gets the index generator (mutable).</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a801503528536ba647f223a30ea57ded2" class="m-doc">key</a>(</span><span class="m-doc-wrap">) const -&gt; std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;</span>
+            </dt>
+            <dd>Gets the current polytope key.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2816a4292d6f956fd99a10db236f895f" class="m-doc">generate</a>(</span><span class="m-doc-wrap">) const -&gt; T* <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Generates a polytope at the current iterator position.</dd>
@@ -213,7 +217,7 @@
                 </tr>
                 <tr>
                   <td>mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> containing the polytopes</td>
+                  <td>Mesh containing the polytopes</td>
                 </tr>
                 <tr>
                   <td>gen&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -337,7 +341,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
               </tfoot>
             </table>
@@ -389,6 +393,23 @@
                 <tr>
                   <th style="width: 1%">Returns</th>
                   <td>Reference to the index generator</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a801503528536ba647f223a30ea57ded2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class T, class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; Rodin::<wbr />Geometry::<wbr />PolytopeIteratorBase&lt;T, Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a801503528536ba647f223a30ea57ded2" class="m-doc-self">key</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the current polytope key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pair of topological dimension and current polytope index.</td>
                 </tr>
               </tfoot>
             </table>

@@ -99,7 +99,7 @@
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="n">Face</span><span class="o">&amp;</span><span class="w"> </span><span class="n">face</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">face</span><span class="p">.</span><span class="n">isOnBoundary</span><span class="p">())</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Boundary face &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">face</span><span class="p">.</span><span class="n">getIndex</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="autotoc_md103"><h2><a href="#autotoc_md103">Thread Safety</a></h2><p>Not thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a>, <a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a>, <a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></p></aside></section>
+<span class="p">}</span></pre></section><section id="autotoc_md103"><h2><a href="#autotoc_md103">Thread Safety</a></h2><p>Not thread-safe. Each thread should use its own iterator instance.</p><aside class="m-note m-default"><h4>See also</h4><p>PolytopeIterator, CellIterator, VertexIterator</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -169,7 +169,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> containing the faces</td>
+                  <td>Mesh containing the faces</td>
                 </tr>
                 <tr>
                   <td>gen&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -187,7 +187,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to new <a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> object</td>
+                  <td>Pointer to new Face object</td>
                 </tr>
               </tfoot>
             </table>

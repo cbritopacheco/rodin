@@ -78,12 +78,12 @@
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction&lt;FES, ::Vec&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Grid function specialization storing DOF coefficients in a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector (<code>::Vec</code>).</p>
+        <p>Grid function specialization storing DOF coefficients in a PETSc vector (<code>Vec</code>).</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md192">Ownership and Ghost Model (MPI)</a></li>
-            <li><a href="#autotoc_md193">Array Access Protocol</a></li>
+            <li><a href="#autotoc_md191">Ownership and Ghost Model (MPI)</a></li>
+            <li><a href="#autotoc_md192">Array Access Protocol</a></li>
             <li>
               Reference
               <ul>
@@ -96,7 +96,7 @@
             </li>
           </ul>
         </nav>
-<p>This partial specialization replaces the default Eigen-based coefficient storage with a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code>, making it possible to assemble and solve variational problems entirely within the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> ecosystem. The class supports both sequential (<code><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a></code>) and distributed (<code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code>) finite element spaces.</p><section id="autotoc_md192"><h3><a href="#autotoc_md192">Ownership and Ghost Model (MPI)</a></h3><p>When the mesh context is <code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code>, the constructor partitions the global DOF vector across <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> ranks. Each rank <em>owns</em> a contiguous range <svg class="m-math" style="width: 8.794em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.420393 11.955168">
+<p>This partial specialization replaces the default Eigen-based coefficient storage with a PETSc <code>Vec</code>, making it possible to assemble and solve variational problems entirely within the PETSc ecosystem. The class supports both sequential (<code>Context::Local</code>) and distributed (<code>Context::MPI</code>) finite element spaces.</p><section id="autotoc_md191"><h3><a href="#autotoc_md191">Ownership and Ghost Model (MPI)</a></h3><p>When the mesh context is <code>Context::MPI</code>, the constructor partitions the global DOF vector across MPI ranks. Each rank <em>owns</em> a contiguous range <svg class="m-math" style="width: 8.794em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.420393 11.955168">
 <title>
 $[\texttt{m\_begin}, \texttt{m\_end})$
 </title>
@@ -129,15 +129,15 @@ $[\texttt{m\_begin}, \texttt{m\_end})$
 <use x='73.591638' y='0' xlink:href='#eq1-g0-100'/>
 <use x='79.868067' y='0' xlink:href='#eq1-g2-41'/>
 </g>
-</svg> and additionally maintains <em>ghost</em> copies of DOFs needed for element-level operations but owned by neighbouring ranks. The ghost indices are recorded in a <code><a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_ghost_bimap.html" class="m-doc">GhostBimap</a></code> so that <code>operator[]</code> can transparently translate a global DOF index to the correct local position in the ghosted vector.</p></section><section id="autotoc_md193"><h3><a href="#autotoc_md193">Array Access Protocol</a></h3><p><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> requires explicit lock/unlock of the underlying raw array via <code>VecGetArray*</code> / <code>VecRestoreArray*</code>. This class manages the lock state through two helper structs (<code><a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_array_read.html" class="m-doc">ArrayRead</a></code> and <code><a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_array_write.html" class="m-doc">ArrayWrite</a></code>) and exposes three public methods:</p><table class="m-table"><thead><tr><th>Method</th><th>Direction</th><th><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> calls</th></tr></thead><tbody><tr><td><code><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire()</a></code></td><td>begin access</td><td><code>VecGetLocalForm</code>, <code>VecGetArrayWrite</code></td></tr><tr><td><code><a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc">flush()</a></code></td><td>end access</td><td><code>VecRestoreArrayWrite</code>, <code>VecGhostRestoreLocalForm</code>, <code>VecGhostUpdate(REVERSE)</code></td></tr><tr><td><code><a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc">release()</a></code></td><td>destroy handles</td><td>Restores any acquired arrays, then <code>VecDestroy</code></td></tr></tbody></table><p>The const overloads use <code>VecGetArrayRead</code> / <code>VecRestoreArrayRead</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunctionBase</a>, <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a> (convenience wrapper)</p></aside></section>
+</svg> and additionally maintains <em>ghost</em> copies of DOFs needed for element-level operations but owned by neighbouring ranks. The ghost indices are recorded in a <code>GhostBimap</code> so that <code>operator[]</code> can transparently translate a global DOF index to the correct local position in the ghosted vector.</p></section><section id="autotoc_md192"><h3><a href="#autotoc_md192">Array Access Protocol</a></h3><p>PETSc requires explicit lock/unlock of the underlying raw array via <code>VecGetArray*</code> / <code>VecRestoreArray*</code>. This class manages the lock state through two helper structs (<code>ArrayRead</code> and <code>ArrayWrite</code>) and exposes three public methods:</p><table class="m-table"><thead><tr><th>Method</th><th>Direction</th><th>PETSc calls</th></tr></thead><tbody><tr><td><code>acquire()</code></td><td>begin access</td><td><code>VecGetLocalForm</code>, <code>VecGetArrayWrite</code></td></tr><tr><td><code>flush()</code></td><td>end access</td><td><code>VecRestoreArrayWrite</code>, <code>VecGhostRestoreLocalForm</code>, <code>VecGhostUpdate(REVERSE)</code></td></tr><tr><td><code>release()</code></td><td>destroy handles</td><td>Restores any acquired arrays, then <code>VecDestroy</code></td></tr></tbody></table><p>The const overloads use <code>VecGetArrayRead</code> / <code>VecRestoreArrayRead</code>.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Variational::GridFunctionBase, Rodin::PETSc::Variational::GridFunction (convenience wrapper)</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::FESType, class Data = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;::DataType&gt;</div>
+              <div class="m-doc-template">template&lt;class Derived, class FES = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">::<wbr />FESType</a>, class Data = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Derived&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#aee60825459fdaf14377eb17bc437a934" class="m-doc">::<wbr />DataType</a>&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase&lt;GridFunction&lt;FES, ::Vec&gt;&gt;</a>
             </dt>
-            <dd>Base class for grid function objects.</dd>
+            <dd>Base class for discrete finite element functions.</dd>
           </dl>
         </section>
         <section id="derived-classes">
@@ -147,7 +147,7 @@ $[\texttt{m\_begin}, \texttt{m\_end})$
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::PETSc::Variational::GridFunction</a>
             </dt>
-            <dd>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</dd>
+            <dd>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -156,15 +156,15 @@ $[\texttt{m\_begin}, \texttt{m\_end})$
             <dt>
               struct <a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_array_read.html" class="m-doc">ArrayRead</a>
             </dt>
-            <dd>State tracking for read-only array access to the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</dd>
+            <dd>State tracking for read-only array access to the PETSc vector.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_array_write.html" class="m-doc">ArrayWrite</a>
             </dt>
-            <dd>State tracking for mutable (write) array access to the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</dd>
+            <dd>State tracking for mutable (write) array access to the PETSc vector.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_ghost_bimap.html" class="m-doc">GhostBimap</a>
             </dt>
-            <dd>Bidirectional mapping between global ghost DOF indices and local ghost offsets within the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> ghosted vector.</dd>
+            <dd>Bidirectional mapping between global ghost DOF indices and local ghost offsets within the PETSc ghosted vector.</dd>
             <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
@@ -172,7 +172,7 @@ $[\texttt{m\_begin}, \texttt{m\_end})$
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
               using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
             </dt>
-            <dd>Underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector data type (<code>::Vec</code>), used to store the DOF coefficient vector <svg class="m-math" style="width: 0.778em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.47198 5.313399">
+            <dd>Underlying PETSc vector data type (<code>Vec</code>), used to store the DOF coefficient vector <svg class="m-math" style="width: 0.778em; height: 0.553em; vertical-align: -0.000em;" viewBox="0 -5.313399 7.47198 5.313399">
 <title>
 $ \mathbf{u} $
 </title>
@@ -190,19 +190,19 @@ $ \mathbf{u} $
             <dt id="a5c7fc1cee1343f294d68ab9388bbfe78">
               using <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc-self">RangeType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::RangeType
             </dt>
-            <dd>Range type of the finite element space (e.g. <code>PetscScalar</code> for scalar FE spaces, or <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;PetscScalar&gt;</code> for vector-valued spaces).</dd>
+            <dd>Range type of the finite element space (e.g. <code>PetscScalar</code> for scalar FE spaces, or <code>Math::Vector&lt;PetscScalar&gt;</code> for vector-valued spaces).</dd>
             <dt id="af9f9ef5d4081fd438cba6ccaa30a0547">
               using <a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc-self">FESMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#afd2113abcfab004d55f4bcbd6f904362" class="m-doc">::<wbr />MeshType</a>
             </dt>
-            <dd>Mesh type associated with the finite element space (e.g. <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code> or <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;</code>).</dd>
+            <dd>Mesh type associated with the finite element space (e.g. <code>Geometry::Mesh&lt;Context::Local&gt;</code> or <code>Geometry::Mesh&lt;Context::MPI&gt;</code>).</dd>
             <dt id="ad980588765c41e2644b1a45742605a38">
               using <a href="#ad980588765c41e2644b1a45742605a38" class="m-doc-self">FESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9f9ef5d4081fd438cba6ccaa30a0547" class="m-doc">FESMeshType</a>&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">::<wbr />ContextType</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type of the finite element space mesh; either <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a> for sequential problems or <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a> for distributed problems.</dd>
+            <dd>Context type of the finite element space mesh; either <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a> for sequential problems or <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Rodin::<wbr />Context::<wbr />MPI</a> for distributed problems.</dd>
             <dt id="a3a7c9c7b52446b53d800779922de198e">
-              using <a href="#a3a7c9c7b52446b53d800779922de198e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&gt;
+              using <a href="#a3a7c9c7b52446b53d800779922de198e" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&lt;<a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;&gt;
             </dt>
-            <dd>Parent CRTP base class providing the generic <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a> interface (projection, interpolation, I/O).</dd>
+            <dd>Parent CRTP base class providing the generic GridFunctionBase interface (projection, interpolation, I/O).</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -213,30 +213,34 @@ $ \mathbf{u} $
             </dt>
             <dd>Constructs a zero-initialised grid function on the given finite element space.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap">const GridFunction&amp; other)</span>
             </dt>
             <dd>Deep-copy constructor.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7f81d468ec369148a4cdc56512e334cc" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a7f81d468ec369148a4cdc56512e334cc" class="m-doc">GridFunction</a>(</span><span class="m-doc-wrap">GridFunction&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="afb32d38db1702f9d925bf08931422a1e">
               <span class="m-doc-wrap-bumper"><a href="#afb32d38db1702f9d925bf08931422a1e" class="m-doc-self">~GridFunction</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
-            <dd>Destructor; calls <code><a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc">release()</a></code> to restore any acquired arrays and destroy the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector.</dd>
+            <dd>Destructor; calls <code>release()</code> to restore any acquired arrays and destroy the underlying PETSc vector.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; other) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac7108dc6c770e0642feadb5250a6c0cb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac7108dc6c770e0642feadb5250a6c0cb" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;&amp; other) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
+            <dt id="ab49e69b89ecff523a846f2f53f80ffd1">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab49e69b89ecff523a846f2f53f80ffd1" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; value) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
+            </dt>
+            <dd>Sets every entry of the PETSc vector to a scalar value.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
@@ -254,7 +258,7 @@ $ \mathbf{u} $
             </dt>
             <dd>Provides read-only element access by global DOF index.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Adds a scalar to every DOF value: <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
 <title>
@@ -278,7 +282,7 @@ $ u_i \leftarrow u_i + c $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Subtracts a scalar from every DOF value: <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
 <title>
@@ -302,7 +306,7 @@ $ u_i \leftarrow u_i - c $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Scales every DOF value by a scalar: <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
 <title>
@@ -324,7 +328,7 @@ $ u_i \leftarrow c \, u_i $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Divides every DOF value by a scalar: <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
 <title>
@@ -348,7 +352,7 @@ $ u_i \leftarrow u_i / c $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Component-wise addition of another grid function: <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
 <title>
@@ -373,7 +377,7 @@ $ u_i \leftarrow u_i + v_i $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Component-wise subtraction of another grid function: <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
 <title>
@@ -398,7 +402,7 @@ $ u_i \leftarrow u_i - v_i $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Component-wise (Hadamard) multiplication by another grid function: <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
 <title>
@@ -423,7 +427,7 @@ $ u_i \leftarrow u_i \cdot v_i $
 </g>
 </svg>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Component-wise division by another grid function: <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
 <title>
@@ -449,40 +453,40 @@ $ u_i \leftarrow u_i / v_i $
 </svg>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a69779584238dac7b4e23d9ff0a7b78b9" class="m-doc">setData</a>(</span><span class="m-doc-wrap">const <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&amp; data,
-              size_t offset = 0) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              size_t offset = 0) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Copies a contiguous slice of DOF values from another <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector into this grid function.</dd>
+            <dd>Copies a contiguous slice of DOF values from another PETSc vector into this grid function.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;</div>
+              <div class="m-doc-template">template&lt;class Function, class Pred&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; v,
-              const Pred&amp; pred) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              const Function&amp; v,
+              const Pred&amp; pred) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Projects a user-supplied function onto the grid function over a filtered mesh region.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Acquires mutable (write) access to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array.</dd>
+            <dd>Acquires mutable (write) access to the underlying PETSc array.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a35095eb434070fff88abb65b08387c7e" class="m-doc">acquire</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35095eb434070fff88abb65b08387c7e" class="m-doc">acquire</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Acquires read-only access to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array.</dd>
+            <dd>Acquires read-only access to the underlying PETSc array.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc">flush</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc">flush</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
             <dd>Releases mutable (write) access and scatters locally-modified ghost values back to their owners.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa7e59253edaf70947f510c9bec12a2a4" class="m-doc">flush</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa7e59253edaf70947f510c9bec12a2a4" class="m-doc">flush</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;</span>
             </dt>
-            <dd>Releases read-only access to the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array.</dd>
+            <dd>Releases read-only access to the PETSc array.</dd>
             <dt id="a7f5e920f4d3240a62c4969abbb757e41">
               <span class="m-doc-wrap-bumper">auto <a href="#a7f5e920f4d3240a62c4969abbb757e41" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp;</span>
             </dt>
-            <dd>Returns a mutable reference to the raw <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code> handle, e.g. for passing to <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> API functions directly.</dd>
+            <dd>Returns a mutable reference to the raw PETSc <code>Vec</code> handle, e.g. for passing to PETSc API functions directly.</dd>
             <dt id="af16e5366aeae1176230b9c40b60fd8d7">
               <span class="m-doc-wrap-bumper">auto <a href="#af16e5366aeae1176230b9c40b60fd8d7" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&amp;</span>
             </dt>
-            <dd>Returns a read-only reference to the raw <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code> handle.</dd>
+            <dd>Returns a read-only reference to the raw PETSc <code>Vec</code> handle.</dd>
             <dt id="ac426c8f959950337f8d6998fc68b367b">
               <span class="m-doc-wrap-bumper">auto <a href="#ac426c8f959950337f8d6998fc68b367b" class="m-doc-self">getArrayRead</a>(</span><span class="m-doc-wrap">) const -&gt; const ArrayRead&amp;</span>
             </dt>
@@ -498,7 +502,7 @@ $ u_i \leftarrow u_i / v_i $
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc">release</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Releases all <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array handles and destroys the vector.</dd>
+            <dd>Releases all PETSc array handles and destroys the vector.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a52b2a6e2f898ab31632b6ccfe5fea5ee" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_grid_function_base.html" class="m-doc">GridFunctionBase</a>&amp;</span>
             </dt>
@@ -508,9 +512,57 @@ $ u_i \leftarrow u_i / v_i $
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;</div>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const T&amp; v) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Assigns this grid function from a function or expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Function&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae77fe31796df64b0e93e43bd4ff0c67d" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Function&amp; fn) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Projects a function on one mesh entity.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87ac29798860cf20e2d9a3dc46055d0c" class="m-doc">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Sets all DOFs attached to one mesh entity from a constant value.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab79e22182b7c08a26f9fa58340f12eca" class="m-doc">project</a>(</span><span class="m-doc-wrap">const T&amp; fn) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Projects a source on all cells.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a180d030c75e0c658a20994011bde76c6" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const T&amp; fn) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Projects a source on a geometric region.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aedae961b3f896ee9e221fb1e2e31b50a" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const T&amp; fn,
+              const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Projects a source on entities of a region with one attribute.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#adde8b8ce0a112d4fe6bcab3505efb692" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const T&amp; fn,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Projects a source on entities of a region with selected attributes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Pred&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae75269d737344d336db60324b1d3692d" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; fn,
+              const Pred&amp; pred) -&gt; Derived&amp;</span>
+            </dt>
+            <dd>Projects a constant value over a filtered region.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Function, class Pred&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#add293b7fe39a85c6b22e0ae915bb9456" class="m-doc">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn,
+              const Function&amp; fn,
               const Pred&amp; pred) -&gt; Derived&amp;</span>
             </dt>
             <dd></dd>
@@ -521,7 +573,7 @@ $ u_i \leftarrow u_i / v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Computes the minimum coefficient and its index.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a83722b0cf86912c8e1cf177c0ede4d5d" class="m-doc">max</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
@@ -529,7 +581,7 @@ $ u_i \leftarrow u_i / v_i $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7c7c15dc43a710a140062694b75a9980" class="m-doc">max</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const -&gt; <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Computes the maximum coefficient and its index.</dd>
           </dl>
         </section>
         <section>
@@ -549,11 +601,11 @@ $ u_i \leftarrow u_i / v_i $
               <tbody>
                 <tr>
                   <td style="width: 1%">fes&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>The finite element space that defines the DOF layout, mesh association, and (in <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode) the parallel partitioning.</td>
+                  <td>The finite element space that defines the DOF layout, mesh association, and (in MPI mode) the parallel partitioning.</td>
                 </tr>
               </tbody>
             </table>
-<p>Allocates a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector whose size matches the number of DOFs in <code>fes</code> and sets all entries to zero.</p><h6 id="autotoc_md194">Local mode (&lt;tt&gt;Context::Local&lt;/tt&gt;)</h6><p>Creates a sequential vector on <code>PETSC_COMM_SELF</code> with <code>VecCreate</code> → <code>VecSetSizes</code> → <code>VecSetFromOptions</code> → <code>VecSetUp</code> → <code>VecZeroEntries</code>.</p><h6 id="autotoc_md195">MPI mode (&lt;tt&gt;Context::MPI&lt;/tt&gt;)</h6><ol><li>Queries the ownership range from the finite element space via <code>fes.getOwnershipRange(m_begin, m_end)</code>.</li><li>Iterates over local shard DOFs to identify ghost indices — those whose global index falls outside <svg class="m-math" style="width: 8.759em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.085771 11.955168">
+<p>Allocates a PETSc vector whose size matches the number of DOFs in <code>fes</code> and sets all entries to zero.</p><h6 id="autotoc_md193">Local mode (&lt;tt&gt;Context::Local&lt;/tt&gt;)</h6><p>Creates a sequential vector on <code>PETSC_COMM_SELF</code> with <code>VecCreate</code> → <code>VecSetSizes</code> → <code>VecSetFromOptions</code> → <code>VecSetUp</code> → <code>VecZeroEntries</code>.</p><h6 id="autotoc_md194">MPI mode (&lt;tt&gt;Context::MPI&lt;/tt&gt;)</h6><ol><li>Queries the ownership range from the finite element space via <code>fes.getOwnershipRange(m_begin, m_end)</code>.</li><li>Iterates over local shard DOFs to identify ghost indices — those whose global index falls outside <svg class="m-math" style="width: 8.759em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 84.085771 11.955168">
 <title>
 $[\text{m\_begin},
    \text{m\_end})$
@@ -587,14 +639,14 @@ $[\text{m\_begin},
 <use x='73.555861' y='0' xlink:href='#eq3-g3-100'/>
 <use x='79.533445' y='0' xlink:href='#eq3-g4-41'/>
 </g>
-</svg> — and populates the <code><a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_ghost_bimap.html" class="m-doc">GhostBimap</a></code>.</li><li>Creates a distributed vector with <code>VecCreate</code> → <code>VecSetSizes</code> → <code>VecSetFromOptions</code> → <code>VecMPISetGhost</code> → <code>VecZeroEntries</code>.</li></ol>
+</svg> — and populates the <code>GhostBimap</code>.</li><li>Creates a distributed vector with <code>VecCreate</code> → <code>VecSetSizes</code> → <code>VecSetFromOptions</code> → <code>VecMPISetGhost</code> → <code>VecZeroEntries</code>.</li></ol>
           </div></section>
           <section class="m-doc-details" id="a45a1af78dc06ce60628dec2e89a98a2f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45a1af78dc06ce60628dec2e89a98a2f" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">const GridFunction&amp; other)</span></span>
             </h3>
             <p>Deep-copy constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -608,14 +660,14 @@ $[\text{m\_begin},
                 </tr>
               </tbody>
             </table>
-<p>Duplicates the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from <code>other</code> with <code>VecDuplicate</code> + <code>VecCopy</code> so that this instance owns an independent copy of the DOF data. Ghost mappings and ownership ranges are also copied. Any acquired array state in <code>other</code> is <strong>not</strong> propagated; the new object starts with no arrays acquired.</p>
+<p>Duplicates the PETSc vector from <code>other</code> with <code>VecDuplicate</code> + <code>VecCopy</code> so that this instance owns an independent copy of the DOF data. Ghost mappings and ownership ranges are also copied. Any acquired array state in <code>other</code> is <strong>not</strong> propagated; the new object starts with no arrays acquired.</p>
           </div></section>
           <section class="m-doc-details" id="a7f81d468ec369148a4cdc56512e334cc"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f81d468ec369148a4cdc56512e334cc" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f81d468ec369148a4cdc56512e334cc" class="m-doc-self">GridFunction</a>(</span><span class="m-doc-wrap">GridFunction&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move constructor.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -629,14 +681,14 @@ $[\text{m\_begin},
                 </tr>
               </tbody>
             </table>
-<p>Transfers ownership of the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector handle from <code>other</code> using <code>std::exchange</code>, leaving <code>other</code> in a valid but empty state (null vector, no array access). No <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> API calls are made.</p>
+<p>Transfers ownership of the PETSc vector handle from <code>other</code> using <code>std::exchange</code>, leaving <code>other</code> in a valid but empty state (null vector, no array access). No PETSc API calls are made.</p>
           </div></section>
           <section class="m-doc-details" id="aa10c0a45af82cdaab1c78ef9af315cbe"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa10c0a45af82cdaab1c78ef9af315cbe" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -656,14 +708,14 @@ $[\text{m\_begin},
                 </tr>
               </tfoot>
             </table>
-<p>Releases any existing <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> handles via <code><a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc">release()</a></code>, then deep-copies the vector from <code>other</code> with <code>VecDuplicate</code> + <code>VecCopy</code>. Ghost mappings, ownership ranges, and assembly state are also copied.</p><aside class="m-note m-success"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
+<p>Releases any existing PETSc handles via <code>release()</code>, then deep-copies the vector from <code>other</code> with <code>VecDuplicate</code> + <code>VecCopy</code>. Ghost mappings, ownership ranges, and assembly state are also copied.</p><aside class="m-note m-success"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac7108dc6c770e0642feadb5250a6c0cb"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7108dc6c770e0642feadb5250a6c0cb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7108dc6c770e0642feadb5250a6c0cb" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -683,7 +735,7 @@ $[\text{m\_begin},
                 </tr>
               </tfoot>
             </table>
-<p>Releases any existing <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> handles via <code><a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc">release()</a></code>, then transfers ownership from <code>other</code>.</p><aside class="m-note m-success"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
+<p>Releases any existing PETSc handles via <code>release()</code>, then transfers ownership from <code>other</code>.</p><aside class="m-note m-success"><h4>Precondition</h4><p>Both grid functions must reference the same finite element space.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a8663bf2c2b14b0c0f1654dccf636f74c"><div>
             <h3>
@@ -729,7 +781,7 @@ $ \min_i u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Flushes any pending write access, then delegates to <code>VecMin</code>. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode the result is the global minimum across all ranks.</p>
+<p>Flushes any pending write access, then delegates to <code>VecMin</code>. In MPI mode the result is the global minimum across all ranks.</p>
           </div></section>
           <section class="m-doc-details" id="a7c7c15dc43a710a140062694b75a9980"><div>
             <h3>
@@ -775,7 +827,7 @@ $ \max_i u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Flushes any pending write access, then delegates to <code>VecMax</code>. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode the result is the global maximum across all ranks.</p>
+<p>Flushes any pending write access, then delegates to <code>VecMax</code>. In MPI mode the result is the global maximum across all ranks.</p>
           </div></section>
           <section class="m-doc-details" id="aa40b9fd92d45801380c5354c8822b016"><div>
             <h3>
@@ -814,7 +866,7 @@ $ u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Lazily acquires write access to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array on first call. In <code><a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a></code> mode the index maps directly to the sequential array. In <code><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a></code> mode, owned indices are translated to <svg class="m-math" style="width: 9.816em; height: 1.053em; vertical-align: -0.221em;" viewBox="0 -7.992029 94.233151 10.108095">
+<p>Lazily acquires write access to the underlying PETSc array on first call. In <code>Context::Local</code> mode the index maps directly to the sequential array. In <code>Context::MPI</code> mode, owned indices are translated to <svg class="m-math" style="width: 9.816em; height: 1.053em; vertical-align: -0.221em;" viewBox="0 -7.992029 94.233151 10.108095">
 <title>
 $ \texttt{global} - \texttt{m\_begin} $
 </title>
@@ -846,7 +898,7 @@ $ \texttt{global} - \texttt{m\_begin} $
 <use x='81.680233' y='0' xlink:href='#eq6-g0-105'/>
 <use x='87.956692' y='0' xlink:href='#eq6-g0-110'/>
 </g>
-</svg> while ghost indices are looked up in the <code><a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_ghost_bimap.html" class="m-doc">GhostBimap</a></code>.</p><aside class="m-note m-info"><h4>Note</h4><p>The caller must call <code><a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc">flush()</a></code> after all modifications to propagate ghost values back to their owners.</p></aside>
+</svg> while ghost indices are looked up in the <code>GhostBimap</code>.</p><aside class="m-note m-info"><h4>Note</h4><p>The caller must call <code>flush()</code> after all modifications to propagate ghost values back to their owners.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a95d6456839cf18137da3b0d5f6dccbda"><div>
             <h3>
@@ -885,14 +937,14 @@ $ u_i $
                 </tr>
               </tfoot>
             </table>
-<p>Lazily acquires read-only access to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array. The index translation logic is identical to the mutable overload.</p>
+<p>Lazily acquires read-only access to the underlying PETSc array. The index translation logic is identical to the mutable overload.</p>
           </div></section>
           <section class="m-doc-details" id="a5a15c7fdd2c776656746e8ea2df8664d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5a15c7fdd2c776656746e8ea2df8664d" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Adds a scalar to every DOF value: <svg class="m-math" style="width: 6.056em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 58.14025 8.684049">
 <title>
@@ -949,7 +1001,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad971d24f5a29ea157727c537fa23120d" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Subtracts a scalar from every DOF value: <svg class="m-math" style="width: 6.076em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 58.334096 8.767119">
 <title>
@@ -1006,7 +1058,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa147a85f2c2df5480870d5b31277c0bb" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Scales every DOF value by a scalar: <svg class="m-math" style="width: 4.710em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 45.216638 6.940636">
 <title>
@@ -1061,7 +1113,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf43b34e239e137af95f838dbfe5feea" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a>&amp; rhs)</span></span>
             </h3>
             <p>Divides every DOF value by a scalar: <svg class="m-math" style="width: 5.164em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 49.575262 11.955168">
 <title>
@@ -1118,7 +1170,7 @@ $ c $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8cd8d1f3bb94590f68bbf067c78c528" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Component-wise addition of another grid function: <svg class="m-math" style="width: 6.421em; height: 0.905em; vertical-align: -0.187em;" viewBox="0 -6.890786 61.644672 8.684049">
 <title>
@@ -1169,14 +1221,14 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>Both grid functions must live on the same finite element space. Delegates to <code>VecAXPY(data, 1.0, rhs.getData())</code>.</p><aside class="m-note m-success"><h4>Precondition</h4><p><code>&amp;this-&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc">getFiniteElementSpace()</a> == &amp;rhs.getFiniteElementSpace()</code></p></aside>
+<p>Both grid functions must live on the same finite element space. Delegates to <code>VecAXPY(data, 1.0, rhs.getData())</code>.</p><aside class="m-note m-success"><h4>Precondition</h4><p><code>&amp;this-&gt;getFiniteElementSpace() == &amp;rhs.getFiniteElementSpace()</code></p></aside>
           </div></section>
           <section class="m-doc-details" id="af27d7820fb9dce5a22a90df5df2403ee"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af27d7820fb9dce5a22a90df5df2403ee" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Component-wise subtraction of another grid function: <svg class="m-math" style="width: 6.442em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 61.838517 8.767119">
 <title>
@@ -1227,14 +1279,14 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>Delegates to <code>VecAXPY(data, -1.0, rhs.getData())</code>.</p><aside class="m-note m-success"><h4>Precondition</h4><p><code>&amp;this-&gt;<a href="class_rodin_1_1_variational_1_1_grid_function_base.html#a4758cdb6b0d7f09e6719a7bfa884e86e" class="m-doc">getFiniteElementSpace()</a> == &amp;rhs.getFiniteElementSpace()</code></p></aside>
+<p>Delegates to <code>VecAXPY(data, -1.0, rhs.getData())</code>.</p><aside class="m-note m-success"><h4>Precondition</h4><p><code>&amp;this-&gt;getFiniteElementSpace() == &amp;rhs.getFiniteElementSpace()</code></p></aside>
           </div></section>
           <section class="m-doc-details" id="a44862edfff1ba702cd3efcaf0cb69479"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44862edfff1ba702cd3efcaf0cb69479" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Component-wise (Hadamard) multiplication by another grid function: <svg class="m-math" style="width: 5.819em; height: 0.740em; vertical-align: -0.187em;" viewBox="0 -5.313422 55.86091 7.106685">
 <title>
@@ -1292,7 +1344,7 @@ $ v $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae5d094b71239723ce0345f67721f4b28" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; rhs)</span></span>
             </h3>
             <p>Component-wise division by another grid function: <svg class="m-math" style="width: 5.529em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 53.079683 11.955168">
 <title>
@@ -1350,10 +1402,10 @@ $ v $
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69779584238dac7b4e23d9ff0a7b78b9" class="m-doc-self">setData</a>(</span><span class="m-doc-wrap">const <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&amp; data,
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69779584238dac7b4e23d9ff0a7b78b9" class="m-doc-self">setData</a>(</span><span class="m-doc-wrap">const <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&amp; data,
               size_t offset = 0)</span></span>
             </h3>
-            <p>Copies a contiguous slice of DOF values from another <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector into this grid function.</p>
+            <p>Copies a contiguous slice of DOF values from another PETSc vector into this grid function.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -1361,7 +1413,7 @@ $ v $
               <tbody>
                 <tr>
                   <td style="width: 1%">data&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Source <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from which to read.</td>
+                  <td>Source PETSc vector from which to read.</td>
                 </tr>
                 <tr>
                   <td>offset&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1408,16 +1460,16 @@ $[\text{offset}, \text{offset}+N)$
 <use x='75.779547' y='0' xlink:href='#eq25-g0-78'/>
 <use x='86.402158' y='0' xlink:href='#eq25-g4-41'/>
 </g>
-</svg> is extracted with <code>VecGetSubVector</code> / <code>VecCopy</code>. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode only the locally-owned portion is copied, and ghost values are refreshed by a <code>VecGhostUpdate(INSERT, FORWARD)</code>.</p>
+</svg> is extracted with <code>VecGetSubVector</code> / <code>VecCopy</code>. In MPI mode only the locally-owned portion is copied, and ghost values are refreshed by a <code>VecGhostUpdate(INSERT, FORWARD)</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a7bf67f07be076e2023ed7da153504931"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;
+                template&lt;class Function, class Pred&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; v,
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7bf67f07be076e2023ed7da153504931" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const Function&amp; v,
               const Pred&amp; pred)</span></span>
             </h3>
             <p>Projects a user-supplied function onto the grid function over a filtered mesh region.</p>
@@ -1427,7 +1479,11 @@ $[\text{offset}, \text{offset}+N)$
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">Pred</td>
+                  <td style="width: 1%">Function</td>
+                  <td>Callable type compatible with the finite element space&#x27;s projection interface.</td>
+                </tr>
+                <tr>
+                  <td>Pred</td>
                   <td>Unary predicate <code>bool(const Polytope&amp;)</code> filtering polytopes within <code>region</code>.</td>
                 </tr>
               </tbody>
@@ -1441,7 +1497,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
                 <tr>
                   <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> to project.</td>
+                  <td>Function to project.</td>
                 </tr>
                 <tr>
                   <td>pred&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1455,16 +1511,16 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Iterates over the polytopes in <code>region</code>, applies the predicate <code>pred</code> to each polytope, and for those that pass, sets the corresponding DOF values by evaluating the function <code>v</code>.</p><p>The method calls <code><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire()</a></code> before the loop and <code><a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc">flush()</a></code> after it, so the caller does not need to manage array access manually.</p>
+<p>Iterates over the polytopes in <code>region</code>, applies the predicate <code>pred</code> to each polytope, and for those that pass, sets the corresponding DOF values by evaluating the function <code>v</code>.</p><p>The method calls <code>acquire()</code> before the loop and <code>flush()</code> after it, so the caller does not need to manage array access manually.</p>
           </div></section>
           <section class="m-doc-details" id="ac2d041132b1540469de13585c1c12a7f"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc-self">acquire</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc-self">acquire</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Acquires mutable (write) access to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array.</p>
+            <p>Acquires mutable (write) access to the underlying PETSc array.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -1473,16 +1529,16 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>This is the entry point of the array access protocol. If the array has not already been acquired (<code>m_write.acquired == false</code>), the method:</p><h6 id="autotoc_md196">Local mode</h6><ul><li>Calls <code>VecGetArrayWrite(m_data, &amp;raw)</code>.</li></ul><h6 id="autotoc_md197">MPI mode</h6><ol><li>Obtains the local (ghosted) form via <code>VecGhostGetLocalForm</code>.</li><li>Locks the local form with <code>VecGetArrayWrite</code>.</li></ol><p>Ghost synchronization is deliberately not done here because element access may happen on only a subset of ranks during filtered assembly.</p><p>Subsequent calls while the array is already acquired are no-ops.</p>
+<p>This is the entry point of the array access protocol. If the array has not already been acquired (<code>m_write.acquired == false</code>), the method:</p><h6 id="autotoc_md195">Local mode</h6><ul><li>Calls <code>VecGetArrayWrite(m_data, &amp;raw)</code>.</li></ul><h6 id="autotoc_md196">MPI mode</h6><ol><li>Obtains the local (ghosted) form via <code>VecGhostGetLocalForm</code>.</li><li>Locks the local form with <code>VecGetArrayWrite</code>.</li></ol><p>Ghost synchronization is deliberately not done here because element access may happen on only a subset of ranks during filtered assembly.</p><p>Subsequent calls while the array is already acquired are no-ops.</p>
           </div></section>
           <section class="m-doc-details" id="a35095eb434070fff88abb65b08387c7e"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35095eb434070fff88abb65b08387c7e" class="m-doc-self">acquire</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35095eb434070fff88abb65b08387c7e" class="m-doc-self">acquire</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Acquires read-only access to the underlying <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array.</p>
+            <p>Acquires read-only access to the underlying PETSc array.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -1491,14 +1547,14 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Behaves like the mutable <code><a href="#ac2d041132b1540469de13585c1c12a7f" class="m-doc">acquire()</a></code> but uses <code>VecGetArrayRead</code> instead, permitting concurrent read access from multiple threads or call sites. In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode this only locks the ghosted local form; ghost synchronization is done by collective data-update paths.</p>
+<p>Behaves like the mutable <code>acquire()</code> but uses <code>VecGetArrayRead</code> instead, permitting concurrent read access from multiple threads or call sites. In MPI mode this only locks the ghosted local form; ghost synchronization is done by collective data-update paths.</p>
           </div></section>
           <section class="m-doc-details" id="a7134d5d6b568f5867a8efcc25d8bc761"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Releases mutable (write) access and scatters locally-modified ghost values back to their owners.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1509,16 +1565,16 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<h6 id="autotoc_md198">Local mode</h6><ul><li>Calls <code>VecRestoreArrayWrite(m_data, &amp;raw)</code>.</li></ul><h6 id="autotoc_md199">MPI mode</h6><ol><li>Restores the array with <code>VecRestoreArrayWrite(ghost, &amp;raw)</code>.</li><li>Returns the local form via <code>VecGhostRestoreLocalForm</code>.</li><li>Performs a <strong>reverse</strong> ghost update (<code>VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)</code>) to propagate ghost modifications back to owners.</li><li>Refreshes ghosts from owner values with a forward update.</li></ol><p>After this call, <code>m_write.acquired</code> is <code>false</code> and subsequent reads of the owned portion will reflect any changes that were made through ghost entries.</p>
+<h6 id="autotoc_md197">Local mode</h6><ul><li>Calls <code>VecRestoreArrayWrite(m_data, &amp;raw)</code>.</li></ul><h6 id="autotoc_md198">MPI mode</h6><ol><li>Restores the array with <code>VecRestoreArrayWrite(ghost, &amp;raw)</code>.</li><li>Returns the local form via <code>VecGhostRestoreLocalForm</code>.</li><li>Performs a <strong>reverse</strong> ghost update (<code>VecGhostUpdateBegin/End(INSERT_VALUES, SCATTER_REVERSE)</code>) to propagate ghost modifications back to owners.</li><li>Refreshes ghosts from owner values with a forward update.</li></ol><p>After this call, <code>m_write.acquired</code> is <code>false</code> and subsequent reads of the owned portion will reflect any changes that were made through ghost entries.</p>
           </div></section>
           <section class="m-doc-details" id="aa7e59253edaf70947f510c9bec12a2a4"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7e59253edaf70947f510c9bec12a2a4" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#a5d6d5bfeed8c675c0e6288256614b32e" class="m-doc">GridFunction</a>&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa7e59253edaf70947f510c9bec12a2a4" class="m-doc-self">flush</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Releases read-only access to the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array.</p>
+            <p>Releases read-only access to the PETSc array.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -1527,7 +1583,7 @@ $[\text{offset}, \text{offset}+N)$
                 </tr>
               </tfoot>
             </table>
-<p>Calls <code>VecRestoreArrayRead</code> (and, in <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode, <code>VecGhostRestoreLocalForm</code>) to unlock the array. No ghost scatter is performed because the array was accessed read-only.</p>
+<p>Calls <code>VecRestoreArrayRead</code> (and, in MPI mode, <code>VecGhostRestoreLocalForm</code>) to unlock the array. No ghost scatter is performed because the array was accessed read-only.</p>
           </div></section>
           <section class="m-doc-details" id="a23b477d0e2d399f75d585d154c346591"><div>
             <h3>
@@ -1536,8 +1592,8 @@ $[\text{offset}, \text{offset}+N)$
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23b477d0e2d399f75d585d154c346591" class="m-doc-self">release</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Releases all <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> array handles and destroys the vector.</p>
-<p>Performs a full teardown of the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> resources owned by this grid function:</p><ol><li>If a read array is acquired, calls <code>VecRestoreArrayRead</code> (and <code>VecGhostRestoreLocalForm</code> in <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode).</li><li>If a write array is acquired, calls <code>VecRestoreArrayWrite</code> and <code>VecGhostRestoreLocalForm</code>. Pending writes must be propagated by an explicit <code><a href="#a7134d5d6b568f5867a8efcc25d8bc761" class="m-doc">flush()</a></code> before release.</li><li>Destroys the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector with <code>VecDestroy</code>.</li></ol><p>After this call the grid function is in an empty (null-vector) state. Called automatically by the destructor. Can also be called explicitly to free resources before the object goes out of scope.</p>
+            <p>Releases all PETSc array handles and destroys the vector.</p>
+<p>Performs a full teardown of the PETSc resources owned by this grid function:</p><ol><li>If a read array is acquired, calls <code>VecRestoreArrayRead</code> (and <code>VecGhostRestoreLocalForm</code> in MPI mode).</li><li>If a write array is acquired, calls <code>VecRestoreArrayWrite</code> and <code>VecGhostRestoreLocalForm</code>. Pending writes must be propagated by an explicit <code>flush()</code> before release.</li><li>Destroys the PETSc vector with <code>VecDestroy</code>.</li></ol><p>After this call the grid function is in an empty (null-vector) state. Called automatically by the destructor. Can also be called explicitly to free resources before the object goes out of scope.</p>
           </div></section>
           <section class="m-doc-details" id="a52b2a6e2f898ab31632b6ccfe5fea5ee"><div>
             <h3>
@@ -1591,14 +1647,237 @@ $[\text{offset}, \text{offset}+N)$
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="acfc7fd27b959cb868fdf1ad16ebf1e1e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const T&amp; v)</span></span>
+            </h3>
+            <p>Assigns this grid function from a function or expression.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Function, expression, or constant accepted by project()</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>v</code> is forwarded to project().</p>
+          </div></section>
+          <section class="m-doc-details" id="ae77fe31796df64b0e93e43bd4ff0c67d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class Function&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae77fe31796df64b0e93e43bd4ff0c67d" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const Function&amp; fn)</span></span>
+            </h3>
+            <p>Projects a function on one mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Function</td>
+                  <td>Function or expression accepted by the FE pullback</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source function <code>fn</code> is interpolated on the entity identified by the <code>(dimension, index)</code> pair <code>p</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a87ac29798860cf20e2d9a3dc46055d0c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87ac29798860cf20e2d9a3dc46055d0c" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; v)</span></span>
+            </h3>
+            <p>Sets all DOFs attached to one mesh entity from a constant value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The constant value <code>v</code> is interpolated on the entity identified by the <code>(dimension, index)</code> pair <code>p</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab79e22182b7c08a26f9fa58340f12eca"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab79e22182b7c08a26f9fa58340f12eca" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const T&amp; fn)</span></span>
+            </h3>
+            <p>Projects a source on all cells.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Function, expression, or constant source type</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated on every cell.</p>
+          </div></section>
+          <section class="m-doc-details" id="a180d030c75e0c658a20994011bde76c6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a180d030c75e0c658a20994011bde76c6" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const T&amp; fn)</span></span>
+            </h3>
+            <p>Projects a source on a geometric region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Function, expression, or constant source type</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated over <code>region</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="aedae961b3f896ee9e221fb1e2e31b50a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aedae961b3f896ee9e221fb1e2e31b50a" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const T&amp; fn,
+              const <a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&amp; attr)</span></span>
+            </h3>
+            <p>Projects a source on entities of a region with one attribute.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Function, expression, or constant source type</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute equals <code>attr</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="adde8b8ce0a112d4fe6bcab3505efb692"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adde8b8ce0a112d4fe6bcab3505efb692" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const T&amp; fn,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; attrs)</span></span>
+            </h3>
+            <p>Projects a source on entities of a region with selected attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Function, expression, or constant source type</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The source object <code>fn</code> is interpolated over entities of <code>region</code> whose attribute belongs to <code>attrs</code>. An empty attribute set accepts all entities in the region.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae75269d737344d336db60324b1d3692d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+                template&lt;class Pred&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae75269d737344d336db60324b1d3692d" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
+              const <a href="#a5c7fc1cee1343f294d68ab9388bbfe78" class="m-doc">RangeType</a>&amp; fn,
+              const Pred&amp; pred)</span></span>
+            </h3>
+            <p>Projects a constant value over a filtered region.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Pred</td>
+                  <td>Predicate type selecting mesh entities</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this grid function</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>The constant value <code>fn</code> is interpolated over entities of <code>region</code> accepted by <code>pred</code>.</p>
+          </div></section>
           <section class="m-doc-details" id="add293b7fe39a85c6b22e0ae915bb9456"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
-                template&lt;class <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>, class Pred&gt;
+                template&lt;class Function, class Pred&gt;
               </div>
               <span class="m-doc-wrap-bumper">Derived&amp; Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add293b7fe39a85c6b22e0ae915bb9456" class="m-doc-self">project</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>&amp; region,
-              const <a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a>&amp; fn,
+              const Function&amp; fn,
               const Pred&amp; pred)</span></span>
             </h3>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
@@ -1628,6 +1907,24 @@ $[\text{offset}, \text{offset}+N)$
               </div>
               <span class="m-doc-wrap-bumper"><a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8663bf2c2b14b0c0f1654dccf636f74c" class="m-doc-self">min</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
+            <p>Computes the minimum coefficient and its index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Global DOF index attaining the minimum</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Minimum coefficient value</td>
+                </tr>
+              </tfoot>
+            </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a83722b0cf86912c8e1cf177c0ede4d5d"><div>
@@ -1655,6 +1952,24 @@ $[\text{offset}, \text{offset}+N)$
               </div>
               <span class="m-doc-wrap-bumper"><a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc">ScalarType</a> Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c7c15dc43a710a140062694b75a9980" class="m-doc-self">max</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; idx) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
+            <p>Computes the maximum coefficient and its index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-warning">out</span></td>
+                  <td>Global DOF index attaining the maximum</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Maximum coefficient value</td>
+                </tr>
+              </tfoot>
+            </table>
 <aside class="m-note m-info"><h4>Note</h4><p>CRTP function to be overriden in Derived class.</p></aside>
           </div></section>
         </section>

@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_context.html">Context</a>::<wbr/></span>MPI <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_context_2_m_p_i_8h.html">&lt;Rodin/MPI/Context/MPI.h&gt;</a></div>
         </h1>
-        <p><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> context for parallel computing with Message Passing Interface.</p>
+        <p>MPI context for parallel computing with Message Passing Interface.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides an <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> context that wraps the Boost.MPI environment and communicator objects. It serves as the interface for parallel computations across multiple processes in distributed memory systems.</p><p>The context is passed to distributed mesh, assembly, and finite-element components so they can access rank-local and collective communication services in a uniform way.</p>
+<p>This class provides an MPI context that wraps the Boost.MPI environment and communicator objects. It serves as the interface for parallel computations across multiple processes in distributed memory systems.</p><p>The context is passed to distributed mesh, assembly, and finite-element components so they can access rank-local and collective communication services in a uniform way.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -108,7 +108,7 @@
               <span class="m-doc-wrap-bumper"><a href="#ac2ee9e40404a0a3d31ef6e84e37af100" class="m-doc">MPI</a>(</span><span class="m-doc-wrap">const boost::mpi::environment&amp; env,
               const boost::mpi::communicator&amp; world)</span>
             </dt>
-            <dd>Constructs an <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> context.</dd>
+            <dd>Constructs an MPI context.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -117,11 +117,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6aaf4222fa31a772a759f2c4f775d6a0" class="m-doc">getCommunicator</a>(</span><span class="m-doc-wrap">) const -&gt; const boost::mpi::communicator&amp;</span>
             </dt>
-            <dd>Gets the <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> communicator.</dd>
+            <dd>Gets the MPI communicator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a04d3958895937469975744c2659ecc44" class="m-doc">getEnvironment</a>(</span><span class="m-doc-wrap">) const -&gt; const boost::mpi::environment&amp;</span>
             </dt>
-            <dd>Gets the <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> environment.</dd>
+            <dd>Gets the MPI environment.</dd>
           </dl>
         </section>
         <section>
@@ -131,7 +131,7 @@
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Context::<wbr />MPI::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2ee9e40404a0a3d31ef6e84e37af100" class="m-doc-self">MPI</a>(</span><span class="m-doc-wrap">const boost::mpi::environment&amp; env,
               const boost::mpi::communicator&amp; world)</span></span>
             </h3>
-            <p>Constructs an <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> context.</p>
+            <p>Constructs an MPI context.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -139,11 +139,11 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">env</td>
-                  <td><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> environment managing <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> initialization/finalization</td>
+                  <td>MPI environment managing MPI initialization/finalization</td>
                 </tr>
                 <tr>
                   <td>world</td>
-                  <td><a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> communicator for process communication</td>
+                  <td>MPI communicator for process communication</td>
                 </tr>
               </tbody>
             </table>
@@ -152,12 +152,12 @@
             <h3>
               <span class="m-doc-wrap-bumper">const boost::mpi::communicator&amp; Rodin::<wbr />Context::<wbr />MPI::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6aaf4222fa31a772a759f2c4f775d6a0" class="m-doc-self">getCommunicator</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Gets the <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> communicator.</p>
+            <p>Gets the MPI communicator.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to the <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> communicator</td>
+                  <td>Const reference to the MPI communicator</td>
                 </tr>
               </tfoot>
             </table>
@@ -166,12 +166,12 @@
             <h3>
               <span class="m-doc-wrap-bumper">const boost::mpi::environment&amp; Rodin::<wbr />Context::<wbr />MPI::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a04d3958895937469975744c2659ecc44" class="m-doc-self">getEnvironment</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Gets the <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> environment.</p>
+            <p>Gets the MPI environment.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to the <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a> environment</td>
+                  <td>Const reference to the MPI environment</td>
                 </tr>
               </tfoot>
             </table>

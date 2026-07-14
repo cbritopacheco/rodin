@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>LDLT&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Robust <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization with pivoting for dense matrices.</p>
+        <p>Robust LDLT Cholesky factorization with pivoting for dense matrices.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>This solver performs <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> decomposition with robust pivoting for numerical stability. It handles symmetric indefinite matrices and provides reliable solutions for dense systems.</p><p><strong>Characteristics:</strong></p><ul><li><strong>Type</strong>: Direct solver</li><li><strong>Matrix requirements</strong>: Symmetric dense (positive definite or indefinite)</li><li><strong>Memory</strong>: <svg class="m-math" style="width: 3.135em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 30.09582 12.463531">
+<p>This solver performs LDLT decomposition with robust pivoting for numerical stability. It handles symmetric indefinite matrices and provides reliable solutions for dense systems.</p><p><strong>Characteristics:</strong></p><ul><li><strong>Type</strong>: Direct solver</li><li><strong>Matrix requirements</strong>: Symmetric dense (positive definite or indefinite)</li><li><strong>Memory</strong>: <svg class="m-math" style="width: 3.135em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 30.09582 12.463531">
 <title>
 $ O(n^2) $
 </title>
@@ -153,7 +153,7 @@ $ O(n^2) $
             </dt>
             <dd>Type of linear system being solved.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Type of problem being solved.</dd>
             <dt id="a85385c6607a397925a213e9098256fdc">
@@ -168,7 +168,7 @@ $ O(n^2) $
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#ae0b2b92351992df3694e5fbf3ea84348" class="m-doc">LDLT</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
             </dt>
-            <dd>Constructs an <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> solver for the given problem.</dd>
+            <dd>Constructs an LDLT solver for the given problem.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#abf42607551838bb3803325e05490dee1" class="m-doc">LDLT</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>&amp; other)</span>
             </dt>
@@ -185,7 +185,7 @@ $ O(n^2) $
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Solves the linear system using <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> factorization with pivoting.</dd>
+            <dd>Solves the linear system using LDLT factorization with pivoting.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afeb229624aea9f4b1335cf1d83af7938" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -209,7 +209,7 @@ $ O(n^2) $
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LDLT&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0b2b92351992df3694e5fbf3ea84348" class="m-doc-self">LDLT</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
             </h3>
-            <p>Constructs an <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> solver for the given problem.</p>
+            <p>Constructs an LDLT solver for the given problem.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -237,7 +237,7 @@ $ O(n^2) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to copy from</td>
+                  <td>Solver to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -257,7 +257,7 @@ $ O(n^2) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to move from</td>
+                  <td>Solver to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -269,7 +269,7 @@ $ O(n^2) $
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />LDLT&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Solves the linear system using <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> factorization with pivoting.</p>
+            <p>Solves the linear system using LDLT factorization with pivoting.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -294,7 +294,7 @@ $ O(n^2) $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> instance</td>
+                  <td>Pointer to a new LDLT instance</td>
                 </tr>
               </tfoot>
             </table>

@@ -108,6 +108,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -180,23 +181,68 @@ $ \mathbf{A} : \delta\mathbf{F} $
 <use x='25.682644' y='0' xlink:href='#eq2-g0-70'/>
 </g>
 </svg> encodes both material and geometric stiffness (no separate geometric-stiffness integrator is needed when using the first Piola-Kirchhoff formulation).</p><p>Typically constructed via <code>InternalVirtualWork::Tangent(u, v)</code> rather than directly.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="ad4f06128fbc842efed38cb41fa6de0ec">
+              using <a href="#ad4f06128fbc842efed38cb41fa6de0ec" class="m-doc-self">Parent</a> = Variational::LocalBilinearFormIntegratorBase&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a642521cadb1a8ac3a99efed89bc5cb0d">
+              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
+            </dt>
+            <dd>Constitutive law type.</dd>
+            <dt id="abe1f3d66cd00cb23235f1b594e220209">
+              using <a href="#abe1f3d66cd00cb23235f1b594e220209" class="m-doc-self">TrialType</a> = TrialFunctionType
+            </dt>
+            <dd>Trial function type.</dd>
+            <dt id="afad784a376132f122234cf9dcdde118c">
+              using <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc-self">TestType</a> = TestFunctionType
+            </dt>
+            <dd>Test function type.</dd>
+            <dt id="ac445b442c21ea71c53c90f799b23ae3c">
+              using <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc-self">StateType</a> = DisplacementType
+            </dt>
+            <dd>Current displacement state type.</dd>
+            <dt id="a2039b80cf4e08953e5a1deda409384fd">
+              using <a href="#a2039b80cf4e08953e5a1deda409384fd" class="m-doc-self">TrialFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#abe1f3d66cd00cb23235f1b594e220209" class="m-doc">TrialType</a>&gt;::FESType
+            </dt>
+            <dd>Trial finite element space type.</dd>
+            <dt id="a265d5d1fa6112b86444b719cf45f5aa1">
+              using <a href="#a265d5d1fa6112b86444b719cf45f5aa1" class="m-doc-self">TestFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&gt;::FESType
+            </dt>
+            <dd>Test finite element space type.</dd>
+            <dt id="ae6311ea478e5e374583b826ab0607d73">
+              using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
+            </dt>
+            <dd>State finite element space type.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#aa85571937211060679825814880585e6" class="m-doc">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
-              const TrialType&amp; u,
-              const TestType&amp; v,
-              const StateType&amp; displacement)</span>
+              const <a href="#abe1f3d66cd00cb23235f1b594e220209" class="m-doc">TrialType</a>&amp; u,
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
             <dd>Constructs the internal virtual work tangent integrator.</dd>
+            <dt id="ab244d6ada7d212a96583fdb761e92992">
+              <span class="m-doc-wrap-bumper"><a href="#ab244d6ada7d212a96583fdb761e92992" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
             <dd>Rebinds the linearization point.</dd>
             <dt>
@@ -207,12 +253,29 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <span class="m-doc-wrap-bumper">auto <a href="#a4e81f0ae3148f3e6a75f48fbe344f2c6" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp;</span>
             </dt>
             <dd>Sets an input for auxiliary constitutive data.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae989d9ab5ca9091f843e636bf86a68ab" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a8d68dad2ab293e76022ff4a5d3aad8a9">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8d68dad2ab293e76022ff4a5d3aad8a9" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
-            <dd>Creates a copy of this integrator.</dd>
+            <dd>Sets the current polytope and assembles the element tangent matrix.</dd>
+            <dt id="af65301ad831f65b88eab3086cd8187cb">
+              <span class="m-doc-wrap-bumper">auto <a href="#af65301ad831f65b88eab3086cd8187cb" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns an entry of the current element tangent matrix.</dd>
+            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns the current polytope.</dd>
+            <dt id="aba6371885ea424dd84df03d85fcb0706">
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns the integration region.</dd>
+            <dt id="ae989d9ab5ca9091f843e636bf86a68ab">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae989d9ab5ca9091f843e636bf86a68ab" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Polymorphically copies this tangent integrator.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const LawType&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -225,9 +288,9 @@ $ \mathbf{A} : \delta\mathbf{F} $
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa85571937211060679825814880585e6" class="m-doc-self">InternalVirtualWorkTangent</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
-              const TrialType&amp; u,
-              const TestType&amp; v,
-              const StateType&amp; displacement)</span></span>
+              const <a href="#abe1f3d66cd00cb23235f1b594e220209" class="m-doc">TrialType</a>&amp; u,
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
             </h3>
             <p>Constructs the internal virtual work tangent integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -259,7 +322,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdfc5472d56db4fe41f02702afd8eedb" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
             </h3>
             <p>Rebinds the linearization point.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -332,24 +395,7 @@ $ \mathbf{A} : \delta\mathbf{F} $
                 </tr>
               </tfoot>
             </table>
-<p>The input is called at each quadrature point after the <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> has been constructed with geometric context and kinematics, allowing injection of fiber directions, activation parameters, region-wise material properties, etc.</p>
-          </div></section>
-          <section class="m-doc-details" id="ae989d9ab5ca9091f843e636bf86a68ab"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TrialFunctionType, class TestFunctionType, class DisplacementType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_tangent.html" class="m-doc">InternalVirtualWorkTangent</a>* Rodin::<wbr />Solid::<wbr />InternalVirtualWorkTangent&lt;LawDerived, TrialFunctionType, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae989d9ab5ca9091f843e636bf86a68ab" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a copy of this integrator.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
-                </tr>
-              </tfoot>
-            </table>
+<p>The input is called at each quadrature point after the ConstitutivePoint has been constructed with geometric context and kinematics, allowing injection of fiber directions, activation parameters, region-wise material properties, etc.</p>
           </div></section>
         </section>
       </div>

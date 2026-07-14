@@ -82,17 +82,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md219">Usage</a></li>
+            <li><a href="#autotoc_md218">Usage</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<section id="autotoc_md219"><h3><a href="#autotoc_md219">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
+<section id="autotoc_md218"><h3><a href="#autotoc_md218">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
 <span class="n">NeoHookean</span><span class="o">::</span><span class="n">Cache</span><span class="w"> </span><span class="n">cache</span><span class="p">;</span>
 <span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">gradU</span><span class="p">);</span>
@@ -101,13 +102,34 @@
 <span class="n">CauchyStress</span><span class="o">&lt;</span><span class="n">NeoHookean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cauchy</span><span class="p">(</span><span class="n">law</span><span class="p">);</span>
 <span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">SpatialMatrix</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sigma</span><span class="p">;</span>
 <span class="n">cauchy</span><span class="p">.</span><span class="n">getCauchyStress</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span></pre></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a642521cadb1a8ac3a99efed89bc5cb0d">
+              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
+            </dt>
+            <dd>Constitutive law type.</dd>
+            <dt id="ae66c074f434a5e00e2bd00da759fb252">
+              using <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc-self">CacheType</a> = typename LawType::Cache
+            </dt>
+            <dd>Cache type used by the constitutive law.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap">const LawType&amp; law)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span>
             </dt>
             <dd>Constructs the Cauchy stress evaluator.</dd>
+            <dt id="ab32b81861b7874571cda2c1fb3a45752">
+              <span class="m-doc-wrap-bumper"><a href="#ab32b81861b7874571cda2c1fb3a45752" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ae28c50b611faadb0a28abe1878742015">
+              <span class="m-doc-wrap-bumper"><a href="#ae28c50b611faadb0a28abe1878742015" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_cauchy_stress.html" class="m-doc">CauchyStress</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -115,7 +137,7 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a5f9063aa930d67204b82ce797ca80e7a" class="m-doc">getCauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
-              const CacheType&amp; cache,
+              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
             </dt>
             <dd>Computes <svg class="m-math" style="width: 5.823em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 55.90278 13.96606">
@@ -143,7 +165,7 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
 </g>
 </svg>.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const LawType&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -155,7 +177,7 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
               <div class="m-doc-template">
                 template&lt;class LawDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const LawType&amp; law)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac12334c779cf3c82f411512644d85211" class="m-doc-self">CauchyStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span></span>
             </h3>
             <p>Constructs the Cauchy stress evaluator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -176,7 +198,7 @@ $ \boldsymbol{\sigma} = \tfrac{1}{J} \mathbf{P} \mathbf{F}^T $
                 template&lt;class LawDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />CauchyStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5f9063aa930d67204b82ce797ca80e7a" class="m-doc-self">getCauchyStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; sigma,
-              const CacheType&amp; cache,
+              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
             </h3>
             <p>Computes <svg class="m-math" style="width: 5.823em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 55.90278 13.96606">

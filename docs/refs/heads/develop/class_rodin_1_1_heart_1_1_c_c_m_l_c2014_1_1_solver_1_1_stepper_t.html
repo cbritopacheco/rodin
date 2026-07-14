@@ -101,19 +101,356 @@
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Manages the Newton iteration for one time step, delegating residual and Jacobian assembly to the <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_numerics_1_1_dynamic_system.html" class="m-doc">Numerics::<wbr />DynamicSystem</a> class, and updating the model state on convergence.</p>
+<p>Manages the Newton iteration for one time step, delegating residual and Jacobian assembly to the Numerics::DynamicSystem class, and updating the model state on convergence.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t_1_1_problem.html" class="m-doc">Problem</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> problem adapter for Newton iteration.</dd>
+            <dd>Variational problem adapter for Newton iteration.</dd>
+            <dt id="a7310e8816f84536025cfe54cca8d25f3">
+              using <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc-self">Scalar</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar type used by the reduced model.</dd>
+            <dt id="afada28e2962f721c5002f98d3208dde1">
+              using <a href="#afada28e2962f721c5002f98d3208dde1" class="m-doc-self">DenseMatrix</a> = <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Dense matrix type used for Newton systems.</dd>
+            <dt id="a13573b2e4d6312f7e6aa76fd7bb2a739">
+              using <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc-self">DenseVector</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Dense vector type used for states and residuals.</dd>
+            <dt id="af7d6a59b3f54f8528d2ef3ea3bcda8c7">
+              using <a href="#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc-self">DenseLinearSystem</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a>&lt;<a href="#afada28e2962f721c5002f98d3208dde1" class="m-doc">DenseMatrix</a>, <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&gt;
+            </dt>
+            <dd>Dense linear system assembled by the reduced model.</dd>
+            <dt id="aef3f85a21f55c15144ac0ff3e4f982d8">
+              using <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc-self">State</a> = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_model_1_1_state_t.html" class="m-doc">Model::<wbr />StateT</a>&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Dynamic state type.</dd>
+            <dt id="a0509f943508e1d8e3e12cc5a89ef86a8">
+              using <a href="#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc-self">Input</a> = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_model_1_1_input_t.html" class="m-doc">Model::<wbr />InputT</a>&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, PassiveEnergyLaw&gt;
+            </dt>
+            <dd>Model input and parameter type.</dd>
+            <dt id="aeffab38c5301ed4c68087273ed91685e">
+              using <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc-self">Report</a> = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_model_1_1_report_t.html" class="m-doc">Model::<wbr />ReportT</a>&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>, <a href="#af7d6a59b3f54f8528d2ef3ea3bcda8c7" class="m-doc">DenseLinearSystem</a>&gt;
+            </dt>
+            <dd>Nonlinear solve report type.</dd>
+            <dt id="a4aee7dd38b6944a4dbf2415e0cee348f">
+              using <a href="#a4aee7dd38b6944a4dbf2415e0cee348f" class="m-doc-self">EvalData</a> = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_model_1_1_eval_data_t.html" class="m-doc">Model::<wbr />EvalDataT</a>&lt;<a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a>&gt;
+            </dt>
+            <dd>Residual/Jacobian evaluation cache type.</dd>
+            <dt id="ab5ea7612dde4a62b086cea35226bfc5d">
+              using <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc-self">History</a> = <a href="struct_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_model_1_1_history_t.html" class="m-doc">Model::<wbr />HistoryT</a>&lt;<a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&gt;
+            </dt>
+            <dd>Time-history type.</dd>
           </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a38a5e2596f75fd8b99fef202c61325ba" class="m-doc">StepperT</a>(</span><span class="m-doc-wrap">const <a href="#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc">Input</a>&amp; input) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs a stepper from model input parameters.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acab9eb514082bd8b344037ad16ead091" class="m-doc">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> atol) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp;</span>
+            </dt>
+            <dd>Sets the Newton absolute residual tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae2344d06e3c036bf3ab24d337fd732e9" class="m-doc">setRelativeTolerance</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> rtol) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp;</span>
+            </dt>
+            <dd>Sets the Newton relative residual tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a196e4d82e15705922e6dfe455a7da4d6" class="m-doc">setStepTolerance</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> stol) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp;</span>
+            </dt>
+            <dd>Sets the Newton step tolerance.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a77ca634db050ee775c2a448e4e0ae064" class="m-doc">setMaxIterations</a>(</span><span class="m-doc-wrap">const size_t maxIt) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of Newton iterations.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa1adeeac9b9b7a14fcd124325f8129e6" class="m-doc">setDampingFactor</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> alpha) -&gt; <a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp;</span>
+            </dt>
+            <dd>Sets the Newton damping factor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab02d0d34edee23c3a7f00d30723992cd" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; initial)</span>
+            </dt>
+            <dd>Initializes the dynamic state and history.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adae52d2754eb847f1bbf68be8294ccbb" class="m-doc">step</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> dt) -&gt; <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a></span>
+            </dt>
+            <dd>Advances the model by one time step.</dd>
+            <dt id="a0232fd0aa65a7156bd7ebd07c5c86e87">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0232fd0aa65a7156bd7ebd07c5c86e87" class="m-doc-self">getState</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the current state.</dd>
+            <dt id="a0febbfb9a7f151b2e2beeae7e36e562d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0febbfb9a7f151b2e2beeae7e36e562d" class="m-doc-self">getHistory</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the stored time history.</dd>
+            <dt id="a66ae5398a8ac737f37f1595fcec9aa09">
+              <span class="m-doc-wrap-bumper">auto <a href="#a66ae5398a8ac737f37f1595fcec9aa09" class="m-doc-self">getReport</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the most recent nonlinear solve report.</dd>
+            <dt id="a2e5b25ea166241e0eeaeb6de4531243f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e5b25ea166241e0eeaeb6de4531243f" class="m-doc-self">getUnknowns</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the packed unknown vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aeb237bfbc5fe02cfdfd0b8e52897190e" class="m-doc">restore</a>(</span><span class="m-doc-wrap">const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; state,
+              const <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; history,
+              const <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; unknowns,
+              const <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a>&amp; report)</span>
+            </dt>
+            <dd>Restores a previously saved stepper state.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a38a5e2596f75fd8b99fef202c61325ba"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38a5e2596f75fd8b99fef202c61325ba" class="m-doc-self">StepperT</a>(</span><span class="m-doc-wrap">const <a href="#a0509f943508e1d8e3e12cc5a89ef86a8" class="m-doc">Input</a>&amp; input) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs a stepper from model input parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">input</td>
+                  <td>Model input parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="acab9eb514082bd8b344037ad16ead091"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acab9eb514082bd8b344037ad16ead091" class="m-doc-self">setAbsoluteTolerance</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> atol)</span></span>
+            </h3>
+            <p>Sets the Newton absolute residual tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">atol</td>
+                  <td>Absolute tolerance.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this stepper.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae2344d06e3c036bf3ab24d337fd732e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae2344d06e3c036bf3ab24d337fd732e9" class="m-doc-self">setRelativeTolerance</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> rtol)</span></span>
+            </h3>
+            <p>Sets the Newton relative residual tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">rtol</td>
+                  <td>Relative tolerance.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this stepper.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a196e4d82e15705922e6dfe455a7da4d6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a196e4d82e15705922e6dfe455a7da4d6" class="m-doc-self">setStepTolerance</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> stol)</span></span>
+            </h3>
+            <p>Sets the Newton step tolerance.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">stol</td>
+                  <td>Step tolerance.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this stepper.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a77ca634db050ee775c2a448e4e0ae064"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77ca634db050ee775c2a448e4e0ae064" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">const size_t maxIt)</span></span>
+            </h3>
+            <p>Sets the maximum number of Newton iterations.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">maxIt</td>
+                  <td>Maximum iteration count.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this stepper.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aa1adeeac9b9b7a14fcd124325f8129e6"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_heart_1_1_c_c_m_l_c2014_1_1_solver_1_1_stepper_t.html" class="m-doc">StepperT</a>&amp; Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa1adeeac9b9b7a14fcd124325f8129e6" class="m-doc-self">setDampingFactor</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> alpha)</span></span>
+            </h3>
+            <p>Sets the Newton damping factor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">alpha</td>
+                  <td>Damping factor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this stepper.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab02d0d34edee23c3a7f00d30723992cd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab02d0d34edee23c3a7f00d30723992cd" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; initial)</span></span>
+            </h3>
+            <p>Initializes the dynamic state and history.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">initial</td>
+                  <td>Initial state.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adae52d2754eb847f1bbf68be8294ccbb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a> Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adae52d2754eb847f1bbf68be8294ccbb" class="m-doc-self">step</a>(</span><span class="m-doc-wrap">const <a href="#a7310e8816f84536025cfe54cca8d25f3" class="m-doc">Scalar</a> dt)</span></span>
+            </h3>
+            <p>Advances the model by one time step.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dt</td>
+                  <td>Time-step size.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Report for the nonlinear solve.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aeb237bfbc5fe02cfdfd0b8e52897190e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class PassiveEnergyLaw, class PassiveLaw&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Heart::<wbr />CCMLC2014::<wbr />Solver::<wbr />StepperT&lt;PassiveEnergyLaw, PassiveLaw&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb237bfbc5fe02cfdfd0b8e52897190e" class="m-doc-self">restore</a>(</span><span class="m-doc-wrap">const <a href="#aef3f85a21f55c15144ac0ff3e4f982d8" class="m-doc">State</a>&amp; state,
+              const <a href="#ab5ea7612dde4a62b086cea35226bfc5d" class="m-doc">History</a>&amp; history,
+              const <a href="#a13573b2e4d6312f7e6aa76fd7bb2a739" class="m-doc">DenseVector</a>&amp; unknowns,
+              const <a href="#aeffab38c5301ed4c68087273ed91685e" class="m-doc">Report</a>&amp; report)</span></span>
+            </h3>
+            <p>Restores a previously saved stepper state.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">state</td>
+                  <td>Current dynamic state.</td>
+                </tr>
+                <tr>
+                  <td>history</td>
+                  <td>Stored time history.</td>
+                </tr>
+                <tr>
+                  <td>unknowns</td>
+                  <td>Packed unknown vector.</td>
+                </tr>
+                <tr>
+                  <td>report</td>
+                  <td>Last nonlinear solve report.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

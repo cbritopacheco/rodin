@@ -86,12 +86,14 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The passive law can be any <a href="namespace_rodin.html" class="m-doc">Rodin</a> hyperelastic law. The active contribution is aligned with <code><a href="struct_rodin_1_1_solid_1_1_tags_1_1_fiber_direction.html" class="m-doc">Tags::<wbr />FiberDirection</a></code> and uses <code><a href="struct_rodin_1_1_solid_1_1_tags_1_1_active_extension.html" class="m-doc">Tags::<wbr />ActiveExtension</a></code>; if dynamic tags are present (<code>TimeStep</code>, <code>PreviousActiveExtension</code>, <code>PreviousActiveGamma</code>, <code>PreviousActiveBeta</code>, <code>ElectricalActivation</code>), the condensed dynamic tangent is used.</p>
+<p>The passive law can be any Rodin hyperelastic law. The active contribution is aligned with <code>Tags::FiberDirection</code> and uses <code>Tags::ActiveExtension</code>; if dynamic tags are present (<code>TimeStep</code>, <code>PreviousActiveExtension</code>, <code>PreviousActiveGamma</code>, <code>PreviousActiveBeta</code>, <code>ElectricalActivation</code>), the condensed dynamic tangent is used.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -100,6 +102,25 @@
               class <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw&lt;ActiveContraction&lt;PassiveLaw, ActiveFiberLaw&gt;&gt;</a>
             </dt>
             <dd>CRTP base class for hyperelastic constitutive laws.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_solid_1_1_active_contraction_1_1_cache.html" class="m-doc">Cache</a>
+            </dt>
+            <dd>Cached passive and active quantities at a quadrature point.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a7f4cca6d519eba96de972c7cb4d9962a">
+              <span class="m-doc-wrap-bumper"><a href="#a7f4cca6d519eba96de972c7cb4d9962a" class="m-doc-self">ActiveContraction</a>(</span><span class="m-doc-wrap">const PassiveLaw&amp; passiveLaw,
+              const ActiveLaw&amp; activeLaw = ActiveLaw())</span>
+            </dt>
+            <dd>Constructs the coupled active contraction law.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -137,6 +158,37 @@ $e_c$
 <use x='5.42544' y='1.793263' xlink:href='#eq2-g0-99'/>
 </g>
 </svg>.</dd>
+            <dt id="a21275a7e2a80cdfd93eab5b1728d44f2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a21275a7e2a80cdfd93eab5b1728d44f2" class="m-doc-self">getPassiveLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const PassiveLaw&amp;</span>
+            </dt>
+            <dd>Returns the passive hyperelastic law.</dd>
+            <dt id="af5d0fffa940387852a95dd6936189ed0">
+              <span class="m-doc-wrap-bumper">auto <a href="#af5d0fffa940387852a95dd6936189ed0" class="m-doc-self">getActiveLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const ActiveLaw&amp;</span>
+            </dt>
+            <dd>Returns the active fiber law.</dd>
+            <dt id="a7c3f4a25b01ac9b17fa90d43921b2dfb">
+              <span class="m-doc-wrap-bumper">void <a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc-self">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_active_contraction_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+            </dt>
+            <dd>Populates cached passive and active quantities.</dd>
+            <dt id="ad6e34e0670dc260c3510a097ab9bd352">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad6e34e0670dc260c3510a097ab9bd352" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_active_contraction_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Returns the sum of passive and active strain-energy densities.</dd>
+            <dt id="aa875e5dbc449421b1cc4fdb7471aa946">
+              <span class="m-doc-wrap-bumper">void <a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
+              const <a href="struct_rodin_1_1_solid_1_1_active_contraction_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+            </dt>
+            <dd>Adds the active contribution to the first Piola-Kirchhoff stress.</dd>
+            <dt id="adbcae15abc4f9d19395789c881e27e7d">
+              <span class="m-doc-wrap-bumper">void <a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
+              const <a href="struct_rodin_1_1_solid_1_1_active_contraction_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span>
+            </dt>
+            <dd>Adds the active contribution to the material tangent action.</dd>
           </dl>
         </section>
       </div>

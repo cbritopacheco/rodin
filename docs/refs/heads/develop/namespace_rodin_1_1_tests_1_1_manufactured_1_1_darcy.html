@@ -76,13 +76,14 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests_1_1_manufactured.html">Manufactured</a>::<wbr/></span>Darcy <span class="m-thin">namespace</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Manufactured</a> solution for the <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_darcy.html" class="m-doc">Darcy</a> problem using P1 spaces.</p>
+        <p>Manufactured solution for the Darcy problem using P1 spaces.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
@@ -334,22 +335,83 @@ $(\mathbf{v},q)$
 <use x='262.484931' y='-2.988792' xlink:href='#eq7-g0-58'/>
 </g>
 </svg></div><aside class="m-note m-info"><h4>Note</h4><p>Although mixed formulations typically use an H(div)–conforming space for the flux, here a vector–valued P1 space.</p></aside>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a> = ManufacturedDarcyTest&lt;16&gt;
+            </dt>
+            <dd>Helper used by the tests to Manufactured Darcy Test 16 x 16.</dd>
+            <dt>
+              using <a href="#af6a31a5139316eb31803382000f0f79f" class="m-doc">ManufacturedDarcyTest32x32</a> = ManufacturedDarcyTest&lt;32&gt;
+            </dt>
+            <dd>Helper used by the tests to Manufactured Darcy Test 32 x 32.</dd>
+            <dt>
+              using <a href="#a87c0d4f12e339982205183607c382877" class="m-doc">ManufacturedDarcyTest64x64</a> = ManufacturedDarcyTest&lt;64&gt;
+            </dt>
+            <dd>Helper used by the tests to Manufactured Darcy Test 64 x 64.</dd>
+          </dl>
+        </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a4537cf7e683a92a97ad6b797408f0529" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_darcy_1_1_manufactured_darcy_test.html" class="m-doc">ManufacturedDarcyTest16x16</a>,
+              <span class="m-doc-wrap-bumper"><a href="#a85386c2a83fdd38f2fc4d1050818307d" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a>,
+              Darcy_P1ExactResidual)</span>
+            </dt>
+            <dd>Verifies darcy P1 exact residual for manufactured darcy test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4537cf7e683a92a97ad6b797408f0529" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a>,
               Darcy_SimpleSine_P1)</span>
             </dt>
             <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a65afda5d77ba62f37d70d43c489dafe4" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams16x16,
+              <a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a>,
+              ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle))</span>
+            </dt>
+            <dd>Instantiates Manufactured Darcy Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.</dd>
           </dl>
         </section>
         <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="ac009aaf893fb7a9961d05ef8ab2e327b"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /><a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc-self">ManufacturedDarcyTest16x16</a> = ManufacturedDarcyTest&lt;16&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_darcy_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Darcy.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Manufactured Darcy Test 16 x 16.</p>
+          </div></section>
+          <section class="m-doc-details" id="af6a31a5139316eb31803382000f0f79f"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /><a href="#af6a31a5139316eb31803382000f0f79f" class="m-doc-self">ManufacturedDarcyTest32x32</a> = ManufacturedDarcyTest&lt;32&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_darcy_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Darcy.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Manufactured Darcy Test 32 x 32.</p>
+          </div></section>
+          <section class="m-doc-details" id="a87c0d4f12e339982205183607c382877"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /><a href="#a87c0d4f12e339982205183607c382877" class="m-doc-self">ManufacturedDarcyTest64x64</a> = ManufacturedDarcyTest&lt;64&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_darcy_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Darcy.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Manufactured Darcy Test 64 x 64.</p>
+          </div></section>
+        </section>
+        <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a85386c2a83fdd38f2fc4d1050818307d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a85386c2a83fdd38f2fc4d1050818307d" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a>,
+              Darcy_P1ExactResidual)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_darcy_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Darcy.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies darcy P1 exact residual for manufactured darcy test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.</p>
+          </div></section>
           <section class="m-doc-details" id="a4537cf7e683a92a97ad6b797408f0529"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4537cf7e683a92a97ad6b797408f0529" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_darcy_1_1_manufactured_darcy_test.html" class="m-doc">ManufacturedDarcyTest16x16</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4537cf7e683a92a97ad6b797408f0529" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a>,
               Darcy_SimpleSine_P1)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_darcy_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Darcy.cpp&gt;</a></div>
             </h3>
 <div class="m-math"><svg style="width: 8.929em; height: 1.245em;" viewBox="151.411805 -11.955168 85.719377 11.955168">
 <title>
@@ -552,6 +614,15 @@ $(\mathbf{v},q)$
 <use x='262.444734' y='-2.988792' xlink:href='#eq11-g2-41'/>
 </g>
 </svg></div>
+          </div></section>
+          <section class="m-doc-details" id="a65afda5d77ba62f37d70d43c489dafe4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Darcy::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65afda5d77ba62f37d70d43c489dafe4" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams16x16,
+              <a href="#ac009aaf893fb7a9961d05ef8ab2e327b" class="m-doc">ManufacturedDarcyTest16x16</a>,
+              ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_darcy_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Darcy.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Manufactured Darcy Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.</p>
           </div></section>
         </section>
       </div>

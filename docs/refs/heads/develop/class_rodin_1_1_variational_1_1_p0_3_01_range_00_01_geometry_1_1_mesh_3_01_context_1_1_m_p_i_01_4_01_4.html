@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Range&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</p>
+        <p>Distributed P0 finite element space for MPI meshes.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -86,7 +86,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">Range</td>
-              <td>Scalar or vector range descriptor used by <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>.</td>
+              <td>Scalar or vector range descriptor used by P0.</td>
             </tr>
           </tbody>
         </table>
@@ -96,7 +96,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -104,17 +103,7 @@
             </li>
           </ul>
         </nav>
-<p>This specialization wraps a local shard <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space and augments it with distributed global indexing. Each cell of the distributed mesh carries exactly one degree of freedom. Owned cells receive contiguous global indices per rank, and ghost cells synchronize their global DOF index from the owning rank.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, P0&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Represernts a finite element space.</dd>
-          </dl>
-        </section>
+<p>This specialization wraps a local shard P0 space and augments it with distributed global indexing. Each cell of the distributed mesh carries exactly one degree of freedom. Owned cells receive contiguous global indices per rank, and ghost cells synchronize their global DOF index from the owning rank.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -126,16 +115,16 @@
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of a function to the reference polytope.</dd>
+            <dd>Pullback of a function to the reference polytope.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class CallableType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> of a function from the reference polytope.</dd>
+            <dd>Pushforward of a function from the reference polytope.</dd>
             <dt id="abccaffe1f1d9f2b4e323c3f4721a26dd">
               using <a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>
             </dt>
-            <dd>Represents the <a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> of the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space.</dd>
+            <dd>Represents the Context of the P0 space.</dd>
             <dt id="a6ad486e9d72c307f0a01e6f889716186">
               using <a href="#a6ad486e9d72c307f0a01e6f889716186" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
             </dt>
@@ -157,7 +146,7 @@
             </dt>
             <dd>Type of finite element.</dd>
             <dt id="a9481c44edf58e0c7a223a39a66eaf782">
-              using <a href="#a9481c44edf58e0c7a223a39a66eaf782" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace</a>&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc">RangeType</a>, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
+              using <a href="#a9481c44edf58e0c7a223a39a66eaf782" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&lt;<a href="#a8d2c542bf6808204c439298c8da0c0d9" class="m-doc">RangeType</a>, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
             </dt>
             <dd>Parent class.</dd>
           </dl>
@@ -168,7 +157,7 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#ab8f52df96f9fbc3c3c6642be7e961888" class="m-doc">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh)</span>
             </dt>
-            <dd>Constructs the distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space on the given mesh.</dd>
+            <dd>Constructs the distributed P0 space on the given mesh.</dd>
             <dt id="ab3efe8437ab24c15cd2b896b1c43e268">
               <span class="m-doc-wrap-bumper"><a href="#ab3efe8437ab24c15cd2b896b1c43e268" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
@@ -233,7 +222,7 @@ $(d, i)$
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc">getVectorDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Returns the vector dimension (1 for scalar <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>).</dd>
+            <dd>Returns the vector dimension (1 for scalar P0).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -349,7 +338,7 @@ $(d, i)$
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab8f52df96f9fbc3c3c6642be7e961888" class="m-doc-self">P0</a>(</span><span class="m-doc-wrap">const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh)</span></span>
             </h3>
-            <p>Constructs the distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space on the given mesh.</p>
+            <p>Constructs the distributed P0 space on the given mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -361,7 +350,7 @@ $(d, i)$
                 </tr>
               </tbody>
             </table>
-<p>Builds the local shard <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space, then assigns contiguous global DOF indices to owned cells. Ghost cells obtain their global DOF index via a direct owner-push exchange:</p><ul><li>Each rank iterates its owned cells and assigns a global DOF index <svg class="m-math" style="width: 7.200em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 69.120923 10.626798">
+<p>Builds the local shard P0 space, then assigns contiguous global DOF indices to owned cells. Ghost cells obtain their global DOF index via a direct owner-push exchange:</p><ul><li>Each rank iterates its owned cells and assigns a global DOF index <svg class="m-math" style="width: 7.200em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 69.120923 10.626798">
 <title>
 $ g = \text{offset} + k $
 </title>
@@ -407,7 +396,7 @@ $ k $
               <span class="m-doc-wrap-bumper">const <a href="#a6ad486e9d72c307f0a01e6f889716186" class="m-doc">FESType</a>&amp; Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns the local shard finite element space.</p>
-<p>The distributed <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space is constructed from the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space defined on the local mesh shard. This method provides access to that underlying local finite element space.</p>
+<p>The distributed P0 space is constructed from the P0 space defined on the local mesh shard. This method provides access to that underlying local finite element space.</p>
           </div></section>
           <section class="m-doc-details" id="a96abd8ba8f14deaed88496405eb96c1d"><div>
             <h3>
@@ -461,7 +450,7 @@ $ [\text{begin}, \text{end}) $
 <use x='46.345887' y='0' xlink:href='#eq3-g3-100'/>
 <use x='52.323471' y='0' xlink:href='#eq3-g4-41'/>
 </g>
-</svg> identifies the global degrees of freedom owned by the current <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> rank.</p>
+</svg> identifies the global degrees of freedom owned by the current MPI rank.</p>
           </div></section>
           <section class="m-doc-details" id="a5dca55880f71baf8ba967bef5e1c992d"><div>
             <h3>
@@ -581,7 +570,7 @@ $(d, i)$
                 </tr>
               </tfoot>
             </table>
-<p>For a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> space, degrees of freedom are associated with mesh cells. The global dimension of the space equals the total number of cells in the distributed mesh:</p><div class="m-math"><svg style="width: 7.251em; height: 1.245em;" viewBox="159.219972 -11.955168 69.604914 11.955168">
+<p>For a P0 space, degrees of freedom are associated with mesh cells. The global dimension of the space equals the total number of cells in the distributed mesh:</p><div class="m-math"><svg style="width: 7.251em; height: 1.245em;" viewBox="159.219972 -11.955168 69.604914 11.955168">
 <title>
 \[
   \dim(V_h) = N_c
@@ -632,7 +621,7 @@ $ N_c $
               </div>
               <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />P0&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c88fa53fe90dcf92c359274842445e9" class="m-doc-self">getVectorDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Returns the vector dimension (1 for scalar <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>).</p>
+            <p>Returns the vector dimension (1 for scalar P0).</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -721,7 +710,7 @@ $\{i\}$
 <use x='5.977607' y='0' xlink:href='#eq8-g1-105'/>
 <use x='9.971039' y='0' xlink:href='#eq8-g0-103'/>
 </g>
-</svg> for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>) is retrieved and mapped to the distributed global DOF index.</p>
+</svg> for P0) is retrieved and mapped to the distributed global DOF index.</p>
           </div></section>
           <section class="m-doc-details" id="a5fb549135bf5098b080495b2532a2b56"><div>
             <h3>
@@ -757,7 +746,7 @@ $(d, i)$
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+                  <td>Pair <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
 <title>
 $(d, i)$
 </title>
@@ -779,7 +768,7 @@ $(d, i)$
                 </tr>
                 <tr>
                   <td>localDof&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Local basis-function index on the polytope (always 0 for <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>).</td>
+                  <td>Local basis-function index on the polytope (always 0 for P0).</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -825,7 +814,7 @@ $(d, i)$
               <tbody>
                 <tr>
                   <td style="width: 1%">Callable</td>
-                  <td>Callable type (<a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> or plain callable).</td>
+                  <td>Callable type (FunctionBase or plain callable).</td>
                 </tr>
               </tbody>
               <thead>
@@ -856,13 +845,13 @@ $(d, i)$
                 </tr>
                 <tr>
                   <td>v&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> defined on physical coordinates.</td>
+                  <td>Function defined on physical coordinates.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> wrapper mapping reference points to physical evaluation.</td>
+                  <td>Pullback wrapper mapping reference points to physical evaluation.</td>
                 </tr>
               </tfoot>
             </table>
@@ -917,7 +906,7 @@ $(d, i)$
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> wrapper mapping physical points to reference evaluation.</td>
+                  <td>Pushforward wrapper mapping physical points to reference evaluation.</td>
                 </tr>
               </tfoot>
             </table>
@@ -954,7 +943,7 @@ $(d, i)$
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_p0_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pushforward.html" class="m-doc">Pushforward</a> wrapper mapping physical points to reference evaluation.</td>
+                  <td>Pushforward wrapper mapping physical points to reference evaluation.</td>
                 </tr>
               </tfoot>
             </table>

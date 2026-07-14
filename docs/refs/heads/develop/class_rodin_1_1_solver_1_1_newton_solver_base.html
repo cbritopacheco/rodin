@@ -85,7 +85,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">LinearSolver</td>
-              <td>Type of the linear solver used at each Newton step. Must have a <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a> specialization providing LinearSystemType.</td>
+              <td>Type of the linear solver used at each Newton step. Must have a FormLanguage::Traits specialization providing LinearSystemType.</td>
             </tr>
           </tbody>
         </table>
@@ -97,13 +97,15 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pro-methods">Protected functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Base interface for Newton-type nonlinear solvers.</p><p>Newton solver class for solving nonlinear systems through a <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a> that assembles the tangent system at each iterate:</p><div class="m-math"><svg style="width: 22.643em; height: 1.402em;" viewBox="85.582751 -13.45978 217.377511 13.45978">
+<p>Base interface for Newton-type nonlinear solvers.</p><p>Newton solver class for solving nonlinear systems through a Variational::ProblemBase that assembles the tangent system at each iterate:</p><div class="m-math"><svg style="width: 22.643em; height: 1.402em;" viewBox="85.582751 -13.45978 217.377511 13.45978">
 <title>
 \[
 J(u^k)\,\delta u^k = -F(u^k), \qquad
@@ -156,7 +158,7 @@ u^{k + 1} = u^k + \delta u^k.
 <use x='294.588853' y='-7.924978' xlink:href='#eq1-g1-107'/>
 <use x='299.708601' y='-2.988792' xlink:href='#eq1-g2-58'/>
 </g>
-</svg></div><p>The linear solver is passed by reference at construction time. The associated ProblemBase is obtained from the solver via <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html#a07663f770d90c7558d8746889964d6bc" class="m-doc">LinearSolverBase::<wbr />getProblem()</a>.</p>
+</svg></div><p>The linear solver is passed by reference at construction time. The associated ProblemBase is obtained from the solver via LinearSolverBase::getProblem().</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -186,6 +188,31 @@ u^{k + 1} = u^k + \delta u^k.
             <dd>Newton solver for state-dependent tangential problems.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a88c5ec3f403517358042a339d5296216">
+              using <a href="#a88c5ec3f403517358042a339d5296216" class="m-doc-self">LinearSolverType</a> = LinearSolver
+            </dt>
+            <dd>Linear solver type used by this Newton solver.</dd>
+            <dt id="ae73919e2e8a3996889a570b3a9ef6f4f">
+              using <a href="#ae73919e2e8a3996889a570b3a9ef6f4f" class="m-doc-self">LinearSystemType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;LinearSolver&gt;::LinearSystemType
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#ae73919e2e8a3996889a570b3a9ef6f4f" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Associated problem base type.</dd>
+            <dt id="a2d2a461e5d422bb001e02df7233fb434">
+              using <a href="#a2d2a461e5d422bb001e02df7233fb434" class="m-doc-self">SolutionType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ae73919e2e8a3996889a570b3a9ef6f4f" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            </dt>
+            <dd>Solution vector type.</dd>
+            <dt id="af6093da9130ce0c2021ab8ab28c727d5">
+              using <a href="#af6093da9130ce0c2021ab8ab28c727d5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_copyable.html" class="m-doc">Copyable</a>
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -207,14 +234,27 @@ u^{k + 1} = u^k + \delta u^k.
             </dt>
             <dd>Returns the associated linear solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap">SolutionType&amp; x) <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            SolutionType&gt;&gt;&gt;</div>
+              <div class="m-doc-template">template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">SolutionType</a>&gt;&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span>
             </dt>
             <dd>Solve a nonlinear system using a GridFunction as the solution container.</dd>
+          </dl>
+        </section>
+        <section id="pro-methods">
+          <h2><a href="#pro-methods">Protected functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07663f770d90c7558d8746889964d6bc" class="m-doc">getProblem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the problem assembled by the associated linear solver.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4d980ca73cf6a9091c8da13f2fa53076" class="m-doc">getProblem</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the problem assembled by the associated linear solver.</dd>
           </dl>
         </section>
         <section>
@@ -244,7 +284,7 @@ u^{k + 1} = u^k + \delta u^k.
               <div class="m-doc-template">
                 template&lt;class LinearSolver&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">SolutionType&amp; x) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e02db55cedf48a5ba1545bc84dfceea" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">SolutionType</a>&amp; x) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Solve a nonlinear system starting from the initial guess stored in <code>x</code>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -263,7 +303,7 @@ u^{k + 1} = u^k + \delta u^k.
             <h3>
               <div class="m-doc-template">
                 template&lt;class LinearSolver&gt;
-                template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            SolutionType&gt;&gt;&gt;
+                template&lt;class GridFunctionType, class = std::enable_if_t&lt;         std::is_same_v&lt;           typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;std::decay_t&lt;GridFunctionType&gt;&gt;::DataType,            <a href="#a2d2a461e5d422bb001e02df7233fb434" class="m-doc">SolutionType</a>&gt;&gt;&gt;
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af5a89e139d4f7ceddba01f8ed8a7e837" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">GridFunctionType&amp; gf)</span></span>
             </h3>
@@ -275,7 +315,7 @@ u^{k + 1} = u^k + \delta u^k.
               <tbody>
                 <tr>
                   <td style="width: 1%">GridFunctionType</td>
-                  <td>GridFunction type whose <a href="namespace_rodin_1_1_traits.html" class="m-doc">Traits</a> must expose DataType.</td>
+                  <td>GridFunction type whose Traits must expose DataType.</td>
                 </tr>
               </tbody>
               <thead>
@@ -289,6 +329,40 @@ u^{k + 1} = u^k + \delta u^k.
               </tbody>
             </table>
 <p>The GridFunction&#x27;s internal data vector is used both as the initial guess and as the storage for the converged solution. The backend data type is inferred from <code>FormLanguage::Traits&lt;GridFunctionType&gt;::DataType</code> and must match the solver&#x27;s <code>SolutionType</code>.</p><p>This is equivalent to calling <code>solve</code>(gf.getData()).</p>
+          </div></section>
+          <section class="m-doc-details" id="a07663f770d90c7558d8746889964d6bc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSolver&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07663f770d90c7558d8746889964d6bc" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">protected</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the problem assembled by the associated linear solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Mutable problem reference.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4d980ca73cf6a9091c8da13f2fa53076"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSolver&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; Rodin::<wbr />Solver::<wbr />NewtonSolverBase&lt;LinearSolver&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4d980ca73cf6a9091c8da13f2fa53076" class="m-doc-self">getProblem</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">protected</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the problem assembled by the associated linear solver.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const problem reference.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

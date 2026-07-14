@@ -78,14 +78,14 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>SubMesh&lt;Context::MPI&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> representing a distributed subregion of a parent <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh.</p>
+        <p>SubMesh representing a distributed subregion of a parent MPI mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md176">Usage</a>
+              <a href="#autotoc_md175">Usage</a>
               <ul>
-                <li><a href="#autotoc_md177">Creating a distributed boundary submesh:</a></li>
+                <li><a href="#autotoc_md176">Creating a distributed boundary submesh:</a></li>
               </ul>
             </li>
             <li>
@@ -99,21 +99,26 @@
             </li>
           </ul>
         </nav>
-<p>A <code><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;</code> is an <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh that represents a subset of polytopes from a parent <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md176"><h2><a href="#autotoc_md176">Usage</a></h2><section id="autotoc_md177"><h3><a href="#autotoc_md177">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md175"><h2><a href="#autotoc_md175">Usage</a></h2><section id="autotoc_md176"><h3><a href="#autotoc_md176">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 
 <span class="c1">// Include all owned boundary faces on this rank</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mpiMesh</span><span class="p">.</span><span class="n">getBoundary</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="p">)</span>
 <span class="w">  </span><span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">());</span>
 
-<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />MPI&gt;</a>, <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a></p></aside></section></section>
+<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, Mesh&lt;Context::MPI&gt;, SubMesh&lt;Context::Local&gt;</p></aside></section></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>
             </dt>
-            <dd>Abstract base class for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> implementations.</dd>
+            <dd>Abstract base class for SubMesh implementations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::MPI&gt;</a>
+            </dt>
+            <dd>Distributed mesh specialization for MPI contexts.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -123,7 +128,7 @@
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4_1_1_builder.html" class="m-doc">Builder</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_m_p_i_01_4_1_1_builder.html" class="m-doc">Builder</a> for constructing distributed <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances.</dd>
+            <dd>Builder for constructing distributed SubMesh instances.</dd>
             <dt id="a341654943c76ff0db62f01c763f29b3b">
               using <a href="#a341654943c76ff0db62f01c763f29b3b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;
             </dt>
@@ -189,11 +194,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Downcasts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>.</dd>
+            <dd>Downcasts to SubMeshBase.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a1c114dba2d138c6b2bf26203fc4723f1" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Downcasts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> (const).</dd>
+            <dd>Downcasts to SubMeshBase (const).</dd>
           </dl>
         </section>
         <section>
@@ -213,7 +218,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">parent&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Reference to the parent <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh.</td>
+                  <td>Reference to the parent MPI mesh.</td>
                 </tr>
               </tbody>
             </table>
@@ -233,7 +238,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to copy from.</td>
+                  <td>SubMesh to copy from.</td>
                 </tr>
               </tbody>
             </table>
@@ -253,7 +258,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to move from.</td>
+                  <td>SubMesh to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -273,7 +278,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to move from.</td>
+                  <td>SubMesh to move from.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -299,7 +304,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> in parent mesh coordinates.</td>
+                  <td>Point in parent mesh coordinates.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -322,7 +327,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Always true for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances.</td>
+                  <td>Always true for SubMesh instances.</td>
                 </tr>
               </tfoot>
             </table>
@@ -342,7 +347,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> to test.</td>
+                  <td>Point to test.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -439,12 +444,12 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa66d766684c6856007643ea05ce1479e" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Downcasts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>.</p>
+            <p>Downcasts to SubMeshBase.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to this as <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>.</td>
+                  <td>Reference to this as SubMeshBase.</td>
                 </tr>
               </tfoot>
             </table>
@@ -456,12 +461,12 @@
               </div>
               <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />SubMesh&lt;Context::<wbr />MPI&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c114dba2d138c6b2bf26203fc4723f1" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Downcasts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> (const).</p>
+            <p>Downcasts to SubMeshBase (const).</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to this as <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>.</td>
+                  <td>Const reference to this as SubMeshBase.</td>
                 </tr>
               </tfoot>
             </table>

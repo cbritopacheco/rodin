@@ -84,6 +84,8 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -120,7 +122,7 @@ $ x_s = \sum_k c_k x_{m_k} + d_s $
 <use x='90.333624' y='0' xlink:href='#eq1-g3-100'/>
 <use x='96.416317' y='1.793263' xlink:href='#eq1-g2-115'/>
 </g>
-</svg>. For unconstrained DOFs, expand returns the identity row <code>{ { i, 1 } }</code>.</p><p>The map supports canonicalization of identification constraints:</p><ul><li>duplicate masters are merged;</li><li>zero coefficients are pruned;</li><li>self-references are removed algebraically;</li><li>identity constraints are ignored;</li><li>constraints such as <svg class="m-math" style="width: 7.014em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 67.333163 10.095454">
+</svg>. For unconstrained DOFs, expand() returns the identity row <code>{ { i, 1 } }</code>.</p><p>The map supports canonicalization of identification constraints:</p><ul><li>duplicate masters are merged;</li><li>zero coefficients are pruned;</li><li>self-references are removed algebraically;</li><li>identity constraints are ignored;</li><li>constraints such as <svg class="m-math" style="width: 7.014em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 67.333163 10.095454">
 <title>
 $ x_s = c x_s + d_s $
 </title>
@@ -160,9 +162,81 @@ $ c \ne 1 $
 <use x='20.784299' y='0' xlink:href='#eq3-g2-49'/>
 </g>
 </svg>, are converted to fixed constraints;</li><li>transitive identifications are flattened by <a href="#a32d626626eee0bc4ade146973f6abb1c" class="m-doc">finalize</a>.</li></ul><p>After calling <a href="#a32d626626eee0bc4ade146973f6abb1c" class="m-doc">finalize</a>, this object can be shared by OpenMP assembly loops as a read-only expansion map.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_assembly_1_1_constraint_map_1_1_entry.html" class="m-doc">Entry</a>
+            </dt>
+            <dd>One master DOF contribution in an expansion row.</dd>
+            <dt id="a97abd18d186558cb081a24805c6e1999">
+              using <a href="#a97abd18d186558cb081a24805c6e1999" class="m-doc-self">Expansion</a> = std::vector&lt;<a href="struct_rodin_1_1_assembly_1_1_constraint_map_1_1_entry.html" class="m-doc">Entry</a>&gt;
+            </dt>
+            <dd>Expansion row for a constrained DOF.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a687982f751a82310789a0e4fbc3d6c43" class="m-doc">ConstraintMap</a>(</span><span class="m-doc-wrap">size_t size) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs an identity constraint map.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a0092e1dd2034bb02ff0507cc39a4a1e0" class="m-doc">reset</a>(</span><span class="m-doc-wrap">size_t size)</span>
+            </dt>
+            <dd>Resets the map to the identity expansion on <code>size</code> DOFs.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of DOFs represented by the map.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea2183b3b451c9cb9fcfb3a92bfc104a" class="m-doc">isFixed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; bool</span>
+            </dt>
+            <dd>Tests whether a DOF is fixed to a value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a06cc207eceb5bcf6d362bfa3e296a840" class="m-doc">isIdentified</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; bool</span>
+            </dt>
+            <dd>Tests whether a DOF is identified with master DOFs.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a723a57487b35cc237235ac730f513d8b" class="m-doc">getFixedValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; Scalar</span>
+            </dt>
+            <dd>Gets the prescribed value for a fixed DOF.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a3ae7c7a8395b8c5c21d366bb4879e9" class="m-doc">expand</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a97abd18d186558cb081a24805c6e1999" class="m-doc">Expansion</a>&amp;</span>
+            </dt>
+            <dd>Expands a DOF into its master DOF row.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a00b6033eb9b7439b5776d57cffc67dc2" class="m-doc">getIdentifiedRows</a>(</span><span class="m-doc-wrap">) const -&gt; const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the indices of rows carrying identification constraints.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a017148f14956e2ca25cf8c8c1db01915" class="m-doc">getIdentificationValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; Scalar</span>
+            </dt>
+            <dd>Gets the affine defect value for an identified DOF.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad9aa7714ca73ce034d1f9f3178955f19" class="m-doc">setFixed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i,
+              Scalar value)</span>
+            </dt>
+            <dd>Marks a DOF as fixed to a prescribed value.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Entries&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a899c105eb4926ccf24420de66568fbac" class="m-doc">setIdentification</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> slave,
+              const Entries&amp; entries)</span>
+            </dt>
+            <dd>Sets a homogeneous identification row.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Entries&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a0b0705fd5294fe8e8a06d37e3e966f5a" class="m-doc">setIdentification</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> slave,
+              const Entries&amp; entries,
+              Scalar value)</span>
+            </dt>
+            <dd>Sets an affine identification row.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a32d626626eee0bc4ade146973f6abb1c" class="m-doc">finalize</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
@@ -171,6 +245,280 @@ $ c \ne 1 $
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a687982f751a82310789a0e4fbc3d6c43"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a687982f751a82310789a0e4fbc3d6c43" class="m-doc-self">ConstraintMap</a>(</span><span class="m-doc-wrap">size_t size) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs an identity constraint map.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">size</td>
+                  <td>Number of DOFs represented by the map.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0092e1dd2034bb02ff0507cc39a4a1e0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0092e1dd2034bb02ff0507cc39a4a1e0" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">size_t size)</span></span>
+            </h3>
+            <p>Resets the map to the identity expansion on <code>size</code> DOFs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">size</td>
+                  <td>Number of DOFs represented by the map.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a259cb5a711406a8c3e5d937eb9350cca"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a259cb5a711406a8c3e5d937eb9350cca" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the number of DOFs represented by the map.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Number of expansion rows.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aea2183b3b451c9cb9fcfb3a92bfc104a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea2183b3b451c9cb9fcfb3a92bfc104a" class="m-doc-self">isFixed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Tests whether a DOF is fixed to a value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>DOF index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a06cc207eceb5bcf6d362bfa3e296a840"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06cc207eceb5bcf6d362bfa3e296a840" class="m-doc-self">isIdentified</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Tests whether a DOF is identified with master DOFs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>DOF index.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a723a57487b35cc237235ac730f513d8b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a723a57487b35cc237235ac730f513d8b" class="m-doc-self">getFixedValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Gets the prescribed value for a fixed DOF.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Fixed DOF index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Prescribed scalar value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6a3ae7c7a8395b8c5c21d366bb4879e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a97abd18d186558cb081a24805c6e1999" class="m-doc">Expansion</a>&amp; Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a3ae7c7a8395b8c5c21d366bb4879e9" class="m-doc-self">expand</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Expands a DOF into its master DOF row.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>DOF index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Expansion row for <code>i</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a00b6033eb9b7439b5776d57cffc67dc2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const std::vector&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a00b6033eb9b7439b5776d57cffc67dc2" class="m-doc-self">getIdentifiedRows</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the indices of rows carrying identification constraints.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Identified slave DOF indices.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a017148f14956e2ca25cf8c8c1db01915"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Scalar Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a017148f14956e2ca25cf8c8c1db01915" class="m-doc-self">getIdentificationValue</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Gets the affine defect value for an identified DOF.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Identified slave DOF index.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Constant term in the identification row.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ad9aa7714ca73ce034d1f9f3178955f19"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad9aa7714ca73ce034d1f9f3178955f19" class="m-doc-self">setFixed</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i,
+              Scalar value)</span></span>
+            </h3>
+            <p>Marks a DOF as fixed to a prescribed value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>DOF index.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Prescribed scalar value.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a899c105eb4926ccf24420de66568fbac"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+                template&lt;class Entries&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a899c105eb4926ccf24420de66568fbac" class="m-doc-self">setIdentification</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> slave,
+              const Entries&amp; entries)</span></span>
+            </h3>
+            <p>Sets a homogeneous identification row.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">slave</td>
+                  <td>Slave DOF index.</td>
+                </tr>
+                <tr>
+                  <td>entries</td>
+                  <td>Master expansion entries.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a0b0705fd5294fe8e8a06d37e3e966f5a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+                template&lt;class Entries&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />ConstraintMap&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b0705fd5294fe8e8a06d37e3e966f5a" class="m-doc-self">setIdentification</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> slave,
+              const Entries&amp; entries,
+              Scalar value)</span></span>
+            </h3>
+            <p>Sets an affine identification row.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">slave</td>
+                  <td>Slave DOF index.</td>
+                </tr>
+                <tr>
+                  <td>entries</td>
+                  <td>Master expansion entries.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Constant term in the identification.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a32d626626eee0bc4ade146973f6abb1c"><div>
             <h3>
               <div class="m-doc-template">

@@ -76,12 +76,12 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Alert <span class="m-thin">namespace</span>
         </h1>
-        <p>Module to handle alerts, exceptions, and diagnostic messages.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_alert.html" class="m-doc">Rodin::<wbr />Alert</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md518">Alert Types</a></li>
-            <li><a href="#autotoc_md519">Usage Pattern</a></li>
+            <li><a href="#autotoc_md428">Alert Types</a></li>
+            <li><a href="#autotoc_md429">Usage Pattern</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> module provides a stream-based system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output. <a href="namespace_rodin.html" class="m-doc">Rodin</a> uses this system <strong>instead of raw <code>throw</code> statements</strong>.</p><section id="autotoc_md518"><h3><a href="#autotoc_md518">Alert Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a></th><th>Behavior</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Alert::<wbr />Info</a></code></td><td>Blue</td><td>Informational message (non-fatal)</td></tr><tr><td><code><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Alert::<wbr />Warning</a></code></td><td>Yellow</td><td><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> message (non-fatal)</td></tr><tr><td><code><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Alert::<wbr />Success</a></code></td><td>Green</td><td><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> notification (non-fatal)</td></tr><tr><td><code><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Alert::<wbr />Exception</a></code></td><td>Red</td><td>Throws an exception (fatal)</td></tr><tr><td><code><a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a></code></td><td>Red</td><td><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with class/method context</td></tr><tr><td><code><a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">Alert::<wbr />MemberFunctionWarning</a></code></td><td>Yellow</td><td><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> with class/method context</td></tr></tbody></table></section><section id="autotoc_md519"><h3><a href="#autotoc_md519">Usage Pattern</a></h3><p>All alerts use the stream insertion operator <code>&lt;&lt;</code> and terminate with <code>Alert::Raise</code>:</p><pre class="m-code"><span class="c1">// Informational message</span>
+<p>Directory src/Rodin/Alert</p><p>Module to handle alerts, exceptions, and diagnostic messages.</p><p>The Alert module provides a stream-based system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output. Rodin uses this system <strong>instead of raw <code>throw</code> statements</strong>.</p><section id="autotoc_md428"><h3><a href="#autotoc_md428">Alert Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Color</th><th>Behavior</th></tr></thead><tbody><tr><td><code>Alert::Info</code></td><td>Blue</td><td>Informational message (non-fatal)</td></tr><tr><td><code>Alert::Warning</code></td><td>Yellow</td><td>Warning message (non-fatal)</td></tr><tr><td><code>Alert::Success</code></td><td>Green</td><td>Success notification (non-fatal)</td></tr><tr><td><code>Alert::Exception</code></td><td>Red</td><td>Throws an exception (fatal)</td></tr><tr><td><code>Alert::MemberFunctionException</code></td><td>Red</td><td>Exception with class/method context</td></tr><tr><td><code>Alert::MemberFunctionWarning</code></td><td>Yellow</td><td>Warning with class/method context</td></tr></tbody></table></section><section id="autotoc_md429"><h3><a href="#autotoc_md429">Usage Pattern</a></h3><p>All alerts use the stream insertion operator <code>&lt;&lt;</code> and terminate with <code>Alert::Raise</code>:</p><pre class="m-code"><span class="c1">// Informational message</span>
 <span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Assembling the system...&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
 
 <span class="c1">// Warning</span>
@@ -104,7 +104,7 @@
 <span class="c1">// Fatal exception (replaces throw)</span>
 <span class="n">Alert</span><span class="o">::</span><span class="n">MemberFunctionException</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">__func__</span><span class="p">)</span>
 <span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Incidence &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; -&gt; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">dp</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; has not been computed.&quot;</span>
-<span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span></pre><aside class="m-note m-danger"><h4>Warning</h4><p>Never use raw <code>throw</code> in <a href="namespace_rodin.html" class="m-doc">Rodin</a> code. Always use the <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> stream pattern with <code>&lt;&lt; Alert::Raise</code>.</p></aside></section>
+<span class="w">  </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span></pre><aside class="m-note m-danger"><h4>Warning</h4><p>Never use raw <code>throw</code> in Rodin code. Always use the Alert stream pattern with <code>&lt;&lt; Alert::Raise</code>.</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -135,12 +135,12 @@
               <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_class_exception.html" class="m-doc">ClassException</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the class name.</dd>
+            <dd>Exception class that automatically includes the class name.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class CodeT&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>
             </dt>
-            <dd>Type-safe wrapper for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</dd>
+            <dd>Type-safe wrapper for custom RGB colors.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a>
             </dt>
@@ -148,7 +148,7 @@
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class with formatted output capabilities.</dd>
+            <dd>Exception class with formatted output capabilities.</dd>
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_exception_prefix.html" class="m-doc">ExceptionPrefix</a>
             </dt>
@@ -182,17 +182,17 @@
               <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> type for errors occurring in member functions.</dd>
+            <dd>Exception type for errors occurring in member functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_member_function_warning.html" class="m-doc">MemberFunctionWarning</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> type for issues occurring in member functions.</dd>
+            <dd>Warning type for issues occurring in member functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Prefix&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a>
             </dt>
-            <dd>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</dd>
+            <dd>Forward declaration of the Message template class.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_alert_1_1_text.html#a3f1541b2548c76949e0d578cb4d28d93" class="m-doc">Foreground</a>&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_message_prefix.html" class="m-doc">MessagePrefix</a>
@@ -201,7 +201,7 @@
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" class="m-doc">NamespacedException</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the namespace name.</dd>
+            <dd>Exception class that automatically includes the namespace name.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>
             </dt>
@@ -218,11 +218,11 @@
               <div class="m-doc-template">template&lt;class Prefix&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_prefixed_message.html" class="m-doc">PrefixedMessage</a>
             </dt>
-            <dd>Convenience message for custom <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> prefixes.</dd>
+            <dd>Convenience message for custom Alert prefixes.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>
             </dt>
-            <dd>Empty tag type for raising an <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> message.</dd>
+            <dd>Empty tag type for raising an Alert message.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>
             </dt>
@@ -235,7 +235,7 @@
               <div class="m-doc-template">template&lt;size_t RED, size_t GREEN, size_t BLUE&gt;</div>
               struct <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color template with compile-time color values.</dd>
+            <dd>RGB color template with compile-time color values.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>
             </dt>
@@ -243,7 +243,7 @@
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message class with formatted output.</dd>
+            <dd>Success message class with formatted output.</dd>
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_success_prefix.html" class="m-doc">SuccessPrefix</a>
             </dt>
@@ -256,7 +256,7 @@
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a> message class with formatted output.</dd>
+            <dd>Warning message class with formatted output.</dd>
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_warning_prefix.html" class="m-doc">WarningPrefix</a>
             </dt>
@@ -297,7 +297,7 @@
               <a href="#a15b1b83081915ae5239f81050ae0f550aabd3472d589bf2baaa02a6472505d93c" class="m-doc">Concealed</a>,
               <a href="#a15b1b83081915ae5239f81050ae0f550a23709652ceedf22aad4bbb6a355b83e2" class="m-doc">Crossed</a> }</span>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a> formatting attributes for terminal output.</dd>
+            <dd>Text formatting attributes for terminal output.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -321,13 +321,13 @@
               <div class="m-doc-template">template&lt;class Code&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a98bef331b3c83c69ca39de22cf1fece0" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const Code&amp;) -&gt; Color&lt; Code &gt;</span>
             </dt>
-            <dd>Deduction guide for <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>.</dd>
+            <dd>Deduction guide for Color.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Code&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a39226fadc0951c5356018a2fbb172b2a" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp;) -&gt; std::ostream&amp;</span>
             </dt>
-            <dd>Stream insertion operator for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</dd>
+            <dd>Stream insertion operator for custom RGB colors.</dd>
             <dt id="ab50a35ef2b205f9bd9bb2ad85e93a388">
               <span class="m-doc-wrap-bumper">auto <a href="#ab50a35ef2b205f9bd9bb2ad85e93a388" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a>&amp;) -&gt; std::ostream&amp;</span>
@@ -382,22 +382,62 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aabdf8ad5380cda9eeb370e5da5e9a0e6" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;) -&gt; std::ostream&amp;</span>
             </dt>
-            <dd>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>.</dd>
+            <dd>Stream insertion operator for NewLineT.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a10a7213329e4231f1e2581c7340066cb" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;) -&gt; std::ostream&amp;</span>
             </dt>
-            <dd>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>.</dd>
+            <dd>Stream insertion operator for ResetT.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0d49473ee9f6757a0a6c6732a99f1593" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp;) -&gt; std::ostream&amp;</span>
             </dt>
-            <dd>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>.</dd>
+            <dd>Stream insertion operator for StylizeT.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab2f8e5633e049880a2ce019e3c7b3048" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               <a href="#a15b1b83081915ae5239f81050ae0f550" class="m-doc">Attribute</a> a) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Stream insertion operator for text attributes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4aa1125bbd5e30c1d1e678285b038caf" class="m-doc">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text) -&gt; Text&lt; NoColorT, NoColorT &gt;</span>
+            </dt>
+            <dd>Deduction guide for uncolored text.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class F&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a4fe02f52dea8d9ea9a7dcee090815f93" class="m-doc">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text,
+              const F&amp; fg) -&gt; Text&lt; F, NoColorT &gt;</span>
+            </dt>
+            <dd>Deduction guide for text with a foreground color.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class F, class B&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a49be6429f2ad91ac7ef93f3309e3e1e8" class="m-doc">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text,
+              const F&amp; fg,
+              const B&amp; bg) -&gt; Text&lt; F, B &gt;</span>
+            </dt>
+            <dd>Deduction guide for text with foreground and background colors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Foreground, class Background&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a42e24e080daf6093ae979c8f610c7623" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;Foreground, Background&gt;&amp; text) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Writes text with foreground and background formatting.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Foreground&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9e52fa5d0306ef8dbcca1500436726f0" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;Foreground, <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;&amp; text) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Writes text with foreground formatting.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Background&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a175d95e378a7b9dca324efe2d6913a53" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;<a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, Background&gt;&amp; text) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Writes text with background formatting.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7d932bc35d22ef1ac7a10d5706835a03" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;<a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;&amp; text) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Writes text without color formatting.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -406,67 +446,67 @@
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> <a href="#a7d26b7dd312a20846e8a6df5fa59c24d" class="m-doc">Bold</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> tag type.</dd>
+            <dd>Instance of BoldT tag type.</dd>
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> <a href="#aaef4af32509cb2debf56145e0b83276d" class="m-doc">NoColor</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> tag type.</dd>
+            <dd>Instance of NoColorT tag type.</dd>
             <dt id="a70326a13f78aac024516bfc9d74c0550">
               static <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a> <a href="#a70326a13f78aac024516bfc9d74c0550" class="m-doc-self">Red</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_red_t.html" class="m-doc">RedT</a> tag type.</dd>
+            <dd>Instance of RedT tag type.</dd>
             <dt id="a92803cd2d69fa243b3fe12c6d9836c52">
               static <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a> <a href="#a92803cd2d69fa243b3fe12c6d9836c52" class="m-doc-self">Green</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_green_t.html" class="m-doc">GreenT</a> tag type.</dd>
+            <dd>Instance of GreenT tag type.</dd>
             <dt id="ac633a08b58782bbd4cbee8f69ceab8d2">
               static <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a> <a href="#ac633a08b58782bbd4cbee8f69ceab8d2" class="m-doc-self">Blue</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_blue_t.html" class="m-doc">BlueT</a> tag type.</dd>
+            <dd>Instance of BlueT tag type.</dd>
             <dt id="a416d22181440fcff37ed82165d95ae5d">
               static <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a> <a href="#a416d22181440fcff37ed82165d95ae5d" class="m-doc-self">Yellow</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_yellow_t.html" class="m-doc">YellowT</a> tag type.</dd>
+            <dd>Instance of YellowT tag type.</dd>
             <dt id="ad1eaa7f9eaa5c245e1572df61087c41f">
               static <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a> <a href="#ad1eaa7f9eaa5c245e1572df61087c41f" class="m-doc-self">Magenta</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a> tag type.</dd>
+            <dd>Instance of MagentaT tag type.</dd>
             <dt id="a5778131b8329fea91bbdb78a744c1f9c">
               static <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a> <a href="#a5778131b8329fea91bbdb78a744c1f9c" class="m-doc-self">Cyan</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_cyan_t.html" class="m-doc">CyanT</a> tag type.</dd>
+            <dd>Instance of CyanT tag type.</dd>
             <dt id="ab4c0df23572c5dd1d82887170eb2c3b2">
               static <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a> <a href="#ab4c0df23572c5dd1d82887170eb2c3b2" class="m-doc-self">White</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_white_t.html" class="m-doc">WhiteT</a> tag type.</dd>
+            <dd>Instance of WhiteT tag type.</dd>
             <dt id="a456aef5e2e65805eee30b22e675fe71d">
               static <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a> <a href="#a456aef5e2e65805eee30b22e675fe71d" class="m-doc-self">Gray</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_gray_t.html" class="m-doc">GrayT</a> tag type.</dd>
+            <dd>Instance of GrayT tag type.</dd>
             <dt id="ac311b9f8abfaf74edee14943db81aba9">
               static <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a> <a href="#ac311b9f8abfaf74edee14943db81aba9" class="m-doc-self">BrightGray</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_bright_gray_t.html" class="m-doc">BrightGrayT</a> tag type.</dd>
+            <dd>Instance of BrightGrayT tag type.</dd>
             <dt id="a34326b1a98fedf399fc8fb3b329e5a09">
               static <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a> <a href="#a34326b1a98fedf399fc8fb3b329e5a09" class="m-doc-self">BrightWhite</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_bright_white_t.html" class="m-doc">BrightWhiteT</a> tag type.</dd>
+            <dd>Instance of BrightWhiteT tag type.</dd>
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> <a href="#a9fa27b1c1233610a89519358019f0852" class="m-doc">NewLine</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> tag type.</dd>
+            <dd>Instance of NewLineT tag type.</dd>
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> <a href="#aabd12e21cf71a6dcdf9e357e1a44468f" class="m-doc">Raise</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> tag type.</dd>
+            <dd>Instance of RaiseT tag type.</dd>
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> <a href="#a5373079a3483ab0c86d3810a7fc1c9ce" class="m-doc">Reset</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> tag type.</dd>
+            <dd>Instance of ResetT tag type.</dd>
             <dt>
               static <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> <a href="#a37a8929404e73ba7e850aee65200e806" class="m-doc">Stylize</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Instance of <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> tag type.</dd>
+            <dd>Instance of StylizeT tag type.</dd>
           </dl>
         </section>
         <section>
@@ -547,7 +587,7 @@
             <h3>
               enum class Rodin::<wbr />Alert::<wbr /><a href="#a15b1b83081915ae5239f81050ae0f550" class="m-doc-self">Attribute</a>
             </h3>
-            <p><a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a> formatting attributes for terminal output.</p>
+            <p>Text formatting attributes for terminal output.</p>
 <p>Enumeration of text formatting attributes that can be applied to terminal output including bold, italic, underline, and other visual effects.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
@@ -611,7 +651,7 @@
               using Rodin::<wbr />Alert::<wbr /><a href="#a692d40b6e9e3d9415efe4bf4e8490443" class="m-doc-self">NotationForeground</a> = <a href="struct_rodin_1_1_alert_1_1_magenta_t.html" class="m-doc">MagentaT</a>
             </h3>
             <p>Type alias for notation foreground color.</p>
-<p><a href="class_rodin_1_1_alert_1_1_notation.html" class="m-doc">Notation</a> text uses magenta color for visual distinction in messages.</p>
+<p>Notation text uses magenta color for visual distinction in messages.</p>
           </div></section>
         </section>
         <section>
@@ -652,7 +692,7 @@
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98bef331b3c83c69ca39de22cf1fece0" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const Code&amp;) -&gt; Color&lt; Code &gt;</span></span>
             </h3>
-            <p>Deduction guide for <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>.</p>
+            <p>Deduction guide for Color.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -673,7 +713,7 @@
               <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39226fadc0951c5356018a2fbb172b2a" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&lt;Code&gt;&amp;)</span></span>
             </h3>
-            <p>Stream insertion operator for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</p>
+            <p>Stream insertion operator for custom RGB colors.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -681,7 +721,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">Code</td>
-                  <td>The <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code type.</td>
+                  <td>The RGB color code type.</td>
                 </tr>
               </tbody>
               <thead>
@@ -700,14 +740,14 @@
                 </tr>
               </tfoot>
             </table>
-<p>Applies a custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color to the output stream using the termcolor library&#x27;s color template.</p>
+<p>Applies a custom RGB color to the output stream using the termcolor library&#x27;s color template.</p>
           </div></section>
           <section class="m-doc-details" id="aabdf8ad5380cda9eeb370e5da5e9a0e6"><div>
             <h3>
               <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabdf8ad5380cda9eeb370e5da5e9a0e6" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>&amp;)</span></span>
             </h3>
-            <p>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a>.</p>
+            <p>Stream insertion operator for NewLineT.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -732,7 +772,7 @@
               <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10a7213329e4231f1e2581c7340066cb" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>&amp;)</span></span>
             </h3>
-            <p>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a>.</p>
+            <p>Stream insertion operator for ResetT.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -757,7 +797,7 @@
               <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d49473ee9f6757a0a6c6732a99f1593" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>&amp;)</span></span>
             </h3>
-            <p>Stream insertion operator for <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a>.</p>
+            <p>Stream insertion operator for StylizeT.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -806,6 +846,252 @@
             </table>
 <p>Applies the specified text formatting attribute to the output stream using termcolor library functionality.</p>
           </div></section>
+          <section class="m-doc-details" id="a4aa1125bbd5e30c1d1e678285b038caf"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4aa1125bbd5e30c1d1e678285b038caf" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text) -&gt; Text&lt; NoColorT, NoColorT &gt;</span></span>
+            </h3>
+            <p>Deduction guide for uncolored text.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">text</td>
+                  <td>The text content.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4fe02f52dea8d9ea9a7dcee090815f93"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fe02f52dea8d9ea9a7dcee090815f93" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text,
+              const F&amp; fg) -&gt; Text&lt; F, NoColorT &gt;</span></span>
+            </h3>
+            <p>Deduction guide for text with a foreground color.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">F</td>
+                  <td>Foreground color type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>text</td>
+                  <td>The text content.</td>
+                </tr>
+                <tr>
+                  <td>fg</td>
+                  <td>The foreground color.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a49be6429f2ad91ac7ef93f3309e3e1e8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class F, class B&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49be6429f2ad91ac7ef93f3309e3e1e8" class="m-doc-self">Text</a>(</span><span class="m-doc-wrap">const std::string&amp; text,
+              const F&amp; fg,
+              const B&amp; bg) -&gt; Text&lt; F, B &gt;</span></span>
+            </h3>
+            <p>Deduction guide for text with foreground and background colors.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">F</td>
+                  <td>Foreground color type.</td>
+                </tr>
+                <tr>
+                  <td>B</td>
+                  <td>Background color type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>text</td>
+                  <td>The text content.</td>
+                </tr>
+                <tr>
+                  <td>fg</td>
+                  <td>The foreground color.</td>
+                </tr>
+                <tr>
+                  <td>bg</td>
+                  <td>The background color.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a42e24e080daf6093ae979c8f610c7623"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Foreground, class Background&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a42e24e080daf6093ae979c8f610c7623" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;Foreground, Background&gt;&amp; text)</span></span>
+            </h3>
+            <p>Writes text with foreground and background formatting.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Foreground</td>
+                  <td>Foreground color type.</td>
+                </tr>
+                <tr>
+                  <td>Background</td>
+                  <td>Background color type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>os</td>
+                  <td>The output stream.</td>
+                </tr>
+                <tr>
+                  <td>text</td>
+                  <td>The text to write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9e52fa5d0306ef8dbcca1500436726f0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Foreground&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9e52fa5d0306ef8dbcca1500436726f0" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;Foreground, <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;&amp; text)</span></span>
+            </h3>
+            <p>Writes text with foreground formatting.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Foreground</td>
+                  <td>Foreground color type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>os</td>
+                  <td>The output stream.</td>
+                </tr>
+                <tr>
+                  <td>text</td>
+                  <td>The text to write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a175d95e378a7b9dca324efe2d6913a53"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Background&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a175d95e378a7b9dca324efe2d6913a53" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;<a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, Background&gt;&amp; text)</span></span>
+            </h3>
+            <p>Writes text with background formatting.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Background</td>
+                  <td>Background color type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>os</td>
+                  <td>The output stream.</td>
+                </tr>
+                <tr>
+                  <td>text</td>
+                  <td>The text to write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7d932bc35d22ef1ac7a10d5706835a03"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Alert::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7d932bc35d22ef1ac7a10d5706835a03" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_alert_1_1_text.html" class="m-doc">Text</a>&lt;<a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>, <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a>&gt;&amp; text)</span></span>
+            </h3>
+            <p>Writes text without color formatting.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os</td>
+                  <td>The output stream.</td>
+                </tr>
+                <tr>
+                  <td>text</td>
+                  <td>The text to write.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to the output stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
         <section>
           <h2>Variable documentation</h2>
@@ -813,43 +1099,43 @@
             <h3>
               static <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> Rodin::<wbr />Alert::<wbr /><a href="#a7d26b7dd312a20846e8a6df5fa59c24d" class="m-doc-self">Bold</a> <span class="m-label m-primary">constexpr</span>
             </h3>
-            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> tag type.</p>
-<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_bold_t.html" class="m-doc">BoldT</a> tag type for convenient usage.</p>
+            <p>Instance of BoldT tag type.</p>
+<p>Constant instance of the BoldT tag type for convenient usage.</p>
           </div></section>
           <section class="m-doc-details" id="aaef4af32509cb2debf56145e0b83276d"><div>
             <h3>
               static <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> Rodin::<wbr />Alert::<wbr /><a href="#aaef4af32509cb2debf56145e0b83276d" class="m-doc-self">NoColor</a> <span class="m-label m-primary">constexpr</span>
             </h3>
-            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> tag type.</p>
-<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_no_color_t.html" class="m-doc">NoColorT</a> tag type for convenient usage.</p>
+            <p>Instance of NoColorT tag type.</p>
+<p>Constant instance of the NoColorT tag type for convenient usage.</p>
           </div></section>
           <section class="m-doc-details" id="a9fa27b1c1233610a89519358019f0852"><div>
             <h3>
               static <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> Rodin::<wbr />Alert::<wbr /><a href="#a9fa27b1c1233610a89519358019f0852" class="m-doc-self">NewLine</a> <span class="m-label m-primary">constexpr</span>
             </h3>
-            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> tag type.</p>
-<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_new_line_t.html" class="m-doc">NewLineT</a> tag type for convenient usage. Use this to insert newlines in <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> messages with proper indentation.</p>
+            <p>Instance of NewLineT tag type.</p>
+<p>Constant instance of the NewLineT tag type for convenient usage. Use this to insert newlines in Alert messages with proper indentation.</p>
           </div></section>
           <section class="m-doc-details" id="aabd12e21cf71a6dcdf9e357e1a44468f"><div>
             <h3>
               static <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> Rodin::<wbr />Alert::<wbr /><a href="#aabd12e21cf71a6dcdf9e357e1a44468f" class="m-doc-self">Raise</a> <span class="m-label m-primary">constexpr</span>
             </h3>
-            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> tag type.</p>
-<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a> tag type for convenient usage. Stream this into a <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> to trigger its raise() method.</p>
+            <p>Instance of RaiseT tag type.</p>
+<p>Constant instance of the RaiseT tag type for convenient usage. Stream this into a Message to trigger its raise() method.</p>
           </div></section>
           <section class="m-doc-details" id="a5373079a3483ab0c86d3810a7fc1c9ce"><div>
             <h3>
               static <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> Rodin::<wbr />Alert::<wbr /><a href="#a5373079a3483ab0c86d3810a7fc1c9ce" class="m-doc-self">Reset</a> <span class="m-label m-primary">constexpr</span>
             </h3>
-            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> tag type.</p>
-<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_reset_t.html" class="m-doc">ResetT</a> tag type for convenient usage. Use this to reset terminal formatting to default.</p>
+            <p>Instance of ResetT tag type.</p>
+<p>Constant instance of the ResetT tag type for convenient usage. Use this to reset terminal formatting to default.</p>
           </div></section>
           <section class="m-doc-details" id="a37a8929404e73ba7e850aee65200e806"><div>
             <h3>
               static <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> Rodin::<wbr />Alert::<wbr /><a href="#a37a8929404e73ba7e850aee65200e806" class="m-doc-self">Stylize</a> <span class="m-label m-primary">constexpr</span>
             </h3>
-            <p>Instance of <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> tag type.</p>
-<p>Constant instance of the <a href="struct_rodin_1_1_alert_1_1_stylize_t.html" class="m-doc">StylizeT</a> tag type for convenient usage. Use this to enable colored terminal output.</p>
+            <p>Instance of StylizeT tag type.</p>
+<p>Constant instance of the StylizeT tag type for convenient usage. Use this to enable colored terminal output.</p>
           </div></section>
         </section>
       </div>

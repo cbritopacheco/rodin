@@ -160,7 +160,7 @@ $ A^TAx = A^Tb $
 <span class="n">Solver</span><span class="o">::</span><span class="n">LeastSquaresCG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">)</span>
 <span class="w">      </span><span class="p">.</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
-<span class="w">      </span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>For well-conditioned square systems, prefer <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> which is more efficient.</p></aside>
+<span class="w">      </span><span class="p">.</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>For well-conditioned square systems, prefer CG which is more efficient.</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -191,7 +191,7 @@ $ A^TAx = A^Tb $
             </dt>
             <dd>Type of linear system being solved.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Type of problem being solved.</dd>
             <dt id="a85385c6607a397925a213e9098256fdc">
@@ -206,7 +206,7 @@ $ A^TAx = A^Tb $
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> solver with default parameters.</dd>
+            <dd>Constructs a LeastSquaresCG solver with default parameters.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#afd39b42cea6a2ba22028095f26704689" class="m-doc">LeastSquaresCG</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>&amp; other)</span>
             </dt>
@@ -259,7 +259,7 @@ $ A^TAx = A^Tb $
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />LeastSquaresCG&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8948ef1c7c2b2578edc7eb1ff9296684" class="m-doc-self">LeastSquaresCG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> solver with default parameters.</p>
+            <p>Constructs a LeastSquaresCG solver with default parameters.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -287,7 +287,7 @@ $ A^TAx = A^Tb $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to copy from</td>
+                  <td>Solver to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -307,7 +307,7 @@ $ A^TAx = A^Tb $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to move from</td>
+                  <td>Solver to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -449,7 +449,7 @@ $ k $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> instance</td>
+                  <td>Pointer to a new LeastSquaresCG instance</td>
                 </tr>
               </tfoot>
             </table>

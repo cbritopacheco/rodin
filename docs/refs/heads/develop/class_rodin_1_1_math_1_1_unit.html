@@ -82,12 +82,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md173">Type Safety</a></li>
-            <li><a href="#autotoc_md174">Arithmetic Operations</a></li>
-            <li><a href="#autotoc_md175">Example Usage</a></li>
+            <li><a href="#autotoc_md172">Type Safety</a></li>
+            <li><a href="#autotoc_md173">Arithmetic Operations</a></li>
+            <li><a href="#autotoc_md174">Example Usage</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -95,7 +96,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md173"><h3><a href="#autotoc_md173">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md174"><h3><a href="#autotoc_md174">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
+<p>This class provides a generic base for creating type-safe units with value semantics and arithmetic operations. It uses the Curiously Recurring Template Pattern (CRTP) to enable derived classes to return their own type from operations.</p><section id="autotoc_md172"><h3><a href="#autotoc_md172">Type Safety</a></h3><p>Units provide compile-time type safety, preventing accidental mixing of incompatible units (e.g., adding radians to meters).</p></section><section id="autotoc_md173"><h3><a href="#autotoc_md173">Arithmetic Operations</a></h3><p>All standard arithmetic operations are supported:</p><ul><li>Addition/subtraction: <svg class="m-math" style="width: 3.844em; height: 0.913em; vertical-align: -0.187em;" viewBox="0 -6.973856 36.903201 8.767119">
 <title>
 $ u_1 \pm u_2 $
 </title>
@@ -170,7 +171,7 @@ $ -u $
 <use x='0' y='0' xlink:href='#eq5-g0-0'/>
 <use x='9.298497' y='0' xlink:href='#eq5-g1-117'/>
 </g>
-</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md175"><h3><a href="#autotoc_md175">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
+</svg></li><li>Compound assignments: +=, -=, *=, /=</li><li>Comparison: ==, !=, &lt;, &gt;, &lt;=, &gt;=</li></ul></section><section id="autotoc_md174"><h3><a href="#autotoc_md174">Example Usage</a></h3><pre class="m-code"><span class="c1">// Creating a derived unit class</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Meter</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Unit</span><span class="o">&lt;</span><span class="n">Meter</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">public</span><span class="o">:</span>
@@ -181,7 +182,16 @@ $ -u $
 <span class="c1">// Using the unit</span>
 <span class="n">Meter</span><span class="w"> </span><span class="nf">length1</span><span class="p">(</span><span class="mf">5.0</span><span class="p">);</span>
 <span class="n">Meter</span><span class="w"> </span><span class="nf">length2</span><span class="p">(</span><span class="mf">3.0</span><span class="p">);</span>
-<span class="n">Meter</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">length2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8.0 meters</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Rad</a></p></aside></section>
+<span class="n">Meter</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">length2</span><span class="p">;</span><span class="w">  </span><span class="c1">// 8.0 meters</span></pre><aside class="m-note m-default"><h4>See also</h4><p>Rad</p></aside></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a19462713b2aab2dae2c87c15f262c1df">
+              using <a href="#a19462713b2aab2dae2c87c15f262c1df" class="m-doc-self">Type</a> = T
+            </dt>
+            <dd>The underlying value type.</dd>
+          </dl>
+        </section>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -202,6 +212,14 @@ $ -u $
               <span class="m-doc-wrap-bumper"><a href="#a8b322f7208c13b82a734720a73360ef9" class="m-doc">Unit</a>(</span><span class="m-doc-wrap">T v) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Constructs a unit from a value.</dd>
+            <dt id="a8f8c92e87a8165d7ca981f0c0fd0d45c">
+              <span class="m-doc-wrap-bumper"><a href="#a8f8c92e87a8165d7ca981f0c0fd0d45c" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="aedb1615ba4579cd38c8b671c7adb2e40">
+              <span class="m-doc-wrap-bumper"><a href="#aedb1615ba4579cd38c8b671c7adb2e40" class="m-doc-self">Unit</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a54724b9dd792a6022b918eae2f393734" class="m-doc">operator T</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
@@ -211,6 +229,14 @@ $ -u $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a42d57c583e178ffe2485508d5c380e49">
+              <span class="m-doc-wrap-bumper">auto <a href="#a42d57c583e178ffe2485508d5c380e49" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt id="aee920db0c1412eaaa2918125238a29e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#aee920db0c1412eaaa2918125238a29e0" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad726fba6216724a96f967eed36c1f9a3" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a>&amp; other) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
@@ -291,7 +317,7 @@ $ -u $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> with value <svg class="m-math" style="width: 0.610em; height: 0.803em; vertical-align: -0.000em;" viewBox="0 -7.704442 5.85299 7.704442">
+                  <td>Unit with value <svg class="m-math" style="width: 0.610em; height: 0.803em; vertical-align: -0.000em;" viewBox="0 -7.704442 5.85299 7.704442">
 <title>
 $ 1 $
 </title>
@@ -318,7 +344,7 @@ $ 1 $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> with value <svg class="m-math" style="width: 0.610em; height: 0.803em; vertical-align: -0.000em;" viewBox="0 -7.704442 5.85299 7.704442">
+                  <td>Unit with value <svg class="m-math" style="width: 0.610em; height: 0.803em; vertical-align: -0.000em;" viewBox="0 -7.704442 5.85299 7.704442">
 <title>
 $ 0 $
 </title>
@@ -385,7 +411,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to compare with</td>
+                  <td>Unit to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -411,7 +437,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to compare with</td>
+                  <td>Unit to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -437,7 +463,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to compare with</td>
+                  <td>Unit to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -463,7 +489,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to compare with</td>
+                  <td>Unit to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -489,7 +515,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to compare with</td>
+                  <td>Unit to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -515,7 +541,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to compare with</td>
+                  <td>Unit to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -541,7 +567,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to add</td>
+                  <td>Unit to add</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -567,7 +593,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to subtract</td>
+                  <td>Unit to subtract</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -593,7 +619,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to multiply by</td>
+                  <td>Unit to multiply by</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -619,7 +645,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to divide by</td>
+                  <td>Unit to divide by</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -679,7 +705,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to add</td>
+                  <td>Unit to add</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -705,7 +731,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to subtract</td>
+                  <td>Unit to subtract</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -731,7 +757,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to multiply by</td>
+                  <td>Unit to multiply by</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -757,7 +783,7 @@ $ 0 $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_unit.html" class="m-doc">Unit</a> to divide by</td>
+                  <td>Unit to divide by</td>
                 </tr>
               </tbody>
               <tfoot>

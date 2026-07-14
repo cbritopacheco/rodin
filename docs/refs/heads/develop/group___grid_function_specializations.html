@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           GridFunction Template Specializations <span class="m-thin">module</span></h1>
-        <p>Template specializations of the <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a> class.</p>
+        <p>Template specializations of the GridFunction class.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -87,7 +87,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p>GridFunction</p></aside>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -95,7 +95,12 @@
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::Variational::GridFunction&lt;FES, ::Vec&gt;</a>
             </dt>
-            <dd>Grid function specialization storing DOF coefficients in a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector (<code>::Vec</code>).</dd>
+            <dd>Grid function specialization storing DOF coefficients in a PETSc vector (<code>Vec</code>).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class FES&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_math_1_1_vector_3_01typename_01_fa803fb5fcea8b5a006f6ebef83f58418.html" class="m-doc">Rodin::Variational::GridFunction&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Grid function storing its degrees of freedom in a dense Math::Vector over the space&#x27;s scalar type (the standard local backend).</dd>
           </dl>
         </section>
       </div>

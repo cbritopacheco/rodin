@@ -77,12 +77,37 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Scotch <span class="m-thin">namespace</span>
         </h1>
         <p>PT-Scotch mesh partitioning integration.</p>
-<p>The <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a> module provides a graph-based mesh partitioner using the <a href="https://www.labri.fr/perso/pelegrin/scotch/">PT-Scotch</a> library. It implements the <code><a href="class_rodin_1_1_geometry_1_1_partitioner.html" class="m-doc">Geometry::<wbr />Partitioner</a></code> interface and supports configurable partitioning strategies via <code>SCOTCH_Strat</code>.</p><p>The primary class is <code><a href="class_rodin_1_1_scotch_1_1_partitioner.html" class="m-doc">Scotch::<wbr />Partitioner</a></code>, which partitions cells of a local mesh into a given number of parts. The resulting partition can be used with the <code>Sharder</code> to distribute the mesh for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> computations.</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Scotch/MeshPartitioner.h&gt;</span>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#nested-classes">Classes</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The Scotch module provides a graph-based mesh partitioner using the <a href="https://www.labri.fr/perso/pelegrin/scotch/">PT-Scotch</a> library. It implements the <code>Geometry::Partitioner</code> interface and supports configurable partitioning strategies via <code>SCOTCH_Strat</code>.</p><p>The primary class is <code>Scotch::Partitioner</code>, which partitions cells of a local mesh into a given number of parts. The resulting partition can be used with the <code>Sharder</code> to distribute the mesh for MPI computations.</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Scotch/MeshPartitioner.h&gt;</span>
 
 <span class="n">Scotch</span><span class="o">::</span><span class="n">Partitioner</span><span class="w"> </span><span class="nf">partitioner</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">partitioner</span><span class="p">.</span><span class="n">partition</span><span class="p">(</span><span class="n">numRanks</span><span class="p">);</span><span class="w">  </span><span class="c1">// partition into numRanks parts</span>
 
-<span class="kt">size_t</span><span class="w"> </span><span class="n">part</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">partitioner</span><span class="p">.</span><span class="n">getPartition</span><span class="p">(</span><span class="n">cellIndex</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Requires the <a href="namespace_rodin_1_1_scotch.html" class="m-doc">Scotch</a> library and is conditionally compiled.</p></aside>
+<span class="kt">size_t</span><span class="w"> </span><span class="n">part</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">partitioner</span><span class="p">.</span><span class="n">getPartition</span><span class="p">(</span><span class="n">cellIndex</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Requires the Scotch library and is conditionally compiled.</p></aside>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
+              class <a href="class_rodin_1_1_scotch_1_1_exception.html" class="m-doc">Exception</a>
+            </dt>
+            <dd>Exception type for errors reported by Scotch wrappers.</dd>
+            <dt>
+              class <a href="class_rodin_1_1_scotch_1_1_partitioner.html" class="m-doc">Partitioner</a>
+            </dt>
+            <dd>Mesh partitioner implemented with the SCOTCH library.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

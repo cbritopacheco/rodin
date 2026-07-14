@@ -76,7 +76,204 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests_1_1_manufactured.html">Manufactured</a>::<wbr/></span>LinearElasticity3D <span class="m-thin">namespace</span>
         </h1>
-<p>3D manufactured tests for isotropic linear elasticity:</p><p>Strong form: -div(sigma(u)) = f in Omega u = g on dOmega</p><p>sigma(u) = lambda (div u) I + 2 mu eps(u), eps(u) = 0.5 (grad u + grad u^T)</p><p>Weak form: \int [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = \int f\cdotv dx</p><p>NOTE on geometry: <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s UniformGrid({M,M,M}) produces coordinates {0,...,M-1}. We scale by 1/(M-1) so the domain is [0,1]^3.</p><p>NOTE on &quot;manufactured&quot;: For non-affine u_exact, the exact discrete solution is not expected with P1. These tests check mathematical consistency (correct f for chosen u), and use a relaxed error bound on a fixed mesh.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>3D manufactured tests for isotropic linear elasticity:</p><p>Strong form: -div(sigma(u)) = f in Omega u = g on dOmega</p><p>sigma(u) = lambda (div u) I + 2 mu eps(u), eps(u) = 0.5 (grad u + grad u^T)</p><p>Weak form: ∫ [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = ∫ f· v dx</p><p>NOTE on geometry: Rodin&#x27;s UniformGrid({M,M,M}) produces coordinates {0,...,M-1}. We scale by 1/(M-1) so the domain is [0,1]^3.</p><p>NOTE on &quot;manufactured&quot;: For non-affine u_exact, the exact discrete solution is not expected with P1. These tests check mathematical consistency (correct f for chosen u), and use a relaxed error bound on a fixed mesh.</p>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a> = Elasticity3DFixture&lt;8&gt;
+            </dt>
+            <dd>Helper used by the tests to Elasticity 3 D Test 8.</dd>
+            <dt>
+              using <a href="#af791b2ece6808f96f200f2cda3fabf1d" class="m-doc">Elasticity3DTest16</a> = Elasticity3DFixture&lt;16&gt;
+            </dt>
+            <dd>Helper used by the tests to Elasticity 3 D Test 16.</dd>
+            <dt>
+              using <a href="#a9493d559be3e4e3674753ebe4f60e1f3" class="m-doc">Elasticity3DTest32</a> = Elasticity3DFixture&lt;32&gt;
+            </dt>
+            <dd>Helper used by the tests to Elasticity 3 D Test 32.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad2b265bff97a4f7b2aa5743ba0787fe8" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              LinearElasticity3D_P1ExactResidual)</span>
+            </dt>
+            <dd>Verifies linear elasticity 3 D P1 exact residual for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a60f7243085b6178df2b73e6fa10fe61c" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              AffineExact_Identity)</span>
+            </dt>
+            <dd>Verifies affine exact identity for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a5302ef01e7815abad74311bc5b2bafae" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              AffineExact_IdentityAltMaterial)</span>
+            </dt>
+            <dd>Verifies affine exact identity alt material for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a89f7b9c83382ef316e6537f5deceacb6" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              GeneralAffine)</span>
+            </dt>
+            <dd>Verifies general affine for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a24fb9696a8fc8ef9d9fb9813b055685e" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              Polynomial)</span>
+            </dt>
+            <dd>Verifies polynomial for elasticity 3 D test 8 by checking solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a445ceea253671bb7fdee0e0d5e1885df" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a9493d559be3e4e3674753ebe4f60e1f3" class="m-doc">Elasticity3DTest32</a>,
+              MixedComponents)</span>
+            </dt>
+            <dd>Verifies mixed components for elasticity 3 D test 32 by checking solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3a66c489f014e0767a21ff274f87092c" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#af791b2ece6808f96f200f2cda3fabf1d" class="m-doc">Elasticity3DTest16</a>,
+              Polynomial_Refined)</span>
+            </dt>
+            <dd>Verifies polynomial refined for elasticity 3 D test 16 by checking solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a46a064388d6608b95405859b3c214599" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span>
+            </dt>
+            <dd>Instantiates Elasticity 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9b6dc46e8bec2ea8cca20f93ca254794" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#af791b2ece6808f96f200f2cda3fabf1d" class="m-doc">Elasticity3DTest16</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span>
+            </dt>
+            <dd>Instantiates Elasticity 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4121de42f3e13650d77407a6c780573d" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#a9493d559be3e4e3674753ebe4f60e1f3" class="m-doc">Elasticity3DTest32</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span>
+            </dt>
+            <dd>Instantiates Elasticity 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="aaf37003a1d291bd24b2fac1cb1baf5e8"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc-self">Elasticity3DTest8</a> = Elasticity3DFixture&lt;8&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Elasticity 3 D Test 8.</p>
+          </div></section>
+          <section class="m-doc-details" id="af791b2ece6808f96f200f2cda3fabf1d"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /><a href="#af791b2ece6808f96f200f2cda3fabf1d" class="m-doc-self">Elasticity3DTest16</a> = Elasticity3DFixture&lt;16&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Elasticity 3 D Test 16.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9493d559be3e4e3674753ebe4f60e1f3"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /><a href="#a9493d559be3e4e3674753ebe4f60e1f3" class="m-doc-self">Elasticity3DTest32</a> = Elasticity3DFixture&lt;32&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Elasticity 3 D Test 32.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ad2b265bff97a4f7b2aa5743ba0787fe8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2b265bff97a4f7b2aa5743ba0787fe8" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              LinearElasticity3D_P1ExactResidual)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies linear elasticity 3 D P1 exact residual for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a60f7243085b6178df2b73e6fa10fe61c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a60f7243085b6178df2b73e6fa10fe61c" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              AffineExact_Identity)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies affine exact identity for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5302ef01e7815abad74311bc5b2bafae"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5302ef01e7815abad74311bc5b2bafae" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              AffineExact_IdentityAltMaterial)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies affine exact identity alt material for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a89f7b9c83382ef316e6537f5deceacb6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a89f7b9c83382ef316e6537f5deceacb6" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              GeneralAffine)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies general affine for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a24fb9696a8fc8ef9d9fb9813b055685e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24fb9696a8fc8ef9d9fb9813b055685e" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              Polynomial)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies polynomial for elasticity 3 D test 8 by checking solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a445ceea253671bb7fdee0e0d5e1885df"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a445ceea253671bb7fdee0e0d5e1885df" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a9493d559be3e4e3674753ebe4f60e1f3" class="m-doc">Elasticity3DTest32</a>,
+              MixedComponents)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies mixed components for elasticity 3 D test 32 by checking solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3a66c489f014e0767a21ff274f87092c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3a66c489f014e0767a21ff274f87092c" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#af791b2ece6808f96f200f2cda3fabf1d" class="m-doc">Elasticity3DTest16</a>,
+              Polynomial_Refined)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies polynomial refined for elasticity 3 D test 16 by checking solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a46a064388d6608b95405859b3c214599"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a46a064388d6608b95405859b3c214599" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#aaf37003a1d291bd24b2fac1cb1baf5e8" class="m-doc">Elasticity3DTest8</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Elasticity 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9b6dc46e8bec2ea8cca20f93ca254794"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b6dc46e8bec2ea8cca20f93ca254794" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#af791b2ece6808f96f200f2cda3fabf1d" class="m-doc">Elasticity3DTest16</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Elasticity 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4121de42f3e13650d77407a6c780573d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />LinearElasticity3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4121de42f3e13650d77407a6c780573d" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#a9493d559be3e4e3674753ebe4f60e1f3" class="m-doc">Elasticity3DTest32</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p1_2_linear_elasticity3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/LinearElasticity3D.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Elasticity 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

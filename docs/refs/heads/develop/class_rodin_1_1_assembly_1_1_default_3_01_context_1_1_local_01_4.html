@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Default&lt;Context::Local&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly strategy for local context without OpenMP.</p>
+        <p>Default assembly strategy for local context without OpenMP.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>When OpenMP support is not available (RODIN_USE_OPENMP is not defined), this specialization selects the <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> single-threaded assembly implementation as the default for local execution contexts.</p><p>This ensures assembly operations work correctly even without parallel support, providing deterministic and reproducible results.</p>
+<p>When OpenMP support is not available (RODIN_USE_OPENMP is not defined), this specialization selects the Sequential single-threaded assembly implementation as the default for local execution contexts.</p><p>This ensures assembly operations work correctly even without parallel support, providing deterministic and reproducible results.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -98,7 +98,7 @@
               <div class="m-doc-template">template&lt;class LinearAlgebraType, class Object&gt;</div>
               using <a href="#a84bffd4aa4b581e7d535001dbbb9a53b" class="m-doc">Type</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>&lt;LinearAlgebraType, Object&gt;
             </dt>
-            <dd><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly type for local context (sequential).</dd>
+            <dd>Default assembly type for local context (sequential).</dd>
           </dl>
         </section>
         <section>
@@ -111,7 +111,7 @@
               </div>
               using Rodin::<wbr />Assembly::<wbr />Default&lt;Context::<wbr />Local&gt;::<wbr /><a href="#a84bffd4aa4b581e7d535001dbbb9a53b" class="m-doc-self">Type</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>&lt;LinearAlgebraType, Object&gt;
             </h3>
-            <p><a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Default</a> assembly type for local context (sequential).</p>
+            <p>Default assembly type for local context (sequential).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -123,11 +123,11 @@
                 </tr>
                 <tr>
                   <td>Object</td>
-                  <td><a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> form type to assemble</td>
+                  <td>Variational form type to assemble</td>
                 </tr>
               </tbody>
             </table>
-<p>Type alias that selects <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> single-threaded assembly when OpenMP is not available.</p>
+<p>Type alias that selects Sequential single-threaded assembly when OpenMP is not available.</p>
           </div></section>
         </section>
       </div>

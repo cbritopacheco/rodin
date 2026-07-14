@@ -77,7 +77,7 @@
           <div class="m-doc-template">template&lt;class CodeT&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Color <span class="m-thin">class</span>
         </h1>
-        <p>Type-safe wrapper for custom <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> colors.</p>
+        <p>Type-safe wrapper for custom RGB colors.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -85,7 +85,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">CodeT</td>
-              <td>The <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code type.</td>
+              <td>The RGB color code type.</td>
             </tr>
           </tbody>
         </table>
@@ -102,14 +102,14 @@
             </li>
           </ul>
         </nav>
-<p>Forward declaration of <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a> template class.</p><p>Template class providing a type-safe wrapper around <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color codes. Used to create custom terminal colors with compile-time color validation.</p><p>Template class for custom terminal colors with type-safe color codes.</p>
+<p>Forward declaration of Color template class.</p><p>Template class providing a type-safe wrapper around RGB color codes. Used to create custom terminal colors with compile-time color validation.</p><p>Template class for custom terminal colors with type-safe color codes.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a90b3c5f24e369485849045f2f7cf342a">
               using <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc-self">Code</a> = CodeT
             </dt>
-            <dd>The <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code type.</dd>
+            <dd>The RGB color code type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -118,16 +118,32 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a96c386434759ce077ab1b38021f2d22a" class="m-doc">Color</a>(</span><span class="m-doc-wrap">const <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>&amp; code = <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>()) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a> with the given code.</dd>
+            <dd>Constructs a Color with the given code.</dd>
+            <dt id="a69fcdcb2c023ca80a857289f72836c7a">
+              <span class="m-doc-wrap-bumper"><a href="#a69fcdcb2c023ca80a857289f72836c7a" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="adfd5be86cbbdfac14c249b9ec1a56f23">
+              <span class="m-doc-wrap-bumper"><a href="#adfd5be86cbbdfac14c249b9ec1a56f23" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a444756602b7fcc7d3b21aaa0c61cf440">
+              <span class="m-doc-wrap-bumper">auto <a href="#a444756602b7fcc7d3b21aaa0c61cf440" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt id="a4420d21fbd73c0de4774436a64b240c4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4420d21fbd73c0de4774436a64b240c4" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2e077fba7182a843195d00097825ae28" class="m-doc">getCode</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Gets the <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code.</dd>
+            <dd>Gets the RGB color code.</dd>
           </dl>
         </section>
         <section>
@@ -139,7 +155,7 @@
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Color&lt;CodeT&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96c386434759ce077ab1b38021f2d22a" class="m-doc-self">Color</a>(</span><span class="m-doc-wrap">const <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>&amp; code = <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>()) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_alert_1_1_color.html" class="m-doc">Color</a> with the given code.</p>
+            <p>Constructs a Color with the given code.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -147,7 +163,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">code</td>
-                  <td>The <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code (defaults to default-constructed Code).</td>
+                  <td>The RGB color code (defaults to default-constructed Code).</td>
                 </tr>
               </tbody>
             </table>
@@ -159,7 +175,7 @@
               </div>
               <span class="m-doc-wrap-bumper">const <a href="#a90b3c5f24e369485849045f2f7cf342a" class="m-doc">Code</a>&amp; Rodin::<wbr />Alert::<wbr />Color&lt;CodeT&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2e077fba7182a843195d00097825ae28" class="m-doc-self">getCode</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Gets the <a href="struct_rodin_1_1_alert_1_1_r_g_b.html" class="m-doc">RGB</a> color code.</p>
+            <p>Gets the RGB color code.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>

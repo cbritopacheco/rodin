@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>Sequential&lt;::Vec, Variational::LinearForm&lt;FES, ::Vec&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a> assembly of a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector from a linear form.</p>
+        <p>Sequential assembly of a PETSc vector from a linear form.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -98,11 +98,12 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Iterates over mesh polytopes on a single thread, evaluates Rodin::Variational::LinearFormIntegrator instances, and inserts entries into the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector with <code>VecSetValue</code>.</p>
+<p>Iterates over mesh polytopes on a single thread, evaluates <code>Rodin::Variational::LinearFormIntegrator</code> instances, and inserts entries into the PETSc vector with <code>VecSetValue</code>.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -123,9 +124,9 @@
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
               using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type (<code>::Vec</code>).</dd>
+            <dd>PETSc vector type (<code>Vec</code>).</dd>
             <dt id="a98f6fba4edecb637608d8f3cf6f4bdef">
-              using <a href="#a98f6fba4edecb637608d8f3cf6f4bdef" class="m-doc-self">LinearFormType</a> = <a href="class_rodin_1_1_variational_1_1_linear_form.html" class="m-doc">Variational::<wbr />LinearForm</a>&lt;FES, <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&gt;
+              using <a href="#a98f6fba4edecb637608d8f3cf6f4bdef" class="m-doc-self">LinearFormType</a> = <a href="group___rodin_c_t_a_d.html#ga428b3bbd91b26401394cc611f7ec36f5" class="m-doc">Variational::<wbr />LinearForm</a>&lt;FES, <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&gt;
             </dt>
             <dd>Linear form type being assembled.</dd>
             <dt id="ae8e7603d828309e35d0727297a917f1f">
@@ -137,6 +138,48 @@
             </dt>
             <dd>Input data type for the assembly pipeline.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Assembles the linear form into a PETSc vector.</dd>
+            <dt id="a5cc5fe811e4bdc5e5e5fc0f748dc4e91">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5cc5fe811e4bdc5e5e5fc0f748dc4e91" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Sequential</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a heap-allocated copy of this assembly backend.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a17f3d79a9feccadabf3a5592e96dc068"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />Sequential&lt;::<wbr />Vec, Variational::<wbr />LinearForm&lt;FES, ::<wbr />Vec&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles the linear form into a PETSc vector.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>PETSc vector receiving accumulated entries.</td>
+                </tr>
+                <tr>
+                  <td>input&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Linear-form assembly input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

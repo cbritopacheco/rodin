@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> provides the common interface for all mesh types in <a href="namespace_rodin.html" class="m-doc">Rodin</a>, defining fundamental operations such as:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> access through iterators</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> I/O operations</li><li><a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> queries</li></ul><section id="autotoc_md86"><h2><a href="#autotoc_md86">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>: Sequential (non-distributed) meshes</li><li><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">SubMesh&lt;Context::<wbr />Local&gt;</a>: Submeshes representing subregions</li><li><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a>: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md87"><h2><a href="#autotoc_md87">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a> and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
+<p>MeshBase provides the common interface for all mesh types in Rodin, defining fundamental operations such as:</p><ul><li>Point inclusion testing</li><li>Basic mesh properties (dimension, vertex count, etc.)</li><li>Polytope access through iterators</li><li>Mesh I/O operations</li><li>Connectivity queries</li></ul><section id="autotoc_md86"><h2><a href="#autotoc_md86">Inheritance Hierarchy</a></h2><p>All concrete mesh implementations derive from this base class:</p><ul><li>Mesh&lt;Context::Local&gt;: Sequential (non-distributed) meshes</li><li>SubMesh&lt;Context::Local&gt;: Submeshes representing subregions</li><li>Shard: Distributed mesh shards for parallel computing</li></ul></section><section id="autotoc_md87"><h2><a href="#autotoc_md87">Thread Safety</a></h2><p>MeshBase and derived classes are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p>Mesh, SubMesh, Shard</p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -102,6 +102,11 @@
               class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
             </dt>
             <dd>Represents the subdivision of some domain into faces of (possibly) different geometries.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;&gt;</div>
+              class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4.html" class="m-doc">Mesh&lt;Context::MPI&gt;</a>
+            </dt>
+            <dd>Distributed mesh specialization for MPI contexts.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -125,13 +130,13 @@
             </dt>
             <dd>Inequality comparison.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab0038955a7cbdc1782e165243507d79c" class="m-doc">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3203ac272db4d8b0a23eef0ed605341f" class="m-doc">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd>Checks whether a point is already expressed in this mesh&#x27;s local indexing convention.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aef53579356e98bee49318d3b43d96a85" class="m-doc">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acc802e09e1a41bb47fc3fa6394184885" class="m-doc">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> point inclusion in the mesh.</dd>
+            <dd>Tests point inclusion in the mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#acf82f9b2937375c7b1cf3dccb3df3312" class="m-doc">isEmpty</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
@@ -193,11 +198,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8061eb8e8fbe91f5b3f3d7a5d31bc23d" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Casts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface (mutable).</dd>
+            <dd>Casts to SubMeshBase interface (mutable).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab039fe7e561ad14d2e263d8fedf1d006" class="m-doc">asSubMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd>Casts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface (const).</dd>
+            <dd>Casts to SubMeshBase interface (const).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -364,13 +369,19 @@
             </dt>
             <dd>Gets the execution context of the mesh.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc">getName</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;StringView&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc">getName</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt;</span>
             </dt>
             <dd>Gets the optional name assigned to this mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad5193c20d0320dd32fd0c8df5460b883" class="m-doc">setName</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; <a href="class_rodin_1_1_geometry_1_1_mesh_base.html" class="m-doc">MeshBase</a>&amp;</span>
             </dt>
             <dd>Sets a human-readable name for the mesh.</dd>
+            <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
+            </dt>
+            <dd>Serializes the mesh (for boost::serialization).</dd>
           </dl>
         </section>
         <section>
@@ -387,7 +398,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> to compare with</td>
+                  <td>Mesh to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -410,7 +421,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> to compare with</td>
+                  <td>Mesh to compare with</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -421,18 +432,18 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab0038955a7cbdc1782e165243507d79c"><div>
+          <section class="m-doc-details" id="a3203ac272db4d8b0a23eef0ed605341f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0038955a7cbdc1782e165243507d79c" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3203ac272db4d8b0a23eef0ed605341f" class="m-doc-self">isLocalPoint</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Checks whether a point is already expressed in this mesh&#x27;s local indexing convention.</p>
 <p>Ordinary meshes accept only points attached directly to themselves. Distributed meshes override this to also accept points attached to their rank-local shard.</p>
           </div></section>
-          <section class="m-doc-details" id="aef53579356e98bee49318d3b43d96a85"><div>
+          <section class="m-doc-details" id="acc802e09e1a41bb47fc3fa6394184885"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef53579356e98bee49318d3b43d96a85" class="m-doc-self">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc802e09e1a41bb47fc3fa6394184885" class="m-doc-self">inclusion</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a>&amp; p) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> point inclusion in the mesh.</p>
+            <p>Tests point inclusion in the mesh.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -440,7 +451,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> to test</td>
+                  <td>Point to test</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -491,7 +502,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> count</td>
+                  <td>Vertex count</td>
                 </tr>
               </tfoot>
             </table>
@@ -505,7 +516,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> count (codimension-1 polytopes)</td>
+                  <td>Face count (codimension-1 polytopes)</td>
                 </tr>
               </tfoot>
             </table>
@@ -519,7 +530,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a> count (maximal dimension polytopes)</td>
+                  <td>Cell count (maximal dimension polytopes)</td>
                 </tr>
               </tfoot>
             </table>
@@ -536,7 +547,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">index&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> index</td>
+                  <td>Face index</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -559,7 +570,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">index&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a> index</td>
+                  <td>Cell index</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -670,11 +681,11 @@ $ c $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>True if this is a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instance</td>
+                  <td>True if this is a SubMesh instance</td>
                 </tr>
               </tfoot>
             </table>
-<p>A <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> which is also a <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> may be casted down to access SubMesh-specific functionality:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<p>A Mesh which is also a SubMesh may be casted down to access SubMesh-specific functionality:</p><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
@@ -692,7 +703,7 @@ $ c $
               <tbody>
                 <tr>
                   <td style="width: 1%">faceIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> index</td>
+                  <td>Face index</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -715,7 +726,7 @@ $ c $
               <tbody>
                 <tr>
                   <td style="width: 1%">faceIdx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> index</td>
+                  <td>Face index</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -730,12 +741,12 @@ $ c $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8061eb8e8fbe91f5b3f3d7a5d31bc23d" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-            <p>Casts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface (mutable).</p>
+            <p>Casts to SubMeshBase interface (mutable).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface</td>
+                  <td>Reference to SubMeshBase interface</td>
                 </tr>
               </thead>
               <thead>
@@ -753,12 +764,12 @@ $ c $
             <h3>
               <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>&amp; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab039fe7e561ad14d2e263d8fedf1d006" class="m-doc-self">asSubMesh</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-            <p>Casts to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface (const).</p>
+            <p>Casts to SubMeshBase interface (const).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a> interface</td>
+                  <td>Const reference to SubMeshBase interface</td>
                 </tr>
               </thead>
               <thead>
@@ -781,7 +792,7 @@ $ c $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
+                  <td>Mesh dimension <svg class="m-math" style="width: 1.046em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.044475 8.169366">
 <title>
 $ D $
 </title>
@@ -795,7 +806,7 @@ $ D $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="#aed7007d20f3a38dba19ef8fd566abb46" class="m-doc">getSpaceDimension()</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p>getSpaceDimension()</p></aside>
           </div></section>
           <section class="m-doc-details" id="aed7007d20f3a38dba19ef8fd566abb46"><div>
             <h3>
@@ -810,7 +821,7 @@ $ D $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension()</a></p></aside><p>For example, a 2D triangulated surface in 3D space has:</p><ul><li><a href="#aecbab974d66ff87d16610de96cf16878" class="m-doc">getDimension()</a> = 2</li><li><a href="#aed7007d20f3a38dba19ef8fd566abb46" class="m-doc">getSpaceDimension()</a> = 3</li></ul>
+<aside class="m-note m-default"><h4>See also</h4><p>getDimension()</p></aside><p>For example, a 2D triangulated surface in 3D space has:</p><ul><li>getDimension() = 2</li><li>getSpaceDimension() = 3</li></ul>
           </div></section>
           <section class="m-doc-details" id="aa90969db1bab02c4a614787ead38bd00"><div>
             <h3>
@@ -1006,7 +1017,7 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1030,7 +1041,7 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1058,7 +1069,7 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">d&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1082,7 +1093,7 @@ $ D $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> for boundary faces</td>
+                  <td>FaceIterator for boundary faces</td>
                 </tr>
               </tfoot>
             </table>
@@ -1096,7 +1107,7 @@ $ D $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> for interface faces</td>
+                  <td>FaceIterator for interface faces</td>
                 </tr>
               </tfoot>
             </table>
@@ -1113,7 +1124,7 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1136,7 +1147,7 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">g&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> geometry type</td>
+                  <td>Polytope geometry type</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1156,7 +1167,7 @@ $ D $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a></td>
+                  <td>CellIterator</td>
                 </tr>
               </tfoot>
             </table>
@@ -1170,7 +1181,7 @@ $ D $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a></td>
+                  <td>FaceIterator</td>
                 </tr>
               </tfoot>
             </table>
@@ -1184,7 +1195,7 @@ $ D $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a></td>
+                  <td>VertexIterator</td>
                 </tr>
               </tfoot>
             </table>
@@ -1201,13 +1212,13 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a></td>
+                  <td>PolytopeIterator</td>
                 </tr>
               </tfoot>
             </table>
@@ -1224,13 +1235,13 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_cell.html" class="m-doc">Cell</a> index</td>
+                  <td>Cell index</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_cell_iterator.html" class="m-doc">CellIterator</a> positioned at cell</td>
+                  <td>CellIterator positioned at cell</td>
                 </tr>
               </tfoot>
             </table>
@@ -1247,13 +1258,13 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face.html" class="m-doc">Face</a> index</td>
+                  <td>Face index</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_face_iterator.html" class="m-doc">FaceIterator</a> positioned at face</td>
+                  <td>FaceIterator positioned at face</td>
                 </tr>
               </tfoot>
             </table>
@@ -1270,13 +1281,13 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> index</td>
+                  <td>Vertex index</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex_iterator.html" class="m-doc">VertexIterator</a> positioned at vertex</td>
+                  <td>VertexIterator positioned at vertex</td>
                 </tr>
               </tfoot>
             </table>
@@ -1294,17 +1305,17 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
                 <tr>
                   <td>idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> index</td>
+                  <td>Polytope index</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">PolytopeIterator</a> positioned at polytope</td>
+                  <td>PolytopeIterator positioned at polytope</td>
                 </tr>
               </tfoot>
             </table>
@@ -1322,11 +1333,11 @@ $ D $
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
                 <tr>
                   <td>idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> index</td>
+                  <td>Polytope index</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1368,17 +1379,17 @@ $ x: K \rightarrow \tau $
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
                 <tr>
                   <td>idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> index</td>
+                  <td>Polytope index</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> type</td>
+                  <td>Geometry type</td>
                 </tr>
               </tfoot>
             </table>
@@ -1396,11 +1407,11 @@ $ x: K \rightarrow \tau $
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> dimension</td>
+                  <td>Polytope dimension</td>
                 </tr>
                 <tr>
                   <td>index&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> index</td>
+                  <td>Polytope index</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -1424,7 +1435,7 @@ $ x: K \rightarrow \tau $
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index)</td>
+                  <td>Pair of (dimension, index)</td>
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1448,7 +1459,7 @@ $ x: K \rightarrow \tau $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Const reference to <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> object</td>
+                  <td>Const reference to Connectivity object</td>
                 </tr>
               </tfoot>
             </table>
@@ -1465,7 +1476,7 @@ $ x: K \rightarrow \tau $
               <tbody>
                 <tr>
                   <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> index</td>
+                  <td>Vertex index</td>
                 </tr>
               </tbody>
             </table>
@@ -1484,7 +1495,7 @@ $ x: K \rightarrow \tau $
               <tbody>
                 <tr>
                   <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> index</td>
+                  <td>Vertex index</td>
                 </tr>
                 <tr>
                   <td>s&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1537,7 +1548,7 @@ $ (0, 5, 10) $
               <tbody>
                 <tr>
                   <td style="width: 1%">idx&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> index</td>
+                  <td>Vertex index</td>
                 </tr>
                 <tr>
                   <td>coords&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1559,7 +1570,7 @@ $ (0, 5, 10) $
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> of (dimension, index) identifying the polytope</td>
+                  <td>Pair of (dimension, index) identifying the polytope</td>
                 </tr>
                 <tr>
                   <td>trans&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -1592,7 +1603,7 @@ $ (0, 5, 10) $
           </div></section>
           <section class="m-doc-details" id="aafa1fbb6fcf1168fe50762a590fe5f89"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;StringView&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;<a href="group___rodin_types.html#gabb48001a8affd5435f164fd88fa1a1bc" class="m-doc">StringView</a>&gt; Rodin::<wbr />Geometry::<wbr />MeshBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aafa1fbb6fcf1168fe50762a590fe5f89" class="m-doc-self">getName</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Gets the optional name assigned to this mesh.</p>
             <table class="m-table m-fullwidth m-flat">

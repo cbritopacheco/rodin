@@ -74,7 +74,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>OpenMP assembler for the identification Dirichlet BC <code>u = A(v)</code>.</p>
@@ -85,6 +85,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -95,40 +97,115 @@
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_0148da7dfd12970cb2258cc7f19a12cb71.html" class="m-doc">AssemblyBase&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a> specialization for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
+            <dd>AssemblyBase specialization for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a22049d49d0b8d1c53b40e105ce05f884">
+              using <a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc-self">OutputType</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;&gt;
+            </dt>
+            <dd>Output map type for slave-to-master identifications.</dd>
+            <dt id="aba29d8cda72551fcc7c1b269c758ace8">
+              using <a href="#aba29d8cda72551fcc7c1b269c758ace8" class="m-doc-self">TrialFunctionType</a> = Variational::TrialFunction&lt;Sol1, FES1&gt;
+            </dt>
+            <dd>Slave trial function type.</dd>
+            <dt id="ac73715afa4a4d3664c4295dd91052dd7">
+              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;
+            </dt>
+            <dd>Shape-function expression type on the right-hand side.</dd>
+            <dt id="ab5a915c8c7b8e07b4e6d38c6f6db437e">
+              using <a href="#ab5a915c8c7b8e07b4e6d38c6f6db437e" class="m-doc-self">DirichletBCType</a> = Variational::DirichletBC&lt;<a href="#aba29d8cda72551fcc7c1b269c758ace8" class="m-doc">TrialFunctionType</a>, <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&gt;
+            </dt>
+            <dd>Dirichlet condition type.</dd>
+            <dt id="ac62316ac7d5fe1023ed24494fe4b95db">
+              using <a href="#ac62316ac7d5fe1023ed24494fe4b95db" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc">OutputType</a>, <a href="#ab5a915c8c7b8e07b4e6d38c6f6db437e" class="m-doc">DirichletBCType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a0619bd014adbfe7e508b058eefb69dab">
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
+            </dt>
+            <dd>Assembly input data type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a14b2249366e25fb8b04d56fdde20690d">
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ab629819992d852fd6c2647d00eee90e6">
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; OpenMP* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#ad2b026c6a7d087eef8c855d04f5f298e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc">OutputType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Executes identification Dirichlet boundary condition assembly.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ad2b026c6a7d087eef8c855d04f5f298e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad2b026c6a7d087eef8c855d04f5f298e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc">OutputType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Executes identification Dirichlet boundary condition assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res</td>
+                  <td>Output map from slave DOFs to master DOF coefficients.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Boundary condition input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
               </div>
-              <span class="m-doc-wrap-bumper">OpenMP* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a polymorphic copy of this object.</p>
+            <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Pointer to a new copy.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
         </section>
       </div>

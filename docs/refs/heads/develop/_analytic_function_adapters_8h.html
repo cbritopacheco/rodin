@@ -89,27 +89,29 @@
             </li>
           </ul>
         </nav>
-<p><code><a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />RealFunction(F)</a></code> already wraps a scalar callable with signature <code>(const Geometry::Point&amp;) -&gt; Real</code>. The stock <code>VectorFunction</code> and <code>MatrixFunction</code> only accept either a constant value or a component-wise variadic list of scalar callables. For analytic level sets the natural shape is a SINGLE callable returning the whole vector or matrix; this header adds the missing adapters.</p><p>Usage:</p><p>Adaptation::AnalyticVectorFunction grad( [&amp;](const Geometry::Point&amp; p) -&gt; Math::SpatialVector&lt;Real&gt; { const auto&amp; c = p.getPhysicalCoordinates(); return analyticLevelSet.grad(c); });</p><p>Adaptation::AnalyticMatrixFunction hess( [&amp;](const Geometry::Point&amp; p) -&gt; Math::SpatialMatrix&lt;Real&gt; { const auto&amp; c = p.getPhysicalCoordinates(); return analyticLevelSet.hess(c); });</p>
+<p><code>Rodin::Variational::RealFunction(F)</code> already wraps a scalar callable with signature <code>(const Geometry::Point&amp;) -&gt; Real</code>. The stock <code>VectorFunction</code> and <code>MatrixFunction</code> only accept either a constant value or a component-wise variadic list of scalar callables. For analytic level sets the natural shape is a SINGLE callable returning the whole vector or matrix; this header adds the missing adapters.</p><p>Usage:</p><p>Adaptation::AnalyticVectorFunction grad( [&amp;](const Geometry::Point&amp; p) -&gt; Math::SpatialVector&lt;Real&gt; { const auto&amp; c = p.getPhysicalCoordinates(); return analyticLevelSet.grad(c); });</p><p>Adaptation::AnalyticMatrixFunction hess( [&amp;](const Geometry::Point&amp; p) -&gt; Math::SpatialMatrix&lt;Real&gt; { const auto&amp; c = p.getPhysicalCoordinates(); return analyticLevelSet.hess(c); });</p>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_adaptation.html" class="m-doc">Rodin::Adaptation</a></dt>
+            <dd>Namespace <a href="namespace_rodin_1_1_tests_1_1_benchmarks.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Benchmarks</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> F&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
               class <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">Rodin::Adaptation::AnalyticVectorFunction</a>
             </dt>
-            <dd>Vector-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Real&gt;</code>.</dd>
+            <dd>Vector-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialVector&lt;Real&gt;</code>.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> F&gt;</div>
+              <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
               class <a href="class_rodin_1_1_adaptation_1_1_analytic_matrix_function.html" class="m-doc">Rodin::Adaptation::AnalyticMatrixFunction</a>
             </dt>
-            <dd>Matrix-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;Real&gt;</code>.</dd>
+            <dd>Matrix-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialMatrix&lt;Real&gt;</code>.</dd>
           </dl>
         </section>
       </div>

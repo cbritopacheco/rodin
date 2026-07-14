@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>FunctionBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for function objects which can be evaluated over a mesh.</p>
+        <p>Base class for functions defined on finite element meshes.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -93,8 +93,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md353">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md354">Key Features</a></li>
+            <li><a href="#autotoc_md336">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md337">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -107,7 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for functions defined on finite element meshes.</p><p>Instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> will always have the <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue()</a> method defined, which enables the evaluation of any function on some mesh element.</p><p><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a> provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md353"><h3><a href="#autotoc_md353">Mathematical Foundation</a></h3><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
+<p>FunctionBase provides the foundation for representing mathematical functions defined over geometric domains discretized by finite element meshes. This includes both analytical functions and discrete finite element functions (grid functions) that arise in variational formulations.</p><section id="autotoc_md336"><h3><a href="#autotoc_md336">Mathematical Foundation</a></h3><p>A function <svg class="m-math" style="width: 6.017em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 57.763451 10.626798">
 <title>
 $ f : \Omega \to \mathbb{R}^n $
 </title>
@@ -184,280 +184,20 @@ $ \phi_i $
 <use x='0' y='0' xlink:href='#eq5-g1-30'/>
 <use x='6.928102' y='1.793263' xlink:href='#eq5-g0-105'/>
 </g>
-</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md354"><h3><a href="#autotoc_md354">Key Features</a></h3><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
+</svg> spanning finite element spaces</li></ul></section><section id="autotoc_md337"><h3><a href="#autotoc_md337">Key Features</a></h3><ul><li><strong>Domain support</strong>: Functions can be restricted to subdomains or boundaries</li><li><strong>Trace operations</strong>: Support for function traces on mesh boundaries</li><li><strong>Point evaluation</strong>: Evaluation at arbitrary points within the domain</li><li><strong>Polymorphic design</strong>: CRTP enables compile-time polymorphism for efficiency</li></ul></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
             </dt>
-            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
+            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
           </dl>
         </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_boolean_function_base.html" class="m-doc">BooleanFunctionBase</a>
-            </dt>
-            <dd>Base class for boolean-valued functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">GridFunctionBaseReference</a>
-            </dt>
-            <dd>Base class for discrete finite element functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_grid_function_base_reference.html" class="m-doc">GridFunctionBaseReference</a>
-            </dt>
-            <dd>Base class for discrete finite element functions.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
-            </dt>
-            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
-            </dt>
-            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
-            </dt>
-            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_matrix_function_base.html" class="m-doc">MatrixFunctionBase</a>
-            </dt>
-            <dd>Base class for matrix-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-            <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
             </dt>
@@ -477,31 +217,6 @@ $ \phi_i $
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
-            </dt>
-            <dd>Base class for vector-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
-            </dt>
-            <dd>Base class for vector-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
-            </dt>
-            <dd>Base class for vector-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>
-            </dt>
-            <dd>Base class for vector-valued functions defined on a mesh.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_trace_operator_3_01_function_base_01_4.html" class="m-doc">TraceOperator&lt;FunctionBase&gt;</a>
-            </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_trace.html" class="m-doc">Trace</a> (boundary restriction) operator for functions.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -541,10 +256,18 @@ $ \phi_i $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a2f180fed0bc9dd83a23d0f0464538409">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2f180fed0bc9dd83a23d0f0464538409" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&amp;</span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the function on a Point belonging to the mesh.</dd>
+            <dt id="a15eb99a5cecce266b59c5e7c1a9b2f4d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a15eb99a5cecce266b59c5e7c1a9b2f4d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad7584a02ad39a4e93816d166a02c170c" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">size_t i) const -&gt; auto</span>
             </dt>
@@ -593,14 +316,26 @@ $ \phi_i $
               <span class="m-doc-wrap-bumper">auto <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Evaluates the function on a Point belonging to the mesh.</dd>
+            <dt id="aa249459e67c36e2343e940d08970970a">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a geometry-dependent polynomial order bound of the expression on the reference element.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad29a755240e4c6938395b937a1c4a132" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a2a1cd57f8a8a7447519f64bb30d04950">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a1cd57f8a8a7447519f64bb30d04950" class="m-doc-self">getDerived</a>(</span><span class="m-doc-wrap">) -&gt; Derived&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Returns this object as the CRTP-derived type.</dd>
+            <dt id="aa75b0ee8f7f82337ebf0b88abfa91b18">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa75b0ee8f7f82337ebf0b88abfa91b18" class="m-doc-self">getDerived</a>(</span><span class="m-doc-wrap">) const -&gt; const Derived&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns this object as the CRTP-derived type.</dd>
+            <dt id="ad29a755240e4c6938395b937a1c4a132">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad29a755240e4c6938395b937a1c4a132" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Polymorphically copies the derived function.</dd>
           </dl>
         </section>
         <section>
@@ -626,11 +361,11 @@ $ \phi_i $
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> value at the given point</td>
+                  <td>Function value at the given point</td>
                 </tr>
               </tfoot>
             </table>
-<p>This operator provides convenient function call syntax for evaluation. Delegates to the derived class&#x27;s <a href="#af5f065ebe0b3b1c58b0c2402a50fc9e3" class="m-doc">getValue()</a> method via CRTP.</p>
+<p>This operator provides convenient function call syntax for evaluation. Delegates to the derived class&#x27;s getValue() method via CRTP.</p>
           </div></section>
           <section class="m-doc-details" id="ad7584a02ad39a4e93816d166a02c170c"><div>
             <h3>
@@ -647,17 +382,17 @@ $ \phi_i $
               <tbody>
                 <tr>
                   <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> index</td>
+                  <td>Component index</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> function object</td>
+                  <td>Component function object</td>
                 </tr>
               </tfoot>
             </table>
-<p>For vector or matrix-valued functions, this returns a scalar function representing the specified component.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a></p></aside>
+<p>For vector or matrix-valued functions, this returns a scalar function representing the specified component.</p><aside class="m-note m-default"><h4>See also</h4><p>Component</p></aside>
           </div></section>
           <section class="m-doc-details" id="afd564b09b05a55499d7576b85f69a01e"><div>
             <h3>
@@ -685,11 +420,11 @@ $ \phi_i $
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> function object</td>
+                  <td>Component function object</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p>Component</p></aside>
           </div></section>
           <section class="m-doc-details" id="a20a02eeff14d68d1c188d8f2386dc91d"><div>
             <h3>
@@ -703,7 +438,7 @@ $ \phi_i $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> function for index 0</td>
+                  <td>Component function for index 0</td>
                 </tr>
               </tfoot>
             </table>
@@ -720,7 +455,7 @@ $ \phi_i $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> function for index 1</td>
+                  <td>Component function for index 1</td>
                 </tr>
               </tfoot>
             </table>
@@ -737,7 +472,7 @@ $ \phi_i $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_variational_1_1_component.html" class="m-doc">Component</a> function for index 2</td>
+                  <td>Component function for index 2</td>
                 </tr>
               </tfoot>
             </table>
@@ -792,7 +527,7 @@ $ A^T(x) $
 <use x='19.932163' y='0' xlink:href='#eq7-g1-120'/>
 <use x='26.58425' y='0' xlink:href='#eq7-g2-41'/>
 </g>
-</svg>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_transpose.html" class="m-doc">Transpose</a></p></aside>
+</svg>.</p><aside class="m-note m-default"><h4>See also</h4><p>Transpose</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac1f4fe7c4fef5a9e347524ae1c5e0ee1"><div>
             <h3>
@@ -819,7 +554,7 @@ $ A^T(x) $
                 </tr>
               </tfoot>
             </table>
-<p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute. The trace operation restricts function evaluation to the specified boundary or interface regions.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#af4786ff00248867e83ef9fa5159c73b7" class="m-doc">getTraceDomain</a></p></aside>
+<p>Convenience function to call traceOf(FlatSet&lt;int&gt;) with only one attribute. The trace operation restricts function evaluation to the specified boundary or interface regions.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain</p></aside>
           </div></section>
           <section class="m-doc-details" id="ad722433deff18a068eb7bd27da532d45"><div>
             <h3>
@@ -883,7 +618,7 @@ $ A^T(x) $
                 </tr>
               </tfoot>
             </table>
-<p>The trace domain specifies regions (typically boundaries or interfaces) where the function should be evaluated via continuous extension from adjacent elements.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#af4786ff00248867e83ef9fa5159c73b7" class="m-doc">getTraceDomain</a></p></aside>
+<p>The trace domain specifies regions (typically boundaries or interfaces) where the function should be evaluated via continuous extension from adjacent elements.</p><aside class="m-note m-default"><h4>See also</h4><p>getTraceDomain</p></aside>
           </div></section>
           <section class="m-doc-details" id="af4786ff00248867e83ef9fa5159c73b7"><div>
             <h3>
@@ -931,24 +666,6 @@ $ A^T(x) $
               </tfoot>
             </table>
 <p>The returned value is a <strong>safe upper bound</strong> on the total polynomial degree of the expression in reference coordinates, ignoring the geometry map.</p><ul><li>Used for quadrature selection and composition rules.</li><li>May depend on the reference geometry (simplex, tensor-product, wedge).</li><li>Returns std::nullopt for non-polynomial expressions.</li><li>The value is not guaranteed to be sharp.</li></ul>
-          </div></section>
-          <section class="m-doc-details" id="ad29a755240e4c6938395b937a1c4a132"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Derived&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>* Rodin::<wbr />Variational::<wbr />FunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad29a755240e4c6938395b937a1c4a132" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of this object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
         </section>
       </div>

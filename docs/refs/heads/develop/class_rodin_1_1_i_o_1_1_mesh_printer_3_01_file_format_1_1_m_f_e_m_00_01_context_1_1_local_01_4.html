@@ -86,6 +86,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -95,7 +96,7 @@
 <p>This printer writes mesh data in the MFEM mesh file format, a text-based format compatible with the MFEM library.</p><section id="autotoc_md144"><h3><a href="#autotoc_md144">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getMesh</span><span class="p">();</span>
 <span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">&quot;output.mfem&quot;</span><span class="p">);</span>
-<span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">file</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_loader.html" class="m-doc">MeshLoader</a></p></aside></section>
+<span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">file</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>MeshLoader</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -106,11 +107,28 @@
             <dd>Base class for printing meshes to streams or files.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a4a1c0b519f1e883b370f4fd6c3b76ee5">
+              using <a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
+            </dt>
+            <dd>Execution context type.</dd>
+            <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
+              using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Mesh type being printed.</dd>
+            <dt id="a0f6063fe81811604830400d335765674">
+              using <a href="#a0f6063fe81811604830400d335765674" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">ObjectType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs an MFEM mesh printer for the given mesh.</dd>
           </dl>
@@ -143,7 +161,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />MFEM, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshPrinter&lt;FileFormat::<wbr />MFEM, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3aa0583533db82bf9f8681138ff46b3" class="m-doc-self">MeshPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs an MFEM mesh printer for the given mesh.</p>
             <table class="m-table m-fullwidth m-flat">

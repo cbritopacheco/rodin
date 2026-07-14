@@ -77,7 +77,21 @@
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;, Variational::LinearForm&lt;FES, Math::Vector&lt;typename FormLanguage::Traits&lt;FES&gt;::ScalarType&gt;&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>OpenMP assembly of the <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a> associated to a LinearForm object.</p>
+        <p>OpenMP assembly of the Math::Vector associated to a LinearForm object.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -87,6 +101,162 @@
             </dt>
             <dd>Base class template for assembly operations.</dd>
           </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
+              using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
+            </dt>
+            <dd>Finite element space type.</dd>
+            <dt id="acdf431ab4381f783f82b9086cc8b6752">
+              using <a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;::ScalarType
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#acdf431ab4381f783f82b9086cc8b6752" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="a98f6fba4edecb637608d8f3cf6f4bdef">
+              using <a href="#a98f6fba4edecb637608d8f3cf6f4bdef" class="m-doc-self">LinearFormType</a> = <a href="group___rodin_c_t_a_d.html#ga428b3bbd91b26401394cc611f7ec36f5" class="m-doc">Variational::<wbr />LinearForm</a>&lt;FES, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear form type assembled by this backend.</dd>
+            <dt id="ae8e7603d828309e35d0727297a917f1f">
+              using <a href="#ae8e7603d828309e35d0727297a917f1f" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>, <a href="#a98f6fba4edecb637608d8f3cf6f4bdef" class="m-doc">LinearFormType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a0619bd014adbfe7e508b058eefb69dab">
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
+            </dt>
+            <dd>Assembly input data type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a14b2249366e25fb8b04d56fdde20690d">
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ab629819992d852fd6c2647d00eee90e6">
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Executes vector assembly.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc">setThreadCount</a>(</span><span class="m-doc-wrap">size_t threadCount) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Sets the thread count.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets the effective thread count.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a17f3d79a9feccadabf3a5592e96dc068"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;, Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17f3d79a9feccadabf3a5592e96dc068" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&amp; res,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Executes vector assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">res</td>
+                  <td>Output vector.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Linear form assembly input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a055edffa61ed185af6a148b38f82144f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;, Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a055edffa61ed185af6a148b38f82144f" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t threadCount) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Sets the thread count.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">threadCount</td>
+                  <td>Number of OpenMP threads to use.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this assembler.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2c80d9cf01a06038bc42cf79d1af63df"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;, Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the effective thread count.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Explicit thread count or the OpenMP default.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;, Variational::<wbr />LinearForm&lt;FES, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;FES&gt;::<wbr />ScalarType&gt;&gt;&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new copy.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

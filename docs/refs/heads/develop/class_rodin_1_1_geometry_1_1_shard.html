@@ -100,7 +100,7 @@
             </li>
           </ul>
         </nav>
-<p>A <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code> is a local mesh enriched with metadata describing how its local entities relate to a distributed partitioning of a larger mesh.</p><p>A shard contains:</p><ul><li>entities that belong to the local partition, either as locally owned entities or as shared entities owned by another partition, and</li><li>ghost entities imported as overlap from neighboring partitions.</li></ul><p>The class derives from <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code> because, once constructed, a shard behaves as an ordinary local mesh for geometric and topological queries. What makes it special is the additional distributed metadata:</p><ul><li>local-to-distributed index correspondences,</li><li>per-entity local state (<code>Owned</code>, <code>Shared</code>, <code>Ghost</code>),</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><section id="autotoc_md116"><h3><a href="#autotoc_md116">Local vs distributed indices</a></h3><p>Every entity stored in a shard has a <strong>local shard index</strong>. This is the index used by the inherited local mesh API.</p><p>In addition, each shard entity corresponds to an entity of the distributed mesh. For every topological dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+<p>A <code>Shard</code> is a local mesh enriched with metadata describing how its local entities relate to a distributed partitioning of a larger mesh.</p><p>A shard contains:</p><ul><li>entities that belong to the local partition, either as locally owned entities or as shared entities owned by another partition, and</li><li>ghost entities imported as overlap from neighboring partitions.</li></ul><p>The class derives from <code>Mesh&lt;Context::Local&gt;</code> because, once constructed, a shard behaves as an ordinary local mesh for geometric and topological queries. What makes it special is the additional distributed metadata:</p><ul><li>local-to-distributed index correspondences,</li><li>per-entity local state (<code>Owned</code>, <code>Shared</code>, <code>Ghost</code>),</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><section id="autotoc_md116"><h3><a href="#autotoc_md116">Local vs distributed indices</a></h3><p>Every entity stored in a shard has a <strong>local shard index</strong>. This is the index used by the inherited local mesh API.</p><p>In addition, each shard entity corresponds to an entity of the distributed mesh. For every topological dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -110,7 +110,7 @@ $ d $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-100'/>
 </g>
-</svg>, <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code> stores a bidirectional map</p><div class="m-math"><svg style="width: 8.830em; height: 1.003em;" viewBox="151.638539 -9.630952 84.767757 9.630952">
+</svg>, <code>Shard</code> stores a bidirectional map</p><div class="m-math"><svg style="width: 8.830em; height: 1.003em;" viewBox="151.638539 -9.630952 84.767757 9.630952">
 <title>
 \[
   i_{\mathrm{local}} \leftrightarrow i_{\mathrm{distributed}}
@@ -153,7 +153,7 @@ $ d $
 <use x='227.937931' y='0' xlink:href='#eq2-g2-101'/>
 <use x='231.701649' y='0' xlink:href='#eq2-g2-100'/>
 </g>
-</svg></div><p>through <code><a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a></code>.</p><p>Therefore:</p><ul><li>all inherited <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;</code> methods use <strong>local shard indices</strong>,</li><li><code>getPolytopeMap(d)</code> is used to recover the corresponding distributed index.</li></ul></section><section id="autotoc_md117"><h3><a href="#autotoc_md117">Local state semantics</a></h3><p>Each local shard entity is classified by two orthogonal notions:</p><ul><li>whether it belongs to the local partition, and</li><li>which partition owns it.</li></ul><p>The following three mutually exclusive states are used:</p><ul><li><p><strong>Owned</strong>: The entity belongs to the local partition and this partition is its designated owner.</p><p>Owned entities are the ones on which assembly, counting, and global reductions should typically be performed.</p></li><li><p><strong>Shared</strong>: The entity belongs to the local partition but is owned by another partition.</p><p>Shared entities are part of the partition’s geometric/topological domain, but this rank is not responsible for their global contribution.</p></li><li><p><strong>Ghost</strong>: The entity does not belong to the local partition but is present locally as overlap because it is needed by neighboring local entities, for example for stencil support, adjacency completeness, or distributed connectivity.</p><p>A ghost entity is always owned by another partition.</p></li></ul><p>In particular:</p><ul><li><code>Owned ∪ Shared</code> are exactly the entities that define the local partition,</li><li><code>Ghost</code> entities form the overlap with neighboring partitions,</li><li>every distributed entity present on multiple partitions has exactly one owner.</li></ul><p>After finalization, users normally reason in terms of:</p><ul><li><code>isOwned(d, i)</code></li><li><code>isShared(d, i)</code></li><li><code>isGhost(d, i)</code></li><li><code>isLocal(d, i)</code> (equivalent to <code>Owned || Shared</code>)</li></ul></section><section id="autotoc_md118"><h3><a href="#autotoc_md118">Owner map</a></h3><p>For each dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></div><p>through <code>PolytopeMap</code>.</p><p>Therefore:</p><ul><li>all inherited <code>Mesh&lt;Context::Local&gt;</code> methods use <strong>local shard indices</strong>,</li><li><code>getPolytopeMap(d)</code> is used to recover the corresponding distributed index.</li></ul></section><section id="autotoc_md117"><h3><a href="#autotoc_md117">Local state semantics</a></h3><p>Each local shard entity is classified by two orthogonal notions:</p><ul><li>whether it belongs to the local partition, and</li><li>which partition owns it.</li></ul><p>The following three mutually exclusive states are used:</p><ul><li><p><strong>Owned</strong>: The entity belongs to the local partition and this partition is its designated owner.</p><p>Owned entities are the ones on which assembly, counting, and global reductions should typically be performed.</p></li><li><p><strong>Shared</strong>: The entity belongs to the local partition but is owned by another partition.</p><p>Shared entities are part of the partition’s geometric/topological domain, but this rank is not responsible for their global contribution.</p></li><li><p><strong>Ghost</strong>: The entity does not belong to the local partition but is present locally as overlap because it is needed by neighboring local entities, for example for stencil support, adjacency completeness, or distributed connectivity.</p><p>A ghost entity is always owned by another partition.</p></li></ul><p>In particular:</p><ul><li><code>Owned ∪ Shared</code> are exactly the entities that define the local partition,</li><li><code>Ghost</code> entities form the overlap with neighboring partitions,</li><li>every distributed entity present on multiple partitions has exactly one owner.</li></ul><p>After finalization, users normally reason in terms of:</p><ul><li><code>isOwned(d, i)</code></li><li><code>isShared(d, i)</code></li><li><code>isGhost(d, i)</code></li><li><code>isLocal(d, i)</code> (equivalent to <code>Owned || Shared</code>)</li></ul></section><section id="autotoc_md118"><h3><a href="#autotoc_md118">Owner map</a></h3><p>For each dimension <svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -305,7 +305,7 @@ $ d $
 <use x='320.1926' y='-2.988792' xlink:href='#eq6-g3-116'/>
 <use x='323.516135' y='-2.988792' xlink:href='#eq6-g0-103'/>
 </g>
-</svg></div><p>So the halo map is dual to the owner map:</p><ul><li><code>owner</code> is attached to non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>halo</code> is attached to owned local entities.</li></ul><p>If <code>k</code> is an owned local entity of dimension <code>d</code>, then <code>getHalo(d).at(k)</code> is the set of remote ranks that also contain the same distributed entity, either as <code>Shared</code> or as <code>Ghost</code>.</p><p>This information is useful for:</p><ul><li>distributed numbering,</li><li>synchronization,</li><li>neighborhood-restricted communication,</li><li>distributed connectivity discovery.</li></ul></section><section id="autotoc_md120"><h3><a href="#autotoc_md120">Geometric and topological contents</a></h3><p>A shard is not just a set of cells. It generally contains lower-dimensional entities as well, for example vertices, edges, and faces needed by the local finite element space or by local topological queries.</p><p>In particular, a finalized shard may contain:</p><ul><li>owned entities,</li><li>shared entities,</li><li>ghost entities,</li><li>local incidences inherited from the distributed mesh and filtered to the shard contents.</li></ul><p>Thus <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code> is intended to be a self-consistent local mesh with overlap.</p></section><section id="autotoc_md121"><h3><a href="#autotoc_md121">Construction model</a></h3><p><code><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Shard::<wbr />Builder</a></code> constructs a shard incrementally from either:</p><ul><li>a parent mesh (<code>Mode::Parent</code>), or</li><li>explicit direct insertion of vertices and polytopes (<code>Mode::Direct</code>).</li></ul><p>In parent-based mode, a typical construction pattern is:</p><pre class="m-code"><span class="n">Shard</span><span class="o">::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+</svg></div><p>So the halo map is dual to the owner map:</p><ul><li><code>owner</code> is attached to non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>halo</code> is attached to owned local entities.</li></ul><p>If <code>k</code> is an owned local entity of dimension <code>d</code>, then <code>getHalo(d).at(k)</code> is the set of remote ranks that also contain the same distributed entity, either as <code>Shared</code> or as <code>Ghost</code>.</p><p>This information is useful for:</p><ul><li>distributed numbering,</li><li>synchronization,</li><li>neighborhood-restricted communication,</li><li>distributed connectivity discovery.</li></ul></section><section id="autotoc_md120"><h3><a href="#autotoc_md120">Geometric and topological contents</a></h3><p>A shard is not just a set of cells. It generally contains lower-dimensional entities as well, for example vertices, edges, and faces needed by the local finite element space or by local topological queries.</p><p>In particular, a finalized shard may contain:</p><ul><li>owned entities,</li><li>shared entities,</li><li>ghost entities,</li><li>local incidences inherited from the distributed mesh and filtered to the shard contents.</li></ul><p>Thus <code>Shard</code> is intended to be a self-consistent local mesh with overlap.</p></section><section id="autotoc_md121"><h3><a href="#autotoc_md121">Construction model</a></h3><p><code>Shard::Builder</code> constructs a shard incrementally from either:</p><ul><li>a parent mesh (<code>Mode::Parent</code>), or</li><li>explicit direct insertion of vertices and polytopes (<code>Mode::Direct</code>).</li></ul><p>In parent-based mode, a typical construction pattern is:</p><pre class="m-code"><span class="n">Shard</span><span class="o">::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">parentMesh</span><span class="p">);</span>
 
 <span class="c1">// insert owned entities</span>
@@ -314,7 +314,7 @@ $ d $
 <span class="c1">// insert overlap entities</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">({</span><span class="n">D</span><span class="p">,</span><span class="w"> </span><span class="n">neighborCellIdx</span><span class="p">},</span><span class="w"> </span><span class="n">Shard</span><span class="o">::</span><span class="n">State</span><span class="o">::</span><span class="n">Ghost</span><span class="p">);</span>
 
-<span class="n">Shard</span><span class="w"> </span><span class="n">shard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><p><code>include()</code> is idempotent with respect to the parent index: if the entity is already present in the shard, it is not duplicated. The returned pair is:</p><ul><li>the local shard index of the entity,</li><li>a boolean telling whether the entity was newly inserted.</li></ul></section><section id="autotoc_md122"><h3><a href="#autotoc_md122">Finalization guarantees</a></h3><p>After <code><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html#aeb6108585130c4fd75d0750f344ce406" class="m-doc">Builder::<wbr />finalize()</a></code>:</p><ul><li>all local entity indices are stable,</li><li>inherited local mesh queries operate on shard-local indices,</li><li><code>getPolytopeMap(d)</code> maps shard-local entities back to distributed or parent indices,</li><li><code><a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc">isOwned()</a></code>, <code><a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc">isShared()</a></code>, <code><a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc">isGhost()</a></code>, and <code><a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc">isLocal()</a></code> are available for every local entity,</li><li><code>getOwner(d)</code> is defined for non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>getHalo(d)</code> is defined for owned local entities.</li></ul></section><section id="autotoc_md123"><h3><a href="#autotoc_md123">Important convention</a></h3><p>A shard does <strong>not</strong> itself define a distributed global numbering of mesh entities or degrees of freedom. It only provides:</p><ul><li>a local mesh with overlap,</li><li>partition/ownership metadata,</li><li>distributed-to-local and local-to-distributed index correspondences.</li></ul><p>Global distributed numbering is a higher-level concern handled for example by <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> finite element spaces.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::<wbr />Local&gt;</a>, <a href="class_rodin_1_1_geometry_1_1_sharder.html" class="m-doc">Sharder</a>, <a href="namespace_rodin_1_1_geometry.html#a79f72df2bf2cffe9d0f8bc189d7924ad" class="m-doc">MPIMesh</a></p></aside></section>
+<span class="n">Shard</span><span class="w"> </span><span class="n">shard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre><p><code>include()</code> is idempotent with respect to the parent index: if the entity is already present in the shard, it is not duplicated. The returned pair is:</p><ul><li>the local shard index of the entity,</li><li>a boolean telling whether the entity was newly inserted.</li></ul></section><section id="autotoc_md122"><h3><a href="#autotoc_md122">Finalization guarantees</a></h3><p>After <code>Builder::finalize()</code>:</p><ul><li>all local entity indices are stable,</li><li>inherited local mesh queries operate on shard-local indices,</li><li><code>getPolytopeMap(d)</code> maps shard-local entities back to distributed or parent indices,</li><li><code>isOwned()</code>, <code>isShared()</code>, <code>isGhost()</code>, and <code>isLocal()</code> are available for every local entity,</li><li><code>getOwner(d)</code> is defined for non-owned local entities (<code>Shared</code> or <code>Ghost</code>),</li><li><code>getHalo(d)</code> is defined for owned local entities.</li></ul></section><section id="autotoc_md123"><h3><a href="#autotoc_md123">Important convention</a></h3><p>A shard does <strong>not</strong> itself define a distributed global numbering of mesh entities or degrees of freedom. It only provides:</p><ul><li>a local mesh with overlap,</li><li>partition/ownership metadata,</li><li>distributed-to-local and local-to-distributed index correspondences.</li></ul><p>Global distributed numbering is a higher-level concern handled for example by MPI finite element spaces.</p><aside class="m-note m-default"><h4>See also</h4><p>Mesh&lt;Context::Local&gt;, Sharder, MPIMesh</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -331,7 +331,7 @@ $ d $
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>
             </dt>
-            <dd>Incremental builder for <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code>.</dd>
+            <dd>Incremental builder for <code>Shard</code>.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_geometry_1_1_shard_1_1_polytope_map.html" class="m-doc">PolytopeMap</a>
             </dt>
@@ -345,7 +345,7 @@ $ d $
             <dt id="adb8d0b2b1d142d3e4a11c0425cd49cc4">
               using <a href="#adb8d0b2b1d142d3e4a11c0425cd49cc4" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (always local for shards).</dd>
+            <dd>Context type (always local for shards).</dd>
             <dt id="a1363ea88bc9813941007ead0bb9d8cfd">
               using <a href="#a1363ea88bc9813941007ead0bb9d8cfd" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="#adb8d0b2b1d142d3e4a11c0425cd49cc4" class="m-doc">ContextType</a>&gt;
             </dt>
@@ -380,22 +380,22 @@ $ d $
               <span class="m-doc-wrap-bumper">auto <a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc">isGhost</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity is ghost.</dd>
+            <dd>Tests whether a local entity is ghost.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity is owned.</dd>
+            <dd>Tests whether a local entity is owned.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc">isShared</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity is shared.</dd>
+            <dd>Tests whether a local entity is shared.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc">isLocal</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const -&gt; bool</span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity belongs to the local partition.</dd>
+            <dd>Tests whether a local entity belongs to the local partition.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a399242681d6f2f49901b9a0145b7ea2c" class="m-doc">getOwner</a>(</span><span class="m-doc-wrap">size_t d) const -&gt; const <a href="group___rodin_types.html#ga5f130bd8b1c58b36b367761092cb5d58" class="m-doc">UnorderedMap</a>&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;</span>
             </dt>
@@ -482,7 +482,7 @@ $ d $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> to copy from.</td>
+                  <td>Shard to copy from.</td>
                 </tr>
               </tbody>
             </table>
@@ -499,7 +499,7 @@ $ d $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> to move from.</td>
+                  <td>Shard to move from.</td>
                 </tr>
               </tbody>
             </table>
@@ -516,7 +516,7 @@ $ d $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a> to move from.</td>
+                  <td>Shard to move from.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -532,7 +532,7 @@ $ d $
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad610077bb89c846adcc5ed154a86d320" class="m-doc-self">isGhost</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity is ghost.</p>
+            <p>Tests whether a local entity is ghost.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -560,7 +560,7 @@ $ d $
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8f91f04e23a9546ac37b3cfdfd55f3c" class="m-doc-self">isOwned</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity is owned.</p>
+            <p>Tests whether a local entity is owned.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -588,7 +588,7 @@ $ d $
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaea8f348bbdd53ad3e7c01b855225844" class="m-doc-self">isShared</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity is shared.</p>
+            <p>Tests whether a local entity is shared.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -616,7 +616,7 @@ $ d $
               <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Geometry::<wbr />Shard::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad40027b1b7d00875a8e570f9e5706636" class="m-doc-self">isLocal</a>(</span><span class="m-doc-wrap">size_t d,
               <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> idx) const</span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether a local entity belongs to the local partition.</p>
+            <p>Tests whether a local entity belongs to the local partition.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

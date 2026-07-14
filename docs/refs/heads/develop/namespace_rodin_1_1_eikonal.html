@@ -76,12 +76,12 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Eikonal <span class="m-thin">namespace</span>
         </h1>
-        <p>Module which provides solvers for the <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Rodin::<wbr />Eikonal</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md541">Fast Marching Method (FMM)</a></li>
-            <li><a href="#autotoc_md542">Typical Usage</a></li>
+            <li><a href="#autotoc_md451">Fast Marching Method (FMM)</a></li>
+            <li><a href="#autotoc_md452">Typical Usage</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation is a non-linear partial differential equation of the form:</p><div class="m-math"><svg style="width: 6.664em; height: 1.245em;" viewBox="162.284712 -11.955168 63.973554 11.955168">
+<p>Directory src/Rodin/Eikonal</p><p>Module which provides solvers for the Eikonal equation.</p><p>The Eikonal equation is a non-linear partial differential equation of the form:</p><div class="m-math"><svg style="width: 6.664em; height: 1.245em;" viewBox="162.284712 -11.955168 63.973554 11.955168">
 <title>
 \[
   |\nabla u| = F(x)
@@ -148,7 +148,7 @@ $ F = 1 $
 <use x='12.524444' y='0' xlink:href='#eq3-g1-61'/>
 <use x='24.949925' y='0' xlink:href='#eq3-g1-49'/>
 </g>
-</svg>, the solution represents the distance function.</p><section id="autotoc_md541"><h3><a href="#autotoc_md541">Fast Marching Method (FMM)</a></h3><p>The primary solver is <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>, which implements the Fast Marching Method on unstructured simplicial meshes. The algorithm propagates a wavefront from seed vertices, updating arrival times in causal order using a priority queue. Vertex states during propagation:</p><table class="m-table"><thead><tr><th>State</th><th>Description</th></tr></thead><tbody><tr><td><strong>Far</strong></td><td>Not yet visited</td></tr><tr><td><strong>Considered</strong></td><td>In the priority queue, tentative value computed</td></tr><tr><td><strong>Accepted</strong></td><td>Finalized — arrival time is correct</td></tr></tbody></table><p>The <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> specialization for P1 finite elements on local meshes supports:</p><ul><li>Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)</li><li>User-defined speed functions <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
+</svg>, the solution represents the distance function.</p><section id="autotoc_md451"><h3><a href="#autotoc_md451">Fast Marching Method (FMM)</a></h3><p>The primary solver is <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>, which implements the Fast Marching Method on unstructured simplicial meshes. The algorithm propagates a wavefront from seed vertices, updating arrival times in causal order using a priority queue. Vertex states during propagation:</p><table class="m-table"><thead><tr><th>State</th><th>Description</th></tr></thead><tbody><tr><td><strong>Far</strong></td><td>Not yet visited</td></tr><tr><td><strong>Considered</strong></td><td>In the priority queue, tentative value computed</td></tr><tr><td><strong>Accepted</strong></td><td>Finalized — arrival time is correct</td></tr></tbody></table><p>The FMM specialization for P1 finite elements on local meshes supports:</p><ul><li>Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)</li><li>User-defined speed functions <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
 <title>
 $ F(x) $
 </title>
@@ -164,14 +164,14 @@ $ F(x) $
 <use x='13.755941' y='0' xlink:href='#eq4-g0-120'/>
 <use x='20.408028' y='0' xlink:href='#eq4-g1-41'/>
 </g>
-</svg></li><li>Seed interface specification (initial zero-distance vertices)</li></ul></section><section id="autotoc_md542"><h3><a href="#autotoc_md542">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li><li>Seed interface specification (initial zero-distance vertices)</li></ul></section><section id="autotoc_md452"><h3><a href="#autotoc_md452">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="c1">// Speed function F(x) = 1 (distance computation)</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
 
 <span class="n">Eikonal</span><span class="o">::</span><span class="n">FMM</span><span class="w"> </span><span class="nf">fmm</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">speed</span><span class="p">);</span>
-<span class="n">fmm</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="n">interfaceVertices</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance module</a> for higher-level distance function computation that wraps <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>.</p></aside></section>
+<span class="n">fmm</span><span class="p">.</span><span class="n">seed</span><span class="p">(</span><span class="n">interfaceVertices</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><aside class="m-note m-info"><h4>Note</h4><p>The module is header-only.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance module</a> for higher-level distance function computation that wraps FMM.</p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -179,12 +179,12 @@ $ F(x) $
               <div class="m-doc-template">template&lt;class Solution, class SpeedFunction&gt;</div>
               class <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>
             </dt>
-            <dd>Fast marching method for solving the <a href="namespace_rodin_1_1_eikonal.html" class="m-doc">Eikonal</a> equation.</dd>
+            <dd>Fast marching method for solving the Eikonal equation.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Data, class SpeedFunction&gt;</div>
               class <a href="class_rodin_1_1_eikonal_1_1_f_m_m_3_01_variational_1_1_grid_function_3_01_variational_1_1_p1_3_069dd3176dc6289ec40b77d51c3109e9b.html" class="m-doc">FMM&lt;Variational::GridFunction&lt;Variational::P1&lt;Real, Geometry::Mesh&lt;Context::Local&gt;&gt;, Data&gt;, SpeedFunction&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> specialization for P1 finite elements on local meshes.</dd>
+            <dd>FMM specialization for P1 finite elements on local meshes.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -195,7 +195,7 @@ $ F(x) $
               <span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc">FMM</a>(</span><span class="m-doc-wrap">Solution&amp; u,
               SpeedFunction&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span>
             </dt>
-            <dd>Deduction guide for <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> constructor.</dd>
+            <dd>Deduction guide for FMM constructor.</dd>
           </dl>
         </section>
         <section>
@@ -209,8 +209,8 @@ $ F(x) $
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Eikonal::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a88f3a1fc5adbd2761a6a432e58b08aec" class="m-doc-self">FMM</a>(</span><span class="m-doc-wrap">Solution&amp; u,
               SpeedFunction&amp;&amp; speed) -&gt; FMM&lt; Solution, SpeedFunction &gt;</span></span>
             </h3>
-            <p>Deduction guide for <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> constructor.</p>
-<p>Allows template argument deduction when constructing <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a> objects.</p>
+            <p>Deduction guide for FMM constructor.</p>
+<p>Allows template argument deduction when constructing FMM objects.</p>
           </div></section>
         </section>
       </div>

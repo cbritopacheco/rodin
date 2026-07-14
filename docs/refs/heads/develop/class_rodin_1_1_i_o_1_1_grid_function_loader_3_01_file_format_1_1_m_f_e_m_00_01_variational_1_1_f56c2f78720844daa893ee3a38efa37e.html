@@ -97,6 +97,8 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -106,12 +108,47 @@
 <p>Loads finite element solution data for continuous Lagrange (P1) elements from MFEM grid function files.</p><section id="autotoc_md145"><h3><a href="#autotoc_md145">MFEM Grid Function Format</a></h3><p>The format includes:</p><ul><li>FiniteElementSpace header</li><li>FiniteElementCollection name (e.g., &quot;H1_2D_P1&quot;)</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values</li></ul></section><section id="autotoc_md146"><h3><a href="#autotoc_md146">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside></section>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionPrinter</p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase&lt;Variational::P1&lt;Range, Geometry::Mesh&lt;Context::Local&gt;&gt;, Math::Vector&lt;FormLanguage::Traits&lt;Range&gt;::ScalarType&gt;&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function loaders.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aa0e1fb39c0134f6ab598e79a91a98940">
+              using <a href="#aa0e1fb39c0134f6ab598e79a91a98940" class="m-doc-self">FESType</a> = <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+            </dt>
+            <dd>Finite element space type.</dd>
+            <dt id="a707fcf9a5b0601453725205cb3894ee9">
+              using <a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;Range&gt;::ScalarType
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a55b94d86d349da371369ff297ccd4268">
+              using <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc-self">DataType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a707fcf9a5b0601453725205cb3894ee9" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Coefficient data storage type.</dd>
+            <dt id="ae90cfd8753b1d4f2541968ee8541b04b">
+              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa0e1fb39c0134f6ab598e79a91a98940" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;
+            </dt>
+            <dd>Grid function type being loaded.</dd>
+            <dt id="aa497f0af6ce394d50349b4416616b312">
+              using <a href="#aa497f0af6ce394d50349b4416616b312" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase</a>&lt;<a href="#aa0e1fb39c0134f6ab598e79a91a98940" class="m-doc">FESType</a>, <a href="#a55b94d86d349da371369ff297ccd4268" class="m-doc">DataType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; gf)</span>
+              <span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span>
             </dt>
             <dd>Constructs a grid function loader.</dd>
           </dl>
@@ -132,7 +169,7 @@
               <div class="m-doc-template">
                 template&lt;class Range&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MFEM, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc-self">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />MFEM, Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;, Math::<wbr />Vector&lt;typename FormLanguage::<wbr />Traits&lt;Range&gt;::<wbr />ScalarType&gt;&gt;&lt;Range&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7b902ee10ffb33450ac1ca58df202f6" class="m-doc-self">GridFunctionLoader</a>(</span><span class="m-doc-wrap"><a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
             </h3>
             <p>Constructs a grid function loader.</p>
             <table class="m-table m-fullwidth m-flat">

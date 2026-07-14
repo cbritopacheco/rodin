@@ -76,13 +76,14 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests_1_1_manufactured.html">Manufactured</a>::<wbr/></span>DivPoisson <span class="m-thin">namespace</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Manufactured</a> solutions for the divergence <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a> problem using P1 vector spaces.</p>
+        <p>Manufactured solutions for the divergence Poisson problem using P1 vector spaces.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
@@ -236,39 +237,90 @@ $u=g$
 <use x='22.40875' y='0' xlink:href='#eq5-g0-103'/>
 </g>
 </svg>.</p>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_DivPoisson_Test_32x32</a> = Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test&lt;32&gt;
+            </dt>
+            <dd>Helper used by the tests to Manufactured Div Poisson Test 32 x 32.</dd>
+            <dt>
+              using <a href="#aa57c011e82b5069efdaf5a5205dce035" class="m-doc">Manufactured_DivPoisson_Test_64x64</a> = Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test&lt;64&gt;
+            </dt>
+            <dd>Helper used by the tests to Manufactured Div Poisson Test 64 x 64.</dd>
+          </dl>
+        </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aca55340127403cc2d27d7da108d1d710" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_div_poisson_1_1_manufactured___div_poisson___test.html" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"><a href="#af99a58f1b8da3bc3fa882e9ce60056aa" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              Divergence_P1ExactResidual)</span>
+            </dt>
+            <dd>Verifies divergence P1 exact residual for manufactured div poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aca55340127403cc2d27d7da108d1d710" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
               Divergence_SimpleSin)</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a64aaa89fdf87ecaa47accbc06fc20b11" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_div_poisson_1_1_manufactured___div_poisson___test.html" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"><a href="#a64aaa89fdf87ecaa47accbc06fc20b11" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
               Divergence_Linear)</span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a7efc9e07ad4fa232b54aaab654d5c065" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_div_poisson_1_1_manufactured___div_poisson___test.html" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"><a href="#a7efc9e07ad4fa232b54aaab654d5c065" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
               Divergence_Polynomial)</span>
             </dt>
             <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa6179aa17d1b3516464df976b5f14c17" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams32x32,
+              <a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle))</span>
+            </dt>
+            <dd>Instantiates Manufactured Div Poisson Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.</dd>
           </dl>
         </section>
         <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a85ae662642203d73dbce3f5a2a83c3a0"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc-self">Manufactured_DivPoisson_Test_32x32</a> = Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test&lt;32&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Manufactured Div Poisson Test 32 x 32.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa57c011e82b5069efdaf5a5205dce035"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /><a href="#aa57c011e82b5069efdaf5a5205dce035" class="m-doc-self">Manufactured_DivPoisson_Test_64x64</a> = Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test&lt;64&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Manufactured Div Poisson Test 64 x 64.</p>
+          </div></section>
+        </section>
+        <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af99a58f1b8da3bc3fa882e9ce60056aa"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af99a58f1b8da3bc3fa882e9ce60056aa" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              Divergence_P1ExactResidual)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies divergence P1 exact residual for manufactured div poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.</p>
+          </div></section>
           <section class="m-doc-details" id="aca55340127403cc2d27d7da108d1d710"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca55340127403cc2d27d7da108d1d710" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_div_poisson_1_1_manufactured___div_poisson___test.html" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca55340127403cc2d27d7da108d1d710" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
               Divergence_SimpleSin)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
             </h3>
 <p>u(x,y) = (sin(pi x), sin(pi y)) Div(u) = pi cos(pi x) + pi cos(pi y)</p>
           </div></section>
           <section class="m-doc-details" id="a64aaa89fdf87ecaa47accbc06fc20b11"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64aaa89fdf87ecaa47accbc06fc20b11" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_div_poisson_1_1_manufactured___div_poisson___test.html" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64aaa89fdf87ecaa47accbc06fc20b11" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
               Divergence_Linear)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
             </h3>
 <p><svg class="m-math" style="width: 7.988em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 76.683848 11.955168">
 <title>
@@ -319,8 +371,9 @@ $ \nabla \cdot u = 2 $
           </div></section>
           <section class="m-doc-details" id="a7efc9e07ad4fa232b54aaab654d5c065"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7efc9e07ad4fa232b54aaab654d5c065" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_tests_1_1_manufactured_1_1_div_poisson_1_1_manufactured___div_poisson___test.html" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7efc9e07ad4fa232b54aaab654d5c065" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
               Divergence_Polynomial)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
             </h3>
 <p><svg class="m-math" style="width: 16.813em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 161.400257 11.955168">
 <title>
@@ -403,6 +456,15 @@ $ \nabla \cdot u = (1-2x)y + (1-2y)x $
 <use x='145.193918' y='0' xlink:href='#eq9-g1-120'/>
 </g>
 </svg></p>
+          </div></section>
+          <section class="m-doc-details" id="aa6179aa17d1b3516464df976b5f14c17"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />DivPoisson::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6179aa17d1b3516464df976b5f14c17" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">MeshParams32x32,
+              <a href="#a85ae662642203d73dbce3f5a2a83c3a0" class="m-doc">Manufactured_<wbr />DivPoisson_<wbr />Test_<wbr />32x32</a>,
+              ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_divergence_poisson_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/DivergencePoisson.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Manufactured Div Poisson Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.</p>
           </div></section>
         </section>
       </div>

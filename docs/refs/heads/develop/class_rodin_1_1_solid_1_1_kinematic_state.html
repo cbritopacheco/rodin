@@ -81,7 +81,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md224">Usage</a></li>
+            <li><a href="#autotoc_md223">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -193,7 +193,7 @@ $ \det(\mathbf{F}) $
 <use x='20.810632' y='0' xlink:href='#eq8-g0-70'/>
 <use x='29.265042' y='0' xlink:href='#eq8-g1-41'/>
 </g>
-</svg></td></tr></tbody></table><section id="autotoc_md224"><h3><a href="#autotoc_md224">Usage</a></h3><pre class="m-code"><span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
+</svg></td></tr></tbody></table><section id="autotoc_md223"><h3><a href="#autotoc_md223">Usage</a></h3><pre class="m-code"><span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">gradU</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">F</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">.</span><span class="n">getDeformationGradient</span><span class="p">();</span>
 <span class="n">Real</span><span class="w"> </span><span class="n">J</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state</span><span class="p">.</span><span class="n">getJacobian</span><span class="p">();</span></pre></section>
@@ -204,11 +204,27 @@ $ \det(\mathbf{F}) $
               <span class="m-doc-wrap-bumper"><a href="#a0e2b50aa3d3612c900708c57a91df947" class="m-doc">KinematicState</a>(</span><span class="m-doc-wrap">size_t d)</span>
             </dt>
             <dd>Constructs a kinematic state for the given spatial dimension.</dd>
+            <dt id="a48ce5a2a6daeb515cf0f6aa8b20b5523">
+              <span class="m-doc-wrap-bumper"><a href="#a48ce5a2a6daeb515cf0f6aa8b20b5523" class="m-doc-self">KinematicState</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a10e27d8fcd6a9f46194133f939771728">
+              <span class="m-doc-wrap-bumper"><a href="#a10e27d8fcd6a9f46194133f939771728" class="m-doc-self">KinematicState</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a01193551a6a77969cd36f01fb1b46e58">
+              <span class="m-doc-wrap-bumper">auto <a href="#a01193551a6a77969cd36f01fb1b46e58" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt id="a52e30f6dadd54a95f6be64d86a6a8e08">
+              <span class="m-doc-wrap-bumper">auto <a href="#a52e30f6dadd54a95f6be64d86a6a8e08" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3bd43c569b8f0b55be9664613a83ec02" class="m-doc">setDisplacementGradient</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; H) -&gt; <a href="class_rodin_1_1_solid_1_1_kinematic_state.html" class="m-doc">KinematicState</a>&amp;</span>
             </dt>

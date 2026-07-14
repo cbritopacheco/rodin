@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>GMRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> solver for sparse systems.</p>
+        <p>GMRES solver for sparse systems.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -97,6 +97,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -112,17 +114,83 @@
             <dd>Abstract base class for linear system solvers.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="ab63ab6eaeaaa03f9e1f192bccb16d69e">
+              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Assembled operator type.</dd>
+            <dt id="a67d1c43c805caee8285834ec30abf729">
+              using <a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a>&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Associated problem base type.</dd>
+            <dt id="a85385c6607a397925a213e9098256fdc">
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a44126252bf8b19df8522a791659a0ad0">
+              <span class="m-doc-wrap-bumper"><a href="#a44126252bf8b19df8522a791659a0ad0" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
+            </dt>
+            <dd>Constructs the solver from the problem to be solved.</dd>
+            <dt id="a6a9ad6e38e6013816ccf3405811aebde">
+              <span class="m-doc-wrap-bumper"><a href="#a6a9ad6e38e6013816ccf3405811aebde" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a21595cbd4d8bbfb69629122a57d654e9">
+              <span class="m-doc-wrap-bumper"><a href="#a21595cbd4d8bbfb69629122a57d654e9" class="m-doc-self">GMRES</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="a8b6ad61bc5115b028d5e5805606caa1f">
+              <span class="m-doc-wrap-bumper"><a href="#a8b6ad61bc5115b028d5e5805606caa1f" class="m-doc-self">~GMRES</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Destructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a97cddff5c2ecf40644e7a1847dbda72f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a97cddff5c2ecf40644e7a1847dbda72f" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol) -&gt; <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp;</span>
+            </dt>
+            <dd>Sets the convergence tolerance; returns a reference to this solver.</dd>
+            <dt id="a214feb4c6520f8db5bb5033c2b376d32">
+              <span class="m-doc-wrap-bumper">auto <a href="#a214feb4c6520f8db5bb5033c2b376d32" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of iterations; returns a reference to this solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#abb15de365ddfdd128ee5158aa6f795cc" class="m-doc">setRestart</a>(</span><span class="m-doc-wrap">size_t restart) -&gt; <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp;</span>
             </dt>
-            <dd>Sets the <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> restart parameter (dimension of Krylov subspace before restart).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Sets the GMRES restart parameter (dimension of Krylov subspace before restart).</dd>
+            <dt id="a3c28e3be8d6ee14eb1c5e01d884f0cd9">
+              <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Solves the assembled linear system.</dd>
+            <dt id="a7bd8b39d7964b40a7a4dcb0a1ff594b7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
+            </dt>
+            <dd>Returns whether the most recent solve converged successfully.</dd>
+            <dt id="ae0d964975c15ca1cca84d8c6eff3c163">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a polymorphic copy of this solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
@@ -142,26 +210,8 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>&amp; Rodin::<wbr />Solver::<wbr />GMRES&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abb15de365ddfdd128ee5158aa6f795cc" class="m-doc-self">setRestart</a>(</span><span class="m-doc-wrap">size_t restart)</span></span>
             </h3>
-            <p>Sets the <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> restart parameter (dimension of Krylov subspace before restart).</p>
+            <p>Sets the GMRES restart parameter (dimension of Krylov subspace before restart).</p>
 <p>Larger values can improve convergence but increase memory and cost per iteration.</p>
-          </div></section>
-          <section class="m-doc-details" id="ae0d964975c15ca1cca84d8c6eff3c163"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>* Rodin::<wbr />Solver::<wbr />GMRES&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0d964975c15ca1cca84d8c6eff3c163" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of this object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>

@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ab40ac20c32b770619b2042a8223271e.html">PETSc</a>/</span><span class="m-breadcrumb"><a href="dir_87c9c30d1d2ce6d6e5b8e4bc2a2b2f31.html">Solver</a>/</span>SNES.h <span class="m-thin">file</span>
         </h1>
-        <p>PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper for Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -109,18 +109,20 @@ $ F(x) = 0 $
 <use x='28.281183' y='0' xlink:href='#eq1-g1-61'/>
 <use x='40.706664' y='0' xlink:href='#eq1-g1-48'/>
 </g>
-</svg> using Newton-type methods. At each Newton iteration the Jacobian system is solved by the associated <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a> linear solver.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a>, <a href="class_rodin_1_1_solver_1_1_newton_solver_base.html" class="m-doc">Rodin::<wbr />Solver::<wbr />NewtonSolverBase</a>, <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a></p></aside>
+</svg> using Newton-type methods. At each Newton iteration the Jacobian system is solved by the associated <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a> linear solver.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Solver::KSP, Rodin::Solver::NewtonSolverBase, Rodin::PETSc::Math::LinearSystem</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Module for solving linear and nonlinear systems arising from finite element discretizations.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> integration module for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>PETSc integration module for Rodin.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_solver.html" class="m-doc">Rodin::PETSc::Solver</a></dt>
+            <dd>PETSc-backed linear and nonlinear solver adapters.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -130,11 +132,11 @@ $ F(x) = 0 $
               <div class="m-doc-template">template&lt;&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_solver_1_1_k_s_p_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Solver::KSP&gt;</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Solver::<wbr />KSP</a> (<a href="namespace_rodin.html" class="m-doc">Rodin</a> wrapper for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> KSP).</dd>
+            <dd>Traits specialization for Solver::KSP (Rodin wrapper for PETSc KSP).</dd>
             <dt>
               class <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">Rodin::Solver::SNES</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> (Scalable Nonlinear Equations Solvers) wrapper.</dd>
+            <dd>PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper.</dd>
           </dl>
         </section>
       </div>

@@ -79,7 +79,7 @@
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
           Your First Problem: Solving the Poisson Equation
         </h1>
-        <p>A complete walkthrough of solving a PDE with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>A complete walkthrough of solving a PDE with Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -115,7 +115,7 @@
             <li><a href="#guides-getting-started-first-problem-next">What&#x27;s Next?</a></li>
           </ul>
         </nav>
-<p>In this section, we&#x27;ll solve a complete partial differential equation using <a href="namespace_rodin.html" class="m-doc">Rodin</a>: the Poisson equation. This is often the &quot;Hello World&quot; of finite element methods.</p><section id="guides-getting-started-first-problem-math"><h2><a href="#guides-getting-started-first-problem-math">The Mathematical Problem</a></h2><p>We want to solve the following boundary value problem:</p><div class="m-math"><svg style="width: 10.243em; height: 3.736em;" viewBox="144.508706 -35.865862 98.33005 35.865869">
+<p>In this section, we&#x27;ll solve a complete partial differential equation using Rodin: the Poisson equation. This is often the &quot;Hello World&quot; of finite element methods.</p><section id="guides-getting-started-first-problem-math"><h2><a href="#guides-getting-started-first-problem-math">The Mathematical Problem</a></h2><p>We want to solve the following boundary value problem:</p><div class="m-math"><svg style="width: 10.243em; height: 3.736em;" viewBox="144.508706 -35.865862 98.33005 35.865869">
 <title>
 \[
 \left\{
@@ -288,7 +288,7 @@ $ v \in H^1_0(\Omega) $
 <use x='246.608038' y='-10.793007' xlink:href='#eq8-g2-100'/>
 <use x='252.690731' y='-10.793007' xlink:href='#eq8-g2-120'/>
 </g>
-</svg></div><p>This is the form that finite element methods work with, and it&#x27;s exactly what we&#x27;ll implement in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p></section></section><section id="guides-getting-started-first-problem-code"><h2><a href="#guides-getting-started-first-problem-code">The Complete Code</a></h2><p>Here&#x27;s the complete program to solve the Poisson equation:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
+</svg></div><p>This is the form that finite element methods work with, and it&#x27;s exactly what we&#x27;ll implement in Rodin.</p></section></section><section id="guides-getting-started-first-problem-code"><h2><a href="#guides-getting-started-first-problem-code">The Complete Code</a></h2><p>Here&#x27;s the complete program to solve the Poisson equation:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Solver.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Variational.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/IO/XDMF.h&gt;</span>
@@ -501,7 +501,7 @@ $ u = 0 $
 
 <span class="c1">// Or, pass a standalone solver to the problem</span>
 <span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="w"> </span><span class="n">lu</span><span class="p">;</span>
-<span class="n">poisson</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">lu</span><span class="p">);</span></pre></section></section><section id="guides-getting-started-first-problem-next"><h2><a href="#guides-getting-started-first-problem-next">What&#x27;s Next?</a></h2><p>Congratulations! You&#x27;ve solved your first PDE with <a href="namespace_rodin.html" class="m-doc">Rodin</a>. To deepen your understanding, proceed to <a href="guides-getting-started-core-concepts.html" class="m-doc">Understanding Core Concepts</a> to learn more about the underlying concepts.</p><p>You can also explore:</p><ul><li><a href="examples-pdes-poisson.html" class="m-doc">Solving the Poisson equation</a> for a more detailed Poisson example</li><li><a href="examples-pdes-elasticity.html" class="m-doc">Solving the elasticity equation</a> for a vector-valued problem</li><li><a href="guides-index.html" class="m-doc">General concepts</a> for in-depth conceptual guides</li></ul></section>
+<span class="n">poisson</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">lu</span><span class="p">);</span></pre></section></section><section id="guides-getting-started-first-problem-next"><h2><a href="#guides-getting-started-first-problem-next">What&#x27;s Next?</a></h2><p>Congratulations! You&#x27;ve solved your first PDE with Rodin. To deepen your understanding, proceed to <a href="guides-getting-started-core-concepts.html" class="m-doc">Understanding Core Concepts</a> to learn more about the underlying concepts.</p><p>You can also explore:</p><ul><li><a href="examples-pdes-poisson.html" class="m-doc">Solving the Poisson equation</a> for a more detailed Poisson example</li><li><a href="examples-pdes-elasticity.html" class="m-doc">Solving the elasticity equation</a> for a vector-valued problem</li><li><a href="guides-index.html" class="m-doc">General concepts</a> for in-depth conceptual guides</li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="guides-getting-started-first-steps.html" class="m-doc">&laquo; First Steps with Rodin</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="guides-getting-started-core-concepts.html" class="m-doc">Understanding Core Concepts &raquo;</a></div>
       </div>
     </div>

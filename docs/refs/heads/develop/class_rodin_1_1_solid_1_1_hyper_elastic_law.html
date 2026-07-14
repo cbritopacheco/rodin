@@ -97,7 +97,9 @@
               Reference
               <ul>
                 <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pro-methods">Protected functions</a></li>
               </ul>
             </li>
           </ul>
@@ -186,6 +188,23 @@ $ D\mathbf{P}[\delta\mathbf{F}] = \frac{\partial^2 W}{\partial \mathbf{F}^2} : \
             <dd>Adds active fiber stress to a passive law.</dd>
           </dl>
         </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a041f04914626b26aedccd3ae295fbdb4">
+              <span class="m-doc-wrap-bumper"><a href="#a041f04914626b26aedccd3ae295fbdb4" class="m-doc-self">HyperElasticLaw</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor for derived CRTP laws.</dd>
+            <dt id="a2a6c75367e061c8e196dabe2489b0c53">
+              <span class="m-doc-wrap-bumper"><a href="#a2a6c75367e061c8e196dabe2489b0c53" class="m-doc-self">HyperElasticLaw</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a5c11b307f71327b1cf76c747d1d76607">
+              <span class="m-doc-wrap-bumper"><a href="#a5c11b307f71327b1cf76c747d1d76607" class="m-doc-self">HyperElasticLaw</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&amp;&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -216,6 +235,19 @@ $ D\mathbf{P}[\delta\mathbf{F}] = \frac{\partial^2 W}{\partial \mathbf{F}^2} : \
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Computes the strain energy density.</dd>
+          </dl>
+        </section>
+        <section id="pro-methods">
+          <h2><a href="#pro-methods">Protected functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a41205a49b3e58d10240d2d7a9829bf93">
+              <span class="m-doc-wrap-bumper">auto <a href="#a41205a49b3e58d10240d2d7a9829bf93" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt id="acc0b3b9dbbd0af621e8e09ee952e18f3">
+              <span class="m-doc-wrap-bumper">auto <a href="#acc0b3b9dbbd0af621e8e09ee952e18f3" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
           </dl>
         </section>
         <section>

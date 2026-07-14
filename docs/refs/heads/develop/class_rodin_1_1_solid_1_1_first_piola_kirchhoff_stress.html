@@ -82,17 +82,18 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md220">Usage</a></li>
+            <li><a href="#autotoc_md219">Usage</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<section id="autotoc_md220"><h3><a href="#autotoc_md220">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
+<section id="autotoc_md219"><h3><a href="#autotoc_md219">Usage</a></h3><pre class="m-code"><span class="n">NeoHookean</span><span class="w"> </span><span class="nf">law</span><span class="p">(</span><span class="n">lambda</span><span class="p">,</span><span class="w"> </span><span class="n">mu</span><span class="p">);</span>
 <span class="n">NeoHookean</span><span class="o">::</span><span class="n">Cache</span><span class="w"> </span><span class="n">cache</span><span class="p">;</span>
 <span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="n">d</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">gradU</span><span class="p">);</span>
@@ -101,13 +102,34 @@
 <span class="n">FirstPiolaKirchhoffStress</span><span class="o">&lt;</span><span class="n">NeoHookean</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pk1</span><span class="p">(</span><span class="n">law</span><span class="p">);</span>
 <span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">SpatialMatrix</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">P</span><span class="p">;</span>
 <span class="n">pk1</span><span class="p">.</span><span class="n">getFirstPiolaKirchhoffStress</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span></pre></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a642521cadb1a8ac3a99efed89bc5cb0d">
+              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
+            </dt>
+            <dd>Constitutive law type.</dd>
+            <dt id="ae66c074f434a5e00e2bd00da759fb252">
+              using <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc-self">CacheType</a> = typename LawType::Cache
+            </dt>
+            <dd>Cache type used by the constitutive law.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const LawType&amp; law)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span>
             </dt>
             <dd>Constructs the stress evaluator.</dd>
+            <dt id="a89ba7bd5273d637feee5bb97faf13bfa">
+              <span class="m-doc-wrap-bumper"><a href="#a89ba7bd5273d637feee5bb97faf13bfa" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="abd62ffdcd96ad4571775c07d17306636">
+              <span class="m-doc-wrap-bumper"><a href="#abd62ffdcd96ad4571775c07d17306636" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_first_piola_kirchhoff_stress.html" class="m-doc">FirstPiolaKirchhoffStress</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -115,7 +137,7 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a6583ffafc439ee162f165b32df82e1a3" class="m-doc">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const CacheType&amp; cache,
+              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
             </dt>
             <dd>Computes <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">
@@ -141,7 +163,7 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
 </g>
 </svg>.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const LawType&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -153,7 +175,7 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
               <div class="m-doc-template">
                 template&lt;class LawDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FirstPiolaKirchhoffStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const LawType&amp; law)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />FirstPiolaKirchhoffStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9339e17639d1326984a3a22fa19a6a85" class="m-doc-self">FirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap">const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp; law)</span></span>
             </h3>
             <p>Constructs the stress evaluator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -174,7 +196,7 @@ $ \mathbf{P} = \partial W / \partial \mathbf{F} $
                 template&lt;class LawDerived&gt;
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />FirstPiolaKirchhoffStress&lt;LawDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6583ffafc439ee162f165b32df82e1a3" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
-              const CacheType&amp; cache,
+              const <a href="#ae66c074f434a5e00e2bd00da759fb252" class="m-doc">CacheType</a>&amp; cache,
               const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span></span>
             </h3>
             <p>Computes <svg class="m-math" style="width: 6.696em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 64.277902 11.955168">

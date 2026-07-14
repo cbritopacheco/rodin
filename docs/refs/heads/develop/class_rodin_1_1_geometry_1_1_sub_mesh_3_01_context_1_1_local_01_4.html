@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span>SubMesh&lt;Context::Local&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> representing a subregion of a parent mesh.</p>
+        <p>SubMesh representing a subregion of a parent mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -102,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> is a mesh that represents a subset of polytopes from a parent mesh, maintaining bidirectional index mappings between child and parent. This is useful for:</p><ul><li>Extracting boundary meshes</li><li>Defining material regions</li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> refinement</li><li>Domain decomposition</li></ul><section id="autotoc_md124"><h2><a href="#autotoc_md124">Mathematical Foundation</a></h2><p>For a parent mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
+<p>A SubMesh is a mesh that represents a subset of polytopes from a parent mesh, maintaining bidirectional index mappings between child and parent. This is useful for:</p><ul><li>Extracting boundary meshes</li><li>Defining material regions</li><li>Mesh refinement</li><li>Domain decomposition</li></ul><section id="autotoc_md124"><h2><a href="#autotoc_md124">Mathematical Foundation</a></h2><p>For a parent mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
 <title>
 $ \mathcal{T}_h $
 </title>
@@ -211,14 +211,14 @@ $ I_{\mathcal{T}_h} $
 <span class="p">{</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">asSubMesh</span><span class="p">();</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
-<span class="p">}</span></pre></section></section><section id="autotoc_md128"><h2><a href="#autotoc_md128">Thread Safety</a></h2><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> objects are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>, <a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></p></aside></section>
+<span class="p">}</span></pre></section></section><section id="autotoc_md128"><h2><a href="#autotoc_md128">Thread Safety</a></h2><p>SubMesh objects are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, Mesh, Shard</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>
             </dt>
-            <dd>Abstract base class for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> implementations.</dd>
+            <dd>Abstract base class for SubMesh implementations.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html" class="m-doc">Mesh&lt;Context::Local&gt;</a>
@@ -233,7 +233,7 @@ $ I_{\mathcal{T}_h} $
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4_1_1_builder.html" class="m-doc">Builder</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_sub_mesh_3_01_context_1_1_local_01_4_1_1_builder.html" class="m-doc">Builder</a> for constructing <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances.</dd>
+            <dd>Builder for constructing SubMesh instances.</dd>
             <dt id="ad785859f8b7c1b2fb93ab319ac879bcf">
               using <a href="#ad785859f8b7c1b2fb93ab319ac879bcf" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;
             </dt>
@@ -241,7 +241,7 @@ $ I_{\mathcal{T}_h} $
             <dt id="a5d11968e3ae899be574a41d47a17a36f">
               using <a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc-self">Context</a> = typename Parent::Context
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type.</dd>
+            <dd>Context type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -331,7 +331,7 @@ $ I_{\mathcal{T}_h} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to copy from</td>
+                  <td>SubMesh to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -351,7 +351,7 @@ $ I_{\mathcal{T}_h} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to move from</td>
+                  <td>SubMesh to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -371,7 +371,7 @@ $ I_{\mathcal{T}_h} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> to move from</td>
+                  <td>SubMesh to move from</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -397,7 +397,7 @@ $ I_{\mathcal{T}_h} $
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> in parent mesh coordinates</td>
+                  <td>Point in parent mesh coordinates</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -407,7 +407,7 @@ $ I_{\mathcal{T}_h} $
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>Implements virtual method from <a href="class_rodin_1_1_geometry_1_1_sub_mesh_base.html" class="m-doc">SubMeshBase</a>.</p></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>Implements virtual method from SubMeshBase.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a07118dd6dc984cb9260ae21fc61a4130"><div>
             <h3>
@@ -421,7 +421,7 @@ $ I_{\mathcal{T}_h} $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Always true for <a href="class_rodin_1_1_geometry_1_1_sub_mesh.html" class="m-doc">SubMesh</a> instances</td>
+                  <td>Always true for SubMesh instances</td>
                 </tr>
               </tfoot>
             </table>

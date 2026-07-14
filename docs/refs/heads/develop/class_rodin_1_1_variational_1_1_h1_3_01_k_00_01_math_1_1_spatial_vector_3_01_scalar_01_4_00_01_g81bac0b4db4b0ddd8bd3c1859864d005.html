@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</p>
+        <p>Distributed vector-valued H1 finite element space for MPI meshes.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -100,7 +100,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -108,7 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>Each scalar interior DOF node is replicated <code>vdim</code> times (once per component). Internally this builds a scalar <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space and derives the vector DOF mappings as:</p><div class="m-math"><svg style="width: 27.484em; height: 1.245em;" viewBox="62.346401 -11.955168 263.8502 11.955168">
+<p>Each scalar interior DOF node is replicated <code>vdim</code> times (once per component). Internally this builds a scalar MPI H1 space and derives the vector DOF mappings as:</p><div class="m-math"><svg style="width: 27.484em; height: 1.245em;" viewBox="62.346401 -11.955168 263.8502 11.955168">
 <title>
 \[
   \text{globalVecDOF}(q, c) =
@@ -188,16 +187,6 @@
 <use x='321.158612' y='-2.988792' xlink:href='#eq1-g1-99'/>
 </g>
 </svg></div>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Represernts a finite element space.</dd>
-          </dl>
-        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -209,12 +198,44 @@
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g6395c0805c539fe8dcbcf349a6e5143a.html" class="m-doc">Pullback</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g6395c0805c539fe8dcbcf349a6e5143a.html" class="m-doc">Pullback</a> of a callable (or <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>) to the reference polytope.</dd>
+            <dd>Pullback of a callable (or FunctionBase) to the reference polytope.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class CallableType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_ge7638f650fa348ea64a34c8ca101e4e3.html" class="m-doc">Pushforward</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_ge7638f650fa348ea64a34c8ca101e4e3.html" class="m-doc">Pushforward</a> of a function from the reference polytope.</dd>
+            <dd>Pushforward of a function from the reference polytope.</dd>
+            <dt id="abccaffe1f1d9f2b4e323c3f4721a26dd">
+              using <a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>
+            </dt>
+            <dd>Execution context type.</dd>
+            <dt id="ab971c6ec4177c374836d376ba1d8c92f">
+              using <a href="#ab971c6ec4177c374836d376ba1d8c92f" class="m-doc-self">FESType</a> = <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+            </dt>
+            <dd>Finite element space type.</dd>
+            <dt id="a34130e18c1deff7165fe2aa4d9429a35">
+              using <a href="#a34130e18c1deff7165fe2aa4d9429a35" class="m-doc-self">ScalarFESType</a> = <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, Scalar, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+            </dt>
+            <dd>Scalar distributed H1 space used for component-wise numbering.</dd>
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a883786ff5269f0c99e98741145efc8f6">
+              using <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="a4ded3263986a36723239faeabaa4a7ed">
+              using <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Mesh type.</dd>
+            <dt id="a5606ef555735d542cf22d49f90326bc4">
+              using <a href="#a5606ef555735d542cf22d49f90326bc4" class="m-doc-self">ElementType</a> = H1Element&lt;K, <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&gt;
+            </dt>
+            <dd>Finite element type.</dd>
+            <dt id="a16684b7e715b851b6b93828d94f2c44e">
+              using <a href="#a16684b7e715b851b6b93828d94f2c44e" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -222,17 +243,29 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt;,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh,
               size_t vdim)</span>
             </dt>
-            <dd>Constructs a distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space.</dd>
+            <dd>Constructs a distributed vector-valued H1 space.</dd>
+            <dt id="a54af72f4bbd1ce5498fa715041cea174">
+              <span class="m-doc-wrap-bumper"><a href="#a54af72f4bbd1ce5498fa715041cea174" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const H1&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="abb322efe6b21425ee99dae0c835ea9a7">
+              <span class="m-doc-wrap-bumper"><a href="#abb322efe6b21425ee99dae0c835ea9a7" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a19ff7be23fad19be92d41b13d6b58274">
+              <span class="m-doc-wrap-bumper">auto <a href="#a19ff7be23fad19be92d41b13d6b58274" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&amp;&amp;) -&gt; <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt id="a88987bef7972e7ef2a6aa0c6b83138b0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html" class="m-doc">FESType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab971c6ec4177c374836d376ba1d8c92f" class="m-doc">FESType</a>&amp;</span>
             </dt>
             <dd>Returns the local shard finite element space.</dd>
             <dt id="a96abd8ba8f14deaed88496405eb96c1d">
@@ -250,7 +283,7 @@
             <dd>Returns the local DOF index for a global DOF, or nullopt if not present.</dd>
             <dt id="ae158db2d2017a069f2ede653e5110753">
               <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">ElementType</a>&amp;</span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a5606ef555735d542cf22d49f90326bc4" class="m-doc">ElementType</a>&amp;</span>
             </dt>
             <dd>Returns the finite element on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
 <title>
@@ -280,7 +313,7 @@ $(d, i)$
             </dt>
             <dd>Returns the vector dimension of the space.</dd>
             <dt id="a023a4642b6e40a2d6ea68a6bdbb096bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the distributed mesh.</dd>
             <dt id="adba1954ca59742b5304d71dcc0854c65">
@@ -316,7 +349,7 @@ $(d, i)$
               <span class="m-doc-wrap-bumper">auto <a href="#a2a363690c6d5bdf368b7b5182bc6f8b7" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
-            <dd>Returns a pullback wrapper for a callable (or <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>) on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+            <dd>Returns a pullback wrapper for a callable (or FunctionBase) on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
 <title>
 $(d, i)$
 </title>
@@ -375,10 +408,10 @@ $(d, i)$
                 template&lt;size_t K, class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt;,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh,
               size_t vdim)</span></span>
             </h3>
-            <p>Constructs a distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space.</p>
+            <p>Constructs a distributed vector-valued H1 space.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

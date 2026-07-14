@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html">HDF5</a>::<wbr/></span>Handle <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_i_o_2_h_d_f5_8h.html">&lt;Rodin/IO/HDF5.h&gt;</a></div>
         </h1>
-        <p>RAII wrapper for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier handles.</p>
+        <p>RAII wrapper for HDF5 identifier handles.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>Manages the lifetime of an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> <code>hid_t</code> identifier by calling the appropriate close function (e.g. <code>H5Fclose</code>, <code>H5Gclose</code>, <code>H5Dclose</code>, <code>H5Sclose</code>) on destruction or reset. Move-only; copying is disabled.</p><p>Use the factory functions <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html#a915b66dcbe18d8dab563880d55e14b9f" class="m-doc">File()</a>, <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html#a5baebbf4547ace64f0834ba5d164d7e0" class="m-doc">Group()</a>, <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html#a5a39497219f310ca12a35bb9db916e37" class="m-doc">DataSet()</a>, and <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html#a4d538f2f08b1f5a0456a2f17d498a9d9" class="m-doc">Space()</a> to construct handles with the correct close function.</p><section id="autotoc_md138"><h3><a href="#autotoc_md138">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">File</span><span class="p">(</span><span class="n">H5Fcreate</span><span class="p">(</span><span class="s">&quot;out.h5&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">H5F_ACC_TRUNC</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">));</span>
+<p>Manages the lifetime of an HDF5 <code>hid_t</code> identifier by calling the appropriate close function (e.g. <code>H5Fclose</code>, <code>H5Gclose</code>, <code>H5Dclose</code>, <code>H5Sclose</code>) on destruction or reset. Move-only; copying is disabled.</p><p>Use the factory functions File(), Group(), DataSet(), and Space() to construct handles with the correct close function.</p><section id="autotoc_md138"><h3><a href="#autotoc_md138">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">File</span><span class="p">(</span><span class="n">H5Fcreate</span><span class="p">(</span><span class="s">&quot;out.h5&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">H5F_ACC_TRUNC</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">));</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">file</span><span class="p">)</span>
 <span class="w">  </span><span class="c1">// handle error ...</span>
 
@@ -108,16 +108,24 @@
               <span class="m-doc-wrap-bumper"><a href="#a080929a1a19fa1d493afeac3c5e9e9b3" class="m-doc">Handle</a>(</span><span class="m-doc-wrap">hid_t id,
               herr_t(*)(hid_t) closeFn)</span>
             </dt>
-            <dd>Constructs a handle wrapping the given <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier.</dd>
+            <dd>Constructs a handle wrapping the given HDF5 identifier.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a15e77759b885d064556fe692201faad3" class="m-doc">Handle</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a67b76affb3b5d35fa419ac234144038b" class="m-doc">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
-            <dd><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether this handle holds a valid <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier.</dd>
+            <dd>Tests whether this handle holds a valid HDF5 identifier.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2949121a75ff680d21714161c1bd2bac" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt id="ad20897c5c8bd47f5d4005989bead0e55">
               <span class="m-doc-wrap-bumper">void <a href="#ad20897c5c8bd47f5d4005989bead0e55" class="m-doc-self">reset</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
@@ -125,7 +133,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad95067d593d9bacb31ca4de3dfadd0e3" class="m-doc">get</a>(</span><span class="m-doc-wrap">) const -&gt; hid_t</span>
             </dt>
-            <dd>Returns the raw <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier.</dd>
+            <dd>Returns the raw HDF5 identifier.</dd>
           </dl>
         </section>
         <section>
@@ -135,7 +143,7 @@
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a080929a1a19fa1d493afeac3c5e9e9b3" class="m-doc-self">Handle</a>(</span><span class="m-doc-wrap">hid_t id,
               herr_t(*)(hid_t) closeFn)</span></span>
             </h3>
-            <p>Constructs a handle wrapping the given <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier.</p>
+            <p>Constructs a handle wrapping the given HDF5 identifier.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -143,11 +151,28 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">id&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier (<code>hid_t</code>) to manage.</td>
+                  <td>HDF5 identifier (<code>hid_t</code>) to manage.</td>
                 </tr>
                 <tr>
                   <td>closeFn&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> close function matching the identifier type.</td>
+                  <td>HDF5 close function matching the identifier type.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a15e77759b885d064556fe692201faad3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a15e77759b885d064556fe692201faad3" class="m-doc-self">Handle</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Handle whose identifier is transferred.</td>
                 </tr>
               </tbody>
             </table>
@@ -156,7 +181,7 @@
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67b76affb3b5d35fa419ac234144038b" class="m-doc-self">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span> </span></span>
             </h3>
-            <p><a href="namespace_rodin_1_1_tests.html" class="m-doc">Tests</a> whether this handle holds a valid <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier.</p>
+            <p>Tests whether this handle holds a valid HDF5 identifier.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -166,11 +191,34 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a2949121a75ff680d21714161c1bd2bac"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp; Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2949121a75ff680d21714161c1bd2bac" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Handle</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move assignment operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Handle whose identifier is transferred.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this handle.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ad95067d593d9bacb31ca4de3dfadd0e3"><div>
             <h3>
               <span class="m-doc-wrap-bumper">hid_t Rodin::<wbr />IO::<wbr />HDF5::<wbr />Handle::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad95067d593d9bacb31ca4de3dfadd0e3" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Returns the raw <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier.</p>
+            <p>Returns the raw HDF5 identifier.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>

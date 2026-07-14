@@ -80,20 +80,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md475">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md476">Applications</a></li>
-            <li><a href="#autotoc_md477">Implementation</a></li>
-            <li><a href="#autotoc_md478">Usage Example</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md393">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md394">Applications</a></li>
+            <li><a href="#autotoc_md395">Implementation</a></li>
+            <li><a href="#autotoc_md396">Usage Example</a></li>
           </ul>
         </nav>
-<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md475"><h3><a href="#autotoc_md475">Mathematical Foundation</a></h3><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
+<p>This file defines classes for imposing periodic boundary conditions in finite element problems. Periodic conditions enforce that the solution values match across opposite boundaries of the domain.</p><section id="autotoc_md393"><h3><a href="#autotoc_md393">Mathematical Foundation</a></h3><p>A periodic boundary condition specifies:</p><div class="m-math"><svg style="width: 16.198em; height: 1.245em;" viewBox="116.27065 -11.955168 155.503566 11.955168">
 <title>
 \[
   u(x + L) = u(x) \quad \text{for} \quad x \in \Gamma_-
@@ -168,32 +161,8 @@ $ L $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-76'/>
 </g>
-</svg>.</p></section><section id="autotoc_md476"><h3><a href="#autotoc_md476">Applications</a></h3><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md477"><h3><a href="#autotoc_md477">Implementation</a></h3><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md478"><h3><a href="#autotoc_md478">Usage Example</a></h3><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
+</svg>.</p></section><section id="autotoc_md394"><h3><a href="#autotoc_md394">Applications</a></h3><ul><li>Crystal lattice simulations</li><li>Unit cell problems in homogenization</li><li>Fluid flow in periodic geometries</li><li>Wave propagation in periodic media</li></ul></section><section id="autotoc_md395"><h3><a href="#autotoc_md395">Implementation</a></h3><p>Periodic conditions are enforced by:</p><ol><li>Identifying matching DOF pairs on opposite boundaries</li><li>Constraining one DOF to equal its periodic partner</li><li>Eliminating dependent DOFs from the system</li></ol></section><section id="autotoc_md396"><h3><a href="#autotoc_md396">Usage Example</a></h3><pre class="m-code"><span class="c1">// Periodic BC between boundaries 1 and 2</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">pbc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PeriodicBC</span><span class="p">(</span><span class="n">u</span><span class="p">).</span><span class="n">from</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="n">to</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span></pre></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_base.html" class="m-doc">Rodin::Variational::PeriodicBCBase</a>
-            </dt>
-            <dd>Abstract base class for a periodic boundary condition.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_periodic_b_c_3_01_trial_function_3_01_solution_00_01_f_e_s_01_4_2a9e6d75de7ed6b1898c3fa8d377abc3.html" class="m-doc">Rodin::Variational::PeriodicBC&lt;TrialFunction&lt;Solution, FES&gt;, IndexMap&lt;IndexSet&gt;&gt;</a>
-            </dt>
-            <dd>Represents a Peridodic boundary condition on a <a href="class_rodin_1_1_variational_1_1_shape_function.html" class="m-doc">ShapeFunction</a> object.</dd>
-          </dl>
-        </section>
       </div>
     </div>
   </div>

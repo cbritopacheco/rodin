@@ -96,23 +96,277 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>A dynamic-size vector with maximum size bounded by RODIN_MAXIMAL_SPACE_DIMENSION. Used for geometric quantities in 2D or 3D space to optimize memory allocation.</p><aside class="m-note m-info"><h4>Note</h4><p>Internally stores a fixed Eigen::Vector3 regardless of the logical size. For size=1 or size=2 vectors, only the first 1 or 2 elements are active; the remaining elements in the underlying storage are unused. This design avoids dynamic allocation for small spatial vectors at the cost of a few extra bytes.</p></aside>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a84e9b844fb562b2576cc8d2810d48b16">
+              using <a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc-self">Scalar</a> = ScalarType
+            </dt>
+            <dd>The element scalar type.</dd>
+            <dt id="a6fd8258aa32ea88618105e8769e4a1ac">
+              using <a href="#a6fd8258aa32ea88618105e8769e4a1ac" class="m-doc-self">Data</a> = Eigen::Vector3&lt;ScalarType&gt;
+            </dt>
+            <dd>Underlying fixed-capacity Eigen storage type.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="ad73ad092439a1ef1ec537e67b4716bfa">
+              static std::uint8_t <a href="#ad73ad092439a1ef1ec537e67b4716bfa" class="m-doc-self">MaxSize</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Maximum storable dimension (RODIN_MAXIMAL_SPACE_DIMENSION, fixed at 3).</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt id="af15f7862e8b077a731a6370c70047745">
+              <span class="m-doc-wrap-bumper">static auto <a href="#af15f7862e8b077a731a6370c70047745" class="m-doc-self">Zero</a>(</span><span class="m-doc-wrap">std::uint8_t size) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a zero spatial vector of the given size.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a44d690cd95bd814f89a35c8d40abcb8b">
+              <span class="m-doc-wrap-bumper"><a href="#a44d690cd95bd814f89a35c8d40abcb8b" class="m-doc-self">SpatialVector</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs an empty (size 0) spatial vector.</dd>
+            <dt id="a3ddc9b9822ed899fae353dca50b7e74a">
+              <span class="m-doc-wrap-bumper"><a href="#a3ddc9b9822ed899fae353dca50b7e74a" class="m-doc-self">SpatialVector</a>(</span><span class="m-doc-wrap">std::uint8_t size) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a zero-initialized spatial vector of the given size.</dd>
+            <dt id="af0ef1f17a2d6a739df6af07513531e69">
+              <span class="m-doc-wrap-bumper"><a href="#af0ef1f17a2d6a739df6af07513531e69" class="m-doc-self">SpatialVector</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;ScalarType&gt; init) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a spatial vector from an initializer list of components.</dd>
+            <dt id="aceb78975c654aa707688bc1a01fd9ae4">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#aceb78975c654aa707688bc1a01fd9ae4" class="m-doc-self">SpatialVector</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Constructs a spatial vector from an Eigen vector expression.</dd>
+            <dt id="aaf124c9b56ee30f103229b74c46eec79">
+              <span class="m-doc-wrap-bumper"><a href="#aaf124c9b56ee30f103229b74c46eec79" class="m-doc-self">SpatialVector</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a83362ffbfc7b3bc7b42c975187f59f80">
+              <span class="m-doc-wrap-bumper"><a href="#a83362ffbfc7b3bc7b42c975187f59f80" class="m-doc-self">SpatialVector</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="ad0898de0e61bf8b71cafc89ab270271b">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0898de0e61bf8b71cafc89ab270271b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt id="a171df7cd9a2e2684bcc351e08e71787e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a171df7cd9a2e2684bcc351e08e71787e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+            <dt id="a906800e5915ad5f2e41c3a3b1633f3a2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a906800e5915ad5f2e41c3a3b1633f3a2" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Adds another spatial vector componentwise in place.</dd>
+            <dt id="a801b893ed562aca615dfeb1e40e40425">
+              <span class="m-doc-wrap-bumper">auto <a href="#a801b893ed562aca615dfeb1e40e40425" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Subtracts another spatial vector componentwise in place.</dd>
+            <dt id="ad378e7d79f1a3d7ace5bceea18d9a5a6">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad378e7d79f1a3d7ace5bceea18d9a5a6" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const ScalarType&amp; s) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Scales this vector by a scalar in place.</dd>
+            <dt id="add785298d8dcb68818d5de3333f1c330">
+              <span class="m-doc-wrap-bumper">auto <a href="#add785298d8dcb68818d5de3333f1c330" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const ScalarType&amp; s) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Divides this vector by a scalar in place.</dd>
+            <dt id="a3bf123f7cee1696f349682d228ef714f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3bf123f7cee1696f349682d228ef714f" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the negation of this vector.</dd>
+            <dt id="a41e9d872103bec0332d088dd5dd3ce5f">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a41e9d872103bec0332d088dd5dd3ce5f" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::ArrayBase&lt;EigenDerived&gt;&amp; other) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Assigns from an Eigen array expression, resizing to match.</dd>
+            <dt id="ab22fd379406b454fe27790abe0f2271e">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab22fd379406b454fe27790abe0f2271e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; v) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp;</span>
+            </dt>
+            <dd>Assigns from an Eigen vector expression, resizing to match.</dd>
+            <dt id="a569dac5a5c101ed1440313e5fec55a4a">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a569dac5a5c101ed1440313e5fec55a4a" class="m-doc-self">operator+=</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; v) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp;</span>
+            </dt>
+            <dd>Adds an Eigen vector expression componentwise in place.</dd>
+            <dt id="aa0e229333c34357005461bfad3e812d7">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa0e229333c34357005461bfad3e812d7" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; v) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp;</span>
+            </dt>
+            <dd>Subtracts an Eigen vector expression componentwise in place.</dd>
+            <dt id="a7c4cfccb2073cf514fc9c7bcf0326d34">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c4cfccb2073cf514fc9c7bcf0326d34" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the number of active components.</dd>
+            <dt id="acd783ecdc9813063810efc09101222c2">
+              <span class="m-doc-wrap-bumper">void <a href="#acd783ecdc9813063810efc09101222c2" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t n) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sets the logical size (must not exceed MaxSize).</dd>
+            <dt id="a891d01105103a35e6eebeafea1100ea2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a891d01105103a35e6eebeafea1100ea2" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a reference to component <code>i</code>.</dd>
+            <dt id="a0b4e43c7b455389cd81c4bc1c77053e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0b4e43c7b455389cd81c4bc1c77053e0" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a const reference to component <code>i</code>.</dd>
+            <dt id="ab3526f2f153d83e649d3b643300b0f12">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab3526f2f153d83e649d3b643300b0f12" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a reference to component <code>i</code>.</dd>
+            <dt id="a63d0ac7f9219df421552987e466454f1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a63d0ac7f9219df421552987e466454f1" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a const reference to component <code>i</code>.</dd>
             <dt id="adb24bba4b295f093052b06e10ce783ff">
               <span class="m-doc-wrap-bumper">auto <a href="#adb24bba4b295f093052b06e10ce783ff" class="m-doc-self">coeffRef</a>(</span><span class="m-doc-wrap">std::size_t i) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Eigen-compatible element access (for drop-in compatibility with <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>)</dd>
+            <dd>Eigen-compatible element access (for drop-in compatibility with Math::Vector)</dd>
             <dt id="add71e5a62d59ec59c6472274fca636a7">
               <span class="m-doc-wrap-bumper">auto <a href="#add71e5a62d59ec59c6472274fca636a7" class="m-doc-self">coeffRef</a>(</span><span class="m-doc-wrap">std::size_t i) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Eigen-compatible element access (const, for drop-in compatibility with <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>)</dd>
+            <dd>Eigen-compatible element access (const, for drop-in compatibility with Math::Vector)</dd>
+            <dt id="ad0e8a331b9efc05a41c7f17cef92d5d1">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0e8a331b9efc05a41c7f17cef92d5d1" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a reference to the first (x) component.</dd>
+            <dt id="aec9a544cd37512f8a7bbb6b17a157046">
+              <span class="m-doc-wrap-bumper">auto <a href="#aec9a544cd37512f8a7bbb6b17a157046" class="m-doc-self">x</a>(</span><span class="m-doc-wrap">) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a const reference to the first (x) component.</dd>
+            <dt id="adb96591eda10125e8c1b3cba4bc5833b">
+              <span class="m-doc-wrap-bumper">auto <a href="#adb96591eda10125e8c1b3cba4bc5833b" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a reference to the second (y) component.</dd>
+            <dt id="aa9b13050a651bcd9f4fa573bb36305a8">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa9b13050a651bcd9f4fa573bb36305a8" class="m-doc-self">y</a>(</span><span class="m-doc-wrap">) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a const reference to the second (y) component.</dd>
+            <dt id="abef3a918f97fb3c7f7dfd781f7c72d1b">
+              <span class="m-doc-wrap-bumper">auto <a href="#abef3a918f97fb3c7f7dfd781f7c72d1b" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) -&gt; ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a reference to the third (z) component.</dd>
+            <dt id="a7e0f3cfa7dd4eb9d73c96104ec7bce42">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e0f3cfa7dd4eb9d73c96104ec7bce42" class="m-doc-self">z</a>(</span><span class="m-doc-wrap">) const -&gt; const ScalarType&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns a const reference to the third (z) component.</dd>
+            <dt id="af991da5f6b74d1fa19aa206c9f8367f9">
+              <span class="m-doc-wrap-bumper">void <a href="#af991da5f6b74d1fa19aa206c9f8367f9" class="m-doc-self">setZero</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Sets all components to zero.</dd>
+            <dt id="a8d5f803ba4c89561d7991a6ce76ccc5e">
+              <span class="m-doc-wrap-bumper">void <a href="#a8d5f803ba4c89561d7991a6ce76ccc5e" class="m-doc-self">setConstant</a>(</span><span class="m-doc-wrap">const ScalarType&amp; value) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Sets all components to the given value.</dd>
+            <dt id="a32f1c62f0b170f00c1aa7f5a662f09c9">
+              <span class="m-doc-wrap-bumper">auto <a href="#a32f1c62f0b170f00c1aa7f5a662f09c9" class="m-doc-self">cross</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; other) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the cross product with another 3D spatial vector.</dd>
+            <dt id="a745e4876b631cf75e37b14dda504e8ec">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a745e4876b631cf75e37b14dda504e8ec" class="m-doc-self">cross</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the cross product with a 3D Eigen vector expression.</dd>
+            <dt id="a46dee8dcfc56648ce801e88c1c46207c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a46dee8dcfc56648ce801e88c1c46207c" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&amp; other) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the Euclidean dot product with another spatial vector.</dd>
+            <dt id="a10b84b624ec403d42e6fdad3076ed0f3">
+              <div class="m-doc-template">template&lt;class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10b84b624ec403d42e6fdad3076ed0f3" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; other) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the Euclidean dot product with an Eigen vector expression.</dd>
+            <dt id="a888b7f839f333d58f0d59a5870938a75">
+              <span class="m-doc-wrap-bumper">auto <a href="#a888b7f839f333d58f0d59a5870938a75" class="m-doc-self">transpose</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;<a href="#a84e9b844fb562b2576cc8d2810d48b16" class="m-doc">Scalar</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns this vector as a 1-by-size row matrix.</dd>
+            <dt id="a2319dbcdd2422f7066e64804815a88bb">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2319dbcdd2422f7066e64804815a88bb" class="m-doc-self">value</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the first component (for size-1 vectors used as scalars).</dd>
+            <dt id="a0b1e25f220af985c0b7f39a927c84c32">
+              <span class="m-doc-wrap-bumper">void <a href="#a0b1e25f220af985c0b7f39a927c84c32" class="m-doc-self">normalize</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Normalizes this vector to unit Euclidean norm in place.</dd>
+            <dt id="a6bff0c3bff1dad2581517e795eb9022c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6bff0c3bff1dad2581517e795eb9022c" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the squared Euclidean norm.</dd>
+            <dt id="aa74585fcef2cf98333da9a25da865da5">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa74585fcef2cf98333da9a25da865da5" class="m-doc-self">stableNorm</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the Euclidean norm computed with Eigen&#x27;s stable algorithm.</dd>
+            <dt id="af5ea09b26402d5da0948d234f1dfa8f1">
+              <span class="m-doc-wrap-bumper">auto <a href="#af5ea09b26402d5da0948d234f1dfa8f1" class="m-doc-self">blueNorm</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the Euclidean norm computed with Eigen&#x27;s Blue algorithm.</dd>
+            <dt id="a14b30ebd8a1a4d0a01e76db4ceb6243f">
+              <div class="m-doc-template">template&lt;size_t P&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a14b30ebd8a1a4d0a01e76db4ceb6243f" class="m-doc-self">lpNorm</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the <svg class="m-math" style="width: 1.193em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 11.457082 9.784673">
+<title>
+$ \ell^P $
+</title>
+<defs>
+<path id='eq1-g0-80' d='M2.510585-2.486675H3.961146C5.108842-2.486675 6.304359-3.283686 6.304359-4.224159C6.304359-4.901619 5.66675-5.443587 4.638605-5.443587H1.952677C1.809215-5.443587 1.705604-5.443587 1.705604-5.292154C1.705604-5.180573 1.809215-5.180573 1.936737-5.180573C2.199751-5.180573 2.430884-5.180573 2.430884-5.053051C2.430884-5.021171 2.422914-5.0132 2.399004-4.909589L1.331009-.629639C1.259278-.334745 1.243337-.263014 .67746-.263014C.494147-.263014 .406476-.263014 .406476-.111582C.406476-.079701 .430386 0 .533998 0C.68543 0 .876712-.01594 1.028144-.02391H1.538232C2.303362-.02391 2.510585 0 2.566376 0C2.614197 0 2.725778 0 2.725778-.151432C2.725778-.263014 2.622167-.263014 2.486675-.263014C2.462765-.263014 2.319303-.263014 2.183811-.278954C2.016438-.294894 2.000498-.318804 2.000498-.390535C2.000498-.430386 2.016438-.478207 2.024408-.518057L2.510585-2.486675ZM3.092403-4.885679C3.164134-5.156663 3.172105-5.180573 3.498879-5.180573H4.375592C5.029141-5.180573 5.531258-4.98929 5.531258-4.399502C5.531258-4.29589 5.491407-3.58655 5.045081-3.148194C4.925529-3.028643 4.542964-2.725778 3.761893-2.725778H2.550436L3.092403-4.885679Z'/>
+<path id='eq1-g1-96' d='M1.099875-2.032379C.3467-1.291158 .155417-1.111831 .155417-1.06401S.203238-.932503 .286924-.932503C.3467-.932503 1.028144-1.590037 1.123786-1.697634C1.195517-.896638 1.494396 .143462 2.426899 .143462C2.905106 .143462 3.335492-.155417 3.526775-.298879C3.682192-.418431 4.25604-.908593 4.25604-1.016189C4.25604-1.075965 4.196264-1.147696 4.136488-1.147696C4.088667-1.147696 3.90934-.968369 3.861519-.920548C3.443088-.514072 2.917061-.095641 2.438854-.095641C1.793275-.095641 1.709589-1.028144 1.709589-1.673724C1.709589-1.793275 1.709589-2.295392 1.793275-2.391034C2.49863-3.120299 4.710336-5.403736 4.710336-7.519801C4.710336-7.998007 4.531009-8.416438 4.016936-8.416438C2.905106-8.416438 1.936737-5.953674 1.769365-5.499377C1.721544-5.379826 1.028144-3.53873 1.099875-2.032379ZM1.817186-2.773599C1.829141-2.84533 2.367123-5.977584 3.371357-7.651308C3.574595-7.974097 3.777833-8.177335 4.016936-8.177335C4.423412-8.177335 4.447323-7.79477 4.447323-7.531756C4.447323-7.113325 4.327771-6.03736 3.287671-4.531009C2.976837-4.088667 2.49863-3.490909 1.817186-2.773599Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-96'/>
+<use x='4.912106' y='-4.338437' xlink:href='#eq1-g0-80'/>
+</g>
+</svg> norm of this vector.</dd>
+            <dt id="a04e2081a09a0a79f1891a0a7d0d7fbe0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a04e2081a09a0a79f1891a0a7d0d7fbe0" class="m-doc-self">normalized</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a unit-norm copy of this vector.</dd>
+            <dt id="aff84fab1b62d3cf1405fbd320a4f4063">
+              <span class="m-doc-wrap-bumper">auto <a href="#aff84fab1b62d3cf1405fbd320a4f4063" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const -&gt; ScalarType <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the Euclidean norm.</dd>
+            <dt id="a236ef63d8d51a065c17fd39bcef9542a">
+              <span class="m-doc-wrap-bumper">auto <a href="#a236ef63d8d51a065c17fd39bcef9542a" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) -&gt; auto&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying Eigen storage.</dd>
+            <dt id="abbd06608f9a50ea28325d064d4e13e19">
+              <span class="m-doc-wrap-bumper">auto <a href="#abbd06608f9a50ea28325d064d4e13e19" class="m-doc-self">getData</a>(</span><span class="m-doc-wrap">) const -&gt; const auto&amp; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a const reference to the underlying Eigen storage.</dd>
+            <dt id="a2f7c607d596f8ad7c34126ab34d1d287">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2f7c607d596f8ad7c34126ab34d1d287" class="m-doc-self">conjugate</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the complex conjugate (identity for real scalar types).</dd>
+            <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
+            </dt>
+            <dd>Serializes the vector (for boost::serialization).</dd>
           </dl>
         </section>
       </div>

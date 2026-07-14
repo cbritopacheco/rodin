@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES, class Data, class Initial, class VectorField, class Step&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_advection.html">Advection</a>::<wbr/></span>Lagrangian&lt;Variational::TrialFunction&lt;Variational::GridFunction&lt;FES, Data&gt;, FES&gt;, Variational::TestFunction&lt;FES&gt;, Initial, VectorField, Step&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection specialization for trial/test function formulation.</p>
+        <p>Lagrangian advection specialization for trial/test function formulation.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -143,17 +143,17 @@
             </dt>
             <dd>Type of the time-stepping scheme.</dd>
             <dt id="a8861b08a5b1de525582a3f26705c9ad8">
-              using <a href="#a8861b08a5b1de525582a3f26705c9ad8" class="m-doc-self">SolutionType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;
+              using <a href="#a8861b08a5b1de525582a3f26705c9ad8" class="m-doc-self">SolutionType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;
             </dt>
             <dd>Solution type: grid function holding the advected field.</dd>
             <dt id="a93f1359d04cd3f2b35b3277350a4a2aa">
-              using <a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc-self">TrialFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Variational::<wbr />TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;
+              using <a href="#a93f1359d04cd3f2b35b3277350a4a2aa" class="m-doc-self">TrialFunctionType</a> = Variational::TrialFunction&lt;<a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;, FES&gt;
             </dt>
             <dd>Trial function type for variational formulation.</dd>
             <dt id="a473b98a93bed175048946215edcc6a61">
-              using <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc-self">TestFunctionType</a> = <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Variational::<wbr />TestFunction</a>&lt;FES&gt;
+              using <a href="#a473b98a93bed175048946215edcc6a61" class="m-doc-self">TestFunctionType</a> = Variational::TestFunction&lt;FES&gt;
             </dt>
-            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function type for variational formulation.</dd>
+            <dd>Test function type for variational formulation.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -167,7 +167,7 @@
               VVel&amp;&amp; vel,
               S&amp;&amp; st = S{})</span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection solver.</dd>
+            <dd>Constructs a Lagrangian advection solver.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -193,7 +193,7 @@
               VVel&amp;&amp; vel,
               S&amp;&amp; st = S{})</span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_advection_1_1_lagrangian.html" class="m-doc">Lagrangian</a> advection solver.</p>
+            <p>Constructs a Lagrangian advection solver.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -222,7 +222,7 @@
                 </tr>
                 <tr>
                   <td>v&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function for variational formulation</td>
+                  <td>Test function for variational formulation</td>
                 </tr>
                 <tr>
                   <td>u0&nbsp;<span class="m-label m-flat m-info">in</span></td>

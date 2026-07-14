@@ -78,16 +78,153 @@
           <div class="m-doc-template">template&lt;class CallableType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_p1_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4.html">P1&lt;Range, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>::<wbr/></span>CallablePullback <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_variational_1_1_p1_3_01_range_00_01_geometry_1_1_mesh_3_01_context_1_1_m_p_i_01_4_01_4_1_1_pullback.html" class="m-doc">Pullback</a> of a pointwise callable to the reference polytope.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <p>Pullback of a pointwise callable to the reference polytope.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pullback_base.html" class="m-doc">FiniteElementSpacePullbackBase&lt;CallablePullback&lt;CallableType&gt;&gt;</a>
+              <div class="m-doc-template">template&lt;class Callable&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#a7a7437a9b7e243d1bef5387cc7763194" class="m-doc">CallablePullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              Callable&amp;&amp; v)</span>
             </dt>
-            <dd>Base class for mappings taking functions defined on physical elements to reference elements.</dd>
+            <dd>Constructs a pullback for a pointwise callable.</dd>
+            <dt id="a580b750bc39dc9b4da5510eeeb8c96b8">
+              <span class="m-doc-wrap-bumper"><a href="#a580b750bc39dc9b4da5510eeeb8c96b8" class="m-doc-self">CallablePullback</a>(</span><span class="m-doc-wrap">const CallablePullback&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afbebcdb38df25a4beba150033fcdea5f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; auto</span>
+            </dt>
+            <dd>Evaluates the pulled-back callable.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2cb787683a6b9932b05e11e84b3a7f61" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const -&gt; auto</span>
+            </dt>
+            <dd>Evaluates the pulled-back callable into storage.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7a7437a9b7e243d1bef5387cc7763194"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+                template&lt;class Callable&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />CallablePullback&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a7437a9b7e243d1bef5387cc7763194" class="m-doc-self">CallablePullback</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope,
+              Callable&amp;&amp; v)</span></span>
+            </h3>
+            <p>Constructs a pullback for a pointwise callable.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Callable</td>
+                  <td>Callable type accepted by the wrapper.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>polytope</td>
+                  <td>Physical polytope.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Callable evaluated on physical points.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afbebcdb38df25a4beba150033fcdea5f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />CallablePullback&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afbebcdb38df25a4beba150033fcdea5f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
+            </h3>
+            <p>Evaluates the pulled-back callable.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">r</td>
+                  <td>Reference coordinates.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Callable value at the mapped physical point.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2cb787683a6b9932b05e11e84b3a7f61"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />P1&lt;Range, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />CallablePullback&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2cb787683a6b9932b05e11e84b3a7f61" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; r) const</span></span>
+            </h3>
+            <p>Evaluates the pulled-back callable into storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Result storage type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>res</td>
+                  <td>Result storage.</td>
+                </tr>
+                <tr>
+                  <td>r</td>
+                  <td>Reference coordinates.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value returned by the wrapped callable.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>SimplicialLDLT&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Simplicial <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization without square root.</p>
+        <p>Simplicial LDLT Cholesky factorization without square root.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -173,7 +173,7 @@ $ O(nnz) $
             </dt>
             <dd>Type of linear system being solved.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Type of problem being solved.</dd>
             <dt id="a85385c6607a397925a213e9098256fdc">
@@ -188,7 +188,7 @@ $ O(nnz) $
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#acd33228e3f7be278ac9d81e6a230adec" class="m-doc">SimplicialLDLT</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
             </dt>
-            <dd>Constructs a <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a> solver for the given problem.</dd>
+            <dd>Constructs a SimplicialLDLT solver for the given problem.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a2c8fe235d1fb94daf1687c933482e776" class="m-doc">SimplicialLDLT</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>&amp; other)</span>
             </dt>
@@ -205,7 +205,7 @@ $ O(nnz) $
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Solves the linear system using simplicial <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> factorization.</dd>
+            <dd>Solves the linear system using simplicial LDLT factorization.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aadb7ab2650eaae66b9c97754e2104662" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -229,7 +229,7 @@ $ O(nnz) $
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />SimplicialLDLT&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd33228e3f7be278ac9d81e6a230adec" class="m-doc-self">SimplicialLDLT</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span></span>
             </h3>
-            <p>Constructs a <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a> solver for the given problem.</p>
+            <p>Constructs a SimplicialLDLT solver for the given problem.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -257,7 +257,7 @@ $ O(nnz) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to copy from</td>
+                  <td>Solver to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -277,7 +277,7 @@ $ O(nnz) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> to move from</td>
+                  <td>Solver to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -289,7 +289,7 @@ $ O(nnz) $
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SimplicialLDLT&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Solves the linear system using simplicial <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> factorization.</p>
+            <p>Solves the linear system using simplicial LDLT factorization.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -314,10 +314,11 @@ $ O(nnz) $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a> instance</td>
+                  <td>Pointer to a new SimplicialLDLT instance</td>
                 </tr>
               </tfoot>
             </table>
+<p>Returns a polymorphic copy of this solver.</p>
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>

@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a>::<wbr/></span>Point2D <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> in 2D <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> space.</p>
+        <p>Point in 2D Euclidean space.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a></p></aside><p>Represents a point <svg class="m-math" style="width: 5.079em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 48.759002 11.955168">
+<aside class="m-note m-default"><h4>See also</h4><p>Line2D, Circle, LineSegment2D</p></aside><p>Represents a point <svg class="m-math" style="width: 5.079em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 48.759002 11.955168">
 <title>
 $ p = (x, y) $
 </title>
@@ -125,7 +125,7 @@ $ p = (x, y) $
 <use x='38.070025' y='0' xlink:href='#eq1-g0-121'/>
 <use x='44.206677' y='0' xlink:href='#eq1-g1-41'/>
 </g>
-</svg> in two-dimensional <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> space. This class inherits from Eigen::Vector2 to provide vector arithmetic operations.</p><section id="autotoc_md70"><h2><a href="#autotoc_md70">Operations</a></h2><p>The class supports:</p><ul><li>Vector arithmetic (addition, subtraction, scaling) via Eigen::Vector2</li><li>Connection to other geometric objects (<a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>, other points)</li><li><a href="namespace_rodin_1_1_distance.html" class="m-doc">Distance</a> computations</li></ul><aside class="m-note m-info"><h4>Note</h4><p>This class uses multiple inheritance from Eigen::Vector2 and <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base</a>, providing both vector operations and CRTP-based geometry interface.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a></p></aside></section>
+</svg> in two-dimensional Euclidean space. This class inherits from Eigen::Vector2 to provide vector arithmetic operations.</p><section id="autotoc_md70"><h2><a href="#autotoc_md70">Operations</a></h2><p>The class supports:</p><ul><li>Vector arithmetic (addition, subtraction, scaling) via Eigen::Vector2</li><li>Connection to other geometric objects (Line2D, Circle, other points)</li><li>Distance computations</li></ul><aside class="m-note m-info"><h4>Note</h4><p>This class uses multiple inheritance from Eigen::Vector2 and Base, providing both vector operations and CRTP-based geometry interface.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>Line2D, Circle, LineSegment2D</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -133,7 +133,7 @@ $ p = (x, y) $
               <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base&lt;Point2D&lt;T&gt;, T&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base</a> class for <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> geometric objects using CRTP.</dd>
+            <dd>Base class for Euclidean geometric objects using CRTP.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -212,7 +212,7 @@ $ p = (x, y) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> to connect to</td>
+                  <td>Point to connect to</td>
                 </tr>
               </tbody>
               <thead>
@@ -227,12 +227,12 @@ $ p = (x, y) $
                   <td>If the points are equal (no segment can be formed)</td>
                 </tr>
                 <tr>
-                  <td>None</td>
+                  <td>LineSegment2D</td>
                   <td>If the points are distinct</td>
                 </tr>
               </tbody>
             </table>
-<p>Creates a line segment where the start point is the current point and the end point is the other point.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a></p></aside>
+<p>Creates a line segment where the start point is the current point and the end point is the other point.</p><aside class="m-note m-default"><h4>See also</h4><p>LineSegment2D</p></aside>
           </div></section>
           <section class="m-doc-details" id="ad6e53d842cdf87dd080b619f111ae9db"><div>
             <h3>
@@ -264,12 +264,12 @@ $ p = (x, y) $
                   <td>If the point lies on the line</td>
                 </tr>
                 <tr>
-                  <td>None</td>
+                  <td>LineSegment2D</td>
                   <td>Perpendicular segment from point to line</td>
                 </tr>
               </tbody>
             </table>
-<p>Creates a line segment where the start point is the current point and the end point is the nearest point on the given line.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a></p></aside>
+<p>Creates a line segment where the start point is the current point and the end point is the nearest point on the given line.</p><aside class="m-note m-default"><h4>See also</h4><p>Line2D, LineSegment2D</p></aside>
           </div></section>
           <section class="m-doc-details" id="ad68a72db7eadee8b4ab13d5cfbb47856"><div>
             <h3>
@@ -286,7 +286,7 @@ $ p = (x, y) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a> to connect to</td>
+                  <td>Circle to connect to</td>
                 </tr>
               </tbody>
               <thead>
@@ -301,12 +301,12 @@ $ p = (x, y) $
                   <td>If the point lies on the circle</td>
                 </tr>
                 <tr>
-                  <td>None</td>
+                  <td>LineSegment2D</td>
                   <td>Segment from point to nearest point on circle</td>
                 </tr>
               </tbody>
             </table>
-<p>Creates a line segment where the start point is the current point and the end point is the nearest point on the circle&#x27;s circumference.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_circle.html" class="m-doc">Circle</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line_segment2_d.html" class="m-doc">LineSegment2D</a></p></aside>
+<p>Creates a line segment where the start point is the current point and the end point is the nearest point on the circle&#x27;s circumference.</p><aside class="m-note m-default"><h4>See also</h4><p>Circle, LineSegment2D</p></aside>
           </div></section>
         </section>
       </div>

@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md242">Notes</a></li>
-            <li><a href="#autotoc_md243">Usage Example</a></li>
+            <li><a href="#autotoc_md241">Notes</a></li>
+            <li><a href="#autotoc_md242">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -109,32 +109,37 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>DGMRES accelerates restarted GMRES by deflating (approximations of) invariant subspaces associated with slow-to-converge eigencomponents.</p><section id="autotoc_md242"><h3><a href="#autotoc_md242">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported DGMRES.</li></ul></section><section id="autotoc_md243"><h3><a href="#autotoc_md243">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">DGMRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>DGMRES accelerates restarted GMRES by deflating (approximations of) invariant subspaces associated with slow-to-converge eigencomponents.</p><section id="autotoc_md241"><h3><a href="#autotoc_md241">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported DGMRES.</li></ul></section><section id="autotoc_md242"><h3><a href="#autotoc_md242">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">DGMRES</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setRestart</span><span class="p">(</span><span class="mi">50</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Module for solving linear and nonlinear systems arising from finite element discretizations.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_solver_1_1_d_g_m_r_e_s_3_01_linear_system_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Solver::DGMRES&lt;LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for DGMRES solvers.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3a260f9eeb2896b6ee84bf13e0d3c0e09.html" class="m-doc">Rodin::Solver::DGMRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> solver for sparse systems.</dd>
+            <dd>DGMRES solver for sparse systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_sca2e5637034909e48f90d64007740923a2.html" class="m-doc">Rodin::Solver::DGMRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> solver for dense systems.</dd>
+            <dd>DGMRES solver for dense systems.</dd>
           </dl>
         </section>
       </div>

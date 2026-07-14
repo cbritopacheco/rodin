@@ -76,7 +76,191 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests.html">Tests</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_tests_1_1_manufactured.html">Manufactured</a>::<wbr/></span>Helmholtz3D <span class="m-thin">namespace</span>
         </h1>
-<p>3D manufactured tests for the Helmholtz equation (sign convention used here):</p><p>Strong form: -Δu - κ² u = f in \Omega u = g on \partial\Omega</p><p>Weak form: \int\Omega \nablau\cdot\nablav dx - κ² \int\Omega u v dx = \int\Omega f v dx</p><p>IMPORTANT (geometry): <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s UniformGrid({M,M,M}) produces coordinates {0,...,M-1}. We scale by 1/(M-1) so the physical domain is [0,1]^3, matching the manufactured expressions (sin(pi*x), x(1-x), etc.).</p><p>NOTE (solver): With the sign &quot;- κ² \int u v&quot;, the operator may be symmetric indefinite for larger κ. These tests keep your current CG usage, but mathematically CG requires SPD. If you hit solver issues, switch to MINRES/GMRES or change the PDE to -Δu + κ² u (screened <a href="namespace_rodin_1_1_tests_1_1_manufactured_1_1_poisson.html" class="m-doc">Poisson</a>) to get SPD.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>3D manufactured tests for the Helmholtz equation (sign convention used here):</p><p>Strong form: -Δu - κ² u = f in Ω u = g on ∂Ω</p><p>Weak form: ∫_Ω ∇ u·∇ v dx - κ² ∫_Ω u v dx = ∫_Ω f v dx</p><p>IMPORTANT (geometry): Rodin&#x27;s UniformGrid({M,M,M}) produces coordinates {0,...,M-1}. We scale by 1/(M-1) so the physical domain is [0,1]^3, matching the manufactured expressions (sin(pi*x), x(1-x), etc.).</p><p>NOTE (solver): With the sign &quot;- κ² ∫ u v&quot;, the operator may be symmetric indefinite for larger κ. These tests keep your current CG usage, but mathematically CG requires SPD. If you hit solver issues, switch to MINRES/GMRES or change the PDE to -Δu + κ² u (screened Poisson) to get SPD.</p>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#a2f108334b53c6f1f5f034a165e0f58bb" class="m-doc">Helmholtz3DTest8</a> = Helmholtz3DFixture&lt;8&gt;
+            </dt>
+            <dd>Helper used by the tests to Helmholtz 3 D Test 8.</dd>
+            <dt>
+              using <a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a> = Helmholtz3DFixture&lt;16&gt;
+            </dt>
+            <dd>Helper used by the tests to Helmholtz 3 D Test 16.</dd>
+            <dt>
+              using <a href="#a5cb57b01953ba99cd27e83a4cc41603f" class="m-doc">Helmholtz3DTest32</a> = Helmholtz3DFixture&lt;32&gt;
+            </dt>
+            <dd>Helper used by the tests to Helmholtz 3 D Test 32.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad744866f2c2c3bbbf1378f7741ed973e" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a2f108334b53c6f1f5f034a165e0f58bb" class="m-doc">Helmholtz3DTest8</a>,
+              Helmholtz_P1ExactResidual)</span>
+            </dt>
+            <dd>Verifies helmholtz P1 exact residual for helmholtz 3 D test 8 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aa3e3b1a28905f4fc2504f100c816f541" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              SimpleSine)</span>
+            </dt>
+            <dd>Verifies simple sine for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#aeecaa4cc64a07c55c9ad0b18eeffa33d" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a5cb57b01953ba99cd27e83a4cc41603f" class="m-doc">Helmholtz3DTest32</a>,
+              VariableFrequency)</span>
+            </dt>
+            <dd>Verifies variable frequency for helmholtz 3 D test 32 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a737dcd41aefea24aab6bebf493074f6c" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              MixedPolynomialTrig)</span>
+            </dt>
+            <dd>Verifies mixed polynomial trig for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a6f970f8252b462f0bee0be9cb2a936f8" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              Exponential)</span>
+            </dt>
+            <dd>Verifies exponential for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8fd3e573a48402802019f865f948a8dd" class="m-doc">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              SimpleSine_RefinedSanity)</span>
+            </dt>
+            <dd>Verifies simple sine refined sanity for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a44fc8a38c64e50d1e435b60d1cf4794b" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#a2f108334b53c6f1f5f034a165e0f58bb" class="m-doc">Helmholtz3DTest8</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span>
+            </dt>
+            <dd>Instantiates Helmholtz 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a0670d33db0859203f94b7dbf9924fbcd" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span>
+            </dt>
+            <dd>Instantiates Helmholtz 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#adba49678458dee37fd82eda13babf9b5" class="m-doc">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#a5cb57b01953ba99cd27e83a4cc41603f" class="m-doc">Helmholtz3DTest32</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span>
+            </dt>
+            <dd>Instantiates Helmholtz 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a2f108334b53c6f1f5f034a165e0f58bb"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /><a href="#a2f108334b53c6f1f5f034a165e0f58bb" class="m-doc-self">Helmholtz3DTest8</a> = Helmholtz3DFixture&lt;8&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Helmholtz 3 D Test 8.</p>
+          </div></section>
+          <section class="m-doc-details" id="acd81432d53bdafe4ebf2d419a623ba33"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc-self">Helmholtz3DTest16</a> = Helmholtz3DFixture&lt;16&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Helmholtz 3 D Test 16.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5cb57b01953ba99cd27e83a4cc41603f"><div>
+            <h3>
+              using Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /><a href="#a5cb57b01953ba99cd27e83a4cc41603f" class="m-doc-self">Helmholtz3DTest32</a> = Helmholtz3DFixture&lt;32&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Helper used by the tests to Helmholtz 3 D Test 32.</p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ad744866f2c2c3bbbf1378f7741ed973e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad744866f2c2c3bbbf1378f7741ed973e" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a2f108334b53c6f1f5f034a165e0f58bb" class="m-doc">Helmholtz3DTest8</a>,
+              Helmholtz_P1ExactResidual)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies helmholtz P1 exact residual for helmholtz 3 D test 8 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa3e3b1a28905f4fc2504f100c816f541"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa3e3b1a28905f4fc2504f100c816f541" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              SimpleSine)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies simple sine for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="aeecaa4cc64a07c55c9ad0b18eeffa33d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeecaa4cc64a07c55c9ad0b18eeffa33d" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#a5cb57b01953ba99cd27e83a4cc41603f" class="m-doc">Helmholtz3DTest32</a>,
+              VariableFrequency)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies variable frequency for helmholtz 3 D test 32 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a737dcd41aefea24aab6bebf493074f6c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a737dcd41aefea24aab6bebf493074f6c" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              MixedPolynomialTrig)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies mixed polynomial trig for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6f970f8252b462f0bee0be9cb2a936f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f970f8252b462f0bee0be9cb2a936f8" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              Exponential)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies exponential for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8fd3e573a48402802019f865f948a8dd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fd3e573a48402802019f865f948a8dd" class="m-doc-self">TEST_P</a>(</span><span class="m-doc-wrap"><a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              SimpleSine_RefinedSanity)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Verifies simple sine refined sanity for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.</p>
+          </div></section>
+          <section class="m-doc-details" id="a44fc8a38c64e50d1e435b60d1cf4794b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44fc8a38c64e50d1e435b60d1cf4794b" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#a2f108334b53c6f1f5f034a165e0f58bb" class="m-doc">Helmholtz3DTest8</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Helmholtz 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0670d33db0859203f94b7dbf9924fbcd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0670d33db0859203f94b7dbf9924fbcd" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#acd81432d53bdafe4ebf2d419a623ba33" class="m-doc">Helmholtz3DTest16</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Helmholtz 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.</p>
+          </div></section>
+          <section class="m-doc-details" id="adba49678458dee37fd82eda13babf9b5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Manufactured::<wbr />Helmholtz3D::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adba49678458dee37fd82eda13babf9b5" class="m-doc-self">INSTANTIATE_TEST_SUITE_P</a>(</span><span class="m-doc-wrap">PolytopeCoverage3D,
+              <a href="#a5cb57b01953ba99cd27e83a4cc41603f" class="m-doc">Helmholtz3DTest32</a>,
+              ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge))</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_helmholtz3_d_8cpp.html">&lt;/home/runner/work/rodin/rodin/tests/manufactured/Rodin/P1/Helmholtz3D.cpp&gt;</a></div>
+            </h3>
+            <p>Instantiates Helmholtz 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

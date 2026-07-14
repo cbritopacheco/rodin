@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This is the simplest hyperelastic law, extending linear elasticity to large deformations through the Green-Lagrange strain tensor.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solid_1_1_hyper_elastic_law.html" class="m-doc">HyperElasticLaw</a></p></aside>
+<p>This is the simplest hyperelastic law, extending linear elasticity to large deformations through the Green-Lagrange strain tensor.</p><aside class="m-note m-default"><h4>See also</h4><p>HyperElasticLaw</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -115,11 +115,19 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a5d2eef1d80a803ff8ab19bb2ab369d4d">
-              <span class="m-doc-wrap-bumper"><a href="#a5d2eef1d80a803ff8ab19bb2ab369d4d" class="m-doc-self">SaintVenantKirchhoff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lameFirstParameter,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> shearModulus)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a77b760fc763f5c10cb02a1e17c92af6d" class="m-doc">SaintVenantKirchhoff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span>
             </dt>
             <dd>Constructs a Saint-Venant-Kirchhoff law with the given Lamé parameters.</dd>
+            <dt id="adfb3f079ac7bd2f9ec2b57c136415e3f">
+              <span class="m-doc-wrap-bumper"><a href="#adfb3f079ac7bd2f9ec2b57c136415e3f" class="m-doc-self">SaintVenantKirchhoff</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_saint_venant_kirchhoff.html" class="m-doc">SaintVenantKirchhoff</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a3ccff514e6bb0a10441ee6bdec316830">
+              <span class="m-doc-wrap-bumper"><a href="#a3ccff514e6bb0a10441ee6bdec316830" class="m-doc-self">SaintVenantKirchhoff</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_saint_venant_kirchhoff.html" class="m-doc">SaintVenantKirchhoff</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -133,7 +141,75 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a8bc76204e126aaf61e4440b7bb525a60" class="m-doc-self">getShearModulus</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Gets the shear modulus.</dd>
+            <dt id="a7c3f4a25b01ac9b17fa90d43921b2dfb">
+              <span class="m-doc-wrap-bumper">void <a href="#a7c3f4a25b01ac9b17fa90d43921b2dfb" class="m-doc-self">setCache</a>(</span><span class="m-doc-wrap"><a href="struct_rodin_1_1_solid_1_1_saint_venant_kirchhoff_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+            </dt>
+            <dd>Populates the Green-Lagrange strain and stress cache.</dd>
+            <dt id="a51fb0657e6874256177b2e95478fded8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a51fb0657e6874256177b2e95478fded8" class="m-doc-self">getStrainEnergyDensity</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_saint_venant_kirchhoff_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp;) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Returns the stored strain-energy density.</dd>
+            <dt id="aa875e5dbc449421b1cc4fdb7471aa946">
+              <span class="m-doc-wrap-bumper">void <a href="#aa875e5dbc449421b1cc4fdb7471aa946" class="m-doc-self">getFirstPiolaKirchhoffStress</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; P,
+              const <a href="struct_rodin_1_1_solid_1_1_saint_venant_kirchhoff_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp) const</span>
+            </dt>
+            <dd>Computes the first Piola-Kirchhoff stress.</dd>
+            <dt id="adbcae15abc4f9d19395789c881e27e7d">
+              <span class="m-doc-wrap-bumper">void <a href="#adbcae15abc4f9d19395789c881e27e7d" class="m-doc-self">getMaterialTangent</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dP,
+              const <a href="struct_rodin_1_1_solid_1_1_saint_venant_kirchhoff_1_1_cache.html" class="m-doc">Cache</a>&amp; cache,
+              const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp; dF) const</span>
+            </dt>
+            <dd>Computes the material tangent action.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a77b760fc763f5c10cb02a1e17c92af6d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />SaintVenantKirchhoff::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77b760fc763f5c10cb02a1e17c92af6d" class="m-doc-self">SaintVenantKirchhoff</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> lambda,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> mu)</span></span>
+            </h3>
+            <p>Constructs a Saint-Venant-Kirchhoff law with the given Lamé parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lambda</td>
+                  <td>First Lamé parameter <svg class="m-math" style="width: 0.711em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.828489 8.302191">
+<title>
+$ \lambda $
+</title>
+<defs>
+<path id='eq1-g0-21' d='M3.694147-7.44807C3.395268-8.296887 2.450809-8.296887 2.295392-8.296887C2.223661-8.296887 2.092154-8.296887 2.092154-8.177335C2.092154-8.081694 2.163885-8.069738 2.223661-8.057783C2.402989-8.033873 2.546451-8.009963 2.737733-7.663263C2.857285-7.436115 4.088667-3.861519 4.088667-3.837609C4.088667-3.825654 4.076712-3.813699 3.981071-3.718057L.872727-.573848C.729265-.430386 .633624-.334745 .633624-.179328C.633624-.011955 .777086 .131507 .968369 .131507C1.016189 .131507 1.147696 .107597 1.219427 .035866C1.41071-.143462 3.120299-2.235616 4.208219-3.526775C4.519054-2.594271 4.901619-1.494396 5.272229-.490162C5.332005-.310834 5.391781-.143462 5.559153 .011955C5.678705 .119552 5.702615 .119552 6.03736 .119552H6.264508C6.312329 .119552 6.396015 .119552 6.396015 .02391C6.396015-.02391 6.38406-.035866 6.336239-.083686C6.228643-.215193 6.144956-.430386 6.097136-.573848L3.694147-7.44807Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-21'/>
+</g>
+</svg></td>
+                </tr>
+                <tr>
+                  <td>mu</td>
+                  <td>Second Lamé parameter (shear modulus) <svg class="m-math" style="width: 0.734em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 7.042971 7.47198">
+<title>
+$ \mu $
+</title>
+<defs>
+<path id='eq2-g0-22' d='M1.721544-.263014C2.020423 .011955 2.462765 .119552 2.86924 .119552C3.634371 .119552 4.160399-.394521 4.435367-.765131C4.554919-.131507 5.057036 .119552 5.475467 .119552C5.834122 .119552 6.121046-.095641 6.336239-.526027C6.527522-.932503 6.694894-1.661768 6.694894-1.709589C6.694894-1.769365 6.647073-1.817186 6.575342-1.817186C6.467746-1.817186 6.455791-1.75741 6.40797-1.578082C6.228643-.872727 6.001494-.119552 5.511333-.119552C5.164633-.119552 5.140722-.430386 5.140722-.669489C5.140722-.944458 5.248319-1.374844 5.332005-1.733499L5.66675-3.024658C5.71457-3.251806 5.846077-3.789788 5.905853-4.004981C5.977584-4.291905 6.109091-4.805978 6.109091-4.853798C6.109091-5.033126 5.965629-5.152677 5.786301-5.152677C5.678705-5.152677 5.427646-5.104857 5.332005-4.746202L4.495143-1.422665C4.435367-1.183562 4.435367-1.159651 4.27995-.968369C4.136488-.765131 3.670237-.119552 2.917061-.119552C2.247572-.119552 2.032379-.609714 2.032379-1.171606C2.032379-1.518306 2.139975-1.936737 2.187796-2.139975L2.725778-4.291905C2.785554-4.519054 2.881196-4.901619 2.881196-4.97335C2.881196-5.164633 2.725778-5.272229 2.570361-5.272229C2.462765-5.272229 2.199751-5.236364 2.10411-4.853798L.37061 2.068244C.358655 2.12802 .334745 2.199751 .334745 2.271482C.334745 2.450809 .478207 2.570361 .657534 2.570361C1.004234 2.570361 1.075965 2.295392 1.159651 1.960648L1.721544-.263014Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-22'/>
+</g>
+</svg></td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

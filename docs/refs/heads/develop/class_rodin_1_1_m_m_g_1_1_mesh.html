@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_m_m_g.html">MMG</a>::<wbr/></span>Mesh <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_mesh_8h.html">&lt;Rodin/MMG/Mesh.h&gt;</a></div>
         </h1>
-        <p>Local mesh enriched with <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary tags and constraints.</p>
+        <p>Local mesh enriched with MMG boundary tags and constraints.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> with index sets used by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges),</li><li>required triangles (<code>MG_REQ</code> on triangle entities),</li><li>required tetrahedra (<code>MG_REQ</code> on tetrahedra).</li></ul><p>These sets are preserved when converting to/from native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">MMG5::<wbr />rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">MMG5::<wbr />meshToRodin</a>. The optimizer and level-set wrappers also restore the required index sets when the original indices are still valid in the remeshed output. In MMG3D, required triangles refer to boundary triangles exported to <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary triangles when face-cell incidence is available.</p><aside class="m-note m-info"><h4>Note</h4><p>Required entities are <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> constraints, not an unconditional element-integrity promise for every workflow. In level-set discretization, required entities that are not crossed by the level set are tested to keep their metadata and geometry in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s 2D/3D test cases. If the level set crosses a required entity, <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> may alter that entity in order to conform the output mesh to the isovalue.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside>
+<p>This class extends <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;</a> with index sets used by MMG workflows:</p><ul><li>corners (<code>MG_CRN</code>),</li><li>ridges (<code>MG_GEO</code>),</li><li>required vertices (<code>MG_REQ</code>),</li><li>required edges (<code>MG_REQ</code> on edges),</li><li>required triangles (<code>MG_REQ</code> on triangle entities),</li><li>required tetrahedra (<code>MG_REQ</code> on tetrahedra).</li></ul><p>These sets are preserved when converting to/from native MMG structures via <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#ab9bd883b7f95228226fd6f267d044287" class="m-doc">MMG5::<wbr />rodinToMesh</a> and <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html#a417246fbd6a72f45ccc4274a5e6f981c" class="m-doc">MMG5::<wbr />meshToRodin</a>. The optimizer and level-set wrappers also restore the required index sets when the original indices are still valid in the remeshed output. In MMG3D, required triangles refer to boundary triangles exported to MMG&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as MMG boundary triangles when face-cell incidence is available.</p><aside class="m-note m-info"><h4>Note</h4><p>Required entities are MMG constraints, not an unconditional element-integrity promise for every workflow. In level-set discretization, required entities that are not crossed by the level set are tested to keep their metadata and geometry in Rodin&#x27;s 2D/3D test cases. If the level set crosses a required entity, MMG may alter that entity in order to conform the output mesh to the isovalue.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -110,7 +110,7 @@
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_mesh_1_1_builder.html" class="m-doc">Builder</a>
             </dt>
-            <dd>Class used to build <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a> instances.</dd>
+            <dd>Class used to build MMG::Mesh instances.</dd>
             <dt id="a89c1d83d8324bded6cf429b33480ae21">
               using <a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Rodin::<wbr />Context::<wbr />Local</a>&gt;
             </dt>
@@ -118,7 +118,7 @@
             <dt id="a5d11968e3ae899be574a41d47a17a36f">
               using <a href="#a5d11968e3ae899be574a41d47a17a36f" class="m-doc-self">Context</a> = typename Parent::Context
             </dt>
-            <dd><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> context type (always local for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>).</dd>
+            <dd>Mesh context type (always local for <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>).</dd>
             <dt id="a748c4cb7eb953682ee130a23771ad367">
               using <a href="#a748c4cb7eb953682ee130a23771ad367" class="m-doc-self">CornerIndex</a> = <a href="group___rodin_types.html#gad2973bbf1f33a52a394e09f8a0ed4293" class="m-doc">IndexSet</a>
             </dt>
@@ -160,7 +160,7 @@
             <dt id="a51021126098595338e367d7ee42aa24c">
               <span class="m-doc-wrap-bumper"><a href="#a51021126098595338e367d7ee42aa24c" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Constructs an empty <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> mesh.</dd>
+            <dd>Constructs an empty MMG mesh.</dd>
             <dt id="afceeead3b92b95c2a5b054efc880a83e">
               <span class="m-doc-wrap-bumper"><a href="#afceeead3b92b95c2a5b054efc880a83e" class="m-doc-self">Mesh</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other)</span>
             </dt>
@@ -189,7 +189,7 @@
             <dt id="acf02536ee4b763b4ed403e777a2d8926">
               <span class="m-doc-wrap-bumper">auto <a href="#acf02536ee4b763b4ed403e777a2d8926" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a89c1d83d8324bded6cf429b33480ae21" class="m-doc">Parent</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>
-            <dd>Move-assigns from a parent mesh, clearing <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> metadata.</dd>
+            <dd>Move-assigns from a parent mesh, clearing MMG metadata.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aab9ef675634a1eb941561a46056947d9" class="m-doc">setCorner</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> vertexIdx) -&gt; <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>&amp;</span>
             </dt>

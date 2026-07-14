@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionPrinter&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> grid function printer for local grid functions backed by <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code>.</p>
+        <p>HDF5 grid function printer for local grid functions backed by <code>Math::Vector&lt;Scalar&gt;</code>.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -101,6 +101,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -108,11 +109,21 @@
             </li>
           </ul>
         </nav>
-<p>Serializes a grid function to a standalone <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> field file (one file per grid function, no mesh or FES embedding). The output layout is:</p><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Meta</span><span class="o">/</span><span class="n">Size</span><span class="w">        </span><span class="err">—</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">DOFs</span>
+<p>Serializes a grid function to a standalone HDF5 field file (one file per grid function, no mesh or FES embedding). The output layout is:</p><pre class="m-code"><span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Meta</span><span class="o">/</span><span class="n">Size</span><span class="w">        </span><span class="err">—</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">DOFs</span>
 <span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Meta</span><span class="o">/</span><span class="n">Dimension</span><span class="w">   </span><span class="err">—</span><span class="w"> </span><span class="n">vector</span><span class="w"> </span><span class="n">dimension</span>
-<span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Values</span><span class="o">/</span><span class="n">Data</span><span class="w">      </span><span class="err">—</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="n">DOF</span><span class="w"> </span><span class="n">vector</span></pre><p>This printer is strictly for canonical <a href="namespace_rodin.html" class="m-doc">Rodin</a> grid function persistence. It writes the raw DOF vector only. The <a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">XDMF</a> visualization path (<a href="class_rodin_1_1_i_o_1_1_x_d_m_f.html" class="m-doc">IO::<wbr />XDMF</a>) handles evaluation at vertices/cells separately using <code><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html#a202d14641e452ff224b15cf7e9db3fa9" class="m-doc">HDF5::<wbr />writeXDMFNodeAttribute</a></code> / <code><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html#a62dcf1eb08b2f13cd8c5dbc56cf08c61" class="m-doc">HDF5::<wbr />writeXDMFCellAttribute</a></code>.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md137"><h3><a href="#autotoc_md137">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">GridFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="o">/</span><span class="n">GridFunction</span><span class="o">/</span><span class="n">Values</span><span class="o">/</span><span class="n">Data</span><span class="w">      </span><span class="err">—</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="n">DOF</span><span class="w"> </span><span class="n">vector</span></pre><p>This printer is strictly for canonical Rodin grid function persistence. It writes the raw DOF vector only. The XDMF visualization path (IO::XDMF) handles evaluation at vertices/cells separately using <code>HDF5::writeXDMFNodeAttribute</code> / <code>HDF5::writeXDMFCellAttribute</code>.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md137"><h3><a href="#autotoc_md137">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">GridFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">GridFunctionPrinter</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;field.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math_dc6de039808d71549c96625799a50b75.html" class="m-doc">GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a></p></aside></section>
+<span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;field.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionLoader&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function printers.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -121,7 +132,7 @@
             </dt>
             <dd>Data storage type.</dd>
             <dt id="a87ab5050b41f14d97440bab3534e33ae">
-              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
+              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being printed.</dd>
             <dt id="aea26ce1ae1c8e16f264f0e3d8dc7827b">
@@ -143,13 +154,13 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Stream-based printing is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</dd>
+            <dd>Stream-based printing is not supported for HDF5.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Writes the grid function to a standalone <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> field file.</dd>
+            <dd>Writes the grid function to a standalone HDF5 field file.</dd>
           </dl>
         </section>
         <section>
@@ -174,14 +185,14 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a7c84cfa9805fac76a8f3f3600270724b"><div>
+          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES, class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Stream-based printing is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</p>
+            <p>Stream-based printing is not supported for HDF5.</p>
 <p>Always raises an exception. Use the file-path overload instead.</p>
           </div></section>
           <section class="m-doc-details" id="ad71af491000e3f2eccd987fe9ad1a999"><div>
@@ -191,7 +202,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Writes the grid function to a standalone <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> field file.</p>
+            <p>Writes the grid function to a standalone HDF5 field file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -199,7 +210,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file path.</td>
+                  <td>Output HDF5 file path.</td>
                 </tr>
               </tbody>
             </table>

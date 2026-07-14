@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_polytope.html">Polytope</a>::<wbr/></span>Key <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
         </h1>
-        <p><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> index array identifying a polytope in the mesh.</p>
+        <p>Vertex index array identifying a polytope in the mesh.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -85,11 +85,14 @@
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>A <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a> stores the vertex indices that define a polytope. Two polytopes with the same vertex set (in any order) are topologically identical. The <a href="struct_rodin_1_1_geometry_1_1_polytope_1_1_key_1_1_symmetric_hash.html" class="m-doc">SymmetricHash</a> and <a href="struct_rodin_1_1_geometry_1_1_polytope_1_1_key_1_1_symmetric_equality.html" class="m-doc">SymmetricEquality</a> functors compare keys ignoring vertex ordering, which allows efficient lookup of polytopes regardless of how their vertices are listed.</p><p>The underlying storage is a fixed-size array of RODIN_MAXIMUM_POLYTOPE_VERTICES entries with a size counter, so that keys do not allocate heap memory.</p>
+<p>A Key stores the vertex indices that define a polytope. Two polytopes with the same vertex set (in any order) are topologically identical. The SymmetricHash and SymmetricEquality functors compare keys ignoring vertex ordering, which allows efficient lookup of polytopes regardless of how their vertices are listed.</p><p>The underlying storage is a fixed-size array of RODIN_MAXIMUM_POLYTOPE_VERTICES entries with a size counter, so that keys do not allocate heap memory.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -101,6 +104,120 @@
               struct <a href="struct_rodin_1_1_geometry_1_1_polytope_1_1_key_1_1_symmetric_hash.html" class="m-doc">SymmetricHash</a>
             </dt>
             <dd>Hash functor that produces the same hash for any permutation of the vertex indices.</dd>
+            <dt id="a31342426503cebfeb90c5e73457556a5">
+              using <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc-self">Vertices</a> = std::array&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>, <a href="group___rodin_directives.html#ga8da95e1a198ef17db1cf14ede7219d07" class="m-doc">RODIN_<wbr />MAXIMUM_<wbr />POLYTOPE_<wbr />VERTICES</a>&gt;
+            </dt>
+            <dd>Fixed-capacity storage of vertex indices (no heap allocation).</dd>
+            <dt id="a95898ea92fa7f65c0271b7de20bff6d0">
+              using <a href="#a95898ea92fa7f65c0271b7de20bff6d0" class="m-doc-self">iterator</a> = Vertices::iterator
+            </dt>
+            <dd>Iterator over the vertex indices.</dd>
+            <dt id="a611706102e5cefb2c61e9349fd7726ce">
+              using <a href="#a611706102e5cefb2c61e9349fd7726ce" class="m-doc-self">const_iterator</a> = Vertices::const_iterator
+            </dt>
+            <dd>Const iterator over the vertex indices.</dd>
+            <dt id="aa12401d77c30c3c027bf0df312061852">
+              using <a href="#aa12401d77c30c3c027bf0df312061852" class="m-doc-self">value_type</a> = <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>
+            </dt>
+            <dd>Element type (a vertex index).</dd>
+            <dt id="a97932fad0faa14516d3777f6280eda97">
+              using <a href="#a97932fad0faa14516d3777f6280eda97" class="m-doc-self">reference</a> = <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;
+            </dt>
+            <dd>Reference to a vertex index.</dd>
+            <dt id="ae0b9b86c7a1031d40f3da5daf9ab7a69">
+              using <a href="#ae0b9b86c7a1031d40f3da5daf9ab7a69" class="m-doc-self">const_reference</a> = const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;
+            </dt>
+            <dd>Const reference to a vertex index.</dd>
+            <dt id="aee75483e46694f603087d1ac11cb045f">
+              using <a href="#aee75483e46694f603087d1ac11cb045f" class="m-doc-self">size_type</a> = std::uint8_t
+            </dt>
+            <dd>Type used for the vertex count.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a542233acc96a6a742beb57c73583b20c">
+              <span class="m-doc-wrap-bumper">static auto <a href="#a542233acc96a6a742beb57c73583b20c" class="m-doc-self">sm64</a>(</span><span class="m-doc-wrap">std::uint64_t x) -&gt; std::uint64_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>SplitMix64 bit-mixing hash of a 64-bit value.</dd>
+            <dt id="aeecc8f7fa5ff390b5e63f6807fce2b4b">
+              <span class="m-doc-wrap-bumper">static void <a href="#aeecc8f7fa5ff390b5e63f6807fce2b4b" class="m-doc-self">cswap</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; a,
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp; b) <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Sorts <code>a</code> and <code>b</code> into non-decreasing order.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a864f3bdec0a6b38a9582783f3dcc16bb">
+              <span class="m-doc-wrap-bumper"><a href="#a864f3bdec0a6b38a9582783f3dcc16bb" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs an empty key (zero vertices).</dd>
+            <dt id="a6f94f4f7f790693b25c2f5f78fb91e41">
+              <span class="m-doc-wrap-bumper"><a href="#a6f94f4f7f790693b25c2f5f78fb91e41" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">std::uint8_t n)</span>
+            </dt>
+            <dd>Constructs a key with <code>n</code> uninitialized vertices.</dd>
+            <dt id="a5c8506495db233d8e277b0c0e25fec63">
+              <span class="m-doc-wrap-bumper"><a href="#a5c8506495db233d8e277b0c0e25fec63" class="m-doc-self">Key</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;<a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt; vertices)</span>
+            </dt>
+            <dd>Constructs a key from a list of vertex indices.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="add5bf95f14914c57925bff61538572c6">
+              <span class="m-doc-wrap-bumper">auto <a href="#add5bf95f14914c57925bff61538572c6" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            </dt>
+            <dd>Returns a reference to vertex index <code>i</code>.</dd>
+            <dt id="aff3425bd8555bfc431e5074b110862ab">
+              <span class="m-doc-wrap-bumper">auto <a href="#aff3425bd8555bfc431e5074b110862ab" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            </dt>
+            <dd>Returns a const reference to vertex index <code>i</code>.</dd>
+            <dt id="aa46eb493b87ce51e45db964d605addfb">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa46eb493b87ce51e45db964d605addfb" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) -&gt; <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            </dt>
+            <dd>Returns a reference to vertex index <code>i</code>.</dd>
+            <dt id="a89d22b7341e63a2b6e52bcd5198ef53d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a89d22b7341e63a2b6e52bcd5198ef53d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::uint8_t i) const -&gt; const <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&amp;</span>
+            </dt>
+            <dd>Returns a const reference to vertex index <code>i</code>.</dd>
+            <dt id="a4943ca670cbf2546197e947970db156c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4943ca670cbf2546197e947970db156c" class="m-doc-self">resize</a>(</span><span class="m-doc-wrap">std::uint8_t n) -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp;</span>
+            </dt>
+            <dd>Sets the number of vertices; returns a reference to this key.</dd>
+            <dt id="a2eed92447eb853cffcba8314e9780ef2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2eed92447eb853cffcba8314e9780ef2" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; std::uint8_t</span>
+            </dt>
+            <dd>Returns the number of vertices.</dd>
+            <dt id="afba173cbbb64c077ff36edbff38b4e7f">
+              <span class="m-doc-wrap-bumper">auto <a href="#afba173cbbb64c077ff36edbff38b4e7f" class="m-doc-self">getVertices</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a31342426503cebfeb90c5e73457556a5" class="m-doc">Vertices</a>&amp;</span>
+            </dt>
+            <dd>Returns the underlying fixed-capacity vertex array.</dd>
+            <dt id="a0a75fa91f74431a633d5801c541716b9">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0a75fa91f74431a633d5801c541716b9" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) -&gt; Vertices::iterator</span>
+            </dt>
+            <dd>Returns an iterator to the first vertex index.</dd>
+            <dt id="ad0798fb4f19165b337af66ac52f76808">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad0798fb4f19165b337af66ac52f76808" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) -&gt; Vertices::iterator</span>
+            </dt>
+            <dd>Returns an iterator past the last vertex index.</dd>
+            <dt id="a19e7d327d764510125bdb8654f684ae4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a19e7d327d764510125bdb8654f684ae4" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) const -&gt; Vertices::const_iterator</span>
+            </dt>
+            <dd>Returns a const iterator to the first vertex index.</dd>
+            <dt id="ab47faa4ef83b87387951790d26394899">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab47faa4ef83b87387951790d26394899" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const -&gt; Vertices::const_iterator</span>
+            </dt>
+            <dd>Returns a const iterator past the last vertex index.</dd>
+            <dt id="af0dd9205158ccf7bcfcd8ff81f79c927">
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#af0dd9205158ccf7bcfcd8ff81f79c927" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int)</span>
+            </dt>
+            <dd>Serializes the key (for boost::serialization).</dd>
           </dl>
         </section>
       </div>

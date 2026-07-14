@@ -76,20 +76,94 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc.html">PETSc</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc_1_1_assembly.html">Assembly</a>::<wbr/></span>MatrixSetup <span class="m-thin">class</span>
         </h1>
-        <p>Sets up a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix for assembly while reusing compatible existing structure.</p>
+        <p>Sets up a PETSc matrix for assembly while reusing compatible existing structure.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md178">Contract</a></li>
-            <li><a href="#autotoc_md179">Why this matters</a></li>
+            <li><a href="#autotoc_md177">Contract</a></li>
+            <li><a href="#autotoc_md178">Why this matters</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<section id="autotoc_md178"><h3><a href="#autotoc_md178">Contract</a></h3><p>The caller guarantees that, between successive assemblies of the <em>same</em> matrix object, the sparsity pattern is unchanged. Concretely this means the trial and test finite element spaces and the mesh connectivity are fixed. Vertex coordinates may move (as in an ALE formulation) because that changes geometry, not the connectivity graph, hence not the pattern.</p><p>Because a <code>LinearSystem</code> is bound to fixed finite element spaces, its global dimensions never change over its lifetime: a different mesh or space means a different <code>LinearSystem</code>. <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> has no in-place resize for an already-assembled matrix (<code>MatSetSizes</code> is only valid before the layout is established), so <code>prepare</code> does not attempt one. If it ever observes an already-assembled matrix whose dimensions differ from the requested ones, which can only happen if a <code>LinearSystem</code> is illegally reused across different spaces, it fails the debug assertion.</p></section><section id="autotoc_md179"><h3><a href="#autotoc_md179">Why this matters</a></h3><p>The structural calls <code>MatSetSizes</code> / <code>MatSetType</code> / <code>MatSetFromOptions</code> / <code>MatSetUp</code> re-establish the matrix internals and bump <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a>&#x27;s nonzero-state counter. Preconditioners compare that counter (<code>pc-&gt;matnonzerostate</code> != Amat-&gt;nonzerostate) to decide whether to redo the symbolic factorization. Running the structural calls on every assembly forces external direct solvers (e.g. MUMPS) to recompute their ordering/analysis each time — which, inside a SNES/Newton loop, repeats the expensive symbolic factorization on every residual/Jacobian evaluation.</p><p>When the existing structure is reusable, <code>prepare</code> skips the structural calls and only does <code>MatZeroEntries</code> + refill. No <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> nonzero-pattern policy is set here; if the user wants to forbid or allow new nonzeros, that remains controlled by <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> defaults or explicit user calls to <code>MatSetOption</code>.</p></section>
+<section id="autotoc_md177"><h3><a href="#autotoc_md177">Contract</a></h3><p>The caller guarantees that, between successive assemblies of the <em>same</em> matrix object, the sparsity pattern is unchanged. Concretely this means the trial and test finite element spaces and the mesh connectivity are fixed. Vertex coordinates may move (as in an ALE formulation) because that changes geometry, not the connectivity graph, hence not the pattern.</p><p>Because a <code>LinearSystem</code> is bound to fixed finite element spaces, its global dimensions never change over its lifetime: a different mesh or space means a different <code>LinearSystem</code>. PETSc has no in-place resize for an already-assembled matrix (<code>MatSetSizes</code> is only valid before the layout is established), so <code>prepare</code> does not attempt one. If it ever observes an already-assembled matrix whose dimensions differ from the requested ones, which can only happen if a <code>LinearSystem</code> is illegally reused across different spaces, it fails the debug assertion.</p></section><section id="autotoc_md178"><h3><a href="#autotoc_md178">Why this matters</a></h3><p>The structural calls <code>MatSetSizes</code> / <code>MatSetType</code> / <code>MatSetFromOptions</code> / <code>MatSetUp</code> re-establish the matrix internals and bump PETSc&#x27;s nonzero-state counter. Preconditioners compare that counter (<code>pc-&gt;matnonzerostate</code> != Amat-&gt;nonzerostate) to decide whether to redo the symbolic factorization. Running the structural calls on every assembly forces external direct solvers (e.g. MUMPS) to recompute their ordering/analysis each time — which, inside a SNES/Newton loop, repeats the expensive symbolic factorization on every residual/Jacobian evaluation.</p><p>When the existing structure is reusable, <code>prepare</code> skips the structural calls and only does <code>MatZeroEntries</code> + refill. No PETSc nonzero-pattern policy is set here; if the user wants to forbid or allow new nonzeros, that remains controlled by PETSc defaults or explicit user calls to <code>MatSetOption</code>.</p></section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_p_e_t_sc_1_1_assembly_1_1_matrix_setup_1_1_options.html" class="m-doc">Options</a>
+            </dt>
+            <dd>Requested PETSc matrix layout and setup policy.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1ae693c8153c8a08ac43f1495337c5f8" class="m-doc">MatrixSetup</a>(</span><span class="m-doc-wrap">::Mat matrix) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Wraps an existing PETSc matrix handle.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab9bbad8f48c85b53a2e08504c92e50a5" class="m-doc">prepare</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_p_e_t_sc_1_1_assembly_1_1_matrix_setup_1_1_options.html" class="m-doc">Options</a>&amp; options) const -&gt; PetscErrorCode</span>
+            </dt>
+            <dd>Prepares the matrix for a fresh assembly pass.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1ae693c8153c8a08ac43f1495337c5f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />PETSc::<wbr />Assembly::<wbr />MatrixSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1ae693c8153c8a08ac43f1495337c5f8" class="m-doc-self">MatrixSetup</a>(</span><span class="m-doc-wrap">::Mat matrix) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Wraps an existing PETSc matrix handle.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">matrix&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Matrix to prepare before assembly.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab9bbad8f48c85b53a2e08504c92e50a5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">PetscErrorCode Rodin::<wbr />PETSc::<wbr />Assembly::<wbr />MatrixSetup::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab9bbad8f48c85b53a2e08504c92e50a5" class="m-doc-self">prepare</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_p_e_t_sc_1_1_assembly_1_1_matrix_setup_1_1_options.html" class="m-doc">Options</a>&amp; options) const</span></span>
+            </h3>
+            <p>Prepares the matrix for a fresh assembly pass.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">options&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Requested layout and setup policy.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>PETSc error code from the final zeroing operation.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Virgin matrices receive their sizes, optional type, optional command line options, and <code>MatSetUp</code>. Already-assembled compatible matrices keep their structure and are zeroed for reuse.</p>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

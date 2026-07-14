@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionLoader&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> grid function loader for local grid functions backed by <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code>.</p>
+        <p>HDF5 grid function loader for local grid functions backed by <code>Math::Vector&lt;Scalar&gt;</code>.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -101,6 +101,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -111,7 +112,17 @@
 <p>Reads a standalone grid function field file (one <code>.h5</code> per grid function) and populates the DOF vector. The file is expected to contain <code>/GridFunction/Meta/{Size,Dimension}</code> and <code>/GridFunction/Values/Data</code>.</p><p>The grid function must already be attached to a finite element space of matching size and dimension before loading.</p><p>Stream-based loading is not supported; only file-path loading is available.</p><section id="autotoc_md136"><h3><a href="#autotoc_md136">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="o">::</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;field.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math68cb348ce8bf27093bff6c8086fbdd6f.html" class="m-doc">GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;</a></p></aside></section>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;field.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionPrinter&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</p></aside></section>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_base.html" class="m-doc">GridFunctionLoaderBase&lt;FES, Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function loaders.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -120,7 +131,7 @@
             </dt>
             <dd>Data storage type.</dd>
             <dt id="a87ab5050b41f14d97440bab3534e33ae">
-              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
+              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a8a7526d9972740e94101fd10bef3831f" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being loaded.</dd>
             <dt id="aedc90d504ba347a2d069c6c004614f5d">
@@ -144,11 +155,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Stream-based loading is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</dd>
+            <dd>Stream-based loading is not supported for HDF5.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Loads a grid function from a standalone <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> field file.</dd>
+            <dd>Loads a grid function from a standalone HDF5 field file.</dd>
           </dl>
         </section>
         <section>
@@ -180,7 +191,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Stream-based loading is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</p>
+            <p>Stream-based loading is not supported for HDF5.</p>
 <p>Always raises an exception. Use the file-path overload instead.</p>
           </div></section>
           <section class="m-doc-details" id="aaf8f2181bfec879c94a4de41ae30b55c"><div>
@@ -190,7 +201,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionLoader&lt;FileFormat::<wbr />HDF5, FES, Math::<wbr />Vector&lt;Scalar&gt;&gt;&lt;FES, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Loads a grid function from a standalone <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> field file.</p>
+            <p>Loads a grid function from a standalone HDF5 field file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -198,7 +209,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Path to the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> field file.</td>
+                  <td>Path to the HDF5 field file.</td>
                 </tr>
               </tbody>
             </table>

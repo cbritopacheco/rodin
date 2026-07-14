@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html">Euclidean</a>::<wbr/></span>LineSegment2D <span class="m-thin">class</span>
         </h1>
-        <p>Line segment in 2D <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> space.</p>
+        <p>Line segment in 2D Euclidean space.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a></p></aside><p>Represents a finite line segment connecting two points <svg class="m-math" style="width: 3.768em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 36.17323 11.955168">
+<aside class="m-note m-default"><h4>See also</h4><p>Line2D, Point2D</p></aside><p>Represents a finite line segment connecting two points <svg class="m-math" style="width: 3.768em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 36.17323 11.955168">
 <title>
 $ (x_0, y_0) $
 </title>
@@ -237,7 +237,7 @@ $ t $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-116'/>
 </g>
-</svg>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_point2_d.html" class="m-doc">Point2D</a>, <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_line2_d.html" class="m-doc">Line2D</a></p></aside></section>
+</svg>.</p><aside class="m-note m-default"><h4>See also</h4><p>Point2D, Line2D</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -245,7 +245,7 @@ $ t $
               <div class="m-doc-template">template&lt;class Derived, class T&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base&lt;LineSegment2D&lt;T&gt;, T&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_euclidean_1_1_base.html" class="m-doc">Base</a> class for <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> geometric objects using CRTP.</dd>
+            <dd>Base class for Euclidean geometric objects using CRTP.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -614,7 +614,7 @@ $ t \in [0, 1] $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> distance <svg class="m-math" style="width: 10.303em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.913498 11.955168">
+                  <td>Euclidean distance <svg class="m-math" style="width: 10.303em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 98.913498 11.955168">
 <title>
 $ \|(x_1, y_1) - (x_0, y_0)\| $
 </title>
@@ -665,7 +665,7 @@ $ \|(x_1, y_1) - (x_0, y_0)\| $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Unit vector from <code><a href="#a2c531e1bbffa27bc8aff136ae813667b" class="m-doc">start()</a></code> to <code><a href="#a9702562c2eb4d4c875dde96f808a431a" class="m-doc">end()</a></code></td>
+                  <td>Unit vector from <code>start()</code> to <code>end()</code></td>
                 </tr>
               </tfoot>
             </table>
@@ -898,7 +898,7 @@ $ (x_1, y_1) $
                   <td>If segments do not intersect or are parallel</td>
                 </tr>
                 <tr>
-                  <td>None</td>
+                  <td>Point2D</td>
                   <td>The intersection point if it exists</td>
                 </tr>
               </tbody>

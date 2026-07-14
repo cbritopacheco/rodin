@@ -80,25 +80,46 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md516">Workflow</a></li>
+            <li><a href="#autotoc_md426">Workflow</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#define-members">Defines</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code><a href="_p_e_t_sc_2_solver_2_c_g_8h.html#acd85a42a8ce2254ae97d31ea641e9266" class="m-doc">PETSc::<wbr />Solver::<wbr />CG</a></code> (and <code><a href="_p_e_t_sc_2_solver_2_g_m_r_e_s_8h.html#ac5dce6c655af6ba8fd9d554d3cef1257" class="m-doc">PETSc::<wbr />Solver::<wbr />GMRES</a></code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed through the PETSc-backed <code>Integral</code> path. For MPI grid functions this evaluates a distributed <code>LinearForm</code>, so PETSc performs the communicator-wide reduction internally.</p><section id="autotoc_md516"><h4><a href="#autotoc_md516">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;<a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The PETSc-backed <code>Integral</code> path returns the communicator-wide L² error, which is checked against the manufactured tolerance.</li></ol></section>
+<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code>PETSc::Solver::CG</code> (and <code>PETSc::Solver::GMRES</code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed through the PETSc-backed <code>Integral</code> path. For MPI grid functions this evaluates a distributed <code>LinearForm</code>, so PETSc performs the communicator-wide reduction internally.</p><section id="autotoc_md426"><h4><a href="#autotoc_md426">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;PETSc::Math::LinearSystem, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The PETSc-backed <code>Integral</code> path returns the communicator-wide L² error, which is checked against the manufactured tolerance.</li></ol></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_tests.html" class="m-doc">Rodin::Tests</a></dt>
-            <dd>Tests of the <a href="namespace_rodin.html" class="m-doc">Rodin</a> library</dd>
+            <dd>Tests of the Rodin library</dd>
             <dt>namespace <a href="namespace_rodin_1_1_tests_1_1_manufactured.html" class="m-doc">Rodin::Tests::Manufactured</a></dt>
-            <dd>Manufactured solution test cases</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Rodin::<wbr />Tests::<wbr />Unit</a>.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a3c04138a5bfe5d72780bb7e82a18e627">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c04138a5bfe5d72780bb7e82a18e627" class="m-doc-self">main</a>(</span><span class="m-doc-wrap">int argc,
+              char** argv) -&gt; int</span>
+            </dt>
+            <dd>Initializes the parallel test runtime and runs the GoogleTest suite.</dd>
+          </dl>
+        </section>
+        <section id="define-members">
+          <h2><a href="#define-members">Defines</a></h2>
+          <dl class="m-doc">
+            <dt id="a3144ce213c9f1f24a5633ea5ac43a9ee">
+              <span class="m-doc-wrap-bumper">#define <a href="#a3144ce213c9f1f24a5633ea5ac43a9ee" class="m-doc-self">RODIN_GETPID</a></span>
+            </dt>
+            <dd>Compatibility macro used by MPI manufactured tests to query the current process id.</dd>
           </dl>
         </section>
       </div>

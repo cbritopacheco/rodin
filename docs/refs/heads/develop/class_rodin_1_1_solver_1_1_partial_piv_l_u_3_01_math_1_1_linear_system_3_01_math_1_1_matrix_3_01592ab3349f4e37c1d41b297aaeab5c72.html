@@ -97,6 +97,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -112,15 +114,65 @@
             <dd>Abstract base class for linear system solvers.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="a8676c7782d82e367b44ebb82e1e4b3a3">
+              using <a href="#a8676c7782d82e367b44ebb82e1e4b3a3" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Assembled operator type.</dd>
+            <dt id="a67d1c43c805caee8285834ec30abf729">
+              using <a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a>&lt;<a href="#a8676c7782d82e367b44ebb82e1e4b3a3" class="m-doc">OperatorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Associated problem base type.</dd>
+            <dt id="a85385c6607a397925a213e9098256fdc">
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a7786ab571af9c874fd40c750e9260eab">
+              <span class="m-doc-wrap-bumper"><a href="#a7786ab571af9c874fd40c750e9260eab" class="m-doc-self">PartialPivLU</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
+            </dt>
+            <dd>Constructs the solver from the problem to be solved.</dd>
+            <dt id="a4053082728de9207a786a797eb0878c8">
+              <span class="m-doc-wrap-bumper"><a href="#a4053082728de9207a786a797eb0878c8" class="m-doc-self">PartialPivLU</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a91243f2b07810a37d5b861f942562f60">
+              <span class="m-doc-wrap-bumper"><a href="#a91243f2b07810a37d5b861f942562f60" class="m-doc-self">PartialPivLU</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6b9b190e19258ba3053561b462d0d869" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a3c28e3be8d6ee14eb1c5e01d884f0cd9">
+              <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Solves the assembled linear system.</dd>
+            <dt id="a6b9b190e19258ba3053561b462d0d869">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6b9b190e19258ba3053561b462d0d869" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a polymorphic copy of this solver.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a012d750968853801d218517a52307961" class="m-doc">getSolver</a>(</span><span class="m-doc-wrap">) const -&gt; const Eigen::PartialPivLU&lt;OperatorType&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a012d750968853801d218517a52307961" class="m-doc">getSolver</a>(</span><span class="m-doc-wrap">) const -&gt; const Eigen::PartialPivLU&lt;<a href="#a8676c7782d82e367b44ebb82e1e4b3a3" class="m-doc">OperatorType</a>&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the underlying Eigen solver.</dd>
             <dt>
@@ -135,30 +187,12 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a6b9b190e19258ba3053561b462d0d869"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_partial_piv_l_u.html" class="m-doc">PartialPivLU</a>* Rodin::<wbr />Solver::<wbr />PartialPivLU&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b9b190e19258ba3053561b462d0d869" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of this object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
-          </div></section>
           <section class="m-doc-details" id="a012d750968853801d218517a52307961"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Scalar&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const Eigen::PartialPivLU&lt;OperatorType&gt;&amp; Rodin::<wbr />Solver::<wbr />PartialPivLU&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a012d750968853801d218517a52307961" class="m-doc-self">getSolver</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const Eigen::PartialPivLU&lt;<a href="#a8676c7782d82e367b44ebb82e1e4b3a3" class="m-doc">OperatorType</a>&gt;&amp; Rodin::<wbr />Solver::<wbr />PartialPivLU&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />Matrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a012d750968853801d218517a52307961" class="m-doc-self">getSolver</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the underlying Eigen solver.</p>
 <p>Useful for diagnostics such as permutationP(), matrixLU(), rcond().</p>

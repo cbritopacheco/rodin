@@ -86,7 +86,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">Solution</td>
-              <td>Solution type (typically <code><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">PETSc::<wbr />Variational::<wbr />GridFunction</a>&lt;FES&gt;</code>).</td>
+              <td>Solution type (typically <code>PETSc::Variational::GridFunction&lt;FES&gt;</code>).</td>
             </tr>
             <tr>
               <td>FES</td>
@@ -100,38 +100,23 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Inherits all functionality from <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TrialFunction</a> and triggers PETSc-specific CTAD. The CTAD deduction guide automatically sets the <code>Solution</code> template parameter to <code><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">PETSc::<wbr />Variational::<wbr />GridFunction</a>&lt;FES&gt;</code>, ensuring that the discrete solution is stored in a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>Vec</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TrialFunction</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::Variational::TrialFunction&lt;Solution, FES&gt;</a>
-            </dt>
-            <dd>Represents a function which belongs to a trial space.</dd>
-          </dl>
-        </section>
+<p>Inherits all functionality from <code>Rodin::Variational::TrialFunction</code> and triggers PETSc-specific CTAD. The CTAD deduction guide automatically sets the <code>Solution</code> template parameter to <code>PETSc::Variational::GridFunction&lt;FES&gt;</code>, ensuring that the discrete solution is stored in a PETSc <code>Vec</code>.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Variational::TrialFunction</p></aside>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
-            <dd>Finite element space type (e.g. <code>P1&lt;Real, Mesh&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;</code>).</dd>
+            <dd>Finite element space type (e.g. <code>P1&lt;Real, Mesh&lt;Context::Local&gt;&gt;</code>).</dd>
             <dt id="a7db524a9fa96ba0be5f7bc781200b4c5">
-              using <a href="#a7db524a9fa96ba0be5f7bc781200b4c5" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TrialFunction</a>&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;
+              using <a href="#a7db524a9fa96ba0be5f7bc781200b4c5" class="m-doc-self">Parent</a> = Rodin::Variational::TrialFunction&lt;Solution, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;
             </dt>
-            <dd>Parent class type (<a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TrialFunction</a>).</dd>
-            <dt id="abb15ff3575ce3feabf17c893d1ec0442">
-              using <a href="#abb15ff3575ce3feabf17c893d1ec0442" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_trial_function_reference.html#aa683a89b41447ac62e476505b38070dd" class="m-doc">TrialFunctionReference</a>&lt;<a href="class_rodin_1_1_variational_1_1_trial_function.html#ac0f4c8c4e192b6f1f05835914421d472" class="m-doc">SolutionType</a>, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;
-            </dt>
-            <dd>Parent class type.</dd>
+            <dd>Parent class type (<code>Rodin::Variational::TrialFunction</code>).</dd>
           </dl>
         </section>
       </div>

@@ -114,16 +114,26 @@ $ a(u,v) $
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Operator&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_bilinear_form_base_3_01_operator_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::BilinearFormBase&lt;Operator&gt;&gt;</a>
+            </dt>
+            <dd>Traits for bilinear form bases.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES, class Operator&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_bilinear_form_3_01_solution_00_0100cb8db1d5ffafced21137b8822c4ecb.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Operator&gt;&gt;</a>
+            </dt>
+            <dd>Traits for bilinear forms.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Operator&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_base.html" class="m-doc">Rodin::Variational::BilinearFormBase</a>
@@ -133,7 +143,12 @@ $ a(u,v) $
               <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_0917ba3400256f1e7c6ccfbcc8158816b.html" class="m-doc">Rodin::Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::SparseMatrix&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd>Speciallization of <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">BilinearForm</a> for a matrix type.</dd>
+            <dd>Speciallization of BilinearForm for a matrix type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Solution, class TrialFES, class TestFES, class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_bilinear_form_3_01_solution_00_01_trial_f_e_s_00_01_test_f_e_s_0fe8fb405df58001aebd9c045d37f9107.html" class="m-doc">Rodin::Variational::BilinearForm&lt;Solution, TrialFES, TestFES, Math::Matrix&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Specialization of BilinearForm for a dense matrix operator.</dd>
           </dl>
         </section>
       </div>

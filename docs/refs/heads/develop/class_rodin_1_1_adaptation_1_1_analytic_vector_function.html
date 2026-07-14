@@ -75,10 +75,10 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_analytic_function_adapters_8h.html">&lt;Rodin/Adaptation/AnalyticFunctionAdapters.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> F&gt;</div>
+          <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">F</a>&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>AnalyticVectorFunction <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Vector-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp;) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Real&gt;</code>.</p>
+        <p>Vector-valued <code>FunctionBase</code> adapter built from a single callable of signature <code>(const Geometry::Point&amp;) -&gt; Math::SpatialVector&lt;Real&gt;</code>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -104,32 +104,11 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5093cb103601a153b81d39b3f809d311" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a5093cb103601a153b81d39b3f809d311">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5093cb103601a153b81d39b3f809d311" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Polymorphically copies the derived function.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a5093cb103601a153b81d39b3f809d311"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> F&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">AnalyticVectorFunction</a>* Rodin::<wbr />Adaptation::<wbr />AnalyticVectorFunction&lt;F&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5093cb103601a153b81d39b3f809d311" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of this object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
-                </tr>
-              </tfoot>
-            </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
-          </div></section>
         </section>
       </div>
     </div>

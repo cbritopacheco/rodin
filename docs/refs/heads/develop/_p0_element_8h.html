@@ -80,15 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md446">Supported Specializations</a></li>
-            <li><a href="#autotoc_md447">Usage Example</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md383">Supported Specializations</a></li>
+            <li><a href="#autotoc_md384">Usage Example</a></li>
           </ul>
         </nav>
 <p>This file provides the P0Element class template for piecewise constant finite elements. P0 elements have:</p><ul><li>One degree of freedom per element (at the barycenter)</li><li>Constant basis function: <svg class="m-math" style="width: 4.613em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 44.284141 11.955168">
@@ -127,7 +120,7 @@ $ \nabla \phi = 0 $
 <use x='20.211602' y='0' xlink:href='#eq2-g2-61'/>
 <use x='32.637083' y='0' xlink:href='#eq2-g2-48'/>
 </g>
-</svg></li></ul><section id="autotoc_md446"><h3><a href="#autotoc_md446">Supported Specializations</a></h3><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></li></ul><section id="autotoc_md383"><h3><a href="#autotoc_md383">Supported Specializations</a></h3><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -177,7 +170,7 @@ $ j = i \mod d $
 <use x='49.158369' y='0' xlink:href='#eq5-g1-100'/>
 <use x='59.646686' y='0' xlink:href='#eq5-g0-100'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md447"><h3><a href="#autotoc_md447">Usage Example</a></h3><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+</svg></li></ul></section><section id="autotoc_md384"><h3><a href="#autotoc_md384">Usage Example</a></h3><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
 <span class="c1">// Scalar P0 element (real or complex)</span>
 <span class="n">RealP0Element</span><span class="w"> </span><span class="nf">p0_real</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
@@ -185,58 +178,6 @@ $ j = i \mod d $
 
 <span class="c1">// Vector P0 element (2D)</span>
 <span class="n">VectorP0Element</span><span class="w"> </span><span class="nf">p0_vec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2 DOFs</span></pre><p>P0 elements are commonly used in discontinuous Galerkin (DG) methods, mixed finite element formulations, and as test spaces for finite volume schemes.</p></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element.html" class="m-doc">Rodin::Variational::P0Element</a>
-            </dt>
-            <dd>Degree 0 Lagrange element.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_linear_form.html" class="m-doc">Rodin::Variational::P0Element::LinearForm</a>
-            </dt>
-            <dd>Represents a linear form of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function.html" class="m-doc">Rodin::Variational::P0Element::BasisFunction</a>
-            </dt>
-            <dd>Represents the constant basis function of a <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> scalar element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::P0Element::BasisFunction::DerivativeFunction</a>
-            </dt>
-            <dd>Represents a derivative of the <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> basis function (always zero).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Piecewise constant (degree 0) vector Lagrange element.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_linear_form.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::LinearForm</a>
-            </dt>
-            <dd>Represents a linear form (evaluation functional) for vector <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> elements.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1_basis_function.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction</a>
-            </dt>
-            <dd>Represents a piecewise constant vector basis function.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p0_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_1db7a36973543fb7f981e50caab19d74.html" class="m-doc">Rodin::Variational::P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
-            </dt>
-            <dd>Represents a derivative of the vector <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> basis function (always zero).</dd>
-          </dl>
-        </section>
       </div>
     </div>
   </div>

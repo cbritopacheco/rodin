@@ -74,10 +74,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>AssemblyBase&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a> specialization for the identification Dirichlet BC <code>u = A(v)</code>.</p>
+        <p>AssemblyBase specialization for the identification Dirichlet BC <code>u = A(v)</code>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -86,6 +86,8 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -98,47 +100,118 @@
             <dt>
               class <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a>
             </dt>
-            <dd><a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">Base</a> class for all objects in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_form_language.html" class="m-doc">FormLanguage</a> system.</dd>
+            <dd>Base class for all objects in Rodin&#x27;s FormLanguage system.</dd>
           </dl>
         </section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+              <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
               class <a href="class_rodin_1_1_assembly_1_1_open_m_p_3_01_index_map_3_01std_1_1pair_3_01_index_array_00_01_matha8b8ef1c7463599156c514d3fe5101ee.html" class="m-doc">OpenMP&lt;IndexMap&lt;std::pair&lt;IndexArray, Math::Vector&lt;Scalar&gt;&gt;&gt;, Variational::DirichletBC&lt;Variational::TrialFunction&lt;Sol1, FES1&gt;, Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
             <dd>OpenMP assembler for the identification Dirichlet BC <code>u = A(v)</code>.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="ac73715afa4a4d3664c4295dd91052dd7">
+              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;
+            </dt>
+            <dd>Shape-function expression type.</dd>
+            <dt id="a80a1d4273f96998f8ead3f6f76cfd02f">
+              using <a href="#a80a1d4273f96998f8ead3f6f76cfd02f" class="m-doc-self">InputType</a> = <a href="class_rodin_1_1_assembly_1_1_dirichlet_b_c_shape_function_assembly_input.html" class="m-doc">DirichletBCShapeFunctionAssemblyInput</a>&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;
+            </dt>
+            <dd>Input data type.</dd>
+            <dt id="a22049d49d0b8d1c53b40e105ce05f884">
+              using <a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc-self">OutputType</a> = <a href="group___rodin_types.html#ga6c5e391ad8021755d9d9f9d5755539cb" class="m-doc">IndexMap</a>&lt;std::pair&lt;<a href="namespace_rodin.html#a3b5d284c6fb7166b753c5664773266cc" class="m-doc">IndexArray</a>, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&gt;&gt;
+            </dt>
+            <dd>Output map for slave-to-master identifications.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ab9f33f0df38a690d6bfa27727601f32d">
+              <span class="m-doc-wrap-bumper"><a href="#ab9f33f0df38a690d6bfa27727601f32d" class="m-doc-self">AssemblyBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="a70ba68674acf5111c90db50f4116bfd3">
+              <span class="m-doc-wrap-bumper"><a href="#a70ba68674acf5111c90db50f4116bfd3" class="m-doc-self">AssemblyBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="aa5d9ca9bc7de284340be634137944a7c">
+              <span class="m-doc-wrap-bumper"><a href="#aa5d9ca9bc7de284340be634137944a7c" class="m-doc-self">AssemblyBase</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="a12359dfd07bf794886d2343455449382">
+              <span class="m-doc-wrap-bumper"><a href="#a12359dfd07bf794886d2343455449382" class="m-doc-self">~AssemblyBase</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
+            </dt>
+            <dd>Virtual destructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8c4c517560f41cda2246faf15f4bef4c" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc">OutputType</a>&amp; out,
+              const <a href="#a80a1d4273f96998f8ead3f6f76cfd02f" class="m-doc">InputType</a>&amp; data) const <span class="m-label m-flat m-warning">pure virtual</span></span>
+            </dt>
+            <dd>Executes identification Dirichlet assembly.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0f610752ceb018058f57d5dfd588e8d2" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>* <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Creates a polymorphic copy.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a8c4c517560f41cda2246faf15f4bef4c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />AssemblyBase&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8c4c517560f41cda2246faf15f4bef4c" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#a22049d49d0b8d1c53b40e105ce05f884" class="m-doc">OutputType</a>&amp; out,
+              const <a href="#a80a1d4273f96998f8ead3f6f76cfd02f" class="m-doc">InputType</a>&amp; data) const <span class="m-label m-warning">pure virtual</span></span></span>
+            </h3>
+            <p>Executes identification Dirichlet assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">out</td>
+                  <td>Output map of slave DOFs to master DOF coefficients.</td>
+                </tr>
+                <tr>
+                  <td>data</td>
+                  <td>Boundary condition input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a0f610752ceb018058f57d5dfd588e8d2"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>* Rodin::<wbr />Assembly::<wbr />AssemblyBase&lt;IndexMap&lt;std::<wbr />pair&lt;IndexArray, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;, Variational::<wbr />DirichletBC&lt;Variational::<wbr />TrialFunction&lt;Sol1, FES1&gt;, Variational::<wbr />ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;&gt;&gt;&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f610752ceb018058f57d5dfd588e8d2" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a polymorphic copy of this object.</p>
+            <p>Creates a polymorphic copy.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Pointer to a new copy.</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
           </div></section>
         </section>
       </div>

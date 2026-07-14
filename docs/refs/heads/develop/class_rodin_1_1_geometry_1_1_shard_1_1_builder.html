@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_geometry.html">Geometry</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_geometry_1_1_shard.html">Shard</a>::<wbr/></span>Builder <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_shard_8h.html">&lt;Rodin/Geometry/Shard.h&gt;</a></div>
         </h1>
-        <p>Incremental builder for <code><a href="class_rodin_1_1_geometry_1_1_shard.html" class="m-doc">Shard</a></code>.</p>
+        <p>Incremental builder for <code>Shard</code>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>The builder accumulates a subset of mesh entities together with state, owner, and halo metadata, and finally produces a self-consistent local mesh.</p><p>The builder maintains, per topological dimension:</p><ul><li>the distributed-to-shard and shard-to-distributed index maps,</li><li>the per-entity local state,</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><p><code><a href="#aa561081b3602773e24ea29f18ff48c11" class="m-doc">include()</a></code> inserts an entity identified by its parent index into the shard if it is not already present, and returns its shard-local index.</p>
+<p>The builder accumulates a subset of mesh entities together with state, owner, and halo metadata, and finally produces a self-consistent local mesh.</p><p>The builder maintains, per topological dimension:</p><ul><li>the distributed-to-shard and shard-to-distributed index maps,</li><li>the per-entity local state,</li><li>owner information for non-owned entities,</li><li>halo information for owned entities.</li></ul><p><code>include()</code> inserts an entity identified by its parent index into the shard if it is not already present, and returns its shard-local index.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -100,7 +100,7 @@
               <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911a30269022e9d8f51beaabb52e5d0de2b7" class="m-doc">Parent</a>,
               <a href="#a46c8a310cf4c094f8c80e1cb8dc1f911afd1dd0c603be8170f9eae0be9f2f6afb" class="m-doc">Direct</a> }</span>
             </dt>
-            <dd></dd>
+            <dd>Builder initialization mode.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -116,7 +116,7 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp; parent) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be" class="m-doc">Context</a>&gt;&amp; parent) -&gt; <a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp;</span>
             </dt>
             <dd>Initializes the builder from a parent mesh.</dd>
             <dt>
@@ -196,6 +196,7 @@
             <h3>
               enum class Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /><a href="#a46c8a310cf4c094f8c80e1cb8dc1f911" class="m-doc-self">Mode</a>
             </h3>
+            <p>Builder initialization mode.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
@@ -225,7 +226,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a7a635a5f3a3edabcd23521d5a8e8e68d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context</a>&gt;&amp; parent)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_shard_1_1_builder.html" class="m-doc">Builder</a>&amp; Rodin::<wbr />Geometry::<wbr />Shard::<wbr />Builder::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a635a5f3a3edabcd23521d5a8e8e68d" class="m-doc-self">initialize</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a>&lt;<a href="class_rodin_1_1_geometry_1_1_mesh_3_01_context_1_1_local_01_4.html#a60060cb372908b6172a8a9c07a4120be" class="m-doc">Context</a>&gt;&amp; parent)</span></span>
             </h3>
             <p>Initializes the builder from a parent mesh.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -259,7 +260,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">dimension&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh</a> topological dimension.</td>
+                  <td>Mesh topological dimension.</td>
                 </tr>
                 <tr>
                   <td>sdim&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -292,7 +293,7 @@
                 </tr>
                 <tr>
                   <td>x&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_vertex.html" class="m-doc">Vertex</a> coordinates.</td>
+                  <td>Vertex coordinates.</td>
                 </tr>
                 <tr>
                   <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -331,7 +332,7 @@
                 </tr>
                 <tr>
                   <td>g&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> type.</td>
+                  <td>Geometry type.</td>
                 </tr>
                 <tr>
                   <td>vs&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -429,7 +430,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <code>(d, localIdx)</code>.</td>
+                  <td>Pair <code>(d, localIdx)</code>.</td>
                 </tr>
                 <tr>
                   <td>attr&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -457,7 +458,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <code>(d, parentIdx)</code> identifying an entity in the parent mesh.</td>
+                  <td>Pair <code>(d, parentIdx)</code> identifying an entity in the parent mesh.</td>
                 </tr>
                 <tr>
                   <td>state&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -467,7 +468,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><p><a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a> <code>(localIdx, inserted)</code> where:</p><ul><li><code>localIdx</code> is the shard-local index of the entity,</li><li><code>inserted</code> is <code>true</code> iff the entity was not already present.</li></ul></td>
+                  <td><p>Pair <code>(localIdx, inserted)</code> where:</p><ul><li><code>localIdx</code> is the shard-local index of the entity,</li><li><code>inserted</code> is <code>true</code> iff the entity was not already present.</li></ul></td>
                 </tr>
               </tfoot>
             </table>

@@ -91,14 +91,14 @@
             </li>
           </ul>
         </nav>
-<p>This class wraps <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> adaptation routines and dispatches automatically to:</p><ul><li>MMG2D for planar 2D meshes,</li><li>MMG3D for volumetric 3D meshes,</li><li>MMGS for surface meshes embedded in 3D.</li></ul><p>The scalar size-map field encodes target local edge length and is sampled at mesh vertices.</p><p>Parameters inherited from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/gradation/angle) can be configured before calling <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>.</p>
+<p>This class wraps MMG adaptation routines and dispatches automatically to:</p><ul><li>MMG2D for planar 2D meshes,</li><li>MMG3D for volumetric 3D meshes,</li><li>MMGS for surface meshes embedded in 3D.</li></ul><p>The scalar size-map field encodes target local edge length and is sampled at mesh vertices.</p><p>Parameters inherited from <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a> (hmin/hmax/hausdorff/gradation/angle) can be configured before calling <a href="#a51b804beced77044afca46839f0c06d5" class="m-doc">adapt</a>.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
             </dt>
-            <dd>Base class for MMG-backed operations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>Base class for MMG-backed operations in Rodin.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -107,7 +107,7 @@
             <dt id="a2722a25941a77e1468bd58c863abd8c4">
               <span class="m-doc-wrap-bumper"><a href="#a2722a25941a77e1468bd58c863abd8c4" class="m-doc-self">Adapt</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Constructs an adaptation operator with default <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> settings.</dd>
+            <dd>Constructs an adaptation operator with default MMG settings.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -155,7 +155,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> to remesh in place.</td>
+                  <td>Mesh to remesh in place.</td>
                 </tr>
                 <tr>
                   <td>sizeMap&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -163,7 +163,7 @@
                 </tr>
               </tbody>
             </table>
-<p>The input mesh is converted to <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> native structures, remeshed, then converted back to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
+<p>The input mesh is converted to MMG native structures, remeshed, then converted back to <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a>.</p>
           </div></section>
           <section class="m-doc-details" id="a6ebd3d6748a11cf664266bd2e4bc10d2"><div>
             <h3>

@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh loader specialization for local (sequential) meshes.</p>
+        <p>HDF5 mesh loader specialization for local (sequential) meshes.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -94,9 +94,9 @@
             </li>
           </ul>
         </nav>
-<p>Reconstructs a complete <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a> from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file previously created by <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a>. The loader reads vertex geometry, full connectivity (entity CSR and incidence CSR), attributes, and transformation indices.</p><p>Stream-based loading is not supported; only file-path loading is available.</p><section id="autotoc_md134"><h3><a href="#autotoc_md134">Usage Example</a></h3><pre class="m-code"><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<p>Reconstructs a complete Geometry::Mesh from an HDF5 file previously created by MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;. The loader reads vertex geometry, full connectivity (entity CSR and incidence CSR), attributes, and transformation indices.</p><p>Stream-based loading is not supported; only file-path loading is available.</p><section id="autotoc_md134"><h3><a href="#autotoc_md134">Usage Example</a></h3><pre class="m-code"><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;output.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">MeshPrinter&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;</a></p></aside></section>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;output.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -113,7 +113,7 @@
             <dt id="a4a1c0b519f1e883b370f4fd6c3b76ee5">
               using <a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type for this loader.</dd>
+            <dd>Context type for this loader.</dd>
             <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
               using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
             </dt>
@@ -139,11 +139,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Stream-based loading is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</dd>
+            <dd>Stream-based loading is not supported for HDF5.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Loads a mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dd>Loads a mesh from an HDF5 file.</dd>
           </dl>
         </section>
         <section>
@@ -163,7 +163,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>Mesh to be populated with data read from <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</td>
+                  <td>Mesh to be populated with data read from HDF5.</td>
                 </tr>
               </tbody>
             </table>
@@ -175,7 +175,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8546f878fca73682edd9c742edd7f2a0" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp;) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Stream-based loading is not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</p>
+            <p>Stream-based loading is not supported for HDF5.</p>
 <p>Always raises an exception. Use the file-path overload instead.</p>
           </div></section>
           <section class="m-doc-details" id="aaf8f2181bfec879c94a4de41ae30b55c"><div>
@@ -185,7 +185,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;FileFormat::<wbr />HDF5, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf8f2181bfec879c94a4de41ae30b55c" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Loads a mesh from an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
+            <p>Loads a mesh from an HDF5 file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -193,7 +193,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">filename&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Path to the <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh file.</td>
+                  <td>Path to the HDF5 mesh file.</td>
                 </tr>
               </tbody>
             </table>

@@ -78,6 +78,20 @@
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_active_fiber_law_8h.html">&lt;Rodin/Solid/Constitutive/ActiveFiberLaw.h&gt;</a></div>
         </h1>
         <p>Local active fiber contraction law.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>Evaluates a one-dimensional fiber stress, the local contraction residual, and the condensed tangent obtained after eliminating the local extension variable <svg class="m-math" style="width: 0.947em; height: 0.723em; vertical-align: -0.187em;" viewBox="0 -5.147373 9.09322 6.940636">
 <title>
 $e_c$
@@ -91,6 +105,137 @@ $e_c$
 <use x='5.42544' y='1.793263' xlink:href='#eq1-g0-99'/>
 </g>
 </svg>.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              struct <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>
+            </dt>
+            <dd>Parameters controlling the local active-fiber law.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_response.html" class="m-doc">Response</a>
+            </dt>
+            <dd>Local response and tangent data for a fiber update.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>
+            </dt>
+            <dd>Internal active-fiber state.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4d3fc891964422de6168f855669a506">
+              <span class="m-doc-wrap-bumper">static auto <a href="#ad4d3fc891964422de6168f855669a506" class="m-doc-self">starling</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Evaluates the length-dependent Starling activation factor.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ab29cfb478035e29f4d325146e9f2c2c2">
+              <span class="m-doc-wrap-bumper"><a href="#ab29cfb478035e29f4d325146e9f2c2c2" class="m-doc-self">ActiveFiberLaw</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructs the active law with default parameters.</dd>
+            <dt id="afb8015a9688a01513b15b25a9744bb98">
+              <span class="m-doc-wrap-bumper"><a href="#afb8015a9688a01513b15b25a9744bb98" class="m-doc-self">ActiveFiberLaw</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; parameters) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs the active law from parameters.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a6637e48887cd69c114ea87ae902553fe">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6637e48887cd69c114ea87ae902553fe" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp;</span>
+            </dt>
+            <dd>Returns the material parameters.</dd>
+            <dt id="a2b90aff81fdeb8cd6b5612bd5201fcbf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b90aff81fdeb8cd6b5612bd5201fcbf" class="m-doc-self">initialState</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a></span>
+            </dt>
+            <dd>Builds the initial internal active-fiber state.</dd>
+            <dt id="a928f322971a5c655e39fb40c63998ab6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a928f322971a5c655e39fb40c63998ab6" class="m-doc-self">stress</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> e,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Evaluates active stress at fiber strain <code>e</code> and extension <code>c</code>.</dd>
+            <dt id="ae8f7bedf33415600474b41805970489d">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae8f7bedf33415600474b41805970489d" class="m-doc-self">dStressDe</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Evaluates <svg class="m-math" style="width: 3.335em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 32.020571 11.955168">
+<title>
+$\partial\sigma/\partial e$
+</title>
+<defs>
+<path id='eq2-g0-27' d='M6.073225-4.507098C6.228643-4.507098 6.623163-4.507098 6.623163-4.889664C6.623163-5.152677 6.396015-5.152677 6.180822-5.152677H3.53873C1.745455-5.152677 .454296-3.156164 .454296-1.745455C.454296-.729265 1.111831 .119552 2.187796 .119552C3.598506 .119552 5.140722-1.398755 5.140722-3.19203C5.140722-3.658281 5.033126-4.112578 4.746202-4.507098H6.073225ZM2.199751-.119552C1.590037-.119552 1.147696-.585803 1.147696-1.41071C1.147696-2.12802 1.578082-4.507098 3.335492-4.507098C3.849564-4.507098 4.423412-4.25604 4.423412-3.335492C4.423412-2.917061 4.23213-1.912827 3.813699-1.219427C3.383313-.514072 2.737733-.119552 2.199751-.119552Z'/>
+<path id='eq2-g0-61' d='M5.128767-8.524035C5.128767-8.53599 5.200498-8.715318 5.200498-8.739228C5.200498-8.88269 5.080946-8.966376 4.985305-8.966376C4.925529-8.966376 4.817933-8.966376 4.722291-8.703362L.71731 2.546451C.71731 2.558406 .645579 2.737733 .645579 2.761644C.645579 2.905106 .765131 2.988792 .860772 2.988792C.932503 2.988792 1.0401 2.976837 1.123786 2.725778L5.128767-8.524035Z'/>
+<path id='eq2-g0-64' d='M5.427646-3.993026C5.355915-4.662516 4.937484-5.463512 3.861519-5.463512C2.175841-5.463512 .454296-3.753923 .454296-1.853051C.454296-1.123786 .956413 .251059 2.582316 .251059C5.403736 .251059 6.611208-3.861519 6.611208-5.499377C6.611208-7.220922 5.642839-8.547945 4.112578-8.547945C2.379078-8.547945 1.865006-7.029639 1.865006-6.706849C1.865006-6.599253 1.936737-6.336239 2.271482-6.336239C2.689913-6.336239 2.86924-6.718804 2.86924-6.922042C2.86924-7.292653 2.49863-7.292653 2.343213-7.292653C2.833375-8.177335 3.741968-8.261021 4.064757-8.261021C5.116812-8.261021 5.786301-7.424159 5.786301-6.085181C5.786301-5.32005 5.559153-4.435367 5.439601-3.993026H5.427646ZM2.618182-.071731C1.494396-.071731 1.303113-.956413 1.303113-1.458531C1.303113-1.984558 1.637858-3.21594 1.817186-3.658281C1.972603-4.016936 2.654047-5.224408 3.897385-5.224408C4.985305-5.224408 5.236364-4.27995 5.236364-3.634371C5.236364-2.749689 4.459278-.071731 2.618182-.071731Z'/>
+<path id='eq2-g0-101' d='M2.139975-2.773599C2.462765-2.773599 3.275716-2.797509 3.849564-3.012702C4.758157-3.359402 4.841843-4.052802 4.841843-4.267995C4.841843-4.794022 4.387547-5.272229 3.598506-5.272229C2.343213-5.272229 .537983-4.136488 .537983-2.008468C.537983-.753176 1.255293 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.685679-.119552 1.327024-.657534 1.327024-1.542217C1.327024-1.709589 1.327024-2.008468 1.506351-2.773599H2.139975ZM1.566127-3.012702C2.080199-4.853798 3.21594-5.033126 3.598506-5.033126C4.124533-5.033126 4.483188-4.722291 4.483188-4.267995C4.483188-3.012702 2.570361-3.012702 2.068244-3.012702H1.566127Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g0-64'/>
+<use x='6.829868' y='0' xlink:href='#eq2-g0-27'/>
+<use x='13.912272' y='0' xlink:href='#eq2-g0-61'/>
+<use x='19.765262' y='0' xlink:href='#eq2-g0-64'/>
+<use x='26.595131' y='0' xlink:href='#eq2-g0-101'/>
+</g>
+</svg> at fixed extension.</dd>
+            <dt id="a1db0763d99e6c879f770de84b4b8e886">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1db0763d99e6c879f770de84b4b8e886" class="m-doc-self">dStressDc</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> e,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Evaluates <svg class="m-math" style="width: 3.295em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 31.633119 11.955168">
+<title>
+$\partial\sigma/\partial c$
+</title>
+<defs>
+<path id='eq3-g0-27' d='M6.073225-4.507098C6.228643-4.507098 6.623163-4.507098 6.623163-4.889664C6.623163-5.152677 6.396015-5.152677 6.180822-5.152677H3.53873C1.745455-5.152677 .454296-3.156164 .454296-1.745455C.454296-.729265 1.111831 .119552 2.187796 .119552C3.598506 .119552 5.140722-1.398755 5.140722-3.19203C5.140722-3.658281 5.033126-4.112578 4.746202-4.507098H6.073225ZM2.199751-.119552C1.590037-.119552 1.147696-.585803 1.147696-1.41071C1.147696-2.12802 1.578082-4.507098 3.335492-4.507098C3.849564-4.507098 4.423412-4.25604 4.423412-3.335492C4.423412-2.917061 4.23213-1.912827 3.813699-1.219427C3.383313-.514072 2.737733-.119552 2.199751-.119552Z'/>
+<path id='eq3-g0-61' d='M5.128767-8.524035C5.128767-8.53599 5.200498-8.715318 5.200498-8.739228C5.200498-8.88269 5.080946-8.966376 4.985305-8.966376C4.925529-8.966376 4.817933-8.966376 4.722291-8.703362L.71731 2.546451C.71731 2.558406 .645579 2.737733 .645579 2.761644C.645579 2.905106 .765131 2.988792 .860772 2.988792C.932503 2.988792 1.0401 2.976837 1.123786 2.725778L5.128767-8.524035Z'/>
+<path id='eq3-g0-64' d='M5.427646-3.993026C5.355915-4.662516 4.937484-5.463512 3.861519-5.463512C2.175841-5.463512 .454296-3.753923 .454296-1.853051C.454296-1.123786 .956413 .251059 2.582316 .251059C5.403736 .251059 6.611208-3.861519 6.611208-5.499377C6.611208-7.220922 5.642839-8.547945 4.112578-8.547945C2.379078-8.547945 1.865006-7.029639 1.865006-6.706849C1.865006-6.599253 1.936737-6.336239 2.271482-6.336239C2.689913-6.336239 2.86924-6.718804 2.86924-6.922042C2.86924-7.292653 2.49863-7.292653 2.343213-7.292653C2.833375-8.177335 3.741968-8.261021 4.064757-8.261021C5.116812-8.261021 5.786301-7.424159 5.786301-6.085181C5.786301-5.32005 5.559153-4.435367 5.439601-3.993026H5.427646ZM2.618182-.071731C1.494396-.071731 1.303113-.956413 1.303113-1.458531C1.303113-1.984558 1.637858-3.21594 1.817186-3.658281C1.972603-4.016936 2.654047-5.224408 3.897385-5.224408C4.985305-5.224408 5.236364-4.27995 5.236364-3.634371C5.236364-2.749689 4.459278-.071731 2.618182-.071731Z'/>
+<path id='eq3-g0-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
+</defs>
+<g id='eq3-page1'>
+<use x='0' y='0' xlink:href='#eq3-g0-64'/>
+<use x='6.829868' y='0' xlink:href='#eq3-g0-27'/>
+<use x='13.912272' y='0' xlink:href='#eq3-g0-61'/>
+<use x='19.765262' y='0' xlink:href='#eq3-g0-64'/>
+<use x='26.595131' y='0' xlink:href='#eq3-g0-99'/>
+</g>
+</svg> at fixed fiber strain.</dd>
+            <dt id="a68e575de8a4dde2e082d8e88758e1264">
+              <span class="m-doc-wrap-bumper">auto <a href="#a68e575de8a4dde2e082d8e88758e1264" class="m-doc-self">evaluateStatic</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> e,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> c) const -&gt; <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_response.html" class="m-doc">Response</a></span>
+            </dt>
+            <dd>Evaluates the static active response.</dd>
+            <dt id="a8b7ff064c7f9f0281a6775e1b329c941">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b7ff064c7f9f0281a6775e1b329c941" class="m-doc-self">update</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activation) const -&gt; <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a></span>
+            </dt>
+            <dd>Advances the internal active-fiber state.</dd>
+            <dt id="accd5a3f8c9c6d8114a47de712949cae7">
+              <span class="m-doc-wrap-bumper">auto <a href="#accd5a3f8c9c6d8114a47de712949cae7" class="m-doc-self">evaluateDynamic</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; newState,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> e,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activation) const -&gt; <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_response.html" class="m-doc">Response</a></span>
+            </dt>
+            <dd>Evaluates the dynamic active response and condensed tangent.</dd>
+            <dt id="a031d500ca67ddc2e9dfef499d209bfc1">
+              <span class="m-doc-wrap-bumper">auto <a href="#a031d500ca67ddc2e9dfef499d209bfc1" class="m-doc-self">dActiveStressDc</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="struct_rodin_1_1_solid_1_1_active_fiber_law_1_1_state.html" class="m-doc">State</a>&amp; oldState,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activation,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> previousActiveExtension,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> activeExtension) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
+            </dt>
+            <dd>Evaluates the derivative of active stress with respect to extension.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

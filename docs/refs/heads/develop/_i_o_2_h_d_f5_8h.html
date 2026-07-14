@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ff6599c6033d39d885e7782b9df2e1c5.html">IO</a>/</span>HDF5.h <span class="m-thin">file</span>
         </h1>
-        <p>HDF5-based mesh and grid function persistence for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>HDF5-based mesh and grid function persistence for Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>This file provides the HDF5 storage backend for <a href="namespace_rodin.html" class="m-doc">Rodin</a> meshes and grid functions using the official HDF5 C API. It implements:</p><ul><li>Full mesh persistence and direct reconstruction from disk, including vertex geometry, full connectivity (entities, incidences, state), attributes, and polytope transformations.</li><li>Standalone grid function field-file serialization (one <code>.h5</code> per grid function), without mesh or finite element space embedding.</li><li>Utility functions for XDMF mixed-topology stream generation and minimal visualization mesh export, used by the IO::XDMF writer. These helpers (<code>writeXDMFMesh</code>, <code>writeXDMFTopology</code>, <code>writeXDMFVertices</code>, <code>writeXDMFRegionAttribute</code>, <code>writeXDMFNodeAttribute</code>, <code>writeXDMFCellAttribute</code>) write only the minimal HDF5 datasets needed by ParaView/XDMF, and are completely separate from the canonical persistence path.</li></ul><section id="autotoc_md131"><h3><a href="#autotoc_md131">HDF5 Mesh Layout</a></h3><pre class="m-code"><span class="o">/</span><span class="n">Mesh</span>
+<p>This file provides the HDF5 storage backend for Rodin meshes and grid functions using the official HDF5 C API. It implements:</p><ul><li>Full mesh persistence and direct reconstruction from disk, including vertex geometry, full connectivity (entities, incidences, state), attributes, and polytope transformations.</li><li>Standalone grid function field-file serialization (one <code>.h5</code> per grid function), without mesh or finite element space embedding.</li><li>Utility functions for XDMF mixed-topology stream generation and minimal visualization mesh export, used by the IO::XDMF writer. These helpers (<code>writeXDMFMesh</code>, <code>writeXDMFTopology</code>, <code>writeXDMFVertices</code>, <code>writeXDMFRegionAttribute</code>, <code>writeXDMFNodeAttribute</code>, <code>writeXDMFCellAttribute</code>) write only the minimal HDF5 datasets needed by ParaView/XDMF, and are completely separate from the canonical persistence path.</li></ul><section id="autotoc_md131"><h3><a href="#autotoc_md131">HDF5 Mesh Layout</a></h3><pre class="m-code"><span class="o">/</span><span class="n">Mesh</span>
 <span class="w">  </span><span class="o">/</span><span class="n">Meta</span>
 <span class="w">    </span><span class="n">SpaceDimension</span><span class="w">                  </span><span class="n">scalar</span><span class="w"> </span><span class="p">(</span><span class="n">U64</span><span class="p">)</span>
 <span class="w">  </span><span class="o">/</span><span class="n">Geometry</span>
@@ -132,13 +132,13 @@
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::IO</a></dt>
-            <dd>Module for mesh and grid function input/output.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_i_o.html" class="m-doc">Rodin::<wbr />IO</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">Rodin::IO::HDF5</a></dt>
-            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> utility namespace providing type aliases, path constants, RAII handle wrappers, and low-level dataset read/write helpers.</dd>
+            <dd>HDF5 utility namespace providing type aliases, path constants, RAII handle wrappers, and low-level dataset read/write helpers.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5_1_1_path.html" class="m-doc">Rodin::IO::HDF5::Path</a></dt>
-            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> dataset path constants for the mesh and grid function storage layouts.</dd>
+            <dd>HDF5 dataset path constants for the mesh and grid function storage layouts.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -147,27 +147,31 @@
             <dt>
               class <a href="class_rodin_1_1_i_o_1_1_h_d_f5_1_1_handle.html" class="m-doc">Rodin::IO::HDF5::Handle</a>
             </dt>
-            <dd>RAII wrapper for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> identifier handles.</dd>
+            <dd>RAII wrapper for HDF5 identifier handles.</dd>
+            <dt>
+              struct <a href="struct_rodin_1_1_i_o_1_1_h_d_f5_1_1_x_d_m_f_topology_layout.html" class="m-doc">Rodin::IO::HDF5::XDMFTopologyLayout</a>
+            </dt>
+            <dd>Layout metadata for XDMF topology dataset emission.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_loader_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">Rodin::IO::MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh loader specialization for local (sequential) meshes.</dd>
+            <dd>HDF5 mesh loader specialization for local (sequential) meshes.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_mesh_printer_3_01_file_format_1_1_h_d_f5_00_01_context_1_1_local_01_4.html" class="m-doc">Rodin::IO::MeshPrinter&lt;FileFormat::HDF5, Context::Local&gt;</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> mesh printer specialization for local (sequential) meshes.</dd>
+            <dd>HDF5 mesh printer specialization for local (sequential) meshes.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_loader_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math_dc6de039808d71549c96625799a50b75.html" class="m-doc">Rodin::IO::GridFunctionLoader&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> grid function loader for local grid functions backed by <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code>.</dd>
+            <dd>HDF5 grid function loader for local grid functions backed by <code>Math::Vector&lt;Scalar&gt;</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Scalar&gt;</div>
               class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_3_01_file_format_1_1_h_d_f5_00_01_f_e_s_00_01_math68cb348ce8bf27093bff6c8086fbdd6f.html" class="m-doc">Rodin::IO::GridFunctionPrinter&lt;FileFormat::HDF5, FES, Math::Vector&lt;Scalar&gt;&gt;</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> grid function printer for local grid functions backed by <code><a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;</code>.</dd>
+            <dd>HDF5 grid function printer for local grid functions backed by <code>Math::Vector&lt;Scalar&gt;</code>.</dd>
           </dl>
         </section>
       </div>

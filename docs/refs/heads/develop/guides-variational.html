@@ -121,7 +121,7 @@
             <li><a href="#guides-variational-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="guides-variational-intro"><h2><a href="#guides-variational-intro">Introduction</a></h2><p>The finite element method works by converting a partial differential equation (PDE) from its <strong>strong form</strong> into a <strong>weak (variational) form</strong>. <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides a form language that lets you express these variational formulations in C++ code that closely mirrors the mathematical notation.</p></section><section id="guides-variational-weak"><h2><a href="#guides-variational-weak">From Strong to Weak Form</a></h2><p>Consider a generic second-order PDE in its strong form:</p><div class="m-math"><svg style="width: 7.333em; height: 1.107em;" viewBox="159.071314 -10.626787 70.400363 10.626798">
+<section id="guides-variational-intro"><h2><a href="#guides-variational-intro">Introduction</a></h2><p>The finite element method works by converting a partial differential equation (PDE) from its <strong>strong form</strong> into a <strong>weak (variational) form</strong>. Rodin&#x27;s <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module provides a form language that lets you express these variational formulations in C++ code that closely mirrors the mathematical notation.</p></section><section id="guides-variational-weak"><h2><a href="#guides-variational-weak">From Strong to Weak Form</a></h2><p>Consider a generic second-order PDE in its strong form:</p><div class="m-math"><svg style="width: 7.333em; height: 1.107em;" viewBox="159.071314 -10.626787 70.400363 10.626798">
 <title>
 \[
   \mathcal{L} u = f \quad \text{in } \Omega
@@ -359,7 +359,7 @@ $ \partial\Omega $
 <use x='246.608038' y='-10.793007' xlink:href='#eq12-g2-100'/>
 <use x='252.690731' y='-10.793007' xlink:href='#eq12-g2-120'/>
 </g>
-</svg></div><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, this translates directly to:</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg></div><p>In Rodin, this translates directly to:</p><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">poisson</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">poisson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w">   </span><span class="c1">// a(u,v) = integral of grad(u) . grad(v)</span>
 <span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w">                </span><span class="c1">// l(v)   = integral of f * v</span>
 <span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">Zero</span><span class="p">());</span><span class="w">       </span><span class="c1">// u = 0 on the boundary</span></pre></section></section><section id="guides-variational-forms"><h2><a href="#guides-variational-forms">Forms in Rodin</a></h2><section id="guides-variational-forms-bilinear"><h3><a href="#guides-variational-forms-bilinear">Bilinear Forms</a></h3><p>A bilinear form <svg class="m-math" style="width: 3.463em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 33.244413 11.955168">
@@ -402,7 +402,7 @@ $ v $
 <g id='eq15-page1'>
 <use x='0' y='0' xlink:href='#eq15-g0-118'/>
 </g>
-</svg>. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, bilinear forms are created using <code>Integral</code> with both trial and test function arguments:</p><pre class="m-code"><span class="c1">// Stiffness: integral of grad(u) . grad(v)</span>
+</svg>. In Rodin, bilinear forms are created using <code>Integral</code> with both trial and test function arguments:</p><pre class="m-code"><span class="c1">// Stiffness: integral of grad(u) . grad(v)</span>
 <span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
 <span class="c1">// Mass: integral of u * v</span>
@@ -439,7 +439,7 @@ $ v $
 <span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
 
 <span class="c1">// Boundary load: integral of g * v over a boundary</span>
-<span class="n">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre></section><section id="guides-variational-forms-assembly"><h3><a href="#guides-variational-forms-assembly">Problem Assembly</a></h3><p>The <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class assembles bilinear and linear forms into a linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
+<span class="n">BoundaryIntegral</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">).</span><span class="n">over</span><span class="p">(</span><span class="n">GammaN</span><span class="p">)</span></pre></section><section id="guides-variational-forms-assembly"><h3><a href="#guides-variational-forms-assembly">Problem Assembly</a></h3><p>The <code>Problem</code> class assembles bilinear and linear forms into a linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
 <title>
 $ A\mathbf{x} = \mathbf{b} $
 </title>
@@ -490,7 +490,7 @@ $ A\mathbf{x} = \mathbf{b} $
 <use x='218.178808' y='-2.988792' xlink:href='#eq19-g0-118'/>
 <use x='224.267027' y='-2.988792' xlink:href='#eq19-g1-41'/>
 </g>
-</svg></div><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> moves everything to the left-hand side, giving:</p><div class="m-math"><svg style="width: 9.329em; height: 1.245em;" viewBox="149.491242 -11.955168 89.560514 11.955168">
+</svg></div><p>Rodin moves everything to the left-hand side, giving:</p><div class="m-math"><svg style="width: 9.329em; height: 1.245em;" viewBox="149.491242 -11.955168 89.560514 11.955168">
 <title>
 \[
   a(u, v) - \ell(v) = 0
@@ -573,7 +573,7 @@ $ \mathbf{b} $
 <g id='eq25-page1'>
 <use x='0' y='0' xlink:href='#eq25-g0-98'/>
 </g>
-</svg> accordingly.</p></section></section><section id="guides-variational-operators"><h2><a href="#guides-variational-operators">Differential Operators</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> provides standard differential operators that work on trial and test functions. These are <strong>expression templates</strong>: they are not evaluated immediately, but recorded as symbolic expressions and evaluated later during assembly.</p><table class="m-table"><thead><tr><th>Operator</th><th>Mathematical meaning</th><th>Result</th><th>Code</th></tr></thead><tbody><tr><td>Gradient</td><td><svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
+</svg> accordingly.</p></section></section><section id="guides-variational-operators"><h2><a href="#guides-variational-operators">Differential Operators</a></h2><p>Rodin provides standard differential operators that work on trial and test functions. These are <strong>expression templates</strong>: they are not evaluated immediately, but recorded as symbolic expressions and evaluated later during assembly.</p><table class="m-table"><thead><tr><th>Operator</th><th>Mathematical meaning</th><th>Result</th><th>Code</th></tr></thead><tbody><tr><td>Gradient</td><td><svg class="m-math" style="width: 1.732em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169354 16.62511 8.169354">
 <title>
 $ \nabla u $
 </title>
@@ -734,10 +734,10 @@ $ \mathbf{u} $
 <g id='eq37-page1'>
 <use x='0' y='0' xlink:href='#eq37-g0-117'/>
 </g>
-</svg>)</td><td><code>Component(u, i)</code> or <code>u.x()</code></td></tr></tbody></table><pre class="m-code"><span class="c1">// Laplacian-like term: \int \nablau \cdot \nablav dx</span>
+</svg>)</td><td><code>Component(u, i)</code> or <code>u.x()</code></td></tr></tbody></table><pre class="m-code"><span class="c1">// Laplacian-like term: \int \nabla u \cdot \nabla v dx</span>
 <span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
-<span class="c1">// Divergence term (for vector fields): \int (\nabla\cdotu)(\nabla\cdotv) dx</span>
+<span class="c1">// Divergence term (for vector fields): \int (\nabla\cdot u)(\nabla\cdot v) dx</span>
 <span class="n">Integral</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Div</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
 <span class="c1">// Elasticity: symmetric gradient ε(u) : ε(v)</span>
@@ -810,7 +810,7 @@ $ \mathbf{u} $
 <span class="w">  </span><span class="n">xdmf</span><span class="p">.</span><span class="n">write</span><span class="p">();</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-variational-mixed"><h2><a href="#guides-variational-mixed">Mixed Formulations</a></h2><p>Some problems require solving for multiple unknowns simultaneously, such as velocity and pressure in the <a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes equations</a>. <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> class supports mixed formulations with multiple trial/test function pairs:</p><pre class="m-code"><span class="c1">// Taylor-Hood finite element spaces</span>
+<span class="p">}</span></pre></section><section id="guides-variational-mixed"><h2><a href="#guides-variational-mixed">Mixed Formulations</a></h2><p>Some problems require solving for multiple unknowns simultaneously, such as velocity and pressure in the <a href="examples-pdes-navierstokes.html" class="m-doc">Navier-Stokes equations</a>. Rodin&#x27;s <code>Problem</code> class supports mixed formulations with multiple trial/test function pairs:</p><pre class="m-code"><span class="c1">// Taylor-Hood finite element spaces</span>
 <span class="n">H1</span><span class="w"> </span><span class="nf">uh</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">d</span><span class="p">);</span><span class="w">  </span><span class="c1">// P2 velocity</span>
 <span class="n">H1</span><span class="w"> </span><span class="nf">ph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span><span class="w">      </span><span class="c1">// P1 pressure</span>
 
@@ -825,7 +825,7 @@ $ \mathbf{u} $
 <span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="n">Div</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 <span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Div</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">q</span><span class="p">)</span>
 <span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span>
-<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span></pre></section><section id="guides-variational-dg"><h2><a href="#guides-variational-dg">Discontinuous Galerkin Formulations</a></h2><p>For problems with <strong>discontinuous</strong> finite element spaces (or when penalty methods are needed across element interfaces), <a href="namespace_rodin.html" class="m-doc">Rodin</a> provides specialized integral types and operators:</p><section id="guides-variational-dg-operators"><h3><a href="#guides-variational-dg-operators">DG Operators</a></h3><table class="m-table"><thead><tr><th>Operator</th><th>Description</th><th>Code</th></tr></thead><tbody><tr><td><a href="class_rodin_1_1_variational_1_1_jump.html" class="m-doc">Jump</a></td><td>Jump across a face: <svg class="m-math" style="width: 7.346em; height: 1.265em; vertical-align: -0.312em;" viewBox="0 -9.153753 70.519921 12.142545">
+<span class="w">       </span><span class="o">+</span><span class="w"> </span><span class="n">DirichletBC</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span></pre></section><section id="guides-variational-dg"><h2><a href="#guides-variational-dg">Discontinuous Galerkin Formulations</a></h2><p>For problems with <strong>discontinuous</strong> finite element spaces (or when penalty methods are needed across element interfaces), Rodin provides specialized integral types and operators:</p><section id="guides-variational-dg-operators"><h3><a href="#guides-variational-dg-operators">DG Operators</a></h3><table class="m-table"><thead><tr><th>Operator</th><th>Description</th><th>Code</th></tr></thead><tbody><tr><td><code>Jump</code></td><td>Jump across a face: <svg class="m-math" style="width: 7.346em; height: 1.265em; vertical-align: -0.312em;" viewBox="0 -9.153753 70.519921 12.142545">
 <title>
 $ [u] = u^+ - u^- $
 </title>
@@ -849,7 +849,7 @@ $ [u] = u^+ - u^- $
 <use x='57.270975' y='0' xlink:href='#eq38-g2-117'/>
 <use x='63.933414' y='-4.338437' xlink:href='#eq38-g0-0'/>
 </g>
-</svg></td><td><code>Jump(u)</code></td></tr><tr><td><a href="class_rodin_1_1_variational_1_1_average.html" class="m-doc">Average</a></td><td>Average across a face: <svg class="m-math" style="width: 9.584em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 92.00596 13.96606">
+</svg></td><td><code>Jump(u)</code></td></tr><tr><td><code>Average</code></td><td>Average across a face: <svg class="m-math" style="width: 9.584em; height: 1.455em; vertical-align: -0.431em;" viewBox="0 -9.843428 92.00596 13.96606">
 <title>
 $ \{u\} = \frac{1}{2}(u^+ + u^-) $
 </title>

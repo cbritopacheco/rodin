@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Exception <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class with formatted output capabilities.</p>
+        <p>Exception class with formatted output capabilities.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>A specialized exception class that extends both std::exception and the <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> messaging system. When raised, it outputs a formatted error message with red coloring and terminates the program.</p><p>The <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class provides stream-like insertion operators for building detailed error messages with formatting capabilities.</p>
+<p>A specialized exception class that extends both std::exception and the Alert messaging system. When raised, it outputs a formatted error message with red coloring and terminates the program.</p><p>The Exception class provides stream-like insertion operators for building detailed error messages with formatting capabilities.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -100,7 +100,7 @@
               <div class="m-doc-template">template&lt;class Prefix&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message&lt;ExceptionPrefix&gt;</a>
             </dt>
-            <dd>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</dd>
+            <dd>Forward declaration of the Message template class.</dd>
           </dl>
         </section>
         <section id="derived-classes">
@@ -110,21 +110,21 @@
               <div class="m-doc-template">template&lt;class T&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_class_exception.html" class="m-doc">ClassException</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the class name.</dd>
+            <dd>Exception class that automatically includes the class name.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T, class FuncName&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">MemberFunctionException</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> type for errors occurring in member functions.</dd>
+            <dd>Exception type for errors occurring in member functions.</dd>
             <dt>
               class <a href="class_rodin_1_1_alert_1_1_namespaced_exception.html" class="m-doc">NamespacedException</a>
             </dt>
-            <dd><a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> class that automatically includes the namespace name.</dd>
+            <dd>Exception class that automatically includes the namespace name.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FuncName&gt;</div>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5_exception.html" class="m-doc">Rodin::MMG::MMG5Exception</a>
             </dt>
-            <dd>Exception type for <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> wrapper failures.</dd>
+            <dd>Exception type for MMG wrapper failures.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -142,11 +142,11 @@
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#abfbc23b99b2e78b609d50ac688611236" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with an empty message.</dd>
+            <dd>Constructs an Exception with an empty message.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#af854b0d2eaa1bf97cfd590cb4c6e2a96" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span>
             </dt>
-            <dd>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with a specific output stream.</dd>
+            <dd>Constructs an Exception with a specific output stream.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#ac18f0d2e03372cc0620efd911f87b57d" class="m-doc">Exception</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>&amp; other)</span>
             </dt>
@@ -176,14 +176,14 @@
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abfbc23b99b2e78b609d50ac688611236" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-            <p>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with an empty message.</p>
+            <p>Constructs an Exception with an empty message.</p>
 <p>Creates an exception that outputs to std::cerr by default.</p>
           </div></section>
           <section class="m-doc-details" id="af854b0d2eaa1bf97cfd590cb4c6e2a96"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Alert::<wbr />Exception::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af854b0d2eaa1bf97cfd590cb4c6e2a96" class="m-doc-self">Exception</a>(</span><span class="m-doc-wrap">std::ostream&amp; os)</span></span>
             </h3>
-            <p>Constructs an <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> with a specific output stream.</p>
+            <p>Constructs an Exception with a specific output stream.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -208,7 +208,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td>The <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> object to copy from.</td>
+                  <td>The Exception object to copy from.</td>
                 </tr>
               </tbody>
             </table>
@@ -225,7 +225,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td>The <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> object to move from.</td>
+                  <td>The Exception object to move from.</td>
                 </tr>
               </tbody>
             </table>

@@ -79,7 +79,7 @@
           <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
           Connectivity
         </h1>
-        <p>Understanding mesh connectivity in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>Understanding mesh connectivity in Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -96,7 +96,7 @@
             <li><a href="#guides-connectivity-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="guides-connectivity-intro"><h2><a href="#guides-connectivity-intro">Introduction</a></h2><p>Connectivity** (or incidence) information describes how the polytopes (vertices, edges, faces, cells) in a mesh relate to each other. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, this is managed by the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> class, which is accessed through Mesh::getConnectivity().</p><p>Connectivity is essential for:</p><ul><li>Identifying boundary entities for imposing boundary conditions</li><li>Traversing mesh topology during assembly</li><li>Finding neighbors and adjacencies</li></ul></section><section id="guides-connectivity-notation"><h2><a href="#guides-connectivity-notation">Notation</a></h2><p>Connectivity is described as a relation between polytopes of dimension <svg class="m-math" style="width: 1.075em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 10.316876 10.095454">
+<section id="guides-connectivity-intro"><h2><a href="#guides-connectivity-intro">Introduction</a></h2><p>Connectivity** (or incidence) information describes how the polytopes (vertices, edges, faces, cells) in a mesh relate to each other. In Rodin, this is managed by the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">Connectivity</a> class, which is accessed through <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />getConnectivity()</a>.</p><p>Connectivity is essential for:</p><ul><li>Identifying boundary entities for imposing boundary conditions</li><li>Traversing mesh topology during assembly</li><li>Finding neighbors and adjacencies</li></ul></section><section id="guides-connectivity-notation"><h2><a href="#guides-connectivity-notation">Notation</a></h2><p>Connectivity is described as a relation between polytopes of dimension <svg class="m-math" style="width: 1.075em; height: 1.052em; vertical-align: -0.187em;" viewBox="0 -8.302191 10.316876 10.095454">
 <title>
 $ d_1 $
 </title>
@@ -255,7 +255,7 @@ $ (2, 1) $
 <use x='15.649475' y='0' xlink:href='#eq10-g1-49'/>
 <use x='21.502465' y='0' xlink:href='#eq10-g1-41'/>
 </g>
-</svg></td><td>Cells → Edges</td><td>Cell edge lookup</td></tr></tbody></table></section><section id="guides-connectivity-compute"><h2><a href="#guides-connectivity-compute">Computing Connectivity</a></h2><p>Connectivity relations are computed on demand using the compute() method:</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+</svg></td><td>Cells → Edges</td><td>Cell edge lookup</td></tr></tbody></table></section><section id="guides-connectivity-compute"><h2><a href="#guides-connectivity-compute">Computing Connectivity</a></h2><p>Connectivity relations are computed on demand using the <a href="class_rodin_1_1_geometry_1_1_connectivity.html" class="m-doc">compute()</a> method:</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
 
 <span class="c1">// Compute edge-to-cell connectivity (required for boundary detection)</span>
@@ -333,7 +333,7 @@ $ d $
 <g id='eq14-page1'>
 <use x='0' y='0' xlink:href='#eq14-g0-100'/>
 </g>
-</svg> is the mesh dimension), <a href="namespace_rodin.html" class="m-doc">Rodin</a> can identify boundary entities — those that are incident to exactly one cell. This is how <code>DirichletBC</code> finds the boundary DOFs automatically.</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+</svg> is the mesh dimension), Rodin can identify boundary entities — those that are incident to exactly one cell. This is how <code>DirichletBC</code> finds the boundary DOFs automatically.</p><pre class="m-code"><span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
 <span class="n">mesh</span><span class="p">.</span><span class="n">getConnectivity</span><span class="p">().</span><span class="n">compute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">  </span><span class="c1">// Required for boundary detection</span>
 

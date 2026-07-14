@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<p>This class provides a minimal CRTP interface shared by all finite elements. Derived classes are expected to implement the following methods:</p><ul><li><code>size_t <a href="#a44d43c17930cfe700de763b67a32fb7b" class="m-doc">getCount() const</a></code></li><li><code>auto <a href="#a8c93953f1a596d6abf47a11b177dc64a" class="m-doc">getBasis(size_<wbr />t) const</a></code></li><li><code>auto <a href="#a5672b0ba04c02bed94a6352f2ea8e234" class="m-doc">getLinearForm(size_<wbr />t) const</a></code></li><li><code>size_t <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder() const</a></code></li></ul><p>The base class stores only the reference geometry and forwards all finite-element-specific queries to the Derived class.</p>
+<p>This class provides a minimal CRTP interface shared by all finite elements. Derived classes are expected to implement the following methods:</p><ul><li><code>size_t getCount() const</code></li><li><code>auto getBasis(size_t) const</code></li><li><code>auto getLinearForm(size_t) const</code></li><li><code>size_t getOrder() const</code></li></ul><p>The base class stores only the reference geometry and forwards all finite-element-specific queries to the Derived class.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -221,7 +221,7 @@
                 </tr>
               </tbody>
             </table>
-<p>The geometry is stored and later queried via <a href="#a31877fd761e82217b0cafe1757d2dab0" class="m-doc">getGeometry()</a>. Derived classes may interpret this geometry to build their DOFs and basis.</p>
+<p>The geometry is stored and later queried via getGeometry(). Derived classes may interpret this geometry to build their DOFs and basis.</p>
           </div></section>
           <section class="m-doc-details" id="aade62daa06b3fa006fb9e65f55c356b9"><div>
             <h3>
@@ -341,7 +341,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> representing the reference geometry.</td>
+                  <td>Geometry::Polytope::Type representing the reference geometry.</td>
                 </tr>
               </tfoot>
             </table>
@@ -523,7 +523,7 @@ $ v $
                 </tr>
               </tfoot>
             </table>
-<p>For polynomial-based elements, this is defined as the maximum total polynomial degree of the shape functions on the reference element, or a safe upper bound for it. It is typically used to select appropriate quadrature rules (e.g. rules exact for polynomials up to degree <a href="#a15b23d5374f96033b06313f150a05b96" class="m-doc">getOrder()</a>, or 2*getOrder() for bilinear forms).</p><p>The precise meaning may be refined in the Derived class documentation (e.g. <svg class="m-math" style="width: 1.242em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.927569 10.029041">
+<p>For polynomial-based elements, this is defined as the maximum total polynomial degree of the shape functions on the reference element, or a safe upper bound for it. It is typically used to select appropriate quadrature rules (e.g. rules exact for polynomials up to degree getOrder(), or 2*getOrder() for bilinear forms).</p><p>The precise meaning may be refined in the Derived class documentation (e.g. <svg class="m-math" style="width: 1.242em; height: 1.045em; vertical-align: -0.187em;" viewBox="0 -8.235778 11.927569 10.029041">
 <title>
 $ \mathbb{P}_k $
 </title>

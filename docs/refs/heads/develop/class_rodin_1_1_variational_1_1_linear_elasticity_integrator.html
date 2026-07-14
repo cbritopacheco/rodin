@@ -233,7 +233,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
             <dt id="ad724fb7805f3a88b7cc4b28db365b282">
               using <a href="#ad724fb7805f3a88b7cc4b28db365b282" class="m-doc-self">TestFESType</a> = FES
             </dt>
-            <dd><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function space type.</dd>
+            <dd>Test function space type.</dd>
             <dt id="a264f3da817d5b89820f8499c6ac89737">
               using <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc-self">MuType</a> = <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>&lt;MuDerived&gt;
             </dt>
@@ -243,7 +243,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
             </dt>
             <dd>First Lamé parameter type.</dd>
             <dt id="aa29e69ee2366c2f0499324bb1d42082a">
-              using <a href="#aa29e69ee2366c2f0499324bb1d42082a" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_local_bilinear_form_integrator_base.html" class="m-doc">LocalBilinearFormIntegratorBase</a>&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;
+              using <a href="#aa29e69ee2366c2f0499324bb1d42082a" class="m-doc-self">Parent</a> = LocalBilinearFormIntegratorBase&lt;<a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a>&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -252,8 +252,8 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a54912780caee3b4ee82163a045252f56" class="m-doc">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, FES&gt;&amp; u,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v,
+              <span class="m-doc-wrap-bumper"><a href="#a54912780caee3b4ee82163a045252f56" class="m-doc">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, FES&gt;&amp; u,
+              const TestFunction&lt;FES&gt;&amp; v,
               const <a href="#a2dc3016a1565d306c0a456ea3901a89e" class="m-doc">LambdaType</a>&amp; lambda,
               const <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc">MuType</a>&amp; mu)</span>
             </dt>
@@ -271,10 +271,19 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="adbfdd734d436c5a1bbee19714721e493">
+              <span class="m-doc-wrap-bumper">auto <a href="#adbfdd734d436c5a1bbee19714721e493" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns the current polytope.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a7ee1803a6f1884284643dff74bbeb488" class="m-doc">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegrator</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Sets the current polytope and computes the local stiffness matrix.</dd>
+            <dt id="a6c0d10cae5d2dba713631afd1af6b991">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6c0d10cae5d2dba713631afd1af6b991" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t tr,
+              size_t te) -&gt; <a href="#abdba688d76c906b73a3a133ed4665425" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Returns an entry of the current element stiffness matrix.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a665c15fd4d38c14f3ba77239ca6f0a2a" class="m-doc">getShearModulus</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc">MuType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
@@ -300,8 +309,8 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
               <div class="m-doc-template">
                 template&lt;class Solution, class FES, class LambdaDerived, class MuDerived&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, FES, LambdaDerived, MuDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54912780caee3b4ee82163a045252f56" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;Solution, FES&gt;&amp; u,
-              const <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;FES&gt;&amp; v,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />LinearElasticityIntegrator&lt;Solution, FES, LambdaDerived, MuDerived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a54912780caee3b4ee82163a045252f56" class="m-doc-self">LinearElasticityIntegrator</a>(</span><span class="m-doc-wrap">const TrialFunction&lt;Solution, FES&gt;&amp; u,
+              const TestFunction&lt;FES&gt;&amp; v,
               const <a href="#a2dc3016a1565d306c0a456ea3901a89e" class="m-doc">LambdaType</a>&amp; lambda,
               const <a href="#a264f3da817d5b89820f8499c6ac89737" class="m-doc">MuType</a>&amp; mu)</span></span>
             </h3>
@@ -317,7 +326,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
                 </tr>
                 <tr>
                   <td>v</td>
-                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function</td>
+                  <td>Test function</td>
                 </tr>
                 <tr>
                   <td>lambda</td>
@@ -345,7 +354,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> to copy</td>
+                  <td>Integrator to copy</td>
                 </tr>
               </tbody>
             </table>
@@ -365,7 +374,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a> to move</td>
+                  <td>Integrator to move</td>
                 </tr>
               </tbody>
             </table>
@@ -395,7 +404,7 @@ $ \varepsilon(u) = \frac{1}{2}(\nabla u + (\nabla u)^T) $
                 </tr>
               </tfoot>
             </table>
-<p>Computes the local elasticity matrix over the given element using quadrature derived from the FE basis order and Lamé parameter orders. At each quadrature point, builds the physical-space <a href="class_rodin_1_1_variational_1_1_jacobian.html" class="m-doc">Jacobian</a> of each basis function via the reference-to-physical map, then accumulates:</p><div class="m-math"><svg style="width: 40.313em; height: 2.901em;" viewBox=".77149 -29.046779 387.000097 27.851265">
+<p>Computes the local elasticity matrix over the given element using quadrature derived from the FE basis order and Lamé parameter orders. At each quadrature point, builds the physical-space Jacobian of each basis function via the reference-to-physical map, then accumulates:</p><div class="m-math"><svg style="width: 40.313em; height: 2.901em;" viewBox=".77149 -29.046779 387.000097 27.851265">
 <title>
 \[
   A^K_{ij} = \sum_q w_q |J_q|

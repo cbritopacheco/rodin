@@ -267,7 +267,7 @@ $ \tau $
 <g id='eq13-page1'>
 <use x='0' y='0' xlink:href='#eq13-g0-28'/>
 </g>
-</svg> is the physical element</li></ul></section><section id="autotoc_md114"><h2><a href="#autotoc_md114">Implementations</a></h2><p>Concrete implementations include:</p><ul><li><a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>: <svg class="m-math" style="width: 4.448em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.703996 11.955168">
+</svg> is the physical element</li></ul></section><section id="autotoc_md114"><h2><a href="#autotoc_md114">Implementations</a></h2><p>Concrete implementations include:</p><ul><li>IdentityTransformation: <svg class="m-math" style="width: 4.448em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.703996 11.955168">
 <title>
 $ x(r) = r $
 </title>
@@ -286,7 +286,7 @@ $ x(r) = r $
 <use x='24.678041' y='0' xlink:href='#eq14-g1-61'/>
 <use x='37.103522' y='0' xlink:href='#eq14-g0-114'/>
 </g>
-</svg> (identity map)</li><li><a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>: Uses finite element basis functions</li></ul></section><section id="autotoc_md115"><h2><a href="#autotoc_md115">Thread Safety</a></h2><p>Transformation objects are immutable after construction and are thread-safe for concurrent read access. The <a href="#a1cebe38715f95dd2bcca579a27e476bb" class="m-doc">transform()</a>, <a href="#a551bb1d2930d7c149e9f6f03cfe779b5" class="m-doc">jacobian()</a>, and <a href="#ae4ab54f76d7dc9b08ca13f3f1eb1f95d" class="m-doc">inverse()</a> methods can be called concurrently from multiple threads.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></p></aside></section>
+</svg> (identity map)</li><li>ParametricTransformation: Uses finite element basis functions</li></ul></section><section id="autotoc_md115"><h2><a href="#autotoc_md115">Thread Safety</a></h2><p>Transformation objects are immutable after construction and are thread-safe for concurrent read access. The transform(), jacobian(), and inverse() methods can be called concurrently from multiple threads.</p><aside class="m-note m-default"><h4>See also</h4><p>IdentityTransformation, ParametricTransformation, Point</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -302,7 +302,7 @@ $ x(r) = r $
             <dt>
               class <a href="class_rodin_1_1_geometry_1_1_identity_transformation.html" class="m-doc">IdentityTransformation</a> <span class="m-label m-flat m-warning">final</span>
             </dt>
-            <dd><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a> identity transformation.</dd>
+            <dd>Polytope identity transformation.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FE&gt;</div>
               class <a href="class_rodin_1_1_geometry_1_1_parametric_transformation.html" class="m-doc">ParametricTransformation</a>

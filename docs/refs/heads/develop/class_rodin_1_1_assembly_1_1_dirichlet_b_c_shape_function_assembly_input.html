@@ -75,7 +75,7 @@
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_assembly_2_input_8h.html">&lt;Rodin/Assembly/Input.h&gt;</a></div>
-          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, <a href="group___rodin_variational.html#ga6cd58505ac5f9e57b8f353cfeef7d7a4" class="m-doc">Variational::<wbr />ShapeFunctionSpaceType</a> Sp&gt;</div>
+          <div class="m-doc-template">template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>DirichletBCShapeFunctionAssemblyInput <span class="m-thin">class</span>
         </h1>
         <p>Input data for identification-style Dirichlet BC assembly (<code>u = A(v)</code>).</p>
@@ -152,7 +152,7 @@ $ v $
             </tr>
             <tr>
               <td>Sp</td>
-              <td>Shape function space type (Trial / <a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a>) of <svg class="m-math" style="width: 2.497em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.968217 11.955168">
+              <td>Shape function space type (Trial / Test) of <svg class="m-math" style="width: 2.497em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 23.968217 11.955168">
 <title>
 $ A(v) $
 </title>
@@ -172,6 +172,19 @@ $ A(v) $
             </tr>
           </tbody>
         </table>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>Encapsulates the slave trial function <svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
@@ -224,7 +237,136 @@ $ A(v) $
 <use x='13.327672' y='0' xlink:href='#eq4-g0-118'/>
 <use x='19.415891' y='0' xlink:href='#eq4-g1-41'/>
 </g>
-</svg> (a ShapeFunctionBase whose leaf is some master trial function), and the essential boundary attributes set.</p>
+</svg> (a <code>ShapeFunctionBase</code> whose leaf is some master trial function), and the essential boundary attributes set.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a324948d222fc99a8b343bf7c58dd298f">
+              using <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc-self">OperandType</a> = Variational::TrialFunction&lt;Sol1, FES1&gt;
+            </dt>
+            <dd>Operand type.</dd>
+            <dt id="ac73715afa4a4d3664c4295dd91052dd7">
+              using <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc-self">ValueType</a> = Variational::ShapeFunctionBase&lt;Derived2, FES2, Sp&gt;
+            </dt>
+            <dd>Shape-function expression type on the right-hand side.</dd>
+            <dt id="a3f4e5aa9305c166599fe7e3db5f72207">
+              using <a href="#a3f4e5aa9305c166599fe7e3db5f72207" class="m-doc-self">DirichletBCType</a> = Variational::DirichletBC&lt;<a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>, <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&gt;
+            </dt>
+            <dd>Dirichlet condition represented by this input.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a4fcc3c0b5f52526cdeb170cf9e40853e" class="m-doc">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
+              const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span>
+            </dt>
+            <dd>Constructs identification Dirichlet BC assembly input.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc">getOperand</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp;</span>
+            </dt>
+            <dd>Gets the slave trial function operand.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fa9fbf8c3fb4dff4de2bc76c06df467" class="m-doc">getShapeFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp;</span>
+            </dt>
+            <dd>Gets the shape-function expression on the right-hand side.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp;</span>
+            </dt>
+            <dd>Gets the essential boundary attributes.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4fcc3c0b5f52526cdeb170cf9e40853e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fcc3c0b5f52526cdeb170cf9e40853e" class="m-doc-self">DirichletBCShapeFunctionAssemblyInput</a>(</span><span class="m-doc-wrap">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; u,
+              const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; v,
+              const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; essBdr)</span></span>
+            </h3>
+            <p>Constructs identification Dirichlet BC assembly input.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">u</td>
+                  <td>Slave trial function to constrain.</td>
+                </tr>
+                <tr>
+                  <td>v</td>
+                  <td>Shape-function expression used as the master value.</td>
+                </tr>
+                <tr>
+                  <td>essBdr</td>
+                  <td>Boundary attributes where the condition applies.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a167036e7e1cfcff01c5f031ea96d3fed"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a324948d222fc99a8b343bf7c58dd298f" class="m-doc">OperandType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a167036e7e1cfcff01c5f031ea96d3fed" class="m-doc-self">getOperand</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the slave trial function operand.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the constrained trial function.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4fa9fbf8c3fb4dff4de2bc76c06df467"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#ac73715afa4a4d3664c4295dd91052dd7" class="m-doc">ValueType</a>&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fa9fbf8c3fb4dff4de2bc76c06df467" class="m-doc-self">getShapeFunction</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the shape-function expression on the right-hand side.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Reference to the master expression.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aebcc7cb36480775d8bb4c133533030f1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class Sol1, class FES1, class Derived2, class FES2, Variational::ShapeFunctionSpaceType Sp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="group___rodin_types.html#gaaa7028d8cff093953627586709836fcb" class="m-doc">FlatSet</a>&lt;<a href="namespace_rodin_1_1_geometry.html#aad3269c6d75ba79d0d3bde699227ea90" class="m-doc">Geometry::<wbr />Attribute</a>&gt;&amp; Rodin::<wbr />Assembly::<wbr />DirichletBCShapeFunctionAssemblyInput&lt;Scalar, Sol1, FES1, Derived2, FES2, Sp&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebcc7cb36480775d8bb4c133533030f1" class="m-doc-self">getEssentialBoundary</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the essential boundary attributes.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Boundary attributes where the condition applies.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

@@ -87,6 +87,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -95,7 +96,7 @@
         </nav>
 <p>This loader reads mesh data from the MFEM mesh file format, a text-based format used by the MFEM library. It supports various element types and can handle 2D and 3D meshes.</p><section id="autotoc_md142"><h3><a href="#autotoc_md142">MFEM Format Structure</a></h3><p>The MFEM mesh format consists of several sections:</p><ul><li>Header: &quot;MFEM mesh v1.0&quot; with version information</li><li>dimension: Spatial dimension of the mesh</li><li>elements: Element connectivity and attributes</li><li>boundary: Boundary element information</li><li>vertices: Vertex coordinates</li></ul></section><section id="autotoc_md143"><h3><a href="#autotoc_md143">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
-<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_mesh_printer.html" class="m-doc">MeshPrinter</a></p></aside></section>
+<span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>MeshPrinter</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -106,11 +107,28 @@
             <dd>Base class for loading meshes from files or streams.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a4a1c0b519f1e883b370f4fd6c3b76ee5">
+              using <a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>
+            </dt>
+            <dd>Execution context type.</dd>
+            <dt id="a0aa213e4c6f5333c6f41f8e57fd9ac5c">
+              using <a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Mesh type being loaded.</dd>
+            <dt id="a0f6063fe81811604830400d335765674">
+              using <a href="#a0f6063fe81811604830400d335765674" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_printer_base.html" class="m-doc">MeshPrinterBase</a>&lt;<a href="#a4a1c0b519f1e883b370f4fd6c3b76ee5" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">ObjectType</a>&amp; mesh)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span>
             </dt>
             <dd>Constructs an MFEM mesh loader for the given mesh.</dd>
           </dl>
@@ -143,7 +161,7 @@
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoader&lt;IO::<wbr />FileFormat::<wbr />MFEM, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc-self">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoader&lt;IO::<wbr />FileFormat::<wbr />MFEM, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc-self">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a0aa213e4c6f5333c6f41f8e57fd9ac5c" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
             </h3>
             <p>Constructs an MFEM mesh loader for the given mesh.</p>
             <table class="m-table m-fullwidth m-flat">

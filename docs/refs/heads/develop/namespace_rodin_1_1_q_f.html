@@ -76,13 +76,13 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>QF <span class="m-thin">namespace</span>
         </h1>
-        <p>Module for defining quadrature formulae over reference polytopes.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_q_f.html" class="m-doc">Rodin::<wbr />QF</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md550">Available Quadrature Rules</a></li>
-            <li><a href="#autotoc_md551">Automatic Selection</a></li>
-            <li><a href="#autotoc_md552">Higher-Dimensional Construction</a></li>
+            <li><a href="#autotoc_md460">Available Quadrature Rules</a></li>
+            <li><a href="#autotoc_md461">Automatic Selection</a></li>
+            <li><a href="#autotoc_md462">Higher-Dimensional Construction</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_q_f.html" class="m-doc">QF</a> (Quadrature Formula) module provides numerical integration rules for computing integrals over reference polytopes. These quadrature rules approximate integrals by weighted sums of function evaluations:</p><div class="m-math"><svg style="width: 13.489em; height: 3.355em;" viewBox="129.524126 -33.407999 129.494726 32.212486">
+<p>Directory src/Rodin/QF</p><p>Module for defining quadrature formulae over reference polytopes.</p><p>The QF (Quadrature Formula) module provides numerical integration rules for computing integrals over reference polytopes. These quadrature rules approximate integrals by weighted sums of function evaluations:</p><div class="m-math"><svg style="width: 13.489em; height: 3.355em;" viewBox="129.524126 -33.407999 129.494726 32.212486">
 <title>
 \[
   \int_{\hat{K}} f(\hat{x}) \, d\hat{x} \approx \sum_{i=1}^n w_i \, f(\hat{x}_i)
@@ -180,7 +180,7 @@ $ w_i $
 <use x='0' y='0' xlink:href='#eq4-g1-119'/>
 <use x='8.36784' y='1.793263' xlink:href='#eq4-g0-105'/>
 </g>
-</svg> are the associated weights.</p><section id="autotoc_md550"><h3><a href="#autotoc_md550">Available Quadrature Rules</a></h3><table class="m-table"><thead><tr><th>Rule</th><th>Class</th><th>Polytopes</th><th>Exactness</th></tr></thead><tbody><tr><td><strong><a href="class_rodin_1_1_q_f_1_1_centroid.html" class="m-doc">Centroid</a></strong></td><td><code><a href="class_rodin_1_1_q_f_1_1_centroid.html" class="m-doc">QF::<wbr />Centroid</a></code></td><td>All types</td><td>Degree 1 (linear). Single point at barycenter.</td></tr><tr><td><strong>Gauss-Legendre</strong></td><td><code><a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html" class="m-doc">QF::<wbr />GaussLegendre</a></code></td><td>All types</td><td>Degree <svg class="m-math" style="width: 3.469em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 33.30541 8.700714">
+</svg> are the associated weights.</p><section id="autotoc_md460"><h3><a href="#autotoc_md460">Available Quadrature Rules</a></h3><table class="m-table"><thead><tr><th>Rule</th><th>Class</th><th>Polytopes</th><th>Exactness</th></tr></thead><tbody><tr><td><strong>Centroid</strong></td><td><code>QF::Centroid</code></td><td>All types</td><td>Degree 1 (linear). Single point at barycenter.</td></tr><tr><td><strong>Gauss-Legendre</strong></td><td><code>QF::GaussLegendre</code></td><td>All types</td><td>Degree <svg class="m-math" style="width: 3.469em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 33.30541 8.700714">
 <title>
 $ 2n-1 $
 </title>
@@ -206,7 +206,7 @@ $ n $
 <g id='eq6-page1'>
 <use x='0' y='0' xlink:href='#eq6-g0-110'/>
 </g>
-</svg> points (1D). Tensor-product or Duffy transform for higher dimensions.</td></tr><tr><td><strong>Gauss-Lobatto</strong></td><td><code><a href="class_rodin_1_1_q_f_1_1_gauss_lobatto.html" class="m-doc">QF::<wbr />GaussLobatto</a></code></td><td>Segments</td><td>Degree <svg class="m-math" style="width: 3.469em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 33.30541 8.700714">
+</svg> points (1D). Tensor-product or Duffy transform for higher dimensions.</td></tr><tr><td><strong>Gauss-Lobatto</strong></td><td><code>QF::GaussLobatto</code></td><td>Segments</td><td>Degree <svg class="m-math" style="width: 3.469em; height: 0.906em; vertical-align: -0.104em;" viewBox="0 -7.704442 33.30541 8.700714">
 <title>
 $ 2n-3 $
 </title>
@@ -232,7 +232,7 @@ $ n $
 <g id='eq8-page1'>
 <use x='0' y='0' xlink:href='#eq8-g0-110'/>
 </g>
-</svg> points. Includes endpoints (useful for spectral methods).</td></tr><tr><td><strong>Grundmann-Möller</strong></td><td><code><a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html" class="m-doc">QF::<wbr />GrundmannMoller</a></code></td><td>Simplices only</td><td>Degree <svg class="m-math" style="width: 3.296em; height: 0.898em; vertical-align: -0.095em;" viewBox="0 -7.704442 31.637965 8.617643">
+</svg> points. Includes endpoints (useful for spectral methods).</td></tr><tr><td><strong>Grundmann-Möller</strong></td><td><code>QF::GrundmannMoller</code></td><td>Simplices only</td><td>Degree <svg class="m-math" style="width: 3.296em; height: 0.898em; vertical-align: -0.095em;" viewBox="0 -7.704442 31.637965 8.617643">
 <title>
 $ 2s+1 $
 </title>
@@ -262,7 +262,7 @@ $ s \geq 0 $
 <use x='8.834835' y='0' xlink:href='#eq10-g0-21'/>
 <use x='21.454161' y='0' xlink:href='#eq10-g2-48'/>
 </g>
-</svg>. Designed specifically for simplicial elements.</td></tr></tbody></table></section><section id="autotoc_md551"><h3><a href="#autotoc_md551">Automatic Selection</a></h3><p>During assembly, the quadrature order is automatically chosen based on the polynomial degree of the finite element space and the integrands. Users can also specify a quadrature rule explicitly:</p><pre class="m-code"><span class="n">QF</span><span class="o">::</span><span class="n">GaussLegendre</span><span class="w"> </span><span class="nf">qf</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// order 5 on triangles</span></pre></section><section id="autotoc_md552"><h3><a href="#autotoc_md552">Higher-Dimensional Construction</a></h3><ul><li><strong>Tensor-product geometries</strong> (quadrilaterals, hexahedra): constructed via tensor products of 1D Gauss-Legendre rules.</li><li><strong>Simplicial geometries</strong> (triangles, tetrahedra): the Duffy transformation maps tensor-product rules to the simplex, or Grundmann-Möller rules are used natively.</li></ul><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> provides quadrature rules for all supported polytope types (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).</p></section>
+</svg>. Designed specifically for simplicial elements.</td></tr></tbody></table></section><section id="autotoc_md461"><h3><a href="#autotoc_md461">Automatic Selection</a></h3><p>During assembly, the quadrature order is automatically chosen based on the polynomial degree of the finite element space and the integrands. Users can also specify a quadrature rule explicitly:</p><pre class="m-code"><span class="n">QF</span><span class="o">::</span><span class="n">GaussLegendre</span><span class="w"> </span><span class="nf">qf</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// order 5 on triangles</span></pre></section><section id="autotoc_md462"><h3><a href="#autotoc_md462">Higher-Dimensional Construction</a></h3><ul><li><strong>Tensor-product geometries</strong> (quadrilaterals, hexahedra): constructed via tensor products of 1D Gauss-Legendre rules.</li><li><strong>Simplicial geometries</strong> (triangles, tetrahedra): the Duffy transformation maps tensor-product rules to the simplex, or Grundmann-Möller rules are used natively.</li></ul><p>Rodin provides quadrature rules for all supported polytope types (segments, triangles, quadrilaterals, tetrahedra, hexahedra, wedges).</p></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">

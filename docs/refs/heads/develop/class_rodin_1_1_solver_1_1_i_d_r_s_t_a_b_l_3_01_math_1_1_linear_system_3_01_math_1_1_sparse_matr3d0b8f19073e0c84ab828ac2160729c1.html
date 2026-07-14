@@ -97,6 +97,8 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -112,17 +114,83 @@
             <dd>Abstract base class for linear system solvers.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="ab63ab6eaeaaa03f9e1f192bccb16d69e">
+              using <a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc-self">OperatorType</a> = <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Assembled operator type.</dd>
+            <dt id="a67d1c43c805caee8285834ec30abf729">
+              using <a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc-self">LinearSystemType</a> = <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a>&lt;<a href="#ab63ab6eaeaaa03f9e1f192bccb16d69e" class="m-doc">OperatorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="ab6098d508adace773204c1e42ece893a">
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Associated problem base type.</dd>
+            <dt id="a85385c6607a397925a213e9098256fdc">
+              using <a href="#a85385c6607a397925a213e9098256fdc" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">LinearSolverBase</a>&lt;<a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a4fbc7a279694d07c9820351b64f34b1b">
+              <span class="m-doc-wrap-bumper"><a href="#a4fbc7a279694d07c9820351b64f34b1b" class="m-doc-self">IDRSTABL</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb)</span>
+            </dt>
+            <dd>Constructs the solver from the problem to be solved.</dd>
+            <dt id="acc6a411f33a7a163b17c6440adf6e90f">
+              <span class="m-doc-wrap-bumper"><a href="#acc6a411f33a7a163b17c6440adf6e90f" class="m-doc-self">IDRSTABL</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a2066e06cf4eb53b1faef28b77853af71">
+              <span class="m-doc-wrap-bumper"><a href="#a2066e06cf4eb53b1faef28b77853af71" class="m-doc-self">IDRSTABL</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="a6ed0b3a16afed166b40ba5ce6b72390c">
+              <span class="m-doc-wrap-bumper"><a href="#a6ed0b3a16afed166b40ba5ce6b72390c" class="m-doc-self">~IDRSTABL</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Destructor.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a7c1eda9226c423866d56d20eb1fa5bc7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c1eda9226c423866d56d20eb1fa5bc7" class="m-doc-self">setTolerance</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&amp; tol) -&gt; <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>&amp;</span>
+            </dt>
+            <dd>Sets the convergence tolerance; returns a reference to this solver.</dd>
+            <dt id="aea2655ace4d9f0eea6dd61cdccd46b53">
+              <span class="m-doc-wrap-bumper">auto <a href="#aea2655ace4d9f0eea6dd61cdccd46b53" class="m-doc-self">setMaxIterations</a>(</span><span class="m-doc-wrap">size_t maxIt) -&gt; <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>&amp;</span>
+            </dt>
+            <dd>Sets the maximum number of iterations; returns a reference to this solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab061e1a9fcc18e9c5752ce52f0f6570b" class="m-doc">setL</a>(</span><span class="m-doc-wrap">size_t l) -&gt; <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>&amp;</span>
             </dt>
             <dd>Sets the IDRstab(l) parameter l.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a22ee958397ea7e2cf004d8f5bc9d5ec6" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a3c28e3be8d6ee14eb1c5e01d884f0cd9">
+              <span class="m-doc-wrap-bumper">void <a href="#a3c28e3be8d6ee14eb1c5e01d884f0cd9" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap"><a href="#a67d1c43c805caee8285834ec30abf729" class="m-doc">LinearSystemType</a>&amp; axb) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Solves the assembled linear system.</dd>
+            <dt id="a7bd8b39d7964b40a7a4dcb0a1ff594b7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7bd8b39d7964b40a7a4dcb0a1ff594b7" class="m-doc-self">success</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a717a190167959b837148d927a5d380ba" class="m-doc">Boolean</a></span>
+            </dt>
+            <dd>Returns whether the most recent solve converged successfully.</dd>
+            <dt id="a22ee958397ea7e2cf004d8f5bc9d5ec6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a22ee958397ea7e2cf004d8f5bc9d5ec6" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a polymorphic copy of this solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc">solve</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
@@ -143,25 +211,7 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>&amp; Rodin::<wbr />Solver::<wbr />IDRSTABL&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab061e1a9fcc18e9c5752ce52f0f6570b" class="m-doc-self">setL</a>(</span><span class="m-doc-wrap">size_t l)</span></span>
             </h3>
             <p>Sets the IDRstab(l) parameter l.</p>
-<p>Typical values: 2, 4, 8. Larger l may improve robustness but increases work and storage.</p>
-          </div></section>
-          <section class="m-doc-details" id="a22ee958397ea7e2cf004d8f5bc9d5ec6"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class Scalar&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a>* Rodin::<wbr />Solver::<wbr />IDRSTABL&lt;Math::<wbr />LinearSystem&lt;Math::<wbr />SparseMatrix&lt;Scalar&gt;, Math::<wbr />Vector&lt;Scalar&gt;&gt;&gt;&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a22ee958397ea7e2cf004d8f5bc9d5ec6" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a polymorphic copy of this object.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new instance that is a copy of this object. The caller is responsible for memory management.</td>
-                </tr>
-              </tfoot>
-            </table>
-<aside class="m-note m-info"><h4>Note</h4><p>This method enables polymorphic copy behavior. The copy semantics (shallow vs deep) depend on the concrete implementation. This method should not throw exceptions.</p></aside>
+<p>Typical values: 2, 4, 8. Larger l may improve robustness but increases work and storage.</p><p>Sets the IDRstab(l) polynomial degree; returns a reference to this solver.</p><p>Sets the IDRstab(l) polynomial degree; returns a reference to this solver.</p>
           </div></section>
           <section class="m-doc-details" id="af7d39f0eac0af0ed5785935ac72a1e7d"><div>
             <h3>

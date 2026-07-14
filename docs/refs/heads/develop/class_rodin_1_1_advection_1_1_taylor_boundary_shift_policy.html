@@ -79,7 +79,19 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_advection.html">Advection</a>::<wbr/></span>TaylorBoundaryShiftPolicy <span class="m-thin">class</span>
         </h1>
         <p>First-order boundary-hit handler for semi-Lagrangian tracing with an inward shift.</p>
-<p>This boundary policy is meant to be used with <code><a href="class_rodin_1_1_variational_1_1_flow.html" class="m-doc">Variational::<wbr />Flow</a></code> (and therefore with semi-Lagrangian / characteristic-based schemes) when a traced characteristic hits a boundary face before the remaining time <code>hit.tau</code> is consumed.</p><p>The policy enforces an &quot;always-sample-inside&quot; rule:</p><ul><li>the reported hit point is sanitized to lie on the hit face and inside the cell,</li><li>the physical outward unit normal at the face is computed,</li><li>the point is nudged by a small <em>physical</em> distance into the domain,</li><li>tracing is terminated for the current step (<code>hit.tau = 0</code>).</li></ul><p>In addition, the policy provides a <em>first-order value correction</em> for a scalar field <code>phi</code> using a Taylor expansion at the (unshifted) hit location. This is useful when:</p><ul><li>you want the traced point to be strictly interior for evaluation/interpolation stability, but</li><li>you want the value that corresponds (approximately) to the true boundary hit location.</li></ul><p>More precisely, letting:</p><ul><li><svg class="m-math" style="width: 1.570em; height: 0.732em; vertical-align: -0.196em;" viewBox="0 -5.147373 15.068189 7.024009">
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>This boundary policy is meant to be used with <code>Variational::Flow</code> (and therefore with semi-Lagrangian / characteristic-based schemes) when a traced characteristic hits a boundary face before the remaining time <code>hit.tau</code> is consumed.</p><p>The policy enforces an &quot;always-sample-inside&quot; rule:</p><ul><li>the reported hit point is sanitized to lie on the hit face and inside the cell,</li><li>the physical outward unit normal at the face is computed,</li><li>the point is nudged by a small <em>physical</em> distance into the domain,</li><li>tracing is terminated for the current step (<code>hit.tau = 0</code>).</li></ul><p>In addition, the policy provides a <em>first-order value correction</em> for a scalar field <code>phi</code> using a Taylor expansion at the (unshifted) hit location. This is useful when:</p><ul><li>you want the traced point to be strictly interior for evaluation/interpolation stability, but</li><li>you want the value that corresponds (approximately) to the true boundary hit location.</li></ul><p>More precisely, letting:</p><ul><li><svg class="m-math" style="width: 1.570em; height: 0.732em; vertical-align: -0.196em;" viewBox="0 -5.147373 15.068189 7.024009">
 <title>
 $ x_{\text{hit}} $
 </title>
@@ -286,6 +298,91 @@ $ \varepsilon $
 <use x='0' y='0' xlink:href='#eq9-g0-34'/>
 </g>
 </svg> is too large relative to local mesh size or curvature of <code>phi</code>, the correction will be poor.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>dt</code>: Signed step size of the tracer (kept for API symmetry; not used directly here).</li><li><code>mesh</code>: Mesh on which tracing occurs.</li><li><code>phi</code>: Scalar field/function to correct (typically the advected field itself in level-set use).</li><li><code>eps_in_phys</code>: Desired inward physical offset. The effective shift is <code>max(eps_in_phys, 50*sqrt(machine_epsilon))</code>.</li></ul></aside>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1f9096a28c1bfdf2a43321070f6d270d" class="m-doc">TaylorBoundaryShiftPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const Field&amp; phi,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps_in_phys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span>
+            </dt>
+            <dd>Constructs the boundary policy.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a67ad93beff1ca7f2e732ea49f3f02b52" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const Variational::BoundaryHit&amp; hit) const -&gt; bool</span>
+            </dt>
+            <dd>Handles a boundary hit and accumulates the Taylor correction.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1f9096a28c1bfdf2a43321070f6d270d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Field&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />TaylorBoundaryShiftPolicy&lt;Field&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f9096a28c1bfdf2a43321070f6d270d" class="m-doc-self">TaylorBoundaryShiftPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
+              const Field&amp; phi,
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps_in_phys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span></span>
+            </h3>
+            <p>Constructs the boundary policy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">dt</td>
+                  <td>Signed time step used by the tracer.</td>
+                </tr>
+                <tr>
+                  <td>mesh</td>
+                  <td>Mesh on which tracing occurs.</td>
+                </tr>
+                <tr>
+                  <td>phi</td>
+                  <td>Scalar field used for the Taylor correction.</td>
+                </tr>
+                <tr>
+                  <td>eps_in_phys</td>
+                  <td>Inward physical offset used after a boundary hit.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a67ad93beff1ca7f2e732ea49f3f02b52"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Field&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool Rodin::<wbr />Advection::<wbr />TaylorBoundaryShiftPolicy&lt;Field&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a67ad93beff1ca7f2e732ea49f3f02b52" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Variational::BoundaryHit&amp; hit) const</span></span>
+            </h3>
+            <p>Handles a boundary hit and accumulates the Taylor correction.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">hit</td>
+                  <td>Boundary hit record updated in place.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Always returns <code>true</code> after handling the hit.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>

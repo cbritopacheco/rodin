@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Solver <span class="m-thin">namespace</span>
         </h1>
-        <p>Module for solving linear and nonlinear systems arising from finite element discretizations.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -88,7 +88,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="namespace_rodin_1_1_solver.html" class="m-doc">Solver</a> module provides a comprehensive set of direct and iterative linear solvers:</p><p>Direct solvers** (exact up to floating-point precision):</p><ul><li><a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a> — General-purpose sparse LU factorization</li><li>UMFPack — SuiteSparse UMFPACK solver</li><li>CHOLMOD — SuiteSparse Cholesky for SPD systems</li><li><a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a> — Simplicial <svg class="m-math" style="width: 2.295em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 22.035371 9.784673">
+<p>Directory src/Rodin/Solver</p><p>Module for solving linear and nonlinear systems arising from finite element discretizations.</p><p>The Solver module provides a comprehensive set of direct and iterative linear solvers:</p><p>Direct solvers** (exact up to floating-point precision):</p><ul><li><a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a> — General-purpose sparse LU factorization</li><li><code>UMFPack</code> — SuiteSparse UMFPACK solver</li><li><code>CHOLMOD</code> — SuiteSparse Cholesky for SPD systems</li><li><a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a> — Simplicial <svg class="m-math" style="width: 2.295em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 22.035371 9.784673">
 <title>
 $ LL^T $
 </title>
@@ -116,7 +116,7 @@ $ LDL^T $
 <use x='18.008982' y='0' xlink:href='#eq2-g1-76'/>
 <use x='25.973488' y='-4.338437' xlink:href='#eq2-g0-84'/>
 </g>
-</svg></li><li><a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a> — Sparse QR factorization</li><li>SPQR — SuiteSparse sparse QR</li><li><a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> — Dense Householder QR</li><li><p><a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> — Dense <svg class="m-math" style="width: 3.342em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 32.079846 9.784673">
+</svg></li><li><a href="class_rodin_1_1_solver_1_1_sparse_q_r.html" class="m-doc">SparseQR</a> — Sparse QR factorization</li><li><code>SPQR</code> — SuiteSparse sparse QR</li><li><a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> — Dense Householder QR</li><li><p><a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> — Dense <svg class="m-math" style="width: 3.342em; height: 1.019em; vertical-align: -0.000em;" viewBox="0 -9.784673 32.079846 9.784673">
 <title>
 $ LDL^T $
 </title>
@@ -131,7 +131,7 @@ $ LDL^T $
 <use x='18.008982' y='0' xlink:href='#eq3-g1-76'/>
 <use x='25.973488' y='-4.338437' xlink:href='#eq3-g0-84'/>
 </g>
-</svg></p><p>Iterative solvers** (for large systems):</p></li><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a></li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a></li></ul><p>Usage:</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
+</svg></p><p>Iterative solvers** (for large systems):</p></li><li><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> — Conjugate Gradient (SPD systems)</li><li><a href="class_rodin_1_1_solver_1_1_bi_c_g_s_t_a_b.html" class="m-doc">BiCGSTAB</a> — Bi-conjugate gradient stabilized</li><li><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> — Generalized Minimum Residual</li><li><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> — Deflated GMRES</li><li><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> — Minimum Residual (symmetric systems)</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s.html" class="m-doc">IDRS</a> — Induced Dimension Reduction</li><li><a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l.html" class="m-doc">IDRSTABL</a> — IDR(s) with stabilization</li><li><a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a> — Least-squares CG</li></ul><p>Usage:</p><pre class="m-code"><span class="c1">// Inline iterative solver — most common pattern</span>
 <span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Configured iterative solver</span>
@@ -141,7 +141,7 @@ $ LDL^T $
 <span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">();</span>
 
 <span class="c1">// Direct solver</span>
-<span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><p>Nonlinear solvers** (for hyperelastic or other nonlinear problems):</p><ul><li><code><a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">Solver::<wbr />NewtonSolver</a>&lt;LinearSolver&gt;</code> — Newton-Raphson iteration for nonlinear variational problems. At each iterate <svg class="m-math" style="width: 1.175em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 11.284055 9.873238">
+<span class="n">Solver</span><span class="o">::</span><span class="n">SparseLU</span><span class="p">(</span><span class="n">problem</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre><p>Nonlinear solvers** (for hyperelastic or other nonlinear problems):</p><ul><li><code>Solver::NewtonSolver&lt;LinearSolver&gt;</code> — Newton-Raphson iteration for nonlinear variational problems. At each iterate <svg class="m-math" style="width: 1.175em; height: 1.028em; vertical-align: -0.000em;" viewBox="0 -9.873238 11.284055 9.873238">
 <title>
 $ u^k $
 </title>
@@ -244,7 +244,7 @@ $ u^{k+1} = u^k + \delta u^k $
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_c_g_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html" class="m-doc">CG&lt;PETSc::Math::LinearSystem&gt;</a>
             </dt>
-            <dd>Conjugate gradient solver for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> linear systems.</dd>
+            <dd>Conjugate gradient solver for PETSc linear systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a>
@@ -254,12 +254,12 @@ $ u^{k+1} = u^k + \delta u^k $
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_sca2e5637034909e48f90d64007740923a2.html" class="m-doc">DGMRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> solver for dense systems.</dd>
+            <dd>DGMRES solver for dense systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3a260f9eeb2896b6ee84bf13e0d3c0e09.html" class="m-doc">DGMRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_d_g_m_r_e_s.html" class="m-doc">DGMRES</a> solver for sparse systems.</dd>
+            <dd>DGMRES solver for sparse systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class EigenSolverType, class OperatorType, class VectorType&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_eigen_solver.html" class="m-doc">EigenSolver</a>
@@ -274,17 +274,17 @@ $ u^{k+1} = u^k + \delta u^k $
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scala4b5278bcb655c78cb017b46d4f3db5ab.html" class="m-doc">GMRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> solver for dense systems.</dd>
+            <dd>GMRES solver for dense systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_0488e2b3a3cd13496de41650cda062d7e.html" class="m-doc">GMRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a> solver for sparse systems.</dd>
+            <dd>GMRES solver for sparse systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_g_m_r_e_s_3_01_p_e_t_sc_1_1_math_1_1_linear_system_01_4.html" class="m-doc">GMRES&lt;PETSc::Math::LinearSystem&gt;</a>
             </dt>
-            <dd>Generalized minimal residual (<a href="class_rodin_1_1_solver_1_1_g_m_r_e_s.html" class="m-doc">GMRES</a>) solver for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> linear systems.</dd>
+            <dd>Generalized minimal residual (GMRES) solver for PETSc linear systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a>
@@ -294,7 +294,7 @@ $ u^{k+1} = u^k + \delta u^k $
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_householder_q_r_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01714fa1f57bf24babc6c5260d885991e7.html" class="m-doc">HouseholderQR&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>A direct sparse <a href="class_rodin_1_1_solver_1_1_householder_q_r.html" class="m-doc">HouseholderQR</a> Cholesky factorizations without square root for use with <a href="namespace_rodin_1_1_math.html#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a> and <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>.</dd>
+            <dd>A direct sparse HouseholderQR Cholesky factorizations without square root for use with Math::SparseMatrix and Math::Vector.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_i_d_r_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scalar_90849de38673597c1dab0c5daba38fe8.html" class="m-doc">IDRS&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
@@ -323,17 +323,17 @@ $ u^{k+1} = u^k + \delta u^k $
             <dt>
               class <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> (Krylov subspace) linear solver wrapper.</dd>
+            <dd>PETSc KSP (Krylov subspace) linear solver wrapper.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a>
             </dt>
-            <dd>Robust <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky decomposition for dense matrices.</dd>
+            <dd>Robust LDLT Cholesky decomposition for dense matrices.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_l_d_l_t_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scalar_f96d6c999dfcf47df8aafb7ccf2d4334.html" class="m-doc">LDLT&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>Robust <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization with pivoting for dense matrices.</dd>
+            <dd>Robust LDLT Cholesky factorization with pivoting for dense matrices.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_least_squares_c_g.html" class="m-doc">LeastSquaresCG</a>
@@ -358,12 +358,12 @@ $ u^{k+1} = u^k + \delta u^k $
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_matrix_3_01_scae6360e13a1df75f352930829c5698bb9.html" class="m-doc">MINRES&lt;Math::LinearSystem&lt;Math::Matrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> solver for symmetric dense systems.</dd>
+            <dd>MINRES solver for symmetric dense systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3e99a3bb6569edadfe0405a4bafdc55c9.html" class="m-doc">MINRES&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd><a href="class_rodin_1_1_solver_1_1_m_i_n_r_e_s.html" class="m-doc">MINRES</a> solver for symmetric sparse systems.</dd>
+            <dd>MINRES solver for symmetric sparse systems.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSolver&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_newton_solver.html" class="m-doc">NewtonSolver</a>
@@ -388,12 +388,12 @@ $ u^{k+1} = u^k + \delta u^k $
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t.html" class="m-doc">SimplicialLDLT</a>
             </dt>
-            <dd>Direct sparse <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization solver.</dd>
+            <dd>Direct sparse LDLT Cholesky factorization solver.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_simplicial_l_d_l_t_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_m409307278b47390e9c22e5e8b5e51940.html" class="m-doc">SimplicialLDLT&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>
             </dt>
-            <dd>Simplicial <a href="class_rodin_1_1_solver_1_1_l_d_l_t.html" class="m-doc">LDLT</a> Cholesky factorization without square root.</dd>
+            <dd>Simplicial LDLT Cholesky factorization without square root.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_simplicial_l_l_t.html" class="m-doc">SimplicialLLT</a>
@@ -407,7 +407,7 @@ $ u^{k+1} = u^k + \delta u^k $
             <dt>
               class <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_s_n_e_s.html" class="m-doc">SNES</a> (Scalable Nonlinear Equations Solvers) wrapper.</dd>
+            <dd>PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_sparse_l_u.html" class="m-doc">SparseLU</a>

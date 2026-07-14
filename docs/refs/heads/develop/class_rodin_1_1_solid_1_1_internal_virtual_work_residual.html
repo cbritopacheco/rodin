@@ -104,7 +104,7 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -160,15 +160,38 @@
 <use x='245.611238' y='-10.793007' xlink:href='#eq1-g7-100'/>
 <use x='251.693931' y='-10.793007' xlink:href='#eq1-g7-88'/>
 </g>
-</svg></div><p>The test function and current displacement state are kept as their concrete <a href="namespace_rodin.html" class="m-doc">Rodin</a> types. The displacement gradient and test-basis gradients are evaluated through <code>Variational::Jacobian(...)</code>, so <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> or other storage backends work as long as they provide the usual <a href="namespace_rodin.html" class="m-doc">Rodin</a> traits and Jacobian specialization. An optional <a href="class_rodin_1_1_solid_1_1_input.html" class="m-doc">Input</a> can inject auxiliary data (fiber directions, activation, etc.) into the <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> at each quadrature point.</p><p>Typically constructed via <code>InternalVirtualWork::Residual(v)</code> rather than directly.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+</svg></div><p>The test function and current displacement state are kept as their concrete Rodin types. The displacement gradient and test-basis gradients are evaluated through <code>Variational::Jacobian(...)</code>, so PETSc or other storage backends work as long as they provide the usual Rodin traits and Jacobian specialization. An optional Input can inject auxiliary data (fiber directions, activation, etc.) into the ConstitutivePoint at each quadrature point.</p><p>Typically constructed via <code>InternalVirtualWork::Residual(v)</code> rather than directly.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Number&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_linear_form_integrator_base.html" class="m-doc">LinearFormIntegratorBase&lt;Real&gt;</a>
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
             </dt>
-            <dd>Base class for linear form integrators.</dd>
+            <dd>Scalar value type.</dd>
+            <dt id="a8bd3d3e6195bf81621f00edb6b12b5e2">
+              using <a href="#a8bd3d3e6195bf81621f00edb6b12b5e2" class="m-doc-self">Parent</a> = Variational::LinearFormIntegratorBase&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a642521cadb1a8ac3a99efed89bc5cb0d">
+              using <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc-self">LawType</a> = LawDerived
+            </dt>
+            <dd>Constitutive law type.</dd>
+            <dt id="afad784a376132f122234cf9dcdde118c">
+              using <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc-self">TestType</a> = TestFunctionType
+            </dt>
+            <dd>Test function type.</dd>
+            <dt id="ac445b442c21ea71c53c90f799b23ae3c">
+              using <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc-self">StateType</a> = DisplacementType
+            </dt>
+            <dd>Current displacement state type.</dd>
+            <dt id="a265d5d1fa6112b86444b719cf45f5aa1">
+              using <a href="#a265d5d1fa6112b86444b719cf45f5aa1" class="m-doc-self">TestFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&gt;::FESType
+            </dt>
+            <dd>Test finite element space type.</dd>
+            <dt id="ae6311ea478e5e374583b826ab0607d73">
+              using <a href="#ae6311ea478e5e374583b826ab0607d73" class="m-doc-self">StateFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&gt;::FESType
+            </dt>
+            <dd>State finite element space type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -176,17 +199,21 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#a8ff892e6a97e2cd1f444502705c77b5f" class="m-doc">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
-              const TestType&amp; v,
-              const StateType&amp; displacement)</span>
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span>
             </dt>
             <dd>Constructs the internal virtual work residual integrator.</dd>
+            <dt id="afd8a13590d46ad921f2ee16a9b0910b3">
+              <span class="m-doc-wrap-bumper"><a href="#afd8a13590d46ad921f2ee16a9b0910b3" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Rebinds the current displacement state.</dd>
             <dt>
@@ -197,12 +224,28 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aec0dbba8d91464eb39f789a780a50dce" class="m-doc">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp;</span>
             </dt>
             <dd>Sets an input for auxiliary constitutive data.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a683931e0bacbe29e7e4948b74bd68618">
+              <span class="m-doc-wrap-bumper">auto <a href="#a683931e0bacbe29e7e4948b74bd68618" class="m-doc-self">setPolytope</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
             </dt>
-            <dd>Creates a copy of this integrator.</dd>
+            <dd>Sets the current polytope and assembles the element residual.</dd>
+            <dt id="a804c6a07f8876572c654f955d09a107c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a804c6a07f8876572c654f955d09a107c" class="m-doc-self">integrate</a>(</span><span class="m-doc-wrap">size_t te) -&gt; <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a> <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns an entry of the current element residual vector.</dd>
+            <dt id="a07a0ed42183d01cb7d7a5e5edf3caba3">
+              <span class="m-doc-wrap-bumper">auto <a href="#a07a0ed42183d01cb7d7a5e5edf3caba3" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns the current polytope.</dd>
+            <dt id="aba6371885ea424dd84df03d85fcb0706">
+              <span class="m-doc-wrap-bumper">auto <a href="#aba6371885ea424dd84df03d85fcb0706" class="m-doc-self">getRegion</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> <span class="m-label m-flat m-warning">final</span></span>
+            </dt>
+            <dd>Returns the integration region.</dd>
+            <dt id="a55fdf58059a17dda553e792ce5749628">
+              <span class="m-doc-wrap-bumper">auto <a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Polymorphically copies this residual integrator.</dd>
             <dt id="ae6c4e20b7089a8517ed5c9a8cef7cb33">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const LawType&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae6c4e20b7089a8517ed5c9a8cef7cb33" class="m-doc-self">getLaw</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a642521cadb1a8ac3a99efed89bc5cb0d" class="m-doc">LawType</a>&amp;</span>
             </dt>
             <dd>Gets the constitutive law.</dd>
           </dl>
@@ -215,8 +258,8 @@
                 template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff892e6a97e2cd1f444502705c77b5f" class="m-doc-self">InternalVirtualWorkResidual</a>(</span><span class="m-doc-wrap">const LawDerived&amp; law,
-              const TestType&amp; v,
-              const StateType&amp; displacement)</span></span>
+              const <a href="#afad784a376132f122234cf9dcdde118c" class="m-doc">TestType</a>&amp; v,
+              const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; displacement)</span></span>
             </h3>
             <p>Constructs the internal virtual work residual integrator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -244,7 +287,7 @@
               <div class="m-doc-template">
                 template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const StateType&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a36cda0db261dd8cc77beb36ea7205c24" class="m-doc-self">setDisplacement</a>(</span><span class="m-doc-wrap">const <a href="#ac445b442c21ea71c53c90f799b23ae3c" class="m-doc">StateType</a>&amp; gf)</span></span>
             </h3>
             <p>Rebinds the current displacement state.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -317,24 +360,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>The input is called at each quadrature point after the <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a> has been constructed with geometric context and kinematics, allowing injection of fiber directions, activation parameters, region-wise material properties, etc.</p>
-          </div></section>
-          <section class="m-doc-details" id="a55fdf58059a17dda553e792ce5749628"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;class LawDerived, class TestFunctionType, class DisplacementType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work_residual.html" class="m-doc">InternalVirtualWorkResidual</a>* Rodin::<wbr />Solid::<wbr />InternalVirtualWorkResidual&lt;LawDerived, TestFunctionType, DisplacementType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55fdf58059a17dda553e792ce5749628" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Creates a copy of this integrator.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <tfoot>
-                <tr>
-                  <th style="width: 1%">Returns</th>
-                  <td>Pointer to newly allocated copy</td>
-                </tr>
-              </tfoot>
-            </table>
+<p>The input is called at each quadrature point after the ConstitutivePoint has been constructed with geometric context and kinematics, allowing injection of fiber directions, activation parameters, region-wise material properties, etc.</p>
           </div></section>
         </section>
       </div>

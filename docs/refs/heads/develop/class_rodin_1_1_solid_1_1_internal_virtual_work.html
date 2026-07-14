@@ -101,6 +101,7 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -116,6 +117,19 @@
               class <a href="class_rodin_1_1_variational_1_1_non_linear_form_integrator.html" class="m-doc">NonLinearFormIntegrator&lt;InternalVirtualWork&lt;Law, State&gt;&gt;</a>
             </dt>
             <dd>CRTP mixin for nonlinear form integrators.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a6698ec580d2b50ca24b3739888a13422">
+              using <a href="#a6698ec580d2b50ca24b3739888a13422" class="m-doc-self">LawType</a> = Law
+            </dt>
+            <dd>Constitutive law type.</dd>
+            <dt id="acf75bce94d355bdf512b62e8d71b73fb">
+              using <a href="#acf75bce94d355bdf512b62e8d71b73fb" class="m-doc-self">StateType</a> = State
+            </dt>
+            <dd>Current displacement state type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -215,7 +229,7 @@
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solid_1_1_internal_virtual_work.html" class="m-doc">InternalVirtualWork</a>&amp; Rodin::<wbr />Solid::<wbr />InternalVirtualWork&lt;Law, State&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6c68c5f158517f4eb058b1b596334ba9" class="m-doc-self">setInput</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin_1_1_solid.html#a3aa8dc482bcdf02906f13509a7b228ba" class="m-doc">InputFunction</a> input)</span></span>
             </h3>
             <p>Sets the auxiliary input for both residual and tangent.</p>
-<p>The input is propagated to every quadrature point in both <code><a href="#a72592c9e644325bd383350ddbd4aa628" class="m-doc">Residual()</a></code> and <code><a href="#ad107c02609fdd30913c0f45023556cd1" class="m-doc">Tangent()</a></code> integrators, ensuring they see the same fiber directions, activation parameters, etc.</p>
+<p>The input is propagated to every quadrature point in both <code>Residual()</code> and <code>Tangent()</code> integrators, ensuring they see the same fiber directions, activation parameters, etc.</p>
           </div></section>
           <section class="m-doc-details" id="a72592c9e644325bd383350ddbd4aa628"><div>
             <h3>

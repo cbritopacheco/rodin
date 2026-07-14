@@ -96,7 +96,7 @@
             </li>
           </ul>
         </nav>
-<p>This class represents a point in the computational domain, maintaining both reference and physical coordinates along with the associated polytope.</p><section id="autotoc_md88"><h2><a href="#autotoc_md88">Mathematical Foundation</a></h2><p>A <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> represents the tuple <svg class="m-math" style="width: 5.076em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 48.733441 11.955168">
+<p>This class represents a point in the computational domain, maintaining both reference and physical coordinates along with the associated polytope.</p><section id="autotoc_md88"><h2><a href="#autotoc_md88">Mathematical Foundation</a></h2><p>A Point represents the tuple <svg class="m-math" style="width: 5.076em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 48.733441 11.955168">
 <title>
 $ (x, r, p, \tau) $
 </title>
@@ -330,7 +330,7 @@ $ \mathbf{J}_x^{-1}(r) $
 <use x='22.817332' y='0' xlink:href='#eq14-g3-114'/>
 <use x='28.417805' y='0' xlink:href='#eq14-g5-41'/>
 </g>
-</svg></li><li>Distortion measure</li></ul></section><section id="autotoc_md91"><h2><a href="#autotoc_md91">Thread Safety</a></h2><p>This class is <strong>not</strong> thread-safe. Each thread should use its own <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> instances.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_geometry_1_1_polytope_transformation.html" class="m-doc">PolytopeTransformation</a>, <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Polytope</a>, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a></p></aside></section>
+</svg></li><li>Distortion measure</li></ul></section><section id="autotoc_md91"><h2><a href="#autotoc_md91">Thread Safety</a></h2><p>This class is <strong>not</strong> thread-safe. Each thread should use its own Point instances.</p><aside class="m-note m-default"><h4>See also</h4><p>PolytopeTransformation, Polytope, Point</p></aside></section>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
           <dl class="m-doc">
@@ -402,7 +402,7 @@ $ \mathbf{J}_x^{-1}(r) $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac2db078dfcc85672be2e6c7d351ecc45" class="m-doc">norm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Computes the <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> norm.</dd>
+            <dd>Computes the Euclidean norm.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aea27891f2dec23a98e002c9b48b41081" class="m-doc">stableNorm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
@@ -412,14 +412,14 @@ $ \mathbf{J}_x^{-1}(r) $
             </dt>
             <dd>Computes the Blue norm.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;size_t p&gt;</div>
+              <div class="m-doc-template">template&lt;size_t P&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a1aab438162f8e6311caee3ac39ede38e" class="m-doc">lpNorm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Computes the Lp norm.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a769f8937ed4c8e87ee1f9d71575ac922" class="m-doc">squaredNorm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Computes the squared <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> norm.</dd>
+            <dd>Computes the squared Euclidean norm.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a665c72bcce6234267d2b00abdf87ab40" class="m-doc">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point_base.html" class="m-doc">PointBase</a>&amp; p) const -&gt; bool</span>
             </dt>
@@ -663,12 +663,12 @@ $ p \in \tau $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac2db078dfcc85672be2e6c7d351ecc45" class="m-doc-self">norm</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Computes the <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> norm.</p>
+            <p>Computes the Euclidean norm.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> norm <svg class="m-math" style="width: 2.298em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.06454 11.955168">
+                  <td>Euclidean norm <svg class="m-math" style="width: 2.298em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 22.06454 11.955168">
 <title>
 $ \|p\|_2 $
 </title>
@@ -719,7 +719,7 @@ $ \|p\|_2 $
           <section class="m-doc-details" id="a1aab438162f8e6311caee3ac39ede38e"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;size_t p&gt;
+                template&lt;size_t P&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1aab438162f8e6311caee3ac39ede38e" class="m-doc-self">lpNorm</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
@@ -730,7 +730,7 @@ $ \|p\|_2 $
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">p</td>
+                  <td style="width: 1%">P</td>
                   <td>Norm order</td>
                 </tr>
               </tbody>
@@ -761,7 +761,7 @@ $ \|p\|_p $
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Geometry::<wbr />PointBase::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a769f8937ed4c8e87ee1f9d71575ac922" class="m-doc-self">squaredNorm</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Computes the squared <a href="namespace_rodin_1_1_geometry_1_1_euclidean.html" class="m-doc">Euclidean</a> norm.</p>
+            <p>Computes the squared Euclidean norm.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
@@ -799,7 +799,7 @@ $ \|p\|_2^2 $
               <tbody>
                 <tr>
                   <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point</a> to compare with</td>
+                  <td>Point to compare with</td>
                 </tr>
               </tbody>
               <tfoot>

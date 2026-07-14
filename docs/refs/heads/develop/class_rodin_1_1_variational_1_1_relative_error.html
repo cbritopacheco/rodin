@@ -77,13 +77,13 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>RelativeError <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_relative_error_8h.html">&lt;Rodin/Variational/RelativeError.h&gt;</a></div>
         </h1>
-        <p><a href="namespace_rodin_1_1_utility.html" class="m-doc">Utility</a> class for computing relative errors.</p>
+        <p>Utility class for computing relative errors.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md490">Supported Norms</a></li>
-            <li><a href="#autotoc_md491">Usage Example</a></li>
-            <li><a href="#autotoc_md492">Convergence Analysis</a></li>
+            <li><a href="#autotoc_md406">Supported Norms</a></li>
+            <li><a href="#autotoc_md407">Usage Example</a></li>
+            <li><a href="#autotoc_md408">Convergence Analysis</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_variational_1_1_relative_error.html" class="m-doc">RelativeError</a> provides static methods to compute the relative error between a computed grid function and an exact solution in various norms. The relative error is defined as:</p><div class="m-math"><svg style="width: 10.077em; height: 2.942em;" viewBox="145.303668 -28.243589 96.740149 28.243589">
+<p>RelativeError provides static methods to compute the relative error between a computed grid function and an exact solution in various norms. The relative error is defined as:</p><div class="m-math"><svg style="width: 10.077em; height: 2.942em;" viewBox="145.303668 -28.243589 96.740149 28.243589">
 <title>
 \[
   E_{\text{rel}} = \frac{\|u_h - u_{\text{exact}}\|}{\|u_{\text{exact}}\|}
@@ -173,7 +173,7 @@ $ u_{\text{exact}} $
 <use x='17.366303' y='1.793263' xlink:href='#eq3-g2-99'/>
 <use x='20.905035' y='1.793263' xlink:href='#eq3-g2-116'/>
 </g>
-</svg> is the exact solution.</p><section id="autotoc_md490"><h3><a href="#autotoc_md490">Supported Norms</a></h3><ul><li><strong>L1 norm</strong>: <svg class="m-math" style="width: 9.068em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 87.055853 13.781784">
+</svg> is the exact solution.</p><section id="autotoc_md406"><h3><a href="#autotoc_md406">Supported Norms</a></h3><ul><li><strong>L1 norm</strong>: <svg class="m-math" style="width: 9.068em; height: 1.436em; vertical-align: -0.434em;" viewBox="0 -9.630618 87.055853 13.781784">
 <title>
 $ \|u\|_{L^1} = \int_\Omega |u| \, dx $
 </title>
@@ -204,7 +204,7 @@ $ \|u\|_{L^1} = \int_\Omega |u| \, dx $
 <use x='74.321073' y='0' xlink:href='#eq4-g3-100'/>
 <use x='80.403766' y='0' xlink:href='#eq4-g3-120'/>
 </g>
-</svg></li><li><strong><a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a> norm</strong>: <svg class="m-math" style="width: 10.115em; height: 2.242em; vertical-align: -0.782em;" viewBox="0 -14.037455 97.101586 21.519522">
+</svg></li><li><strong>L2 norm</strong>: <svg class="m-math" style="width: 10.115em; height: 2.242em; vertical-align: -0.782em;" viewBox="0 -14.037455 97.101586 21.519522">
 <title>
 $ \|u\|_{L^2} = \sqrt{\int_\Omega u^2 \, dx} $
 </title>
@@ -278,13 +278,13 @@ $ \|u\|_{L^\infty} = \max_{x \in \Omega} |u(x)| $
 <use x='110.418177' y='0' xlink:href='#eq6-g6-41'/>
 <use x='114.970502' y='0' xlink:href='#eq6-g2-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md491"><h3><a href="#autotoc_md491">Usage Example</a></h3><pre class="m-code"><span class="c1">// Compute L2 relative error</span>
+</svg></li></ul></section><section id="autotoc_md407"><h3><a href="#autotoc_md407">Usage Example</a></h3><pre class="m-code"><span class="c1">// Compute L2 relative error</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">exact</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">());</span><span class="w"> </span><span class="p">};</span>
 <span class="n">Real</span><span class="w"> </span><span class="n">error_l2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RelativeError</span><span class="o">::</span><span class="n">l2</span><span class="p">(</span><span class="n">uh</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;L2 relative error: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">error_l2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="c1">// Compute L∞ relative error</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">error_linf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RelativeError</span><span class="o">::</span><span class="n">lInf</span><span class="p">(</span><span class="n">uh</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span></pre></section><section id="autotoc_md492"><h3><a href="#autotoc_md492">Convergence Analysis</a></h3><p>These error measures are used to verify convergence rates:</p><ul><li><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> elements: <svg class="m-math" style="width: 6.756em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 64.860491 12.463531">
+<span class="n">Real</span><span class="w"> </span><span class="n">error_linf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RelativeError</span><span class="o">::</span><span class="n">lInf</span><span class="p">(</span><span class="n">uh</span><span class="p">,</span><span class="w"> </span><span class="n">exact</span><span class="p">);</span></pre></section><section id="autotoc_md408"><h3><a href="#autotoc_md408">Convergence Analysis</a></h3><p>These error measures are used to verify convergence rates:</p><ul><li>P1 elements: <svg class="m-math" style="width: 6.756em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 64.860491 12.463531">
 <title>
 $ E_{L^2} \sim O(h^2) $
 </title>
@@ -353,25 +353,25 @@ $ E_{L^2} \sim O(h^3) $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data, class FunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a7f094b36dea830bce0f1b8762c10a50f" class="m-doc">l1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static auto <a href="#a7f094b36dea830bce0f1b8762c10a50f" class="m-doc">l1</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Computes relative error in L1 norm.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data, class FunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a1feedc8ad214891acd276db8306bc3c5" class="m-doc">l2</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static auto <a href="#a1feedc8ad214891acd276db8306bc3c5" class="m-doc">l2</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
-            <dd>Computes relative error in <a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a> norm.</dd>
+            <dd>Computes relative error in L2 norm.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data, class FunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a80fc562d64b0d4040c5860b038e54879" class="m-doc">lInf</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static auto <a href="#a80fc562d64b0d4040c5860b038e54879" class="m-doc">lInf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
             <dd>Computes relative error in L∞ norm.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data, class FunctionType&gt;</div>
-              <span class="m-doc-wrap-bumper">static auto <a href="#aeb09de0ad4fb3a98f50f4b56c7ccea74" class="m-doc">compute</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static auto <a href="#aeb09de0ad4fb3a98f50f4b56c7ccea74" class="m-doc">compute</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact,
               const <a href="#a2e0f25289c14e546b4ba10dd8fc735e5" class="m-doc">Norm</a>&amp; norm) -&gt; <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a></span>
             </dt>
@@ -397,7 +397,7 @@ $ E_{L^2} \sim O(h^3) $
                 <tr>
                   <td><a href="#a2e0f25289c14e546b4ba10dd8fc735e5a7e6aa2d53f6ee2b1a34b017fa403cb76" class="m-doc-self" id="a2e0f25289c14e546b4ba10dd8fc735e5a7e6aa2d53f6ee2b1a34b017fa403cb76">L2</a></td>
                   <td>
-                  <p><a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a> norm (square root of integral of square)</p>
+                  <p>L2 norm (square root of integral of square)</p>
                   </td>
                 </tr>
                 <tr>
@@ -417,7 +417,7 @@ $ E_{L^2} \sim O(h^3) $
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class FunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f094b36dea830bce0f1b8762c10a50f" class="m-doc-self">l1</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f094b36dea830bce0f1b8762c10a50f" class="m-doc-self">l1</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact)</span></span>
             </h3>
             <p>Computes relative error in L1 norm.</p>
@@ -477,10 +477,10 @@ $ \|u_h - u\|_{L^1} / \|u\|_{L^1} $
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class FunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1feedc8ad214891acd276db8306bc3c5" class="m-doc-self">l2</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1feedc8ad214891acd276db8306bc3c5" class="m-doc-self">l2</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact)</span></span>
             </h3>
-            <p>Computes relative error in <a href="class_rodin_1_1_variational_1_1_l2.html" class="m-doc">L2</a> norm.</p>
+            <p>Computes relative error in L2 norm.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -537,7 +537,7 @@ $ \|u_h - u\|_{L^2} / \|u\|_{L^2} $
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class FunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80fc562d64b0d4040c5860b038e54879" class="m-doc-self">lInf</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a80fc562d64b0d4040c5860b038e54879" class="m-doc-self">lInf</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact)</span></span>
             </h3>
             <p>Computes relative error in L∞ norm.</p>
@@ -597,7 +597,7 @@ $ \|u_h - u\|_{L^\infty} / \|u\|_{L^\infty} $
               <div class="m-doc-template">
                 template&lt;class FES, class Data, class FunctionType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb09de0ad4fb3a98f50f4b56c7ccea74" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
+              <span class="m-doc-wrap-bumper">static <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> Rodin::<wbr />Variational::<wbr />RelativeError::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aeb09de0ad4fb3a98f50f4b56c7ccea74" class="m-doc-self">compute</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">GridFunction</a>&lt;FES, Data&gt;&amp; model,
               const FunctionType&amp; exact,
               const <a href="#a2e0f25289c14e546b4ba10dd8fc735e5" class="m-doc">Norm</a>&amp; norm)</span></span>
             </h3>

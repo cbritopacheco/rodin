@@ -79,7 +79,7 @@
           <span class="m-breadcrumb"><a href="guides-meshes.html">Meshes</a> &raquo;</span>
           Mesh Creation
         </h1>
-        <p>How to create and load meshes in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>How to create and load meshes in Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -113,7 +113,7 @@
             <li><a href="#guides-meshes-creation-see-also">See Also</a></li>
           </ul>
         </nav>
-<p><a href="namespace_rodin.html" class="m-doc">Rodin</a> provides multiple ways to create meshes: loading from files, programmatic generation, or building custom meshes from scratch.</p><section id="guides-meshes-creation-uniform"><h2><a href="#guides-meshes-creation-uniform">Generating Uniform Grids</a></h2><p>The simplest way to create a mesh is using the <code>UniformGrid</code> static method, which generates structured grids of various polytope types.</p><section id="guides-meshes-creation-uniform-2d"><h3><a href="#guides-meshes-creation-uniform-2d">2D Uniform Grids</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+<p>Rodin provides multiple ways to create meshes: loading from files, programmatic generation, or building custom meshes from scratch.</p><section id="guides-meshes-creation-uniform"><h2><a href="#guides-meshes-creation-uniform">Generating Uniform Grids</a></h2><p>The simplest way to create a mesh is using the <code>UniformGrid</code> static method, which generates structured grids of various polytope types.</p><section id="guides-meshes-creation-uniform-2d"><h3><a href="#guides-meshes-creation-uniform-2d">2D Uniform Grids</a></h3><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -177,7 +177,7 @@ $ [0,1]^3 $
 <use x='20.201801' y='0' xlink:href='#eq2-g2-93'/>
 <use x='23.453462' y='-4.338437' xlink:href='#eq2-g1-51'/>
 </g>
-</svg>. The grid parameters specify the number of subdivisions in each direction.</p></section></section><section id="guides-meshes-creation-files"><h2><a href="#guides-meshes-creation-files">Loading from Files</a></h2><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> supports loading meshes from various file formats.</p><section id="guides-meshes-creation-files-formats"><h3><a href="#guides-meshes-creation-files-formats">Supported Formats</a></h3><ul><li><strong>MFEM</strong> (<code>.mesh</code>) - MFEM native format</li><li><strong>MEDIT</strong> (<code>.mesh</code>) - MEDIT format from INRIA (used by MMG)</li></ul></section><section id="guides-meshes-creation-files-loading"><h3><a href="#guides-meshes-creation-files-loading">Loading Meshes</a></h3><p>Use Mesh::load() with an explicit <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
+</svg>. The grid parameters specify the number of subdivisions in each direction.</p></section></section><section id="guides-meshes-creation-files"><h2><a href="#guides-meshes-creation-files">Loading from Files</a></h2><p>Rodin supports loading meshes from various file formats.</p><section id="guides-meshes-creation-files-formats"><h3><a href="#guides-meshes-creation-files-formats">Supported Formats</a></h3><ul><li><strong>MFEM</strong> (<code>.mesh</code>) - MFEM native format</li><li><strong>MEDIT</strong> (<code>.mesh</code>) - MEDIT format from INRIA (used by MMG)</li></ul></section><section id="guides-meshes-creation-files-loading"><h3><a href="#guides-meshes-creation-files-loading">Loading Meshes</a></h3><p>Use <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh::<wbr />load()</a> with an explicit <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">IO::<wbr />FileFormat</a>:</p><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;Rodin/Geometry.h&gt;</span>
 
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Geometry</span><span class="p">;</span>
@@ -296,7 +296,7 @@ $ [0,1]^3 $
 <span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Mesh 3 cells: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">mesh3</span><span class="p">.</span><span class="n">getCellCount</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre></section><section id="guides-meshes-creation-see-also"><h2><a href="#guides-meshes-creation-see-also">See Also</a></h2><ul><li><a href="guides-meshes-io.html" class="m-doc">Mesh I/O</a></li><li><a href="guides-meshes.html" class="m-doc">Meshes overview</a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh class reference</a></li><li>Example: examples/Geometry/UniformGrid.cpp</li></ul></section>
+<span class="p">}</span></pre></section><section id="guides-meshes-creation-see-also"><h2><a href="#guides-meshes-creation-see-also">See Also</a></h2><ul><li><a href="guides-meshes-io.html" class="m-doc">Mesh I/O</a></li><li><a href="guides-meshes.html" class="m-doc">Meshes overview</a></li><li><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Mesh class reference</a></li><li>Example: <code>examples/Geometry/UniformGrid.cpp</code></li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="guides-meshes.html" class="m-doc">Meshes</a> | <a href="guides-meshes-connectivity.html" class="m-doc">Mesh Connectivity &raquo;</a></div>
       </div>
     </div>

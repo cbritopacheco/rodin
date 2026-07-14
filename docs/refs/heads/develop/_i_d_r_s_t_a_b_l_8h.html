@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md253">Notes</a></li>
-            <li><a href="#autotoc_md254">Usage Example</a></li>
+            <li><a href="#autotoc_md252">Notes</a></li>
+            <li><a href="#autotoc_md253">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -109,22 +109,27 @@
 <use x='194.944339' y='0' xlink:href='#eq1-g1-61'/>
 <use x='207.36982' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDRstab(l) is a stabilized variant in the IDR family (similar spirit to BiCGSTAB(l)).</p><section id="autotoc_md253"><h3><a href="#autotoc_md253">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRSTABL.</li></ul></section><section id="autotoc_md254"><h3><a href="#autotoc_md254">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRSTABL</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
+</svg></div><p>for general (possibly non-symmetric) matrices.</p><p>IDRstab(l) is a stabilized variant in the IDR family (similar spirit to BiCGSTAB(l)).</p><section id="autotoc_md252"><h3><a href="#autotoc_md252">Notes</a></h3><ul><li>This implementation uses Eigen&#x27;s unsupported IDRSTABL.</li></ul></section><section id="autotoc_md253"><h3><a href="#autotoc_md253">Usage Example</a></h3><pre class="m-code"><span class="n">Solver</span><span class="o">::</span><span class="n">IDRSTABL</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
 <span class="n">solver</span><span class="p">.</span><span class="n">setTolerance</span><span class="p">(</span><span class="mf">1e-10</span><span class="p">).</span><span class="n">setMaxIterations</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">setL</span><span class="p">(</span><span class="mi">4</span><span class="p">).</span><span class="n">solve</span><span class="p">();</span></pre></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Module for solving linear and nonlinear systems arising from finite element discretizations.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_solver_1_1_i_d_r_s_t_a_b_l_3_01_linear_system_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Solver::IDRSTABL&lt;LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for IDRSTABL solvers.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_i_d_r_s_t_a_b_l_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matr3d0b8f19073e0c84ab828ac2160729c1.html" class="m-doc">Rodin::Solver::IDRSTABL&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>

@@ -76,11 +76,11 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ab40ac20c32b770619b2042a8223271e.html">PETSc</a>/</span><span class="m-breadcrumb"><a href="dir_c27be3fd98a5c7752af761ffeea734c4.html">Math</a>/</span>LinearSystem.h <span class="m-thin">file</span>
         </h1>
-        <p>PETSc specialization of <a href="namespace_rodin.html" class="m-doc">Rodin</a> linear system containers.</p>
+        <p>PETSc specialization of Rodin linear system containers.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md184">Usage</a></li>
+            <li><a href="#autotoc_md183">Usage</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides the <code>LinearSystem&lt;::Mat, ::Vec&gt;</code> specialization that stores the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<p>Provides the PETSc-backed linear system specialization that stores the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -120,16 +120,18 @@ $ \mathbf{x} $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-120'/>
 </g>
-</svg> as PETSc handles. Also defines the Rodin::Math::LinearSystem&lt;::Mat,::Vec&gt;::FieldSplits inner class for block-preconditioner support.</p><section id="autotoc_md184"><h3><a href="#autotoc_md184">Usage</a></h3><p>This class is normally not instantiated directly; instead it is created internally by <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> specializations. Solvers such as <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a> receive a reference to the linear system through the <code>solve(LinearSystem&amp;)</code> interface.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> (convenience alias), <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a>, <a href="_p_e_t_sc_2_variational_2_problem_8h.html#ae1fbfa50d43bb3e1ed943e7de7f1fb73" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a></p></aside></section>
+</svg> as PETSc handles. Also defines the <code>FieldSplits</code> inner class for block-preconditioner support.</p><section id="autotoc_md183"><h3><a href="#autotoc_md183">Usage</a></h3><p>This class is normally not instantiated directly; instead it is created internally by <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> specializations. Solvers such as <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a> receive a reference to the linear system through the <code>solve(LinearSystem&amp;)</code> interface.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Math::LinearSystem (convenience alias), Rodin::Solver::KSP, Rodin::PETSc::Variational::Problem</p></aside></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::Math</a></dt>
-            <dd>Module for general mathematical operations.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> integration module for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>PETSc integration module for Rodin.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html" class="m-doc">Rodin::PETSc::Math</a></dt>
+            <dd>PETSc-backed linear algebra adapters.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -139,12 +141,12 @@ $ \mathbf{x} $
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::Math::LinearSystem&lt;::Mat, ::Vec&gt;</a>
             </dt>
-            <dd>Specialization of <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Rodin::<wbr />Math::<wbr />LinearSystem</a> for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> objects (<code>::Mat</code> and <code>::Vec</code>).</dd>
+            <dd>Specialization of <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Rodin::<wbr />Math::<wbr />LinearSystem</a> for PETSc objects (<code>Mat</code> and <code>Vec</code>).</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">Rodin::Math::LinearSystem&lt;::Mat, ::Vec&gt;::FieldSplits</a>
             </dt>
-            <dd>Container for named <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</dd>
+            <dd>Container for named PETSc index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               struct <a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Rodin::Math::LinearSystem&lt;::Mat, ::Vec&gt;::FieldSplits::Split</a>

@@ -80,20 +80,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md433">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md434">Numerical Considerations</a></li>
-            <li><a href="#autotoc_md435">Applications</a></li>
-            <li><a href="#autotoc_md436">Usage Example</a></li>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
+            <li><a href="#autotoc_md373">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md374">Numerical Considerations</a></li>
+            <li><a href="#autotoc_md375">Applications</a></li>
+            <li><a href="#autotoc_md376">Usage Example</a></li>
           </ul>
         </nav>
-<p>This file defines the NEQ class, which implements the not-equal comparison operation between functions. This operator tests whether two function values differ at each point in the domain.</p><section id="autotoc_md433"><h3><a href="#autotoc_md433">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
+<p>This file defines the NEQ class, which implements the not-equal comparison operation between functions. This operator tests whether two function values differ at each point in the domain.</p><section id="autotoc_md373"><h3><a href="#autotoc_md373">Mathematical Foundation</a></h3><p>For functions <svg class="m-math" style="width: 6.589em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 63.253332 10.626798">
 <title>
 $ f, g : \Omega \to \mathbb{R} $
 </title>
@@ -178,26 +171,7 @@ $ f, g : \Omega \to \mathbb{R} $
 <use x='243.555676' y='-5.798537' xlink:href='#eq2-g5-115'/>
 <use x='248.206235' y='-5.798537' xlink:href='#eq2-g5-101'/>
 </g>
-</svg></div></section><section id="autotoc_md434"><h3><a href="#autotoc_md434">Numerical Considerations</a></h3><p>For floating-point comparisons, consider using approximate equality tests rather than strict inequality, due to numerical precision limitations.</p></section><section id="autotoc_md435"><h3><a href="#autotoc_md435">Applications</a></h3><ul><li>Complement of indicator functions</li><li>Non-zero region detection</li><li>Logical complement of equality conditions</li></ul></section><section id="autotoc_md436"><h3><a href="#autotoc_md436">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">is_nonzero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean function, true where u is non-zero</span></pre></section>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LHSDerived, class RHSDerived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_n_e_q_3_01_function_base_3_01_l_h_s_derived_01_4_00_01_function_ffc9caa2e8ffef80650e757049c28db7.html" class="m-doc">Rodin::Variational::NEQ&lt;FunctionBase&lt;LHSDerived&gt;, FunctionBase&lt;RHSDerived&gt;&gt;</a>
-            </dt>
-            <dd>Logical <a href="class_rodin_1_1_variational_1_1_n_e_q.html" class="m-doc">NEQ</a> operator between two instances of <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>.</dd>
-          </dl>
-        </section>
+</svg></div></section><section id="autotoc_md374"><h3><a href="#autotoc_md374">Numerical Considerations</a></h3><p>For floating-point comparisons, consider using approximate equality tests rather than strict inequality, due to numerical precision limitations.</p></section><section id="autotoc_md375"><h3><a href="#autotoc_md375">Applications</a></h3><ul><li>Complement of indicator functions</li><li>Non-zero region detection</li><li>Logical complement of equality conditions</li></ul></section><section id="autotoc_md376"><h3><a href="#autotoc_md376">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">is_nonzero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Boolean function, true where u is non-zero</span></pre></section>
       </div>
     </div>
   </div>

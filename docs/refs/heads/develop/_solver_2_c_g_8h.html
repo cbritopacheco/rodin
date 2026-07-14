@@ -80,10 +80,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md235">Algorithm</a></li>
-            <li><a href="#autotoc_md236">Convergence</a></li>
-            <li><a href="#autotoc_md237">Applicability</a></li>
-            <li><a href="#autotoc_md238">Usage Example</a></li>
+            <li><a href="#autotoc_md234">Algorithm</a></li>
+            <li><a href="#autotoc_md235">Convergence</a></li>
+            <li><a href="#autotoc_md236">Applicability</a></li>
+            <li><a href="#autotoc_md237">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -93,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This header provides the CG (Conjugate Gradient) solver class, an iterative method for solving linear systems with symmetric positive definite matrices.</p><section id="autotoc_md235"><h3><a href="#autotoc_md235">Algorithm</a></h3><p>The conjugate gradient method solves:</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
+<p>This header provides the CG (Conjugate Gradient) solver class, an iterative method for solving linear systems with symmetric positive definite matrices.</p><section id="autotoc_md234"><h3><a href="#autotoc_md234">Algorithm</a></h3><p>The conjugate gradient method solves:</p><div class="m-math"><svg style="width: 3.766em; height: 0.865em;" viewBox="176.196076 -8.302191 36.150849 8.302191">
 <title>
 \[
   Ax = b
@@ -147,7 +147,7 @@ $ \frac{1}{2}x^TAx - b^Tx $
 <use x='54.898151' y='-4.338437' xlink:href='#eq3-g1-84'/>
 <use x='61.502641' y='0' xlink:href='#eq3-g2-120'/>
 </g>
-</svg> using conjugate search directions.</p></section><section id="autotoc_md236"><h3><a href="#autotoc_md236">Convergence</a></h3><p>CG converges in at most <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
+</svg> using conjugate search directions.</p></section><section id="autotoc_md235"><h3><a href="#autotoc_md235">Convergence</a></h3><p>CG converges in at most <svg class="m-math" style="width: 0.728em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.987606 5.147373">
 <title>
 $ n $
 </title>
@@ -234,7 +234,7 @@ $ A $
 <g id='eq7-page1'>
 <use x='0' y='0' xlink:href='#eq7-g0-65'/>
 </g>
-</svg>.</p></section><section id="autotoc_md237"><h3><a href="#autotoc_md237">Applicability</a></h3><ul><li>Symmetric positive definite matrices</li><li>Large sparse systems</li><li>Elliptic PDEs (Poisson, heat equation, elasticity)</li><li>Systems amenable to preconditioning</li></ul></section><section id="autotoc_md238"><h3><a href="#autotoc_md238">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
+</svg>.</p></section><section id="autotoc_md236"><h3><a href="#autotoc_md236">Applicability</a></h3><ul><li>Symmetric positive definite matrices</li><li>Large sparse systems</li><li>Elliptic PDEs (Poisson, heat equation, elasticity)</li><li>Systems amenable to preconditioning</li></ul></section><section id="autotoc_md237"><h3><a href="#autotoc_md237">Usage Example</a></h3><pre class="m-code"><span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 <span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
 
 <span class="n">Solver</span><span class="o">::</span><span class="n">CG</span><span class="w"> </span><span class="nf">solver</span><span class="p">(</span><span class="n">problem</span><span class="p">);</span>
@@ -246,16 +246,21 @@ $ A $
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Module for solving linear and nonlinear systems arising from finite element discretizations.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_solver_1_1_c_g_3_01_linear_system_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Solver::CG&lt;LinearSystem&gt;&gt;</a>
+            </dt>
+            <dd>Form-language traits for CG solvers.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               class <a href="class_rodin_1_1_solver_1_1_c_g_3_01_math_1_1_linear_system_3_01_math_1_1_sparse_matrix_3_01_scald80048bd3bd0cc423179a410fd97fd8f.html" class="m-doc">Rodin::Solver::CG&lt;Math::LinearSystem&lt;Math::SparseMatrix&lt;Scalar&gt;, Math::Vector&lt;Scalar&gt;&gt;&gt;</a>

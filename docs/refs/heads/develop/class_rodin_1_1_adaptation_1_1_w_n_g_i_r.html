@@ -77,7 +77,7 @@
           <div class="m-doc-template">template&lt;<a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> TrialFunctionType, <a href="class_rodin_1_1_adaptation_1_1_analytic_vector_function.html" class="m-doc">class</a> TestFunctionType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_adaptation.html">Adaptation</a>::<wbr/></span>WNGIR <span class="m-thin">class</span>
         </h1>
-        <p>Backend-independent <a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a> mesh-fitting solver.</p>
+        <p>Backend-independent WNGIR mesh-fitting solver.</p>
 <p>Fits the interface skeleton of a mesh to the zero level set of <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
 $\phi$
@@ -88,7 +88,7 @@ $\phi$
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg> by repeatedly solving a regularized first-derivative metric problem and line-searching the resulting displacement on the true geometry.</p><p>Constructed from backend-matched trial and test functions, the solver uses the ordinary <a href="namespace_rodin.html" class="m-doc">Rodin</a> form-language deduction path for the step <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>, the metric <a href="class_rodin_1_1_variational_1_1_bilinear_form.html" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>, and <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a>. Every global quantity is a backend-matched GridFunction; only element-local geometry uses <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a> / <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>. <a href="class_rodin_1_1_adaptation_1_1_w_n_g_i_r.html" class="m-doc">WNGIR</a> contains no backend-specific code.</p>
+</svg> by repeatedly solving a regularized first-derivative metric problem and line-searching the resulting displacement on the true geometry.</p><p>Constructed from backend-matched trial and test functions, the solver uses the ordinary Rodin form-language deduction path for the step <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>, the metric <a href="group___rodin_c_t_a_d.html#gadb6cc755fd112527cf92474e3e74ee24" class="m-doc">Rodin::<wbr />Variational::<wbr />BilinearForm</a>, and <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a>. Every global quantity is a backend-matched GridFunction; only element-local geometry uses <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a> / <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>. WNGIR contains no backend-specific code.</p>
       </div>
     </div>
   </div>

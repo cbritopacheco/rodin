@@ -95,16 +95,16 @@
 
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Test</span><span class="o">&gt;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">Tangent</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// BilinearFormIntegrator</span></pre><p>This mixin then provides:</p><pre class="m-code"><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Trial</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Test</span><span class="o">&gt;</span>
-<span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// ProblemBody</span></pre><p>so that <code>obj(u, v)</code> can be used directly in a <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> assignment, registering both the residual and tangent contributions at once.</p>
+<span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="k">const</span><span class="w"> </span><span class="n">Trial</span><span class="o">&amp;</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Test</span><span class="o">&amp;</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w">  </span><span class="c1">// ProblemBody</span></pre><p>so that <code>obj(u, v)</code> can be used directly in a Problem assignment, registering both the residual and tangent contributions at once.</p>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
-              const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const -&gt; auto</span>
+              <div class="m-doc-template">template&lt;class Trial, class Test&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const Trial&amp; u,
+              const Test&amp; v) const -&gt; auto</span>
             </dt>
-            <dd>Returns both residual and tangent contributions as a <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>.</dd>
+            <dd>Returns both residual and tangent contributions as a ProblemBody.</dd>
           </dl>
         </section>
         <section>
@@ -113,12 +113,12 @@
             <h3>
               <div class="m-doc-template">
                 template&lt;class Derived&gt;
-                template&lt;class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>, class <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&gt;
+                template&lt;class Trial, class Test&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />NonLinearFormIntegrator&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a1b52c526b858eb9dd2c66da1c0b8f44d" class="m-doc">Trial</a>&amp; u,
-              const <a href="group___rodin_variational.html#gga6cd58505ac5f9e57b8f353cfeef7d7a4a0cbc6611f5540bd0809a388dc95a615b" class="m-doc">Test</a>&amp; v) const</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />NonLinearFormIntegrator&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a817680d8bb9b91737c5dbe931dd90ac4" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const Trial&amp; u,
+              const Test&amp; v) const</span></span>
             </h3>
-            <p>Returns both residual and tangent contributions as a <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">ProblemBody</a>.</p>
+            <p>Returns both residual and tangent contributions as a ProblemBody.</p>
 <p>Equivalent to <code>Tangent(u, v) + Residual(v)</code>.</p>
           </div></section>
         </section>

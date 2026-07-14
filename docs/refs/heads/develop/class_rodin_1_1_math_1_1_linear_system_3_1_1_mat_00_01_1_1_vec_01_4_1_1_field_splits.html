@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_math.html">Math</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html">LinearSystem&lt;::Mat, ::Vec&gt;</a>::<wbr/></span>FieldSplits <span class="m-thin">class</span>
         </h1>
-        <p>Container for named <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</p>
+        <p>Container for named PETSc index sets used with field-split preconditioners (e.g. <code>PCFIELDSPLIT</code>).</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -92,7 +92,7 @@
             </li>
           </ul>
         </nav>
-<p>Each <a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a> pairs a human-readable field name (e.g. <code>&quot;velocity&quot;</code>, <code>&quot;pressure&quot;</code>) with a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <code>IS</code> that identifies the DOF indices belonging to that field within the global system. The class takes ownership of the <code>IS</code> handles and destroys them in its destructor.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::Problem::setFieldSplits</p></aside>
+<p>Each <a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a> pairs a human-readable field name (e.g. <code>&quot;velocity&quot;</code>, <code>&quot;pressure&quot;</code>) with a PETSc <code>IS</code> that identifies the DOF indices belonging to that field within the global system. The class takes ownership of the <code>IS</code> handles and destroys them in its destructor.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::Problem::setFieldSplits</p></aside>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -117,7 +117,7 @@
             <dt id="a029ddd0412467005df9263b88c48812e">
               <span class="m-doc-wrap-bumper"><a href="#a029ddd0412467005df9263b88c48812e" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span>
             </dt>
-            <dd>Copy constructor (deep-copies <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> index sets).</dd>
+            <dd>Copy constructor (deep-copies PETSc index sets).</dd>
             <dt id="aaa76572f1b75ec734e99666e4f0946f8">
               <span class="m-doc-wrap-bumper"><a href="#aaa76572f1b75ec734e99666e4f0946f8" class="m-doc-self">FieldSplits</a>(</span><span class="m-doc-wrap">FieldSplits&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -125,7 +125,7 @@
             <dt id="a57cd43f977de353e99f5a8b4c57963a9">
               <span class="m-doc-wrap-bumper"><a href="#a57cd43f977de353e99f5a8b4c57963a9" class="m-doc-self">~FieldSplits</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
-            <dd>Destructor; destroys owned <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> index sets.</dd>
+            <dd>Destructor; destroys owned PETSc index sets.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -150,11 +150,11 @@
             <dt id="a03bfacfaaba9195e4498375659f43531">
               <span class="m-doc-wrap-bumper">void <a href="#a03bfacfaaba9195e4498375659f43531" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Destroys all owned <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> index sets and clears the splits.</dd>
+            <dd>Destroys all owned PETSc index sets and clears the splits.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc">copyFrom</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span>
             </dt>
-            <dd>Deep-copies splits from another <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a> object.</dd>
+            <dd>Deep-copies splits from another FieldSplits object.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ac9363592a2038e3a08f757d8f924df76" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">size_t i) -&gt; Split&amp;</span>
             </dt>
@@ -190,7 +190,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">splits&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Vector of <a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a> objects.</td>
+                  <td>Vector of Split objects.</td>
                 </tr>
               </tbody>
             </table>
@@ -210,13 +210,13 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a> to copy.</td>
+                  <td>FieldSplits to copy.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>.</td>
+                  <td>Reference to this FieldSplits.</td>
                 </tr>
               </tfoot>
             </table>
@@ -236,13 +236,13 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a> to move from.</td>
+                  <td>FieldSplits to move from.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a>.</td>
+                  <td>Reference to this FieldSplits.</td>
                 </tr>
               </tfoot>
             </table>
@@ -254,7 +254,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Math::<wbr />LinearSystem&lt;::<wbr />Mat, ::<wbr />Vec&gt;::<wbr />FieldSplits::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4e29cbf851a88ccdfc914cf84b0f8df" class="m-doc-self">copyFrom</a>(</span><span class="m-doc-wrap">const FieldSplits&amp; other)</span></span>
             </h3>
-            <p>Deep-copies splits from another <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a> object.</p>
+            <p>Deep-copies splits from another FieldSplits object.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -262,7 +262,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Source <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits.html" class="m-doc">FieldSplits</a> to copy from.</td>
+                  <td>Source FieldSplits to copy from.</td>
                 </tr>
               </tbody>
             </table>
@@ -282,7 +282,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a> index.</td>
+                  <td>Split index.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -308,7 +308,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">i&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="struct_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4_1_1_field_splits_1_1_split.html" class="m-doc">Split</a> index.</td>
+                  <td>Split index.</td>
                 </tr>
               </tbody>
               <tfoot>

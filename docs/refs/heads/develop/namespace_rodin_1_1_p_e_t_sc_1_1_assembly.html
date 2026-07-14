@@ -89,18 +89,18 @@
             </li>
           </ul>
         </nav>
-<p>Provides sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, and OpenMP assembly kernels that populate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vectors (<code>::Vec</code>) and matrices (<code>::Mat</code>) from <a href="namespace_rodin.html" class="m-doc">Rodin</a> variational forms.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Sequential</a>, Rodin::Assembly::MPI</p></aside>
+<p>Provides sequential, MPI, and OpenMP assembly kernels that populate PETSc vectors (<code>Vec</code>) and matrices (<code>Mat</code>) from Rodin variational forms.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Assembly::Sequential, Rodin::Assembly::MPI</p></aside>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_assembly_1_1_matrix_setup.html" class="m-doc">MatrixSetup</a>
             </dt>
-            <dd>Sets up a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix for assembly while reusing compatible existing structure.</dd>
+            <dd>Sets up a PETSc matrix for assembly while reusing compatible existing structure.</dd>
             <dt>
               class <a href="class_rodin_1_1_p_e_t_sc_1_1_assembly_1_1_vector_setup.html" class="m-doc">VectorSetup</a>
             </dt>
-            <dd>Sets up a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector for assembly while reusing compatible existing structure.</dd>
+            <dd>Sets up a PETSc vector for assembly while reusing compatible existing structure.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -110,7 +110,17 @@
               <div class="m-doc-template">template&lt;class ... Ts&gt;</div>
               using <a href="#a74786fd0d020e752e1f4126fc8a12670" class="m-doc">Default</a> = <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>&lt;Ts...&gt;
             </dt>
-            <dd>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> assembly strategy (sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, or OpenMP) based on the mesh context type.</dd>
+            <dd>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate PETSc assembly strategy (sequential, MPI, or OpenMP) based on the mesh context type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
+              using <a href="#a4a09d02deb50e60f51c2321b444bf1fd" class="m-doc">OpenMP</a> = Rodin::Assembly::OpenMP&lt;LinearAlgebraType, Operand&gt;
+            </dt>
+            <dd>PETSc namespace alias for OpenMP assembly specializations.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearAlgebraType, class Operand&gt;</div>
+              using <a href="#a0733de4c09ccfc47ce4463a929bb0e01" class="m-doc">Sequential</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Sequential</a>&lt;LinearAlgebraType, Operand&gt;
+            </dt>
+            <dd>PETSc namespace alias for sequential assembly specializations.</dd>
           </dl>
         </section>
         <section>
@@ -123,7 +133,27 @@
               </div>
               using Rodin::<wbr />PETSc::<wbr />Assembly::<wbr /><a href="#a74786fd0d020e752e1f4126fc8a12670" class="m-doc-self">Default</a> = <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>&lt;Ts...&gt;
             </h3>
-            <p>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> assembly strategy (sequential, <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>, or OpenMP) based on the mesh context type.</p>
+            <p>Alias for <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Default</a>, selecting the appropriate PETSc assembly strategy (sequential, MPI, or OpenMP) based on the mesh context type.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4a09d02deb50e60f51c2321b444bf1fd"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_open_m_p_8h.html">&lt;Rodin/PETSc/Assembly/OpenMP.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearAlgebraType, class Operand&gt;
+              </div>
+              using Rodin::<wbr />PETSc::<wbr />Assembly::<wbr /><a href="#a4a09d02deb50e60f51c2321b444bf1fd" class="m-doc-self">OpenMP</a> = Rodin::Assembly::OpenMP&lt;LinearAlgebraType, Operand&gt;
+            </h3>
+            <p>PETSc namespace alias for OpenMP assembly specializations.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0733de4c09ccfc47ce4463a929bb0e01"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_assembly_2_sequential_8h.html">&lt;Rodin/PETSc/Assembly/Sequential.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LinearAlgebraType, class Operand&gt;
+              </div>
+              using Rodin::<wbr />PETSc::<wbr />Assembly::<wbr /><a href="#a0733de4c09ccfc47ce4463a929bb0e01" class="m-doc-self">Sequential</a> = <a href="class_rodin_1_1_assembly_1_1_sequential.html" class="m-doc">Rodin::<wbr />Assembly::<wbr />Sequential</a>&lt;LinearAlgebraType, Operand&gt;
+            </h3>
+            <p>PETSc namespace alias for sequential assembly specializations.</p>
           </div></section>
         </section>
       </div>

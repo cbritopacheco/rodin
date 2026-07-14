@@ -76,17 +76,17 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Math <span class="m-thin">namespace</span>
         </h1>
-        <p>Module for general mathematical operations.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_math.html" class="m-doc">Rodin::<wbr />Math</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md556">Types</a></li>
-            <li><a href="#autotoc_md557">Constants</a></li>
-            <li><a href="#autotoc_md558">Mathematical Functions</a></li>
-            <li><a href="#autotoc_md559">Unit Types</a></li>
-            <li><a href="#autotoc_md560">Runge-Kutta Schemes</a></li>
-            <li><a href="#autotoc_md561">Root Finding</a></li>
-            <li><a href="#autotoc_md562">Linear Algebra Utilities</a></li>
+            <li><a href="#autotoc_md466">Types</a></li>
+            <li><a href="#autotoc_md467">Constants</a></li>
+            <li><a href="#autotoc_md468">Mathematical Functions</a></li>
+            <li><a href="#autotoc_md469">Unit Types</a></li>
+            <li><a href="#autotoc_md470">Runge-Kutta Schemes</a></li>
+            <li><a href="#autotoc_md471">Root Finding</a></li>
+            <li><a href="#autotoc_md472">Linear Algebra Utilities</a></li>
             <li>
               Reference
               <ul>
@@ -97,7 +97,7 @@
             </li>
           </ul>
         </nav>
-<p>Provides mathematical types, constants, and utility functions used throughout the <a href="namespace_rodin.html" class="m-doc">Rodin</a> framework.</p><section id="autotoc_md556"><h3><a href="#autotoc_md556">Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code><a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;T&gt;</code></td><td>Dense column vector (Eigen-based)</td></tr><tr><td><code><a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;T&gt;</code></td><td>Dense matrix (Eigen-based)</td></tr><tr><td><code><a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">Math::<wbr />SparseMatrix</a>&lt;T&gt;</code></td><td>Compressed sparse column matrix</td></tr><tr><td><code><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;T&gt;</code></td><td>Small fixed-size vector for physical coordinates</td></tr><tr><td><code><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;T&gt;</code></td><td>Small fixed-size matrix (e.g. Jacobians, stress tensors)</td></tr><tr><td><code><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Math::<wbr />LinearSystem</a></code></td><td>Couples operator matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<p>Directory src/Rodin/Math</p><p>Module for general mathematical operations.</p><p>Provides mathematical types, constants, and utility functions used throughout the Rodin framework.</p><section id="autotoc_md466"><h3><a href="#autotoc_md466">Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>Math::Vector&lt;T&gt;</code></td><td>Dense column vector (Eigen-based)</td></tr><tr><td><code>Math::Matrix&lt;T&gt;</code></td><td>Dense matrix (Eigen-based)</td></tr><tr><td><code>Math::SparseMatrix&lt;T&gt;</code></td><td>Compressed sparse column matrix</td></tr><tr><td><code>Math::SpatialVector&lt;T&gt;</code></td><td>Small fixed-size vector for physical coordinates</td></tr><tr><td><code>Math::SpatialMatrix&lt;T&gt;</code></td><td>Small fixed-size matrix (e.g. Jacobians, stress tensors)</td></tr><tr><td><code>Math::LinearSystem</code></td><td>Couples operator matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -127,7 +127,7 @@ $ x $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-120'/>
 </g>
-</svg></td></tr></tbody></table></section><section id="autotoc_md557"><h3><a href="#autotoc_md557">Constants</a></h3><p><code><a href="_constants_8h.html#a94c0aa95a6f6a1969b52a2e655288ddc" class="m-doc">Math::<wbr />Constants::<wbr />pi()</a></code> — <svg class="m-math" style="width: 0.736em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.069273 5.147373">
+</svg></td></tr></tbody></table></section><section id="autotoc_md467"><h3><a href="#autotoc_md467">Constants</a></h3><p><code>Math::Constants::pi()</code> — <svg class="m-math" style="width: 0.736em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.069273 5.147373">
 <title>
 $ \pi $
 </title>
@@ -137,7 +137,7 @@ $ \pi $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-25'/>
 </g>
-</svg></p></section><section id="autotoc_md558"><h3><a href="#autotoc_md558">Mathematical Functions</a></h3><table class="m-table"><thead><tr><th>Function</th><th>Signature</th><th>Domain</th></tr></thead><tbody><tr><td><code>abs</code></td><td><code>abs(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>exp</code></td><td><code>exp(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>sqrt</code></td><td><code>sqrt(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>pow</code></td><td><code>pow(base, exp)</code></td><td>Scalar or matrix</td></tr><tr><td><code>pow2</code></td><td><code>pow2(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>log</code></td><td><code>log(x)</code></td><td>Scalar</td></tr><tr><td><code>log2</code></td><td><code>log2(x)</code></td><td>Scalar</td></tr><tr><td><code>log10</code></td><td><code>log10(x)</code></td><td>Scalar</td></tr><tr><td><code>sin</code>, <code>cos</code>, <code>tan</code></td><td>Trigonometric</td><td>Scalar or matrix</td></tr><tr><td><code>asin</code>, <code>acos</code>, <code>atan</code></td><td>Inverse trig</td><td>Scalar</td></tr><tr><td><code>atan2</code></td><td><code>atan2(y, x)</code></td><td>Two-argument arctangent</td></tr><tr><td><code>sinh</code>, <code>cosh</code>, <code>tanh</code></td><td>Hyperbolic</td><td>Scalar or matrix</td></tr><tr><td><code>min</code>, <code>max</code></td><td>Element-wise</td><td>Scalar</td></tr><tr><td><code>clamp</code></td><td><code>clamp(x, lo, hi)</code></td><td>Scalar</td></tr></tbody></table></section><section id="autotoc_md559"><h3><a href="#autotoc_md559">Unit Types</a></h3><ul><li><code><a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Math::<wbr />Rad</a></code> — Radian wrapper with implicit <code>Real</code> conversion</li><li><code><a href="class_rodin_1_1_math_1_1_deg.html" class="m-doc">Math::<wbr />Deg</a></code> — Degree wrapper with conversion to <code><a href="class_rodin_1_1_math_1_1_rad.html" class="m-doc">Rad</a></code></li></ul></section><section id="autotoc_md560"><h3><a href="#autotoc_md560">Runge-Kutta Schemes</a></h3><ul><li><code><a href="struct_rodin_1_1_math_1_1_runge_kutta_1_1_r_k2.html" class="m-doc">Math::<wbr />RungeKutta::<wbr />RK2</a></code> — Second-order Runge-Kutta (midpoint)</li><li><code><a href="struct_rodin_1_1_math_1_1_runge_kutta_1_1_r_k4.html" class="m-doc">Math::<wbr />RungeKutta::<wbr />RK4</a></code> — Classical fourth-order Runge-Kutta</li></ul></section><section id="autotoc_md561"><h3><a href="#autotoc_md561">Root Finding</a></h3><ul><li><code>Math::RootFinding::Bisection</code> — Bisection method for scalar root finding</li></ul></section><section id="autotoc_md562"><h3><a href="#autotoc_md562">Linear Algebra Utilities</a></h3><ul><li><code>dot(a, b)</code> — Inner product</li><li><code>cross(a, b)</code> — Cross product (3D)</li><li><code>sum</code>, <code>minus</code>, <code>mult</code>, <code>division</code> — Element-wise operations</li><li><code>conj</code> — Complex conjugate</li><li><code>nan&lt;T&gt;()</code> — NaN sentinel</li></ul></section>
+</svg></p></section><section id="autotoc_md468"><h3><a href="#autotoc_md468">Mathematical Functions</a></h3><table class="m-table"><thead><tr><th>Function</th><th>Signature</th><th>Domain</th></tr></thead><tbody><tr><td><code>abs</code></td><td><code>abs(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>exp</code></td><td><code>exp(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>sqrt</code></td><td><code>sqrt(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>pow</code></td><td><code>pow(base, exp)</code></td><td>Scalar or matrix</td></tr><tr><td><code>pow2</code></td><td><code>pow2(x)</code></td><td>Scalar or matrix</td></tr><tr><td><code>log</code></td><td><code>log(x)</code></td><td>Scalar</td></tr><tr><td><code>log2</code></td><td><code>log2(x)</code></td><td>Scalar</td></tr><tr><td><code>log10</code></td><td><code>log10(x)</code></td><td>Scalar</td></tr><tr><td><code>sin</code>, <code>cos</code>, <code>tan</code></td><td>Trigonometric</td><td>Scalar or matrix</td></tr><tr><td><code>asin</code>, <code>acos</code>, <code>atan</code></td><td>Inverse trig</td><td>Scalar</td></tr><tr><td><code>atan2</code></td><td><code>atan2(y, x)</code></td><td>Two-argument arctangent</td></tr><tr><td><code>sinh</code>, <code>cosh</code>, <code>tanh</code></td><td>Hyperbolic</td><td>Scalar or matrix</td></tr><tr><td><code>min</code>, <code>max</code></td><td>Element-wise</td><td>Scalar</td></tr><tr><td><code>clamp</code></td><td><code>clamp(x, lo, hi)</code></td><td>Scalar</td></tr></tbody></table></section><section id="autotoc_md469"><h3><a href="#autotoc_md469">Unit Types</a></h3><ul><li><code>Math::Rad</code> — Radian wrapper with implicit <code>Real</code> conversion</li><li><code>Math::Deg</code> — Degree wrapper with conversion to <code>Rad</code></li></ul></section><section id="autotoc_md470"><h3><a href="#autotoc_md470">Runge-Kutta Schemes</a></h3><ul><li><code>Math::RungeKutta::RK2</code> — Second-order Runge-Kutta (midpoint)</li><li><code>Math::RungeKutta::RK4</code> — Classical fourth-order Runge-Kutta</li></ul></section><section id="autotoc_md471"><h3><a href="#autotoc_md471">Root Finding</a></h3><ul><li><code>Math::RootFinding::Bisection</code> — Bisection method for scalar root finding</li></ul></section><section id="autotoc_md472"><h3><a href="#autotoc_md472">Linear Algebra Utilities</a></h3><ul><li><code>dot(a, b)</code> — Inner product</li><li><code>cross(a, b)</code> — Cross product (3D)</li><li><code>sum</code>, <code>minus</code>, <code>mult</code>, <code>division</code> — Element-wise operations</li><li><code>conj</code> — Complex conjugate</li><li><code>nan&lt;T&gt;()</code> — NaN sentinel</li></ul></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -164,7 +164,7 @@ $ \pi $
               <div class="m-doc-template">template&lt;&gt;</div>
               class <a href="class_rodin_1_1_math_1_1_linear_system_3_1_1_mat_00_01_1_1_vec_01_4.html" class="m-doc">LinearSystem&lt;::Mat, ::Vec&gt;</a>
             </dt>
-            <dd>Specialization of <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Rodin::<wbr />Math::<wbr />LinearSystem</a> for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> objects (<code>::Mat</code> and <code>::Vec</code>).</dd>
+            <dd>Specialization of <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">Rodin::<wbr />Math::<wbr />LinearSystem</a> for PETSc objects (<code>Mat</code> and <code>Vec</code>).</dd>
             <dt>
               <div class="m-doc-template">template&lt;class <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, class <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>, class Derived&gt;</div>
               class <a href="class_rodin_1_1_math_1_1_linear_system_base.html" class="m-doc">LinearSystemBase</a>
@@ -174,16 +174,16 @@ $ \pi $
 $ Ax = b $
 </title>
 <defs>
-<path id='eq2-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
-<path id='eq2-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
-<path id='eq2-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
-<path id='eq2-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq1-g1-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq1-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+<path id='eq1-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
 </defs>
-<g id='eq2-page1'>
-<use x='0' y='0' xlink:href='#eq2-g0-65'/>
-<use x='8.775347' y='0' xlink:href='#eq2-g0-120'/>
-<use x='18.748263' y='0' xlink:href='#eq2-g1-61'/>
-<use x='31.173744' y='0' xlink:href='#eq2-g0-98'/>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g0-65'/>
+<use x='8.775347' y='0' xlink:href='#eq1-g0-120'/>
+<use x='18.748263' y='0' xlink:href='#eq1-g1-61'/>
+<use x='31.173744' y='0' xlink:href='#eq1-g0-98'/>
 </g>
 </svg>.</dd>
             <dt>
@@ -462,37 +462,37 @@ $ Ax = b $
               <span class="m-doc-wrap-bumper">auto <a href="#a1e3aac16bb0ad77e3f7c5355d497de05" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;LHSScalar&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;RHSScalar&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Computes the dot product of two <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> objects.</dd>
+            <dd>Computes the dot product of two SpatialVector objects.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSScalar, class RHSScalar&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a6cab14f730d8729a68637bae1f763d33" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;LHSScalar&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;RHSScalar&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Computes the dot product of two <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> objects.</dd>
+            <dd>Computes the dot product of two SpatialMatrix objects.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSScalar&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a77f710b0779d9a9103edb2ad93b5d44c" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;LHSDerived&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;RHSScalar&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Computes the dot product of an Eigen vector and a <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>.</dd>
+            <dd>Computes the dot product of an Eigen vector and a SpatialVector.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSScalar, class RHSDerived&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a4fdf174ec51ada3d08d94babe8ec4f0d" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;LHSScalar&gt;&amp; lhs,
               const Eigen::MatrixBase&lt;RHSDerived&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Computes the dot product of a <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> and an Eigen vector.</dd>
+            <dd>Computes the dot product of a SpatialVector and an Eigen vector.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSDerived, class RHSScalar&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a0642d356cbee182297d00c8cf510ada2" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;LHSDerived&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;RHSScalar&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Computes the dot product of an Eigen matrix and a <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>.</dd>
+            <dd>Computes the dot product of an Eigen matrix and a SpatialMatrix.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHSScalar, class RHSDerived&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a3352c716ea42065259ebf804c5e1e1e4" class="m-doc">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;LHSScalar&gt;&amp; lhs,
               const Eigen::MatrixBase&lt;RHSDerived&gt;&amp; rhs) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Computes the dot product of a <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> and an Eigen matrix.</dd>
+            <dd>Computes the dot product of a SpatialMatrix and an Eigen matrix.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aad479cbe491177540493aa58ea187932" class="m-doc">log</a>(</span><span class="m-doc-wrap">const T&amp; x) -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
@@ -575,6 +575,56 @@ $ [\text{lo}, \text{hi}] $
 <use x='27.098059' y='0' xlink:href='#eq119-g4-93'/>
 </g>
 </svg>.</dd>
+            <dt id="a132fa0dad5957967a7e80502e23f5b3f">
+              <div class="m-doc-template">template&lt;std::size_t I, class Matrix, class Vector&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a132fa0dad5957967a7e80502e23f5b3f" class="m-doc-self">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>&gt;&amp; ls) -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Structured-binding accessor: element <code>I</code> of <code>ls</code> (0 = operator <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<title>
+$ A $
+</title>
+<defs>
+<path id='eq126-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+</defs>
+<g id='eq126-page1'>
+<use x='0' y='0' xlink:href='#eq126-g0-65'/>
+</g>
+</svg>, 1 = solution <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
+<title>
+$ x $
+</title>
+<defs>
+<path id='eq127-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+</defs>
+<g id='eq127-page1'>
+<use x='0' y='0' xlink:href='#eq127-g0-120'/>
+</g>
+</svg>, 2 = right-hand side <svg class="m-math" style="width: 0.518em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 4.977105 8.302191">
+<title>
+$ b $
+</title>
+<defs>
+<path id='eq128-g0-98' d='M2.761644-7.998007C2.773599-8.045828 2.797509-8.117559 2.797509-8.177335C2.797509-8.296887 2.677958-8.296887 2.654047-8.296887C2.642092-8.296887 2.211706-8.261021 1.996513-8.237111C1.793275-8.225156 1.613948-8.201245 1.398755-8.18929C1.111831-8.16538 1.028144-8.153425 1.028144-7.938232C1.028144-7.81868 1.147696-7.81868 1.267248-7.81868C1.876961-7.81868 1.876961-7.711083 1.876961-7.591532C1.876961-7.507846 1.78132-7.161146 1.733499-6.945953L1.446575-5.798257C1.327024-5.32005 .645579-2.606227 .597758-2.391034C.537983-2.092154 .537983-1.888917 .537983-1.733499C.537983-.514072 1.219427 .119552 1.996513 .119552C3.383313 .119552 4.817933-1.661768 4.817933-3.395268C4.817933-4.495143 4.196264-5.272229 3.299626-5.272229C2.677958-5.272229 2.116065-4.758157 1.888917-4.519054L2.761644-7.998007ZM2.008468-.119552C1.625903-.119552 1.207472-.406476 1.207472-1.338979C1.207472-1.733499 1.243337-1.960648 1.458531-2.797509C1.494396-2.952927 1.685679-3.718057 1.733499-3.873474C1.75741-3.969116 2.462765-5.033126 3.275716-5.033126C3.801743-5.033126 4.040847-4.507098 4.040847-3.88543C4.040847-3.311582 3.706102-1.960648 3.407223-1.338979C3.108344-.6934 2.558406-.119552 2.008468-.119552Z'/>
+</defs>
+<g id='eq128-page1'>
+<use x='0' y='0' xlink:href='#eq128-g0-98'/>
+</g>
+</svg>).</dd>
+            <dt id="a6a41701273373e1b6ee84f18dba27aab">
+              <div class="m-doc-template">template&lt;std::size_t I, class Matrix, class Vector&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a41701273373e1b6ee84f18dba27aab" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>&gt;&amp; ls) -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Structured-binding accessor (const overload); see get(LinearSystem&amp;).</dd>
+            <dt id="a136e69142a57c3f44a928e6cc16bb7ef">
+              <div class="m-doc-template">template&lt;std::size_t I, class Matrix, class Vector&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a136e69142a57c3f44a928e6cc16bb7ef" class="m-doc-self">get</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>&gt;&amp;&amp; ls) -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Structured-binding accessor (rvalue overload); moves out element <code>I</code>.</dd>
+            <dt id="a6a8179f86582c0f9bc5aac369b865084">
+              <div class="m-doc-template">template&lt;std::size_t I, class Matrix, class Vector&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a8179f86582c0f9bc5aac369b865084" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_linear_system.html" class="m-doc">LinearSystem</a>&lt;<a href="#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Matrix</a>, <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Vector</a>&gt;&amp;&amp; ls) -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Structured-binding accessor (const rvalue overload); see get(LinearSystem&amp;&amp;).</dd>
             <dt>
               <div class="m-doc-template">template&lt;class AScalarType, class YScalarType, class XScalarType&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a8ddac5818d636a9c9993c5b89086d4c8" class="m-doc">axpy</a>(</span><span class="m-doc-wrap"><a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a>&lt;YScalarType&gt;&amp; y,
@@ -582,6 +632,30 @@ $ [\text{lo}, \text{hi}] $
               const <a href="#ad869d53f77679c9faf8eed668f4ba02c" class="m-doc">SparseMatrix</a>&lt;XScalarType&gt;&amp; x)</span>
             </dt>
             <dd>Performs the AXPY operation on sparse matrices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaaf06a1f0ceea2b1a0ef169e9ea4bb2e" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const Scalar&amp; s,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Scalar-times-matrix product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSScalar, class RHSScalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a468b5a91e2ff8ca0e66d42c10f76b1e7" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;LHSScalar&gt;&amp; A,
+              const <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;RHSScalar&gt;&amp; s) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">FormLanguage::<wbr />Mult</a>&lt;LHSScalar, RHSScalar&gt;::Type&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Matrix-times-vector product, returned as a single-column matrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8143353ae2061c30b37761f1f526bd14" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const Scalar&amp; s) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Matrix-times-scalar product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c64ab60100f8bed3ca212fccf93d91b" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Matrix-matrix product.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Scalar&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#acba5cc3d2c7732e4ef49c413a9211f78" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
@@ -594,6 +668,138 @@ $ [\text{lo}, \text{hi}] $
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;</span>
             </dt>
             <dd>Computes the element-wise difference of two spatial matrices.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHSScalar, class RHSScalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c0db22e9b37a4537bddbfe11537b0f3" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;LHSScalar&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;RHSScalar&gt;&amp; x) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">FormLanguage::<wbr />Mult</a>&lt;LHSScalar, RHSScalar&gt;::Type&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Matrix-times-vector product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a85841a89ab7af492dd5fd0e32a084426" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Row-vector-times-matrix product, returned as a single-row matrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived, class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9b99d5225ef297c778efe6a13a65b3af" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; s,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m) -&gt; auto</span>
+            </dt>
+            <dd>Product of an Eigen matrix expression and a spatial matrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a57916e377b27ad8263d1be58b3fa28ef" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; s) -&gt; auto</span>
+            </dt>
+            <dd>Product of a spatial matrix and an Eigen matrix expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a62648efa8515961110844a7e582c7082" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m,
+              const <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&amp; v) -&gt; auto</span>
+            </dt>
+            <dd>Matrix-times-(dynamic)-vector product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a78c630f5001517e7cf6477326af9a9f4" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; B) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd>Componentwise sum of a spatial matrix and an Eigen matrix expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived, class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2a65bf7cc81b286c103b7029de6fe7bd" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd>Componentwise sum of an Eigen matrix expression and a spatial matrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39d2f7a68135d03596ba59b133071d67" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Streams the matrix&#x27;s active block to an output stream.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a75acc47c3919e3b1aa3666b06d2cfd29" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Componentwise sum of two spatial vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87c20c5be9fa7c1c7b9a00b406026043" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Componentwise difference of two spatial vectors.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class Scalar, std::enable_if_t&lt;std::is_arithmetic_v&lt;std::decay_t&lt;LHS&gt;&gt;, int&gt; = 0&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37524fdccec1563c4a3df2e9ee89ea6d" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const LHS&amp; s,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Scalar-times-vector product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class RHS&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6e09755f135707d3f89877cd22a5e377" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const RHS&amp; s) -&gt; auto</span>
+            </dt>
+            <dd>Vector-times-scalar product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class RHS&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39aca544646650a04d0b087235e79a7d" class="m-doc">operator/</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const RHS&amp; s) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Vector-divided-by-scalar product.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived, class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae708564c1aec200cdc13e93bd72f42c9" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd>Componentwise sum of an Eigen vector expression and a spatial vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a07305fca92a3acb2e595e18c1a8694b6" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; b) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd>Componentwise sum of a spatial vector and an Eigen vector expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived, class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af30bf98f2770497e0c7c531193f5ae7e" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b) -&gt; auto</span>
+            </dt>
+            <dd>Componentwise difference of an Eigen vector expression and a spatial vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7825e4f698c9b23322d756d579d90e05" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; b) -&gt; auto</span>
+            </dt>
+            <dd>Componentwise difference of a spatial vector and an Eigen vector expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a35dfc33b58e52cfb9486ebacfa102afe" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; m) -&gt; auto</span>
+            </dt>
+            <dd>Row-vector-times-matrix product with an Eigen matrix expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived, class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a29d730e9fc31cc376403e99a787807b7" class="m-doc">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; m,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v) -&gt; auto</span>
+            </dt>
+            <dd>Matrix-times-vector product with an Eigen matrix expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class EigenDerived&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5e663503dfc7f3fab34ca389d13ec728" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; B) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd>Componentwise difference of a spatial matrix and an Eigen matrix expression.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class EigenDerived, class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aefad92ffcb3bc89eb3c9856fb6ae6d3b" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B) -&gt; <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;</span>
+            </dt>
+            <dd>Componentwise difference of an Eigen matrix expression and a spatial matrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a028e8b511d7d645dd317f51e3bbcc87c" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Streams the vector&#x27;s active components to an output stream.</dd>
           </dl>
         </section>
         <section>
@@ -686,7 +892,7 @@ $ [\text{lo}, \text{hi}] $
                 </tr>
               </tbody>
             </table>
-<p>A sparse matrix stores only the non-zero elements, making it memory-efficient for large matrices arising from finite element discretizations where most entries are zero. The matrix uses compressed column storage (CCS) format by default.</p><h5 id="autotoc_md171">Storage Format</h5><p>Eigen&#x27;s SparseMatrix uses Compressed Column Storage (CCS), also known as Compressed Sparse Column (CSC) format, which stores:</p><ul><li>Non-zero values</li><li>Row indices for each non-zero value</li><li>Column pointers indicating where each column starts</li></ul><h5 id="autotoc_md172">Typical Applications</h5><ul><li>Stiffness matrices: <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>A sparse matrix stores only the non-zero elements, making it memory-efficient for large matrices arising from finite element discretizations where most entries are zero. The matrix uses compressed column storage (CCS) format by default.</p><h5 id="autotoc_md170">Storage Format</h5><p>Eigen&#x27;s SparseMatrix uses Compressed Column Storage (CCS), also known as Compressed Sparse Column (CSC) format, which stores:</p><ul><li>Non-zero values</li><li>Row indices for each non-zero value</li><li>Column pointers indicating where each column starts</li></ul><h5 id="autotoc_md171">Typical Applications</h5><ul><li>Stiffness matrices: <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -753,7 +959,7 @@ $ M\ddot{u} + Ku = f $
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
             </h3>
             <p>Real-valued spatial vector for point coordinates.</p>
-<p>Convenience alias for <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector&lt;Real&gt;</a>, commonly used to represent points in 2D or 3D space.</p>
+<p>Convenience alias for SpatialVector&lt;Real&gt;, commonly used to represent points in 2D or 3D space.</p>
           </div></section>
           <section class="m-doc-details" id="a27cd225c75d47a2bd0cc5850164c2a6b"><div>
             <h3>
@@ -3551,7 +3757,7 @@ $ \overline{v_i} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1e3aac16bb0ad77e3f7c5355d497de05" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;LHSScalar&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;RHSScalar&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Computes the dot product of two <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> objects.</p>
+            <p>Computes the dot product of two SpatialVector objects.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -3572,11 +3778,11 @@ $ \overline{v_i} $
               <tbody>
                 <tr>
                   <td>lhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Left-hand side <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a></td>
+                  <td>Left-hand side SpatialVector</td>
                 </tr>
                 <tr>
                   <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Right-hand side <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a></td>
+                  <td>Right-hand side SpatialVector</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -3596,7 +3802,7 @@ $ \overline{v_i} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cab14f730d8729a68637bae1f763d33" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;LHSScalar&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;RHSScalar&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Computes the dot product of two <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> objects.</p>
+            <p>Computes the dot product of two SpatialMatrix objects.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -3617,11 +3823,11 @@ $ \overline{v_i} $
               <tbody>
                 <tr>
                   <td>lhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Left-hand side <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a></td>
+                  <td>Left-hand side SpatialMatrix</td>
                 </tr>
                 <tr>
                   <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Right-hand side <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a></td>
+                  <td>Right-hand side SpatialMatrix</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -3641,7 +3847,7 @@ $ \overline{v_i} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77f710b0779d9a9103edb2ad93b5d44c" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;LHSDerived&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;RHSScalar&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Computes the dot product of an Eigen vector and a <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>.</p>
+            <p>Computes the dot product of an Eigen vector and a SpatialVector.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -3653,7 +3859,7 @@ $ \overline{v_i} $
                 </tr>
                 <tr>
                   <td>RHSScalar</td>
-                  <td>Scalar type of <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a></td>
+                  <td>Scalar type of SpatialVector</td>
                 </tr>
               </tbody>
               <thead>
@@ -3666,7 +3872,7 @@ $ \overline{v_i} $
                 </tr>
                 <tr>
                   <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Right-hand side <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a></td>
+                  <td>Right-hand side SpatialVector</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -3686,7 +3892,7 @@ $ \overline{v_i} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4fdf174ec51ada3d08d94babe8ec4f0d" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;LHSScalar&gt;&amp; lhs,
               const Eigen::MatrixBase&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Computes the dot product of a <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a> and an Eigen vector.</p>
+            <p>Computes the dot product of a SpatialVector and an Eigen vector.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -3694,7 +3900,7 @@ $ \overline{v_i} $
               <tbody>
                 <tr>
                   <td style="width: 1%">LHSScalar</td>
-                  <td>Scalar type of <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a></td>
+                  <td>Scalar type of SpatialVector</td>
                 </tr>
                 <tr>
                   <td>RHSDerived</td>
@@ -3707,7 +3913,7 @@ $ \overline{v_i} $
               <tbody>
                 <tr>
                   <td>lhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Left-hand side <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a></td>
+                  <td>Left-hand side SpatialVector</td>
                 </tr>
                 <tr>
                   <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -3731,7 +3937,7 @@ $ \overline{v_i} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0642d356cbee182297d00c8cf510ada2" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;LHSDerived&gt;&amp; lhs,
               const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;RHSScalar&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Computes the dot product of an Eigen matrix and a <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>.</p>
+            <p>Computes the dot product of an Eigen matrix and a SpatialMatrix.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -3743,7 +3949,7 @@ $ \overline{v_i} $
                 </tr>
                 <tr>
                   <td>RHSScalar</td>
-                  <td>Scalar type of <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a></td>
+                  <td>Scalar type of SpatialMatrix</td>
                 </tr>
               </tbody>
               <thead>
@@ -3756,7 +3962,7 @@ $ \overline{v_i} $
                 </tr>
                 <tr>
                   <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Right-hand side <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a></td>
+                  <td>Right-hand side SpatialMatrix</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -3776,7 +3982,7 @@ $ \overline{v_i} $
               <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3352c716ea42065259ebf804c5e1e1e4" class="m-doc-self">dot</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">Math::<wbr />SpatialMatrix</a>&lt;LHSScalar&gt;&amp; lhs,
               const Eigen::MatrixBase&lt;RHSDerived&gt;&amp; rhs) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Computes the dot product of a <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a> and an Eigen matrix.</p>
+            <p>Computes the dot product of a SpatialMatrix and an Eigen matrix.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -3784,7 +3990,7 @@ $ \overline{v_i} $
               <tbody>
                 <tr>
                   <td style="width: 1%">LHSScalar</td>
-                  <td>Scalar type of <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a></td>
+                  <td>Scalar type of SpatialMatrix</td>
                 </tr>
                 <tr>
                   <td>RHSDerived</td>
@@ -3797,7 +4003,7 @@ $ \overline{v_i} $
               <tbody>
                 <tr>
                   <td>lhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Left-hand side <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a></td>
+                  <td>Left-hand side SpatialMatrix</td>
                 </tr>
                 <tr>
                   <td>rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -5021,51 +5227,95 @@ $ x $
 $ y \leftarrow y + \alpha x $
 </title>
 <defs>
-<path id='eq126-g2-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
-<path id='eq126-g0-32' d='M10.855293-2.749689C11.070486-2.749689 11.285679-2.749689 11.285679-2.988792S11.070486-3.227895 10.855293-3.227895H1.972603C2.630137-3.730012 2.952927-4.220174 3.048568-4.375592C3.58655-5.200498 3.682192-5.953674 3.682192-5.965629C3.682192-6.109091 3.53873-6.109091 3.443088-6.109091C3.239851-6.109091 3.227895-6.085181 3.180075-5.869988C2.905106-4.698381 2.199751-3.706102 .848817-3.144209C.71731-3.096389 .669489-3.072478 .669489-2.988792S.729265-2.881196 .848817-2.833375C2.092154-2.319303 2.893151-1.3868 3.19203-.047821C3.227895 .095641 3.239851 .131507 3.443088 .131507C3.53873 .131507 3.682192 .131507 3.682192-.011955C3.682192-.035866 3.574595-.789041 3.072478-1.590037C2.833375-1.948692 2.486675-2.367123 1.972603-2.749689H10.855293Z'/>
-<path id='eq126-g1-11' d='M5.535243-3.024658C5.535243-4.184309 4.877709-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.084433 .119552 3.969116-.167372 4.817933-.884682C4.985305-.215193 5.355915 .119552 5.869988 .119552C6.515567 .119552 6.838356-.549938 6.838356-.705355C6.838356-.812951 6.75467-.812951 6.718804-.812951C6.623163-.812951 6.611208-.777086 6.575342-.681445C6.467746-.382565 6.192777-.119552 5.905853-.119552C5.535243-.119552 5.535243-.884682 5.535243-1.613948C6.75467-3.072478 7.041594-4.578829 7.041594-4.590785C7.041594-4.698381 6.945953-4.698381 6.910087-4.698381C6.802491-4.698381 6.790535-4.662516 6.742715-4.447323C6.587298-3.921295 6.276463-2.988792 5.535243-2.008468V-3.024658ZM4.782067-1.171606C3.730012-.227148 2.785554-.119552 2.367123-.119552C1.518306-.119552 1.279203-.872727 1.279203-1.43462C1.279203-1.948692 1.542217-3.16812 1.912827-3.825654C2.402989-4.662516 3.072478-5.033126 3.610461-5.033126C4.770112-5.033126 4.770112-3.514819 4.770112-2.510585C4.770112-2.211706 4.758157-1.900872 4.758157-1.601993C4.758157-1.362889 4.770112-1.303113 4.782067-1.171606Z'/>
-<path id='eq126-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
-<path id='eq126-g1-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
+<path id='eq129-g2-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq129-g0-32' d='M10.855293-2.749689C11.070486-2.749689 11.285679-2.749689 11.285679-2.988792S11.070486-3.227895 10.855293-3.227895H1.972603C2.630137-3.730012 2.952927-4.220174 3.048568-4.375592C3.58655-5.200498 3.682192-5.953674 3.682192-5.965629C3.682192-6.109091 3.53873-6.109091 3.443088-6.109091C3.239851-6.109091 3.227895-6.085181 3.180075-5.869988C2.905106-4.698381 2.199751-3.706102 .848817-3.144209C.71731-3.096389 .669489-3.072478 .669489-2.988792S.729265-2.881196 .848817-2.833375C2.092154-2.319303 2.893151-1.3868 3.19203-.047821C3.227895 .095641 3.239851 .131507 3.443088 .131507C3.53873 .131507 3.682192 .131507 3.682192-.011955C3.682192-.035866 3.574595-.789041 3.072478-1.590037C2.833375-1.948692 2.486675-2.367123 1.972603-2.749689H10.855293Z'/>
+<path id='eq129-g1-11' d='M5.535243-3.024658C5.535243-4.184309 4.877709-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.084433 .119552 3.969116-.167372 4.817933-.884682C4.985305-.215193 5.355915 .119552 5.869988 .119552C6.515567 .119552 6.838356-.549938 6.838356-.705355C6.838356-.812951 6.75467-.812951 6.718804-.812951C6.623163-.812951 6.611208-.777086 6.575342-.681445C6.467746-.382565 6.192777-.119552 5.905853-.119552C5.535243-.119552 5.535243-.884682 5.535243-1.613948C6.75467-3.072478 7.041594-4.578829 7.041594-4.590785C7.041594-4.698381 6.945953-4.698381 6.910087-4.698381C6.802491-4.698381 6.790535-4.662516 6.742715-4.447323C6.587298-3.921295 6.276463-2.988792 5.535243-2.008468V-3.024658ZM4.782067-1.171606C3.730012-.227148 2.785554-.119552 2.367123-.119552C1.518306-.119552 1.279203-.872727 1.279203-1.43462C1.279203-1.948692 1.542217-3.16812 1.912827-3.825654C2.402989-4.662516 3.072478-5.033126 3.610461-5.033126C4.770112-5.033126 4.770112-3.514819 4.770112-2.510585C4.770112-2.211706 4.758157-1.900872 4.758157-1.601993C4.758157-1.362889 4.770112-1.303113 4.782067-1.171606Z'/>
+<path id='eq129-g1-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq129-g1-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
 </defs>
-<g id='eq126-page1'>
-<use x='0' y='0' xlink:href='#eq126-g1-121'/>
-<use x='9.457481' y='0' xlink:href='#eq126-g0-32'/>
-<use x='24.733513' y='0' xlink:href='#eq126-g1-121'/>
-<use x='33.526828' y='0' xlink:href='#eq126-g2-43'/>
-<use x='45.288143' y='0' xlink:href='#eq126-g1-11'/>
-<use x='52.809867' y='0' xlink:href='#eq126-g1-120'/>
+<g id='eq129-page1'>
+<use x='0' y='0' xlink:href='#eq129-g1-121'/>
+<use x='9.457481' y='0' xlink:href='#eq129-g0-32'/>
+<use x='24.733513' y='0' xlink:href='#eq129-g1-121'/>
+<use x='33.526828' y='0' xlink:href='#eq129-g2-43'/>
+<use x='45.288143' y='0' xlink:href='#eq129-g1-11'/>
+<use x='52.809867' y='0' xlink:href='#eq129-g1-120'/>
 </g>
 </svg> where <svg class="m-math" style="width: 0.639em; height: 0.778em; vertical-align: -0.243em;" viewBox="0 -5.147373 6.136656 7.47198">
 <title>
 $ y $
 </title>
 <defs>
-<path id='eq127-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
+<path id='eq130-g0-121' d='M3.144209 1.338979C2.82142 1.793275 2.355168 2.199751 1.769365 2.199751C1.625903 2.199751 1.052055 2.175841 .872727 1.625903C.908593 1.637858 .968369 1.637858 .992279 1.637858C1.350934 1.637858 1.590037 1.327024 1.590037 1.052055S1.362889 .681445 1.183562 .681445C.992279 .681445 .573848 .824907 .573848 1.41071C.573848 2.020423 1.08792 2.438854 1.769365 2.438854C2.964882 2.438854 4.172354 1.338979 4.507098 .011955L5.678705-4.65056C5.69066-4.710336 5.71457-4.782067 5.71457-4.853798C5.71457-5.033126 5.571108-5.152677 5.391781-5.152677C5.284184-5.152677 5.033126-5.104857 4.937484-4.746202L4.052802-1.231382C3.993026-1.016189 3.993026-.992279 3.897385-.860772C3.658281-.526027 3.263761-.119552 2.689913-.119552C2.020423-.119552 1.960648-.777086 1.960648-1.099875C1.960648-1.78132 2.283437-2.701868 2.606227-3.56264C2.737733-3.90934 2.809465-4.076712 2.809465-4.315816C2.809465-4.817933 2.450809-5.272229 1.865006-5.272229C.765131-5.272229 .32279-3.53873 .32279-3.443088C.32279-3.395268 .37061-3.335492 .454296-3.335492C.561893-3.335492 .573848-3.383313 .621669-3.550685C.908593-4.554919 1.362889-5.033126 1.829141-5.033126C1.936737-5.033126 2.139975-5.033126 2.139975-4.638605C2.139975-4.327771 2.008468-3.981071 1.829141-3.526775C1.243337-1.960648 1.243337-1.566127 1.243337-1.279203C1.243337-.143462 2.056289 .119552 2.654047 .119552C3.000747 .119552 3.431133 .011955 3.849564-.430386L3.861519-.418431C3.682192 .286924 3.56264 .753176 3.144209 1.338979Z'/>
 </defs>
-<g id='eq127-page1'>
-<use x='0' y='0' xlink:href='#eq127-g0-121'/>
+<g id='eq130-page1'>
+<use x='0' y='0' xlink:href='#eq130-g0-121'/>
 </g>
 </svg> and <svg class="m-math" style="width: 0.693em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.652087 5.147373">
 <title>
 $ x $
 </title>
 <defs>
-<path id='eq128-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
+<path id='eq131-g0-120' d='M5.66675-4.877709C5.284184-4.805978 5.140722-4.519054 5.140722-4.291905C5.140722-4.004981 5.36787-3.90934 5.535243-3.90934C5.893898-3.90934 6.144956-4.220174 6.144956-4.542964C6.144956-5.045081 5.571108-5.272229 5.068991-5.272229C4.339726-5.272229 3.93325-4.554919 3.825654-4.327771C3.550685-5.224408 2.809465-5.272229 2.594271-5.272229C1.374844-5.272229 .729265-3.706102 .729265-3.443088C.729265-3.395268 .777086-3.335492 .860772-3.335492C.956413-3.335492 .980324-3.407223 1.004234-3.455044C1.41071-4.782067 2.211706-5.033126 2.558406-5.033126C3.096389-5.033126 3.203985-4.531009 3.203985-4.244085C3.203985-3.981071 3.132254-3.706102 2.988792-3.132254L2.582316-1.494396C2.402989-.777086 2.056289-.119552 1.422665-.119552C1.362889-.119552 1.06401-.119552 .812951-.274969C1.243337-.358655 1.338979-.71731 1.338979-.860772C1.338979-1.099875 1.159651-1.243337 .932503-1.243337C.645579-1.243337 .334745-.992279 .334745-.609714C.334745-.107597 .896638 .119552 1.41071 .119552C1.984558 .119552 2.391034-.334745 2.642092-.824907C2.833375-.119552 3.431133 .119552 3.873474 .119552C5.092902 .119552 5.738481-1.446575 5.738481-1.709589C5.738481-1.769365 5.69066-1.817186 5.618929-1.817186C5.511333-1.817186 5.499377-1.75741 5.463512-1.661768C5.140722-.609714 4.447323-.119552 3.90934-.119552C3.490909-.119552 3.263761-.430386 3.263761-.920548C3.263761-1.183562 3.311582-1.374844 3.502864-2.163885L3.921295-3.789788C4.100623-4.507098 4.507098-5.033126 5.057036-5.033126C5.080946-5.033126 5.415691-5.033126 5.66675-4.877709Z'/>
 </defs>
-<g id='eq128-page1'>
-<use x='0' y='0' xlink:href='#eq128-g0-120'/>
+<g id='eq131-page1'>
+<use x='0' y='0' xlink:href='#eq131-g0-120'/>
 </g>
 </svg> are sparse matrices and <svg class="m-math" style="width: 0.784em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 7.521724 5.147373">
 <title>
 $ \alpha $
 </title>
 <defs>
-<path id='eq129-g0-11' d='M5.535243-3.024658C5.535243-4.184309 4.877709-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.084433 .119552 3.969116-.167372 4.817933-.884682C4.985305-.215193 5.355915 .119552 5.869988 .119552C6.515567 .119552 6.838356-.549938 6.838356-.705355C6.838356-.812951 6.75467-.812951 6.718804-.812951C6.623163-.812951 6.611208-.777086 6.575342-.681445C6.467746-.382565 6.192777-.119552 5.905853-.119552C5.535243-.119552 5.535243-.884682 5.535243-1.613948C6.75467-3.072478 7.041594-4.578829 7.041594-4.590785C7.041594-4.698381 6.945953-4.698381 6.910087-4.698381C6.802491-4.698381 6.790535-4.662516 6.742715-4.447323C6.587298-3.921295 6.276463-2.988792 5.535243-2.008468V-3.024658ZM4.782067-1.171606C3.730012-.227148 2.785554-.119552 2.367123-.119552C1.518306-.119552 1.279203-.872727 1.279203-1.43462C1.279203-1.948692 1.542217-3.16812 1.912827-3.825654C2.402989-4.662516 3.072478-5.033126 3.610461-5.033126C4.770112-5.033126 4.770112-3.514819 4.770112-2.510585C4.770112-2.211706 4.758157-1.900872 4.758157-1.601993C4.758157-1.362889 4.770112-1.303113 4.782067-1.171606Z'/>
+<path id='eq132-g0-11' d='M5.535243-3.024658C5.535243-4.184309 4.877709-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.084433 .119552 3.969116-.167372 4.817933-.884682C4.985305-.215193 5.355915 .119552 5.869988 .119552C6.515567 .119552 6.838356-.549938 6.838356-.705355C6.838356-.812951 6.75467-.812951 6.718804-.812951C6.623163-.812951 6.611208-.777086 6.575342-.681445C6.467746-.382565 6.192777-.119552 5.905853-.119552C5.535243-.119552 5.535243-.884682 5.535243-1.613948C6.75467-3.072478 7.041594-4.578829 7.041594-4.590785C7.041594-4.698381 6.945953-4.698381 6.910087-4.698381C6.802491-4.698381 6.790535-4.662516 6.742715-4.447323C6.587298-3.921295 6.276463-2.988792 5.535243-2.008468V-3.024658ZM4.782067-1.171606C3.730012-.227148 2.785554-.119552 2.367123-.119552C1.518306-.119552 1.279203-.872727 1.279203-1.43462C1.279203-1.948692 1.542217-3.16812 1.912827-3.825654C2.402989-4.662516 3.072478-5.033126 3.610461-5.033126C4.770112-5.033126 4.770112-3.514819 4.770112-2.510585C4.770112-2.211706 4.758157-1.900872 4.758157-1.601993C4.758157-1.362889 4.770112-1.303113 4.782067-1.171606Z'/>
 </defs>
-<g id='eq129-page1'>
-<use x='0' y='0' xlink:href='#eq129-g0-11'/>
+<g id='eq132-page1'>
+<use x='0' y='0' xlink:href='#eq132-g0-11'/>
 </g>
 </svg> is a scalar.</p><p>This is the sparse matrix version of the Level 1 BLAS AXPY operation.</p>
+          </div></section>
+          <section class="m-doc-details" id="aaaf06a1f0ceea2b1a0ef169e9ea4bb2e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaaf06a1f0ceea2b1a0ef169e9ea4bb2e" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Scalar&amp; s,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Scalar-times-matrix product.</p>
+          </div></section>
+          <section class="m-doc-details" id="a468b5a91e2ff8ca0e66d42c10f76b1e7"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHSScalar, class RHSScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">FormLanguage::<wbr />Mult</a>&lt;LHSScalar, RHSScalar&gt;::Type&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a468b5a91e2ff8ca0e66d42c10f76b1e7" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;LHSScalar&gt;&amp; A,
+              const <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;RHSScalar&gt;&amp; s) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Matrix-times-vector product, returned as a single-column matrix.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8143353ae2061c30b37761f1f526bd14"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8143353ae2061c30b37761f1f526bd14" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const Scalar&amp; s) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Matrix-times-scalar product.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1c64ab60100f8bed3ca212fccf93d91b"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c64ab60100f8bed3ca212fccf93d91b" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Matrix-matrix product.</p>
           </div></section>
           <section class="m-doc-details" id="acba5cc3d2c7732e4ef49c413a9211f78"><div>
             <h3>
@@ -5108,14 +5358,14 @@ $ \alpha $
 $ A + B $
 </title>
 <defs>
-<path id='eq130-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
-<path id='eq130-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
-<path id='eq130-g0-66' d='M4.375592-7.352428C4.483188-7.79477 4.531009-7.81868 4.99726-7.81868H6.551432C7.902366-7.81868 7.902366-6.670984 7.902366-6.563387C7.902366-5.595019 6.933998-4.363636 5.355915-4.363636H3.634371L4.375592-7.352428ZM6.396015-4.267995C7.699128-4.507098 8.88269-5.415691 8.88269-6.515567C8.88269-7.44807 8.057783-8.16538 6.706849-8.16538H2.86924C2.642092-8.16538 2.534496-8.16538 2.534496-7.938232C2.534496-7.81868 2.642092-7.81868 2.82142-7.81868C3.550685-7.81868 3.550685-7.723039 3.550685-7.591532C3.550685-7.567621 3.550685-7.49589 3.502864-7.316563L1.888917-.884682C1.78132-.466252 1.75741-.3467 .920548-.3467C.6934-.3467 .573848-.3467 .573848-.131507C.573848 0 .645579 0 .884682 0H4.985305C6.814446 0 8.225156-1.3868 8.225156-2.594271C8.225156-3.574595 7.364384-4.172354 6.396015-4.267995ZM4.698381-.3467H3.084433C2.917061-.3467 2.893151-.3467 2.82142-.358655C2.689913-.37061 2.677958-.394521 2.677958-.490162C2.677958-.573848 2.701868-.645579 2.725778-.753176L3.56264-4.124533H5.810212C7.220922-4.124533 7.220922-2.809465 7.220922-2.713823C7.220922-1.566127 6.180822-.3467 4.698381-.3467Z'/>
+<path id='eq133-g1-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
+<path id='eq133-g0-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq133-g0-66' d='M4.375592-7.352428C4.483188-7.79477 4.531009-7.81868 4.99726-7.81868H6.551432C7.902366-7.81868 7.902366-6.670984 7.902366-6.563387C7.902366-5.595019 6.933998-4.363636 5.355915-4.363636H3.634371L4.375592-7.352428ZM6.396015-4.267995C7.699128-4.507098 8.88269-5.415691 8.88269-6.515567C8.88269-7.44807 8.057783-8.16538 6.706849-8.16538H2.86924C2.642092-8.16538 2.534496-8.16538 2.534496-7.938232C2.534496-7.81868 2.642092-7.81868 2.82142-7.81868C3.550685-7.81868 3.550685-7.723039 3.550685-7.591532C3.550685-7.567621 3.550685-7.49589 3.502864-7.316563L1.888917-.884682C1.78132-.466252 1.75741-.3467 .920548-.3467C.6934-.3467 .573848-.3467 .573848-.131507C.573848 0 .645579 0 .884682 0H4.985305C6.814446 0 8.225156-1.3868 8.225156-2.594271C8.225156-3.574595 7.364384-4.172354 6.396015-4.267995ZM4.698381-.3467H3.084433C2.917061-.3467 2.893151-.3467 2.82142-.358655C2.689913-.37061 2.677958-.394521 2.677958-.490162C2.677958-.573848 2.701868-.645579 2.725778-.753176L3.56264-4.124533H5.810212C7.220922-4.124533 7.220922-2.809465 7.220922-2.713823C7.220922-1.566127 6.180822-.3467 4.698381-.3467Z'/>
 </defs>
-<g id='eq130-page1'>
-<use x='0' y='0' xlink:href='#eq130-g0-65'/>
-<use x='11.43201' y='0' xlink:href='#eq130-g1-43'/>
-<use x='23.193325' y='0' xlink:href='#eq130-g0-66'/>
+<g id='eq133-page1'>
+<use x='0' y='0' xlink:href='#eq133-g0-65'/>
+<use x='11.43201' y='0' xlink:href='#eq133-g1-43'/>
+<use x='23.193325' y='0' xlink:href='#eq133-g0-66'/>
 </g>
 </svg></td>
                 </tr>
@@ -5163,19 +5413,261 @@ $ A + B $
 $ A - B $
 </title>
 <defs>
-<path id='eq131-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
-<path id='eq131-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
-<path id='eq131-g1-66' d='M4.375592-7.352428C4.483188-7.79477 4.531009-7.81868 4.99726-7.81868H6.551432C7.902366-7.81868 7.902366-6.670984 7.902366-6.563387C7.902366-5.595019 6.933998-4.363636 5.355915-4.363636H3.634371L4.375592-7.352428ZM6.396015-4.267995C7.699128-4.507098 8.88269-5.415691 8.88269-6.515567C8.88269-7.44807 8.057783-8.16538 6.706849-8.16538H2.86924C2.642092-8.16538 2.534496-8.16538 2.534496-7.938232C2.534496-7.81868 2.642092-7.81868 2.82142-7.81868C3.550685-7.81868 3.550685-7.723039 3.550685-7.591532C3.550685-7.567621 3.550685-7.49589 3.502864-7.316563L1.888917-.884682C1.78132-.466252 1.75741-.3467 .920548-.3467C.6934-.3467 .573848-.3467 .573848-.131507C.573848 0 .645579 0 .884682 0H4.985305C6.814446 0 8.225156-1.3868 8.225156-2.594271C8.225156-3.574595 7.364384-4.172354 6.396015-4.267995ZM4.698381-.3467H3.084433C2.917061-.3467 2.893151-.3467 2.82142-.358655C2.689913-.37061 2.677958-.394521 2.677958-.490162C2.677958-.573848 2.701868-.645579 2.725778-.753176L3.56264-4.124533H5.810212C7.220922-4.124533 7.220922-2.809465 7.220922-2.713823C7.220922-1.566127 6.180822-.3467 4.698381-.3467Z'/>
+<path id='eq134-g0-0' d='M7.878456-2.749689C8.081694-2.749689 8.296887-2.749689 8.296887-2.988792S8.081694-3.227895 7.878456-3.227895H1.41071C1.207472-3.227895 .992279-3.227895 .992279-2.988792S1.207472-2.749689 1.41071-2.749689H7.878456Z'/>
+<path id='eq134-g1-65' d='M2.032379-1.327024C1.613948-.621669 1.207472-.382565 .633624-.3467C.502117-.334745 .406476-.334745 .406476-.119552C.406476-.047821 .466252 0 .549938 0C.765131 0 1.303113-.02391 1.518306-.02391C1.865006-.02391 2.247572 0 2.582316 0C2.654047 0 2.797509 0 2.797509-.227148C2.797509-.334745 2.701868-.3467 2.630137-.3467C2.355168-.37061 2.12802-.466252 2.12802-.753176C2.12802-.920548 2.199751-1.052055 2.355168-1.315068L3.263761-2.82142H6.312329C6.324284-2.713823 6.324284-2.618182 6.336239-2.510585C6.372105-2.199751 6.515567-.956413 6.515567-.729265C6.515567-.37061 5.905853-.3467 5.71457-.3467C5.583064-.3467 5.451557-.3467 5.451557-.131507C5.451557 0 5.559153 0 5.630884 0C5.834122 0 6.073225-.02391 6.276463-.02391H6.957908C7.687173-.02391 8.2132 0 8.225156 0C8.308842 0 8.440349 0 8.440349-.227148C8.440349-.3467 8.332752-.3467 8.153425-.3467C7.49589-.3467 7.483935-.454296 7.44807-.812951L6.718804-8.272976C6.694894-8.51208 6.647073-8.53599 6.515567-8.53599C6.396015-8.53599 6.324284-8.51208 6.216687-8.332752L2.032379-1.327024ZM3.466999-3.16812L5.869988-7.185056L6.276463-3.16812H3.466999Z'/>
+<path id='eq134-g1-66' d='M4.375592-7.352428C4.483188-7.79477 4.531009-7.81868 4.99726-7.81868H6.551432C7.902366-7.81868 7.902366-6.670984 7.902366-6.563387C7.902366-5.595019 6.933998-4.363636 5.355915-4.363636H3.634371L4.375592-7.352428ZM6.396015-4.267995C7.699128-4.507098 8.88269-5.415691 8.88269-6.515567C8.88269-7.44807 8.057783-8.16538 6.706849-8.16538H2.86924C2.642092-8.16538 2.534496-8.16538 2.534496-7.938232C2.534496-7.81868 2.642092-7.81868 2.82142-7.81868C3.550685-7.81868 3.550685-7.723039 3.550685-7.591532C3.550685-7.567621 3.550685-7.49589 3.502864-7.316563L1.888917-.884682C1.78132-.466252 1.75741-.3467 .920548-.3467C.6934-.3467 .573848-.3467 .573848-.131507C.573848 0 .645579 0 .884682 0H4.985305C6.814446 0 8.225156-1.3868 8.225156-2.594271C8.225156-3.574595 7.364384-4.172354 6.396015-4.267995ZM4.698381-.3467H3.084433C2.917061-.3467 2.893151-.3467 2.82142-.358655C2.689913-.37061 2.677958-.394521 2.677958-.490162C2.677958-.573848 2.701868-.645579 2.725778-.753176L3.56264-4.124533H5.810212C7.220922-4.124533 7.220922-2.809465 7.220922-2.713823C7.220922-1.566127 6.180822-.3467 4.698381-.3467Z'/>
 </defs>
-<g id='eq131-page1'>
-<use x='0' y='0' xlink:href='#eq131-g1-65'/>
-<use x='11.43201' y='0' xlink:href='#eq131-g0-0'/>
-<use x='23.387171' y='0' xlink:href='#eq131-g1-66'/>
+<g id='eq134-page1'>
+<use x='0' y='0' xlink:href='#eq134-g1-65'/>
+<use x='11.43201' y='0' xlink:href='#eq134-g0-0'/>
+<use x='23.387171' y='0' xlink:href='#eq134-g1-66'/>
 </g>
 </svg></td>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a5c0db22e9b37a4537bddbfe11537b0f3"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHSScalar, class RHSScalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;typename <a href="struct_rodin_1_1_form_language_1_1_mult.html" class="m-doc">FormLanguage::<wbr />Mult</a>&lt;LHSScalar, RHSScalar&gt;::Type&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c0db22e9b37a4537bddbfe11537b0f3" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;LHSScalar&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;RHSScalar&gt;&amp; x) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Matrix-times-vector product.</p>
+          </div></section>
+          <section class="m-doc-details" id="a85841a89ab7af492dd5fd0e32a084426"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a85841a89ab7af492dd5fd0e32a084426" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Row-vector-times-matrix product, returned as a single-row matrix.</p>
+          </div></section>
+          <section class="m-doc-details" id="a9b99d5225ef297c778efe6a13a65b3af"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9b99d5225ef297c778efe6a13a65b3af" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; s,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m)</span></span>
+            </h3>
+            <p>Product of an Eigen matrix expression and a spatial matrix.</p>
+          </div></section>
+          <section class="m-doc-details" id="a57916e377b27ad8263d1be58b3fa28ef"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a57916e377b27ad8263d1be58b3fa28ef" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; s)</span></span>
+            </h3>
+            <p>Product of a spatial matrix and an Eigen matrix expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="a62648efa8515961110844a7e582c7082"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a62648efa8515961110844a7e582c7082" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m,
+              const <a href="#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;Scalar&gt;&amp; v)</span></span>
+            </h3>
+            <p>Matrix-times-(dynamic)-vector product.</p>
+          </div></section>
+          <section class="m-doc-details" id="a78c630f5001517e7cf6477326af9a9f4"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a78c630f5001517e7cf6477326af9a9f4" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; B)</span></span>
+            </h3>
+            <p>Componentwise sum of a spatial matrix and an Eigen matrix expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="a2a65bf7cc81b286c103b7029de6fe7bd"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2a65bf7cc81b286c103b7029de6fe7bd" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B)</span></span>
+            </h3>
+            <p>Componentwise sum of an Eigen matrix expression and a spatial matrix.</p>
+          </div></section>
+          <section class="m-doc-details" id="a39d2f7a68135d03596ba59b133071d67"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_matrix_8h.html">&lt;Rodin/Math/SpatialMatrix.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39d2f7a68135d03596ba59b133071d67" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; m)</span></span>
+            </h3>
+            <p>Streams the matrix&#x27;s active block to an output stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="a75acc47c3919e3b1aa3666b06d2cfd29"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a75acc47c3919e3b1aa3666b06d2cfd29" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Componentwise sum of two spatial vectors.</p>
+          </div></section>
+          <section class="m-doc-details" id="a87c20c5be9fa7c1c7b9a00b406026043"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87c20c5be9fa7c1c7b9a00b406026043" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Componentwise difference of two spatial vectors.</p>
+          </div></section>
+          <section class="m-doc-details" id="a37524fdccec1563c4a3df2e9ee89ea6d"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class LHS, class Scalar, std::enable_if_t&lt;std::is_arithmetic_v&lt;std::decay_t&lt;LHS&gt;&gt;, int&gt; = 0&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37524fdccec1563c4a3df2e9ee89ea6d" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const LHS&amp; s,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Scalar-times-vector product.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6e09755f135707d3f89877cd22a5e377"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class RHS&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6e09755f135707d3f89877cd22a5e377" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const RHS&amp; s)</span></span>
+            </h3>
+            <p>Vector-times-scalar product.</p>
+          </div></section>
+          <section class="m-doc-details" id="a39aca544646650a04d0b087235e79a7d"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class RHS&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39aca544646650a04d0b087235e79a7d" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const RHS&amp; s) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Vector-divided-by-scalar product.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae708564c1aec200cdc13e93bd72f42c9"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae708564c1aec200cdc13e93bd72f42c9" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b)</span></span>
+            </h3>
+            <p>Componentwise sum of an Eigen vector expression and a spatial vector.</p>
+          </div></section>
+          <section class="m-doc-details" id="a07305fca92a3acb2e595e18c1a8694b6"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07305fca92a3acb2e595e18c1a8694b6" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; b)</span></span>
+            </h3>
+            <p>Componentwise sum of a spatial vector and an Eigen vector expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="af30bf98f2770497e0c7c531193f5ae7e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af30bf98f2770497e0c7c531193f5ae7e" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; a,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; b)</span></span>
+            </h3>
+            <p>Componentwise difference of an Eigen vector expression and a spatial vector.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7825e4f698c9b23322d756d579d90e05"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7825e4f698c9b23322d756d579d90e05" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; a,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; b)</span></span>
+            </h3>
+            <p>Componentwise difference of a spatial vector and an Eigen vector expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="a35dfc33b58e52cfb9486ebacfa102afe"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a35dfc33b58e52cfb9486ebacfa102afe" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; m)</span></span>
+            </h3>
+            <p>Row-vector-times-matrix product with an Eigen matrix expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="a29d730e9fc31cc376403e99a787807b7"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a29d730e9fc31cc376403e99a787807b7" class="m-doc-self">operator*</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; m,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v)</span></span>
+            </h3>
+            <p>Matrix-times-vector product with an Eigen matrix expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5e663503dfc7f3fab34ca389d13ec728"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar, class EigenDerived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5e663503dfc7f3fab34ca389d13ec728" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; A,
+              const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; B)</span></span>
+            </h3>
+            <p>Componentwise difference of a spatial matrix and an Eigen matrix expression.</p>
+          </div></section>
+          <section class="m-doc-details" id="aefad92ffcb3bc89eb3c9856fb6ae6d3b"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class EigenDerived, class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aefad92ffcb3bc89eb3c9856fb6ae6d3b" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const Eigen::MatrixBase&lt;EigenDerived&gt;&amp; A,
+              const <a href="class_rodin_1_1_math_1_1_spatial_matrix.html" class="m-doc">SpatialMatrix</a>&lt;Scalar&gt;&amp; B)</span></span>
+            </h3>
+            <p>Componentwise difference of an Eigen matrix expression and a spatial matrix.</p>
+          </div></section>
+          <section class="m-doc-details" id="a028e8b511d7d645dd317f51e3bbcc87c"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_spatial_vector_8h.html">&lt;Rodin/Math/SpatialVector.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::ostream&amp; Rodin::<wbr />Math::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a028e8b511d7d645dd317f51e3bbcc87c" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">SpatialVector</a>&lt;Scalar&gt;&amp; v)</span></span>
+            </h3>
+            <p>Streams the vector&#x27;s active components to an output stream.</p>
           </div></section>
         </section>
       </div>

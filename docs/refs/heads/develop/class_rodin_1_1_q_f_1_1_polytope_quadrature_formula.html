@@ -81,24 +81,25 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md215">Automatic Rule Selection</a></li>
-            <li><a href="#autotoc_md216">Usage</a></li>
+            <li><a href="#autotoc_md214">Automatic Rule Selection</a></li>
+            <li><a href="#autotoc_md215">Usage</a></li>
             <li>
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p><a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a> provides a convenient interface for creating quadrature formulas without needing to know which specific quadrature rule to use for each geometry type. It automatically selects an appropriate quadrature formula based on:</p><ul><li>The polytope geometry (triangle, tetrahedron, etc.)</li><li>The desired polynomial degree of exactness</li></ul><section id="autotoc_md215"><h3><a href="#autotoc_md215">Automatic Rule Selection</a></h3><p>The class internally selects the most appropriate quadrature rule:</p><ul><li>For simplices (triangles, tetrahedra): Grundmann-Möller rules</li><li>For tensor-product elements (quads, hexahedra, wedges): Gauss-Legendre rules</li><li>For segments: Gauss-Legendre rules</li><li>For points: Single point with unit weight</li></ul></section><section id="autotoc_md216"><h3><a href="#autotoc_md216">Usage</a></h3><pre class="m-code"><span class="c1">// Create a quadrature rule exact for degree 3 polynomials on a triangle</span>
+<p>PolytopeQuadratureFormula provides a convenient interface for creating quadrature formulas without needing to know which specific quadrature rule to use for each geometry type. It automatically selects an appropriate quadrature formula based on:</p><ul><li>The polytope geometry (triangle, tetrahedron, etc.)</li><li>The desired polynomial degree of exactness</li></ul><section id="autotoc_md214"><h3><a href="#autotoc_md214">Automatic Rule Selection</a></h3><p>The class internally selects the most appropriate quadrature rule:</p><ul><li>For simplices (triangles, tetrahedra): Grundmann-Möller rules</li><li>For tensor-product elements (quads, hexahedra, wedges): Gauss-Legendre rules</li><li>For segments: Gauss-Legendre rules</li><li>For points: Single point with unit weight</li></ul></section><section id="autotoc_md215"><h3><a href="#autotoc_md215">Usage</a></h3><pre class="m-code"><span class="c1">// Create a quadrature rule exact for degree 3 polynomials on a triangle</span>
 <span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
 
 <span class="c1">// Use default order (degree 1)</span>
-<span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf_default</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a></p><p><a href="class_rodin_1_1_q_f_1_1_gauss_legendre.html" class="m-doc">GaussLegendre</a></p><p><a href="class_rodin_1_1_q_f_1_1_grundmann_moller.html" class="m-doc">GrundmannMoller</a></p></aside></section>
+<span class="n">PolytopeQuadratureFormula</span><span class="w"> </span><span class="nf">qf_default</span><span class="p">(</span><span class="n">Geometry</span><span class="o">::</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Tetrahedron</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>QuadratureFormulaBase</p><p>GaussLegendre</p><p>GrundmannMoller</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -115,6 +116,21 @@
               using <a href="#a21e2442cc835c73699062acd28ce6f72" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>
             </dt>
             <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a90fb1e4dc89ce7136780ac357a2641ce" class="m-doc">get</a>(</span><span class="m-doc-wrap">size_t order,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp;</span>
+            </dt>
+            <dd>Gets a cached quadrature formula for a polytope geometry.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a383ff97f161d0fb0e18da3d9fc9d5c83" class="m-doc">build</a>(</span><span class="m-doc-wrap">size_t order,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g) -&gt; std::unique_ptr&lt;const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&gt;</span>
+            </dt>
+            <dd>Builds a quadrature formula for a polytope geometry.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -143,6 +159,10 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc">getGeometry</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a></span>
+            </dt>
+            <dd>Gets the polytope geometry of the delegated quadrature formula.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a23e73ba10e16901b2326d8212936b72b" class="m-doc">getSize</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets the number of quadrature points.</dd>
@@ -162,6 +182,62 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a90fb1e4dc89ce7136780ac357a2641ce"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&amp; Rodin::<wbr />QF::<wbr />PolytopeQuadratureFormula::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a90fb1e4dc89ce7136780ac357a2641ce" class="m-doc-self">get</a>(</span><span class="m-doc-wrap">size_t order,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
+            </h3>
+            <p>Gets a cached quadrature formula for a polytope geometry.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">order</td>
+                  <td>Polynomial degree of exactness.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Polytope geometry type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to a cached quadrature formula.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a383ff97f161d0fb0e18da3d9fc9d5c83"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static std::unique_ptr&lt;const <a href="class_rodin_1_1_q_f_1_1_quadrature_formula_base.html" class="m-doc">QuadratureFormulaBase</a>&gt; Rodin::<wbr />QF::<wbr />PolytopeQuadratureFormula::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a383ff97f161d0fb0e18da3d9fc9d5c83" class="m-doc-self">build</a>(</span><span class="m-doc-wrap">size_t order,
+              <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
+            </h3>
+            <p>Builds a quadrature formula for a polytope geometry.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">order</td>
+                  <td>Polynomial degree of exactness.</td>
+                </tr>
+                <tr>
+                  <td>g</td>
+                  <td>Polytope geometry type.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Owning pointer to the selected quadrature formula.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a8e8d4cac674a101db33a123c42b8b9c8"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />QF::<wbr />PolytopeQuadratureFormula::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8e8d4cac674a101db33a123c42b8b9c8" class="m-doc-self">PolytopeQuadratureFormula</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> g)</span></span>
@@ -215,7 +291,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a> to copy from</td>
+                  <td>PolytopeQuadratureFormula to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -232,9 +308,23 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td><a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a> to move from</td>
+                  <td>PolytopeQuadratureFormula to move from</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aaef10ae0396553a4843747b73f44ff78"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Geometry::<wbr />Polytope::<wbr />Type</a> Rodin::<wbr />QF::<wbr />PolytopeQuadratureFormula::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaef10ae0396553a4843747b73f44ff78" class="m-doc-self">getGeometry</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+            <p>Gets the polytope geometry of the delegated quadrature formula.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Polytope geometry type.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a23e73ba10e16901b2326d8212936b72b"><div>
@@ -318,7 +408,7 @@ $ w_i $
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to a new <a href="class_rodin_1_1_q_f_1_1_polytope_quadrature_formula.html" class="m-doc">PolytopeQuadratureFormula</a> instance</td>
+                  <td>Pointer to a new PolytopeQuadratureFormula instance</td>
                 </tr>
               </tfoot>
             </table>

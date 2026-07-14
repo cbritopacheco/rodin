@@ -76,16 +76,16 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>MMG <span class="m-thin">namespace</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> integration with <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_traits.html" class="m-doc">Rodin::<wbr />Traits</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md563">Key Classes</a></li>
-            <li><a href="#autotoc_md564">Workflow Semantics</a></li>
-            <li><a href="#autotoc_md565">Auto-Dispatch</a></li>
-            <li><a href="#autotoc_md566">Shared Configuration (MMG5 base)</a></li>
-            <li><a href="#autotoc_md567">Required Entities</a></li>
-            <li><a href="#autotoc_md568">LevelSetDiscretizer API</a></li>
+            <li><a href="#autotoc_md473">Key Classes</a></li>
+            <li><a href="#autotoc_md474">Workflow Semantics</a></li>
+            <li><a href="#autotoc_md475">Auto-Dispatch</a></li>
+            <li><a href="#autotoc_md476">Shared Configuration (MMG5 base)</a></li>
+            <li><a href="#autotoc_md477">Required Entities</a></li>
+            <li><a href="#autotoc_md478">LevelSetDiscretizer API</a></li>
             <li>
               Reference
               <ul>
@@ -97,11 +97,11 @@
             </li>
           </ul>
         </nav>
-<p>The <code><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />MMG</a></code> module provides C++ wrappers for the <a href="https://www.mmgtools.org/">Mmg Platform</a>, enabling metric-based mesh adaptation, mesh-quality optimization, and level-set discretization directly from <a href="namespace_rodin.html" class="m-doc">Rodin</a> objects.</p><section id="autotoc_md563"><h3><a href="#autotoc_md563">Key Classes</a></h3><table class="m-table"><thead><tr><th>Class</th><th>Purpose</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></code></td><td>Local mesh type extending <code><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Local&gt;</code> with corner, ridge, and required-entity metadata.</td></tr><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">MMG::<wbr />Adapt</a></code></td><td>Metric-based adaptation from a nodal size map.</td></tr><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">MMG::<wbr />Optimizer</a></code></td><td>Mesh-quality optimization without an external metric field.</td></tr><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">MMG::<wbr />LevelSetDiscretizer</a></code></td><td>Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface.</td></tr><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG::<wbr />MMG5</a></code></td><td>Base class providing shared <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> configuration and native conversion helpers.</td></tr></tbody></table></section><section id="autotoc_md564"><h3><a href="#autotoc_md564">Workflow Semantics</a></h3><p><code><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a></code>, <code><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a></code>, and <code><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a></code> are intentionally different operations:</p><table class="m-table"><thead><tr><th>Workflow</th><th>Expected behavior</th></tr></thead><tbody><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_optimizer.html" class="m-doc">Optimizer</a></code></td><td>Improves element quality while keeping the mesh close to the existing local size distribution.</td></tr><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a></code></td><td>Refines, coarsens, moves, and reconnects elements according to a size field.</td></tr><tr><td><code><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a></code></td><td>Alters topology as needed to conform the output mesh to the selected level-set isovalue.</td></tr></tbody></table><p>All workflows convert an <code><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></code> to native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> structures, run <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>, and convert the result back. The output is a remeshed object; input element indices should be treated as stable only where the wrapper or tests explicitly document preservation.</p></section><section id="autotoc_md565"><h3><a href="#autotoc_md565">Auto-Dispatch</a></h3><p>The wrappers auto-dispatch to the appropriate <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> backend based on the mesh type:</p><table class="m-table"><thead><tr><th><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a> type</th><th>Backend</th></tr></thead><tbody><tr><td>2D planar</td><td>MMG2D</td></tr><tr><td>3D volumetric</td><td>MMG3D</td></tr><tr><td>Surface in 3D</td><td>MMGS</td></tr></tbody></table></section><section id="autotoc_md566"><h3><a href="#autotoc_md566">Shared Configuration (MMG5 base)</a></h3><p>The <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> wrappers inherit common configuration methods from <code><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a></code>; each returns <code>*this</code> for chaining:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setHMin(hmin)</code></td><td>Minimal allowed edge size</td></tr><tr><td><code>setHMax(hmax)</code></td><td>Maximal allowed edge size</td></tr><tr><td><code>setHausdorff(hausd)</code></td><td>Hausdorff distance tolerance for boundary approximation</td></tr><tr><td><code>setGradation(hgrad)</code></td><td>Edge-size gradation ratio between adjacent elements</td></tr><tr><td><code>setAngleDetection(bool)</code></td><td>Enable ridge angle detection for feature preservation</td></tr></tbody></table></section><section id="autotoc_md567"><h3><a href="#autotoc_md567">Required Entities</a></h3><p><code><a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">MMG::<wbr />Mesh</a></code> stores MMG-specific metadata:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setCorner(vertexIdx)</code></td><td>Mark a vertex as a geometric corner</td></tr><tr><td><code>setRidge(edgeIdx)</code></td><td>Mark an edge as a geometric ridge</td></tr><tr><td><code>setRequiredVertex(idx)</code></td><td>Mark a vertex as required (<code>MG_REQ</code>)</td></tr><tr><td><code>setRequiredEdge(idx)</code></td><td>Mark an edge as required (<code>MG_REQ</code>)</td></tr><tr><td><code>setRequiredTriangle(idx)</code></td><td>Mark a triangle as required (<code>MG_REQ</code>)</td></tr><tr><td><code>setRequiredTetrahedron(idx)</code></td><td>Mark a tetrahedron as required (<code>MG_REQ</code>)</td></tr></tbody></table><p>Required vertices, edges, triangles, and tetrahedra are serialized through MEDIT, converted to native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> <code>MG_REQ</code> tags, and restored from native <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> output. The optimizer and level-set wrappers restore required index sets when the original indices are still valid after remeshing. In MMG3D, <code>setRequiredTriangle(idx)</code> applies to boundary triangles exported to <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a>&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary triangles when face-cell incidence is available.</p><p>For level-set discretization, the tested behavior is:</p><ul><li>required entities not crossed by the level set retain their required metadata and original geometry in the 2D/3D cases covered by the test suite;</li><li>required entities crossed by the level set are not guaranteed to remain intact. <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> may replace them to conform the mesh to the isovalue, even when <code>MG_REQ</code>, individual labels, adjacent tetrahedron labels, local closure requirements, or <code>noSplit(ref)</code> are used.</li></ul><p>See <a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a> for the full characterization.</p></section><section id="autotoc_md568"><h3><a href="#autotoc_md568">LevelSetDiscretizer API</a></h3><p>In addition to <code><a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a></code> parameters, <code><a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a></code> provides:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setLevelSet(ls)</code></td><td>Isovalue to extract (default: 0.0)</td></tr><tr><td><code>surface(bool)</code></td><td>When true, discretize the isosurface; when false, discretize the subdomain volume</td></tr><tr><td><code>setRMC(rmc)</code></td><td>Removal threshold for small parasitic components</td></tr><tr><td><code>setBoundaryReference(ref)</code></td><td>Material reference for the discretized boundary</td></tr><tr><td><code>setBaseReferences(refs)</code></td><td>Restrict level-set splitting to specified base materials</td></tr><tr><td><code>split(ref, split)</code></td><td><a href="struct_rodin_1_1_m_m_g_1_1_split.html" class="m-doc">Split</a> one material reference into inside/outside references</td></tr><tr><td><code>noSplit(ref)</code></td><td>Keep one material reference from being split by the material policy</td></tr></tbody></table><p><code>noSplit(ref)</code> is a material-reference splitting policy. It is not an element-integrity guarantee for an individual edge, triangle, or tetrahedron that the level set cuts.</p><pre class="m-code"><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">cut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MMG</span><span class="o">::</span><span class="n">LevelSetDiscretizer</span><span class="p">()</span>
+<p>Directory Rodin/Traits Directory src/Rodin/MMG</p><p>Namespace <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">Rodin::<wbr />MMG</a></p><p>MMG integration with Rodin</p><p>The <code>Rodin::MMG</code> module provides C++ wrappers for the <a href="https://www.mmgtools.org/">Mmg Platform</a>, enabling metric-based mesh adaptation, mesh-quality optimization, and level-set discretization directly from Rodin objects.</p><section id="autotoc_md473"><h3><a href="#autotoc_md473">Key Classes</a></h3><table class="m-table"><thead><tr><th>Class</th><th>Purpose</th></tr></thead><tbody><tr><td><code>MMG::Mesh</code></td><td>Local mesh type extending <code>Geometry::Mesh&lt;Local&gt;</code> with corner, ridge, and required-entity metadata.</td></tr><tr><td><code>MMG::Adapt</code></td><td>Metric-based adaptation from a nodal size map.</td></tr><tr><td><code>MMG::Optimizer</code></td><td>Mesh-quality optimization without an external metric field.</td></tr><tr><td><code>MMG::LevelSetDiscretizer</code></td><td>Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface.</td></tr><tr><td><code>MMG::MMG5</code></td><td>Base class providing shared MMG configuration and native conversion helpers.</td></tr></tbody></table></section><section id="autotoc_md474"><h3><a href="#autotoc_md474">Workflow Semantics</a></h3><p><code>Optimizer</code>, <code>Adapt</code>, and <code>LevelSetDiscretizer</code> are intentionally different operations:</p><table class="m-table"><thead><tr><th>Workflow</th><th>Expected behavior</th></tr></thead><tbody><tr><td><code>Optimizer</code></td><td>Improves element quality while keeping the mesh close to the existing local size distribution.</td></tr><tr><td><code>Adapt</code></td><td>Refines, coarsens, moves, and reconnects elements according to a size field.</td></tr><tr><td><code>LevelSetDiscretizer</code></td><td>Alters topology as needed to conform the output mesh to the selected level-set isovalue.</td></tr></tbody></table><p>All workflows convert an <code>MMG::Mesh</code> to native MMG structures, run MMG, and convert the result back. The output is a remeshed object; input element indices should be treated as stable only where the wrapper or tests explicitly document preservation.</p></section><section id="autotoc_md475"><h3><a href="#autotoc_md475">Auto-Dispatch</a></h3><p>The wrappers auto-dispatch to the appropriate MMG backend based on the mesh type:</p><table class="m-table"><thead><tr><th>Mesh type</th><th>Backend</th></tr></thead><tbody><tr><td>2D planar</td><td>MMG2D</td></tr><tr><td>3D volumetric</td><td>MMG3D</td></tr><tr><td>Surface in 3D</td><td>MMGS</td></tr></tbody></table></section><section id="autotoc_md476"><h3><a href="#autotoc_md476">Shared Configuration (MMG5 base)</a></h3><p>The MMG wrappers inherit common configuration methods from <code>MMG5</code>; each returns <code>*this</code> for chaining:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setHMin(hmin)</code></td><td>Minimal allowed edge size</td></tr><tr><td><code>setHMax(hmax)</code></td><td>Maximal allowed edge size</td></tr><tr><td><code>setHausdorff(hausd)</code></td><td>Hausdorff distance tolerance for boundary approximation</td></tr><tr><td><code>setGradation(hgrad)</code></td><td>Edge-size gradation ratio between adjacent elements</td></tr><tr><td><code>setAngleDetection(bool)</code></td><td>Enable ridge angle detection for feature preservation</td></tr></tbody></table></section><section id="autotoc_md477"><h3><a href="#autotoc_md477">Required Entities</a></h3><p><code>MMG::Mesh</code> stores MMG-specific metadata:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setCorner(vertexIdx)</code></td><td>Mark a vertex as a geometric corner</td></tr><tr><td><code>setRidge(edgeIdx)</code></td><td>Mark an edge as a geometric ridge</td></tr><tr><td><code>setRequiredVertex(idx)</code></td><td>Mark a vertex as required (<code>MG_REQ</code>)</td></tr><tr><td><code>setRequiredEdge(idx)</code></td><td>Mark an edge as required (<code>MG_REQ</code>)</td></tr><tr><td><code>setRequiredTriangle(idx)</code></td><td>Mark a triangle as required (<code>MG_REQ</code>)</td></tr><tr><td><code>setRequiredTetrahedron(idx)</code></td><td>Mark a tetrahedron as required (<code>MG_REQ</code>)</td></tr></tbody></table><p>Required vertices, edges, triangles, and tetrahedra are serialized through MEDIT, converted to native MMG <code>MG_REQ</code> tags, and restored from native MMG output. The optimizer and level-set wrappers restore required index sets when the original indices are still valid after remeshing. In MMG3D, <code>setRequiredTriangle(idx)</code> applies to boundary triangles exported to MMG&#x27;s triangle table; interior faces of a tetrahedral mesh are not exported as MMG boundary triangles when face-cell incidence is available.</p><p>For level-set discretization, the tested behavior is:</p><ul><li>required entities not crossed by the level set retain their required metadata and original geometry in the 2D/3D cases covered by the test suite;</li><li>required entities crossed by the level set are not guaranteed to remain intact. MMG may replace them to conform the mesh to the isovalue, even when <code>MG_REQ</code>, individual labels, adjacent tetrahedron labels, local closure requirements, or <code>noSplit(ref)</code> are used.</li></ul><p>See <a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a> for the full characterization.</p></section><section id="autotoc_md478"><h3><a href="#autotoc_md478">LevelSetDiscretizer API</a></h3><p>In addition to <code>MMG5</code> parameters, <code>LevelSetDiscretizer</code> provides:</p><table class="m-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>setLevelSet(ls)</code></td><td>Isovalue to extract (default: 0.0)</td></tr><tr><td><code>surface(bool)</code></td><td>When true, discretize the isosurface; when false, discretize the subdomain volume</td></tr><tr><td><code>setRMC(rmc)</code></td><td>Removal threshold for small parasitic components</td></tr><tr><td><code>setBoundaryReference(ref)</code></td><td>Material reference for the discretized boundary</td></tr><tr><td><code>setBaseReferences(refs)</code></td><td>Restrict level-set splitting to specified base materials</td></tr><tr><td><code>split(ref, split)</code></td><td>Split one material reference into inside/outside references</td></tr><tr><td><code>noSplit(ref)</code></td><td>Keep one material reference from being split by the material policy</td></tr></tbody></table><p><code>noSplit(ref)</code> is a material-reference splitting policy. It is not an element-integrity guarantee for an individual edge, triangle, or tetrahedron that the level set cuts.</p><pre class="m-code"><span class="n">MMG</span><span class="o">::</span><span class="n">Mesh</span><span class="w"> </span><span class="n">cut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MMG</span><span class="o">::</span><span class="n">LevelSetDiscretizer</span><span class="p">()</span>
 <span class="w">  </span><span class="p">.</span><span class="n">setLevelSet</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">interior</span><span class="p">,</span><span class="w"> </span><span class="n">exterior</span><span class="w"> </span><span class="p">})</span>
 <span class="w">  </span><span class="p">.</span><span class="n">setBoundaryReference</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span></pre><p>Use <code><a href="class_rodin_1_1_m_m_g_1_1_mesh.html#a4f87f0175bc4cbe6518ba48a2ed0555c" class="m-doc">MMG::<wbr />Mesh::<wbr />Build()</a></code> to construct meshes programmatically via the builder pattern.</p><aside class="m-note m-info"><h4>Note</h4><p>Requires the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> library and <a href="namespace_rodin.html" class="m-doc">Rodin</a> configured with <code>RODIN_USE_MMG=ON</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-index.html" class="m-doc">MMG examples</a></p><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside></section>
+<span class="w">  </span><span class="p">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">phi</span><span class="p">);</span></pre><p>Use <code>MMG::Mesh::Build()</code> to construct meshes programmatically via the builder pattern.</p><aside class="m-note m-info"><h4>Note</h4><p>Requires the MMG library and Rodin configured with <code>RODIN_USE_MMG=ON</code>.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="examples-mmg-index.html" class="m-doc">MMG examples</a></p><p><a href="examples-mmg-behavior.html" class="m-doc">MMG behavior and guarantees</a></p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -116,7 +116,7 @@
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Mesh</a>
             </dt>
-            <dd>Local mesh enriched with <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> boundary tags and constraints.</dd>
+            <dd>Local mesh enriched with MMG boundary tags and constraints.</dd>
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_mesh_loader.html" class="m-doc">MeshLoader</a>
             </dt>
@@ -128,12 +128,12 @@
             <dt>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5.html" class="m-doc">MMG5</a>
             </dt>
-            <dd>Base class for MMG-backed operations in <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>Base class for MMG-backed operations in Rodin.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FuncName&gt;</div>
               class <a href="class_rodin_1_1_m_m_g_1_1_m_m_g5_exception.html" class="m-doc">MMG5Exception</a>
             </dt>
-            <dd>Exception type for <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> wrapper failures.</dd>
+            <dd>Exception type for MMG wrapper failures.</dd>
             <dt>
               struct <a href="struct_rodin_1_1_m_m_g_1_1_no_split_t.html" class="m-doc">NoSplitT</a>
             </dt>
@@ -157,21 +157,21 @@
             <dd>Material splitting policy map used by level-set discretization.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Range&gt;</div>
-              using <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a> = Variational::GridFunction&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
-            <dd>Grid function type used by the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> module.</dd>
+            <dd>Grid function type used by the MMG module.</dd>
             <dt>
               using <a href="#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc">RealGridFunction</a> = <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
             </dt>
-            <dd>Scalar <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> grid function alias.</dd>
+            <dd>Scalar MMG grid function alias.</dd>
             <dt>
               using <a href="#a8d017c962902a24dcc35a4e6d5f459ff" class="m-doc">VectorGridFunction</a> = <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </dt>
-            <dd>Vector-valued <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> grid function alias.</dd>
+            <dd>Vector-valued MMG grid function alias.</dd>
             <dt>
               using <a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc">ReturnCode</a> = int
             </dt>
-            <dd>Return-code type used by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> C API calls.</dd>
+            <dd>Return-code type used by MMG C API calls.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -188,7 +188,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#af2fd2fb7a1c5394e6c5a637486000037" class="m-doc">getMMGVerbosityLevel</a>(</span><span class="m-doc-wrap">) -&gt; int</span>
             </dt>
-            <dd>Gets the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> verbosity level selected at configuration time.</dd>
+            <dd>Gets the MMG verbosity level selected at configuration time.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -203,13 +203,21 @@
             </dt>
             <dd>Path to the ISCD Mshdist executable.</dd>
             <dt>
+              const char* <a href="#adf01ff3cac59d37abf9d96808cdd84d2" class="m-doc">MSHDIST_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Path to the Mshdist executable used by MMG helpers.</dd>
+            <dt>
               const char* <a href="#a4404167df2ec94385623e756594ccb5c" class="m-doc">ISCD_ADVECTION_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Path to the ISCD Mshdist executable.</dd>
             <dt>
+              const char* <a href="#ad93a12389fcb3bc12503f9d572dc9cc7" class="m-doc">ADVECTION_EXECUTABLE</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Path to the ISCD advection executable used by MMG helpers.</dd>
+            <dt>
               const int <a href="#a269af232c229adaba3e889ad4c895218" class="m-doc">VERBOSITY_LEVEL</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Verbosity level for <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> console output.</dd>
+            <dd>Verbosity level for MMG console output.</dd>
           </dl>
         </section>
         <section>
@@ -228,9 +236,9 @@
               <div class="m-doc-template">
                 template&lt;class Range&gt;
               </div>
-              using Rodin::<wbr />MMG::<wbr /><a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc-self">GridFunction</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
+              using Rodin::<wbr />MMG::<wbr /><a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc-self">GridFunction</a> = Variational::GridFunction&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">Variational::<wbr />P1</a>&lt;Range, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;, <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
             </h3>
-            <p>Grid function type used by the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> module.</p>
+            <p>Grid function type used by the MMG module.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -238,18 +246,18 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">Range</td>
-                  <td>Value type (<code>Real</code> for scalar fields, <code><a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Real&gt;</code> for vector fields).</td>
+                  <td>Value type (<code>Real</code> for scalar fields, <code>Math::SpatialVector&lt;Real&gt;</code> for vector fields).</td>
                 </tr>
               </tbody>
             </table>
-<p><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> workflows in <a href="namespace_rodin.html" class="m-doc">Rodin</a> operate on first-order nodal fields defined on <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">local meshes</a>. This alias standardizes that representation for scalar and vector quantities transferred to/from <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> solution structures.</p>
+<p>MMG workflows in Rodin operate on first-order nodal fields defined on <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">local meshes</a>. This alias standardizes that representation for scalar and vector quantities transferred to/from MMG solution structures.</p>
           </div></section>
           <section class="m-doc-details" id="a5b080db16bbb2ed744518df89ccd8d06"><div>
             <h3>
               using Rodin::<wbr />MMG::<wbr /><a href="#a5b080db16bbb2ed744518df89ccd8d06" class="m-doc-self">RealGridFunction</a> = <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_grid_function_8h.html">&lt;Rodin/MMG/GridFunction.h&gt;</a></div>
             </h3>
-            <p>Scalar <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> grid function alias.</p>
+            <p>Scalar MMG grid function alias.</p>
 <p>Commonly used for size maps and level-set values passed to <a href="class_rodin_1_1_m_m_g_1_1_adapt.html" class="m-doc">Adapt</a> and <a href="class_rodin_1_1_m_m_g_1_1_level_set_discretizer.html" class="m-doc">LevelSetDiscretizer</a>.</p>
           </div></section>
           <section class="m-doc-details" id="a8d017c962902a24dcc35a4e6d5f459ff"><div>
@@ -257,7 +265,7 @@
               using Rodin::<wbr />MMG::<wbr /><a href="#a8d017c962902a24dcc35a4e6d5f459ff" class="m-doc-self">VectorGridFunction</a> = <a href="#ab70352a48e99dc1e9cbe4ebfd15bea2f" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_grid_function_8h.html">&lt;Rodin/MMG/GridFunction.h&gt;</a></div>
             </h3>
-            <p>Vector-valued <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> grid function alias.</p>
+            <p>Vector-valued MMG grid function alias.</p>
 <p>Useful for vector metrics or vector fields in MMG-related pre/post-processing.</p>
           </div></section>
           <section class="m-doc-details" id="a2e664251a56ddb6630af9e4586dd47cd"><div>
@@ -265,8 +273,8 @@
               using Rodin::<wbr />MMG::<wbr /><a href="#a2e664251a56ddb6630af9e4586dd47cd" class="m-doc-self">ReturnCode</a> = int
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g5_8h.html">&lt;Rodin/MMG/MMG5.h&gt;</a></div>
             </h3>
-            <p>Return-code type used by <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> C API calls.</p>
-<p><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> kernels conventionally return <code>MMG5_SUCCESS</code>, <code>MMG5_LOWFAILURE</code>, or <code>MMG5_STRONGFAILURE</code>.</p>
+            <p>Return-code type used by MMG C API calls.</p>
+<p>MMG kernels conventionally return <code>MMG5_SUCCESS</code>, <code>MMG5_LOWFAILURE</code>, or <code>MMG5_STRONGFAILURE</code>.</p>
           </div></section>
         </section>
         <section>
@@ -306,12 +314,12 @@
               <span class="m-doc-wrap-bumper">int Rodin::<wbr />MMG::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2fd2fb7a1c5394e6c5a637486000037" class="m-doc-self">getMMGVerbosityLevel</a>(</span><span class="m-doc-wrap">)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_common_8h.html">&lt;Rodin/MMG/Common.h&gt;</a></div>
             </h3>
-            <p>Gets the <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> verbosity level selected at configuration time.</p>
+            <p>Gets the MMG verbosity level selected at configuration time.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td><a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> verbosity value passed to <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> <code>imprim</code> settings.</td>
+                  <td>MMG verbosity value passed to MMG <code>imprim</code> settings.</td>
                 </tr>
               </tfoot>
             </table>
@@ -335,6 +343,13 @@
             </h3>
             <p>Path to the ISCD Mshdist executable.</p>
           </div></section>
+          <section class="m-doc-details" id="adf01ff3cac59d37abf9d96808cdd84d2"><div>
+            <h3>
+              const char* Rodin::<wbr />MMG::<wbr /><a href="#adf01ff3cac59d37abf9d96808cdd84d2" class="m-doc-self">MSHDIST_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Path to the Mshdist executable used by MMG helpers.</p>
+          </div></section>
           <section class="m-doc-details" id="a4404167df2ec94385623e756594ccb5c"><div>
             <h3>
               const char* Rodin::<wbr />MMG::<wbr /><a href="#a4404167df2ec94385623e756594ccb5c" class="m-doc-self">ISCD_ADVECTION_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
@@ -342,12 +357,19 @@
             </h3>
             <p>Path to the ISCD Mshdist executable.</p>
           </div></section>
+          <section class="m-doc-details" id="ad93a12389fcb3bc12503f9d572dc9cc7"><div>
+            <h3>
+              const char* Rodin::<wbr />MMG::<wbr /><a href="#ad93a12389fcb3bc12503f9d572dc9cc7" class="m-doc-self">ADVECTION_EXECUTABLE</a> <span class="m-label m-primary">constexpr</span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
+            </h3>
+            <p>Path to the ISCD advection executable used by MMG helpers.</p>
+          </div></section>
           <section class="m-doc-details" id="a269af232c229adaba3e889ad4c895218"><div>
             <h3>
               const int Rodin::<wbr />MMG::<wbr /><a href="#a269af232c229adaba3e889ad4c895218" class="m-doc-self">VERBOSITY_LEVEL</a> <span class="m-label m-primary">constexpr</span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_m_g_2_configure_8h_8in.html">&lt;Rodin/MMG/Configure.h.in&gt;</a></div>
             </h3>
-            <p>Verbosity level for <a href="namespace_rodin_1_1_m_m_g.html" class="m-doc">MMG</a> console output.</p>
+            <p>Verbosity level for MMG console output.</p>
 <p>Ranges from -1 to INT_MAX. A higher number means more verbose output.</p>
           </div></section>
         </section>

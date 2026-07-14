@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class Derived&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>RealFunctionBase <span class="m-thin">class</span>
         </h1>
-        <p>Base class for real-valued functions defined on a mesh.</p>
+        <p>Base class for real-valued scalar functions.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -93,11 +93,10 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md489">Usage Examples</a></li>
+            <li><a href="#autotoc_md405">Usage Examples</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -105,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>Base class for real-valued scalar functions.</p><p><a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a> extends <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a> with Real as the scalar type, representing functions <svg class="m-math" style="width: 5.482em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 52.625249 10.626798">
+<p>RealFunctionBase extends ScalarFunctionBase with Real as the scalar type, representing functions <svg class="m-math" style="width: 5.482em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 52.625249 10.626798">
 <title>
 $ f: \Omega \to \mathbb{R} $
 </title>
@@ -123,23 +122,13 @@ $ f: \Omega \to \mathbb{R} $
 <use x='28.714905' y='0' xlink:href='#eq1-g1-33'/>
 <use x='43.990937' y='0' xlink:href='#eq1-g0-82'/>
 </g>
-</svg>. This is the most common function type in finite element analysis, used for scalar fields like temperature, pressure, or concentration.</p><section id="autotoc_md489"><h3><a href="#autotoc_md489">Usage Examples</a></h3><pre class="m-code"><span class="c1">// Constant real function</span>
+</svg>. This is the most common function type in finite element analysis, used for scalar fields like temperature, pressure, or concentration.</p><section id="autotoc_md405"><h3><a href="#autotoc_md405">Usage Examples</a></h3><pre class="m-code"><span class="c1">// Constant real function</span>
 <span class="n">RealFunction</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="mf">3.14</span><span class="p">);</span>
 
 <span class="c1">// Lambda-based function</span>
 <span class="n">RealFunction</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">g</span><span class="p">(</span>
 <span class="w">  </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
-<span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>, <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a></p></aside></section>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase&lt;Real, RealFunctionBase&lt;Derived&gt;&gt;</a>
-            </dt>
-            <dd>Base class for scalar-valued functions with templated scalar type.</dd>
-          </dl>
-        </section>
+<span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>ScalarFunctionBase, RealFunction</p></aside></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -148,7 +137,7 @@ $ f: \Omega \to \mathbb{R} $
             </dt>
             <dd>Type of scalar values (Real)</dd>
             <dt id="aa263707718221620ec9393bc23e7be07">
-              using <a href="#aa263707718221620ec9393bc23e7be07" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_scalar_function_base.html" class="m-doc">ScalarFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;Derived&gt;&gt;
+              using <a href="#aa263707718221620ec9393bc23e7be07" class="m-doc-self">Parent</a> = ScalarFunctionBase&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>&lt;Derived&gt;&gt;
             </dt>
             <dd>Parent class type.</dd>
           </dl>
@@ -182,10 +171,18 @@ $ f: \Omega \to \mathbb{R} $
             </dt>
             <dd>Evaluates the function at a point.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa249459e67c36e2343e940d08970970a" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the function at an integration point.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class ... Args&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a1b80f06a428d3badf45e18059ef1b25b" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... args) -&gt; Derived&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Sets the trace domain for the function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the polynomial order on a mesh entity.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0822ff4d9597b99e197fe8586179f5e5" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_real_function_base.html" class="m-doc">RealFunctionBase</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -209,7 +206,7 @@ $ f: \Omega \to \mathbb{R} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> to copy from</td>
+                  <td>Function to copy from</td>
                 </tr>
               </tbody>
             </table>
@@ -229,7 +226,7 @@ $ f: \Omega \to \mathbb{R} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_function.html" class="m-doc">Function</a> to move from</td>
+                  <td>Function to move from</td>
                 </tr>
               </tbody>
             </table>
@@ -260,6 +257,32 @@ $ f: \Omega \to \mathbb{R} $
               </tfoot>
             </table>
 <p>CRTP method delegating to derived class implementation.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa249459e67c36e2343e940d08970970a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />RealFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa249459e67c36e2343e940d08970970a" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the function at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integration point at which to evaluate</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Real value at the integration point</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a1b80f06a428d3badf45e18059ef1b25b"><div>
             <h3>
@@ -293,6 +316,32 @@ $ f: \Omega \to \mathbb{R} $
                 <tr>
                   <th>Returns</th>
                   <td>Reference to derived object (for method chaining)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />RealFunctionBase&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the polynomial order on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geom&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Entity whose local polynomial order is requested</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order when known</td>
                 </tr>
               </tfoot>
             </table>

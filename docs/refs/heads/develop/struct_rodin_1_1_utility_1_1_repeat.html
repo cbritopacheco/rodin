@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;size_t N, class T&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>Repeat <span class="m-thin">struct</span>
         </h1>
-        <p>Metafunction to create a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with N repetitions of type T.</p>
+        <p>Metafunction to create a Tuple with N repetitions of type T.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -94,8 +94,27 @@
             </tr>
           </tbody>
         </table>
-<p>General case for N &gt; 1.</p><p><a href="struct_rodin_1_1_utility_1_1_repeat.html" class="m-doc">Repeat</a> creates a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> containing N copies of type T. This is useful for generating homogeneous tuple types at compile time.</p><p>Example usage:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">ThreeInts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Repeat</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">Type</span><span class="p">;</span>
-<span class="c1">// ThreeInts is Tuple&lt;int, int, int&gt;</span></pre><p>Recursively concatenates Tuple&lt;T&gt; with <a href="struct_rodin_1_1_utility_1_1_repeat.html" class="m-doc">Repeat</a>&lt;N-1, T&gt;Type.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>General case for N &gt; 1.</p><p>Repeat creates a Tuple containing N copies of type T. This is useful for generating homogeneous tuple types at compile time.</p><p>Example usage: <code class="m-code"><span class="c1">// Repeat&lt;3, int&gt; exposes the tuple containing three int entries.</span></code></p><p>Recursively concatenates the one-element tuple with the repeated tail.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aca92e95d49cc29393ff6646f72241199">
+              using <a href="#aca92e95d49cc29393ff6646f72241199" class="m-doc-self">Type</a> = decltype(std::declval&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;T&gt;&gt;().concatenate(std::declval&lt;typename <a href="struct_rodin_1_1_utility_1_1_repeat.html" class="m-doc">Repeat</a>&lt;N - 1, T&gt;::Type&gt;()))
+            </dt>
+            <dd>Tuple containing <code>N</code> copies of <code>T</code>.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

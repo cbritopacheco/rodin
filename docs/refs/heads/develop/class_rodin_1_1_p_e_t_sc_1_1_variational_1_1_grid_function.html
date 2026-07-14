@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc.html">PETSc</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html">Variational</a>::<wbr/></span>GridFunction <span class="m-thin">class</span>
         </h1>
-        <p>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</p>
+        <p>Convenience wrapper that inherits all functionality from <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a>.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -103,7 +103,7 @@
             </li>
           </ul>
         </nav>
-<p>This thin derived class lives in the <code>Rodin::PETSc::Variational</code> namespace and pulls in all base-class constructors, operators, and methods via <code>using</code> declarations. Its sole purpose is to enable cleaner user-facing syntax:</p><pre class="m-code"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>instead of the fully-qualified specialization name.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction&lt;FES, ::<wbr />Vec&gt;</a></p></aside>
+<p>This thin derived class lives in the <code>Rodin::PETSc::Variational</code> namespace and pulls in all base-class constructors, operators, and methods via <code>using</code> declarations. Its sole purpose is to enable cleaner user-facing syntax:</p><pre class="m-code"><span class="n">PETSc</span><span class="o">::</span><span class="n">Variational</span><span class="o">::</span><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre><p>instead of the fully-qualified specialization name.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Variational::GridFunction&lt;FES, ::Vec&gt;</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -111,14 +111,14 @@
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html" class="m-doc">GridFunction&lt;FES, ::Vec&gt;</a>
             </dt>
-            <dd>Grid function specialization storing DOF coefficients in a <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector (<code>::Vec</code>).</dd>
+            <dd>Grid function specialization storing DOF coefficients in a PETSc vector (<code>Vec</code>).</dd>
           </dl>
         </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a03479c10042334a732f24badd3acd6d1">
-              using <a href="#a03479c10042334a732f24badd3acd6d1" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a>&lt;FES, ::Vec&gt;
+              using <a href="#a03479c10042334a732f24badd3acd6d1" class="m-doc-self">Parent</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Rodin::<wbr />Variational::<wbr />GridFunction</a>&lt;FES, ::Vec&gt;
             </dt>
             <dd>Parent specialization type.</dd>
             <dt id="a3a7c9c7b52446b53d800779922de198e">
@@ -151,8 +151,8 @@
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="acfc7fd27b959cb868fdf1ad16ebf1e1e">
-              <div class="m-doc-template">template&lt;class <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_function_base.html#a64936f544e7cee3bc94dd3850a0458a9" class="m-doc">T</a>&amp; v) -&gt; Derived&amp;</span>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acfc7fd27b959cb868fdf1ad16ebf1e1e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const T&amp; v) -&gt; Derived&amp;</span>
             </dt>
             <dd>&lt; Inherit getValue.</dd>
             <dt id="a5a15c7fdd2c776656746e8ea2df8664d">

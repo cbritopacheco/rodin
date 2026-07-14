@@ -76,14 +76,14 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Elasticity <span class="m-thin">namespace</span>
         </h1>
-        <p>Module which provides models for solid mechanics and elasticity.</p>
+        <p>Namespace <a href="namespace_rodin_1_1_elasticity.html" class="m-doc">Rodin::<wbr />Elasticity</a>.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md543">Typical Usage</a></li>
+            <li><a href="#autotoc_md453">Typical Usage</a></li>
           </ul>
         </nav>
-<p>This module implements the linearized elasticity bilinear form for small deformations. The primary class is <a href="class_rodin_1_1_variational_1_1_linear_elasticity_integrator.html" class="m-doc">LinearElasticityIntegral</a>, which assembles:</p><div class="m-math"><svg style="width: 26.119em; height: 2.819em;" viewBox="68.900346 -27.065451 250.74228 27.065451">
+<p>Directory Rodin/Elasticity</p><p>Module which provides models for solid mechanics and elasticity.</p><p>This module implements the linearized elasticity bilinear form for small deformations. The primary class is <code>LinearElasticityIntegral</code>, which assembles:</p><div class="m-math"><svg style="width: 26.119em; height: 2.819em;" viewBox="68.900346 -27.065451 250.74228 27.065451">
 <title>
 \[
   a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[\lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
@@ -201,7 +201,7 @@ $ \lambda, \mu $
 <use x='6.828489' y='0' xlink:href='#eq3-g0-59'/>
 <use x='12.072647' y='0' xlink:href='#eq3-g0-22'/>
 </g>
-</svg> are the Lamé parameters.</p><section id="autotoc_md543"><h3><a href="#autotoc_md543">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span><span class="w"> </span><span class="c1">// vector P1 space</span>
+</svg> are the Lamé parameters.</p><section id="autotoc_md453"><h3><a href="#autotoc_md453">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">getSpaceDimension</span><span class="p">());</span><span class="w"> </span><span class="c1">// vector P1 space</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 

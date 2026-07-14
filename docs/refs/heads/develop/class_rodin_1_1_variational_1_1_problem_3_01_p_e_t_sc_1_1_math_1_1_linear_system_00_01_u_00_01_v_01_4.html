@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class U, class V&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>Problem&lt;PETSc::Math::LinearSystem, U, V&gt; <span class="m-thin">class</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> variational problem for a single trial / test function pair.</p>
+        <p>PETSc variational problem for a single trial / test function pair.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -86,11 +86,11 @@
           <tbody>
             <tr>
               <td style="width: 1%">U</td>
-              <td>Trial function type (e.g. <code><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;…&gt;&gt;, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;…&gt;&gt;</code>).</td>
+              <td>Trial function type (e.g. <code>TrialFunction&lt;GridFunction&lt;P1&lt;…&gt;&gt;, P1&lt;…&gt;&gt;</code>).</td>
             </tr>
             <tr>
               <td>V</td>
-              <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function type (e.g. <code><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>&lt;…&gt;&gt;</code>).</td>
+              <td>Test function type (e.g. <code>TestFunction&lt;P1&lt;…&gt;&gt;</code>).</td>
             </tr>
           </tbody>
         </table>
@@ -100,7 +100,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -108,7 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>Assembles a variational formulation into a <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> containing the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
+<p>Assembles a variational formulation into a <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> containing the system matrix <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
 $ A $
 </title>
@@ -138,24 +137,14 @@ $ \mathbf{x} $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-120'/>
 </g>
-</svg>. After calling <code><a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve()</a></code>, the solution is automatically scattered back into the trial function&#x27;s grid function.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="_p_e_t_sc_2_variational_2_problem_8h.html#ae1fbfa50d43bb3e1ed943e7de7f1fb73" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />Problem</a> (convenience alias), <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class LinearSystem, class U, class V&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">ProblemUVBase&lt;PETSc::Math::LinearSystem, U, V&gt;</a>
-            </dt>
-            <dd>General class to assemble linear systems with <code>Operator</code> and <code>Vector</code> generic types in a sequential context.</dd>
-          </dl>
-        </section>
+</svg>. After calling <code>solve()</code>, the solution is automatically scattered back into the trial function&#x27;s grid function.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::Problem (convenience alias), Rodin::Solver::KSP</p></aside>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a0e2ed914b272429dbc177e1882a866f1">
-              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
+              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
             </dt>
-            <dd>Type of the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> linear system.</dd>
+            <dd>Type of the PETSc linear system.</dd>
             <dt id="a42202ed1db5760067e78140c3583f06d">
               using <a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc-self">SolverBaseType</a> = <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">Solver::<wbr />LinearSolverBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
             </dt>
@@ -163,19 +152,19 @@ $ \mathbf{x} $
             <dt id="a3f02c76806f998a41174a54479486d51">
               using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::OperatorType
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix operator type.</dd>
+            <dd>PETSc matrix operator type.</dd>
             <dt id="a8d4666f2edbd3de42a6bfbdbec15e536">
               using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::VectorType
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type.</dd>
+            <dd>PETSc vector type.</dd>
             <dt id="a5584bb04cdb3914f8da2f4904a179ef0">
               using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;::ScalarType
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> scalar type.</dd>
+            <dd>PETSc scalar type.</dd>
             <dt id="af723523eed8a866c8fa646cb4d08f428">
-              using <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc-self">ProblemBodyType</a> = <a href="class_rodin_1_1_variational_1_1_problem_body.html" class="m-doc">Variational::<wbr />ProblemBody</a>&lt;<a href="#a3f02c76806f998a41174a54479486d51" class="m-doc">OperatorType</a>, <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc">VectorType</a>, <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
+              using <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc-self">ProblemBodyType</a> = Variational::ProblemBody&lt;<a href="#a3f02c76806f998a41174a54479486d51" class="m-doc">OperatorType</a>, <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc">VectorType</a>, <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> body type encapsulating bilinear/linear forms.</dd>
+            <dd>Problem body type encapsulating bilinear/linear forms.</dd>
             <dt id="a358fdd58d7140091d16ab400b3fc3ea5">
               using <a href="#a358fdd58d7140091d16ab400b3fc3ea5" class="m-doc-self">TrialFESType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;U&gt;::FESType
             </dt>
@@ -191,7 +180,7 @@ $ \mathbf{x} $
             <dt id="ab49846dd94d56f9ec67fb4402be9f401">
               using <a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc-self">TrialFESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a508421247062fce0082cef624ba91cb7" class="m-doc">TrialFESMeshType</a>&gt;::ContextType
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (Local or <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) for the trial mesh.</dd>
+            <dd>Context type (Local or MPI) for the trial mesh.</dd>
             <dt id="a5ad12a3c6a7118c030eff9613e2d2467">
               using <a href="#a5ad12a3c6a7118c030eff9613e2d2467" class="m-doc-self">TestFESMeshType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#af9b0497a2df4b2ec56a12a2e893ab94f" class="m-doc">TestFESType</a>&gt;::MeshType
             </dt>
@@ -199,15 +188,15 @@ $ \mathbf{x} $
             <dt id="ac4bc1a3f31bd1062c9aee1d256ef4b65">
               using <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc-self">TestFESMeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#a5ad12a3c6a7118c030eff9613e2d2467" class="m-doc">TestFESMeshType</a>&gt;::ContextType
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (Local or <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) for the test mesh.</dd>
+            <dd>Context type (Local or MPI) for the test mesh.</dd>
             <dt id="ab48623a8ef35ddaf85afb38affa4fc2b">
-              using <a href="#ab48623a8ef35ddaf85afb38affa4fc2b" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_problem_u_v_base.html" class="m-doc">Variational::<wbr />ProblemUVBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, U, V&gt;
+              using <a href="#ab48623a8ef35ddaf85afb38affa4fc2b" class="m-doc-self">Parent</a> = Variational::ProblemUVBase&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, U, V&gt;
             </dt>
             <dd>Parent class type.</dd>
             <dt id="a42d8ebbdd89a1ddc05c9b2b813886e6c">
-              using <a href="#a42d8ebbdd89a1ddc05c9b2b813886e6c" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc">TrialFESMeshContextType</a>, <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc">TestFESMeshContextType</a>&gt; ::template Type&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&gt;
+              using <a href="#a42d8ebbdd89a1ddc05c9b2b813886e6c" class="m-doc-self">AssemblyType</a> = typename <a href="class_rodin_1_1_assembly_1_1_default.html" class="m-doc">Assembly::<wbr />Default</a>&lt;<a href="#ab49846dd94d56f9ec67fb4402be9f401" class="m-doc">TrialFESMeshContextType</a>, <a href="#ac4bc1a3f31bd1062c9aee1d256ef4b65" class="m-doc">TestFESMeshContextType</a>&gt; ::template Type&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>, <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&gt;
             </dt>
-            <dd><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> type for this problem.</dd>
+            <dd>Assembly type for this problem.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -219,11 +208,11 @@ $ \mathbf{x} $
             </dt>
             <dd>Constructs the problem from a trial and test function pair.</dd>
             <dt id="ab2b65141b453fe957a35a8eaf0cab162">
-              <span class="m-doc-wrap-bumper"><a href="#ab2b65141b453fe957a35a8eaf0cab162" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#ab2b65141b453fe957a35a8eaf0cab162" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">const Problem&amp; other) <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a87d558d57dd62754889d267c9ec61189">
-              <span class="m-doc-wrap-bumper"><a href="#a87d558d57dd62754889d267c9ec61189" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a87d558d57dd62754889d267c9ec61189" class="m-doc-self">Problem</a>(</span><span class="m-doc-wrap">Problem&amp;&amp; other) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
           </dl>
@@ -232,21 +221,25 @@ $ \mathbf{x} $
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; other) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp;</span>
             </dt>
             <dd>Copy assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp;&amp; other) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move assignment operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body (bilinear and linear forms).</dd>
             <dt id="ade273f2556fd4951a4e7b8dad8006d5f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assembles the variational formulation into the linear system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a52c9cb6ad3a86b473eb82a1be6dcae6f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">AssemblyTarget target) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Assembles only the requested target into the linear system.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a242286126958bec41dec8f80d88b0d54" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a42202ed1db5760067e78140c3583f06d" class="m-doc">SolverBaseType</a>&amp; solver) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -260,7 +253,7 @@ $ \mathbf{x} $
             </dt>
             <dd>Returns a read-only reference to the linear system.</dd>
             <dt id="ad2429ffd7600bef5051f4fab1a8eb0a5">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2429ffd7600bef5051f4fab1a8eb0a5" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a heap-allocated copy of this problem.</dd>
           </dl>
@@ -287,7 +280,7 @@ $ \mathbf{x} $
                 </tr>
                 <tr>
                   <td>v</td>
-                  <td><a href="namespace_rodin_1_1_test.html" class="m-doc">Test</a> function.</td>
+                  <td>Test function.</td>
                 </tr>
               </tbody>
             </table>
@@ -297,7 +290,7 @@ $ \mathbf{x} $
               <div class="m-doc-template">
                 template&lt;class U, class V&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; other)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; other)</span></span>
             </h3>
             <p>Copy assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -307,7 +300,7 @@ $ \mathbf{x} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> to copy.</td>
+                  <td>Problem to copy.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -323,7 +316,7 @@ $ \mathbf{x} $
               <div class="m-doc-template">
                 template&lt;class U, class V&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab01eb0b6bcc53cd8b697a29a141b3b50" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Move assignment operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -333,7 +326,7 @@ $ \mathbf{x} $
               <tbody>
                 <tr>
                   <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> to move from.</td>
+                  <td>Problem to move from.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -349,7 +342,7 @@ $ \mathbf{x} $
               <div class="m-doc-template">
                 template&lt;class U, class V&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Assigns a problem body (bilinear and linear forms).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -359,7 +352,33 @@ $ \mathbf{x} $
               <tbody>
                 <tr>
                   <td style="width: 1%">rhs&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td><a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Problem</a> body to assign.</td>
+                  <td>Problem body to assign.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this problem.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a52c9cb6ad3a86b473eb82a1be6dcae6f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a52c9cb6ad3a86b473eb82a1be6dcae6f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">AssemblyTarget target) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles only the requested target into the linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">target&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Assembly target to update.</td>
                 </tr>
               </tbody>
               <tfoot>
@@ -389,7 +408,7 @@ $ \mathbf{x} $
                 </tr>
               </tbody>
             </table>
-<p>Assigning a new problem body with <a href="#a24f33cae29d53dfaa37b1732bcb0190d" class="m-doc">operator=()</a> marks the current assembly stale. If that happens, or if <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> has not been called yet, this function calls <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble()</a> before invoking the linear solver.</p>
+<p>Assigning a new problem body with operator=() marks the current assembly stale. If that happens, or if assemble() has not been called yet, this function calls assemble() before invoking the linear solver.</p>
           </div></section>
         </section>
       </div>
