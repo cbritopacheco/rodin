@@ -247,6 +247,10 @@ namespace Rodin::IO
         Handle(const Handle&) = delete;
         Handle& operator=(const Handle&) = delete;
 
+        /**
+         * @brief Move constructor.
+         * @param[in,out] other Handle whose identifier is transferred.
+         */
         Handle(Handle&& other) noexcept
           : m_id(other.m_id),
             m_close(other.m_close)
@@ -255,6 +259,11 @@ namespace Rodin::IO
           other.m_close = nullptr;
         }
 
+        /**
+         * @brief Move assignment operator.
+         * @param[in,out] other Handle whose identifier is transferred.
+         * @returns Reference to this handle.
+         */
         Handle& operator=(Handle&& other) noexcept
         {
           if (this != &other)
@@ -310,8 +319,7 @@ namespace Rodin::IO
      * @param[in] id  File identifier returned by `H5Fcreate` or `H5Fopen`.
      * @returns Handle that calls `H5Fclose` on destruction.
      */
-    inline
-    Handle File(hid_t id)
+    inline Handle File(hid_t id)
     {
       return Handle(id, H5Fclose);
     }
@@ -321,8 +329,7 @@ namespace Rodin::IO
      * @param[in] id  Group identifier returned by `H5Gcreate2` or `H5Gopen2`.
      * @returns Handle that calls `H5Gclose` on destruction.
      */
-    inline
-    Handle Group(hid_t id)
+    inline Handle Group(hid_t id)
     {
       return Handle(id, H5Gclose);
     }
@@ -332,8 +339,7 @@ namespace Rodin::IO
      * @param[in] id  Dataset identifier returned by `H5Dcreate2` or `H5Dopen2`.
      * @returns Handle that calls `H5Dclose` on destruction.
      */
-    inline
-    Handle DataSet(hid_t id)
+    inline Handle DataSet(hid_t id)
     {
       return Handle(id, H5Dclose);
     }
@@ -343,8 +349,7 @@ namespace Rodin::IO
      * @param[in] id  Dataspace identifier returned by `H5Screate_simple` etc.
      * @returns Handle that calls `H5Sclose` on destruction.
      */
-    inline
-    Handle Space(hid_t id)
+    inline Handle Space(hid_t id)
     {
       return Handle(id, H5Sclose);
     }
@@ -359,28 +364,36 @@ namespace Rodin::IO
 
     template <>
     inline
-    hid_t getNativeType<U64>()
+      /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
+      hid_t
+      getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
     }
 
     template <>
     inline
-    hid_t getNativeType<I32>()
+      /// @brief Returns the native HDF5 type for signed 32-bit integers.
+      hid_t
+      getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
     }
 
     template <>
     inline
-    hid_t getNativeType<F64>()
+      /// @brief Returns the native HDF5 type for 64-bit floating point values.
+      hid_t
+      getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
     }
 
     template <>
     inline
-    hid_t getNativeType<U8>()
+      /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
+      hid_t
+      getNativeType<U8>()
     {
       return H5T_NATIVE_UCHAR;
     }
@@ -655,6 +668,11 @@ namespace Rodin::IO
       return std::numeric_limits<U64>::max();
     }
 
+    /**
+     * @brief Returns the XDMF uniform topology name for a quadratic cell type.
+     * @param[in] t Polytope geometry type.
+     * @returns XDMF topology name string.
+     */
     inline
     const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
     {
@@ -679,15 +697,31 @@ namespace Rodin::IO
       return nullptr;
     }
 
+    /**
+     * @brief Layout metadata for XDMF topology dataset emission.
+     *
+     * Uniform topologies are written as a dense node table; mixed topologies
+     * are written as the flat XDMF mixed stream.
+     */
     struct XDMFTopologyLayout
     {
-      bool isUniform = false;
-      std::string topologyType = "Mixed";
-      size_t rowCount = 0;
-      size_t columnCount = 0;
-      size_t entryCount = 0;
+        /// @brief Whether the topology can be written as a uniform XDMF topology.
+        bool isUniform = false;
+        /// @brief XDMF topology type name.
+        std::string topologyType = "Mixed";
+        /// @brief Number of rows for uniform topology datasets.
+        size_t rowCount = 0;
+        /// @brief Number of columns for uniform topology datasets.
+        size_t columnCount = 0;
+        /// @brief Total number of entries in the topology dataset.
+        size_t entryCount = 0;
     };
 
+    /**
+     * @brief Builds a spatial reference point from coordinate values.
+     * @param[in] values Coordinate values in reference-cell coordinates.
+     * @returns Spatial point with the same dimension as @p values.
+     */
     inline
     Math::SpatialPoint xdmfReferencePoint(std::initializer_list<Real> values)
     {
@@ -879,6 +913,11 @@ namespace Rodin::IO
       return {};
     }
 
+    /**
+     * @brief Tests whether the mesh needs curved XDMF visualization geometry.
+     * @param[in] mesh Mesh to inspect.
+     * @returns True when at least one exported cell has order greater than one.
+     */
     inline
     bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
     {
@@ -940,6 +979,11 @@ namespace Rodin::IO
       return count;
     }
 
+    /**
+     * @brief Counts visualization vertices emitted for XDMF geometry.
+     * @param[in] mesh Mesh to inspect.
+     * @returns Vertex count for the XDMF geometry dataset.
+     */
     inline
     size_t getXDMFVisualizationVertexCount(const Geometry::MeshBase& mesh)
     {
@@ -1013,6 +1057,12 @@ namespace Rodin::IO
       return size;
     }
 
+    /**
+     * @brief Computes the XDMF topology dataset layout for a mesh.
+     * @param[in] mesh Mesh whose cells define the topology.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
+     * @returns Topology layout metadata.
+     */
     inline
     XDMFTopologyLayout getXDMFTopologyLayout(
         const Geometry::MeshBase& mesh,
@@ -1161,14 +1211,8 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      const auto dset = DataSet(H5Dcreate2(
-          file,
-          path.c_str(),
-          getNativeType<T>(),
-          space.get(),
-          H5P_DEFAULT,
-          H5P_DEFAULT,
-          H5P_DEFAULT));
+      const auto dset = DataSet(H5Dcreate2(file, path.c_str(), getNativeType<T>(),
+        space.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
       if (!dset)
       {
         Alert::Exception()
@@ -1240,14 +1284,8 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      const auto dset = DataSet(H5Dcreate2(
-          file,
-          path.c_str(),
-          getNativeType<T>(),
-          space.get(),
-          H5P_DEFAULT,
-          H5P_DEFAULT,
-          H5P_DEFAULT));
+      const auto dset = DataSet(H5Dcreate2(file, path.c_str(), getNativeType<T>(),
+        space.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
       if (!dset)
       {
         Alert::Exception()
@@ -1377,6 +1415,7 @@ namespace Rodin::IO
      *
      * @param[in] file  Open HDF5 file identifier with write access.
      * @param[in] mesh  Local mesh whose cells provide the topology data.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
     inline
     void writeXDMFTopology(
@@ -1385,7 +1424,8 @@ namespace Rodin::IO
         bool allowUniformCurvedTopology = true)
     {
       {
-        const auto g = Group(H5Gcreate2(file, Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g =
+          Group(H5Gcreate2(file, Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1487,6 +1527,7 @@ namespace Rodin::IO
      *
      * @param[in] filename  Path to an existing HDF5 mesh file.
      * @param[in] mesh      Local mesh whose cells provide the topology data.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
     inline
     void writeXDMFTopology(
@@ -1519,7 +1560,8 @@ namespace Rodin::IO
     void writeXDMFVertices(hid_t file, const Geometry::MeshBase& mesh)
     {
       {
-        const auto g = Group(H5Gcreate2(file, Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(
+          H5Gcreate2(file, Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1600,7 +1642,8 @@ namespace Rodin::IO
     void writeXDMFRegionAttribute(hid_t file, const Geometry::MeshBase& mesh)
     {
       {
-        const auto g = Group(H5Gcreate2(file, Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(
+          H5Gcreate2(file, Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1663,6 +1706,7 @@ namespace Rodin::IO
      *
      * @param[in] filename  Output HDF5 file path.
      * @param[in] mesh      Local mesh to export for visualization.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      *
      * @see writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute,
      *      MeshPrinter<FileFormat::HDF5, Context::Local>
@@ -1673,7 +1717,8 @@ namespace Rodin::IO
         const Geometry::MeshBase& mesh,
         bool allowUniformCurvedTopology = true)
     {
-      const auto file = File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
       {
         Alert::Exception()
@@ -1682,7 +1727,8 @@ namespace Rodin::IO
       }
 
       {
-        const auto g = Group(H5Gcreate2(file.get(), Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(
+          H5Gcreate2(file.get(), Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1696,12 +1742,14 @@ namespace Rodin::IO
       writeXDMFRegionAttribute(file.get(), mesh);
     }
 
+    /// @cond
     // Forward declaration of the explicit-mesh overload, defined below.
     template <class GridFunctionType>
     void writeXDMFNodeAttribute(
         const GridFunctionType& gf,
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename);
+    /// @endcond
 
     /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
@@ -1756,6 +1804,7 @@ namespace Rodin::IO
       writeXDMFNodeAttribute(gf, *localMesh, filename);
     }
 
+    /// @cond
     /**
      * @brief Writes a grid function as cell-centered data to an HDF5 file
      *        for XDMF visualization.
@@ -1785,7 +1834,14 @@ namespace Rodin::IO
         const GridFunctionType& gf,
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename);
+    /// @endcond
 
+    /**
+     * @brief Writes a grid function as cell-centered data using its own mesh.
+     * @tparam GridFunctionType Concrete grid function type.
+     * @param[in] gf Grid function to export.
+     * @param[in] filename Output HDF5 file path.
+     */
     template <class GridFunctionType>
     void writeXDMFCellAttribute(
         const GridFunctionType& gf, const boost::filesystem::path& filename)
@@ -1835,14 +1891,18 @@ namespace Rodin::IO
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename)
     {
+      /// @brief Finite element space type.
       using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       const size_t nv = getXDMFVisualizationVertexCount(visMesh);
       const size_t vdim = gf.getDimension();
 
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
       {
         Alert::Exception()
@@ -1851,7 +1911,8 @@ namespace Rodin::IO
       }
 
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1860,7 +1921,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1869,7 +1931,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -2026,8 +2089,11 @@ namespace Rodin::IO
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename)
     {
+      /// @brief Finite element space type.
       using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       // In distributed mode `visMesh` is the per-rank shard; emit only
@@ -2042,7 +2108,8 @@ namespace Rodin::IO
       const size_t vdim = gf.getDimension();
       const size_t D = visMesh.getDimension();
 
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
       {
         Alert::Exception()
@@ -2051,7 +2118,8 @@ namespace Rodin::IO
       }
 
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -2060,7 +2128,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -2069,7 +2138,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -2209,7 +2279,8 @@ namespace Rodin::IO
        */
       void load(const boost::filesystem::path& filename) override
       {
-        const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2479,7 +2550,7 @@ namespace Rodin::IO
        *
        * Always raises an exception. Use the file-path overload instead.
        */
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 mesh printing requires file-path based printing."
@@ -2497,7 +2568,8 @@ namespace Rodin::IO
       {
         const auto& mesh = this->getObject();
 
-        const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+        const auto file = HDF5::File(
+          H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2522,47 +2594,59 @@ namespace Rodin::IO
       void createBaseGroups(hid_t file) const
       {
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(
+            H5Gcreate2(file, HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Meta group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Geometry group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityMeta,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Meta group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityCounts, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityCounts,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Counts group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file,
+            HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Entities group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityState,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/State group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityIncidence, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g =
+            HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityIncidence,
+              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Incidence group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Attributes group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshTransformations, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshTransformations,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Transformations group." << Alert::Raise; }
         }
       }
@@ -2625,7 +2709,8 @@ namespace Rodin::IO
 
         for (size_t d = 1; d <= Dmax; ++d)
         {
-          const auto group = HDF5::Group(H5Gcreate2(file, HDF5::entityGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file,
+            HDF5::entityGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2679,7 +2764,9 @@ namespace Rodin::IO
             if (!present[flat])
               continue;
 
-            const auto group = HDF5::Group(H5Gcreate2(file, HDF5::incidenceGroupPath(d, dp).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+            const auto group =
+              HDF5::Group(H5Gcreate2(file, HDF5::incidenceGroupPath(d, dp).c_str(),
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
             if (!group)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -2734,7 +2821,9 @@ namespace Rodin::IO
 
         for (size_t d = 0; d <= Dmax; ++d)
         {
-          const auto group = HDF5::Group(H5Gcreate2(file, HDF5::transformationGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group =
+            HDF5::Group(H5Gcreate2(file, HDF5::transformationGroupPath(d).c_str(),
+              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2820,7 +2909,8 @@ namespace Rodin::IO
       void load(const boost::filesystem::path& filename) override
       {
         auto& gf = this->getObject();
-        const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2919,7 +3009,7 @@ namespace Rodin::IO
        *
        * Always raises an exception. Use the file-path overload instead.
        */
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction printing is file-path based."
@@ -2936,7 +3026,8 @@ namespace Rodin::IO
       {
         const auto& gf = this->getObject();
 
-        const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+        const auto file = HDF5::File(
+          H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2945,7 +3036,8 @@ namespace Rodin::IO
         }
 
         {
-          const auto group = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(
+            file.get(), HDF5::Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2954,7 +3046,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto group = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file.get(),
+            HDF5::Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2963,7 +3056,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto group = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file.get(),
+            HDF5::Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)

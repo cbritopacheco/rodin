@@ -16,6 +16,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- UniformGrid for all geometry types ----
 
+  /// @brief Verifies quadrilateral 2 x 2 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Quadrilateral_2x2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {2, 2});
@@ -25,6 +26,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getSpaceDimension(), 2);
   }
 
+  /// @brief Verifies quadrilateral 4 x 4 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Quadrilateral_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
@@ -33,6 +35,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getDimension(), 2);
   }
 
+  /// @brief Verifies quadrilateral 3 x 5 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Quadrilateral_3x5)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {3, 5});
@@ -41,6 +44,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getCellCount(), 8);
   }
 
+  /// @brief Verifies tetrahedron 2 x 2 x 2 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Tetrahedron_2x2x2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -50,6 +54,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getSpaceDimension(), 3);
   }
 
+  /// @brief Verifies tetrahedron 3 x 3 x 3 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Tetrahedron_3x3x3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -58,6 +63,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getDimension(), 3);
   }
 
+  /// @brief Verifies hexahedron 2 x 2 x 2 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Hexahedron_2x2x2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, {2, 2, 2});
@@ -67,6 +73,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getSpaceDimension(), 3);
   }
 
+  /// @brief Verifies hexahedron 3 x 3 x 3 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Hexahedron_3x3x3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, {3, 3, 3});
@@ -75,6 +82,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getDimension(), 3);
   }
 
+  /// @brief Verifies hexahedron 4 x 3 x 2 for geometry uniform grid by checking exact expected values.
   TEST(Geometry_UniformGrid, Hexahedron_4x3x2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, {4, 3, 2});
@@ -85,6 +93,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Geometric measures ----
 
+  /// @brief 16x16 uniform grid spans [0,15]^2, area = 15^2 = 225.
   TEST(Geometry_MeshMeasures, TriangleUnitSquare_Area)
   {
     // 16x16 uniform grid spans [0,15]^2, area = 15^2 = 225
@@ -93,6 +102,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(area, 225.0, 1e-10);
   }
 
+  /// @brief Verifies triangle unit square perimeter for geometry mesh measures by checking tolerance-based numerical results.
   TEST(Geometry_MeshMeasures, TriangleUnitSquare_Perimeter)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {16, 16});
@@ -102,6 +112,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(perim, 60.0, 1e-10);
   }
 
+  /// @brief 8x8 uniform grid spans [0,7]^2, area = 49.
   TEST(Geometry_MeshMeasures, QuadrilateralUnitSquare_Area)
   {
     // 8x8 uniform grid spans [0,7]^2, area = 49
@@ -110,6 +121,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(area, 49.0, 1e-10);
   }
 
+  /// @brief Verifies get measure dimension 2 for geometry mesh measures by checking tolerance-based numerical results.
   TEST(Geometry_MeshMeasures, GetMeasure_Dimension2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {16, 16});
@@ -117,6 +129,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(measure, 225.0, 1e-10);
   }
 
+  /// @brief Verifies get measure dimension 1 for geometry mesh measures.
   TEST(Geometry_MeshMeasures, GetMeasure_Dimension1)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {16, 16});
@@ -126,6 +139,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(edgeMeasure, 0.0);
   }
 
+  /// @brief 8x8 grid has area = 7^2 = 49; scaled by 2 -> area * 4 = 196.
   TEST(Geometry_MeshMeasures, ScaledMesh_Area)
   {
     // 8x8 grid has area = 7^2 = 49; scaled by 2 -> area * 4 = 196
@@ -136,6 +150,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(scaledArea, origArea * 4.0, 1e-10);
   }
 
+  /// @brief 3x3x3 grid spans [0,2]^3, volume = 8.
   TEST(Geometry_MeshMeasures, TetrahedronUnitCube_Volume)
   {
     // 3x3x3 grid spans [0,2]^3, volume = 8
@@ -144,6 +159,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(vol, 8.0, 1e-10);
   }
 
+  /// @brief 3x3x3 grid spans [0,2]^3, volume = 8.
   TEST(Geometry_MeshMeasures, HexahedronUnitCube_Volume)
   {
     // 3x3x3 grid spans [0,2]^3, volume = 8
@@ -152,6 +168,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(vol, 8.0, 1e-10);
   }
 
+  /// @brief Verifies area by attribute for geometry mesh measures.
   TEST(Geometry_MeshMeasures, AreaByAttribute)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {8, 8});
@@ -168,6 +185,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Scale ----
 
+  /// @brief Verifies scale for geometry mesh ops by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_MeshOps, Scale)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -185,6 +203,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Copy / Move ----
 
+  /// @brief Verifies copy constructor for geometry mesh ops by checking exact expected values, copy semantics.
   TEST(Geometry_MeshOps, CopyConstructor)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -195,6 +214,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(copy.getSpaceDimension(), mesh.getSpaceDimension());
   }
 
+  /// @brief Verifies move constructor for geometry mesh ops by checking exact expected values, move semantics.
   TEST(Geometry_MeshOps, MoveConstructor)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -205,6 +225,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(moved.getCellCount(), origCells);
   }
 
+  /// @brief Verifies move assignment for geometry mesh ops by checking exact expected values, move semantics.
   TEST(Geometry_MeshOps, MoveAssignment)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -218,12 +239,14 @@ namespace Rodin::Tests::Unit
 
   // ---- isEmpty / isSurface ----
 
+  /// @brief Verifies is empty default for geometry mesh ops by checking true predicates.
   TEST(Geometry_MeshOps, IsEmpty_Default)
   {
     Mesh mesh;
     EXPECT_TRUE(mesh.isEmpty());
   }
 
+  /// @brief Verifies is empty after build for geometry mesh ops by checking false predicates.
   TEST(Geometry_MeshOps, IsEmpty_AfterBuild)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -232,6 +255,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Name ----
 
+  /// @brief Verifies name set get for geometry mesh ops by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_MeshOps, NameSetGet)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -243,6 +267,7 @@ namespace Rodin::Tests::Unit
 
   // ---- setAttribute / getAttribute ----
 
+  /// @brief Verifies set attribute for geometry mesh ops by checking exact expected values, true predicates.
   TEST(Geometry_MeshOps, SetAttribute)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -254,6 +279,7 @@ namespace Rodin::Tests::Unit
 
   // ---- setVertexCoordinates ----
 
+  /// @brief Verifies set vertex coordinates single component for geometry mesh ops by checking tolerance-based numerical results.
   TEST(Geometry_MeshOps, SetVertexCoordinates_SingleComponent)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -262,6 +288,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(coords(0), 99.0, 1e-14);
   }
 
+  /// @brief Verifies set vertex coordinates vector for geometry mesh ops by checking tolerance-based numerical results.
   TEST(Geometry_MeshOps, SetVertexCoordinates_Vector)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -276,6 +303,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Flush ----
 
+  /// @brief Verifies flush clears cache for geometry mesh ops.
   TEST(Geometry_MeshOps, FlushClearsCache)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});

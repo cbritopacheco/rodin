@@ -28,6 +28,7 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -189,7 +190,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * VectorFunction class, please see @ref VectorFunctionSpecializations.
+   * VectorFunction class, please see `Vec`torFunctionSpecializations.
    *
    * @see VectorFunctionSpecializations
    */
@@ -204,7 +205,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * MatrixFunction class, please see @ref MatrixFunctionSpecializations.
+   * MatrixFunction class, please see `Mat`rixFunctionSpecializations.
    *
    * @see MatrixFunctionSpecializations
    */
@@ -1116,4 +1117,5 @@ namespace Rodin::Variational
   > class Flow;
 }
 
+/// @endcond
 #endif

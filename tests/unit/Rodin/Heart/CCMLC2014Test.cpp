@@ -362,6 +362,7 @@ namespace
   }
 }
 
+/// @brief Verifies initialize uses input active defaults when initial active state is zero for CCMLC 2014 test by checking tolerance-based numerical results.
 TEST(CCMLC2014Test, InitializeUsesInputActiveDefaultsWhenInitialActiveStateIsZero)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -383,6 +384,7 @@ TEST(CCMLC2014Test, InitializeUsesInputActiveDefaultsWhenInitialActiveStateIsZer
   EXPECT_NEAR(state.tauc, 0.5, 1e-14);
 }
 
+/// @brief Verifies initialize uses provided gamma and beta for CCMLC 2014 test by checking tolerance-based numerical results.
 TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -406,6 +408,7 @@ TEST(CCMLC2014Test, InitializeUsesProvidedGammaAndBeta)
   EXPECT_NEAR(state.tauc, 0.08, 1e-14);
 }
 
+/// @brief Verifies initialize uses relaxation target when initial W is zero for CCMLC 2014 test by checking tolerance-based numerical results.
 TEST(CCMLC2014Test, InitializeUsesRelaxationTargetWhenInitialWIsZero)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -424,6 +427,7 @@ TEST(CCMLC2014Test, InitializeUsesRelaxationTargetWhenInitialWIsZero)
   EXPECT_NEAR(state.w, 1.4, 1e-14);
 }
 
+/// @brief Verifies step converges and advances time for CCMLC 2014 test by checking tolerance-based numerical results, true predicates.
 TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -453,6 +457,7 @@ TEST(CCMLC2014Test, StepConvergesAndAdvancesTime)
   EXPECT_NEAR(model.getState().t, dt, 1e-14);
 }
 
+/// @brief Verifies example setup completes three cycles with physical state for CCMLC 2014 test by checking tolerance-based numerical results, true predicates.
 TEST(CCMLC2014Test, ExampleSetupCompletesThreeCyclesWithPhysicalState)
 {
   auto cardiacInput = makeExampleCardiacInput();
@@ -498,6 +503,7 @@ TEST(CCMLC2014Test, ExampleSetupCompletesThreeCyclesWithPhysicalState)
   EXPECT_LT(maxIterations, 20u);
 }
 
+/// @brief Verifies example setup evolves windkessel and relaxation states for CCMLC 2014 test by checking true predicates.
 TEST(CCMLC2014Test, ExampleSetupEvolvesWindkesselAndRelaxationStates)
 {
   auto cardiacInput = makeExampleCardiacInput();
@@ -543,6 +549,7 @@ TEST(CCMLC2014Test, ExampleSetupEvolvesWindkesselAndRelaxationStates)
   EXPECT_GT(maxActiveStress, 100.0);
 }
 
+/// @brief Verifies non newtonian example trajectory differs from newtonian for CCMLC 2014 test by checking true predicates.
 TEST(CCMLC2014Test, NonNewtonianExampleTrajectoryDiffersFromNewtonian)
 {
   auto nonNewtonianInput = makeExampleCardiacInput();
@@ -586,6 +593,7 @@ TEST(CCMLC2014Test, NonNewtonianExampleTrajectoryDiffersFromNewtonian)
       10.0);
 }
 
+/// @brief Verifies load dependent relaxation accelerates negative activation decay for CCMLC 2014 test.
 TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
 {
   auto baseInput = makeGenericCardiacInput();
@@ -634,6 +642,7 @@ TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
       baseResidual[CCMLC2014Vars::ActiveStiffness]);
 }
 
+/// @brief Verifies dynamic jacobian matches finite difference for CCMLC 2014 test.
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -648,6 +657,7 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifference)
   EXPECT_LT(relativeError, 1e-3);
 }
 
+/// @brief Verifies windkessel residual and jacobian use branch flows and BDF 2 for CCMLC 2014 test by checking tolerance-based numerical results.
 TEST(CCMLC2014Test, WindkesselResidualAndJacobianUseBranchFlowsAndBDF2)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -747,6 +757,7 @@ TEST(CCMLC2014Test, WindkesselResidualAndJacobianUseBranchFlowsAndBDF2)
       1e-14);
 }
 
+/// @brief Verifies non newtonian windkessel path produces finite consistent jacobian for CCMLC 2014 test by checking true predicates.
 TEST(CCMLC2014Test, NonNewtonianWindkesselPathProducesFiniteConsistentJacobian)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -781,6 +792,7 @@ TEST(CCMLC2014Test, NonNewtonianWindkesselPathProducesFiniteConsistentJacobian)
   EXPECT_LT(relativeError, 3e-3);
 }
 
+/// @brief Verifies dynamic jacobian matches finite difference across perturbation scales for CCMLC 2014 test.
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossPerturbationScales)
 {
   auto cardiacInput = makeGenericCardiacInput();
@@ -804,6 +816,7 @@ TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossPerturbationScal
   }
 }
 
+/// @brief Verifies dynamic jacobian matches finite difference across data scales for CCMLC 2014 test.
 TEST(CCMLC2014Test, DynamicJacobianMatchesFiniteDifferenceAcrossDataScales)
 {
   auto cardiacInput = makeGenericCardiacInput();

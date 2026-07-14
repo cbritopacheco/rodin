@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Reaction-diffusion manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a reaction-diffusion manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -21,11 +29,11 @@ using namespace Rodin::Solver;
  * 3D manufactured tests for the reaction–diffusion equation:
  *
  * Strong form:
- *   -Δu + \alpha u = f   in \Omega
- *             u = g   on \partial\Omega
+ *   -Δu + α u = f   in Ω
+ *             u = g   on ∂Ω
  *
  * Weak form:
- *   \int\Omega \nablau\cdot\nablav dx + \alpha \int\Omega u v dx = \int\Omega f v dx
+ *   ∫_Ω ∇ u·∇ v dx + α ∫_Ω u v dx = ∫_Ω f v dx
  *
  * Geometry note:
  *   UniformGrid({M,M,M}) creates coordinates {0,…,M−1}.
@@ -55,9 +63,12 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the tests to Reaction Diffusion 3 D Test 8.
   using ReactionDiffusion3DTest8  = ReactionDiffusion3DFixture<8>;
+  /// @brief Helper used by the tests to Reaction Diffusion 3 D Test 16.
   using ReactionDiffusion3DTest16 = ReactionDiffusion3DFixture<16>;
 
+  /// @brief Verifies reaction diffusion P1 exact residual for reaction diffusion 3 D test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(ReactionDiffusion3DTest8, ReactionDiffusion_P1ExactResidual)
   {
     const Real alpha = 1.0;
@@ -100,8 +111,9 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // ---------------------------------------------------------------------------
   // u = sin(pi x) sin(pi y) sin(pi z)
   // Δu = -3 pi^2 u
-  // f = -Δu + \alpha u = (3 pi^2 + \alpha) u
+  // f = -Δu + α u = (3 pi^2 + α) u
   // ---------------------------------------------------------------------------
+  /// @brief Verifies simple sine for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(ReactionDiffusion3DTest16, SimpleSine)
   {
     const Real pi = Math::Constants::pi();
@@ -133,8 +145,9 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // Polynomial:
   // u = x(1-x)y(1-y)z(1-z)
   // Δu = 2y(1-y)z(1-z) + 2x(1-x)z(1-z) + 2x(1-x)y(1-y)
-  // f = -Δu + \alpha u
+  // f = -Δu + α u
   // ---------------------------------------------------------------------------
+  /// @brief Verifies polynomial for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(ReactionDiffusion3DTest16, Polynomial)
   {
     const Real alpha = 2.0;
@@ -173,6 +186,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // Mixed polynomial–trigonometric
   // u = x(1-x) sin(pi y) sin(pi z)
   // ---------------------------------------------------------------------------
+  /// @brief Verifies mixed polynomial trig for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(ReactionDiffusion3DTest16, MixedPolynomialTrig)
   {
     const Real pi = Math::Constants::pi();
@@ -210,6 +224,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // u = cos(pi x) cos(pi y) e^z
   // Δu = (1 - 2 pi^2) u
   // ---------------------------------------------------------------------------
+  /// @brief Verifies exponential for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(ReactionDiffusion3DTest16, Exponential)
   {
     const Real pi = Math::Constants::pi();
@@ -242,6 +257,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // ---------------------------------------------------------------------------
   // Extra: refinement sanity check
   // ---------------------------------------------------------------------------
+  /// @brief Verifies simple sine refined sanity for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(ReactionDiffusion3DTest16, SimpleSine_RefinedSanity)
   {
     const Real pi = Math::Constants::pi();
@@ -269,6 +285,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
     EXPECT_NEAR(Integral(diff).compute(), 0.0, 2 * RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Reaction Diffusion 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     ReactionDiffusion3DTest8,
@@ -279,6 +296,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Reaction Diffusion 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     ReactionDiffusion3DTest16,

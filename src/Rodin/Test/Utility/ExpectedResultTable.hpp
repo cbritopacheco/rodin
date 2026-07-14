@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file ExpectedResultTable.hpp
+ * @brief Expected-result tables for parameterized test checks.
+ */
 #ifndef RODIN_TEST_UTILITY_EXPECTEDRESULTTABLE_HPP
 #define RODIN_TEST_UTILITY_EXPECTEDRESULTTABLE_HPP
 

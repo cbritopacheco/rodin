@@ -18,6 +18,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies construction for variational dense problem.
   TEST(Rodin_Variational_DenseProblem, Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -32,6 +33,7 @@ namespace Rodin::Tests::Unit
     SUCCEED();
   }
 
+  /// @brief Verifies assemble for variational dense problem by checking exact expected values, form assembly.
   TEST(Rodin_Variational_DenseProblem, Assemble)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -58,6 +60,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(static_cast<size_t>(b.size()), Vh.getSize());
   }
 
+  /// @brief Verifies stiffness matrix is symmetric for variational dense problem by checking tolerance-based numerical results, form assembly.
   TEST(Rodin_Variational_DenseProblem, StiffnessMatrixIsSymmetric)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -80,6 +83,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(A(i, j), A(j, i), 1e-12);
   }
 
+  /// @brief Verifies RHS is non zero with forcing for variational dense problem by checking true predicates, form assembly.
   TEST(Rodin_Variational_DenseProblem, RHSIsNonZeroWithForcing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});

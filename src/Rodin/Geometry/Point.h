@@ -187,13 +187,13 @@ namespace Rodin::Geometry
 
       /**
        * @brief Computes the Lp norm.
-       * @tparam p Norm order
+       * @tparam P Norm order
        * @returns Lp norm @f$ \|p\|_p @f$
        */
-      template <size_t p>
+      template <size_t P>
       Real lpNorm() const
       {
-        return vector().lpNorm<p>();
+        return vector().lpNorm<P>();
       }
 
       /**
@@ -469,6 +469,7 @@ namespace Rodin::Geometry
     return p.vector() * s;
   }
 
+  /// @brief Adds a spatial vector to a point.
   template <class Scalar>
   auto operator+(
     const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
@@ -476,6 +477,7 @@ namespace Rodin::Geometry
     return v + p.vector();
   }
 
+  /// @brief Adds a point to a spatial vector.
   template <class Scalar>
   auto operator+(
     const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)
@@ -483,6 +485,7 @@ namespace Rodin::Geometry
     return p.vector() + v;
   }
 
+  /// @brief Subtracts a point's coordinates from a spatial vector.
   template <class Scalar>
   auto operator-(
     const Math::SpatialVector<Scalar>& v, const Geometry::Point& p)
@@ -490,6 +493,7 @@ namespace Rodin::Geometry
     return v - p.vector();
   }
 
+  /// @brief Subtracts a spatial vector from a point's coordinates.
   template <class Scalar>
   auto operator-(
     const Geometry::Point& p, const Math::SpatialVector<Scalar>& v)

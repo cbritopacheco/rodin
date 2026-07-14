@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Conductivity manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a conductivity manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -43,6 +51,7 @@ using namespace Rodin::Test::Random;
  */
 namespace Rodin::Tests::Manufactured::Conductivity
 {
+  /// @brief Verifies conductivity P1 exact residual for manufactured P1 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST(Rodin_Manufactured_P1, Conductivity_P1ExactResidual)
   {
     Mesh mesh;

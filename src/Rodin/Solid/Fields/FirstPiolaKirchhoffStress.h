@@ -49,7 +49,9 @@ namespace Rodin::Solid
   class FirstPiolaKirchhoffStress
   {
     public:
+      /// @brief Constitutive law type.
       using LawType = LawDerived;
+      /// @brief Cache type used by the constitutive law.
       using CacheType = typename LawType::Cache;
 
       /**
@@ -60,7 +62,9 @@ namespace Rodin::Solid
         : m_law(law)
       {}
 
+      /// @brief Copy constructor.
       FirstPiolaKirchhoffStress(const FirstPiolaKirchhoffStress&) = default;
+      /// @brief Move constructor.
       FirstPiolaKirchhoffStress(FirstPiolaKirchhoffStress&&) = default;
 
       /**

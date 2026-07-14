@@ -122,8 +122,8 @@ namespace Rodin::IO
         Geometry::Mesh<Context::Local> baseMesh;
         baseMesh.load(filename, FileFormat::HDF5);
 
-        const auto file = HDF5::File(
-            H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
         if (!file)
         {
           Alert::Exception()
@@ -369,8 +369,8 @@ namespace Rodin::IO
         localPrinter.print(filename);
 
         // Phase 2: reopen and append shard metadata
-        const auto file = HDF5::File(
-            H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -394,7 +394,7 @@ namespace Rodin::IO
         // Create top-level groups: /Shard, /Shard/Flags, etc.
         {
           const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::Path::Shard, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+            H5Gcreate2(file, HDF5::Path::Shard, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -403,8 +403,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::Path::ShardState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::ShardState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -413,8 +413,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::Path::ShardPolytopeMap, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::ShardPolytopeMap, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -423,8 +423,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::Path::ShardOwner, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::ShardOwner, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -433,8 +433,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::Path::ShardHalo, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::ShardHalo, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -482,9 +482,9 @@ namespace Rodin::IO
 
         // Per-dimension group
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::shardPolytopeMapGroupPath(d).c_str(),
-                         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g =
+            HDF5::Group(H5Gcreate2(file, HDF5::shardPolytopeMapGroupPath(d).c_str(),
+              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -505,9 +505,8 @@ namespace Rodin::IO
         {
           const auto rightGroup = HDF5::shardPolytopeMapRightGroupPath(d);
           {
-            const auto g = HDF5::Group(
-                H5Gcreate2(file, rightGroup.c_str(),
-                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+            const auto g = HDF5::Group(H5Gcreate2(
+              file, rightGroup.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
             if (!g)
             {
               Alert::Exception()
@@ -538,9 +537,8 @@ namespace Rodin::IO
         const auto& owner = shard.getOwner(d);
 
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::shardOwnerGroupPath(d).c_str(),
-                         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file,
+            HDF5::shardOwnerGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()
@@ -575,9 +573,8 @@ namespace Rodin::IO
         const auto& halo = shard.getHalo(d);
 
         {
-          const auto g = HDF5::Group(
-              H5Gcreate2(file, HDF5::shardHaloGroupPath(d).c_str(),
-                         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::shardHaloGroupPath(d).c_str(),
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g)
           {
             Alert::Exception()

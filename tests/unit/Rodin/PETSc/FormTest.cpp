@@ -669,219 +669,236 @@ namespace
 #endif
 }
 
-  TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
+/// @brief Verifies sequential linear form uses self communicator and assembles for PET sc form by checking exact expected values, form assembly.
+TEST(PETSc_Form, SequentialLinearFormUsesSelfCommunicatorAndAssembles)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  P1 fes(mesh);
+  PETSc::Variational::TestFunction v(fes);
+
+  LinearForm lf(v);
+  lf = Integral(v);
+  lf.assemble();
+
+  auto& b = lf.getVector();
+
+  MPI_Comm comm = MPI_COMM_NULL;
+  PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(b), &comm);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+  int commSize = 0;
+  MPI_Comm_size(comm, &commSize);
+  EXPECT_EQ(commSize, 1);
+
+  PetscInt localSize = 0;
+  PetscInt globalSize = 0;
+  ierr = VecGetLocalSize(b, &localSize);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = VecGetSize(b, &globalSize);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+  EXPECT_EQ(localSize, static_cast<PetscInt>(fes.getSize()));
+  EXPECT_EQ(globalSize, static_cast<PetscInt>(fes.getSize()));
+}
+
+/// @brief Verifies sequential bilinear form uses self communicator and assembles for PET sc form by checking exact expected values, form assembly.
+TEST(PETSc_Form, SequentialBilinearFormUsesSelfCommunicatorAndAssembles)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
+  P1 fes(mesh);
+  PETSc::Variational::TrialFunction u(fes);
+  PETSc::Variational::TestFunction v(fes);
+
+  BilinearForm bf(u, v);
+  bf = Integral(u, v);
+  bf.assemble();
+
+  auto& A = bf.getOperator();
+
+  MPI_Comm comm = MPI_COMM_NULL;
+  PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(A), &comm);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+  int commSize = 0;
+  MPI_Comm_size(comm, &commSize);
+  EXPECT_EQ(commSize, 1);
+
+  PetscInt localRows = 0;
+  PetscInt localCols = 0;
+  PetscInt globalRows = 0;
+  PetscInt globalCols = 0;
+  ierr = MatGetLocalSize(A, &localRows, &localCols);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = MatGetSize(A, &globalRows, &globalCols);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+
+  EXPECT_EQ(localRows, static_cast<PetscInt>(fes.getSize()));
+  EXPECT_EQ(localCols, static_cast<PetscInt>(fes.getSize()));
+  EXPECT_EQ(globalRows, static_cast<PetscInt>(fes.getSize()));
+  EXPECT_EQ(globalCols, static_cast<PetscInt>(fes.getSize()));
+}
+
+/// @brief Verifies sequential identification projects matrix and vector for PET sc form by checking tolerance-based numerical results, exact expected values, form assembly.
+TEST(PETSc_Form, SequentialIdentificationProjectsMatrixAndVector)
+{
+  auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
+  mesh.getConnectivity().compute(1, 2);
+
+  P1 fes(mesh);
+  PETSc::Variational::TrialFunction u(fes);
+  PETSc::Variational::TestFunction v(fes);
+  PETSc::Variational::TrialFunction eta(fes);
+  PETSc::Variational::TestFunction zeta(fes);
+
+  constexpr PetscScalar gamma = 2.0;
+  const PetscInt n = static_cast<PetscInt>(fes.getSize());
+
+  BilinearForm uu(u, v);
+  auto& op = uu.getOperator();
+  PetscErrorCode ierr = MatSetSizes(op, n, n, n, n);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = MatSetFromOptions(op);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = MatSetUp(op);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  PetscInt rows[3] = {0, 0, 1};
+  PetscInt cols[3] = {0, 1, 0};
+  PetscScalar vals[3] = {2.0, 3.0, 5.0};
+  for (PetscInt i = 0; i < 3; i++)
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    P1 fes(mesh);
-    PETSc::Variational::TestFunction v(fes);
-
-    LinearForm lf(v);
-    lf = Integral(v);
-    lf.assemble();
-
-    auto& b = lf.getVector();
-
-    MPI_Comm comm = MPI_COMM_NULL;
-    PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(b), &comm);
+    ierr = MatSetValue(op, rows[i], cols[i], vals[i], INSERT_VALUES);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
-
-    int commSize = 0;
-    MPI_Comm_size(comm, &commSize);
-    EXPECT_EQ(commSize, 1);
-
-    PetscInt localSize = 0;
-    PetscInt globalSize = 0;
-    ierr = VecGetLocalSize(b, &localSize);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = VecGetSize(b, &globalSize);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-
-    EXPECT_EQ(localSize, static_cast<PetscInt>(fes.getSize()));
-    EXPECT_EQ(globalSize, static_cast<PetscInt>(fes.getSize()));
   }
+  ierr = MatAssemblyBegin(op, MAT_FINAL_ASSEMBLY);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = MatAssemblyEnd(op, MAT_FINAL_ASSEMBLY);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
 
-  TEST(PETSc_Form, SequentialBilinearFormUsesSelfCommunicatorAndAssembles)
-  {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
-    P1 fes(mesh);
-    PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction v(fes);
+  LinearForm loadU(v);
+  auto& load = loadU.getVector();
+  ierr = VecSetSizes(load, n, n);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = VecSetFromOptions(load);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  PetscInt rhsRows[2] = {0, 1};
+  PetscScalar rhsVals[2] = {7.0, 11.0};
+  ierr = VecSetValues(load, 2, rhsRows, rhsVals, INSERT_VALUES);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = VecAssemblyBegin(load);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  ierr = VecAssemblyEnd(load);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
 
-    BilinearForm bf(u, v);
-    bf = Integral(u, v);
-    bf.assemble();
+  Problem problem(u, v, eta, zeta);
+  problem = uu + DirichletBC(u, RealFunction(gamma) * eta) - loadU;
+  problem.assemble();
 
-    auto& A = bf.getOperator();
+  auto& A = problem.getLinearSystem().getOperator();
+  auto& b = problem.getLinearSystem().getVector();
 
-    MPI_Comm comm = MPI_COMM_NULL;
-    PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject>(A), &comm);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
+  PetscInt r, c;
+  PetscScalar value;
 
-    int commSize = 0;
-    MPI_Comm_size(comm, &commSize);
-    EXPECT_EQ(commSize, 1);
+  r = n + 0;
+  c = n + 0;
+  ierr = MatGetValues(A, 1, &r, 1, &c, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, gamma * 2.0 * gamma, 1e-14);
 
-    PetscInt localRows = 0;
-    PetscInt localCols = 0;
-    PetscInt globalRows = 0;
-    PetscInt globalCols = 0;
-    ierr = MatGetLocalSize(A, &localRows, &localCols);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = MatGetSize(A, &globalRows, &globalCols);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
+  r = n + 0;
+  c = n + 1;
+  ierr = MatGetValues(A, 1, &r, 1, &c, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, gamma * 3.0 * gamma, 1e-14);
 
-    EXPECT_EQ(localRows, static_cast<PetscInt>(fes.getSize()));
-    EXPECT_EQ(localCols, static_cast<PetscInt>(fes.getSize()));
-    EXPECT_EQ(globalRows, static_cast<PetscInt>(fes.getSize()));
-    EXPECT_EQ(globalCols, static_cast<PetscInt>(fes.getSize()));
-  }
+  r = n + 1;
+  c = n + 0;
+  ierr = MatGetValues(A, 1, &r, 1, &c, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, gamma * 5.0 * gamma, 1e-14);
 
-  TEST(PETSc_Form, SequentialIdentificationProjectsMatrixAndVector)
-  {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
-    mesh.getConnectivity().compute(1, 2);
+  r = 0;
+  c = 0;
+  ierr = MatGetValues(A, 1, &r, 1, &c, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, 1.0, 1e-14);
 
-    P1 fes(mesh);
-    PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
-    PETSc::Variational::TrialFunction eta(fes);
-    PETSc::Variational::TestFunction  zeta(fes);
+  r = 0;
+  c = n + 0;
+  ierr = MatGetValues(A, 1, &r, 1, &c, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, -gamma, 1e-14);
 
-    constexpr PetscScalar gamma = 2.0;
-    const PetscInt n = static_cast<PetscInt>(fes.getSize());
+  r = 0;
+  ierr = VecGetValues(b, 1, &r, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, 0.0, 1e-14);
 
-    BilinearForm uu(u, v);
-    auto& op = uu.getOperator();
-    PetscErrorCode ierr = MatSetSizes(op, n, n, n, n);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = MatSetFromOptions(op);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = MatSetUp(op);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    PetscInt rows[3] = { 0, 0, 1 };
-    PetscInt cols[3] = { 0, 1, 0 };
-    PetscScalar vals[3] = { 2.0, 3.0, 5.0 };
-    for (PetscInt i = 0; i < 3; i++)
-    {
-      ierr = MatSetValue(op, rows[i], cols[i], vals[i], INSERT_VALUES);
-      ASSERT_EQ(ierr, PETSC_SUCCESS);
-    }
-    ierr = MatAssemblyBegin(op, MAT_FINAL_ASSEMBLY);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = MatAssemblyEnd(op, MAT_FINAL_ASSEMBLY);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
+  r = n + 0;
+  ierr = VecGetValues(b, 1, &r, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, gamma * 7.0, 1e-14);
 
-    LinearForm loadU(v);
-    auto& load = loadU.getVector();
-    ierr = VecSetSizes(load, n, n);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = VecSetFromOptions(load);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    PetscInt rhsRows[2] = { 0, 1 };
-    PetscScalar rhsVals[2] = { 7.0, 11.0 };
-    ierr = VecSetValues(load, 2, rhsRows, rhsVals, INSERT_VALUES);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = VecAssemblyBegin(load);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    ierr = VecAssemblyEnd(load);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
+  r = n + 1;
+  ierr = VecGetValues(b, 1, &r, &value);
+  ASSERT_EQ(ierr, PETSC_SUCCESS);
+  EXPECT_NEAR(value, gamma * 11.0, 1e-14);
+}
 
-    Problem problem(u, v, eta, zeta);
-    problem = uu + DirichletBC(u, RealFunction(gamma) * eta) - loadU;
-    problem.assemble();
+/// @brief Verifies sequential vector master identification projects matrix and vector for PET sc form.
+TEST(PETSc_Form, SequentialVectorMasterIdentificationProjectsMatrixAndVector)
+{
+  checkPETScVectorMasterIdentification<PETSc::Assembly::Sequential>();
+}
 
-    auto& A = problem.getLinearSystem().getOperator();
-    auto& b = problem.getLinearSystem().getVector();
+/// @brief Verifies sequential affine identification has defect for PET sc form.
+TEST(PETSc_Form, SequentialAffineIdentificationHasDefect)
+{
+  checkPETScAffineIdentificationDefect<PETSc::Assembly::Sequential>();
+}
 
-    PetscInt r, c;
-    PetscScalar value;
+/// @brief Verifies sequential self identification matches zero value constraint for PET sc form.
+TEST(PETSc_Form, SequentialSelfIdentificationMatchesZeroValueConstraint)
+{
+  checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
+}
 
-    r = n + 0; c = n + 0;
-    ierr = MatGetValues(A, 1, &r, 1, &c, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, gamma * 2.0 * gamma, 1e-14);
-
-    r = n + 0; c = n + 1;
-    ierr = MatGetValues(A, 1, &r, 1, &c, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, gamma * 3.0 * gamma, 1e-14);
-
-    r = n + 1; c = n + 0;
-    ierr = MatGetValues(A, 1, &r, 1, &c, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, gamma * 5.0 * gamma, 1e-14);
-
-    r = 0; c = 0;
-    ierr = MatGetValues(A, 1, &r, 1, &c, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, 1.0, 1e-14);
-
-    r = 0; c = n + 0;
-    ierr = MatGetValues(A, 1, &r, 1, &c, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, -gamma, 1e-14);
-
-    r = 0;
-    ierr = VecGetValues(b, 1, &r, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, 0.0, 1e-14);
-
-    r = n + 0;
-    ierr = VecGetValues(b, 1, &r, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, gamma * 7.0, 1e-14);
-
-    r = n + 1;
-    ierr = VecGetValues(b, 1, &r, &value);
-    ASSERT_EQ(ierr, PETSC_SUCCESS);
-    EXPECT_NEAR(value, gamma * 11.0, 1e-14);
-  }
-
-  TEST(PETSc_Form, SequentialVectorMasterIdentificationProjectsMatrixAndVector)
-  {
-    checkPETScVectorMasterIdentification<PETSc::Assembly::Sequential>();
-  }
-
-  TEST(PETSc_Form, SequentialAffineIdentificationHasDefect)
-  {
-    checkPETScAffineIdentificationDefect<PETSc::Assembly::Sequential>();
-  }
-
-  TEST(PETSc_Form, SequentialSelfIdentificationMatchesZeroValueConstraint)
-  {
-    checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::Sequential>();
-  }
-
-  TEST(PETSc_Form, SequentialReassemblyKeepsExplicitZeroStructuralEntries)
-  {
-    checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::Sequential>();
-  }
+/// @brief Verifies sequential reassembly keeps explicit zero structural entries for PET sc form.
+TEST(PETSc_Form, SequentialReassemblyKeepsExplicitZeroStructuralEntries)
+{
+  checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::Sequential>();
+}
 
 #ifdef RODIN_USE_OPENMP
-  TEST(PETSc_Form, OpenMPStandaloneFormsMatchSequential)
-  {
-    checkPETScStandaloneOpenMPFormsMatchSequential();
-  }
+/// @brief Verifies open MP standalone forms match sequential for PET sc form.
+TEST(PETSc_Form, OpenMPStandaloneFormsMatchSequential)
+{
+  checkPETScStandaloneOpenMPFormsMatchSequential();
+}
 
-  TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
-  {
-    checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
-  }
+/// @brief Verifies open MP vector master identification projects matrix and vector for PET sc form.
+TEST(PETSc_Form, OpenMPVectorMasterIdentificationProjectsMatrixAndVector)
+{
+  checkPETScVectorMasterIdentification<PETSc::Assembly::OpenMP>();
+}
 
-  TEST(PETSc_Form, OpenMPAffineIdentificationHasDefect)
-  {
-    checkPETScAffineIdentificationDefect<PETSc::Assembly::OpenMP>();
-  }
+/// @brief Verifies open MP affine identification has defect for PET sc form.
+TEST(PETSc_Form, OpenMPAffineIdentificationHasDefect)
+{
+  checkPETScAffineIdentificationDefect<PETSc::Assembly::OpenMP>();
+}
 
-  TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
-  {
-    checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
-  }
+/// @brief Verifies open MP self identification matches zero value constraint for PET sc form.
+TEST(PETSc_Form, OpenMPSelfIdentificationMatchesZeroValueConstraint)
+{
+  checkPETScSelfIdentificationMatchesZeroValueConstraint<PETSc::Assembly::OpenMP>();
+}
 
-  TEST(PETSc_Form, OpenMPReassemblyKeepsExplicitZeroStructuralEntries)
-  {
-    checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::OpenMP>();
-  }
+/// @brief Verifies open MP reassembly keeps explicit zero structural entries for PET sc form.
+TEST(PETSc_Form, OpenMPReassemblyKeepsExplicitZeroStructuralEntries)
+{
+  checkPETScReassemblyKeepsExplicitZeroStructuralEntries<PETSc::Assembly::OpenMP>();
+}
 #endif
 
 int main(int argc, char** argv)

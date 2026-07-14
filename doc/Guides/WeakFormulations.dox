@@ -101,7 +101,7 @@
     RealFunction f = 1;
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))   // \int \nablau \cdot \nablav dx
+    poisson = Integral(Grad(u), Grad(v))   // \int \nabla u \cdot \nabla v dx
             - Integral(f, v)               // \int f v dx
             + DirichletBC(u, Zero());      // u = 0 on \partial\Omega
 

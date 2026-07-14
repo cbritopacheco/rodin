@@ -11,10 +11,10 @@
  * @file LinearSystem.h
  * @brief PETSc specialization of Rodin linear system containers.
  *
- * Provides the `LinearSystem<::Mat, ::Vec>` specialization that stores
+ * Provides the PETSc-backed linear system specialization that stores
  * the system matrix @f$ A @f$, right-hand side vector @f$ \mathbf{b} @f$,
  * and solution vector @f$ \mathbf{x} @f$ as PETSc handles.  Also defines
- * the @ref Rodin::Math::LinearSystem<::Mat,::Vec>::FieldSplits inner
+ * the @c FieldSplits inner
  * class for block-preconditioner support.
  *
  * ## Usage
@@ -42,7 +42,7 @@ namespace Rodin::Math
 {
   /**
    * @brief Specialization of @ref Rodin::Math::LinearSystem for PETSc
-   *        objects (`::Mat` and `::Vec`).
+   *        objects (@c Mat and @c Vec).
    *
    * Couples a PETSc matrix (operator @f$ A @f$), right-hand side vector
    * (@f$ \mathbf{b} @f$), and solution vector (@f$ \mathbf{x} @f$) into
@@ -71,11 +71,11 @@ namespace Rodin::Math
     : public LinearSystemBase<::Mat, ::Vec, LinearSystem<::Mat, ::Vec>>
   {
     public:
-      /// @brief PETSc matrix type (`::Mat`) for the system operator @f$ A @f$.
+      /// @brief PETSc matrix type (@c Mat) for the system operator @f$ A @f$.
       using MatrixType =
         ::Mat;
 
-      /// @brief PETSc vector type (`::Vec`) for @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
+      /// @brief PETSc vector type (@c Vec) for @f$ \mathbf{b} @f$ and @f$ \mathbf{x} @f$.
       using VectorType =
         ::Vec;
 

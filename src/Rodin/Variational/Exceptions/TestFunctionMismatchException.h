@@ -4,17 +4,24 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file TestFunctionMismatchException.h
+ * @brief Exception raised when a problem body references a test function
+ * other than the one the Problem was constructed with.
+ */
 #ifndef RODIN_VARIATIONAL_EXCEPTIONS_TESTFUNCTIONMISMATCHEXCEPTION_H
 #define RODIN_VARIATIONAL_EXCEPTIONS_TESTFUNCTIONMISMATCHEXCEPTION_H
 
 #include "Rodin/Alert/Exception.h"
 #include "Rodin/Alert/Identifier.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   class TestFunctionMismatchException : public Alert::Exception
   {
     public:
+      /// @brief Parent class type.
       using Parent = Alert::Exception;
 
       template <class UPb>
@@ -43,8 +50,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif
-
-
-
-

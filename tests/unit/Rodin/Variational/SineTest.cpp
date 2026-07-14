@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function zero for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_Zero)
   {
     RealFunction f(0.0);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over two for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_PiOverTwo)
   {
     RealFunction f(M_PI / 2.0);
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_Pi)
   {
     RealFunction f(M_PI);
@@ -56,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function three pi over two for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_ThreePiOverTwo)
   {
     RealFunction f(3.0 * M_PI / 2.0);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), -1.0, 1e-10);
   }
 
+  /// @brief Verifies real function two pi for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_TwoPi)
   {
     RealFunction f(2.0 * M_PI);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over six for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_PiOverSix)
   {
     RealFunction f(M_PI / 6.0);
@@ -101,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies real function pi over four for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_PiOverFour)
   {
     RealFunction f(M_PI / 4.0);
@@ -116,6 +123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), std::sqrt(2.0) / 2.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over three for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_PiOverThree)
   {
     RealFunction f(M_PI / 3.0);
@@ -131,6 +139,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), std::sqrt(3.0) / 2.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative value for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, RealFunction_NegativeValue)
   {
     RealFunction f(-M_PI / 6.0);
@@ -146,6 +155,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), -0.5, 1e-10);
   }
 
+  /// @brief Verifies grid function sin wave for variational sin by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Sin, GridFunction_SinWave)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -167,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies chained operations for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, ChainedOperations)
   {
     RealFunction f(M_PI / 6.0);
@@ -183,6 +194,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_sin_f.getValue(p), std::sin(0.5), 1e-10);
   }
 
+  /// @brief Verifies periodicity for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, Periodicity)
   {
     RealFunction f1(M_PI / 4.0);
@@ -201,6 +213,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin1.getValue(p), sin2.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies sin of sum for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, SinOfSum)
   {
     RealFunction f1(M_PI / 6.0);  // π/6
@@ -218,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_sum.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies small angle for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, SmallAngle)
   {
     RealFunction f(0.1);  // Small angle in radians
@@ -235,6 +249,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 0.1, 1e-2);  // Approximate equality
   }
 
+  /// @brief Verifies large angle for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, LargeAngle)
   {
     RealFunction f(10.0 * M_PI);
@@ -251,6 +266,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies sin squared identity for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, SinSquaredIdentity)
   {
     RealFunction f(M_PI / 3.0);
@@ -271,6 +287,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_squared.getValue(p), 3.0 / 4.0, 1e-10);
   }
 
+  /// @brief Verifies sin with multiplication for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, SinWithMultiplication)
   {
     RealFunction f(M_PI / 6.0);
@@ -288,6 +305,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sin_product.getValue(p), std::sqrt(3.0) / 2.0, 1e-10);
   }
 
+  /// @brief Verifies sin odd function for variational sin by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sin, SinOddFunction)
   {
     RealFunction f(M_PI / 4.0);

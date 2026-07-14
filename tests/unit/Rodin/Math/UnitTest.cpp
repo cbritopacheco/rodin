@@ -28,6 +28,7 @@ class UnitTest : public ::testing::Test
 };
 
 // Test Unit construction
+/// @brief Test value constructor.
 TEST_F(UnitTest, Construction)
 {
   // Test value constructor
@@ -45,6 +46,7 @@ TEST_F(UnitTest, Construction)
 }
 
 // Test Unit static factory methods
+/// @brief Test One().
 TEST_F(UnitTest, StaticFactoryMethods)
 {
   // Test One()
@@ -57,6 +59,7 @@ TEST_F(UnitTest, StaticFactoryMethods)
 }
 
 // Test Unit assignment operators
+/// @brief Verifies assignment operators for unit test by checking tolerance-based numerical results, move semantics.
 TEST_F(UnitTest, AssignmentOperators)
 {
   TestUnit u1(5.0);
@@ -73,6 +76,7 @@ TEST_F(UnitTest, AssignmentOperators)
 }
 
 // Test Unit comparison operators
+/// @brief Verifies comparison operators for unit test by checking true predicates, false predicates.
 TEST_F(UnitTest, ComparisonOperators)
 {
   TestUnit u1(5.0);
@@ -110,6 +114,7 @@ TEST_F(UnitTest, ComparisonOperators)
 }
 
 // Test Unit arithmetic operators
+/// @brief Verifies arithmetic operators for unit test by checking tolerance-based numerical results.
 TEST_F(UnitTest, ArithmeticOperators)
 {
   TestUnit u1(5.0);
@@ -133,6 +138,7 @@ TEST_F(UnitTest, ArithmeticOperators)
 }
 
 // Test Unit unary operators
+/// @brief Verifies unary operators for unit test by checking tolerance-based numerical results.
 TEST_F(UnitTest, UnaryOperators)
 {
   TestUnit u1(5.0);
@@ -151,6 +157,7 @@ TEST_F(UnitTest, UnaryOperators)
 }
 
 // Test Unit compound assignment operators
+/// @brief Verifies compound assignment operators for unit test by checking tolerance-based numerical results.
 TEST_F(UnitTest, CompoundAssignmentOperators)
 {
   TestUnit u1(5.0);
@@ -174,6 +181,7 @@ TEST_F(UnitTest, CompoundAssignmentOperators)
 }
 
 // Test Unit explicit type conversion
+/// @brief Verifies type conversion for unit test by checking tolerance-based numerical results.
 TEST_F(UnitTest, TypeConversion)
 {
   TestUnit u1(3.14159);
@@ -184,6 +192,7 @@ TEST_F(UnitTest, TypeConversion)
 }
 
 // Test Unit with different underlying types
+/// @brief Test with integer type.
 TEST_F(UnitTest, DifferentTypes)
 {
   // Test with integer type
@@ -220,6 +229,7 @@ TEST_F(UnitTest, DifferentTypes)
 }
 
 // Test Unit edge cases
+/// @brief Test with zero values.
 TEST_F(UnitTest, EdgeCases)
 {
   // Test with zero values

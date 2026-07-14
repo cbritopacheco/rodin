@@ -11,6 +11,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies construction for variational boundary normal by checking exact expected values.
 TEST(Rodin_Variational_BoundaryNormal, Construction)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -19,6 +20,7 @@ TEST(Rodin_Variational_BoundaryNormal, Construction)
   EXPECT_EQ(n.getDimension(), mesh.getSpaceDimension());
 }
 
+/// @brief Verifies copy for variational boundary normal by checking exact expected values, copy semantics.
 TEST(Rodin_Variational_BoundaryNormal, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -28,6 +30,7 @@ TEST(Rodin_Variational_BoundaryNormal, Copy)
   EXPECT_EQ(copy.getDimension(), n.getDimension());
 }
 
+/// @brief Verifies get order for variational boundary normal by checking exact expected values, true predicates.
 TEST(Rodin_Variational_BoundaryNormal, GetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -39,6 +42,7 @@ TEST(Rodin_Variational_BoundaryNormal, GetOrder)
   EXPECT_EQ(*order, 0u);
 }
 
+/// @brief Verifies unit normal on boundary for variational boundary normal by checking tolerance-based numerical results, true predicates.
 TEST(Rodin_Variational_BoundaryNormal, UnitNormalOnBoundary)
 {
   // Create a simple mesh and check normal at a boundary face

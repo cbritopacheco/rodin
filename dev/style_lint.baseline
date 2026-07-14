@@ -1,0 +1,14 @@
+# Known pre-existing style_lint violations (check:path).
+# Shrink by fixing; never grow to silence a new finding.
+# Regenerate with: python3 dev/style_lint.py --update-baseline
+# The Adaptation/WNGIR documentation fixes are carried on module/Adaptation.
+# These entries keep the develop-bound documentation PR free of that module work.
+filedoc:src/Rodin/Adaptation/WNGIRAdmissibility.h
+filedoc:src/Rodin/Adaptation/WNGIRAdmissibilityGradient.h
+filedoc:src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h
+filedoc:src/Rodin/Adaptation/WNGIRCommon.h
+filedoc:src/Rodin/Adaptation/WNGIRDetail.h
+filedoc:src/Rodin/Adaptation/WNGIRParameters.h
+filedoc:src/Rodin/Adaptation/WNGIRReport.h
+filedoc:src/Rodin/Adaptation/WNGIRSurfaceForce.h
+filedoc:src/Rodin/Adaptation/WNGIRSurfaceObservationMetric.h

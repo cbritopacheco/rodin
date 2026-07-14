@@ -37,8 +37,8 @@
  *
  * @see BiCGSTAB for the solver implementation
  */
-#ifndef RODIN_SOLVER_BiCGSTAB_H
-#define RODIN_SOLVER_BiCGSTAB_H
+#ifndef RODIN_SOLVER_BICGSTAB_H
+#define RODIN_SOLVER_BICGSTAB_H
 
 #include <Eigen/SparseCholesky>
 
@@ -50,10 +50,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for BiCGSTAB solvers.
   template <class LinearSystem>
   struct Traits<Solver::BiCGSTAB<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -221,5 +223,3 @@ namespace Rodin::Solver
 }
 
 #endif
-
-

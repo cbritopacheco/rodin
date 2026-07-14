@@ -27,6 +27,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -46,16 +47,21 @@ namespace Rodin::Variational
     : public GradBase<GridFunction<P1<Scalar, Mesh>, Data>, Grad<GridFunction<P1<Scalar, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Scalar, Mesh>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<Scalar>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
@@ -194,17 +200,22 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
       struct Cache
@@ -339,8 +350,8 @@ namespace Rodin::Variational
         ckey.transOrder = transOrder;
         ckey.valid = true;
 
-        const bool cell_changed = !(m_cache.cellKey == ckey);
-        if (cell_changed)
+        const bool cellChanged = !(m_cache.cellKey == ckey);
+        if (cellChanged)
         {
           m_cache.cellKey = ckey;
           m_cache.qpKey = {}; // invalidate qp cache
@@ -355,15 +366,14 @@ namespace Rodin::Variational
         }
 
         // ---- decide if gradients depend on quadrature point
-        const bool tensor_ref =
-          (geom == Geometry::Polytope::Type::Quadrilateral) ||
+        const bool tensorRef = (geom == Geometry::Polytope::Type::Quadrilateral) ||
           (geom == Geometry::Polytope::Type::Wedge) ||
           (geom == Geometry::Polytope::Type::Hexahedron);
 
-        const bool needs_qp = (transOrder > 1) || tensor_ref;
+        const bool needsQp = (transOrder > 1) || tensorRef;
 
         typename Cache::QpKey qkey;
-        if (needs_qp)
+        if (needsQp)
         {
           qkey.qf = qf;
           qkey.qp = qf ? ip.getIndex() : 0;
@@ -377,8 +387,8 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
-        if (cell_changed || qp_changed)
+        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
+        if (cellChanged || qpChanged)
         {
           m_cache.qpKey = qkey;
 
@@ -438,4 +448,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

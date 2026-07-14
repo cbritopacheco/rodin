@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies true constant construction for variational boolean function by checking true predicates.
   TEST(Rodin_Variational_BooleanFunction, TrueConstant_Construction)
   {
     BooleanFunction bf(true);
@@ -25,6 +26,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(bf.getValue(p));
   }
 
+  /// @brief Verifies false constant construction for variational boolean function by checking false predicates.
   TEST(Rodin_Variational_BooleanFunction, FalseConstant_Construction)
   {
     BooleanFunction bf(false);
@@ -39,6 +41,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(bf.getValue(p));
   }
 
+  /// @brief Verifies copy constructor true for variational boolean function by checking exact expected values, true predicates, copy semantics.
   TEST(Rodin_Variational_BooleanFunction, CopyConstructor_True)
   {
     BooleanFunction bf(true);
@@ -55,6 +58,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(bf_copy.getValue(p));
   }
 
+  /// @brief Verifies copy constructor false for variational boolean function by checking exact expected values, false predicates, copy semantics.
   TEST(Rodin_Variational_BooleanFunction, CopyConstructor_False)
   {
     BooleanFunction bf(false);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(bf_copy.getValue(p));
   }
 
+  /// @brief Verifies move constructor true for variational boolean function by checking exact expected values, true predicates, move semantics.
   TEST(Rodin_Variational_BooleanFunction, MoveConstructor_True)
   {
     BooleanFunction bf(true);
@@ -89,6 +94,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(bf_moved.getValue(p));
   }
 
+  /// @brief Verifies move constructor false for variational boolean function by checking exact expected values, false predicates, move semantics.
   TEST(Rodin_Variational_BooleanFunction, MoveConstructor_False)
   {
     BooleanFunction bf(false);
@@ -107,6 +113,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(bf_moved.getValue(p));
   }
 
+  /// @brief Verifies copy true for variational boolean function by checking exact expected values, true predicates, copy semantics.
   TEST(Rodin_Variational_BooleanFunction, Copy_True)
   {
     BooleanFunction bf(true);
@@ -126,6 +133,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies copy false for variational boolean function by checking exact expected values, false predicates, copy semantics.
   TEST(Rodin_Variational_BooleanFunction, Copy_False)
   {
     BooleanFunction bf(false);
@@ -145,6 +153,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies constant value multiple points for variational boolean function by checking true predicates, false predicates.
   TEST(Rodin_Variational_BooleanFunction, ConstantValue_MultiplePoints)
   {
     BooleanFunction bf_true(true);
@@ -172,6 +181,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test that we can use BooleanFunction polymorphically as BooleanFunctionBase.
   TEST(Rodin_Variational_BooleanFunction, PolymorphicUsage)
   {
     // Test that we can use BooleanFunction polymorphically as BooleanFunctionBase
@@ -188,6 +198,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(bool_func->getValue(p));
   }
 
+  /// @brief Verifies trace to boundary for variational boolean function by checking true predicates.
   TEST(Rodin_Variational_BooleanFunction, TraceToBoundary)
   {
     const Attribute interior_attr = 1;
@@ -209,6 +220,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traced_bf.getValue(p));
   }
 
+  /// @brief Test Class Template Argument Deduction.
   TEST(Rodin_Variational_BooleanFunction, CTAD_True)
   {
     // Test Class Template Argument Deduction
@@ -224,6 +236,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(bf.getValue(p));
   }
 
+  /// @brief Test Class Template Argument Deduction.
   TEST(Rodin_Variational_BooleanFunction, CTAD_False)
   {
     // Test Class Template Argument Deduction

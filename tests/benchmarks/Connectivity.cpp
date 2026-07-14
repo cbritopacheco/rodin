@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Connectivity benchmark coverage
+ *
+ * Benchmarks cold and warm construction of mesh incidence relations, transposes, and intersections across segment, triangle, quadrilateral, tetrahedron, wedge, pyramid, and hexahedron grids. The cases measure both first-computation cost and cached-query cost while recording entity counts for comparison.
+ */
+
 #include <benchmark/benchmark.h>
 
 #include <array>
@@ -356,51 +364,61 @@ namespace Rodin::Tests::Benchmarks
   // 1D: EDGE / SEGMENT
   // --------------------------------------------------------------------------
 
+  /// @brief Benchmarks edge cold all pairs in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Cold_AllPairs)(benchmark::State& st)
   {
     benchmarkColdAllPairs(st, kMeshes[0]);
   }
 
+  /// @brief Benchmarks edge warm all pairs in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Warm_AllPairs)(benchmark::State& st)
   {
     benchmarkWarmAllPairs(st, kMeshes[0]);
   }
 
+  /// @brief Benchmarks edge cold compute 0 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Cold_Compute_0_0)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[0], 0, 0);
   }
 
+  /// @brief Benchmarks edge cold compute 0 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Cold_Compute_0_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[0], 0, 1);
   }
 
+  /// @brief Benchmarks edge cold compute 1 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Cold_Compute_1_0)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[0], 1, 0);
   }
 
+  /// @brief Benchmarks edge cold compute 1 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Cold_Compute_1_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[0], 1, 1);
   }
 
+  /// @brief Benchmarks edge warm compute 0 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Warm_Compute_0_0)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[0], 0, 0);
   }
 
+  /// @brief Benchmarks edge warm compute 0 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Warm_Compute_0_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[0], 0, 1);
   }
 
+  /// @brief Benchmarks edge warm compute 1 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Warm_Compute_1_0)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[0], 1, 0);
   }
 
+  /// @brief Benchmarks edge warm compute 1 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Edge_Warm_Compute_1_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[0], 1, 1);
@@ -410,91 +428,109 @@ namespace Rodin::Tests::Benchmarks
   // 2D: TRIANGLE
   // --------------------------------------------------------------------------
 
+  /// @brief Benchmarks triangle cold all pairs in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_AllPairs)(benchmark::State& st)
   {
     benchmarkColdAllPairs(st, kMeshes[1]);
   }
 
+  /// @brief Benchmarks triangle warm all pairs in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_AllPairs)(benchmark::State& st)
   {
     benchmarkWarmAllPairs(st, kMeshes[1]);
   }
 
+  /// @brief Benchmarks triangle cold compute 2 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Compute_2_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[1], 2, 1);
   }
 
+  /// @brief Benchmarks triangle cold compute 1 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Compute_1_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[1], 1, 2);
   }
 
+  /// @brief Benchmarks triangle cold compute 2 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Compute_2_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[1], 2, 2);
   }
 
+  /// @brief Benchmarks triangle cold compute 1 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Compute_1_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[1], 1, 1);
   }
 
+  /// @brief Benchmarks triangle warm compute 2 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Compute_2_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[1], 2, 1);
   }
 
+  /// @brief Benchmarks triangle warm compute 1 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Compute_1_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[1], 1, 2);
   }
 
+  /// @brief Benchmarks triangle warm compute 2 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Compute_2_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[1], 2, 2);
   }
 
+  /// @brief Benchmarks triangle warm compute 1 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Compute_1_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[1], 1, 1);
   }
 
+  /// @brief Benchmarks triangle cold build 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Build_1)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[1], 1);
   }
 
+  /// @brief Benchmarks triangle warm build 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Build_1)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[1], 1);
   }
 
+  /// @brief Benchmarks triangle cold transpose 1 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Transpose_1_2)(benchmark::State& st)
   {
     benchmarkColdTranspose(st, kMeshes[1], 1, 2);
   }
 
+  /// @brief Benchmarks triangle warm transpose 1 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Transpose_1_2)(benchmark::State& st)
   {
     benchmarkWarmTranspose(st, kMeshes[1], 1, 2);
   }
 
+  /// @brief Benchmarks triangle cold intersection 2 2 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Intersection_2_2_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[1], 2, 2, 0);
   }
 
+  /// @brief Benchmarks triangle warm intersection 2 2 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Intersection_2_2_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[1], 2, 2, 0);
   }
 
+  /// @brief Benchmarks triangle cold intersection 1 1 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Cold_Intersection_1_1_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[1], 1, 1, 0);
   }
 
+  /// @brief Benchmarks triangle warm intersection 1 1 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Triangle_Warm_Intersection_1_1_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[1], 1, 1, 0);
@@ -504,91 +540,109 @@ namespace Rodin::Tests::Benchmarks
   // 2D: QUADRILATERAL
   // --------------------------------------------------------------------------
 
+  /// @brief Benchmarks quadrilateral cold all pairs in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_AllPairs)(benchmark::State& st)
   {
     benchmarkColdAllPairs(st, kMeshes[2]);
   }
 
+  /// @brief Benchmarks quadrilateral warm all pairs in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_AllPairs)(benchmark::State& st)
   {
     benchmarkWarmAllPairs(st, kMeshes[2]);
   }
 
+  /// @brief Benchmarks quadrilateral cold compute 2 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Compute_2_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[2], 2, 1);
   }
 
+  /// @brief Benchmarks quadrilateral cold compute 1 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Compute_1_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[2], 1, 2);
   }
 
+  /// @brief Benchmarks quadrilateral cold compute 2 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Compute_2_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[2], 2, 2);
   }
 
+  /// @brief Benchmarks quadrilateral cold compute 1 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Compute_1_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[2], 1, 1);
   }
 
+  /// @brief Benchmarks quadrilateral warm compute 2 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Compute_2_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[2], 2, 1);
   }
 
+  /// @brief Benchmarks quadrilateral warm compute 1 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Compute_1_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[2], 1, 2);
   }
 
+  /// @brief Benchmarks quadrilateral warm compute 2 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Compute_2_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[2], 2, 2);
   }
 
+  /// @brief Benchmarks quadrilateral warm compute 1 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Compute_1_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[2], 1, 1);
   }
 
+  /// @brief Benchmarks quadrilateral cold build 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Build_1)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[2], 1);
   }
 
+  /// @brief Benchmarks quadrilateral warm build 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Build_1)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[2], 1);
   }
 
+  /// @brief Benchmarks quadrilateral cold transpose 1 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Transpose_1_2)(benchmark::State& st)
   {
     benchmarkColdTranspose(st, kMeshes[2], 1, 2);
   }
 
+  /// @brief Benchmarks quadrilateral warm transpose 1 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Transpose_1_2)(benchmark::State& st)
   {
     benchmarkWarmTranspose(st, kMeshes[2], 1, 2);
   }
 
+  /// @brief Benchmarks quadrilateral cold intersection 2 2 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Intersection_2_2_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[2], 2, 2, 0);
   }
 
+  /// @brief Benchmarks quadrilateral warm intersection 2 2 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Intersection_2_2_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[2], 2, 2, 0);
   }
 
+  /// @brief Benchmarks quadrilateral cold intersection 1 1 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Cold_Intersection_1_1_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[2], 1, 1, 0);
   }
 
+  /// @brief Benchmarks quadrilateral warm intersection 1 1 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Quadrilateral_Warm_Intersection_1_1_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[2], 1, 1, 0);
@@ -598,101 +652,121 @@ namespace Rodin::Tests::Benchmarks
   // 3D: TETRAHEDRON
   // --------------------------------------------------------------------------
 
+  /// @brief Benchmarks tetrahedron cold all pairs in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_AllPairs)(benchmark::State& st)
   {
     benchmarkColdAllPairs(st, kMeshes[3]);
   }
 
+  /// @brief Benchmarks tetrahedron warm all pairs in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_AllPairs)(benchmark::State& st)
   {
     benchmarkWarmAllPairs(st, kMeshes[3]);
   }
 
+  /// @brief Benchmarks tetrahedron cold compute 3 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Compute_3_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[3], 3, 1);
   }
 
+  /// @brief Benchmarks tetrahedron cold compute 3 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Compute_3_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[3], 3, 2);
   }
 
+  /// @brief Benchmarks tetrahedron cold compute 2 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Compute_2_3)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[3], 2, 3);
   }
 
+  /// @brief Benchmarks tetrahedron cold compute 3 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Compute_3_3)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[3], 3, 3);
   }
 
+  /// @brief Benchmarks tetrahedron warm compute 3 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Compute_3_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[3], 3, 1);
   }
 
+  /// @brief Benchmarks tetrahedron warm compute 3 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Compute_3_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[3], 3, 2);
   }
 
+  /// @brief Benchmarks tetrahedron warm compute 2 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Compute_2_3)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[3], 2, 3);
   }
 
+  /// @brief Benchmarks tetrahedron warm compute 3 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Compute_3_3)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[3], 3, 3);
   }
 
+  /// @brief Benchmarks tetrahedron cold build 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Build_1)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[3], 1);
   }
 
+  /// @brief Benchmarks tetrahedron warm build 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Build_1)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[3], 1);
   }
 
+  /// @brief Benchmarks tetrahedron cold build 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Build_2)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[3], 2);
   }
 
+  /// @brief Benchmarks tetrahedron warm build 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Build_2)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[3], 2);
   }
 
+  /// @brief Benchmarks tetrahedron cold transpose 2 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Transpose_2_3)(benchmark::State& st)
   {
     benchmarkColdTranspose(st, kMeshes[3], 2, 3);
   }
 
+  /// @brief Benchmarks tetrahedron warm transpose 2 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Transpose_2_3)(benchmark::State& st)
   {
     benchmarkWarmTranspose(st, kMeshes[3], 2, 3);
   }
 
+  /// @brief Benchmarks tetrahedron cold intersection 3 3 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Intersection_3_3_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[3], 3, 3, 0);
   }
 
+  /// @brief Benchmarks tetrahedron warm intersection 3 3 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Intersection_3_3_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[3], 3, 3, 0);
   }
 
+  /// @brief Benchmarks tetrahedron cold intersection 3 3 via 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Cold_Intersection_3_3_via_2)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[3], 3, 3, 2);
   }
 
+  /// @brief Benchmarks tetrahedron warm intersection 3 3 via 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Tetrahedron_Warm_Intersection_3_3_via_2)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[3], 3, 3, 2);
@@ -702,101 +776,121 @@ namespace Rodin::Tests::Benchmarks
   // 3D: HEXAHEDRON
   // --------------------------------------------------------------------------
 
+  /// @brief Benchmarks hexahedron cold all pairs in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_AllPairs)(benchmark::State& st)
   {
     benchmarkColdAllPairs(st, kMeshes[4]);
   }
 
+  /// @brief Benchmarks hexahedron warm all pairs in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_AllPairs)(benchmark::State& st)
   {
     benchmarkWarmAllPairs(st, kMeshes[4]);
   }
 
+  /// @brief Benchmarks hexahedron cold compute 3 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Compute_3_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[4], 3, 1);
   }
 
+  /// @brief Benchmarks hexahedron cold compute 3 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Compute_3_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[4], 3, 2);
   }
 
+  /// @brief Benchmarks hexahedron cold compute 2 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Compute_2_3)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[4], 2, 3);
   }
 
+  /// @brief Benchmarks hexahedron cold compute 3 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Compute_3_3)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[4], 3, 3);
   }
 
+  /// @brief Benchmarks hexahedron warm compute 3 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Compute_3_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[4], 3, 1);
   }
 
+  /// @brief Benchmarks hexahedron warm compute 3 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Compute_3_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[4], 3, 2);
   }
 
+  /// @brief Benchmarks hexahedron warm compute 2 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Compute_2_3)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[4], 2, 3);
   }
 
+  /// @brief Benchmarks hexahedron warm compute 3 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Compute_3_3)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[4], 3, 3);
   }
 
+  /// @brief Benchmarks hexahedron cold build 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Build_1)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[4], 1);
   }
 
+  /// @brief Benchmarks hexahedron warm build 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Build_1)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[4], 1);
   }
 
+  /// @brief Benchmarks hexahedron cold build 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Build_2)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[4], 2);
   }
 
+  /// @brief Benchmarks hexahedron warm build 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Build_2)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[4], 2);
   }
 
+  /// @brief Benchmarks hexahedron cold transpose 2 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Transpose_2_3)(benchmark::State& st)
   {
     benchmarkColdTranspose(st, kMeshes[4], 2, 3);
   }
 
+  /// @brief Benchmarks hexahedron warm transpose 2 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Transpose_2_3)(benchmark::State& st)
   {
     benchmarkWarmTranspose(st, kMeshes[4], 2, 3);
   }
 
+  /// @brief Benchmarks hexahedron cold intersection 3 3 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Intersection_3_3_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[4], 3, 3, 0);
   }
 
+  /// @brief Benchmarks hexahedron warm intersection 3 3 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Intersection_3_3_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[4], 3, 3, 0);
   }
 
+  /// @brief Benchmarks hexahedron cold intersection 3 3 via 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Cold_Intersection_3_3_via_2)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[4], 3, 3, 2);
   }
 
+  /// @brief Benchmarks hexahedron warm intersection 3 3 via 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Hexahedron_Warm_Intersection_3_3_via_2)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[4], 3, 3, 2);
@@ -806,105 +900,126 @@ namespace Rodin::Tests::Benchmarks
   // 3D: WEDGE
   // --------------------------------------------------------------------------
 
+  /// @brief Benchmarks wedge cold all pairs in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_AllPairs)(benchmark::State& st)
   {
     benchmarkColdAllPairs(st, kMeshes[5]);
   }
 
+  /// @brief Benchmarks wedge warm all pairs in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_AllPairs)(benchmark::State& st)
   {
     benchmarkWarmAllPairs(st, kMeshes[5]);
   }
 
+  /// @brief Benchmarks wedge cold compute 3 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Compute_3_1)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[5], 3, 1);
   }
 
+  /// @brief Benchmarks wedge cold compute 3 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Compute_3_2)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[5], 3, 2);
   }
 
+  /// @brief Benchmarks wedge cold compute 2 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Compute_2_3)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[5], 2, 3);
   }
 
+  /// @brief Benchmarks wedge cold compute 3 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Compute_3_3)(benchmark::State& st)
   {
     benchmarkColdCompute(st, kMeshes[5], 3, 3);
   }
 
+  /// @brief Benchmarks wedge warm compute 3 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Compute_3_1)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[5], 3, 1);
   }
 
+  /// @brief Benchmarks wedge warm compute 3 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Compute_3_2)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[5], 3, 2);
   }
 
+  /// @brief Benchmarks wedge warm compute 2 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Compute_2_3)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[5], 2, 3);
   }
 
+  /// @brief Benchmarks wedge warm compute 3 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Compute_3_3)(benchmark::State& st)
   {
     benchmarkWarmCompute(st, kMeshes[5], 3, 3);
   }
 
+  /// @brief Benchmarks wedge cold build 1 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Build_1)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[5], 1);
   }
 
+  /// @brief Benchmarks wedge warm build 1 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Build_1)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[5], 1);
   }
 
+  /// @brief Benchmarks wedge cold build 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Build_2)(benchmark::State& st)
   {
     benchmarkColdBuild(st, kMeshes[5], 2);
   }
 
+  /// @brief Benchmarks wedge warm build 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Build_2)(benchmark::State& st)
   {
     benchmarkWarmBuild(st, kMeshes[5], 2);
   }
 
+  /// @brief Benchmarks wedge cold transpose 2 3 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Transpose_2_3)(benchmark::State& st)
   {
     benchmarkColdTranspose(st, kMeshes[5], 2, 3);
   }
 
+  /// @brief Benchmarks wedge warm transpose 2 3 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Transpose_2_3)(benchmark::State& st)
   {
     benchmarkWarmTranspose(st, kMeshes[5], 2, 3);
   }
 
+  /// @brief Benchmarks wedge cold intersection 3 3 via 0 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Intersection_3_3_via_0)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[5], 3, 3, 0);
   }
 
+  /// @brief Benchmarks wedge warm intersection 3 3 via 0 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Intersection_3_3_via_0)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[5], 3, 3, 0);
   }
 
+  /// @brief Benchmarks wedge cold intersection 3 3 via 2 in connectivity benchmark by checking cold-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Cold_Intersection_3_3_via_2)(benchmark::State& st)
   {
     benchmarkColdIntersection(st, kMeshes[5], 3, 3, 2);
   }
 
+  /// @brief Benchmarks wedge warm intersection 3 3 via 2 in connectivity benchmark by checking warm-cache timing, connectivity operations.
   BENCHMARK_F(ConnectivityBenchmark, Wedge_Warm_Intersection_3_3_via_2)(benchmark::State& st)
   {
     benchmarkWarmIntersection(st, kMeshes[5], 3, 3, 2);
   }
 }
 
+/// @brief Provides the Google Benchmark entry point for this benchmark executable.
 BENCHMARK_MAIN();

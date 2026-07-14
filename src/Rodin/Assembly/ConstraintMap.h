@@ -22,7 +22,7 @@ namespace Rodin::Assembly
    *
    * Identification constraints are stored as rows of the expansion map
    * @f$ x_s = \sum_k c_k x_{m_k} + d_s @f$. For unconstrained DOFs,
-   * @ref expand returns the identity row `{ { i, 1 } }`.
+   * expand() returns the identity row `{ { i, 1 } }`.
    *
    * The map supports canonicalization of identification constraints:
    * - duplicate masters are merged;
@@ -40,21 +40,34 @@ namespace Rodin::Assembly
   class ConstraintMap
   {
     public:
+      /// @brief One master DOF contribution in an expansion row.
       struct Entry
       {
-        Index index;
-        Scalar coefficient;
+        /// @brief Master DOF index.
+          Index index;
+
+        /// @brief Coefficient multiplying the master DOF.
+          Scalar coefficient;
       };
 
+      /// @brief Expansion row for a constrained DOF.
       using Expansion = std::vector<Entry>;
 
       ConstraintMap() = default;
 
+      /**
+       * @brief Constructs an identity constraint map.
+       * @param size Number of DOFs represented by the map.
+       */
       explicit ConstraintMap(size_t size)
       {
         reset(size);
       }
 
+      /**
+       * @brief Resets the map to the identity expansion on @p size DOFs.
+       * @param size Number of DOFs represented by the map.
+       */
       void reset(size_t size)
       {
         m_fixed.assign(size, Optional<Scalar>{});
@@ -68,46 +81,82 @@ namespace Rodin::Assembly
           m_expansions[static_cast<size_t>(i)].push_back({ i, Scalar(1) });
       }
 
+      /**
+       * @brief Gets the number of DOFs represented by the map.
+       * @return Number of expansion rows.
+       */
       size_t size() const
       {
         return m_expansions.size();
       }
 
+      /**
+       * @brief Tests whether a DOF is fixed to a value.
+       * @param i DOF index.
+       */
       bool isFixed(Index i) const
       {
         return static_cast<size_t>(i) < m_fixed.size()
             && m_fixed[static_cast<size_t>(i)].has_value();
       }
 
+      /**
+       * @brief Tests whether a DOF is identified with master DOFs.
+       * @param i DOF index.
+       */
       bool isIdentified(Index i) const
       {
         return static_cast<size_t>(i) < m_expansions.size()
             && m_isIdentified[static_cast<size_t>(i)];
       }
 
+      /**
+       * @brief Gets the prescribed value for a fixed DOF.
+       * @param i Fixed DOF index.
+       * @return Prescribed scalar value.
+       */
       Scalar getFixedValue(Index i) const
       {
         assert(isFixed(i));
         return *m_fixed[static_cast<size_t>(i)];
       }
 
+      /**
+       * @brief Expands a DOF into its master DOF row.
+       * @param i DOF index.
+       * @return Expansion row for @p i.
+       */
       const Expansion& expand(Index i) const
       {
         assert(static_cast<size_t>(i) < m_expansions.size());
         return m_expansions[static_cast<size_t>(i)];
       }
 
+      /**
+       * @brief Gets the indices of rows carrying identification constraints.
+       * @return Identified slave DOF indices.
+       */
       const std::vector<Index>& getIdentifiedRows() const
       {
         return m_identifiedRows;
       }
 
+      /**
+       * @brief Gets the affine defect value for an identified DOF.
+       * @param i Identified slave DOF index.
+       * @return Constant term in the identification row.
+       */
       Scalar getIdentificationValue(Index i) const
       {
         check(i);
         return m_identificationValues[static_cast<size_t>(i)];
       }
 
+      /**
+       * @brief Marks a DOF as fixed to a prescribed value.
+       * @param i DOF index.
+       * @param value Prescribed scalar value.
+       */
       void setFixed(Index i, Scalar value)
       {
         check(i);
@@ -122,12 +171,23 @@ namespace Rodin::Assembly
         m_fixed[static_cast<size_t>(i)] = value;
       }
 
+      /**
+       * @brief Sets a homogeneous identification row.
+       * @param slave Slave DOF index.
+       * @param entries Master expansion entries.
+       */
       template <class Entries>
       void setIdentification(Index slave, const Entries& entries)
       {
         setIdentification(slave, entries, Scalar(0));
       }
 
+      /**
+       * @brief Sets an affine identification row.
+       * @param slave Slave DOF index.
+       * @param entries Master expansion entries.
+       * @param value Constant term in the identification.
+       */
       template <class Entries>
       void setIdentification(Index slave, const Entries& entries, Scalar value)
       {

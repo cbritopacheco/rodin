@@ -64,6 +64,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Helper used by the tests to Check Open MP Self Identification Matches Zero Value Constraint.
   void checkOpenMPSelfIdentificationMatchesZeroValueConstraint()
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -166,6 +167,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((seqResult - ompResult).norm(), 0.0, 1e-12);
   }
 
+  /// @brief Instantiates Assembly Open MP Linear Form over the All Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries,
     Assembly_OpenMP_LinearForm,
@@ -346,6 +348,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
   }
 
+  /// @brief Instantiates Assembly Open MP Bilinear Form over the All Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries,
     Assembly_OpenMP_BilinearForm,
@@ -370,6 +373,7 @@ namespace Rodin::Tests::Unit
    */
   class Assembly_OpenMP_Problem : public ::testing::TestWithParam<Polytope::Type> {};
 
+  /// @brief Verifies single var P1 dimensions correct for assembly open MP problem by checking exact expected values, form assembly.
   TEST_P(Assembly_OpenMP_Problem, SingleVar_P1_DimensionsCorrect)
   {
     auto mesh = makeMesh(GetParam());
@@ -390,6 +394,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(b.size(), static_cast<Eigen::Index>(fes.getSize()));
   }
 
+  /// @brief Verifies multi var P0 P1 dimensions correct for assembly open MP problem by checking exact expected values, form assembly.
   TEST_P(Assembly_OpenMP_Problem, MultiVar_P0P1_DimensionsCorrect)
   {
     auto mesh = makeMesh(GetParam());
@@ -414,6 +419,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(A.cols(), expected);
   }
 
+  /// @brief Verifies affine identification defect matches sequential for assembly open MP problem by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_OpenMP_Problem, AffineIdentificationDefectMatchesSequential)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -517,6 +523,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies identification vector master matches sequential for assembly open MP problem by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Assembly_OpenMP_Problem, IdentificationVectorMasterMatchesSequential)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -636,11 +643,13 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies self identification matches zero value constraint for assembly open MP problem by checking form assembly.
   TEST(Assembly_OpenMP_Problem, SelfIdentificationMatchesZeroValueConstraint)
   {
     checkOpenMPSelfIdentificationMatchesZeroValueConstraint();
   }
 
+  /// @brief Instantiates Assembly Open MP Problem over the All Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries,
     Assembly_OpenMP_Problem,

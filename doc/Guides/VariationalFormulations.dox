@@ -94,7 +94,7 @@
 
   @subsection guides-variational-forms-assembly Problem Assembly
 
-  The @ref Rodin::Variational::Problem "Problem" class assembles bilinear
+  The `Problem` class assembles bilinear
   and linear forms into a linear system @f$ A\mathbf{x} = \mathbf{b} @f$:
 
   @code{.cpp}
@@ -144,10 +144,10 @@
   | Component | @f$ u_i @f$ | Scalar (from vector @f$ \mathbf{u} @f$) | `Component(u, i)` or `u.x()` |
 
   @code{.cpp}
-  // Laplacian-like term: \int \nablau \cdot \nablav dx
+  // Laplacian-like term: \int \nabla u \cdot \nabla v dx
   Integral(Grad(u), Grad(v))
 
-  // Divergence term (for vector fields): \int (\nabla\cdotu)(\nabla\cdotv) dx
+  // Divergence term (for vector fields): \int (\nabla\cdot u)(\nabla\cdot v) dx
   Integral(Div(u), Div(v))
 
   // Elasticity: symmetric gradient ε(u) : ε(v)
@@ -282,7 +282,7 @@
   Some problems require solving for multiple unknowns simultaneously, such as
   velocity and pressure in the
   @ref examples-pdes-navierstokes "Navier-Stokes equations". Rodin's
-  @ref Rodin::Variational::Problem "Problem" class supports mixed formulations
+  `Problem` class supports mixed formulations
   with multiple trial/test function pairs:
 
   @code{.cpp}
@@ -314,8 +314,8 @@
 
   | Operator | Description | Code |
   |----------|------------|------|
-  | @ref Rodin::Variational::Jump "Jump" | Jump across a face: @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
-  | @ref Rodin::Variational::Average "Average" | Average across a face: @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
+  | `Jump` | Jump across a face: @f$ [u] = u^+ - u^- @f$ | `Jump(u)` |
+  | `Average` | Average across a face: @f$ \{u\} = \frac{1}{2}(u^+ + u^-) @f$ | `Average(u)` |
 
   @subsection guides-variational-dg-integrals DG Integral Types
 
@@ -369,7 +369,7 @@
      + DirichletBC(u, Zero());
   @endcode
 
-  See the @ref examples-dg-poisson "DG Poisson example" for a complete
+  See the DG Poisson example for a complete
   working implementation.
 
   @section guides-variational-see-also See Also

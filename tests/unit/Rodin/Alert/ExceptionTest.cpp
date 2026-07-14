@@ -30,6 +30,7 @@ class ExceptionTest : public ::testing::Test
 };
 
 // Test Exception Prefix
+/// @brief Verifies exception prefix for exception test by checking true predicates.
 TEST_F(ExceptionTest, ExceptionPrefix)
 {
   ExceptionPrefix prefix;
@@ -45,6 +46,7 @@ TEST_F(ExceptionTest, ExceptionPrefix)
 }
 
 // Test Exception class construction (but not raising since it aborts)
+/// @brief Verifies exception construction for exception test by checking no-throw behavior.
 TEST_F(ExceptionTest, ExceptionConstruction)
 {
   Exception ex(errorStream);
@@ -55,6 +57,7 @@ TEST_F(ExceptionTest, ExceptionConstruction)
 }
 
 // Test exception prefix type
+/// @brief Verifies exception prefix type for exception test by checking no-throw behavior.
 TEST_F(ExceptionTest, ExceptionPrefixType)
 {
   ExceptionPrefix exPrefix;

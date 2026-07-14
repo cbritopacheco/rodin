@@ -19,6 +19,7 @@ namespace Rodin::Tests::Unit
   // WarpFactor1D Tests
   //==========================================================================
 
+  /// @brief K=0 should give zero warp.
   TEST(WarpFactor1D, Zero_K0)
   {
     // K=0 should give zero warp
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(WarpFactor1D<0>::get(0.5), 0.0, 1e-14);
   }
 
+  /// @brief K=1 should give zero warp (only endpoints).
   TEST(WarpFactor1D, Zero_K1)
   {
     // K=1 should give zero warp (only endpoints)
@@ -33,6 +35,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(WarpFactor1D<1>::get(0.5), 0.0, 1e-14);
   }
 
+  /// @brief Warp should be zero at endpoints.
   TEST(WarpFactor1D, ZeroAtEndpoints_K3)
   {
     // Warp should be zero at endpoints
@@ -40,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(WarpFactor1D<3>::get(1.0), 0.0, 1e-14);
   }
 
+  /// @brief Warp should be non-zero at interior points for K > 1.
   TEST(WarpFactor1D, NonZeroInterior_K3)
   {
     // Warp should be non-zero at interior points for K > 1
@@ -49,6 +53,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(warp));
   }
 
+  /// @brief Verifies finite K 5 for warp factor 1 D by checking false predicates.
   TEST(WarpFactor1D, Finite_K5)
   {
     for (Real r = -0.9; r <= 0.9; r += 0.1)
@@ -63,6 +68,7 @@ namespace Rodin::Tests::Unit
   // TriangleBlend Alpha Tests
   //==========================================================================
 
+  /// @brief Verify known alpha values from Hesthaven-Warburton.
   TEST(TriangleBlend, AlphaValues)
   {
     // Verify known alpha values from Hesthaven-Warburton
@@ -74,6 +80,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(TriangleBlend<5>::getAlpha(), 0.2751, 1e-4);
   }
 
+  /// @brief For higher orders, alpha should be positive.
   TEST(TriangleBlend, AlphaPositive_HigherOrders)
   {
     // For higher orders, alpha should be positive
@@ -86,6 +93,7 @@ namespace Rodin::Tests::Unit
   // TetrahedronBlend Alpha Tests
   //==========================================================================
 
+  /// @brief Verify known alpha values.
   TEST(TetrahedronBlend, AlphaValues)
   {
     // Verify known alpha values
@@ -100,6 +108,7 @@ namespace Rodin::Tests::Unit
   // WarpShiftFace2D Tests
   //==========================================================================
 
+  /// @brief At vertex L1 = 1 (other two are 0).
   TEST(WarpShiftFace2D, ZeroAtVertex_K2)
   {
     // At vertex L1 = 1 (other two are 0)
@@ -108,6 +117,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dy, 0.0, 1e-14);
   }
 
+  /// @brief K=1 should give zero warp.
   TEST(WarpShiftFace2D, ZeroForLowOrder)
   {
     // K=1 should give zero warp
@@ -116,6 +126,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dy, 0.0, 1e-14);
   }
 
+  /// @brief Verifies finite K 5 for warp shift face 2 D by checking false predicates.
   TEST(WarpShiftFace2D, Finite_K5)
   {
     // Test at interior point
@@ -130,6 +141,7 @@ namespace Rodin::Tests::Unit
   // WarpBlendTriangle Tests
   //==========================================================================
 
+  /// @brief Verifies preserves vertices K 3 for warp blend triangle by checking true predicates.
   TEST(WarpBlendTriangle, PreservesVertices_K3)
   {
     std::array<Math::SpatialPoint, 10> nodes;
@@ -166,6 +178,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v2);
   }
 
+  /// @brief Verifies nodes stay in triangle K 5 for warp blend triangle.
   TEST(WarpBlendTriangle, NodesStayInTriangle_K5)
   {
     std::array<Math::SpatialPoint, 21> nodes;
@@ -191,6 +204,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies no effect K 1 for warp blend triangle by checking tolerance-based numerical results.
   TEST(WarpBlendTriangle, NoEffect_K1)
   {
     std::array<Math::SpatialPoint, 3> nodes = {
@@ -215,6 +229,7 @@ namespace Rodin::Tests::Unit
   // WarpBlendTetrahedron Tests
   //==========================================================================
 
+  /// @brief Verifies preserves vertices K 3 for warp blend tetrahedron by checking true predicates.
   TEST(WarpBlendTetrahedron, PreservesVertices_K3)
   {
     std::array<Math::SpatialPoint, 20> nodes;
@@ -256,6 +271,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v3);
   }
 
+  /// @brief Verifies nodes stay in tetrahedron K 4 for warp blend tetrahedron.
   TEST(WarpBlendTetrahedron, NodesStayInTetrahedron_K4)
   {
     std::array<Math::SpatialPoint, 35> nodes;
@@ -286,6 +302,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies no effect K 1 for warp blend tetrahedron by checking tolerance-based numerical results.
   TEST(WarpBlendTetrahedron, NoEffect_K1)
   {
     std::array<Math::SpatialPoint, 4> nodes = {
@@ -311,6 +328,7 @@ namespace Rodin::Tests::Unit
   // Higher Order Tests (K = 5, 6)
   //==========================================================================
 
+  /// @brief Verifies finite K 6 for warp factor 1 D by checking false predicates.
   TEST(WarpFactor1D, Finite_K6)
   {
     for (Real r = -0.9; r <= 0.9; r += 0.1)
@@ -321,18 +339,21 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies zero at endpoints K 5 for warp factor 1 D by checking tolerance-based numerical results.
   TEST(WarpFactor1D, ZeroAtEndpoints_K5)
   {
     EXPECT_NEAR(WarpFactor1D<5>::get(-1.0), 0.0, 1e-14);
     EXPECT_NEAR(WarpFactor1D<5>::get(1.0), 0.0, 1e-14);
   }
 
+  /// @brief Verifies zero at endpoints K 6 for warp factor 1 D by checking tolerance-based numerical results.
   TEST(WarpFactor1D, ZeroAtEndpoints_K6)
   {
     EXPECT_NEAR(WarpFactor1D<6>::get(-1.0), 0.0, 1e-14);
     EXPECT_NEAR(WarpFactor1D<6>::get(1.0), 0.0, 1e-14);
   }
 
+  /// @brief Verifies nodes stay in triangle K 6 for warp blend triangle.
   TEST(WarpBlendTriangle, NodesStayInTriangle_K6)
   {
     std::array<Math::SpatialPoint, 28> nodes;
@@ -358,6 +379,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies preserves vertices K 6 for warp blend triangle by checking true predicates.
   TEST(WarpBlendTriangle, PreservesVertices_K6)
   {
     std::array<Math::SpatialPoint, 28> nodes;
@@ -391,6 +413,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v2);
   }
 
+  /// @brief Verifies nodes stay in tetrahedron K 5 for warp blend tetrahedron.
   TEST(WarpBlendTetrahedron, NodesStayInTetrahedron_K5)
   {
     std::array<Math::SpatialPoint, 56> nodes;
@@ -421,6 +444,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies preserves vertices K 5 for warp blend tetrahedron by checking true predicates.
   TEST(WarpBlendTetrahedron, PreservesVertices_K5)
   {
     std::array<Math::SpatialPoint, 56> nodes;
@@ -461,6 +485,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v3);
   }
 
+  /// @brief Verifies finite K 6 for warp shift face 2 D by checking false predicates.
   TEST(WarpShiftFace2D, Finite_K6)
   {
     // Test at interior point
@@ -475,12 +500,14 @@ namespace Rodin::Tests::Unit
   // Very High Order Tests (K = 15)
   //==========================================================================
 
+  /// @brief Verifies zero at endpoints K 15 for warp factor 1 D by checking tolerance-based numerical results.
   TEST(WarpFactor1D, ZeroAtEndpoints_K15)
   {
     EXPECT_NEAR(WarpFactor1D<15>::get(-1.0), 0.0, 1e-14);
     EXPECT_NEAR(WarpFactor1D<15>::get(1.0), 0.0, 1e-14);
   }
 
+  /// @brief Verifies finite K 15 for warp factor 1 D by checking false predicates.
   TEST(WarpFactor1D, Finite_K15)
   {
     for (Real r = -0.9; r <= 0.9; r += 0.1)
@@ -491,6 +518,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief For K=15, alpha should be positive.
   TEST(TriangleBlend, Alpha_K15)
   {
     // For K=15, alpha should be positive
@@ -499,6 +527,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(TriangleBlend<15>::getAlpha()));
   }
 
+  /// @brief For K=15, alpha should be positive.
   TEST(TetrahedronBlend, Alpha_K15)
   {
     // For K=15, alpha should be positive
@@ -507,6 +536,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(TetrahedronBlend<15>::getAlpha()));
   }
 
+  /// @brief Verifies finite K 15 for warp shift face 2 D by checking false predicates.
   TEST(WarpShiftFace2D, Finite_K15)
   {
     // Test at interior point
@@ -517,6 +547,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(std::isinf(dy));
   }
 
+  /// @brief Verifies nodes stay in triangle K 15 for warp blend triangle.
   TEST(WarpBlendTriangle, NodesStayInTriangle_K15)
   {
     constexpr size_t N = (15 + 1) * (15 + 2) / 2;  // 136
@@ -543,6 +574,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies preserves vertices K 15 for warp blend triangle by checking true predicates.
   TEST(WarpBlendTriangle, PreservesVertices_K15)
   {
     constexpr size_t N = (15 + 1) * (15 + 2) / 2;  // 136
@@ -577,6 +609,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v2);
   }
 
+  /// @brief Verifies nodes stay in tetrahedron K 15 for warp blend tetrahedron.
   TEST(WarpBlendTetrahedron, NodesStayInTetrahedron_K15)
   {
     constexpr size_t N = (15 + 1) * (15 + 2) * (15 + 3) / 6;  // 816
@@ -608,6 +641,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies preserves vertices K 15 for warp blend tetrahedron by checking true predicates.
   TEST(WarpBlendTetrahedron, PreservesVertices_K15)
   {
     constexpr size_t N = (15 + 1) * (15 + 2) * (15 + 3) / 6;  // 816

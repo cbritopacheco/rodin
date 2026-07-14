@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_P0g_P0G_H
-#define RODIN_VARIATIONAL_P0g_P0G_H
+#ifndef RODIN_VARIATIONAL_P0G_P0G_H
+#define RODIN_VARIATIONAL_P0G_P0G_H
 
 #include <cassert>
 #include <cstddef>
@@ -27,6 +27,7 @@
 
 #include "P0gElement.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Number, class Mesh>
@@ -35,7 +36,9 @@ namespace Rodin::FormLanguage
     using MeshType    = Mesh;
     using ScalarType  = Number;
     using RangeType   = ScalarType;
+    /// @brief Execution context type.
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    /// @brief Finite element type.
     using ElementType = Variational::P0gElement<RangeType>;
   };
 
@@ -45,7 +48,9 @@ namespace Rodin::FormLanguage
     using MeshType    = Mesh;
     using ScalarType  = Number;
     using RangeType   = Math::SpatialVector<ScalarType>;
+    /// @brief Execution context type.
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    /// @brief Finite element type.
     using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
   };
 }
@@ -75,8 +80,10 @@ namespace Rodin::Variational
     public:
       using ScalarType  = Real;
       using RangeType   = ScalarType;
+      /// @brief Execution context type.
       using ContextType = Context::Local;
       using MeshType    = Geometry::Mesh<ContextType>;
+      /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
       using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
 
@@ -245,8 +252,10 @@ namespace Rodin::Variational
     public:
       using ScalarType  = Real;
       using RangeType   = Math::SpatialVector<Real>;
+      /// @brief Execution context type.
       using ContextType = Context::Local;
       using MeshType    = Geometry::Mesh<ContextType>;
+      /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
       using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
 
@@ -430,4 +439,5 @@ namespace Rodin::Variational
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }
 
+/// @endcond
 #endif

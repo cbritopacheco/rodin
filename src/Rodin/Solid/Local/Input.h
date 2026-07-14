@@ -75,10 +75,15 @@ namespace Rodin::Solid
       }
 
     protected:
+      /// @brief Default constructor for derived CRTP inputs.
       Input() = default;
+      /// @brief Copy constructor.
       Input(const Input&) = default;
+      /// @brief Move constructor.
       Input(Input&&) = default;
+      /// @brief Copy assignment operator.
       Input& operator=(const Input&) = default;
+      /// @brief Move assignment operator.
       Input& operator=(Input&&) = default;
   };
 

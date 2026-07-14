@@ -83,6 +83,7 @@ namespace
 
   // --- MPI Mesh HDF5 round-trip via MeshPrinter/MeshLoader -------------------
 
+  /// @brief Verifies mesh round trip via printer loader for MPI mesh HDF 5 by checking exact expected values, MPI behavior.
   TEST_P(MPIMeshHDF5, MeshRoundTripViaPrinterLoader)
   {
     const auto type = GetParam();
@@ -125,6 +126,7 @@ namespace
 
   // --- MPI Mesh persistence does not create XDMF datasets -------------------
 
+  /// @brief Verifies mesh persistence no XDMF for MPI mesh HDF 5 by checking exact expected values, MPI behavior.
   TEST_P(MPIMeshHDF5, MeshPersistenceNoXDMF)
   {
     const auto type = GetParam();
@@ -151,6 +153,7 @@ namespace
 
   // --- MPI Mesh XDMF visualization -------------------------------------------
 
+  /// @brief Verifies XDMF visualization topology for MPI mesh HDF 5 by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIMeshHDF5, XDMFVisualizationTopology)
   {
     const auto type = GetParam();
@@ -192,6 +195,7 @@ namespace
 
   // --- XDMF write-and-close full workflow ------------------------------------
 
+  /// @brief Verifies XDMF write and close for MPI mesh HDF 5 by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIMeshHDF5, XDMFWriteAndClose)
   {
     const auto type = GetParam();
@@ -396,6 +400,7 @@ namespace
 
   // --- Shard path helpers ---------------------------------------------------
 
+  /// @brief Verifies path helpers for shard metadata by checking exact expected values.
   TEST(ShardMetadata, PathHelpers)
   {
     EXPECT_EQ(HDF5::shardStatePath(0), "/Shard/State/0");
@@ -439,6 +444,7 @@ namespace
    */
   class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type> {};
 
+  /// @brief Verifies file per rank visualization for MPI distributed XDMF by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIDistributedXDMF, FilePerRankVisualization)
   {
     const auto type = GetParam();
@@ -490,6 +496,7 @@ namespace
     boost::filesystem::remove_all(testDir);
   }
 
+  /// @brief Verifies file per rank with attributes for MPI distributed XDMF by checking true predicates, MPI behavior.
   TEST_P(MPIDistributedXDMF, FilePerRankWithAttributes)
   {
     const auto type = GetParam();

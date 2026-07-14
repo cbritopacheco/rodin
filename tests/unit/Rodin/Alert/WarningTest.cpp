@@ -30,6 +30,7 @@ class WarningTest : public ::testing::Test
 };
 
 // Test Warning class functionality
+/// @brief Test default construction.
 TEST_F(WarningTest, WarningConstruction)
 {
   // Test default construction
@@ -48,6 +49,7 @@ TEST_F(WarningTest, WarningConstruction)
   EXPECT_NO_THROW(Warning());
 }
 
+/// @brief Verifies warning message for warning test by checking true predicates.
 TEST_F(WarningTest, WarningMessage)
 {
   Warning warn(warningStream);
@@ -61,6 +63,7 @@ TEST_F(WarningTest, WarningMessage)
   EXPECT_TRUE(output.find("This is a test warning message") != std::string::npos);
 }
 
+/// @brief Verifies warning stream operator for warning test by checking true predicates.
 TEST_F(WarningTest, WarningStreamOperator)
 {
   Warning warn(warningStream);
@@ -77,6 +80,7 @@ TEST_F(WarningTest, WarningStreamOperator)
 }
 
 // Test message chaining
+/// @brief Verifies message chaining for warning test by checking true predicates.
 TEST_F(WarningTest, MessageChaining)
 {
   Warning warn(warningStream);
@@ -91,6 +95,7 @@ TEST_F(WarningTest, MessageChaining)
 }
 
 // Test empty messages
+/// @brief Verifies empty messages for warning test by checking true predicates.
 TEST_F(WarningTest, EmptyMessages)
 {
   Warning warn(warningStream);
@@ -103,6 +108,7 @@ TEST_F(WarningTest, EmptyMessages)
 }
 
 // Test color functionality (basic test)
+/// @brief Verifies color output presence for warning test by checking true predicates, false predicates.
 TEST_F(WarningTest, ColorOutputPresence)
 {
   Warning warn(warningStream);
@@ -120,6 +126,7 @@ TEST_F(WarningTest, ColorOutputPresence)
 }
 
 // Test warning prefix type
+/// @brief Verifies warning prefix type for warning test by checking no-throw behavior.
 TEST_F(WarningTest, WarningPrefixType)
 {
   WarningPrefix warnPrefix; 

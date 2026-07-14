@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_ASSEMBLY_MPI_H
 #define RODIN_PETSC_ASSEMBLY_MPI_H
 
@@ -55,7 +61,7 @@ namespace Rodin::Assembly
         std::is_same_v<ScalarType, PetscScalar>,
         "FES::ScalarType must be PetscScalar"
       );
-      /// @brief PETSc vector type (`::Vec`).
+      /// @brief PETSc vector type (@c Vec).
       using VectorType     = ::Vec;
       /// @brief Linear form type being assembled.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
@@ -64,6 +70,11 @@ namespace Rodin::Assembly
       /// @brief Input data type for the assembly pipeline.
       using InputType      = typename Parent::InputType;
 
+      /**
+       * @brief Assembles the linear form into a distributed PETSc vector.
+       * @param[in,out] res PETSc vector receiving accumulated entries.
+       * @param[in] input Linear-form assembly input.
+       */
       void execute(VectorType& res, const InputType& input) const override
       {
         assert(res);
@@ -131,6 +142,7 @@ namespace Rodin::Assembly
         (void) ierr;
       }
 
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -161,7 +173,7 @@ namespace Rodin::Assembly
         std::is_same_v<DotType, PetscScalar>,
         "DotType must be PetscScalar"
       );
-      /// @brief PETSc matrix type (`::Mat`).
+      /// @brief PETSc matrix type (@c Mat).
       using OperatorType     = ::Mat;
       /// @brief Bilinear form type being assembled.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
@@ -170,6 +182,11 @@ namespace Rodin::Assembly
       /// @brief Input data type for the assembly pipeline.
       using InputType        = typename Parent::InputType;
 
+      /**
+       * @brief Assembles the bilinear form into a distributed PETSc matrix.
+       * @param[in,out] res PETSc matrix receiving accumulated entries.
+       * @param[in] input Bilinear-form assembly input.
+       */
       void execute(OperatorType& res, const InputType& input) const override
       {
         assert(res);
@@ -254,6 +271,7 @@ namespace Rodin::Assembly
         (void) ierr;
       }
 
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -289,9 +307,9 @@ namespace Rodin::Assembly
       /// @brief Input data type for the assembly pipeline.
       using InputType        = typename Parent::InputType;
 
-      /// @brief PETSc matrix type (`::Mat`) for the system operator.
+      /// @brief PETSc matrix type (@c Mat) for the system operator.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
-      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
       /// @brief Finite element space type for the trial function.
@@ -302,11 +320,22 @@ namespace Rodin::Assembly
       using MeshContextType =
         typename Rodin::FormLanguage::Traits<TrialMeshType>::ContextType;
 
+      /**
+       * @brief Assembles the full single-field distributed PETSc linear system.
+       * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
+       * @param[in] input Single-field problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Assembles only the requested single-field distributed target.
+       * @param[in,out] axb Linear system receiving the requested target.
+       * @param[in] input Single-field problem assembly input.
+       * @param[in] target Assembly target to update.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -883,6 +912,7 @@ namespace Rodin::Assembly
       }
 
     public:
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -921,16 +951,27 @@ namespace Rodin::Assembly
       /// @brief Input data type for the assembly pipeline.
       using InputType = typename Parent::InputType;
 
-      /// @brief PETSc matrix type (`::Mat`) for the block system operator.
+      /// @brief PETSc matrix type (@c Mat) for the block system operator.
       using OperatorType = typename Rodin::FormLanguage::Traits<LinearSystemType>::OperatorType; // ::Mat
-      /// @brief PETSc vector type (`::Vec`) for the block RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the block RHS and solution.
       using VectorType   = typename Rodin::FormLanguage::Traits<LinearSystemType>::VectorType;   // ::Vec
 
+      /**
+       * @brief Assembles the full multi-field distributed PETSc linear system.
+       * @param[in,out] axb Linear system receiving operator, RHS, and solution layout.
+       * @param[in] input Multi-field problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         execute(axb, input, AssemblyMode::Full);
       }
 
+      /**
+       * @brief Assembles only the requested multi-field distributed target.
+       * @param[in,out] axb Linear system receiving the requested target.
+       * @param[in] input Multi-field problem assembly input.
+       * @param[in] target Assembly target to update.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -1636,6 +1677,7 @@ namespace Rodin::Assembly
       }
 
     public:
+      /// @brief Creates a heap-allocated copy of this assembly backend.
       MPI* copy() const noexcept override
       {
         return new MPI(*this);
@@ -1645,6 +1687,7 @@ namespace Rodin::Assembly
 
 namespace Rodin::PETSc::Math::Assembly
 {
+  /// @brief PETSc math namespace alias for MPI assembly specializations.
   template <class LinearAlgebraType, class Operand>
   using MPI = Rodin::Assembly::MPI<LinearAlgebraType, Operand>;
 }

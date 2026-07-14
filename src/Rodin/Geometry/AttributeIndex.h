@@ -33,7 +33,7 @@ namespace Rodin::Geometry
    * Data layout
    * -----------
    * The storage is organized by dimension:
-   * - For each @c d in @c [0, meshDim], a @ref Dimension stores:
+   * - For each @c d in @c [0, meshDim], a @c Dimension stores:
    *   - @c slots: a vector of @c Optional<Attribute>, indexed by polytope index.
    *   - @c mutex: a @c std::shared_mutex protecting accesses to @c slots.
    *
@@ -48,8 +48,8 @@ namespace Rodin::Geometry
    * After initialization, concurrent calls to the following methods are safe
    * w.r.t. each other (subject to each method's preconditions):
    * - @ref resize(size_t,size_t)
-   * - @ref set(const std::pair<size_t,Index>&,Attribute)
-   * - @ref set(const std::pair<size_t,Index>&,size_t,Attribute)
+   * - @c set(const std::pair<size_t,Index>&, Attribute)
+   * - @c set(const std::pair<size_t,Index>&, size_t, Attribute)
    * - @ref unset(const std::pair<size_t,Index>&,size_t)
    * - @ref get(const std::pair<size_t,Index>&,size_t) const
    * - @ref getAttributes(size_t) const
@@ -84,7 +84,7 @@ namespace Rodin::Geometry
    *
    * Usage Contract
    * --------------
-   * 1. Call @ref initialize(meshDim) exactly once (or idempotently with the same
+   * 1. Call initialize() exactly once (or idempotently with the same
    *    value) before any concurrent use.
    * 2. Do not change the mesh dimension after initialization.
    * 3. Ensure storage exists (via @ref resize() or via @ref set()) before relying
@@ -156,14 +156,14 @@ namespace Rodin::Geometry
 
         if (first == this)
         {
-          std::unique_lock<std::shared_mutex> lock_this(mutex);
-          std::shared_lock<std::shared_mutex> lock_other(other.mutex);
+          std::unique_lock<std::shared_mutex> lockThis(mutex);
+          std::shared_lock<std::shared_mutex> lockOther(other.mutex);
           slots = other.slots;
         }
         else
         {
-          std::shared_lock<std::shared_mutex> lock_other(other.mutex);
-          std::unique_lock<std::shared_mutex> lock_this(mutex);
+          std::shared_lock<std::shared_mutex> lockOther(other.mutex);
+          std::unique_lock<std::shared_mutex> lockThis(mutex);
           slots = other.slots;
         }
 
@@ -198,9 +198,9 @@ namespace Rodin::Geometry
         if (this == &other)
           return *this;
 
-        std::unique_lock<std::shared_mutex> this_lock(mutex, std::defer_lock);
-        std::unique_lock<std::shared_mutex> other_lock(other.mutex, std::defer_lock);
-        std::lock(this_lock, other_lock);
+        std::unique_lock<std::shared_mutex> thisLock(mutex, std::defer_lock);
+        std::unique_lock<std::shared_mutex> otherLock(other.mutex, std::defer_lock);
+        std::lock(thisLock, otherLock);
 
         slots = std::move(other.slots);
         return *this;
@@ -209,7 +209,8 @@ namespace Rodin::Geometry
       /**
        * @brief Serialization method for Boost.Serialization.
        * @param[in,out] ar Archive object
-       * @param[in] version Serialization version (unused)
+       *
+       * The serialization version argument is ignored.
        */
       template <class Archive>
       void serialize(Archive& ar, const unsigned int)

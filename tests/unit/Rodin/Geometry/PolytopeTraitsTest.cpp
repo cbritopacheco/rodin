@@ -16,132 +16,154 @@ namespace Rodin::Tests::Unit
   // Polytope::Traits Tests
   // ============================================================================
 
+  /// @brief Verifies point dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, PointDimension)
   {
     Polytope::Traits traits(Polytope::Type::Point);
     EXPECT_EQ(traits.getDimension(), 0);
   }
 
+  /// @brief Verifies point vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, PointVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Point);
     EXPECT_EQ(traits.getVertexCount(), 1);
   }
 
+  /// @brief Verifies point is simplex for geometry polytope traits by checking true predicates.
   TEST(Geometry_PolytopeTraits, PointIsSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Point);
     EXPECT_TRUE(traits.isSimplex());
   }
 
+  /// @brief Verifies segment dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, SegmentDimension)
   {
     Polytope::Traits traits(Polytope::Type::Segment);
     EXPECT_EQ(traits.getDimension(), 1);
   }
 
+  /// @brief Verifies segment vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, SegmentVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Segment);
     EXPECT_EQ(traits.getVertexCount(), 2);
   }
 
+  /// @brief Verifies segment is simplex for geometry polytope traits by checking true predicates.
   TEST(Geometry_PolytopeTraits, SegmentIsSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Segment);
     EXPECT_TRUE(traits.isSimplex());
   }
 
+  /// @brief Verifies triangle dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, TriangleDimension)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
     EXPECT_EQ(traits.getDimension(), 2);
   }
 
+  /// @brief Verifies triangle vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, TriangleVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
     EXPECT_EQ(traits.getVertexCount(), 3);
   }
 
+  /// @brief Verifies triangle is simplex for geometry polytope traits by checking true predicates.
   TEST(Geometry_PolytopeTraits, TriangleIsSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
     EXPECT_TRUE(traits.isSimplex());
   }
 
+  /// @brief Verifies quadrilateral dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, QuadrilateralDimension)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
     EXPECT_EQ(traits.getDimension(), 2);
   }
 
+  /// @brief Verifies quadrilateral vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, QuadrilateralVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
     EXPECT_EQ(traits.getVertexCount(), 4);
   }
 
+  /// @brief Verifies quadrilateral is not simplex for geometry polytope traits by checking false predicates.
   TEST(Geometry_PolytopeTraits, QuadrilateralIsNotSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
     EXPECT_FALSE(traits.isSimplex());
   }
 
+  /// @brief Verifies tetrahedron dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, TetrahedronDimension)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
     EXPECT_EQ(traits.getDimension(), 3);
   }
 
+  /// @brief Verifies tetrahedron vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, TetrahedronVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
     EXPECT_EQ(traits.getVertexCount(), 4);
   }
 
+  /// @brief Verifies tetrahedron is simplex for geometry polytope traits by checking true predicates.
   TEST(Geometry_PolytopeTraits, TetrahedronIsSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
     EXPECT_TRUE(traits.isSimplex());
   }
 
+  /// @brief Verifies pyramid dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, PyramidDimension)
   {
     Polytope::Traits traits(Polytope::Type::Pyramid);
     EXPECT_EQ(traits.getDimension(), 3);
   }
 
+  /// @brief Verifies pyramid vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, PyramidVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Pyramid);
     EXPECT_EQ(traits.getVertexCount(), 5);
   }
 
+  /// @brief Verifies pyramid is not simplex for geometry polytope traits by checking false predicates.
   TEST(Geometry_PolytopeTraits, PyramidIsNotSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Pyramid);
     EXPECT_FALSE(traits.isSimplex());
   }
 
+  /// @brief Verifies wedge dimension for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, WedgeDimension)
   {
     Polytope::Traits traits(Polytope::Type::Wedge);
     EXPECT_EQ(traits.getDimension(), 3);
   }
 
+  /// @brief Verifies wedge vertex count for geometry polytope traits by checking exact expected values.
   TEST(Geometry_PolytopeTraits, WedgeVertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Wedge);
     EXPECT_EQ(traits.getVertexCount(), 6);
   }
 
+  /// @brief Verifies wedge is not simplex for geometry polytope traits by checking false predicates.
   TEST(Geometry_PolytopeTraits, WedgeIsNotSimplex)
   {
     Polytope::Traits traits(Polytope::Type::Wedge);
     EXPECT_FALSE(traits.isSimplex());
   }
 
+  /// @brief Verifies triangle vertices for geometry polytope traits.
   TEST(Geometry_PolytopeTraits, TriangleVertices)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
@@ -157,6 +179,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(v2.size(), 0);
   }
 
+  /// @brief Verifies half space accessible for geometry polytope traits.
   TEST(Geometry_PolytopeTraits, HalfSpaceAccessible)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
@@ -173,11 +196,13 @@ namespace Rodin::Tests::Unit
   // Polytope::Types Array Tests
   // ============================================================================
 
+  /// @brief Verifies array size for geometry polytope types by checking exact expected values.
   TEST(Geometry_PolytopeTypes, ArraySize)
   {
     EXPECT_EQ(Polytope::Types.size(), 8);
   }
 
+  /// @brief Verifies array contents for geometry polytope types by checking exact expected values.
   TEST(Geometry_PolytopeTypes, ArrayContents)
   {
     EXPECT_EQ(Polytope::Types[0], Polytope::Type::Point);
@@ -190,6 +215,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Polytope::Types[7], Polytope::Type::Wedge);
   }
 
+  /// @brief Verifies iterable array for geometry polytope types by checking exact expected values.
   TEST(Geometry_PolytopeTypes, IterableArray)
   {
     int count = 0;

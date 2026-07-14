@@ -8,7 +8,7 @@
  * @file QuadratureRule.h
  * @brief Quadrature rule classes for numerical integration.
  *
- * This file defines specializations of @ref Rodin::Variational::QuadratureRule
+ * This file defines specializations of `Rodin::Variational::QuadratureRule`
  * for integrating functions and shape-function expressions over mesh
  * polytopes.
  *
@@ -39,7 +39,7 @@
  * const auto value = qr.compute();
  * @endcode
  *
- * For local element integrators, @ref setPolytope binds the integrator to a
+ * For local element integrators, setPolytope() binds the integrator to a
  * concrete polytope, selects an appropriate quadrature formula, and retrieves
  * the corresponding cached @ref Rodin::Geometry::PolytopeQuadrature from the
  * mesh.
@@ -57,6 +57,7 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -80,9 +81,12 @@ namespace Rodin::Variational
     : public FormLanguage::Base
   {
     public:
+      /// @brief Integrand expression type.
       using IntegrandType = FunctionBase<FunctionDerived>;
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandRangeType>::ScalarType;
+      /// @brief Parent class type.
       using Parent = FormLanguage::Base;
 
       /**
@@ -231,9 +235,13 @@ namespace Rodin::Variational
   class QuadratureRule<GridFunction<FES, Data>> : public Integrator
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Integrand expression type.
       using IntegrandType = GridFunction<FESType, Data>;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Parent class type.
       using Parent = Integrator;
 
       /**
@@ -414,10 +422,15 @@ namespace Rodin::Variational
             ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>::ScalarType>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       /**
@@ -630,9 +643,13 @@ namespace Rodin::Variational
           ShapeFunctionBase<NestedDerived, FES, TestSpace>>::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
+      /// @brief Integrand expression type.
       using IntegrandType = ShapeFunctionBase<NestedDerived, FESType, TestSpace>;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
       /**
@@ -813,4 +830,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

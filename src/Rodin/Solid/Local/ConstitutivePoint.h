@@ -63,73 +63,85 @@ namespace Rodin::Solid
     /// @brief Tag for the fiber direction vector.
     struct FiberDirection
     {
-      using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet direction vector.
     struct SheetDirection
     {
-      using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet-normal direction vector.
     struct SheetNormalDirection
     {
-      using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the activation parameter.
     struct Activation
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for the active fiber extension @f$e_c^{n+1}@f$.
     struct ActiveExtension
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for the previous active fiber extension @f$e_c^n@f$.
     struct PreviousActiveExtension
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for the active-law time step.
     struct TimeStep
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for the scalar electrical/chemical activation input.
     struct ElectricalActivation
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for previous active variable @f$\gamma^n@f$.
     struct PreviousActiveGamma
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for previous active variable @f$\beta^n@f$.
     struct PreviousActiveBeta
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
     };
 
     /// @brief Tag for the index of the current cell (polytope) being assembled.
     struct CellIndex
     {
-      using Type = Index;
+      /// @brief Stored value type for this tag.
+        using Type = Index;
     };
 
     /// @brief Tag for the index of the current quadrature point within the cell.
     struct QuadraturePointIndex
     {
-      using Type = std::size_t;
+      /// @brief Stored value type for this tag.
+        using Type = std::size_t;
     };
   }
 
@@ -201,9 +213,13 @@ namespace Rodin::Solid
         : m_state(std::cref(state))
       {}
 
+      /// @brief Copy constructor.
       ConstitutivePoint(const ConstitutivePoint&) = default;
+      /// @brief Move constructor.
       ConstitutivePoint(ConstitutivePoint&&) = default;
+      /// @brief Copy assignment operator.
       ConstitutivePoint& operator=(const ConstitutivePoint&) = default;
+      /// @brief Move assignment operator.
       ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
 
       /// @brief Gets the kinematic state.

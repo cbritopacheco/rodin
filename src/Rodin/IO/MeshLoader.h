@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_MESHLOADER_H
-#define RODIN_MESH_MESHLOADER_H
+#ifndef RODIN_IO_MESHLOADER_H
+#define RODIN_IO_MESHLOADER_H
 
 #include <utility>
 #include <fstream>

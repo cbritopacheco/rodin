@@ -62,7 +62,7 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief All entries of \int 1\cdotv d\Omega are positive for a positive basis.
+   * @brief All entries of ∫ 1· v dΩ are positive for a positive basis.
    */
   TEST(Assembly_Sequential_LinearForm, ConstantRHS_EntriesPositive_P1)
   {
@@ -80,7 +80,7 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief \int 1\cdotv d\Omega with P0 sums to area (each element has exactly one DOF
+   * @brief ∫ 1· v dΩ with P0 sums to area (each element has exactly one DOF
    * and the mass is |K|).
    */
   TEST(Assembly_Sequential_LinearForm, ConstantRHS_SumEqualsArea_P0)
@@ -101,7 +101,7 @@ namespace Rodin::Tests::Unit
   }
 
   /**
-   * @brief Scaling: \int 2\cdotv d\Omega = 2 \cdot \int 1\cdotv d\Omega.
+   * @brief Scaling: ∫ 2· v dΩ = 2 · ∫ 1· v dΩ.
    */
   TEST(Assembly_Sequential_LinearForm, LinearScaling_P1)
   {
@@ -214,7 +214,7 @@ namespace Rodin::Tests::Unit
 
   /**
    * @brief P1 mass matrix row-sum equals domain area (∑_j M_ij summed over all
-   * i,j equals \int_\Omega 1 d\Omega = area(\Omega)).  For UniformGrid({4,4}) the domain is
+   * i,j equals ∫_Ω 1 dΩ = area(Ω)).  For UniformGrid({4,4}) the domain is
    * [0,3]x[0,3] so area = 9.
    */
   TEST(Assembly_Sequential_BilinearForm_Sparse, P1MassMatrix_SumEqualsArea)
@@ -228,7 +228,7 @@ namespace Rodin::Tests::Unit
     bf = Integral(u, v);
     bf.assemble();
 
-    // sum of all entries of M equals \int_\Omega (∑_i φ_i)(∑_j φ_j) d\Omega = \int_\Omega 1 d\Omega = area(\Omega).
+    // sum of all entries of M equals ∫_Ω (∑_i φ_i)(∑_j φ_j) dΩ = ∫_Ω 1 dΩ = area(Ω).
     // UniformGrid({4,4}) spans [0,3]x[0,3], so area = 9.
     const auto& A = bf.getOperator();
     Math::Vector<Real> ones(A.cols());
@@ -526,6 +526,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((b1 - b2).norm(), 0.0, 1e-12);
   }
 
+  /// @brief Verifies preassembled forms project rows columns and vector for assembly problem identification by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_Problem_Identification, PreassembledFormsProjectRowsColumnsAndVector)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -575,6 +576,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(b.coeff(n + 1), gamma * 11.0, 1e-14);
   }
 
+  /// @brief Verifies affine identification writes defect rows for assembly problem identification by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_Problem_Identification, AffineIdentificationWritesDefectRows)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -630,6 +632,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sequential vector master projects multiple finite spaces for assembly problem identification by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Assembly_Problem_Identification, SequentialVectorMasterProjectsMultipleFiniteSpaces)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -799,6 +802,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies self identification matches zero value constraint for assembly problem identification by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_Problem_Identification, SelfIdentificationMatchesZeroValueConstraint)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -837,6 +841,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((bRef - bId).norm(), 0.0, 1e-12);
   }
 
+  /// @brief Verifies overlapping value and identification throws for assembly problem identification by checking exception behavior, form assembly.
   TEST(Assembly_Problem_Identification, OverlappingValueAndIdentificationThrows)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -1043,6 +1048,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(b.minCoeff(), 0.0);
   }
 
+  /// @brief Instantiates Assembly Sequential All Geometries over the All Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries,
     Assembly_Sequential_AllGeometries,

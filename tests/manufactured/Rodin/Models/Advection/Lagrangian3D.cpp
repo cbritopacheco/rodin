@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Lagrangian advection manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Lagrangian advection manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the Advection finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -90,8 +98,10 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     }
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Advection 3 D Test 10.
   using ManufacturedAdvection3DTest_10 = ManufacturedAdvection3DTest<15, 15, 15>;
 
+  /// @brief Verifies constant velocity one step L 2 interior for manufactured advection 3 D test 10 by checking manufactured-solution convergence.
   TEST_P(ManufacturedAdvection3DTest_10, ConstantVelocity_OneStep_L2Interior)
   {
     auto mesh = this->getMesh();
@@ -123,6 +133,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     this->checkL2CentroidError(mesh, uh, vel, dt, atol, rtol);
   }
 
+  /// @brief Verifies constant velocity two half steps vs one full step for manufactured advection 3 D test 10 by checking manufactured-solution convergence.
   TEST_P(ManufacturedAdvection3DTest_10, ConstantVelocity_TwoHalfSteps_vs_OneFullStep)
   {
     auto mesh = this->getMesh();
@@ -197,6 +208,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian3D
     EXPECT_LE(rel, 5e-2) << "two half-steps diverge from one full step too much";
   }
 
+  /// @brief Instantiates Manufactured Advection 3 D Test 10 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     ManufacturedAdvection3DTest_10,

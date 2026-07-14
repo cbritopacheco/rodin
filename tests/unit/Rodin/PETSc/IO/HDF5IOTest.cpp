@@ -73,6 +73,7 @@ namespace
 
   // --- PETSc GridFunction HDF5 standalone field file -------------------------
 
+  /// @brief Verifies grid function standalone for PET sc HDF 5 by checking exact expected values.
   TEST_P(PETScHDF5, GridFunctionStandalone)
   {
     const auto type = GetParam();
@@ -126,6 +127,7 @@ namespace
 
   // --- PETSc GridFunction HDF5 round-trip raw DOFs ---------------------------
 
+  /// @brief Verifies grid function persistence raw DO fs for PET sc HDF 5 by checking tolerance-based numerical results, exact expected values.
   TEST_P(PETScHDF5, GridFunctionPersistenceRawDOFs)
   {
     const auto type = GetParam();

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_VARIATIONAL_PROBLEM_H
 #define RODIN_PETSC_VARIATIONAL_PROBLEM_H
 
@@ -6,7 +12,7 @@
  * @brief PETSc specialization of variational problems.
  *
  * Provides two partial specializations of @ref Rodin::Variational::Problem
- * that assemble into a @ref Rodin::PETSc::Math::LinearSystem:
+ * that assemble into a @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem":
  *
  * 1. **Two-field** (`Problem<LinearSystem, U, V>`): A single trial / test
  *    function pair producing a scalar linear system @f$ A\mathbf{x} = \mathbf{b} @f$.
@@ -231,6 +237,9 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles only the requested target into the linear system.
+      /// @param[in] target Assembly target to update.
+      /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
@@ -602,6 +611,9 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles only the requested target into the block linear system.
+      /// @param[in] target Assembly target to update.
+      /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
         computeOffsets();
@@ -833,6 +845,7 @@ namespace Rodin::Variational
             const auto& fes  = uref.get().getFiniteElementSpace();
             const auto& mesh = fes.getMesh();
 
+            /// @brief Mesh type.
             using MeshType = std::decay_t<decltype(mesh)>;
             using Ctx      = typename FormLanguage::Traits<MeshType>::ContextType;
 

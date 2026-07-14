@@ -8,8 +8,8 @@
  * @file MeshOptimizer.h
  * @brief Mesh-quality optimization operator.
  */
-#ifndef RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
-#define RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
+#ifndef RODIN_MMG_MESHOPTIMIZER_H
+#define RODIN_MMG_MESHOPTIMIZER_H
 
 #include "Rodin/Alert/MemberFunctionWarning.h"
 

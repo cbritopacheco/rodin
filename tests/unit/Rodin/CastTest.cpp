@@ -66,6 +66,7 @@ namespace Rodin::Tests::Unit
 
   //=== Template Declaration Tests ===========================================
 
+  /// @brief Test that the Cast template class is declared and can be used.
   TEST(Rodin_Cast, TemplateDeclaration)
   {
     // Test that the Cast template class is declared and can be used
@@ -79,6 +80,7 @@ namespace Rodin::Tests::Unit
 
   //=== Specialization Tests =================================================
 
+  /// @brief Verifies int to double cast for cast by checking tolerance-based numerical results.
   TEST(Rodin_Cast, IntToDoubleCast)
   {
     Cast<int, double> caster;
@@ -89,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(result, 42.0);
   }
 
+  /// @brief Verifies double to int cast for cast by checking exact expected values.
   TEST(Rodin_Cast, DoubleToIntCast)
   {
     Cast<double, int> caster;
@@ -99,6 +102,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result, 3);  // Truncation expected
   }
 
+  /// @brief Verifies pointer cast success for cast by checking exact expected values.
   TEST(Rodin_Cast, PointerCastSuccess)
   {
     DerivedClass derived;
@@ -112,6 +116,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result->getSpecialValue(), 200);
   }
 
+  /// @brief Verifies pointer cast failure for cast by checking exact expected values.
   TEST(Rodin_Cast, PointerCastFailure)
   {
     BaseClass base;
@@ -125,6 +130,7 @@ namespace Rodin::Tests::Unit
 
   //=== Edge Cases ============================================================
 
+  /// @brief Verifies zero values for cast by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Cast, ZeroValues)
   {
     Cast<int, double> intToDouble;
@@ -134,6 +140,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(doubleToInt(0.0), 0);
   }
 
+  /// @brief Verifies negative values for cast by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Cast, NegativeValues)
   {
     Cast<int, double> intToDouble;
@@ -143,6 +150,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(doubleToInt(-3.14), -3);
   }
 
+  /// @brief Verifies large values for cast by checking tolerance-based numerical results.
   TEST(Rodin_Cast, LargeValues)
   {
     Cast<int, double> intToDouble;
@@ -153,6 +161,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(result, 1000000.0);
   }
 
+  /// @brief Verifies null pointer for cast by checking exact expected values.
   TEST(Rodin_Cast, NullPointer)
   {
     Cast<BaseClass*, DerivedClass*> caster;
@@ -165,6 +174,7 @@ namespace Rodin::Tests::Unit
 
   //=== Functional Tests =====================================================
 
+  /// @brief Test that Cast objects can be used as functors.
   TEST(Rodin_Cast, FunctorBehavior)
   {
     // Test that Cast objects can be used as functors
@@ -180,6 +190,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(result2, 456.0);
   }
 
+  /// @brief Verifies const correctness for cast by checking tolerance-based numerical results.
   TEST(Rodin_Cast, ConstCorrectness)
   {
     const Cast<int, double> constCaster;
@@ -192,6 +203,7 @@ namespace Rodin::Tests::Unit
 
   //=== Type Safety Tests ====================================================
 
+  /// @brief These should compile correctly.
   TEST(Rodin_Cast, TypeSafety)
   {
     // These should compile correctly
@@ -206,6 +218,7 @@ namespace Rodin::Tests::Unit
 
   //=== Documentation Example Test ===========================================
 
+  /// @brief Test the example from the documentation comment.
   TEST(Rodin_Cast, DocumentationExample)
   {
     // Test the example from the documentation comment

@@ -8,8 +8,8 @@
  * @file ForwardDecls.h
  * @brief Forward declarations for the @ref Rodin::MMG module.
  */
-#ifndef RODIN_RODININTEGRATION_MMG_FORWARDDECLS_H
-#define RODIN_RODININTEGRATION_MMG_FORWARDDECLS_H
+#ifndef RODIN_MMG_FORWARDDECLS_H
+#define RODIN_MMG_FORWARDDECLS_H
 
 namespace Rodin::MMG
 {

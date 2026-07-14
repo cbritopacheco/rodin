@@ -277,6 +277,7 @@ namespace Rodin::Tests::Unit
   // MMG::Mesh construction tests
   // ========================================================================
 
+  /// @brief Verifies default construction for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, DefaultConstruction)
   {
     MMG::Mesh mesh;
@@ -289,6 +290,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 0);
   }
 
+  /// @brief Verifies uniform grid construction for MMG mesh by checking exact expected values, false predicates.
   TEST(Rodin_MMG_Mesh, UniformGridConstruction)
   {
     const size_t n = 4;
@@ -301,6 +303,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getSpaceDimension(), 2);
   }
 
+  /// @brief Verifies set corner for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, SetCorner)
   {
     const size_t n = 4;
@@ -319,6 +322,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getCorners().count(15));
   }
 
+  /// @brief Verifies set ridge for MMG mesh by checking exact expected values.
   TEST(Rodin_MMG_Mesh, SetRidge)
   {
     const size_t n = 4;
@@ -337,6 +341,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(ridgeCount, 0);
   }
 
+  /// @brief Verifies set required vertex for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, SetRequiredVertex)
   {
     MMG::Mesh mesh;
@@ -350,6 +355,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredVertices().count(5));
   }
 
+  /// @brief Verifies set required edge for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, SetRequiredEdge)
   {
     MMG::Mesh mesh;
@@ -364,6 +370,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredEdges().count(1));
   }
 
+  /// @brief Verifies set required triangle for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, SetRequiredTriangle)
   {
     MMG::Mesh mesh;
@@ -377,6 +384,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredTriangles().count(3));
   }
 
+  /// @brief Verifies set required tetrahedron for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, SetRequiredTetrahedron)
   {
     MMG::Mesh mesh;
@@ -394,6 +402,7 @@ namespace Rodin::Tests::Unit
   // MMG::Mesh copy and move tests
   // ========================================================================
 
+  /// @brief Verifies copy construction for MMG mesh by checking exact expected values, true predicates, copy semantics.
   TEST(Rodin_MMG_Mesh, CopyConstruction)
   {
     MMG::Mesh mesh;
@@ -421,6 +430,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(copy.getRequiredTetrahedra().count(0));
   }
 
+  /// @brief Verifies move construction for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, MoveConstruction)
   {
     MMG::Mesh mesh;
@@ -446,6 +456,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(moved.getRequiredTetrahedra().size(), 1);
   }
 
+  /// @brief Verifies move assignment for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, MoveAssignment)
   {
     MMG::Mesh mesh;
@@ -464,6 +475,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(target.getRidges().size(), 1);
   }
 
+  /// @brief Verifies move from parent for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, MoveFromParent)
   {
     Mesh<Context::Local> parentMesh;
@@ -483,6 +495,7 @@ namespace Rodin::Tests::Unit
   // MMG::Mesh Builder tests
   // ========================================================================
 
+  /// @brief Verifies triangle mesh with MMG metadata for MMG mesh builder by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_Builder, TriangleMeshWithMMGMetadata)
   {
     MMG::Mesh mesh =
@@ -510,6 +523,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getCorners().count(3));
   }
 
+  /// @brief Verifies builder with all MMG metadata for MMG mesh builder by checking exact expected values.
   TEST(Rodin_MMG_Mesh_Builder, BuilderWithAllMMGMetadata)
   {
     MMG::Mesh mesh =
@@ -543,6 +557,7 @@ namespace Rodin::Tests::Unit
   // MMG::Mesh I/O roundtrip tests (MEDIT format)
   // ========================================================================
 
+  /// @brief Verifies save load MEDIT roundtrip for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRoundtrip)
   {
     const size_t n = 4;
@@ -600,6 +615,7 @@ namespace Rodin::Tests::Unit
     std::remove(filename.c_str());
   }
 
+  /// @brief Verifies save load MEDIT required triangles 2 D for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRequiredTriangles2D)
   {
     MMG::Mesh mesh;
@@ -623,6 +639,7 @@ namespace Rodin::Tests::Unit
     std::remove(filename.c_str());
   }
 
+  /// @brief Verifies save load MEDIT required triangles 3 D for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRequiredTriangles3D)
   {
     MMG::Mesh mesh;
@@ -645,6 +662,7 @@ namespace Rodin::Tests::Unit
     std::remove(filename.c_str());
   }
 
+  /// @brief Verifies save load MEDIT required entities 3 D for MMG mesh IO by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITRequiredEntities3D)
   {
     MMG::Mesh mesh;
@@ -681,6 +699,7 @@ namespace Rodin::Tests::Unit
     std::remove(filename.c_str());
   }
 
+  /// @brief Verifies save load MEDIT empty metadata for MMG mesh IO by checking exact expected values.
   TEST(Rodin_MMG_Mesh_IO, SaveLoadMEDITEmptyMetadata)
   {
     const size_t n = 4;
@@ -710,6 +729,7 @@ namespace Rodin::Tests::Unit
   // MMG5 mesh conversion roundtrip tests
   // ========================================================================
 
+  /// @brief Verifies rodin to mesh and back 2 D for MMG MMG 5 by checking exact expected values.
   TEST(Rodin_MMG_MMG5, RodinToMeshAndBack2D)
   {
     const size_t n = 4;
@@ -731,6 +751,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.getDimension(), 2);
   }
 
+  /// @brief Verifies rodin to mesh preserves MMG metadata for MMG MMG 5 by checking exact expected values, true predicates.
   TEST(Rodin_MMG_MMG5, RodinToMeshPreservesMMGMetadata)
   {
     const size_t n = 4;
@@ -787,6 +808,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies required triangles roundtrip 2 D for MMG MMG 5 by checking exact expected values, true predicates.
   TEST(Rodin_MMG_MMG5, RequiredTrianglesRoundtrip2D)
   {
     MMG::Mesh mesh;
@@ -805,6 +827,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTriangles().count(3));
   }
 
+  /// @brief Verifies required entities roundtrip 2 D for MMG MMG 5 by checking exact expected values, true predicates.
   TEST(Rodin_MMG_MMG5, RequiredEntitiesRoundtrip2D)
   {
     MMG::Mesh mesh;
@@ -832,6 +855,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
   }
 
+  /// @brief Verifies required triangles roundtrip 3 D without face attributes for MMG MMG 5 by checking exact expected values.
   TEST(Rodin_MMG_MMG5, RequiredTrianglesRoundtrip3DWithoutFaceAttributes)
   {
     MMG::Mesh mesh;
@@ -848,6 +872,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.getRequiredTriangles().size(), 1);
   }
 
+  /// @brief Verifies required triangles roundtrip 3 D preserves boundary metadata with face attributes for MMG MMG 5 by checking exact expected values, true predicates.
   TEST(Rodin_MMG_MMG5, RequiredTrianglesRoundtrip3DPreservesBoundaryMetadataWithFaceAttributes)
   {
     MMG::Mesh mesh;
@@ -866,6 +891,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTriangles().count(0));
   }
 
+  /// @brief Verifies required entities roundtrip 3 D for MMG MMG 5 by checking exact expected values, true predicates.
   TEST(Rodin_MMG_MMG5, RequiredEntitiesRoundtrip3D)
   {
     MMG::Mesh mesh;
@@ -902,6 +928,7 @@ namespace Rodin::Tests::Unit
   // MMG::Optimizer tests
   // ========================================================================
 
+  /// @brief Verifies optimize 2 D triangle mesh for MMG optimizer by checking exact expected values, false predicates.
   TEST(Rodin_MMG_Optimizer, Optimize2DTriangleMesh)
   {
     const size_t n = 8;
@@ -919,6 +946,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getDimension(), 2);
   }
 
+  /// @brief Verifies fluent API for MMG optimizer by checking false predicates.
   TEST(Rodin_MMG_Optimizer, FluentAPI)
   {
     const size_t n = 8;
@@ -937,6 +965,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Verifies optimize with corners for MMG optimizer by checking false predicates.
   TEST(Rodin_MMG_Optimizer, OptimizeWithCorners)
   {
     const size_t n = 8;
@@ -961,6 +990,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Verifies preserves required triangles 2 D for MMG optimizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_Optimizer, PreservesRequiredTriangles2D)
   {
     MMG::Mesh mesh;
@@ -978,6 +1008,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredTriangles().count(required));
   }
 
+  /// @brief Verifies preserves required triangles 3 D for MMG optimizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_Optimizer, PreservesRequiredTriangles3D)
   {
     MMG::Mesh mesh;
@@ -995,6 +1026,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredTriangles().count(required));
   }
 
+  /// @brief Verifies preserves required entities 2 D for MMG optimizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_Optimizer, PreservesRequiredEntities2D)
   {
     MMG::Mesh mesh;
@@ -1022,6 +1054,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(mesh.getRequiredTriangles().count(requiredTriangle));
   }
 
+  /// @brief Verifies preserves required entities 3 D for MMG optimizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_Optimizer, PreservesRequiredEntities3D)
   {
     MMG::Mesh mesh;
@@ -1058,6 +1091,7 @@ namespace Rodin::Tests::Unit
   // MMG::Adapt tests
   // ========================================================================
 
+  /// @brief Verifies uniform size map 2 D for MMG adapt by checking exact expected values, false predicates.
   TEST(Rodin_MMG_Adapt, UniformSizeMap2D)
   {
     const size_t n = 8;
@@ -1080,6 +1114,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getDimension(), 2);
   }
 
+  /// @brief Verifies variable size map 2 D for MMG adapt by checking false predicates.
   TEST(Rodin_MMG_Adapt, VariableSizeMap2D)
   {
     const size_t n = 8;
@@ -1109,6 +1144,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Verifies fluent API for MMG adapt by checking false predicates.
   TEST(Rodin_MMG_Adapt, FluentAPI)
   {
     const size_t n = 8;
@@ -1137,6 +1173,7 @@ namespace Rodin::Tests::Unit
   // MMG::LevelSetDiscretizer tests
   // ========================================================================
 
+  /// @brief Verifies circle level set 2 D for MMG level set discretizer by checking exact expected values, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, CircleLevelSet2D)
   {
     static constexpr Attribute interior = 1;
@@ -1175,6 +1212,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.getDimension(), 2);
   }
 
+  /// @brief Verifies fluent API for MMG level set discretizer by checking false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, FluentAPI)
   {
     static constexpr Attribute interior = 1;
@@ -1209,6 +1247,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(result.isEmpty());
   }
 
+  /// @brief Verifies no split material for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitMaterial)
   {
     static constexpr Attribute mat1 = 1;
@@ -1244,6 +1283,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(result.isEmpty());
   }
 
+  /// @brief Verifies set level set value for MMG level set discretizer by checking false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, SetLevelSetValue)
   {
     static constexpr Attribute interior = 1;
@@ -1277,6 +1317,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(result.getVertexCount(), 0);
   }
 
+  /// @brief Verifies preserves required triangles 2 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredTriangles2D)
   {
     static constexpr Attribute interior = 1;
@@ -1312,6 +1353,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTriangles().count(required));
   }
 
+  /// @brief Verifies preserves required triangles 3 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredTriangles3D)
   {
     static constexpr Attribute interior = 1;
@@ -1350,6 +1392,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTriangles().count(required));
   }
 
+  /// @brief Verifies preserves required entities 2 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredEntities2D)
   {
     static constexpr Attribute interior = 1;
@@ -1395,6 +1438,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTriangles().count(requiredTriangle));
   }
 
+  /// @brief Verifies preserves uncut required entity geometry 2 D for MMG level set discretizer by checking true predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, PreservesUncutRequiredEntityGeometry2D)
   {
     static constexpr Attribute interior = 1;
@@ -1449,6 +1493,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredTrianglePoints));
   }
 
+  /// @brief Verifies preserves required entities 3 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, PreservesRequiredEntities3D)
   {
     static constexpr Attribute interior = 1;
@@ -1520,6 +1565,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.getRequiredTetrahedra().count(requiredTetrahedron));
   }
 
+  /// @brief Verifies preserves uncut required entity geometry 3 D for MMG level set discretizer by checking true predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, PreservesUncutRequiredEntityGeometry3D)
   {
     static constexpr Attribute interior = 1;
@@ -1584,6 +1630,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(hasEntityWithCoordinates(result, Polytope::Type::Tetrahedron, requiredTetrahedronPoints));
   }
 
+  /// @brief Verifies no split does not preserve cut required edge 2 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredEdge2D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1622,6 +1669,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredPoints));
   }
 
+  /// @brief Verifies no split does not preserve cut required triangle 2 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredTriangle2D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1659,6 +1707,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredPoints));
   }
 
+  /// @brief Verifies no split does not preserve individually labeled cut triangle 2 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveIndividuallyLabeledCutTriangle2D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1695,6 +1744,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split does not preserve cut required edge 3 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredEdge3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1733,6 +1783,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Segment, requiredPoints));
   }
 
+  /// @brief Verifies no split does not preserve cut required triangle 3 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1771,6 +1822,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, requiredPoints));
   }
 
+  /// @brief Verifies no split adjacent tetrahedra does not preserve cut triangle 3 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitAdjacentTetrahedraDoesNotPreserveCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1808,6 +1860,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split adjacent tetrahedra does not preserve labeled required cut triangle 3 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitAdjacentTetrahedraDoesNotPreserveLabeledRequiredCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1847,6 +1900,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split required adjacent tetrahedra does not preserve cut triangle 3 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitRequiredAdjacentTetrahedraDoesNotPreserveCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1890,6 +1944,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split required triangle closure does not preserve cut triangle 3 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitRequiredTriangleClosureDoesNotPreserveCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1939,6 +1994,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split required full triangle closure does not preserve cut triangle 3 D for MMG level set discretizer by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitRequiredFullTriangleClosureDoesNotPreserveCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -1990,6 +2046,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split does not preserve individually labeled cut triangle 3 D for MMG level set discretizer by checking false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveIndividuallyLabeledCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -2027,6 +2084,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split does not preserve individually labeled required cut triangle 3 D for MMG level set discretizer by checking false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveIndividuallyLabeledRequiredCutTriangle3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -2065,6 +2123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(hasEntityWithCoordinates(result, Polytope::Type::Triangle, protectedPoints));
   }
 
+  /// @brief Verifies no split does not preserve cut required tetrahedron 3 D for MMG level set discretizer by checking true predicates, false predicates.
   TEST(Rodin_MMG_LevelSetDiscretizer, NoSplitDoesNotPreserveCutRequiredTetrahedron3D)
   {
     static constexpr Attribute splitRef = 1;
@@ -2106,6 +2165,7 @@ namespace Rodin::Tests::Unit
   // Common types tests
   // ========================================================================
 
+  /// @brief Verifies split map construction for MMG common by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Common, SplitMapConstruction)
   {
     MMG::SplitMap splitMap;
@@ -2125,6 +2185,7 @@ namespace Rodin::Tests::Unit
   // MMG::GridFunction alias tests
   // ========================================================================
 
+  /// @brief Verifies scalar grid function construction for MMG grid function by checking exact expected values.
   TEST(Rodin_MMG_GridFunction, ScalarGridFunctionConstruction)
   {
     MMG::Mesh mesh;
@@ -2138,6 +2199,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.getFiniteElementSpace().getSize(), mesh.getVertexCount());
   }
 
+  /// @brief Verifies vector grid function construction for MMG grid function by checking exact expected values.
   TEST(Rodin_MMG_GridFunction, VectorGridFunctionConstruction)
   {
     MMG::Mesh mesh;
@@ -2157,6 +2219,7 @@ namespace Rodin::Tests::Unit
   // MMG5 parameter configuration tests
   // ========================================================================
 
+  /// @brief Verify that parameter setters return reference for chaining.
   TEST(Rodin_MMG_MMG5, ParameterSetters)
   {
     // Verify that parameter setters return reference for chaining
@@ -2175,6 +2238,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&ref5, &opt);
   }
 
+  /// @brief Verifies adapt parameter setters for MMG MMG 5 by checking exact expected values.
   TEST(Rodin_MMG_MMG5, AdaptParameterSetters)
   {
     MMG::Adapt adapt;
@@ -2191,6 +2255,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&ref5, &adapt);
   }
 
+  /// @brief Verifies level set discretizer parameter setters for MMG MMG 5 by checking exact expected values.
   TEST(Rodin_MMG_MMG5, LevelSetDiscretizerParameterSetters)
   {
     MMG::LevelSetDiscretizer lsd;
@@ -2217,6 +2282,7 @@ namespace Rodin::Tests::Unit
   // MMG::Mesh deeper behavior tests
   // ========================================================================
 
+  /// @brief Verifies scale preserves topology for MMG mesh by checking exact expected values.
   TEST(Rodin_MMG_Mesh, ScalePreservesTopology)
   {
     const size_t n = 4;
@@ -2229,6 +2295,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getDimension(), 2);
   }
 
+  /// @brief Verifies set attribute on cells for MMG mesh by checking exact expected values, true predicates.
   TEST(Rodin_MMG_Mesh, SetAttributeOnCells)
   {
     const size_t n = 4;
@@ -2250,6 +2317,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies vertex coordinates for MMG mesh by checking exact expected values.
   TEST(Rodin_MMG_Mesh, VertexCoordinates)
   {
     MMG::Mesh mesh;
@@ -2268,6 +2336,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scale affects coordinates for MMG mesh.
   TEST(Rodin_MMG_Mesh, ScaleAffectsCoordinates)
   {
     MMG::Mesh mesh;
@@ -2283,6 +2352,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies connectivity compute for MMG mesh by checking exact expected values, true predicates, mesh connectivity computation.
   TEST(Rodin_MMG_Mesh, ConnectivityCompute)
   {
     const size_t n = 4;
@@ -2301,6 +2371,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(boundaryCount, 4 * (n - 1));
   }
 
+  /// @brief Verifies idempotent set corner for MMG mesh by checking exact expected values.
   TEST(Rodin_MMG_Mesh, IdempotentSetCorner)
   {
     MMG::Mesh mesh;
@@ -2314,6 +2385,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getCorners().size(), 1);
   }
 
+  /// @brief Verifies idempotent set ridge for MMG mesh by checking exact expected values.
   TEST(Rodin_MMG_Mesh, IdempotentSetRidge)
   {
     MMG::Mesh mesh;
@@ -2325,6 +2397,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getRidges().size(), 1);
   }
 
+  /// @brief Verifies move assignment clears source for MMG mesh by checking exact expected values, false predicates, move semantics.
   TEST(Rodin_MMG_Mesh, MoveAssignmentClearsSource)
   {
     MMG::Mesh mesh;
@@ -2350,6 +2423,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(target.isEmpty());
   }
 
+  /// @brief Verifies copy preserves metadata after mutation for MMG mesh by checking exact expected values, copy semantics.
   TEST(Rodin_MMG_Mesh, CopyPreservesMetadataAfterMutation)
   {
     MMG::Mesh mesh;
@@ -2368,6 +2442,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(copy.getCorners().size(), 1);
   }
 
+  /// @brief Verifies parent move assignment clears MMG metadata for MMG mesh by checking exact expected values, move semantics.
   TEST(Rodin_MMG_Mesh, ParentMoveAssignmentClearsMMGMetadata)
   {
     MMG::Mesh mesh;
@@ -2392,6 +2467,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getRequiredTetrahedra().size(), 0);
   }
 
+  /// @brief A 2D uniform grid on triangles is not a surface mesh.
   TEST(Rodin_MMG_Mesh, IsSurface)
   {
     // A 2D uniform grid on triangles is not a surface mesh
@@ -2400,6 +2476,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(mesh.isSurface());
   }
 
+  /// @brief Verifies get area for MMG mesh.
   TEST(Rodin_MMG_Mesh, GetArea)
   {
     MMG::Mesh mesh;
@@ -2415,6 +2492,7 @@ namespace Rodin::Tests::Unit
   // MMG::GridFunction deeper behavior tests
   // ========================================================================
 
+  /// @brief Verifies scalar zero initialization for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarZeroInitialization)
   {
     MMG::Mesh mesh;
@@ -2430,6 +2508,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar project from lambda for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarProjectFromLambda)
   {
     MMG::Mesh mesh;
@@ -2449,6 +2528,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar project constant for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarProjectConstant)
   {
     MMG::Mesh mesh;
@@ -2464,6 +2544,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar data access for MMG grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_MMG_GridFunction, ScalarDataAccess)
   {
     MMG::Mesh mesh;
@@ -2481,6 +2562,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar operator bracket for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarOperatorBracket)
   {
     MMG::Mesh mesh;
@@ -2501,6 +2583,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic add scalar for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddScalar)
   {
     MMG::Mesh mesh;
@@ -2517,6 +2600,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic sub scalar for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubScalar)
   {
     MMG::Mesh mesh;
@@ -2533,6 +2617,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic mul scalar for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulScalar)
   {
     MMG::Mesh mesh;
@@ -2549,6 +2634,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic div scalar for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivScalar)
   {
     MMG::Mesh mesh;
@@ -2565,6 +2651,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic add grid function for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticAddGridFunction)
   {
     MMG::Mesh mesh;
@@ -2582,6 +2669,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic sub grid function for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticSubGridFunction)
   {
     MMG::Mesh mesh;
@@ -2599,6 +2687,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic mul grid function for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticMulGridFunction)
   {
     MMG::Mesh mesh;
@@ -2616,6 +2705,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar arithmetic div grid function for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarArithmeticDivGridFunction)
   {
     MMG::Mesh mesh;
@@ -2633,6 +2723,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar min max for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarMinMax)
   {
     MMG::Mesh mesh;
@@ -2649,6 +2740,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(gf.max(), static_cast<Real>(gf.getSize() - 1), 1e-14);
   }
 
+  /// @brief Verifies scalar arg min arg max for MMG grid function by checking exact expected values.
   TEST(Rodin_MMG_GridFunction, ScalarArgMinArgMax)
   {
     MMG::Mesh mesh;
@@ -2665,6 +2757,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.argmax(), static_cast<Index>(gf.getSize() - 1));
   }
 
+  /// @brief Verifies scalar copy constructor for MMG grid function by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_MMG_GridFunction, ScalarCopyConstructor)
   {
     MMG::Mesh mesh;
@@ -2687,6 +2780,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(gf2[0], 99.0, 1e-14);
   }
 
+  /// @brief Verifies scalar move constructor for MMG grid function by checking tolerance-based numerical results, exact expected values, move semantics.
   TEST(Rodin_MMG_GridFunction, ScalarMoveConstructor)
   {
     MMG::Mesh mesh;
@@ -2704,6 +2798,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar copy assignment for MMG grid function by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_MMG_GridFunction, ScalarCopyAssignment)
   {
     MMG::Mesh mesh;
@@ -2720,6 +2815,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies scalar FES association for MMG grid function by checking exact expected values.
   TEST(Rodin_MMG_GridFunction, ScalarFESAssociation)
   {
     MMG::Mesh mesh;
@@ -2733,6 +2829,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.getSize(), mesh.getVertexCount());
   }
 
+  /// @brief Verifies scalar point evaluation for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarPointEvaluation)
   {
     MMG::Mesh mesh;
@@ -2753,6 +2850,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 42.0, 1e-10);
   }
 
+  /// @brief Verifies scalar linear function exact interpolation for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarLinearFunctionExactInterpolation)
   {
     MMG::Mesh mesh;
@@ -2781,6 +2879,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies vector project from lambda for MMG grid function by checking exact expected values.
   TEST(Rodin_MMG_GridFunction, VectorProjectFromLambda)
   {
     MMG::Mesh mesh;
@@ -2797,6 +2896,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.getSize(), mesh.getVertexCount() * 2);
   }
 
+  /// @brief Verifies vector FES association for MMG grid function by checking exact expected values.
   TEST(Rodin_MMG_GridFunction, VectorFESAssociation)
   {
     MMG::Mesh mesh;
@@ -2809,6 +2909,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.getSize(), mesh.getVertexCount() * 3);
   }
 
+  /// @brief Verifies scalar IO save load MEDIT for MMG grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMEDIT)
   {
     MMG::Mesh mesh;
@@ -2839,6 +2940,7 @@ namespace Rodin::Tests::Unit
     std::remove(solFile.c_str());
   }
 
+  /// @brief Verifies scalar IO save load MFEM for MMG grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_MMG_GridFunction, ScalarIOSaveLoadMFEM)
   {
     MMG::Mesh mesh;
@@ -2869,6 +2971,7 @@ namespace Rodin::Tests::Unit
     std::remove(gfFile.c_str());
   }
 
+  /// @brief Integration test: project a size map, adapt, then verify the adapted.
   TEST(Rodin_MMG_GridFunction, ScalarProjectThenAdapt)
   {
     // Integration test: project a size map, adapt, then verify the adapted
@@ -2893,6 +2996,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(gfAdapted.getSize(), 0);
   }
 
+  /// @brief Verifies vector point evaluation for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, VectorPointEvaluation)
   {
     MMG::Mesh mesh;
@@ -2917,6 +3021,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value(1), 2.0, 1e-10);
   }
 
+  /// @brief Verifies scalar set data for MMG grid function by checking tolerance-based numerical results.
   TEST(Rodin_MMG_GridFunction, ScalarSetData)
   {
     MMG::Mesh mesh;

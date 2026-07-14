@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Dirichlet b c identification manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Dirichlet B C Identification manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -27,11 +35,11 @@ using namespace Rodin::Solver;
  *  - `DirichletBC(u, -u).on(\Gamma)` reduces to `u = 0 on \Gamma`, since the constraint
  *    @f$ u_s = -u_s @f$ implies @f$ 2 u_s = 0 @f$, hence @f$ u_s = 0 @f$.
  *
- *  - `DirichletBC(u, c\cdotu).on(\Gamma)` with @f$ c \neq 1 @f$ also reduces to
+ *  - `DirichletBC(u, c\cdot u).on(\Gamma)` with @f$ c \neq 1 @f$ also reduces to
  *    @f$ u = 0 @f$ on @f$ \Gamma @f$, since
  *    @f$ u_s = c\,u_s \;\Leftrightarrow\; (1-c)\,u_s = 0 @f$.
  *
- *  - `DirichletBC(u, f\cdotv).on(\Gamma)` with `v` itself constrained to a known
+ *  - `DirichletBC(u, f\cdot v).on(\Gamma)` with `v` itself constrained to a known
  *    function `g_v` via a value-prescribing BC produces an effective
  *    Dirichlet of value @f$ f(x_s) g_v(x_s) @f$ on each slave node @f$ x_s @f$
  *    (Lagrange same-FES). Comparing solutions confirms the constraint
@@ -61,8 +69,10 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
       }
   };
 
+  /// @brief Helper used by the tests to Test 16 x 16.
   using Test_16x16 =
     Manufactured_DirichletBCIdentification_Test<16>;
+  /// @brief Helper used by the tests to Test 32 x 32.
   using Test_32x32 =
     Manufactured_DirichletBCIdentification_Test<32>;
 
@@ -117,7 +127,7 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
   }
 
   /**
-   * @brief `DirichletBC(u, c\cdotu).on(\Gamma)` with @f$ c \neq 1 @f$ and @f$ c \neq 0 @f$
+   * @brief `DirichletBC(u, c\cdot u).on(\Gamma)` with @f$ c \neq 1 @f$ and @f$ c \neq 0 @f$
    *        reduces to @f$ u=0 @f$ on @f$ \Gamma @f$ for the Poisson problem.
    *
    * For each @f$ c \in \{ -1, -2, 0.5, 3 \} @f$ the identification
@@ -127,7 +137,7 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
    *       (singular row). `c = 0` is excluded because the assembler's
    *       strict-zero pruning drops the empty constraint row entirely;
    *       to pin DOFs to zero use `DirichletBC(u, Zero())`, not
-   *       `DirichletBC(u, 0\cdotv)`.
+   *       `DirichletBC(u, 0\cdot v)`.
    */
   TEST_P(Test_32x32, ScalarSelfIdentificationEquivalentToZero)
   {
@@ -241,8 +251,8 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
 
   /**
    * @brief The identification BC produces the documented
-   *        @ref DirichletBCBase::IdentifiedDOFs variant alternative, never
-   *        the @ref DirichletBCBase::ValueDOFs alternative — used as a
+   *        @c DirichletBCBase::IdentifiedDOFs variant alternative, never
+   *        the @c DirichletBCBase::ValueDOFs alternative — used as a
    *        runtime invariant during the manufactured tests.
    */
   TEST_P(Test_16x16, IdentificationAlternativeIsActive)
@@ -263,6 +273,7 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     EXPECT_EQ(*dbc.getValueUUID(), v.getUUID());
   }
 
+  /// @brief Verifies cross field vector master matches value reference for test 16 x 16 by checking tolerance-based numerical results, exact expected values, solver behavior.
   TEST_P(Test_16x16, CrossFieldVectorMasterMatchesValueReference)
   {
     const auto etaX = 1.0 + F::x;
@@ -316,11 +327,13 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
       EXPECT_NEAR(etaRefData(i), etaIdData(i), 1e-10) << "eta dof " << i;
   }
 
+  /// @brief Instantiates Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Test_16x16,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral));
 
+  /// @brief Instantiates Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Test_32x32,

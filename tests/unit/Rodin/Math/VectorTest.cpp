@@ -22,6 +22,7 @@ class VectorTest : public ::testing::Test
 };
 
 // Test basic vector type aliases
+/// @brief Test Vector type alias.
 TEST_F(VectorTest, TypeAliases)
 {
   // Test Vector type alias
@@ -40,6 +41,7 @@ TEST_F(VectorTest, TypeAliases)
 }
 
 // Test vector construction and basic operations
+/// @brief Test default construction.
 TEST_F(VectorTest, Construction)
 {
   // Test default construction
@@ -64,6 +66,7 @@ TEST_F(VectorTest, Construction)
 }
 
 // Test vector element access and assignment
+/// @brief Verifies access and assignment for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, AccessAndAssignment)
 {
   Vector<Real> v(3);
@@ -89,6 +92,7 @@ TEST_F(VectorTest, AccessAndAssignment)
 }
 
 // Test vector arithmetic operations
+/// @brief Verifies arithmetic operations for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, ArithmeticOperations)
 {
   Vector<Real> v1(3);
@@ -123,6 +127,7 @@ TEST_F(VectorTest, ArithmeticOperations)
 }
 
 // Test dot product and vector norms
+/// @brief Verifies dot product and norms for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, DotProductAndNorms)
 {
   Vector<Real> v1(3);
@@ -150,6 +155,7 @@ TEST_F(VectorTest, DotProductAndNorms)
 }
 
 // Test FixedSizeVector functionality
+/// @brief Test Vector2.
 TEST_F(VectorTest, FixedSizeVectors)
 {
   // Test Vector2
@@ -182,6 +188,7 @@ TEST_F(VectorTest, FixedSizeVectors)
 }
 
 // Test SpatialVector functionality
+/// @brief Verifies spatial vector for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVector)
 {
   SpatialVector<Real> sv(3);
@@ -207,6 +214,7 @@ TEST_F(VectorTest, SpatialVector)
 }
 
 // Test complex vector operations
+/// @brief Verifies complex vector for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, ComplexVector)
 {
   ComplexVector cv(3);
@@ -229,6 +237,7 @@ TEST_F(VectorTest, ComplexVector)
 }
 
 // Test vector resizing
+/// @brief Verifies resizing for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, Resizing)
 {
   Vector<Real> v(3);
@@ -249,6 +258,7 @@ TEST_F(VectorTest, Resizing)
 }
 
 // Test vector cross product (for 3D vectors)
+/// @brief Verifies cross product for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, CrossProduct)
 {
   Vector3<Real> v1;
@@ -271,6 +281,7 @@ TEST_F(VectorTest, CrossProduct)
 }
 
 // Test vector max and min operations
+/// @brief Verifies max min operations for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, MaxMinOperations)
 {
   Vector<Real> v(4);
@@ -298,6 +309,7 @@ TEST_F(VectorTest, MaxMinOperations)
 }
 
 // Test vector segment operations
+/// @brief Verifies segment operations for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SegmentOperations)
 {
   Vector<Real> v(6);
@@ -326,6 +338,7 @@ TEST_F(VectorTest, SegmentOperations)
 
 // --- Comprehensive SpatialVector Tests ---
 
+/// @brief Verifies spatial vector initializer list for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVectorInitializerList)
 {
   SpatialVector<Real> v3({1.0, 2.0, 3.0});
@@ -344,6 +357,7 @@ TEST_F(VectorTest, SpatialVectorInitializerList)
   EXPECT_DOUBLE_EQ(v1[0], 7.0);
 }
 
+/// @brief Verifies spatial vector eigen constructor for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVectorEigenConstructor)
 {
   Eigen::Vector3d ev;
@@ -355,6 +369,7 @@ TEST_F(VectorTest, SpatialVectorEigenConstructor)
   EXPECT_DOUBLE_EQ(sv[2], 3.0);
 }
 
+/// @brief Verifies spatial vector compound operators for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorCompoundOperators)
 {
   SpatialVector<Real> b({4.0, 5.0, 6.0});
@@ -388,6 +403,7 @@ TEST_F(VectorTest, SpatialVectorCompoundOperators)
   EXPECT_DOUBLE_EQ(a[2], 1.5);
 }
 
+/// @brief Verifies spatial vector unary negation for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVectorUnaryNegation)
 {
   SpatialVector<Real> v({1.0, 2.0, 3.0});
@@ -398,6 +414,7 @@ TEST_F(VectorTest, SpatialVectorUnaryNegation)
   EXPECT_DOUBLE_EQ(neg[2], -3.0);
 }
 
+/// @brief Verifies spatial vector resize for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVectorResize)
 {
   SpatialVector<Real> v(3);
@@ -411,6 +428,7 @@ TEST_F(VectorTest, SpatialVectorResize)
   EXPECT_DOUBLE_EQ(v[1], 20.0);
 }
 
+/// @brief Verifies spatial vector named accessors for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorNamedAccessors)
 {
   SpatialVector<Real> v({1.0, 2.0, 3.0});
@@ -422,6 +440,7 @@ TEST_F(VectorTest, SpatialVectorNamedAccessors)
   EXPECT_DOUBLE_EQ(v(0), 10.0);
 }
 
+/// @brief Verifies spatial vector set zero set constant for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorSetZeroSetConstant)
 {
   SpatialVector<Real> v({1.0, 2.0, 3.0});
@@ -437,6 +456,7 @@ TEST_F(VectorTest, SpatialVectorSetZeroSetConstant)
   EXPECT_DOUBLE_EQ(v[2], 5.0);
 }
 
+/// @brief Verifies spatial vector cross product for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorCrossProduct)
 {
   SpatialVector<Real> a({1.0, 0.0, 0.0});
@@ -453,6 +473,7 @@ TEST_F(VectorTest, SpatialVectorCrossProduct)
   EXPECT_DOUBLE_EQ(d[2], -1.0);
 }
 
+/// @brief Verifies spatial vector dot product for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorDotProduct)
 {
   SpatialVector<Real> a({1.0, 2.0, 3.0});
@@ -460,6 +481,7 @@ TEST_F(VectorTest, SpatialVectorDotProduct)
   EXPECT_DOUBLE_EQ(a.dot(b), 32.0);
 }
 
+/// @brief Verifies spatial vector transpose for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVectorTranspose)
 {
   SpatialVector<Real> v({1.0, 2.0, 3.0});
@@ -471,12 +493,14 @@ TEST_F(VectorTest, SpatialVectorTranspose)
   EXPECT_DOUBLE_EQ(m(0, 2), 3.0);
 }
 
+/// @brief Verifies spatial vector value for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorValue)
 {
   SpatialVector<Real> v({7.5, 2.0});
   EXPECT_DOUBLE_EQ(v.value(), 7.5);
 }
 
+/// @brief Verifies spatial vector normalize for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorNormalize)
 {
   SpatialVector<Real> v({3.0, 4.0, 0.0});
@@ -491,6 +515,7 @@ TEST_F(VectorTest, SpatialVectorNormalize)
   EXPECT_DOUBLE_EQ(w[2], 0.0);
 }
 
+/// @brief Verifies spatial vector norms for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorNorms)
 {
   SpatialVector<Real> v({3.0, 4.0, 0.0});
@@ -500,6 +525,7 @@ TEST_F(VectorTest, SpatialVectorNorms)
   EXPECT_NEAR(v.blueNorm(), 5.0, 1e-10);
 }
 
+/// @brief Verifies spatial vector lp norm for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorLpNorm)
 {
   SpatialVector<Real> v({3.0, 4.0, 0.0});
@@ -507,6 +533,7 @@ TEST_F(VectorTest, SpatialVectorLpNorm)
   EXPECT_NEAR(v.lpNorm<2>(), 5.0, 1e-10);
 }
 
+/// @brief Verifies spatial vector conjugate for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorConjugate)
 {
   SpatialVector<Real> v({1.0, 2.0, 3.0});
@@ -516,6 +543,7 @@ TEST_F(VectorTest, SpatialVectorConjugate)
   EXPECT_DOUBLE_EQ(c[2], 3.0);
 }
 
+/// @brief Verifies spatial vector get data for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVectorGetData)
 {
   SpatialVector<Real> v({1.0, 2.0, 3.0});
@@ -525,6 +553,7 @@ TEST_F(VectorTest, SpatialVectorGetData)
   EXPECT_DOUBLE_EQ(d(2), 3.0);
 }
 
+/// @brief Verifies spatial vector 2 D for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVector2D)
 {
   SpatialVector<Real> v(2);
@@ -549,6 +578,7 @@ TEST_F(VectorTest, SpatialVector2D)
   EXPECT_DOUBLE_EQ(v[1], 6.0);
 }
 
+/// @brief Verifies spatial vector 1 D for vector test by checking tolerance-based numerical results.
 TEST_F(VectorTest, SpatialVector1D)
 {
   SpatialVector<Real> v(1);
@@ -559,6 +589,7 @@ TEST_F(VectorTest, SpatialVector1D)
   EXPECT_DOUBLE_EQ(v.squaredNorm(), 25.0);
 }
 
+/// @brief Verifies spatial vector 0 D for vector test by checking tolerance-based numerical results, exact expected values.
 TEST_F(VectorTest, SpatialVector0D)
 {
   SpatialVector<Real> v(0);

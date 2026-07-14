@@ -8,8 +8,8 @@
  * @file MeshPrinter.h
  * @brief MEDIT mesh printer for @ref Rodin::MMG::Mesh.
  */
-#ifndef RODIN_EXTERNAL_MMG_MESHPRINTER_H
-#define RODIN_EXTERNAL_MMG_MESHPRINTER_H
+#ifndef RODIN_MMG_MESHPRINTER_H
+#define RODIN_MMG_MESHPRINTER_H
 
 #include "Rodin/IO/MEDIT.h"
 

@@ -2,7 +2,7 @@
  * Stokes P2–P1 convergence validation with mesh refinement.
  *
  * Problem:
- *   -Δu + \nablap = f   in \Omega = (0,1)^3
+ *   -Δu + \nabla p = f   in \Omega = (0,1)^3
  *        div u = 0 in \Omega
  *             u = u_exact on \partial\Omega
  *
@@ -392,7 +392,7 @@ int main(int argc, char** argv)
     // Non-P1 pressure so that pressure convergence is nontrivial.
     auto p_exact = x * x + y * y + z * z;
 
-    // f = -Δu + \nablap
+    // f = -Δu + \nabla p
     VectorFunction f{
       -(d2ax * day + ax * d3ay) + 2.0 * x,
        (d3ax * ay + dax * d2ay) + 2.0 * y,

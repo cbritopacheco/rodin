@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_MATH_VECTOR_H
 #define RODIN_PETSC_MATH_VECTOR_H
 
@@ -5,7 +11,7 @@
  * @file
  * @brief PETSc vector type alias and form-language traits.
  *
- * Introduces @ref Rodin::PETSc::Math::Vector as an alias for `::Vec` and
+ * Introduces @ref Rodin::PETSc::Math::Vector as an alias for @c Vec and
  * provides the @ref Rodin::FormLanguage::Traits specialization so that
  * Rodin's type-trait machinery recognises PETSc vectors.
  *
@@ -39,12 +45,13 @@ namespace Rodin::FormLanguage
   /**
    * @brief Traits specialization for PETSc vectors.
    *
-   * Allows the form language to deduce the scalar type of a `::Vec`.
+   * Allows the form language to deduce the scalar type of a @c Vec.
    */
   template <>
   struct Traits<::Vec>
   {
-    using ScalarType = PetscScalar;
+    /// @brief Scalar value type.
+      using ScalarType = PetscScalar;
   };
 }
 

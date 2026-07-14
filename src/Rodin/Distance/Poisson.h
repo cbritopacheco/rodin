@@ -11,8 +11,8 @@
  * This file provides a distance function computation method using
  * the Poisson equation as an approximation.
  */
-#ifndef RODIN_MODELS_DISTANCE_POISSON_H
-#define RODIN_MODELS_DISTANCE_POISSON_H
+#ifndef RODIN_DISTANCE_POISSON_H
+#define RODIN_DISTANCE_POISSON_H
 
 #include "Rodin/Solver/CG.h"
 

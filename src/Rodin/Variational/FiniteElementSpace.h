@@ -50,6 +50,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -196,6 +197,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementSpaceBase;
 
+      /// @brief Mesh type.
       using MeshType = Mesh;
 
       constexpr
@@ -364,4 +366,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

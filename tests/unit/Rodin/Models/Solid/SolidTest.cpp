@@ -17,6 +17,7 @@ namespace Rodin::Tests::Unit
   // KinematicState tests
   // ========================================================================
 
+  /// @brief Verifies identity for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, Identity)
   {
     Solid::KinematicState state(2);
@@ -38,6 +39,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(C(i, j), (i == j) ? 1.0 : 0.0, 1e-14);
   }
 
+  /// @brief Verifies simple shear 2 D for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, SimpleShear2D)
   {
     Solid::KinematicState state(2);
@@ -65,6 +67,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(C(1, 1), 1.01, 1e-14);
   }
 
+  /// @brief Verifies uniform expansion 3 D for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, UniformExpansion3D)
   {
     Solid::KinematicState state(3);
@@ -80,6 +83,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(state.getLogJacobian(), std::log(expected_J), 1e-12);
   }
 
+  /// @brief Verifies inverse consistency for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, InverseConsistency)
   {
     Solid::KinematicState state(2);
@@ -104,6 +108,7 @@ namespace Rodin::Tests::Unit
   // Invariants tests
   // ========================================================================
 
+  /// @brief Verifies identity for solid isotropic invariants by checking tolerance-based numerical results.
   TEST(Rodin_Solid_IsotropicInvariants, Identity)
   {
     Solid::KinematicState state(2);
@@ -120,6 +125,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(inv.getThirdInvariant(), 1.0, 1e-14);
   }
 
+  /// @brief Verifies identity 3 D for solid isotropic invariants by checking tolerance-based numerical results.
   TEST(Rodin_Solid_IsotropicInvariants, Identity3D)
   {
     Solid::KinematicState state(3);
@@ -136,6 +142,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(inv.getThirdInvariant(), 1.0, 1e-14);
   }
 
+  /// @brief Verifies aligned fiber for solid fiber invariants by checking tolerance-based numerical results.
   TEST(Rodin_Solid_FiberInvariants, AlignedFiber)
   {
     Solid::KinematicState state(2);
@@ -157,6 +164,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(fib.getFifthInvariant(), 1.44 * 1.44, 1e-12);
   }
 
+  /// @brief Verifies normalized direction and strain for solid fiber kinematics by checking tolerance-based numerical results.
   TEST(Rodin_Solid_FiberKinematics, NormalizedDirectionAndStrain)
   {
     Solid::KinematicState state(2);
@@ -182,6 +190,7 @@ namespace Rodin::Tests::Unit
   // NeoHookean tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, ZeroDeformation)
   {
     const Real lambda = 1.0, mu = 0.5;
@@ -206,6 +215,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
 
+  /// @brief Verifies stress symmetry under pure stretch for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, StressSymmetryUnderPureStretch)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -229,6 +239,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P(0, 0), P(1, 1), 1e-13);
   }
 
+  /// @brief Verifies tangent finite difference for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, TangentFiniteDifference)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -275,6 +286,7 @@ namespace Rodin::Tests::Unit
   // SaintVenantKirchhoff tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, ZeroDeformation)
   {
     const Real lambda = 1.0, mu = 0.5;
@@ -298,6 +310,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
 
+  /// @brief Verifies tangent finite difference for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, TangentFiniteDifference)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -339,6 +352,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
   }
 
+  /// @brief For small deformations, SVK should behave like linear elasticity.
   TEST(Rodin_Solid_SaintVenantKirchhoff, ReducesToLinearElasticity)
   {
     // For small deformations, SVK should behave like linear elasticity
@@ -373,6 +387,7 @@ namespace Rodin::Tests::Unit
   // MooneyRivlin tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, ZeroDeformation)
   {
     const Real c1 = 0.5, c2 = 0.1, kappa = 10.0;
@@ -394,6 +409,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
   }
 
+  /// @brief Verifies tangent finite difference for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, TangentFiniteDifference)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -439,6 +455,7 @@ namespace Rodin::Tests::Unit
   // Holzapfel-Ogden and active contraction tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation stress free for solid holzapfel ogden by checking tolerance-based numerical results.
   TEST(Rodin_Solid_HolzapfelOgden, ZeroDeformationStressFree)
   {
     Solid::HolzapfelOgden law(0.5, 0.2, 0.1, 1.5, 0.3, 2.0, 10.0);
@@ -464,6 +481,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
   }
 
+  /// @brief Verifies tangent finite difference 3 D for solid holzapfel ogden by checking tolerance-based numerical results.
   TEST(Rodin_Solid_HolzapfelOgden, TangentFiniteDifference3D)
   {
     Solid::HolzapfelOgden law(0.5, 0.2, 0.1, 1.5, 0.3, 2.0, 10.0);
@@ -509,6 +527,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-8);
   }
 
+  /// @brief Verifies adds fiber stress for solid active contraction by checking tolerance-based numerical results.
   TEST(Rodin_Solid_ActiveContraction, AddsFiberStress)
   {
     Solid::NeoHookean passive(0.0, 0.0);
@@ -544,6 +563,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P(1, 1), 0.0, 1e-12);
   }
 
+  /// @brief Pure active contribution: zero passive parameters so the FD check.
   TEST(Rodin_Solid_ActiveContraction, TangentFiniteDifference2D)
   {
     // Pure active contribution: zero passive parameters so the FD check
@@ -596,6 +616,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
   }
 
+  /// @brief Mixed passive + active in 3D, fiber not aligned with an axis.
   TEST(Rodin_Solid_ActiveContraction, TangentFiniteDifference3DWithPassive)
   {
     // Mixed passive + active in 3D, fiber not aligned with an axis.
@@ -649,6 +670,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
   }
 
+  /// @brief Verifies that, after the per-quadrature-point local Newton on c.
   TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference2D)
   {
     // Verifies that, after the per-quadrature-point local Newton on c
@@ -713,6 +735,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
   }
 
+  /// @brief Verifies dynamic tangent finite difference 3 D with passive for solid active contraction by checking tolerance-based numerical results, true predicates.
   TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference3DWithPassive)
   {
     Solid::NeoHookean passive(20.0, 8.0);
@@ -775,6 +798,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
   }
 
+  /// @brief After the local Newton converges, the dynamic residual should be at.
   TEST(Rodin_Solid_ActiveContraction, DynamicLocalSolveResidualIsZero)
   {
     // After the local Newton converges, the dynamic residual should be at
@@ -812,6 +836,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cache.active.residual, 0.0, 1e-11);
   }
 
+  /// @brief Verifies static stress derivative finite difference for solid active fiber law by checking tolerance-based numerical results.
   TEST(Rodin_Solid_ActiveFiberLaw, StaticStressDerivativeFiniteDifference)
   {
     Solid::ActiveFiberLaw::Parameters params;
@@ -830,6 +855,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.dStressDc(e, c), fdDc, 1e-5);
   }
 
+  /// @brief Verifies initial values for solid active fiber law by checking tolerance-based numerical results.
   TEST(Rodin_Solid_ActiveFiberLaw, InitialValues)
   {
     Solid::ActiveFiberLaw::Parameters parameters;
@@ -847,6 +873,7 @@ namespace Rodin::Tests::Unit
   // Hooke tests
   // ========================================================================
 
+  /// @brief Verifies isotropic stress for solid hooke by checking tolerance-based numerical results.
   TEST(Rodin_Solid_Hooke, IsotropicStress)
   {
     Solid::Hooke hooke(1.0, 0.5);
@@ -865,6 +892,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sigma(1, 0), 0.05, 1e-14);
   }
 
+  /// @brief Verifies young poisson conversion for solid hooke by checking tolerance-based numerical results.
   TEST(Rodin_Solid_Hooke, YoungPoissonConversion)
   {
     const Real E = 200.0, nu = 0.3;
@@ -881,6 +909,7 @@ namespace Rodin::Tests::Unit
   // PostProcessing tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid green lagrange strain by checking tolerance-based numerical results.
   TEST(Rodin_Solid_GreenLagrangeStrain, ZeroDeformation)
   {
     Solid::KinematicState state(2);
@@ -897,6 +926,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(E(i, j), 0.0, 1e-14);
   }
 
+  /// @brief Verifies pure extension for solid green lagrange strain by checking tolerance-based numerical results.
   TEST(Rodin_Solid_GreenLagrangeStrain, PureExtension)
   {
     Solid::KinematicState state(2);
@@ -916,6 +946,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(E(1, 0), 0.0, 1e-14);
   }
 
+  /// @brief Verifies symmetry check for solid cauchy stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_CauchyStress, SymmetryCheck)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -941,6 +972,7 @@ namespace Rodin::Tests::Unit
   // ConstitutivePoint tag tests
   // ========================================================================
 
+  /// @brief Verifies typed tag set get for solid constitutive point by checking tolerance-based numerical results, true predicates, false predicates.
   TEST(Rodin_Solid_ConstitutivePoint, TypedTagSetGet)
   {
     Solid::KinematicState state(2);
@@ -970,6 +1002,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cp.has<Solid::Tags::SheetNormalDirection>());
   }
 
+  /// @brief Verifies reference wrapper semantics for solid constitutive point by checking tolerance-based numerical results, false predicates.
   TEST(Rodin_Solid_ConstitutivePoint, ReferenceWrapperSemantics)
   {
     Solid::KinematicState state(2);
@@ -986,6 +1019,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cp.getPoint().has_value());
   }
 
+  /// @brief Verifies custom tag for solid constitutive point by checking tolerance-based numerical results, true predicates.
   TEST(Rodin_Solid_ConstitutivePoint, CustomTag)
   {
     struct MyCustomTag
@@ -1008,6 +1042,7 @@ namespace Rodin::Tests::Unit
   // InternalVirtualWorkResidual tests
   // ========================================================================
 
+  /// @brief Verifies zero displacement zero force for solid internal virtual work residual by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce)
   {
     using namespace Rodin::Geometry;
@@ -1036,6 +1071,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
+  /// @brief Verifies zero displacement zero force SVK for solid internal virtual work residual by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce_SVK)
   {
     using namespace Rodin::Geometry;
@@ -1062,6 +1098,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
+  /// @brief Verifies zero displacement zero force mooney rivlin for solid internal virtual work residual by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce_MooneyRivlin)
   {
     using namespace Rodin::Geometry;
@@ -1088,6 +1125,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-12);
   }
 
+  /// @brief Verifies non zero displacement non zero force for solid internal virtual work residual.
   TEST(Rodin_Solid_InternalVirtualWork_Residual, NonZeroDisplacementNonZeroForce)
   {
     using namespace Rodin::Geometry;
@@ -1120,6 +1158,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(norm, 1e-14);
   }
 
+  /// @brief Verifies with input function for solid internal virtual work residual by checking true predicates.
   TEST(Rodin_Solid_InternalVirtualWork_Residual, WithInputFunction)
   {
     using namespace Rodin::Geometry;
@@ -1156,6 +1195,7 @@ namespace Rodin::Tests::Unit
   // InternalVirtualWorkTangent tests
   // ========================================================================
 
+  /// @brief Verifies zero displacement symmetry for solid internal virtual work tangent by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry)
   {
     using namespace Rodin::Geometry;
@@ -1186,6 +1226,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
+  /// @brief Verifies zero displacement symmetry SVK for solid internal virtual work tangent by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry_SVK)
   {
     using namespace Rodin::Geometry;
@@ -1214,6 +1255,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
+  /// @brief Verifies zero displacement symmetry mooney rivlin for solid internal virtual work tangent by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry_MooneyRivlin)
   {
     using namespace Rodin::Geometry;
@@ -1242,6 +1284,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
+  /// @brief Verifies non zero displacement symmetry for solid internal virtual work tangent by checking tolerance-based numerical results.
   TEST(Rodin_Solid_InternalVirtualWork_Tangent, NonZeroDisplacementSymmetry)
   {
     using namespace Rodin::Geometry;
@@ -1273,6 +1316,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-10);
   }
 
+  /// @brief Verifies non zero displacement non trivial for solid internal virtual work tangent.
   TEST(Rodin_Solid_InternalVirtualWork_Tangent, NonZeroDisplacementNonTrivial)
   {
     using namespace Rodin::Geometry;
@@ -1306,6 +1350,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(norm, 1e-14);
   }
 
+  /// @brief Verifies with input function for solid internal virtual work tangent by checking true predicates.
   TEST(Rodin_Solid_InternalVirtualWork_Tangent, WithInputFunction)
   {
     using namespace Rodin::Geometry;
@@ -1340,6 +1385,7 @@ namespace Rodin::Tests::Unit
   // 3D tests
   // ========================================================================
 
+  /// @brief Verifies tangent finite difference 3 D for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, TangentFiniteDifference3D)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1385,6 +1431,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
   }
 
+  /// @brief Verifies tangent finite difference 3 D for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, TangentFiniteDifference3D)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1429,6 +1476,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
   }
 
+  /// @brief Verifies tangent finite difference 3 D for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, TangentFiniteDifference3D)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1477,6 +1525,7 @@ namespace Rodin::Tests::Unit
   // Additional law tests
   // ========================================================================
 
+  /// @brief Verifies energy positive under deformation for solid neo hookean.
   TEST(Rodin_Solid_NeoHookean, EnergyPositiveUnderDeformation)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1494,6 +1543,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
 
+  /// @brief Verifies energy positive under deformation for solid saint venant kirchhoff.
   TEST(Rodin_Solid_SaintVenantKirchhoff, EnergyPositiveUnderDeformation)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1510,6 +1560,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
 
+  /// @brief Verifies energy positive under deformation for solid mooney rivlin.
   TEST(Rodin_Solid_MooneyRivlin, EnergyPositiveUnderDeformation)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1526,6 +1577,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
 
+  /// @brief For isotropic material: K = lambda + 2*mu/d (2D), K = lambda + 2*mu/3 (3D).
   TEST(Rodin_Solid_Hooke, BulkModulusConsistency)
   {
     // For isotropic material: K = lambda + 2*mu/d (2D), K = lambda + 2*mu/3 (3D)
@@ -1541,6 +1593,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(K3D, K3D_direct, 1e-10);
   }
 
+  /// @brief Verifies symmetry with SVK for solid cauchy stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_CauchyStress, SymmetryWithSVK)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1562,6 +1615,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
   }
 
+  /// @brief Verifies symmetry with mooney rivlin for solid cauchy stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_CauchyStress, SymmetryWithMooneyRivlin)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1582,6 +1636,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
   }
 
+  /// @brief Verifies consistency with law for solid first piola kirchhoff stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_FirstPiolaKirchhoffStress, ConsistencyWithLaw)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1609,6 +1664,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(P_direct(i, j), P_wrapper(i, j), 1e-14);
   }
 
+  /// @brief Verifies parameter accessors for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, ParameterAccessors)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1619,6 +1675,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getBulkModulus(), kappa, 1e-14);
   }
 
+  /// @brief Verifies parameter accessors for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, ParameterAccessors)
   {
     Solid::NeoHookean law(3.0, 1.5);
@@ -1626,6 +1683,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getShearModulus(), 1.5, 1e-14);
   }
 
+  /// @brief Verifies parameter accessors for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, ParameterAccessors)
   {
     Solid::SaintVenantKirchhoff law(4.0, 2.0);

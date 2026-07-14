@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test build for variational real P1 grid function by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_GridFunction, SanityTest_Build)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -22,6 +23,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Verifies assignment from real function for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, AssignmentFromRealFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -38,6 +40,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies project linear function for variational real P1 grid function by checking grid-function projection.
   TEST(Rodin_Variational_Real_P1_GridFunction, ProjectLinearFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -52,6 +55,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(gf.getSize(), 0);
   }
 
+  /// @brief Verifies arithmetic operations for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, ArithmeticOperations)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -77,6 +81,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies subtraction operations for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, SubtractionOperations)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -102,6 +107,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies division operations for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, DivisionOperations)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -118,6 +124,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies min max operations for variational real P1 grid function by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_GridFunction, MinMaxOperations)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -143,6 +150,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(gf.argmax(), static_cast<Index>(gf.getSize() - 1));
   }
 
+  /// @brief Verifies sanity test build for variational vector P1 grid function by checking exact expected values.
   TEST(Rodin_Variational_Vector_P1_GridFunction, SanityTest_Build)
   {
     constexpr size_t vdim = 2;
@@ -155,6 +163,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&gf.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Verifies project vector function for variational vector P1 grid function by checking grid-function projection.
   TEST(Rodin_Variational_Vector_P1_GridFunction, ProjectVectorFunction)
   {
     constexpr size_t vdim = 2;
@@ -168,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(gf.getSize(), 0);
   }
 
+  /// @brief Verifies get value for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, GetValue)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -186,6 +196,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 7.5, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies zero initialization for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, ZeroInitialization)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

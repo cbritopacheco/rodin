@@ -141,39 +141,53 @@ namespace Rodin::Assembly
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
+      /// @brief Assembled operator type.
       using OperatorType = std::vector<Eigen::Triplet<ScalarType>>;
 
+      /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType =
         Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType =
         Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /**
+       * @brief Constructs an assembler with an explicit thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       */
       explicit OpenMP(size_t threadCount)
         : m_threadCount(threadCount)
       {
         assert(threadCount > 0);
       }
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
@@ -255,17 +269,30 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Gets the effective thread count.
+       * @return Explicit thread count or the OpenMP default.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Sets the thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       * @return Reference to this assembler.
+       */
       OpenMP& setThreadCount(size_t threadCount) noexcept
       {
         m_threadCount = threadCount;
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -306,32 +333,44 @@ namespace Rodin::Assembly
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
+      /// @brief Assembled operator type.
       using OperatorType = Math::SparseMatrix<ScalarType>;
 
+      /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /**
+       * @brief Constructs an assembler with an explicit thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       */
       OpenMP(size_t threadCount)
         : m_assembly(threadCount)
       {
         assert(threadCount > 0);
       }
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_assembly(other.m_assembly)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_assembly(std::move(other.m_assembly))
@@ -351,17 +390,30 @@ namespace Rodin::Assembly
         res.setFromTriplets(triplets.begin(), triplets.end());
       }
 
+      /**
+       * @brief Gets the effective thread count.
+       * @return Explicit thread count or the OpenMP default.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_assembly.getThreadCount();
       }
 
+      /**
+       * @brief Sets the thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       * @return Reference to this assembler.
+       */
       OpenMP& setThreadCount(size_t threadCount) noexcept
       {
         m_assembly.setThreadCount(threadCount);
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -373,6 +425,9 @@ namespace Rodin::Assembly
         Variational::BilinearForm<Solution, TrialFES, TestFES, std::vector<Eigen::Triplet<ScalarType>>>> m_assembly;
   };
 
+  /**
+   * @brief OpenMP bilinear form assembly into a dense matrix.
+   */
   template <class Solution, class TrialFES, class TestFES>
   class OpenMP<
     Math::Matrix<
@@ -400,35 +455,50 @@ namespace Rodin::Assembly
               typename FormLanguage::Traits<TestFES>::ScalarType>::Type>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Dot<
           typename FormLanguage::Traits<TrialFES>::ScalarType,
           typename FormLanguage::Traits<TestFES>::ScalarType>::Type;
 
+      /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType = Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Bilinear form type assembled by this backend.
       using BilinearFormType = Variational::BilinearForm<Solution, TrialFES, TestFES, OperatorType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OperatorType, BilinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
+      /**
+       * @brief Executes dense matrix assembly.
+       * @param res Output dense matrix.
+       * @param input Bilinear form assembly input.
+       */
       void execute(OperatorType& res, const InputType& input) const override
       {
         res.resize(input.getTestFES().getSize(), input.getTrialFES().getSize());
@@ -547,12 +617,21 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Sets the thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       * @return Reference to this assembler.
+       */
       OpenMP& setThreadCount(size_t threadCount) noexcept
       {
         m_threadCount = threadCount;
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -575,30 +654,44 @@ namespace Rodin::Assembly
         Variational::LinearForm<FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
 
+      /// @brief Linear form type assembled by this backend.
       using LinearFormType = Variational::LinearForm<FES, VectorType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<VectorType, LinearFormType>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
+      /**
+       * @brief Executes vector assembly.
+       * @param res Output vector.
+       * @param input Linear form assembly input.
+       */
       void execute(VectorType& res, const InputType& input) const override
       {
         res.resize(input.getFES().getSize());
@@ -664,17 +757,30 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Sets the thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       * @return Reference to this assembler.
+       */
       OpenMP& setThreadCount(size_t threadCount) noexcept
       {
         m_threadCount = threadCount;
         return *this;
       }
 
+      /**
+       * @brief Gets the effective thread count.
+       * @return Explicit thread count or the OpenMP default.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -684,6 +790,9 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
+  /**
+   * @brief OpenMP value Dirichlet boundary condition assembly.
+   */
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class OpenMP<
     IndexMap<Scalar>,
@@ -695,32 +804,47 @@ namespace Rodin::Assembly
           Variational::TrialFunction<Solution, FES>, Variational::FunctionBase<ValueDerived>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Trial function type constrained by the boundary condition.
       using TrialFunctionType = Variational::TrialFunction<Solution, FES>;
 
+      /// @brief Boundary value function type.
       using ValueType = Variational::FunctionBase<ValueDerived>;
 
+      /// @brief Dirichlet condition type.
       using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
 
+      /// @brief Parent class type.
       using Parent = AssemblyBase<IndexMap<Scalar>, DirichletBCType>;
 
+      /// @brief Range type of the finite element space.
       using FESRangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(std::move(other.m_threadCount))
       {}
 
+      /**
+       * @brief Executes value Dirichlet boundary condition assembly.
+       * @param res Output map from constrained DOFs to values.
+       * @param input Boundary condition input.
+       */
       void execute(IndexMap<Scalar>& res, const InputType& input) const override
       {
         const auto& u = input.getOperand();
@@ -774,17 +898,30 @@ namespace Rodin::Assembly
         } // end parallel
       }
 
+      /**
+       * @brief Gets the effective thread count.
+       * @return Explicit thread count or the OpenMP default.
+       */
       size_t getThreadCount() const noexcept
       {
         return m_threadCount.value_or(omp_get_max_threads());
       }
 
+      /**
+       * @brief Sets the thread count.
+       * @param threadCount Number of OpenMP threads to use.
+       * @return Reference to this assembler.
+       */
       OpenMP& setThreadCount(size_t threadCount) noexcept
       {
         m_threadCount = threadCount;
         return *this;
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override
       {
         return new OpenMP(*this);
@@ -794,6 +931,9 @@ namespace Rodin::Assembly
       Optional<size_t> m_threadCount;
   };
 
+  /**
+   * @brief OpenMP single-field problem assembly.
+   */
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class OpenMP<
     LinearSystem,
@@ -803,44 +943,61 @@ namespace Rodin::Assembly
         Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
+      /// @brief Parent class type.
       using Parent =
         AssemblyBase<
           LinearSystemType,
           Variational::Problem<LinearSystemType, TrialFunction, TestFunction>>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType =
         Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType =
         Variational::LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)), m_threadCount(other.m_threadCount)
       {}
 
+      /**
+       * @brief Executes full problem assembly.
+       * @param axb Output linear system.
+       * @param input Problem assembly input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         auto& A = axb.getOperator();
@@ -928,11 +1085,9 @@ namespace Rodin::Assembly
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
           std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
 
-          auto sparse_entry =
-            [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
-                std::vector<std::pair<Index, ScalarType>>& localRhs,
-                Index row, Index col, ScalarType val)
-          {
+          auto sparseEntry = [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
+                               std::vector<std::pair<Index, ScalarType>>& localRhs,
+                               Index row, Index col, ScalarType val) {
             if (val == ScalarType(0))
               return;
 
@@ -953,9 +1108,8 @@ namespace Rodin::Assembly
             }
           };
 
-          auto vector_entry =
-            [&](std::vector<std::pair<Index, ScalarType>>& localRhs, Index row, ScalarType val)
-          {
+          auto vectorEntry = [&](std::vector<std::pair<Index, ScalarType>>& localRhs,
+                               Index row, ScalarType val) {
             if (val == ScalarType(0))
               return;
 
@@ -1002,7 +1156,7 @@ namespace Rodin::Assembly
                   {
                     const Index J = colsDOF(j);
                     const ScalarType val = Math::conj(integrator->integrate(j, i));
-                    sparse_entry(localT, localRhs, I, J, val);
+                    sparseEntry(localT, localRhs, I, J, val);
                   }
                 }
               }
@@ -1067,7 +1221,7 @@ namespace Rodin::Assembly
                     {
                       const Index J = colsDOF(j);
                       const ScalarType val = Math::conj(integrator->integrate(j, i));
-                      sparse_entry(localT, localRhs, I, J, val);
+                      sparseEntry(localT, localRhs, I, J, val);
                     }
                   }
                 }
@@ -1081,7 +1235,7 @@ namespace Rodin::Assembly
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-                sparse_entry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
+                sparseEntry(tchunks[0], rhsChunks[0], it.row(), it.col(), it.value());
           }
 
           // ---------------- LFIs ----------------
@@ -1116,8 +1270,8 @@ namespace Rodin::Assembly
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = dofs(l);
-                  vector_entry(
-                      localRhs, I, -static_cast<ScalarType>(integrator->integrate(l)));
+                  vectorEntry(
+                    localRhs, I, -static_cast<ScalarType>(integrator->integrate(l)));
                 }
               }
             }
@@ -1128,10 +1282,8 @@ namespace Rodin::Assembly
           {
             const auto& vec = lf.getVector();
             for (Eigen::Index i = 0; i < vec.size(); ++i)
-              vector_entry(
-                  rhsChunks[0],
-                  static_cast<Index>(i),
-                  static_cast<ScalarType>(vec.coeff(i)));
+              vectorEntry(rhsChunks[0], static_cast<Index>(i),
+                static_cast<ScalarType>(vec.coeff(i)));
           }
 
           // ---------------- Reduce RHS chunks into b ----------------
@@ -1495,6 +1647,12 @@ namespace Rodin::Assembly
       // requested side, leaving the other operand untouched (the targeted
       // contract). This keeps the intricate parallel BC-elimination logic in a
       // single code path instead of duplicating a gated variant.
+      /**
+       * @brief Executes targeted problem assembly.
+       * @param axb Output linear system.
+       * @param input Problem assembly input.
+       * @param target Side of the system to assemble.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -1508,12 +1666,19 @@ namespace Rodin::Assembly
           axb.getVector() = std::move(scratch.getVector());
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 
     private:
       Optional<size_t> m_threadCount;
   };
 
+  /**
+   * @brief OpenMP mixed problem assembly.
+   */
   template <class LinearSystem, class U1, class U2, class U3, class ... Us>
   class OpenMP<
     LinearSystem,
@@ -1523,45 +1688,62 @@ namespace Rodin::Assembly
         Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
   {
     public:
+      /// @brief Linear system type.
       using LinearSystemType = LinearSystem;
 
+      /// @brief Parent class type.
       using Parent =
         AssemblyBase<
           LinearSystemType,
           Variational::Problem<LinearSystemType, U1, U2, U3, Us...>>;
 
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystemType>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystemType>::ScalarType;
 
+      /// @brief Local bilinear form integrator base type.
       using LocalBilinearFormIntegratorBaseType =
         Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Global bilinear form integrator base type.
       using GlobalBilinearFormIntegratorBaseType =
         Variational::GlobalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType =
         Variational::LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Default constructor.
       OpenMP() = default;
 
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other)
         : Parent(other),
           m_threadCount(other.m_threadCount)
       {}
 
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other)
         : Parent(std::move(other)),
           m_threadCount(other.m_threadCount)
       {}
 
+      /**
+       * @brief Executes full mixed problem assembly.
+       * @param axb Output linear system.
+       * @param input Mixed problem input.
+       */
       void execute(LinearSystemType& axb, const InputType& input) const override
       {
         auto& A = axb.getOperator();
@@ -1704,8 +1886,7 @@ namespace Rodin::Assembly
             tchunks.shrink_to_fit();
         }
 
-        auto sparse_entry = [&](int tid, Index row, Index col, ScalarType val)
-        {
+        auto sparseEntry = [&](int tid, Index row, Index col, ScalarType val) {
           if (val == ScalarType(0))
             return;
 
@@ -1791,7 +1972,7 @@ namespace Rodin::Assembly
                         continue;
 
                       if constexpr (IsSparse)
-                        sparse_entry(tid, I, J, val);
+                        sparseEntry(tid, I, J, val);
                       else
                       {
                         const ScalarType colValue =
@@ -1901,7 +2082,7 @@ namespace Rodin::Assembly
                           continue;
 
                         if constexpr (IsSparse)
-                          sparse_entry(tid, I, J, val);
+                          sparseEntry(tid, I, J, val);
                         else
                         {
                           const ScalarType colValue =
@@ -2030,11 +2211,9 @@ namespace Rodin::Assembly
             const auto& op = bf.getOperator();
             for (int k = 0; k < op.outerSize(); ++k)
               for (typename OperatorType::InnerIterator it(op, k); it; ++it)
-	                sparse_entry(0,
-	                  static_cast<Index>(vOff) + it.row(),
-	                  static_cast<Index>(uOff) + it.col(),
-	                  it.value());
-	          }
+                sparseEntry(0, static_cast<Index>(vOff) + it.row(),
+                  static_cast<Index>(uOff) + it.col(), it.value());
+          }
 
           for (int tid = 0; tid < tc; ++tid)
           {
@@ -2191,6 +2370,12 @@ namespace Rodin::Assembly
       // backend: assemble the full system into a scratch object and expose only
       // the requested side, leaving the other operand untouched (the targeted
       // contract). Keeps the parallel block BC-elimination logic in one path.
+      /**
+       * @brief Executes targeted mixed problem assembly.
+       * @param axb Output linear system.
+       * @param input Mixed problem input.
+       * @param target Side of the system to assemble.
+       */
       void execute(
           LinearSystemType& axb,
           const InputType& input,
@@ -2204,6 +2389,10 @@ namespace Rodin::Assembly
           axb.getVector() = std::move(scratch.getVector());
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
 
     private:
@@ -2235,27 +2424,48 @@ namespace Rodin::Assembly
           Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
+      /// @brief Output map type for slave-to-master identifications.
       using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+
+      /// @brief Slave trial function type.
       using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
+
+      /// @brief Shape-function expression type on the right-hand side.
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+
+      /// @brief Dirichlet condition type.
       using DirichletBCType =
         Variational::DirichletBC<TrialFunctionType, ValueType>;
+
+      /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
+
+      /// @brief Assembly input data type.
       using InputType = typename Parent::InputType;
 
+      /// @brief Default constructor.
       OpenMP() = default;
+
+      /// @brief Copy constructor.
       OpenMP(const OpenMP& other) : Parent(other) {}
+
+      /// @brief Move constructor.
       OpenMP(OpenMP&& other) : Parent(std::move(other)) {}
 
+      /**
+       * @brief Executes identification Dirichlet boundary condition assembly.
+       * @param res Output map from slave DOFs to master DOF coefficients.
+       * @param input Boundary condition input.
+       */
       void execute(OutputType& res, const InputType& input) const override
       {
         const auto& u = input.getOperand();
         auto& Av = const_cast<ValueType&>(input.getShapeFunction());
         const auto& essBdr = input.getEssentialBoundary();
 
-        const auto& fes_u = u.getFiniteElementSpace();
-        const auto& fes_v = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh  = fes_u.getMesh();
+        const auto& fesU = u.getFiniteElementSpace();
+        const auto& fesV = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh = fesU.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
 
         res.clear();
@@ -2268,15 +2478,13 @@ namespace Rodin::Assembly
             if (!a || !essBdr.count(*a)) continue;
           }
 
-          const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
-          const auto& fe_v = fes_v.getFiniteElement(faceDim, fi);
-          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
-          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          const auto& feU = fesU.getFiniteElement(faceDim, fi);
+          const auto& feV = fesV.getFiniteElement(faceDim, fi);
+          const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
 
-          const Index nMasters = static_cast<Index>(fe_v.getCount());
-          for (Index s = 0;
-               s < static_cast<Index>(fe_u.getCount());
-               s++)
+          const Index nMasters = static_cast<Index>(feV.getCount());
+          for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
           {
             const Index slave = slaveDOFs[s];
             if (res.find(slave) != res.end()) continue;
@@ -2296,9 +2504,8 @@ namespace Rodin::Assembly
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =
-                fes_u.getPullback({ faceDim, fi }, std::move(basisCallable));
-              const Scalar c =
-                static_cast<Scalar>(fe_u.getLinearForm(s)(mapping));
+                fesU.getPullback({faceDim, fi}, std::move(basisCallable));
+              const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
               if (c != Scalar(0))
               {
                 mIdx.push_back(masterDOFs[j]);
@@ -2321,6 +2528,10 @@ namespace Rodin::Assembly
         }
       }
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       OpenMP* copy() const noexcept override { return new OpenMP(*this); }
   };
 }

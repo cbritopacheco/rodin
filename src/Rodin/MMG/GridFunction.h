@@ -8,8 +8,8 @@
  * @file GridFunction.h
  * @brief Grid function aliases for MMG-driven workflows.
  */
-#ifndef RODIN_RODINEXTERNAL_MMG_GRIDFUNCTION_H
-#define RODIN_RODINEXTERNAL_MMG_GRIDFUNCTION_H
+#ifndef RODIN_MMG_GRIDFUNCTION_H
+#define RODIN_MMG_GRIDFUNCTION_H
 
 #include "Rodin/Geometry/Mesh.h"
 #include "Rodin/Variational/ForwardDecls.h"
@@ -23,7 +23,7 @@ namespace Rodin::MMG
    * for vector fields).
    *
    * MMG workflows in Rodin operate on first-order nodal fields defined on
-   * @ref Rodin::Geometry::Mesh<Context::Local> "local meshes". This alias
+   * @ref Rodin::Geometry::Mesh "local meshes". This alias
    * standardizes that representation for scalar and vector quantities transferred
    * to/from MMG solution structures.
    */

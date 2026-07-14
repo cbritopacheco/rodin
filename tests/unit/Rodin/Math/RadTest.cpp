@@ -21,6 +21,7 @@ class RadTest : public ::testing::Test
 };
 
 // Test Rad construction
+/// @brief Test value constructor.
 TEST_F(RadTest, Construction)
 {
   // Test value constructor
@@ -38,6 +39,7 @@ TEST_F(RadTest, Construction)
 }
 
 // Test Rad static factory methods inherited from Unit
+/// @brief Test One() - should represent 1 radian.
 TEST_F(RadTest, StaticFactoryMethods)
 {
   // Test One() - should represent 1 radian
@@ -50,6 +52,7 @@ TEST_F(RadTest, StaticFactoryMethods)
 }
 
 // Test Rad with common angular values
+/// @brief Test pi radians (180 degrees).
 TEST_F(RadTest, CommonAngularValues)
 {
   // Test pi radians (180 degrees)
@@ -70,6 +73,7 @@ TEST_F(RadTest, CommonAngularValues)
 }
 
 // Test Rad arithmetic operations
+/// @brief Verifies arithmetic operations for rad test by checking tolerance-based numerical results.
 TEST_F(RadTest, ArithmeticOperations)
 {
   Rad r1(M_PI_2);  // 90 degrees
@@ -93,6 +97,7 @@ TEST_F(RadTest, ArithmeticOperations)
 }
 
 // Test Rad comparison operations
+/// @brief Verifies comparison operations for rad test by checking true predicates, false predicates.
 TEST_F(RadTest, ComparisonOperations)
 {
   Rad r1(M_PI_4);     // 45 degrees
@@ -129,6 +134,7 @@ TEST_F(RadTest, ComparisonOperations)
 }
 
 // Test Rad unary operations
+/// @brief Verifies unary operations for rad test by checking tolerance-based numerical results.
 TEST_F(RadTest, UnaryOperations)
 {
   Rad r1(M_PI_4);
@@ -147,6 +153,7 @@ TEST_F(RadTest, UnaryOperations)
 }
 
 // Test Rad compound assignment operations
+/// @brief Verifies compound assignment operations for rad test by checking tolerance-based numerical results.
 TEST_F(RadTest, CompoundAssignmentOperations)
 {
   Rad r1(M_PI_4);  // 45 degrees
@@ -170,6 +177,7 @@ TEST_F(RadTest, CompoundAssignmentOperations)
 }
 
 // Test Rad with trigonometric functions
+/// @brief Test that Rad works correctly with trigonometric functions.
 TEST_F(RadTest, TrigonometricConsistency)
 {
   // Test that Rad works correctly with trigonometric functions
@@ -192,6 +200,7 @@ TEST_F(RadTest, TrigonometricConsistency)
 }
 
 // Test Rad assignment operations
+/// @brief Verifies assignment operations for rad test by checking tolerance-based numerical results.
 TEST_F(RadTest, AssignmentOperations)
 {
   Rad r1(M_PI_4);
@@ -207,6 +216,7 @@ TEST_F(RadTest, AssignmentOperations)
 }
 
 // Test Rad edge cases
+/// @brief Test with zero.
 TEST_F(RadTest, EdgeCases)
 {
   // Test with zero
@@ -227,6 +237,7 @@ TEST_F(RadTest, EdgeCases)
 }
 
 // Test Rad type properties
+/// @brief Test that Rad inherits from Unit<Rad, Real>.
 TEST_F(RadTest, TypeProperties)
 {
   // Test that Rad inherits from Unit<Rad, Real>

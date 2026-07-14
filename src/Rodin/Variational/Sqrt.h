@@ -17,6 +17,7 @@
 #include "Function.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -48,8 +49,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Sqrt<FunctionBase<NestedDerived>>>;
 
       /**
@@ -143,4 +146,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

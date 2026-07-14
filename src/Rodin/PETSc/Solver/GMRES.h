@@ -1,5 +1,11 @@
-#ifndef RODIN_SOLVER_PETSC_GMRES_H
-#define RODIN_SOLVER_PETSC_GMRES_H
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_PETSC_SOLVER_GMRES_H
+#define RODIN_PETSC_SOLVER_GMRES_H
 
 /**
  * @file GMRES.h
@@ -38,9 +44,9 @@ namespace Rodin::Solver
   class GMRES<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
-      /// @brief PETSc matrix type (`::Mat`) for the system operator.
+      /// @brief PETSc matrix type (@c Mat) for the system operator.
       using OperatorType = ::Mat;
-      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the RHS and solution.
       using VectorType = ::Vec;
       /// @brief Scalar type (`PetscScalar`).
       using ScalarType = PetscScalar;
@@ -88,4 +94,4 @@ namespace Rodin::PETSc::Solver
   using GMRES = Rodin::Solver::GMRES<Math::LinearSystem>;
 }
 
-#endif // RODIN_SOLVER_PETSC_GMRES_H
+#endif // RODIN_PETSC_SOLVER_GMRES_H

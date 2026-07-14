@@ -84,12 +84,15 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
   };
 
   // Resolution aliases.
+  /// @brief Helper used by the tests to PET Sc Manufactured Poisson 16 x 16.
   using PETSc_Manufactured_Poisson_16x16 =
     PETSc_Manufactured_Poisson<16>;
 
+  /// @brief Helper used by the tests to PET Sc Manufactured Poisson 32 x 32.
   using PETSc_Manufactured_Poisson_32x32 =
     PETSc_Manufactured_Poisson<32>;
 
+  /// @brief Helper used by the tests to PET Sc Manufactured Poisson 64 x 64.
   using PETSc_Manufactured_Poisson_64x64 =
     PETSc_Manufactured_Poisson<64>;
 
@@ -362,6 +365,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
     }
   };
 
+  /// @brief Instantiates PET Sc Manufactured Poisson 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       MeshParams16x16,
       PETSc_Manufactured_Poisson_16x16,
@@ -370,6 +374,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
           Polytope::Type::Quadrilateral),
       PolytopeNameGenerator());
 
+  /// @brief Instantiates PET Sc Manufactured Poisson 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       MeshParams32x32,
       PETSc_Manufactured_Poisson_32x32,
@@ -382,6 +387,7 @@ namespace Rodin::Tests::Manufactured::PETScPoisson
 // ---------------------------------------------------------------------------
 // main() — initializes PETSc once before running all tests.
 // ---------------------------------------------------------------------------
+/// @brief Initializes the parallel test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   [[maybe_unused]] PetscErrorCode ierr =

@@ -18,7 +18,7 @@
   @section examples-mmg-io-create Creating an MMG Mesh
 
   An `MMG::Mesh` can be created using the same
-  @ref Rodin::Geometry::Mesh::UniformGrid "UniformGrid()" method as a
+  @ref Rodin::Geometry::Mesh "UniformGrid()" method as a
   regular mesh. The key difference is that `MMG::Mesh` stores additional
   metadata (corners, ridges, and required entities) that MMG uses during
   remeshing:

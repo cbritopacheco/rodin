@@ -11,8 +11,8 @@
  * This file provides the Rvachev class, which normalizes level set functions
  * to approximate signed distance functions using Rvachev's method.
  */
-#ifndef RODIN_MODELS_DISTANCE_RVACHEV_H
-#define RODIN_MODELS_DISTANCE_RVACHEV_H
+#ifndef RODIN_DISTANCE_RVACHEV_H
+#define RODIN_DISTANCE_RVACHEV_H
 
 #include <utility>
 

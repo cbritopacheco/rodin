@@ -8,7 +8,7 @@
  * @file Flow.h
  * @brief Flow map operators for shape functions and grid functions.
  *
- * This file defines the @ref Rodin::Variational::Flow class, which implements
+ * This file defines the `Rodin::Variational::Flow` class, which implements
  * the flow map (push-forward) of functions along a vector field. Flow maps are
  * used in advection problems, level set methods, and semi-Lagrangian time
  * integration schemes.
@@ -60,6 +60,7 @@
 #include "Rodin/QF/QuadratureFormula.h"
 #include "Rodin/Variational/ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <
@@ -74,13 +75,15 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>,
       VectorField, Step, BoundaryPolicy>>
   {
-    using FESType = FES;
+    /// @brief Finite element space type.
+      using FESType = FES;
 
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType =
-      Variational::TestSpace;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType =
+        Variational::TestSpace;
 
-    using OperandType =
-      Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
+    /// @brief Operand type.
+      using OperandType =
+        Variational::ShapeFunctionBase<Derived, FES, Variational::TestSpace>;
   };
 }
 
@@ -153,6 +156,7 @@ namespace Rodin::Variational
       /// @brief Boundary policy type.
       using BoundaryPolicyType = BoundaryPolicy;
 
+      /// @brief Parent class type.
       using Parent =
         FunctionBase<Flow<FunctionBase<Derived>, VectorField, Step, BoundaryPolicy>>;
 
@@ -393,18 +397,17 @@ namespace Rodin::Variational
         };
 
         // Reuse dynamic work buffers while keeping stack-backed points local.
-        Index s_cell = Index(-1);
-        Math::SpatialPoint s_rc{{}}, s_rc1{{}}, s_rcTmp{{}},
-                           s_rEval{{}}, s_rIn{{}};
-        Math::SpatialPoint s_pc{{}}, s_x{{}}, s_xIn{{}}, s_xFace{{}};
+        Index sCell = Index(-1);
+        Math::SpatialPoint sRc{{}}, sRc1{{}}, sRcTmp{{}}, sREval{{}}, sRIn{{}};
+        Math::SpatialPoint sPc{{}}, sX{{}}, sXIn{{}}, sXFace{{}};
         static thread_local std::vector<Candidate> s_candidates;
         static thread_local std::vector<size_t> s_faceSet;
 
         // Locate the starting cell and reference coordinates.
         if (poly0.getDimension() == cd)
         {
-          s_cell = poly0.getIndex();
-          s_rc = p.getReferenceCoordinates();
+          sCell = poly0.getIndex();
+          sRc = p.getReferenceCoordinates();
         }
         else if (poly0.getDimension() == cd - 1)
         {
@@ -414,22 +417,25 @@ namespace Rodin::Variational
           if (mesh.isBoundary(f))
           {
             const Index c = adj[0];
-            mesh.getPolytopeTransformation(cd, c).inverse(s_rcTmp, p.getPhysicalCoordinates());
-            Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(s_rc, s_rcTmp);
-            s_cell = c;
+            mesh.getPolytopeTransformation(cd, c).inverse(
+              sRcTmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c)).cell(sRc, sRcTmp);
+            sCell = c;
           }
           else
           {
             const Index c0 = adj[0];
             const Index c1 = adj[1];
 
-            mesh.getPolytopeTransformation(cd, c0).inverse(s_rcTmp, p.getPhysicalCoordinates());
-            Geometry::Polytope::Project(mesh.getGeometry(cd, c0)).cell(s_rc1, s_rcTmp);
-            const Math::SpatialPoint rc0 = s_rc1;
+            mesh.getPolytopeTransformation(cd, c0).inverse(
+              sRcTmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c0)).cell(sRc1, sRcTmp);
+            const Math::SpatialPoint rc0 = sRc1;
 
-            mesh.getPolytopeTransformation(cd, c1).inverse(s_rcTmp, p.getPhysicalCoordinates());
-            Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(s_rc1, s_rcTmp);
-            const Math::SpatialPoint rc1 = s_rc1;
+            mesh.getPolytopeTransformation(cd, c1).inverse(
+              sRcTmp, p.getPhysicalCoordinates());
+            Geometry::Polytope::Project(mesh.getGeometry(cd, c1)).cell(sRc1, sRcTmp);
+            const Math::SpatialPoint rc1 = sRc1;
 
             const auto& faces0 = conn.getIncidence(cd, cd - 1).at(c0);
             size_t j0 = faces0.size();
@@ -476,24 +482,24 @@ namespace Rodin::Variational
               const Real s1 = interiorScore(c1, rc1);
               if (s1 > s0)
               {
-                s_cell = c1;
-                s_rc = rc1;
+                sCell = c1;
+                sRc = rc1;
               }
               else
               {
-                s_cell = c0;
-                s_rc = rc0;
+                sCell = c0;
+                sRc = rc0;
               }
             }
             else if (ndv0 > 0)
             {
-              s_cell = c1;
-              s_rc = rc1;
+              sCell = c1;
+              sRc = rc1;
             }
             else
             {
-              s_cell = c0;
-              s_rc = rc0;
+              sCell = c0;
+              sRc = rc0;
             }
           }
         }
@@ -503,15 +509,15 @@ namespace Rodin::Variational
         }
 
         // Resize scratch buffers.
-        s_rc1.resize(s_rc.size());
-        s_rcTmp.resize(s_rc.size());
-        s_rEval.resize(s_rc.size());
-        s_rIn.resize(s_rc.size());
+        sRc1.resize(sRc.size());
+        sRcTmp.resize(sRc.size());
+        sREval.resize(sRc.size());
+        sRIn.resize(sRc.size());
 
-        s_pc.resize(p.getPhysicalCoordinates().size());
-        s_x.resize(s_pc.size());
-        s_xIn.resize(s_pc.size());
-        s_xFace.resize(s_pc.size());
+        sPc.resize(p.getPhysicalCoordinates().size());
+        sX.resize(sPc.size());
+        sXIn.resize(sPc.size());
+        sXFace.resize(sPc.size());
 
         // Avoid immediate backtracking if there are alternatives.
         std::optional<size_t> lastFace;
@@ -540,8 +546,8 @@ namespace Rodin::Variational
 
           if (violated)
           {
-            Geometry::Polytope::Project(g).cell(s_rc1, r);
-            r = s_rc1;
+            Geometry::Polytope::Project(g).cell(sRc1, r);
+            r = sRc1;
           }
         };
 
@@ -549,20 +555,20 @@ namespace Rodin::Variational
         {
           if (++outerIterations > maxOuterIterations)
           {
-            const auto itf = mesh.getPolytope(cd, s_cell);
-            return Trace{ true, tau, Geometry::Point(*itf, s_rc), correction };
+            const auto itf = mesh.getPolytope(cd, sCell);
+            return Trace{true, tau, Geometry::Point(*itf, sRc), correction};
           }
 
           const Real tauBeforeLoop = tau;
-          const Index cellBeforeLoop = s_cell;
-          const Math::SpatialPoint rcBeforeLoop = s_rc;
+          const Index cellBeforeLoop = sCell;
+          const Math::SpatialPoint rcBeforeLoop = sRc;
 
-          const auto itc = mesh.getPolytope(cd, s_cell);
+          const auto itc = mesh.getPolytope(cd, sCell);
           const auto& cell = *itc;
 
-          const auto g = mesh.getGeometry(cd, s_cell);
+          const auto g = mesh.getGeometry(cd, sCell);
           const Geometry::Polytope::Traits ts(g);
-          const auto& faces = conn.getIncidence(cd, cd - 1).at(s_cell);
+          const auto& faces = conn.getIncidence(cd, cd - 1).at(sCell);
           const auto& hs = ts.getHalfSpace();
 
           auto vref = [&](const Math::SpatialPoint& r) -> Math::SpatialVector<Real>
@@ -581,10 +587,10 @@ namespace Rodin::Variational
               });
           };
 
-          mesh.getPolytopeTransformation(cd, s_cell).transform(s_x, s_rc);
+          mesh.getPolytopeTransformation(cd, sCell).transform(sX, sRc);
 
-          const Real rnorm = std::sqrt(norm2(s_rc));
-          const auto v0 = vref(s_rc);
+          const Real rnorm = std::sqrt(norm2(sRc));
+          const auto v0 = vref(sRc);
           const Real vrefMag = std::sqrt(norm2(v0));
 
           const Real epsPhi = tolFactor * sqrtEps * (Real(1) + rnorm);
@@ -593,10 +599,10 @@ namespace Rodin::Variational
           Real dtCap = tau;
           {
             const auto rcent = ts.getCentroid();
-            s_rIn = rcent;
-            mesh.getPolytopeTransformation(cd, s_cell).transform(s_xIn, s_rIn);
+            sRIn = rcent;
+            mesh.getPolytopeTransformation(cd, sCell).transform(sXIn, sRIn);
 
-            const Geometry::Point qJ(cell, s_rIn, s_xIn);
+            const Geometry::Point qJ(cell, sRIn, sXIn);
             const auto JinvT = qJ.getJacobianInverse().transpose();
 
             Real hScale = Real(0);
@@ -604,30 +610,30 @@ namespace Rodin::Variational
             for (size_t j = 0; j < faces.size(); ++j)
             {
               const Math::SpatialVector<Real> nref = hs.matrix.row(j).transpose();
-              auto n_u = JinvT * nref;
-              const Real nn = std::sqrt(std::max<Real>(Real(0), dot(n_u, n_u)));
+              auto nU = JinvT * nref;
+              const Real nn = std::sqrt(std::max<Real>(Real(0), dot(nU, nU)));
               if (!(nn > Real(0)) || !isFinite(nn))
                 continue;
 
-              Geometry::Polytope::Project(g).face(j, s_rcTmp, s_rIn);
-              mesh.getPolytopeTransformation(cd, s_cell).transform(s_xFace, s_rcTmp);
+              Geometry::Polytope::Project(g).face(j, sRcTmp, sRIn);
+              mesh.getPolytopeTransformation(cd, sCell).transform(sXFace, sRcTmp);
 
-              Real c_u = dot(n_u, s_xFace);
-              const Real sdIn = c_u - dot(n_u, s_xIn);
+              Real cU = dot(nU, sXFace);
+              const Real sdIn = cU - dot(nU, sXIn);
               if (sdIn < 0)
               {
-                n_u = -n_u;
-                c_u = -c_u;
+                nU = -nU;
+                cU = -cU;
               }
 
-              const Real d = (c_u - dot(n_u, s_xIn)) / nn;
+              const Real d = (cU - dot(nU, sXIn)) / nn;
               if (isFinite(d))
                 hScale = std::max(hScale, d);
             }
 
             Real vphysMag = Real(0);
             {
-              const Geometry::Point qp(cell, s_rc, s_x);
+              const Geometry::Point qp(cell, sRc, sX);
               const auto vphys = vphysOf(qp);
               vphysMag = std::sqrt(norm2(vphys));
               if (!isFinite(vphysMag))
@@ -653,7 +659,7 @@ namespace Rodin::Variational
             size_t hops = 0;
             while (hops++ < maxZeroHops)
             {
-              const auto vz = vref(s_rc);
+              const auto vz = vref(sRc);
 
               s_faceSet.clear();
               s_faceSet.reserve(faces.size());
@@ -661,7 +667,7 @@ namespace Rodin::Variational
               bool haveNonLast = false;
               for (size_t j = 0; j < faces.size(); ++j)
               {
-                const Real ph = phiFace(hs, j, s_rc);
+                const Real ph = phiFace(hs, j, sRc);
                 if (std::abs(ph) > epsPhi)
                   continue;
 
@@ -680,10 +686,9 @@ namespace Rodin::Variational
               if (s_faceSet.empty())
                 break;
 
-              auto key = [&](size_t j) -> std::tuple<Real, Real, Index>
-              {
-                const Real ph = phiFace(hs, j, s_rc);
-                const auto vz2 = vref(s_rc);
+              auto key = [&](size_t j) -> std::tuple<Real, Real, Index> {
+                const Real ph = phiFace(hs, j, sRc);
+                const auto vz2 = vref(sRc);
                 const Real ndv = vz2.dot(hs.matrix.row(j).transpose());
                 const Index fid = faces[j];
                 return { std::abs(ph), -ndv, fid };
@@ -714,28 +719,28 @@ namespace Rodin::Variational
 
               if (mesh.isBoundary(f))
               {
-                BoundaryHit bh{ tau, s_cell, s_rc, best, correction };
+                BoundaryHit bh{tau, sCell, sRc, best, correction};
                 if (!m_bp(bh))
                 {
-                  exitTrace.emplace(true, tau, Geometry::Point(cell, s_rc), correction);
+                  exitTrace.emplace(true, tau, Geometry::Point(cell, sRc), correction);
                   return false;
                 }
                 lastFace.reset();
                 break;
               }
 
-              mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+              mesh.getPolytopeTransformation(cd, sCell).transform(sPc, sRc);
               const auto& nbrs = conn.getIncidence(cd - 1, cd).at(f);
               if (nbrs.size() != 2)
                 return false;
 
-              s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
+              sCell = (nbrs[0] == sCell) ? nbrs[1] : nbrs[0];
 
-              mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-              Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-              s_rc = s_rc1;
+              mesh.getPolytopeTransformation(cd, sCell).inverse(sRc, sPc);
+              Geometry::Polytope::Project(mesh.getGeometry(cd, sCell)).cell(sRc1, sRc);
+              sRc = sRc1;
 
-              const auto& facesNew = conn.getIncidence(cd, cd - 1).at(s_cell);
+              const auto& facesNew = conn.getIncidence(cd, cd - 1).at(sCell);
               lastFace.reset();
               for (size_t j = 0; j < facesNew.size(); ++j)
               {
@@ -754,23 +759,23 @@ namespace Rodin::Variational
 
           if (doZeroHops())
           {
-            const Real rcMove2 = (s_rc - rcBeforeLoop).squaredNorm();
+            const Real rcMove2 = (sRc - rcBeforeLoop).squaredNorm();
             const bool sameTau = !(tau < tauBeforeLoop);
-            const bool sameCell = (s_cell == cellBeforeLoop);
+            const bool sameCell = (sCell == cellBeforeLoop);
             const bool sameRc = rcMove2 <= Real(100) * epsMachine;
 
             if (sameTau && sameCell && sameRc)
             {
-              const auto itf = mesh.getPolytope(cd, s_cell);
-              return Trace{ true, tau, Geometry::Point(*itf, s_rc), correction };
+              const auto itf = mesh.getPolytope(cd, sCell);
+              return Trace{true, tau, Geometry::Point(*itf, sRc), correction};
             }
 
             if (sameTau)
             {
               if (++stagnantIterations > maxStagnations)
               {
-                const auto itf = mesh.getPolytope(cd, s_cell);
-                return Trace{ true, tau, Geometry::Point(*itf, s_rc), correction };
+                const auto itf = mesh.getPolytope(cd, sCell);
+                return Trace{true, tau, Geometry::Point(*itf, sRc), correction};
               }
             }
             else
@@ -790,9 +795,8 @@ namespace Rodin::Variational
           size_t jStar = 0;
           Real hiStar = Real(0);
 
-          auto phiAtTime = [&](size_t j, Real t, Math::SpatialPoint& rOut) -> Real
-          {
-            advance(rOut, t, s_rc);
+          auto phiAtTime = [&](size_t j, Real t, Math::SpatialPoint& rOut) -> Real {
+            advance(rOut, t, sRc);
             return phiFace(hs, j, rOut);
           };
 
@@ -802,7 +806,7 @@ namespace Rodin::Variational
             if (!(t > Real(0)) || !isFinite(t))
               return false;
 
-            Real ph = phiAtTime(j, t, s_rEval);
+            Real ph = phiAtTime(j, t, sREval);
             if (!isFinite(ph))
               return false;
 
@@ -820,7 +824,7 @@ namespace Rodin::Variational
                 break;
 
               texp = tnext;
-              ph = phiAtTime(j, texp, s_rEval);
+              ph = phiAtTime(j, texp, sREval);
               if (!isFinite(ph))
                 return false;
 
@@ -833,7 +837,7 @@ namespace Rodin::Variational
 
             if (texp < tauCell)
             {
-              ph = phiAtTime(j, tauCell, s_rEval);
+              ph = phiAtTime(j, tauCell, sREval);
               if (isFinite(ph) && ph <= Real(0))
               {
                 hiOut = tauCell;
@@ -851,7 +855,7 @@ namespace Rodin::Variational
 
             for (size_t j = 0; j < faces.size(); ++j)
             {
-              const Real phi0 = phiFace(hs, j, s_rc);
+              const Real phi0 = phiFace(hs, j, sRc);
 
               if (!(phi0 > epsPhi))
                 continue;
@@ -929,22 +933,22 @@ namespace Rodin::Variational
           {
             if (!isFinite(tauCell) || !(tauCell > Real(0)))
             {
-              return Trace{ true, tau, Geometry::Point(cell, s_rc), correction };
+              return Trace{true, tau, Geometry::Point(cell, sRc), correction};
             }
 
             const Real tauStep = tauCell;
 
             const Real tauBefore = tau;
-            const Math::SpatialPoint rcBefore = s_rc;
+            const Math::SpatialPoint rcBefore = sRc;
 
-            advance(s_rc1, tauStep, s_rc);
-            s_rc = s_rc1;
+            advance(sRc1, tauStep, sRc);
+            sRc = sRc1;
 
-            clampIfOutside(hs, g, s_rc, epsPhi);
+            clampIfOutside(hs, g, sRc, epsPhi);
 
             tau -= tauStep;
 
-            const Real rcMove2 = (s_rc - rcBefore).squaredNorm();
+            const Real rcMove2 = (sRc - rcBefore).squaredNorm();
             const bool timeProgress = (tau < tauBefore);
             const bool spaceProgress = rcMove2 > Real(100) * epsMachine;
 
@@ -957,11 +961,11 @@ namespace Rodin::Variational
             continue;
           }
 
-          const Real phi0Star = phiFace(hs, jStar, s_rc);
+          const Real phi0Star = phiFace(hs, jStar, sRc);
           if (!(phi0Star > Real(0)))
           {
-            Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
-            s_rc = s_rc1;
+            Geometry::Polytope::Project(g).cell(sRc1, sRc);
+            sRc = sRc1;
             continue;
           }
 
@@ -978,7 +982,7 @@ namespace Rodin::Variational
               break;
 
             const Real mid = Real(0.5) * (lo + hi);
-            const Real phm = phiAtTime(jStar, mid, s_rEval);
+            const Real phm = phiAtTime(jStar, mid, sREval);
 
             if (!isFinite(phm))
             {
@@ -994,40 +998,37 @@ namespace Rodin::Variational
 
           const Real thit = hi;
 
-          advance(s_rc1, thit, s_rc);
-          Geometry::Polytope::Project(g).face(jStar, s_rc, s_rc1);
-          s_rc = s_rc1;
+          advance(sRc1, thit, sRc);
+          Geometry::Polytope::Project(g).face(jStar, sRc, sRc1);
+          sRc = sRc1;
 
-          Geometry::Polytope::Project(g).cell(s_rc1, s_rc);
-          s_rc = s_rc1;
+          Geometry::Polytope::Project(g).cell(sRc1, sRc);
+          sRc = sRc1;
 
           tau -= thit;
 
           const Index faceHit = faces[jStar];
 
-          mesh.getPolytopeTransformation(cd, s_cell).transform(s_pc, s_rc);
+          mesh.getPolytopeTransformation(cd, sCell).transform(sPc, sRc);
 
           if (mesh.isBoundary(faceHit))
           {
             const Real tauBeforeBp = tau;
-            const Index cellBeforeBp = s_cell;
-            const Math::SpatialPoint rcBeforeBp = s_rc;
+            const Index cellBeforeBp = sCell;
+            const Math::SpatialPoint rcBeforeBp = sRc;
             const Real correctionBeforeBp = correction;
 
-            BoundaryHit bh{ tau, s_cell, s_rc, jStar, correction };
+            BoundaryHit bh{tau, sCell, sRc, jStar, correction};
             if (!m_bp(bh))
-              return Trace{ true, tau, Geometry::Point(*itc, s_rc), correction };
+              return Trace{true, tau, Geometry::Point(*itc, sRc), correction};
 
-            const Real rcMove2 = (s_rc - rcBeforeBp).squaredNorm();
-            const bool progressed =
-                 (tau < tauBeforeBp)
-              || (s_cell != cellBeforeBp)
-              || (rcMove2 > Real(100) * epsMachine)
-              || (correction != correctionBeforeBp);
+            const Real rcMove2 = (sRc - rcBeforeBp).squaredNorm();
+            const bool progressed = (tau < tauBeforeBp) || (sCell != cellBeforeBp) ||
+              (rcMove2 > Real(100) * epsMachine) || (correction != correctionBeforeBp);
 
             if (!progressed)
             {
-              return Trace{ true, tau, Geometry::Point(*itc, s_rc), correction };
+              return Trace{true, tau, Geometry::Point(*itc, sRc), correction};
             }
 
             lastFace.reset();
@@ -1037,16 +1038,16 @@ namespace Rodin::Variational
           {
             const auto& nbrs = conn.getIncidence(cd - 1, cd).at(faceHit);
             if (nbrs.size() != 2)
-              return Trace{ true, tau, Geometry::Point(*itc, s_rc), correction };
-            s_cell = (nbrs[0] == s_cell) ? nbrs[1] : nbrs[0];
+              return Trace{true, tau, Geometry::Point(*itc, sRc), correction};
+            sCell = (nbrs[0] == sCell) ? nbrs[1] : nbrs[0];
           }
 
-          mesh.getPolytopeTransformation(cd, s_cell).inverse(s_rc, s_pc);
-          Geometry::Polytope::Project(mesh.getGeometry(cd, s_cell)).cell(s_rc1, s_rc);
-          s_rc = s_rc1;
+          mesh.getPolytopeTransformation(cd, sCell).inverse(sRc, sPc);
+          Geometry::Polytope::Project(mesh.getGeometry(cd, sCell)).cell(sRc1, sRc);
+          sRc = sRc1;
 
           {
-            const auto& facesNew = conn.getIncidence(cd, cd - 1).at(s_cell);
+            const auto& facesNew = conn.getIncidence(cd, cd - 1).at(sCell);
             lastFace.reset();
             for (size_t j = 0; j < facesNew.size(); ++j)
             {
@@ -1059,8 +1060,8 @@ namespace Rodin::Variational
           }
         }
 
-        const auto itf = mesh.getPolytope(cd, s_cell);
-        return Trace{ false, tau, Geometry::Point(*itf, s_rc), correction };
+        const auto itf = mesh.getPolytope(cd, sCell);
+        return Trace{false, tau, Geometry::Point(*itf, sRc), correction};
       }
 
       /**
@@ -1311,4 +1312,5 @@ namespace Rodin::Variational
     -> Flow<FunctionBase<Derived>, Velocity, Step, BBP>;
 }
 
+/// @endcond
 #endif

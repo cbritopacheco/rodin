@@ -30,6 +30,7 @@ class SuccessTest : public ::testing::Test
 };
 
 // Test Success class functionality
+/// @brief Test default construction.
 TEST_F(SuccessTest, SuccessConstruction)
 {
   // Test default construction
@@ -48,6 +49,7 @@ TEST_F(SuccessTest, SuccessConstruction)
   EXPECT_NO_THROW(Success());
 }
 
+/// @brief Verifies success message for success test by checking true predicates.
 TEST_F(SuccessTest, SuccessMessage)
 {
   Success success(successStream);
@@ -60,6 +62,7 @@ TEST_F(SuccessTest, SuccessMessage)
   EXPECT_TRUE(output.find("Operation completed successfully") != std::string::npos);
 }
 
+/// @brief Verifies success stream operator for success test by checking true predicates.
 TEST_F(SuccessTest, SuccessStreamOperator)
 {
   Success success(successStream);

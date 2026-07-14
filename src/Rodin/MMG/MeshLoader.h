@@ -8,8 +8,8 @@
  * @file MeshLoader.h
  * @brief MEDIT mesh loader specialization for @ref Rodin::MMG::Mesh.
  */
-#ifndef RODIN_EXTERNAL_MMG_MESHLOADER_H
-#define RODIN_EXTERNAL_MMG_MESHLOADER_H
+#ifndef RODIN_MMG_MESHLOADER_H
+#define RODIN_MMG_MESHLOADER_H
 
 #include "Rodin/IO/MEDIT.h"
 

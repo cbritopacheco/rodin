@@ -17,7 +17,7 @@ namespace Rodin::PETSc::Assembly
    * @brief Sets up a PETSc vector for assembly while reusing compatible
    *        existing structure.
    *
-   * The @c Vec counterpart of @ref MatrixSetup. A @c LinearSystem is bound to
+   * The @c Vec counterpart of @c MatrixSetup. A @c LinearSystem is bound to
    * fixed finite element spaces, so its right-hand side @f$ \mathbf{b} @f$ and
    * solution @f$ \mathbf{x} @f$ keep their sizes for the whole lifetime. The
    * first call lays the vector out (sizes, type, options); subsequent calls
@@ -38,19 +38,46 @@ namespace Rodin::PETSc::Assembly
   class VectorSetup
   {
     public:
+      /**
+       * @brief Requested PETSc vector layout and setup policy.
+       *
+       * Sizes and optional type/options are applied only when the vector has no
+       * PETSc type yet. Reused vectors may still be zeroed, depending on
+       * @ref zeroOnReuse.
+       */
       struct Options
       {
-        PetscInt localSize;
-        PetscInt globalSize;
-        VecType type = nullptr;
-        bool setFromOptions = false;
-        bool zeroOnReuse = true;
+          /// @brief Local vector size owned by this MPI rank, or @c PETSC_DECIDE.
+          PetscInt localSize;
+          /// @brief Global vector size.
+          PetscInt globalSize;
+          /// @brief Optional PETSc vector type to set during initial setup.
+          VecType type = nullptr;
+          /// @brief Whether to call @c VecSetFromOptions during initial setup.
+          bool setFromOptions = false;
+          /// @brief Whether compatible reused vectors are zeroed before assembly.
+          bool zeroOnReuse = true;
       };
 
+      /**
+       * @brief Wraps an existing PETSc vector handle.
+       * @param[in] vector Vector to prepare before assembly or solve reuse.
+       */
       explicit VectorSetup(::Vec vector)
         : m_vector(vector)
       {}
 
+      /**
+       * @brief Prepares the vector for use by assembly or a solver.
+       *
+       * Virgin vectors receive their sizes, optional type, and optional command
+       * line options. Reused vectors keep their structure and are zeroed only
+       * when requested by @ref Options::zeroOnReuse.
+       *
+       * @param[in] options Requested layout and reuse policy.
+       * @returns PETSc error code from zeroing, or @c PETSC_SUCCESS when no
+       *          zeroing is requested.
+       */
       PetscErrorCode prepare(const Options& options) const
       {
         bool needsSetup = true;

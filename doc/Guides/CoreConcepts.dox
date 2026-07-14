@@ -117,9 +117,9 @@
 
   | Space | Polynomial degree | Continuity | DOF location | Typical use |
   |-------|-------------------|------------|--------------|-------------|
-  | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | One per cell | Material indicators, piecewise constant data |
-  | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ continuous | One per vertex | Most scalar and vector PDEs |
-  | @ref Rodin::Variational::H1 "H1<k>" | @f$ k @f$ (arbitrary) | @f$ C^0 @f$ continuous | Vertices + edges + interior | Higher-order accuracy, mixed formulations |
+  | `P0` | 0 (constant) | Discontinuous | One per cell | Material indicators, piecewise constant data |
+  | `P1` | 1 (linear) | @f$ C^0 @f$ continuous | One per vertex | Most scalar and vector PDEs |
+  | `H1<k>` | @f$ k @f$ (arbitrary) | @f$ C^0 @f$ continuous | Vertices + edges + interior | Higher-order accuracy, mixed formulations |
 
   @note There is no separate `P2` class. Quadratic elements are obtained via
   `H1` with order 2: `H1 Vh(std::integral_constant<size_t, 2>{}, mesh)`.
@@ -171,7 +171,7 @@
 
   - The **trial function** @f$ u_h @f$ (represented by `TrialFunction`) is the
     unknown being solved for. After solving, its coefficients are stored in the
-    associated @ref Rodin::Variational::GridFunction "GridFunction", accessible
+    associated `GridFunction`, accessible
     via `u.getSolution()`.
   - The **test function** @f$ v_h @f$ (represented by `TestFunction`) is used
     to generate the equations of the discrete system. Each basis function
@@ -212,7 +212,7 @@
   auto grad_v = Grad(v);
 
   // Used in integrals: the dot product is taken implicitly
-  auto stiffness = Integral(Grad(u), Grad(v));  // \int \nablau \cdot \nablav dx
+  auto stiffness = Integral(Grad(u), Grad(v));  // \int \nabla u \cdot \nabla v dx
   @endcode
 
   @subsection guides-getting-started-core-concepts-integrals Integrals
@@ -220,7 +220,7 @@
   The `Integral` function represents integration over the domain or boundary:
 
   @code{.cpp}
-  // Domain integral: \int_\Omega \nablau \cdot \nablav dx
+  // Domain integral: \int_\Omega \nabla u \cdot \nabla v dx
   auto stiffness = Integral(Grad(u), Grad(v));
 
   // Domain integral with function: \int_\Omega f v dx
@@ -259,7 +259,7 @@
 
   @subsection guides-getting-started-core-concepts-problem-assembly Problem Assembly
 
-  The @ref Rodin::Variational::Problem "Problem" class represents a complete
+  The `Problem` class represents a complete
   variational problem:
 
   @code{.cpp}
@@ -314,8 +314,7 @@
   auto& solution = u.getSolution();
   @endcode
 
-  The solution is stored in the @ref Rodin::Variational::GridFunction
-  "GridFunction" associated with the trial function. You can evaluate it at
+  The solution is stored in the `GridFunction` associated with the trial function. You can evaluate it at
   any point, compute norms, or export it for visualization.
 
   @section guides-getting-started-core-concepts-workflow Typical Workflow
@@ -363,7 +362,7 @@
 
   @section guides-getting-started-core-concepts-gridfunctions Grid Functions
 
-  A @ref Rodin::Variational::GridFunction "GridFunction" represents a discrete
+  A `GridFunction` represents a discrete
   function in a finite element space — it stores the actual coefficient values
   (degrees of freedom) and provides evaluation, projection, and I/O.
 
@@ -456,7 +455,7 @@
 
   @subsection guides-getting-started-core-concepts-functions-real RealFunction
 
-  @ref Rodin::Variational::RealFunction "RealFunction" represents a
+  `RealFunction` represents a
   scalar-valued function @f$ f : \Omega \to \mathbb{R} @f$. It can be
   constructed from a constant, an integer, or a callable:
 
@@ -473,7 +472,7 @@
 
   @subsection guides-getting-started-core-concepts-functions-vector VectorFunction
 
-  @ref Rodin::Variational::VectorFunction "VectorFunction" represents a
+  `VectorFunction` represents a
   vector-valued function @f$ \mathbf{f} : \Omega \to \mathbb{R}^d @f$.
   Components can be constants, RealFunctions, or mixed:
 
@@ -489,7 +488,7 @@
 
   @subsection guides-getting-started-core-concepts-functions-zero Zero
 
-  @ref Rodin::Variational::Zero "Zero" is a class (not a free function) that
+  `Zero` is a class (not a free function) that
   produces the zero function. It supports both scalar and vector forms:
 
   @code{.cpp}
@@ -579,8 +578,8 @@
 
   @subsection guides-getting-started-core-concepts-dg-ops Jump and Average
 
-  The @ref Rodin::Variational::Jump "Jump" and
-  @ref Rodin::Variational::Average "Average" operators act on inter-element
+  The `Jump` and
+  `Average` operators act on inter-element
   faces. For a function @f$ u @f$ with values @f$ u^+ @f$ and @f$ u^- @f$
   on the two sides of an internal face:
 
@@ -594,9 +593,9 @@
   In addition to `Integral` (cell interior) and `BoundaryIntegral`
   (boundary faces), Rodin provides:
 
-  - @ref Rodin::Variational::FaceIntegral "FaceIntegral" — integrates over
+  - `FaceIntegral` — integrates over
     **all** faces (interior and boundary)
-  - @ref Rodin::Variational::InterfaceIntegral "InterfaceIntegral" —
+  - `InterfaceIntegral` —
     integrates over **interior** faces only (excludes boundary)
 
   These are essential for DG penalty and consistency terms:
@@ -625,7 +624,7 @@
 
   @subsection guides-getting-started-core-concepts-flow Flow Operator
 
-  The @ref Rodin::Variational::Flow "Flow" operator computes the composition
+  The `Flow` operator computes the composition
   @f$ u \circ \Phi @f$, where @f$ \Phi @f$ is the flow map generated by a
   velocity field @f$ \mathbf{v} @f$:
   @f[
@@ -646,7 +645,7 @@
 
   @subsection guides-getting-started-core-concepts-potential Potential Operator
 
-  The @ref Rodin::Variational::Potential "Potential" operator computes integral
+  The `Potential` operator computes integral
   convolutions of the form:
   @f[
     u(\mathbf{x}) = \int_\Omega K(\mathbf{x}, \mathbf{y}) \, f(\mathbf{y}) \, d\mathbf{y}

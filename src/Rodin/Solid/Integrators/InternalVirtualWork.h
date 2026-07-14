@@ -90,7 +90,9 @@ namespace Rodin::Solid
     : public Variational::NonLinearFormIntegrator<InternalVirtualWork<Law, State>>
   {
     public:
+      /// @brief Constitutive law type.
       using LawType   = Law;
+      /// @brief Current displacement state type.
       using StateType = State;
 
       /**
