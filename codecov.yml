@@ -1,5 +1,10 @@
 coverage:
   status:
+    project:
+      default:
+        # Keep project coverage enforced, but allow tiny report jitter from
+        # documentation/comment-heavy changes and coverage upload variance.
+        threshold: 0.05%
     patch:
       default:
         # Documentation and formatting PRs can touch executable headers without
