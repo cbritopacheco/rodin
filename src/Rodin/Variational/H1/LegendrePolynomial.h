@@ -82,10 +82,10 @@ namespace Rodin::Variational
           for (size_t k = 1; k < K; ++k)
           {
             const Real kk = static_cast<Real>(k);
-            const Real two_k_plus_one = 2.0 * kk + 1.0;
-            const Real inv_kp1 = 1.0 / (kk + 1.0);
-            const Real alpha = two_k_plus_one * inv_kp1; // (2k + 1) / (k + 1)
-            const Real beta = kk * inv_kp1; // k / (k + 1)
+            const Real twoKPlusOne = 2.0 * kk + 1.0;
+            const Real invKp1 = 1.0 / (kk + 1.0);
+            const Real alpha = twoKPlusOne * invKp1; // (2k + 1) / (k + 1)
+            const Real beta = kk * invKp1; // k / (k + 1)
             const Real P2 = alpha * x * P1 - beta * P0;
             const Real dP2 = alpha * (P1 + x * dP1) - beta * dP0;
             P0 = P1;

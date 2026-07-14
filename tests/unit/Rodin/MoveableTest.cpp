@@ -50,6 +50,7 @@ namespace Rodin::Tests::Unit
 
   //=== Basic Functionality Tests ============================================
 
+  /// @brief Verifies basic move for moveable by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_Moveable, BasicMove)
   {
     TestMoveable original(42);
@@ -62,6 +63,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(original.getValue(), 42);  // Value should remain
   }
 
+  /// @brief Verifies polymorphic move for moveable by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_Moveable, PolymorphicMove)
   {
     std::unique_ptr<Moveable> moveable = std::make_unique<TestMoveable>(99);
@@ -77,6 +79,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(typedOriginal->getValue(), 99);
   }
 
+  /// @brief Verifies move with resource for moveable by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_Moveable, MoveWithResource)
   {
     auto resource = std::make_unique<int>(123);
@@ -96,6 +99,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(*original.getResource(), 123);
   }
 
+  /// @brief Verifies multiple moves for moveable by checking exact expected values, true predicates, move semantics.
   TEST(Rodin_Moveable, MultipleMoves)
   {
     TestMoveable original(77);
@@ -111,6 +115,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(original.wasMoved());
   }
 
+  /// @brief Verify that move() is declared as noexcept.
   TEST(Rodin_Moveable, NoExceptSpecification)
   {
     // Verify that move() is declared as noexcept
@@ -123,6 +128,7 @@ namespace Rodin::Tests::Unit
     });
   }
 
+  /// @brief Test that the caller assumes ownership responsibility.
   TEST(Rodin_Moveable, OwnershipTransfer)
   {
     // Test that the caller assumes ownership responsibility

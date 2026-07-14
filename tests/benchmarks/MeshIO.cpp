@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Mesh I/O benchmark coverage
+ *
+ * Benchmarks loading representative MEDIT meshes from disk. The cases protect the cost model for mesh parser setup and repeated mesh-file ingestion used by examples and regression workflows.
+ */
+
 #include <benchmark/benchmark.h>
 
 #include <Rodin/Geometry.h>
@@ -25,6 +33,7 @@ namespace Rodin::Tests::Benchmarks
       {}
   };
 
+  /// @brief Measures repeated MEDIT loading of the square 2D resource mesh.
   BENCHMARK_F(MeshIO, Load_MEDIT_2D_Square)(benchmark::State& st)
   {
     static constexpr const char* filename = "medit/Square.medit.mesh";
@@ -36,6 +45,7 @@ namespace Rodin::Tests::Benchmarks
       mesh.load(meshfile, IO::FileFormat::MEDIT);
   }
 
+  /// @brief Measures repeated MEDIT loading of the 64x64 triangular resource mesh.
   BENCHMARK_F(MeshIO, Load_MEDIT_2D_UniformTriangular64)(benchmark::State& st)
   {
     static constexpr const char* filename = "medit/UniformTriangular64.medit.mesh";

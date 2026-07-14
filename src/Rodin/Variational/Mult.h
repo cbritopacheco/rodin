@@ -43,6 +43,7 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -51,25 +52,27 @@ namespace Rodin::FormLanguage
       Variational::FunctionBase<LHSDerived>,
       Variational::ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-    using LHSType =
-      Variational::FunctionBase<LHSDerived>;
+    /// @brief Left-hand side operand type.
+      using LHSType = Variational::FunctionBase<LHSDerived>;
 
-    using RHSType =
-      Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>;
+    /// @brief Right-hand side operand type.
+      using RHSType = Variational::ShapeFunctionBase<RHSDerived, FESType, SpaceType>;
 
-    using LHSRangeType =
-      typename FormLanguage::Traits<LHSType>::RangeType;
+    /// @brief Range type of the left-hand side operand.
+      using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
-    using RHSRangeType =
-      typename FormLanguage::Traits<RHSType>::RangeType;
+    /// @brief Range type of the right-hand side operand.
+      using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
-    using RangeType =
-      std::conditional_t<
+    /// @brief Range (evaluation value) type.
+      using RangeType = std::conditional_t<
         // If
         std::is_same_v<LHSRangeType, ScalarType>,
         // Then <----------------------------------------------- LHS is Scalar
@@ -98,35 +101,22 @@ namespace Rodin::FormLanguage
                 // Then
                 Math::SpatialMatrix<ScalarType>,
                 // Else
-                void
-              >
-            >
-          >,
+                void>>>,
           // -----------------------------------------------------------------
           // Else
           std::conditional_t<
             // If
             FormLanguage::IsMatrixRange<LHSRangeType>::Value,
             // Then <------------------------------------------- LHS is Matrix
-            std::conditional_t<
-              std::is_same_v<RHSRangeType, ScalarType>,
+            std::conditional_t<std::is_same_v<RHSRangeType, ScalarType>,
               Math::SpatialMatrix<ScalarType>,
-              std::conditional_t<
-                FormLanguage::IsVectorRange<RHSRangeType>::Value,
+              std::conditional_t<FormLanguage::IsVectorRange<RHSRangeType>::Value,
                 Math::SpatialVector<ScalarType>,
-                std::conditional_t<
-                  FormLanguage::IsMatrixRange<RHSRangeType>::Value,
-                    Math::SpatialMatrix<ScalarType>,
-                    void
-                  >
-                >
-              >,
+                std::conditional_t<FormLanguage::IsMatrixRange<RHSRangeType>::Value,
+                  Math::SpatialMatrix<ScalarType>, void>>>,
             // ---------------------------------------------------------------
             // Else
-            void
-          >
-        >
-      >;
+            void>>>;
   };
 
   template <class LHSDerived, class RHSDerived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -135,8 +125,9 @@ namespace Rodin::FormLanguage
       Variational::ShapeFunctionBase<LHSDerived, FES, Space>,
       Variational::FunctionBase<RHSDerived>>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+      /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -148,6 +139,7 @@ namespace Rodin::Variational
     constexpr
     auto materializeProduct(const Product& product)
     {
+      /// @brief Range (evaluation value) type.
       using RangeType =
         typename FormLanguage::RangeOf<std::remove_cvref_t<Product>>::Type;
       RangeType out;
@@ -179,14 +171,19 @@ namespace Rodin::Variational
     : public FunctionBase<Mult<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Mult<LHSType, RHSType>>;
 
       Mult(const LHSType& lhs, const RHSType& rhs)
@@ -366,17 +363,23 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Mult<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, Space>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, FES, SpaceType>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
@@ -512,23 +515,32 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Mult<ShapeFunctionBase<LHSDerived, FES, Space>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, FES, SpaceType>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Scalar type of the left-hand side operand.
       using LHSScalarType = typename FormLanguage::Traits<LHSRangeType>::ScalarType;
 
+      /// @brief Scalar type of the right-hand side operand.
       using RHSScalarType = typename FormLanguage::Traits<RHSRangeType>::ScalarType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Mult<LHSScalarType, RHSScalarType>::Type;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Mult<LHSType, RHSType>, FES, SpaceType>;
 
       constexpr
@@ -654,12 +666,16 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
+      /// @brief Right-hand side operand type.
       using RHSType = LocalBilinearFormIntegratorBase<RHSNumber>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Mult<LHS, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       Mult(const LHSType& lhs, const RHSType& rhs)
@@ -735,12 +751,16 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase<typename FormLanguage::Mult<LHS, RHSNumber>::Type>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = LHS;
 
+      /// @brief Right-hand side operand type.
       using RHSType = LinearFormIntegratorBase<RHSNumber>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Mult<LHS, RHSNumber>::Type;
 
+      /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
       Mult(const LHSType& lhs, const RHSType& rhs)
@@ -863,4 +883,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

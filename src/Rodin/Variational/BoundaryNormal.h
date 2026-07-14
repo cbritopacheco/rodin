@@ -37,7 +37,7 @@
  * ```cpp
  * BoundaryNormal n(mesh);
  * 
- * // Neumann BC: \int_\Gamma g(n\cdot\nablau) v ds
+ * // Neumann BC: \int_\Gamma g(n\cdot\nabla u) v ds
  * auto neumann = BoundaryIntegral(g * Dot(n, Grad(u)), v).on(boundary_attr);
  * 
  * // Normal derivative
@@ -59,6 +59,7 @@
 #include "ForwardDecls.h"
 #include "VectorFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -72,12 +73,15 @@ namespace Rodin::Variational
   class BoundaryNormal final : public VectorFunctionBase<Real, BoundaryNormal>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, BoundaryNormal>;
 
       using Parent::traceOf;
@@ -217,8 +221,9 @@ namespace Rodin::Variational
           const auto xf = p.getCoordinates();
 
           // cell interior point (physical)
-          const auto rc_cell = Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
-          Geometry::Point pc(cellPoly, rc_cell);
+          const auto rcCell =
+            Geometry::Polytope::Traits(cellPoly.getGeometry()).getCentroid();
+          Geometry::Point pc(cellPoly, rcCell);
           const auto xc = pc.getCoordinates();
 
           // If res points into the cell, flip it to point outward.
@@ -295,4 +300,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

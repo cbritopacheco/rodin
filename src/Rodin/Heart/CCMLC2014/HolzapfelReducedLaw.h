@@ -39,6 +39,10 @@ namespace Rodin::Heart
         Scalar C3 = Scalar(0);  ///< Exponential exponent factor for @f$ J_4 @f$.
       };
 
+      /**
+       * @brief Constructs the law with a parameter set.
+       * @param params Reduced passive-energy parameters.
+       */
       explicit HolzapfelReducedLaw(const Parameters& params = Parameters())
         : m_params(params)
       {}
@@ -82,6 +86,10 @@ namespace Rodin::Heart
         return out;
       }
 
+      /**
+       * @brief Returns the parameter set used by this law.
+       * @return Const parameter reference.
+       */
       const Parameters& getParameters() const noexcept
       {
         return m_params;

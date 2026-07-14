@@ -24,6 +24,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- Scalar P0g space ----
 
+  /// @brief Verifies scalar construction for variational P0 g by checking exact expected values.
   TEST(Rodin_Variational_P0g, ScalarConstruction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -34,6 +35,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Vh.getVectorDimension(), 1u);
   }
 
+  /// @brief Verifies scalar grid function projection for variational P0 g by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_P0g, ScalarGridFunctionProjection)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -48,6 +50,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(u.getData()(0), 3.14, 1e-10);
   }
 
+  /// @brief Verifies scalar DO fs mapping for variational P0 g by checking exact expected values.
   TEST(Rodin_Variational_P0g, ScalarDOFsMapping)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -66,6 +69,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Vector P0g space ----
 
+  /// @brief Verifies vector construction for variational P0 g by checking exact expected values.
   TEST(Rodin_Variational_P0g, VectorConstruction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -76,6 +80,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(Vh.getVectorDimension(), 2u);
   }
 
+  /// @brief Verifies vector DO fs mapping for variational P0 g by checking exact expected values.
   TEST(Rodin_Variational_P0g, VectorDOFsMapping)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -90,6 +95,7 @@ namespace Rodin::Tests::Unit
 
   // ---- P0g element properties ----
 
+  /// @brief Verifies scalar element properties for variational P0 g by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_P0g, ScalarElementProperties)
   {
     P0gElement<Real> elem(Polytope::Type::Triangle);
@@ -108,6 +114,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Grad of P0g scalar GridFunction is zero ----
 
+  /// @brief Verifies grad of scalar grid function is zero for variational P0 g by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P0g, GradOfScalarGridFunctionIsZero)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -126,6 +133,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(integral_val, 0.0, 1e-14);
   }
 
+  /// @brief Verifies grad order for variational P0 g by checking exact expected values, true predicates.
   TEST(Rodin_Variational_P0g, GradOrder)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -145,6 +153,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Div of P0g vector GridFunction is zero ----
 
+  /// @brief Verifies div of vector grid function is zero for variational P0 g by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P0g, DivOfVectorGridFunctionIsZero)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -168,6 +177,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Jacobian of P0g vector GridFunction is zero ----
 
+  /// @brief Verifies jacobian of vector grid function is zero for variational P0 g by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P0g, JacobianOfVectorGridFunctionIsZero)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});

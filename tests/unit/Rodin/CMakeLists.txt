@@ -97,6 +97,7 @@ gtest_discover_tests(RodinUtilityTest
     LABELS unit
 )
 
+add_subdirectory(Adaptation)
 add_subdirectory(Alert)
 add_subdirectory(IO)
 add_subdirectory(QF)

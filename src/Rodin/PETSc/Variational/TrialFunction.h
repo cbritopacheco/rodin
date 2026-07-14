@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_VARIATIONAL_TRIALFUNCTION_H
 #define RODIN_PETSC_VARIATIONAL_TRIALFUNCTION_H
 
@@ -5,11 +11,11 @@
  * @file TrialFunction.h
  * @brief PETSc-aware trial function wrappers.
  *
- * Provides the @ref Rodin::PETSc::Variational::TrialFunction class, a thin
- * wrapper around @ref Rodin::Variational::TrialFunction that lives in the
+ * Provides the PETSc-aware trial-function wrapper class, a thin
+ * wrapper around the core variational trial function that lives in the
  * PETSc namespace.  Its CTAD deduction guide automatically associates the
  * trial function with a PETSc-backed
- * @ref Rodin::PETSc::Variational::GridFunction as its solution type.
+ * PETSc-backed grid function as its solution type.
  *
  * @see Rodin::PETSc::Variational::TestFunction,
  *      Rodin::PETSc::Variational::GridFunction,
@@ -27,11 +33,11 @@ namespace Rodin::PETSc::Variational
   /**
    * @brief PETSc-aware trial function wrapper.
    *
-   * Inherits all functionality from @ref Rodin::Variational::TrialFunction
+   * Inherits all functionality from `Rodin::Variational::TrialFunction`
    * and triggers PETSc-specific CTAD.  The CTAD deduction guide
    * automatically sets the `Solution` template parameter to
    * `PETSc::Variational::GridFunction<FES>`, ensuring that the discrete
-   * solution is stored in a PETSc `Vec`.
+   * solution is stored in a PETSc @c Vec.
    *
    * @tparam Solution Solution type (typically
    *         `PETSc::Variational::GridFunction<FES>`).
@@ -47,7 +53,7 @@ namespace Rodin::PETSc::Variational
       using FESType =
         FES;
 
-      /// @brief Parent class type (@ref Rodin::Variational::TrialFunction).
+      /// @brief Parent class type (`Rodin::Variational::TrialFunction`).
       using Parent =
         Rodin::Variational::TrialFunction<Solution, FESType>;
 
@@ -68,7 +74,8 @@ namespace Rodin::Variational
   template <class Solution, class FES>
   struct IsTrialFunction<PETSc::Variational::TrialFunction<Solution, FES>>
   {
-    static constexpr Boolean Value = true;
+    /// @brief True because the PETSc wrapper models a trial function.
+      static constexpr Boolean Value = true;
   };
 }
 

@@ -39,6 +39,7 @@ namespace Rodin::Math
   class Deg : public Unit<Deg, Real>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Unit<Deg, Real>;
       using Parent::Parent;
 

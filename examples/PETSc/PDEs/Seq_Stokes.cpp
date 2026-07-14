@@ -10,7 +10,7 @@
  *
  * Problem solved
  * --------------
- *   -Δu + \nablap = f   in \Omega
+ *   -Δu + \nabla p = f   in \Omega
  *        div u = 0 in \Omega
  *             u = u_exact on \partial\Omega
  *
@@ -20,7 +20,7 @@
  *
  * The discrete system is
  *
- *   (\nablau, \nablav) - (p, div v) + (div u, q) + (λ, q) + (p, μ) = (f, v)
+ *   (\nabla u, \nabla v) - (p, div v) + (div u, q) + (λ, q) + (p, μ) = (f, v)
  *
  * where μ is the test function associated with λ.
  *

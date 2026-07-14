@@ -63,7 +63,7 @@
 
   @subsection examples-pdes-surface-space Finite Element Space
 
-  We use @ref Rodin::Variational::H1 "H1" elements (higher-order continuous
+  We use `H1` elements (higher-order continuous
   Lagrange elements) to better approximate the solution on the curved
   surface:
 

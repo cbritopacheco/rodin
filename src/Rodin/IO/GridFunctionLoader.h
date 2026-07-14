@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
-#define RODIN_VARIATIONAL_GRIDFUNCTIONLOADER_H
+#ifndef RODIN_IO_GRIDFUNCTIONLOADER_H
+#define RODIN_IO_GRIDFUNCTIONLOADER_H
 
 #include <functional>
 
@@ -38,8 +38,13 @@ namespace Rodin::IO
   class GridFunctionLoader : public IO::Loader<Variational::GridFunction<FES, Data>>
   {
     public:
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, Data>;
 
+      /**
+       * @brief Constructs a fallback grid function loader.
+       * @param[in,out] gf Grid function to populate.
+       */
       GridFunctionLoader(ObjectType& gf)
         : m_gf(gf)
       {}
@@ -58,6 +63,12 @@ namespace Rodin::IO
       std::reference_wrapper<ObjectType> m_gf;
   };
 
+  /**
+   * @brief Base class for concrete grid function loaders.
+   *
+   * Stores the grid function by reference and exposes it to derived loaders
+   * through @ref getObject().
+   */
   template <class FES, class Data>
   class GridFunctionLoaderBase : public IO::Loader<Variational::GridFunction<FES, Data>>
   {

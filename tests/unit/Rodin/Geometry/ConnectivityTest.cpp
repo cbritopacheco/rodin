@@ -7,6 +7,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test 2 D 3 nodes triangles for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, SanityTest_2D_3Nodes_Triangles)
   {
     constexpr const size_t meshDim = 2;
@@ -58,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getGeometry(d, 2), Polytope::Type::Point);
   }
 
+  /// @brief Verifies sanity test 2 D 4 nodes triangles for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, SanityTest2D_4Nodes_Triangles)
   {
     constexpr const size_t meshDim = 2;
@@ -104,6 +106,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
   }
 
+  /// @brief Verifies sanity test 2 D 5 nodes triangles for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Triangles)
   {
     constexpr const size_t meshDim = 2;
@@ -154,6 +157,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence(d, 0).size(), connectivity.getCount(d));
   }
 
+  /// @brief Verifies sanity test 2 D 5 nodes mixed for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, SanityTest2D_5Nodes_Mixed)
   {
     const size_t meshDim = 2;
@@ -179,6 +183,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({0, d}, 4), IndexVector({ 0, 1 }));
   }
 
+  /// @brief Verifies sanity test 2 D 9 nodes mixed for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, SanityTest2D_9Nodes_Mixed)
   {
     constexpr const size_t meshDim = 2;
@@ -221,6 +226,7 @@ namespace Rodin::Tests::Unit
 
   // Additional comprehensive tests
 
+  /// @brief Verifies quadrilateral 2 D for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Quadrilateral_2D)
   {
     constexpr const size_t meshDim = 2;
@@ -247,6 +253,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
   }
 
+  /// @brief Verifies tetrahedron 3 D for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Tetrahedron_3D)
   {
     constexpr const size_t meshDim = 3;
@@ -277,6 +284,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
   }
 
+  /// @brief Verifies pyramid 3 D for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Pyramid_3D)
   {
     constexpr const size_t meshDim = 3;
@@ -313,6 +321,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 5);
   }
 
+  /// @brief Verifies empty mesh for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EmptyMesh)
   {
     Connectivity<Context::Local> connectivity;
@@ -323,6 +332,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 0);
   }
 
+  /// @brief Verifies multiple compute calls for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, MultipleComputeCalls)
   {
     constexpr const size_t meshDim = 2;
@@ -346,6 +356,7 @@ namespace Rodin::Tests::Unit
 
   // EDGE CASE TESTS - Starting with the most basic edge cases
 
+  /// @brief Verifies edge case zero nodes for geometry connectivity by checking exact expected values.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_ZeroNodes)
   {
     Connectivity<Context::Local> connectivity;
@@ -357,6 +368,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), 0);
   }
 
+  /// @brief Verifies edge case single node no polytopes for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_SingleNode_NoPolytopes)
   {
     Connectivity<Context::Local> connectivity;
@@ -367,6 +379,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), 0);
   }
 
+  /// @brief Verifies edge case multiple nodes no polytopes for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_MultipleNodes_NoPolytopes)
   {
     constexpr const size_t nodes = 10;
@@ -379,6 +392,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), 0);
   }
 
+  /// @brief Verifies edge case 1 D single segment for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_1D_SingleSegment)
   {
     Connectivity<Context::Local> connectivity;
@@ -398,6 +412,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 2);
   }
 
+  /// @brief Verifies edge case 1 D multiple segments for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_1D_MultipleSegments)
   {
     Connectivity<Context::Local> connectivity;
@@ -421,6 +436,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
   }
 
+  /// @brief Verifies edge case 3 D single tetrahedron for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_3D_SingleTetrahedron)
   {
     Connectivity<Context::Local> connectivity;
@@ -452,6 +468,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 4);
   }
 
+  /// @brief Verifies edge case copy construction for geometry connectivity by checking exact expected values, mesh connectivity computation, copy semantics.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_CopyConstruction)
   {
     Connectivity<Context::Local> connectivity1;
@@ -472,6 +489,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity2.getCount(2), connectivity1.getCount(2));
   }
 
+  /// @brief Verifies edge case move construction for geometry connectivity by checking exact expected values, mesh connectivity computation, move semantics.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_MoveConstruction)
   {
     Connectivity<Context::Local> connectivity1;
@@ -489,6 +507,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity2.getCount(2), originalCount);
   }
 
+  /// @brief Verifies edge case copy assignment for geometry connectivity by checking exact expected values, mesh connectivity computation, copy semantics.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_CopyAssignment)
   {
     Connectivity<Context::Local> connectivity1;
@@ -507,6 +526,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity2.getCount(2), connectivity1.getCount(2));
   }
 
+  /// @brief Verifies edge case move assignment for geometry connectivity by checking exact expected values, mesh connectivity computation, move semantics.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_MoveAssignment)
   {
     Connectivity<Context::Local> connectivity1;
@@ -525,6 +545,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity2.getGeometry(2, 0), Polytope::Type::Quadrilateral);
   }
 
+  /// @brief Verifies edge case degenerate triangle duplicate vertex for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_DegenerateTriangle_DuplicateVertex)
   {
     Connectivity<Context::Local> connectivity;
@@ -540,6 +561,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(connectivity.getCount(1), 0);
   }
 
+  /// @brief Verifies edge case compute order dependency for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_ComputeOrder_Dependency)
   {
     Connectivity<Context::Local> connectivity;
@@ -559,6 +581,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(0), 3);
   }
 
+  /// @brief Verifies edge case get count by geometry triangle for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_GetCountByGeometry_Triangle)
   {
     Connectivity<Context::Local> connectivity;
@@ -574,6 +597,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(Polytope::Type::Quadrilateral), 1);
   }
 
+  /// @brief Verifies edge case all quadrilaterals for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_AllQuadrilaterals)
   {
     Connectivity<Context::Local> connectivity;
@@ -594,6 +618,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({d, d}, 1).size(), 1);
   }
 
+  /// @brief Verifies edge case 3 D two tets shared face for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_3D_TwoTets_SharedFace)
   {
     Connectivity<Context::Local> connectivity;
@@ -617,6 +642,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(d), 7);
   }
 
+  /// @brief Verifies edge case compute transpose for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_ComputeTranspose)
   {
     Connectivity<Context::Local> connectivity;
@@ -637,6 +663,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({0, 2}, 3).size(), 1);
   }
 
+  /// @brief Verifies edge case clear specific connectivity for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_Clear_Specific_Connectivity)
   {
     Connectivity<Context::Local> connectivity;
@@ -657,6 +684,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), 1);
   }
 
+  /// @brief Verifies edge case reserve performance for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_Reserve_Performance)
   {
     Connectivity<Context::Local> connectivity;
@@ -675,6 +703,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), 10);
   }
 
+  /// @brief Verifies edge case get geometry all dimensions for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_GetGeometry_AllDimensions)
   {
     Connectivity<Context::Local> connectivity;
@@ -692,6 +721,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getGeometry(0, 0), Polytope::Type::Point);
   }
 
+  /// @brief Verifies edge case get polytope vertex indices for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_GetPolytope_VertexIndices)
   {
     Connectivity<Context::Local> connectivity;
@@ -709,6 +739,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(polytope[3], 2);
   }
 
+  /// @brief Verifies edge case interface boundary single cell for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, EdgeCase_InterfaceBoundary_SingleCell)
   {
     Connectivity<Context::Local> connectivity;
@@ -727,6 +758,7 @@ namespace Rodin::Tests::Unit
   // COMPREHENSIVE MODE TESTS
   // ============================================================================
 
+  /// @brief Verifies mode discover 2 D adds edges for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Mode_Discover_2D_AddsEdges)
   {
     Connectivity<Context::Local> connectivity;
@@ -746,6 +778,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(1), 5);
   }
 
+  /// @brief Verifies mode restrict 2 D only uses existing for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Mode_Restrict_2D_OnlyUsesExisting)
   {
     Connectivity<Context::Local> connectivity;
@@ -769,6 +802,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence(2, 1).size(), 2);  // 2 cells
   }
 
+  /// @brief Verifies mode discover 3 D adds faces for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Mode_Discover_3D_AddsFaces)
   {
     Connectivity<Context::Local> connectivity;
@@ -788,6 +822,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), 7);
   }
 
+  /// @brief Verifies mode restrict 3 D only uses existing for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Mode_Restrict_3D_OnlyUsesExisting)
   {
     Connectivity<Context::Local> connectivity;
@@ -811,6 +846,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(2), faceCount);
   }
 
+  /// @brief Verifies mode discover mixed 2 D for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Mode_Discover_Mixed_2D)
   {
     Connectivity<Context::Local> connectivity;
@@ -836,6 +872,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({2, 1}, 2).size(), 3);  // Triangle has 3 edges
   }
 
+  /// @brief Verifies mode restrict with partial edges for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, Mode_Restrict_WithPartialEdges)
   {
     Connectivity<Context::Local> connectivity;
@@ -868,6 +905,7 @@ namespace Rodin::Tests::Unit
   // UNIFORM GRID TESTS
   // ============================================================================
 
+  /// @brief Verifies uniform grid 2 D triangles small for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, UniformGrid_2D_Triangles_Small)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -893,6 +931,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies uniform grid 2 D triangles medium for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, UniformGrid_2D_Triangles_Medium)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {8, 8});
@@ -919,6 +958,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies uniform grid 2 D quadrilaterals for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, UniformGrid_2D_Quadrilaterals)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {5, 5});
@@ -941,6 +981,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies uniform grid 3 D tetrahedra for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, UniformGrid_3D_Tetrahedra)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -963,6 +1004,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies uniform grid 2 D boundary and interface for geometry connectivity by checking mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, UniformGrid_2D_BoundaryAndInterface)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {5, 5});
@@ -993,6 +1035,7 @@ namespace Rodin::Tests::Unit
   // COMPLEX MIXED MESH TESTS
   // ============================================================================
 
+  /// @brief Verifies complex mixed 2 D triangles and quads for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, ComplexMixed_2D_TrianglesAndQuads)
   {
     // Create a more complex mixed mesh
@@ -1036,6 +1079,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(connectivity.getCount(1), 0);
   }
 
+  /// @brief Verifies complex mixed 3 D tets and wedges for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, ComplexMixed_3D_TetsAndWedges)
   {
     // Create a 3D mixed mesh with tets and wedges (triangular prisms)
@@ -1069,6 +1113,7 @@ namespace Rodin::Tests::Unit
   // NON-TRIVIAL TOPOLOGY TESTS
   // ============================================================================
 
+  /// @brief Verifies non trivial disconnected components for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, NonTrivial_DisconnectedComponents)
   {
     // Create two separate triangles (disconnected mesh)
@@ -1091,6 +1136,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getIncidence({2, 2}, 1).size(), 0);
   }
 
+  /// @brief Verifies non trivial complex sharing for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, NonTrivial_ComplexSharing)
   {
     // Create a mesh where multiple cells share edges in complex ways
@@ -1119,6 +1165,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(connectivity.getCount(1), 12);
   }
 
+  /// @brief Verifies non trivial large mesh consistency for geometry connectivity by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, NonTrivial_LargeMesh_Consistency)
   {
     // Create a larger mesh to test consistency
@@ -1170,6 +1217,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(interiorEdges, 0);
   }
 
+  /// @brief Verifies non trivial all dimension connectivity for geometry connectivity by checking true predicates, mesh connectivity computation.
   TEST(Rodin_Geometry_Connectivity, NonTrivial_AllDimensionConnectivity)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {6, 6});
@@ -1203,6 +1251,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(foundSharedVertex);
   }
 
+  /// @brief Test that Discover and Restrict give same results when edges pre-exist.
   TEST(Rodin_Geometry_Connectivity, Mode_Comparison_SameResults)
   {
     // Test that Discover and Restrict give same results when edges pre-exist

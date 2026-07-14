@@ -1,5 +1,11 @@
-#ifndef RODIN_SOLVER_PETSC_CG_H
-#define RODIN_SOLVER_PETSC_CG_H
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_PETSC_SOLVER_CG_H
+#define RODIN_PETSC_SOLVER_CG_H
 
 /**
  * @file CG.h
@@ -37,9 +43,9 @@ namespace Rodin::Solver
   class CG<PETSc::Math::LinearSystem> final : public KSP
   {
     public:
-      /// @brief PETSc matrix type (`::Mat`) for the system operator.
+      /// @brief PETSc matrix type (@c Mat) for the system operator.
       using OperatorType = ::Mat;
-      /// @brief PETSc vector type (`::Vec`) for the RHS and solution.
+      /// @brief PETSc vector type (@c Vec) for the RHS and solution.
       using VectorType = ::Vec;
       /// @brief Scalar type (`PetscScalar`).
       using ScalarType = PetscScalar;
@@ -87,4 +93,4 @@ namespace Rodin::PETSc::Solver
   using CG = Rodin::Solver::CG<Math::LinearSystem>;
 }
 
-#endif // RODIN_SOLVER_PETSC_CG_H
+#endif // RODIN_PETSC_SOLVER_CG_H

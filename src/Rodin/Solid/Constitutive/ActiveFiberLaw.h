@@ -28,59 +28,86 @@ namespace Rodin::Solid
   class ActiveFiberLaw
   {
     public:
+      /// @brief Parameters controlling the local active-fiber law.
       struct Parameters
       {
-        struct Initial
-        {
-          Real extension = 0.0;
-          Real stiffness = 0.0;
-          Real stress = 0.0;
-        };
+        /// @brief Initial active extension, stiffness, and stress data.
+          struct Initial
+          {
+          /// @brief Initial active extension.
+              Real extension = 0.0;
+          /// @brief Initial active branch stiffness.
+              Real stiffness = 0.0;
+          /// @brief Initial active branch stress.
+              Real stress = 0.0;
+          };
 
-        Real stiffness = 1.0;
-        Real damping = 0.0;
-        Real destructionRate = 0.0;
-        Real crossBridgeStiffness = 0.0;
-        Real contractility = 0.0;
+        /// @brief Passive serial stiffness in the active branch.
+          Real stiffness = 1.0;
+        /// @brief Viscous damping coefficient for dynamic active extension.
+          Real damping = 0.0;
+        /// @brief Cross-bridge destruction rate.
+          Real destructionRate = 0.0;
+        /// @brief Cross-bridge stiffness coefficient.
+          Real crossBridgeStiffness = 0.0;
+        /// @brief Activation-dependent contractility coefficient.
+          Real contractility = 0.0;
 
-        Initial initial;
+        /// @brief Initial active branch state parameters.
+          Initial initial;
       };
 
+      /// @brief Internal active-fiber state.
       struct State
       {
-        Real gamma = 0.0;
-        Real beta = 0.0;
+        /// @brief Square-root stiffness-like internal variable.
+          Real gamma = 0.0;
+        /// @brief Stress-like internal variable.
+          Real beta = 0.0;
 
-        Real activeStress() const
-        {
-          return gamma * beta;
-        }
+        /// @brief Returns the active stress @f$\gamma\beta@f$.
+          Real activeStress() const
+          {
+            return gamma * beta;
+          }
       };
 
+      /// @brief Local response and tangent data for a fiber update.
       struct Response
       {
-        Real stress = 0.0;
-        Real dStressDe = 0.0;
-        Real dStressDc = 0.0;
-        Real residual = 0.0;
-        Real kce = 0.0;
-        Real kcc = 1.0;
-        Real tangent = 0.0;
+        /// @brief Active fiber stress.
+          Real stress = 0.0;
+        /// @brief Partial derivative of stress with respect to fiber strain.
+          Real dStressDe = 0.0;
+          /// @brief Partial derivative of stress with respect to active extension.
+          Real dStressDc = 0.0;
+          /// @brief Scaled local residual used as the Newton update.
+          Real residual = 0.0;
+          /// @brief Mixed derivative of the local residual with respect to strain.
+          Real kce = 0.0;
+          /// @brief Derivative of the local residual with respect to active extension.
+          Real kcc = 1.0;
+          /// @brief Condensed tangent after eliminating the active extension.
+          Real tangent = 0.0;
       };
 
+      /// @brief Constructs the active law with default parameters.
       ActiveFiberLaw()
         : m_parameters()
       {}
 
+      /// @brief Constructs the active law from parameters.
       explicit ActiveFiberLaw(const Parameters& parameters)
         : m_parameters(parameters)
       {}
 
+      /// @brief Returns the material parameters.
       const Parameters& getParameters() const
       {
         return m_parameters;
       }
 
+      /// @brief Builds the initial internal active-fiber state.
       State initialState() const
       {
         State state;
@@ -92,6 +119,7 @@ namespace Rodin::Solid
         return state;
       }
 
+      /// @brief Evaluates active stress at fiber strain @p e and extension @p c.
       Real stress(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
@@ -99,12 +127,14 @@ namespace Rodin::Solid
              * (e - c) / (denom * denom);
       }
 
+      /// @brief Evaluates @f$\partial\sigma/\partial e@f$ at fixed extension.
       Real dStressDe(Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
         return m_parameters.stiffness / (denom * denom);
       }
 
+      /// @brief Evaluates @f$\partial\sigma/\partial c@f$ at fixed fiber strain.
       Real dStressDc(Real e, Real c) const
       {
         const Real denom = 1.0 + 2.0 * c;
@@ -113,6 +143,7 @@ namespace Rodin::Solid
              / (denom * denom * denom);
       }
 
+      /// @brief Evaluates the static active response.
       Response evaluateStatic(Real e, Real c) const
       {
         Response response;
@@ -131,6 +162,7 @@ namespace Rodin::Solid
         return response;
       }
 
+      /// @brief Advances the internal active-fiber state.
       State update(
           Real dt,
           const State& oldState,
@@ -173,6 +205,7 @@ namespace Rodin::Solid
         return state;
       }
 
+      /// @brief Evaluates the dynamic active response and condensed tangent.
       Response evaluateDynamic(
           Real dt,
           const State& oldState,
@@ -219,6 +252,7 @@ namespace Rodin::Solid
         return response;
       }
 
+      /// @brief Evaluates the derivative of active stress with respect to extension.
       Real dActiveStressDc(
           Real dt,
           const State& oldState,
@@ -277,6 +311,7 @@ namespace Rodin::Solid
         return dGamma * (Nb / Db) + gamma * dBeta;
       }
 
+      /// @brief Evaluates the length-dependent Starling activation factor.
       static Real starling(Real activeExtension)
       {
         const Real x1 = -0.4;

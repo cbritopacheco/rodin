@@ -16,6 +16,7 @@
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -41,10 +42,13 @@ namespace Rodin::Variational
     : public FunctionBase<Transpose<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Transpose<OperandType>>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
       /**
@@ -128,10 +132,13 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Transpose<OperandType>, FES, Space>;
 
       /**
@@ -247,4 +254,5 @@ namespace Rodin::Variational
     -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

@@ -10,6 +10,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies scalar zero for variational zero by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Zero, ScalarZero)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -22,6 +23,7 @@ TEST(Rodin_Variational_Zero, ScalarZero)
   EXPECT_NEAR(z.getValue(p), 0.0, 1e-15);
 }
 
+/// @brief Verifies scalar copy for variational zero by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Zero, ScalarCopy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -35,6 +37,7 @@ TEST(Rodin_Variational_Zero, ScalarCopy)
   EXPECT_NEAR(copy.getValue(p), 0.0, 1e-15);
 }
 
+/// @brief Verifies vector zero for variational zero by checking tolerance-based numerical results, exact expected values.
 TEST(Rodin_Variational_Zero, VectorZero)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -51,6 +54,7 @@ TEST(Rodin_Variational_Zero, VectorZero)
   EXPECT_NEAR(val(2), 0.0, 1e-15);
 }
 
+/// @brief Verifies vector copy for variational zero by checking tolerance-based numerical results, exact expected values, copy semantics.
 TEST(Rodin_Variational_Zero, VectorCopy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -66,6 +70,7 @@ TEST(Rodin_Variational_Zero, VectorCopy)
   EXPECT_NEAR(val.norm(), 0.0, 1e-15);
 }
 
+/// @brief Verifies scalar get order for variational zero by checking exact expected values, true predicates.
 TEST(Rodin_Variational_Zero, ScalarGetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -78,6 +83,7 @@ TEST(Rodin_Variational_Zero, ScalarGetOrder)
   EXPECT_EQ(*order, 0u);
 }
 
+/// @brief Verifies vector get order for variational zero by checking exact expected values, true predicates.
 TEST(Rodin_Variational_Zero, VectorGetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

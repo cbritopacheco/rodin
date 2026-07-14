@@ -7,6 +7,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test for geometry mesh uniform grid by checking exact expected values.
   TEST(Rodin_Geometry_Mesh_UniformGrid, SanityTest)
   {
     {
@@ -46,6 +47,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies pyramid one brick for geometry mesh uniform grid by checking exact expected values.
   TEST(Rodin_Geometry_Mesh_UniformGrid, Pyramid_OneBrick)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });

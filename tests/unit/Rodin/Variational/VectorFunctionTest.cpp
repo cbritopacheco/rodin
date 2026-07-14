@@ -55,6 +55,7 @@ namespace Rodin::Tests::Unit
     };
   }
 
+  /// @brief Verifies constant vector 2 D construction for variational vector function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_VectorFunction, ConstantVector_2D_Construction)
   {
     VectorFunction vf{1.0, 2.0};
@@ -70,6 +71,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vf.getDimension(), 2);
   }
 
+  /// @brief Verifies constant vector 3 D construction for variational vector function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_VectorFunction, ConstantVector_3D_Construction)
   {
     VectorFunction vf{3.14, -2.71, 1.41};
@@ -86,6 +88,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vf.getDimension(), 3);
   }
 
+  /// @brief Verifies mixed types construction for variational vector function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_VectorFunction, MixedTypes_Construction)
   {
     VectorFunction vf{1.0, 2.5, 3.0};
@@ -102,6 +105,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vf.getDimension(), 3);
   }
 
+  /// @brief Verifies component access 2 D for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, ComponentAccess_2D)
   {
     VectorFunction vf{10.0, 20.0};
@@ -117,6 +121,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(y_comp.getValue(p), 20.0, 1e-10);
   }
 
+  /// @brief Verifies component access 3 D for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, ComponentAccess_3D)
   {
     VectorFunction vf{100.0, 200.0, 300.0};
@@ -134,6 +139,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(z_comp.getValue(p), 300.0, 1e-10);
   }
 
+  /// @brief Verifies index access for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, IndexAccess)
   {
     VectorFunction vf{5.0, 15.0, 25.0};
@@ -151,6 +157,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp2.getValue(p), 25.0, 1e-10);
   }
 
+  /// @brief Verifies copy constructor for variational vector function by checking tolerance-based numerical results, exact expected values, copy semantics.
   TEST(Rodin_Variational_VectorFunction, CopyConstructor)
   {
     VectorFunction vf{7.5, -12.3};
@@ -168,6 +175,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vf_copy.getDimension(), vf.getDimension());
   }
 
+  /// @brief Verifies move constructor for variational vector function by checking tolerance-based numerical results, exact expected values, move semantics.
   TEST(Rodin_Variational_VectorFunction, MoveConstructor)
   {
     VectorFunction vf{42.0, 84.0};
@@ -185,6 +193,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(vf_moved.getDimension(), 2);
   }
 
+  /// @brief Verifies copy for variational vector function by checking tolerance-based numerical results, exact expected values, copy semantics.
   TEST(Rodin_Variational_VectorFunction, Copy)
   {
     VectorFunction vf{99.9, -77.7, 55.5};
@@ -205,6 +214,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies trace to boundary for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, TraceToBoundary)
   {
     const Attribute interior_attr = 1;
@@ -226,6 +236,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value(1), 2.0, 1e-10);
   }
 
+  /// @brief Verifies zero vector for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, ZeroVector)
   {
     VectorFunction vf{0.0, 0.0, 0.0};
@@ -239,6 +250,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value.norm(), 0.0, 1e-10);
   }
 
+  /// @brief Verifies component callables use integration point fast path for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, ComponentCallables_UseIntegrationPointFastPath)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -261,6 +273,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(ipValue(1), 25.0, 1e-10);
   }
 
+  /// @brief Verifies callable uses integration point fast path for variational vector function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_VectorFunction, Callable_UsesIntegrationPointFastPath)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

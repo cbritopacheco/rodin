@@ -49,10 +49,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for PartialPivLU solvers.
   template <class LinearSystem>
   struct Traits<Solver::PartialPivLU<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -75,27 +77,37 @@ namespace Rodin::Solver
     : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+      /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
+      /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
+      /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       PartialPivLU(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       PartialPivLU(const PartialPivLU& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       PartialPivLU(PartialPivLU&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         const auto& A = axb.getOperator();
@@ -111,6 +123,7 @@ namespace Rodin::Solver
         axb.getSolution() = m_solver.solve(b);
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       PartialPivLU* copy() const noexcept override
       {
         return new PartialPivLU(*this);

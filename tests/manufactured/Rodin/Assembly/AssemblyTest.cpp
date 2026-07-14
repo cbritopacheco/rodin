@@ -17,6 +17,14 @@
  * the error in the assembled discrete system is roundoff, regardless of mesh
  * refinement level.
  */
+
+/**
+ * @file
+ * @brief Assembly test manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Assembly Test manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the assembly backends and targeted element assembly path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -57,6 +65,7 @@ namespace Rodin::Tests::Manufactured::Assembly
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Assembly 2 D Test 8 x 8.
   using Assembly_2D_Test_8x8 = Assembly_2D_Test<8>;
 
   // -----------------------------------------------------------------------
@@ -68,6 +77,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // manufactured solution to machine precision, regardless of mesh size or
   // type.
   // -----------------------------------------------------------------------
+  /// @brief Verifies poisson P1 exact solution zero error for assembly 2 D test 8 x 8 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Assembly_2D_Test_8x8, Poisson_P1ExactSolution_ZeroError)
   {
     const auto& mesh = getMesh();
@@ -115,6 +125,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -Δu + u = f,  u = x*(1-x)*y*(1-y)  on \partial\Omega (= 0).
   // f = 2*y*(1-y) + 2*x*(1-x) + x*(1-x)*y*(1-y).
   // -----------------------------------------------------------------------
+  /// @brief Verifies reaction diffusion quadratic solution low error for assembly 2 D test 8 x 8 by checking form assembly, solver behavior.
   TEST_P(Assembly_2D_Test_8x8, ReactionDiffusion_QuadraticSolution_LowError)
   {
     const auto& mesh = getMesh();
@@ -152,6 +163,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // Stiffness assembled separately then passed as a preassembled BF must
   // yield an identical matrix and the same solution as the inline integral.
   // -----------------------------------------------------------------------
+  /// @brief Verifies preassembled BF same system as inline for assembly 2 D test 8 x 8 by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST_P(Assembly_2D_Test_8x8, PreassembledBF_SameSystemAsInline)
   {
     const auto& mesh = getMesh();
@@ -192,6 +204,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -----------------------------------------------------------------------
   // Test 4: Preassembled LinearForm produces same RHS as inline integral.
   // -----------------------------------------------------------------------
+  /// @brief Verifies preassembled LF same RHS as inline for assembly 2 D test 8 x 8 by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST_P(Assembly_2D_Test_8x8, PreassembledLF_SameRHSAsInline)
   {
     const auto& mesh = getMesh();
@@ -222,6 +235,7 @@ namespace Rodin::Tests::Manufactured::Assembly
     EXPECT_NEAR((b1 - b2).norm(), 0.0, 1e-12);
   }
 
+  /// @brief Instantiates Assembly 2 D Test 8 x 8 over the All Geometries 2 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries2D,
     Assembly_2D_Test_8x8,
@@ -257,6 +271,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   //
   // u = x + 2y + 3z + 1,  f = 0 (affine → -Δu = 0).
   // -----------------------------------------------------------------------
+  /// @brief Verifies poisson 3 D P1 exact solution zero error for assembly 3 D test by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Assembly_3D_Test, Poisson3D_P1ExactSolution_ZeroError)
   {
     const auto& mesh = getMesh();
@@ -295,6 +310,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -----------------------------------------------------------------------
   // Test 6: 3-D BilinearForm dimensions correct.
   // -----------------------------------------------------------------------
+  /// @brief Verifies stiffness matrix correct dimensions for assembly 3 D test by checking exact expected values, form assembly.
   TEST_P(Assembly_3D_Test, StiffnessMatrix_CorrectDimensions)
   {
     const auto& mesh = getMesh();
@@ -314,6 +330,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   // -----------------------------------------------------------------------
   // Test 7: 3-D LinearForm size correct.
   // -----------------------------------------------------------------------
+  /// @brief Verifies load vector correct size for assembly 3 D test by checking exact expected values, form assembly.
   TEST_P(Assembly_3D_Test, LoadVector_CorrectSize)
   {
     const auto& mesh = getMesh();
@@ -351,10 +368,11 @@ namespace Rodin::Tests::Manufactured::Assembly
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Assembly P0 2 D Test 8 x 8.
   using Assembly_P0_2D_Test_8x8 = Assembly_P0_2D_Test<8>;
 
   /**
-   * @brief P0 mass matrix row sums equal element areas (\int_K 1 dK = |K|).
+   * @brief Verifies P0 mass matrix row sums equal element areas, @f$ \int_K 1\,dK = |K| @f$.
    */
   TEST_P(Assembly_P0_2D_Test_8x8, P0MassMatrix_RowSumsEqualAreas)
   {
@@ -378,7 +396,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   }
 
   /**
-   * @brief P0 load vector sums to domain area (\int_\Omega 1 d\Omega = 1).
+   * @brief Verifies the P0 load vector sums to the domain area, @f$ \int_\Omega 1\,d\Omega = 1 @f$.
    */
   TEST_P(Assembly_P0_2D_Test_8x8, P0LoadVector_SumEqualsArea)
   {
@@ -393,6 +411,7 @@ namespace Rodin::Tests::Manufactured::Assembly
     EXPECT_NEAR(load.getVector().sum(), 1.0, 1e-12);
   }
 
+  /// @brief Instantiates Assembly P0 2 D Test 8 x 8 over the All Geometries 2 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries2D,
     Assembly_P0_2D_Test_8x8,
@@ -478,9 +497,13 @@ namespace Rodin::Tests::Manufactured::Assembly
   /**
    * @brief 1-D P1 mass matrix: (M * ones).sum() equals the domain length.
    *
-   * By partition of unity, ∑_i φ_i(x) = 1 for all x, so
-   * (M * ones)_i = ∑_j M_ij = \int_\Omega φ_i d\Omega, and summing over i gives
-   * ∑_i \int_\Omega φ_i d\Omega = \int_\Omega 1 d\Omega = |\Omega| = 1 (after scaling to [0,1]).
+   * By partition of unity, @f$ \sum_i \phi_i(x) = 1 @f$ for all @f$ x @f$, so
+   * @f[
+   *   (M\mathbf{1})_i = \sum_j M_{ij} = \int_\Omega \phi_i\,d\Omega,
+   *   \qquad
+   *   \sum_i \int_\Omega \phi_i\,d\Omega = \int_\Omega 1\,d\Omega = |\Omega| = 1.
+   * @f]
+   * The mesh is scaled to @f$ [0,1] @f$.
    */
   TEST_F(Assembly_Segment_Test, P1MassMatrix_SumEqualsLength)
   {
@@ -552,6 +575,7 @@ namespace Rodin::Tests::Manufactured::Assembly
     EXPECT_NEAR(diff.norm(), 0.0, 1e-12);
   }
 
+  /// @brief Instantiates Assembly 3 D Test over the All Geometries 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometries3D,
     Assembly_3D_Test,

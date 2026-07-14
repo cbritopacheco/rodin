@@ -8,8 +8,8 @@
  * @file MeshOptimizer.h
  * @brief Mesh-quality optimization operator.
  */
-#ifndef RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
-#define RODIN_EXTERNAL_MMG_MESHOPTIMIZER_H
+#ifndef RODIN_MMG_MESHOPTIMIZER_H
+#define RODIN_MMG_MESHOPTIMIZER_H
 
 #include "Rodin/Alert/MemberFunctionWarning.h"
 
@@ -28,6 +28,10 @@ namespace Rodin::MMG
    *
    * Typical usage is post-processing after adaptation/imported meshes to remove
    * poorly shaped elements while preserving geometric features.
+   *
+   * Required vertex, edge, triangle, and tetrahedron metadata is passed to MMG
+   * and restored on output when the original indices are still valid after the
+   * optimization.
    */
   class Optimizer : public MMG5
   {
@@ -57,6 +61,10 @@ namespace Rodin::MMG
           return;
         }
 
+        const auto requiredVertices = mesh.getRequiredVertices();
+        const auto requiredEdges = mesh.getRequiredEdges();
+        const auto requiredTriangles = mesh.getRequiredTriangles();
+        const auto requiredTetrahedra = mesh.getRequiredTetrahedra();
         MMG5_pMesh mmgMesh = rodinToMesh(mesh);
 
         MMG5::setParameters(mmgMesh);
@@ -89,6 +97,35 @@ namespace Rodin::MMG
         }
 
         mesh = meshToRodin(mmgMesh);
+        mesh.getRequiredVertices().clear();
+        const size_t vertexCount = mesh.getVertexCount();
+        for (const auto& idx : requiredVertices)
+        {
+          if (idx < vertexCount)
+            mesh.setRequiredVertex(idx);
+        }
+        mesh.getRequiredEdges().clear();
+        const size_t edgeCount = mesh.getPolytopeCount(Geometry::Polytope::Type::Segment);
+        for (const auto& idx : requiredEdges)
+        {
+          if (idx < edgeCount)
+            mesh.setRequiredEdge(idx);
+        }
+        mesh.getRequiredTriangles().clear();
+        const size_t triangleCount = mesh.getPolytopeCount(Geometry::Polytope::Type::Triangle);
+        for (const auto& idx : requiredTriangles)
+        {
+          if (idx < triangleCount)
+            mesh.setRequiredTriangle(idx);
+        }
+        mesh.getRequiredTetrahedra().clear();
+        const size_t tetrahedronCount =
+          mesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron);
+        for (const auto& idx : requiredTetrahedra)
+        {
+          if (idx < tetrahedronCount)
+            mesh.setRequiredTetrahedron(idx);
+        }
         destroyMesh(mmgMesh);
       }
 

@@ -19,7 +19,7 @@ namespace Rodin::Variational
    * @tparam Range Range value type
    *
    * @note For an overview of all the possible specializations of the
-   * P1 class, please see @ref P1Specializations.
+   * P1 class, please see `P1Specializations`.
    *
    * @see P1ElementSpecializations
    */
@@ -40,9 +40,9 @@ namespace Rodin::Variational
    * for a given vector dimension @f$ d \in \mathbb{N} @f$.
    *
    * @note For an overview of all the possible specializations of the
-   * P1 class, please see @ref P1Specializations.
+   * P1 class, please see `P1Specializations`.
    *
-   * @see P1Specializations
+   * @see `P1Specializations`
    */
   template <class Range, class Mesh>
   class P1;

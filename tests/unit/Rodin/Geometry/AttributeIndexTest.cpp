@@ -16,6 +16,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- Mesh-level attribute tests (tests AttributeIndex indirectly) ----
 
+  /// @brief Verifies set and get cell attribute for geometry attribute index by checking exact expected values, true predicates.
   TEST(Geometry_AttributeIndex, SetAndGetCellAttribute)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -28,6 +29,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(*attr, 42);
   }
 
+  /// @brief Verifies set and get multiple cells for geometry attribute index by checking exact expected values, true predicates.
   TEST(Geometry_AttributeIndex, SetAndGetMultipleCells)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -44,6 +46,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies get multiple attributes for geometry attribute index by checking exact expected values, true predicates.
   TEST(Geometry_AttributeIndex, GetMultipleAttributes)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -65,6 +68,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(uniqueAttrs.size(), 3);
   }
 
+  /// @brief Verifies set boundary attributes for geometry attribute index by checking exact expected values, true predicates.
   TEST(Geometry_AttributeIndex, SetBoundaryAttributes)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -84,6 +88,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies vertex attributes for geometry attribute index by checking exact expected values, true predicates.
   TEST(Geometry_AttributeIndex, VertexAttributes)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});

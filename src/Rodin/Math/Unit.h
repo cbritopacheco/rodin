@@ -62,6 +62,7 @@ namespace Rodin::Math
   class Unit
   {
     public:
+      /// @brief The underlying value type.
       using Type = T;
 
       /**
@@ -91,15 +92,19 @@ namespace Rodin::Math
         : m_v(v)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Unit(const Unit&) = default;
 
+      /// @brief Move constructor.
       constexpr
       Unit(Unit&&) = default;
 
+      /// @brief Copy assignment operator.
       constexpr
       Unit& operator=(const Unit&) = default;
 
+      /// @brief Move assignment operator.
       constexpr
       Unit& operator=(Unit&&) = default;
 

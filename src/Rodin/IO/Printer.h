@@ -83,6 +83,10 @@ namespace Rodin::IO
        */
       virtual void print(std::ostream& os) = 0;
 
+      /**
+       * @brief Prints object to a file path.
+       * @param[in] filename Output file path.
+       */
       virtual void print(const boost::filesystem::path& filename)
       {
         std::ofstream os(filename.string());
@@ -101,4 +105,3 @@ namespace Rodin::IO
 }
 
 #endif
-

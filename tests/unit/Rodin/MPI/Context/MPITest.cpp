@@ -9,6 +9,7 @@ static boost::mpi::communicator* g_world = nullptr;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies const getters for MPI context by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Context, ConstGetters)
   {
     const auto& env = *g_env;

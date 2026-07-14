@@ -21,14 +21,14 @@
     are imposed by modifying the assembled linear system — the corresponding
     rows and columns of the system matrix are adjusted to enforce the
     prescribed values. In Rodin, this is handled by
-    @ref Rodin::Variational::DirichletBC "DirichletBC".
+    `DirichletBC`.
   - **Natural (Neumann) conditions**: Prescribe the flux or normal derivative
     of the solution: @f$ \partial u / \partial n = h @f$ on @f$ \Gamma_N @f$.
     These appear **naturally** in the weak formulation as boundary integrals
     after integration by parts. In Rodin, they are expressed as
     `BoundaryIntegral(h, v).over(GammaN)`.
   - **Periodic conditions**: Tie degrees of freedom on opposite boundaries.
-    In Rodin, handled by @ref Rodin::Variational::PeriodicBC "PeriodicBC"
+    In Rodin, handled by `PeriodicBC`
     with an explicit DOF correspondence map.
 
   @note **Homogeneous Neumann** conditions (@f$ \partial u / \partial n = 0 @f$)
@@ -167,7 +167,7 @@
 
   In Rodin, periodic conditions are imposed by building an `IndexMap` that
   pairs the DOF indices on opposite boundaries, then passing it to
-  @ref Rodin::Variational::PeriodicBC "PeriodicBC":
+  `PeriodicBC`:
 
   @code{.cpp}
   const size_t n = 200;

@@ -17,10 +17,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for linear solver bases.
   template <class LinearSystem>
   struct Traits<Solver::LinearSolverBase<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 

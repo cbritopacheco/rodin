@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Darcy manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Darcy manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
@@ -59,10 +67,14 @@ namespace Rodin::Tests::Manufactured::Darcy
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Darcy Test 16 x 16.
   using ManufacturedDarcyTest16x16 = ManufacturedDarcyTest<16>;
+  /// @brief Helper used by the tests to Manufactured Darcy Test 32 x 32.
   using ManufacturedDarcyTest32x32 = ManufacturedDarcyTest<32>;
+  /// @brief Helper used by the tests to Manufactured Darcy Test 64 x 64.
   using ManufacturedDarcyTest64x64 = ManufacturedDarcyTest<64>;
 
+  /// @brief Verifies darcy P1 exact residual for manufactured darcy test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(ManufacturedDarcyTest16x16, Darcy_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -201,6 +213,7 @@ namespace Rodin::Tests::Manufactured::Darcy
     EXPECT_NEAR(error_u, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured Darcy Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     ManufacturedDarcyTest16x16,

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_MESHPRINTER_H
-#define RODIN_MESH_MESHPRINTER_H
+#ifndef RODIN_IO_MESHPRINTER_H
+#define RODIN_IO_MESHPRINTER_H
 
 #include <utility>
 

@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Helmholtz manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Helmholtz manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -21,11 +29,11 @@ using namespace Rodin::Solver;
  * 3D manufactured tests for the Helmholtz equation (sign convention used here):
  *
  * Strong form:
- *   -Δu - κ² u = f   in \Omega
- *            u = g   on \partial\Omega
+ *   -Δu - κ² u = f   in Ω
+ *            u = g   on ∂Ω
  *
  * Weak form:
- *   \int\Omega \nablau\cdot\nablav dx - κ² \int\Omega u v dx = \int\Omega f v dx
+ *   ∫_Ω ∇ u·∇ v dx - κ² ∫_Ω u v dx = ∫_Ω f v dx
  *
  * IMPORTANT (geometry):
  *   Rodin's UniformGrid({M,M,M}) produces coordinates {0,...,M-1}.
@@ -33,7 +41,7 @@ using namespace Rodin::Solver;
  *   manufactured expressions (sin(pi*x), x(1-x), etc.).
  *
  * NOTE (solver):
- *   With the sign "- κ² \int u v", the operator may be symmetric indefinite for
+ *   With the sign "- κ² ∫ u v", the operator may be symmetric indefinite for
  *   larger κ. These tests keep your current CG usage, but mathematically CG
  *   requires SPD. If you hit solver issues, switch to MINRES/GMRES or change
  *   the PDE to -Δu + κ² u (screened Poisson) to get SPD.
@@ -60,10 +68,14 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the tests to Helmholtz 3 D Test 8.
   using Helmholtz3DTest8  = Helmholtz3DFixture<8>;
+  /// @brief Helper used by the tests to Helmholtz 3 D Test 16.
   using Helmholtz3DTest16 = Helmholtz3DFixture<16>;
+  /// @brief Helper used by the tests to Helmholtz 3 D Test 32.
   using Helmholtz3DTest32 = Helmholtz3DFixture<32>;
 
+  /// @brief Verifies helmholtz P1 exact residual for helmholtz 3 D test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Helmholtz3DTest8, Helmholtz_P1ExactResidual)
   {
     const Real kappa = 1.0;
@@ -107,8 +119,9 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // u = sin(pi x) sin(pi y) sin(pi z)
   // Δu = -3 pi^2 u
   // f = -Δu - κ^2 u = (3 pi^2 - κ^2) u
-  // Dirichlet: u=0 on \partial\Omega (sine vanishes on x,y,z=0 or 1)
+  // Dirichlet: u=0 on ∂Ω (sine vanishes on x,y,z=0 or 1)
   // ---------------------------------------------------------------------------
+  /// @brief Verifies simple sine for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Helmholtz3DTest16, SimpleSine)
   {
     const Real pi = Math::Constants::pi();
@@ -140,8 +153,9 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // u = sin(ω1 pi x) sin(ω2 pi y) sin(ω3 pi z)
   // Δu = -(ω1^2 + ω2^2 + ω3^2) pi^2 u
   // f = -Δu - κ^2 u = ( (ω1^2+ω2^2+ω3^2) pi^2 - κ^2 ) u
-  // Dirichlet: u=0 on \partial\Omega for integer ωi (still vanishes at x,y,z=0 or 1)
+  // Dirichlet: u=0 on ∂Ω for integer ωi (still vanishes at x,y,z=0 or 1)
   // ---------------------------------------------------------------------------
+  /// @brief Verifies variable frequency for helmholtz 3 D test 32 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Helmholtz3DTest32, VariableFrequency)
   {
     const Real pi = Math::Constants::pi();
@@ -178,13 +192,14 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
 
   // ---------------------------------------------------------------------------
   // u = x(1-x) sin(pi y) sin(pi z)
-  // \partialxx u = -2 sin(pi y) sin(pi z)
-  // \partialyy u = -pi^2 x(1-x) sin(pi y) sin(pi z)
-  // \partialzz u = -pi^2 x(1-x) sin(pi y) sin(pi z)
+  // ∂xx u = -2 sin(pi y) sin(pi z)
+  // ∂yy u = -pi^2 x(1-x) sin(pi y) sin(pi z)
+  // ∂zz u = -pi^2 x(1-x) sin(pi y) sin(pi z)
   // Δu = -2 s - 2 pi^2 x(1-x) s, where s = sin(pi y) sin(pi z)
   // f = -Δu - κ^2 u
-  // Dirichlet: u=0 on \partial\Omega (x=0,1 or y=0,1 or z=0,1)
+  // Dirichlet: u=0 on ∂Ω (x=0,1 or y=0,1 or z=0,1)
   // ---------------------------------------------------------------------------
+  /// @brief Verifies mixed polynomial trig for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Helmholtz3DTest16, MixedPolynomialTrig)
   {
     const Real pi = Math::Constants::pi();
@@ -219,13 +234,14 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
 
   // ---------------------------------------------------------------------------
   // u = sin(pi x) sin(pi y) e^z
-  // \partialxx u = -pi^2 u
-  // \partialyy u = -pi^2 u
-  // \partialzz u = u
+  // ∂xx u = -pi^2 u
+  // ∂yy u = -pi^2 u
+  // ∂zz u = u
   // Δu = (1 - 2 pi^2) u
   // f = -Δu - κ^2 u = (2 pi^2 - 1 - κ^2) u
-  // Dirichlet: here we impose u=g on \partial\Omega (nonzero on many faces)
+  // Dirichlet: here we impose u=g on ∂Ω (nonzero on many faces)
   // ---------------------------------------------------------------------------
+  /// @brief Verifies exponential for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Helmholtz3DTest16, Exponential)
   {
     const Real pi = Math::Constants::pi();
@@ -256,6 +272,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   // ---------------------------------------------------------------------------
   // Extra: run the SimpleSine case as a refinement sanity check.
   // ---------------------------------------------------------------------------
+  /// @brief Verifies simple sine refined sanity for helmholtz 3 D test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Helmholtz3DTest16, SimpleSine_RefinedSanity)
   {
     const Real pi = Math::Constants::pi();
@@ -283,6 +300,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
     EXPECT_NEAR(error, 0, 10 * RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Helmholtz 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Helmholtz3DTest8,
@@ -293,6 +311,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Helmholtz 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Helmholtz3DTest16,
@@ -303,6 +322,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Helmholtz 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Helmholtz3DTest32,

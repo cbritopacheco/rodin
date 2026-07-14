@@ -19,6 +19,7 @@ namespace Rodin::Tests::Unit
   // Legendre Polynomial Value Tests
   //==========================================================================
 
+  /// @brief P_0(x) = 1 for all x.
   TEST(LegendrePolynomial, P0_Value)
   {
     // P_0(x) = 1 for all x
@@ -37,6 +38,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, 1.0, 1e-14);
   }
 
+  /// @brief P_1(x) = x.
   TEST(LegendrePolynomial, P1_Value)
   {
     // P_1(x) = x
@@ -55,6 +57,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, 1.0, 1e-14);
   }
 
+  /// @brief P_2(x) = (3x^2 - 1) / 2.
   TEST(LegendrePolynomial, P2_Value)
   {
     // P_2(x) = (3x^2 - 1) / 2
@@ -75,6 +78,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, expected, 1e-14);
   }
 
+  /// @brief P_3(x) = (5x^3 - 3x) / 2.
   TEST(LegendrePolynomial, P3_Value)
   {
     // P_3(x) = (5x^3 - 3x) / 2
@@ -95,6 +99,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, expected, 1e-14);
   }
 
+  /// @brief P_4(x) = (35x^4 - 30x^2 + 3) / 8.
   TEST(LegendrePolynomial, P4_Value)
   {
     // P_4(x) = (35x^4 - 30x^2 + 3) / 8
@@ -114,6 +119,7 @@ namespace Rodin::Tests::Unit
   // Legendre Polynomial Derivative Tests
   //==========================================================================
 
+  /// @brief P'_0(x) = 0.
   TEST(LegendrePolynomial, P0_Derivative)
   {
     // P'_0(x) = 0
@@ -126,6 +132,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dP, 0.0, 1e-14);
   }
 
+  /// @brief P'_1(x) = 1.
   TEST(LegendrePolynomial, P1_Derivative)
   {
     // P'_1(x) = 1
@@ -141,6 +148,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dP, 1.0, 1e-14);
   }
 
+  /// @brief P'_2(x) = 3x.
   TEST(LegendrePolynomial, P2_Derivative)
   {
     // P'_2(x) = 3x
@@ -159,6 +167,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dP, -3.0, 1e-14);
   }
 
+  /// @brief P'_3(x) = (15x^2 - 3) / 2.
   TEST(LegendrePolynomial, P3_Derivative)
   {
     // P'_3(x) = (15x^2 - 3) / 2
@@ -177,6 +186,7 @@ namespace Rodin::Tests::Unit
   // Legendre Polynomial Endpoint Tests
   //==========================================================================
 
+  /// @brief P_K(1) = 1 for all K.
   TEST(LegendrePolynomial, EndpointValues_K0_to_K10)
   {
     // P_K(1) = 1 for all K
@@ -213,6 +223,7 @@ namespace Rodin::Tests::Unit
   // Legendre Polynomial Orthogonality (Sanity Check)
   //==========================================================================
 
+  /// @brief Verifies the orthogonality integral @f$ \int_{-1}^{1} P_0(x)P_1(x)\,dx = 0 @f$.
   TEST(LegendrePolynomial, Orthogonality_P0_P1)
   {
     // \int_{-1}^{1} P_0(x) P_1(x) dx = 0
@@ -230,6 +241,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 0.0, 1e-12);
   }
 
+  /// @brief Verifies the orthogonality integral @f$ \int_{-1}^{1} P_1(x)P_2(x)\,dx = 0 @f$.
   TEST(LegendrePolynomial, Orthogonality_P1_P2)
   {
     // \int_{-1}^{1} P_1(x) P_2(x) dx = 0
@@ -250,6 +262,7 @@ namespace Rodin::Tests::Unit
   // Legendre Polynomial Symmetry Tests
   //==========================================================================
 
+  /// @brief P_K(-x) = P_K(x) for even K.
   TEST(LegendrePolynomial, Symmetry_EvenDegree)
   {
     // P_K(-x) = P_K(x) for even K
@@ -269,6 +282,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P_pos, P_neg, 1e-14);
   }
 
+  /// @brief P_K(-x) = -P_K(x) for odd K.
   TEST(LegendrePolynomial, Symmetry_OddDegree)
   {
     // P_K(-x) = -P_K(x) for odd K
@@ -292,6 +306,7 @@ namespace Rodin::Tests::Unit
   // Higher Order Tests (K = 5, 6)
   //==========================================================================
 
+  /// @brief P_5(x) = (63x^5 - 70x^3 + 15x) / 8.
   TEST(LegendrePolynomial, P5_Value)
   {
     // P_5(x) = (63x^5 - 70x^3 + 15x) / 8
@@ -312,6 +327,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, expected, 1e-14);
   }
 
+  /// @brief P_6(x) = (231x^6 - 315x^4 + 105x^2 - 5) / 16.
   TEST(LegendrePolynomial, P6_Value)
   {
     // P_6(x) = (231x^6 - 315x^4 + 105x^2 - 5) / 16
@@ -333,6 +349,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, expected, 1e-13);
   }
 
+  /// @brief P'_5(x) = (315x^4 - 210x^2 + 15) / 8.
   TEST(LegendrePolynomial, P5_Derivative)
   {
     // P'_5(x) = (315x^4 - 210x^2 + 15) / 8
@@ -347,6 +364,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dP, 15.0 / 8.0, 1e-14);
   }
 
+  /// @brief P'_6(x) = (1386x^5 - 1260x^3 + 210x) / 16.
   TEST(LegendrePolynomial, P6_Derivative)
   {
     // P'_6(x) = (1386x^5 - 1260x^3 + 210x) / 16
@@ -361,6 +379,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dP, 0.0, 1e-14);  // Even polynomial has odd derivative
   }
 
+  /// @brief Verifies the orthogonality integral @f$ \int_{-1}^{1} P_2(x)P_5(x)\,dx = 0 @f$.
   TEST(LegendrePolynomial, Orthogonality_P2_P5)
   {
     // \int_{-1}^{1} P_2(x) P_5(x) dx = 0
@@ -381,6 +400,7 @@ namespace Rodin::Tests::Unit
   // Very High Order Tests (K = 15)
   //==========================================================================
 
+  /// @brief P_15(1) = 1, P_15(-1) = -1 (odd degree).
   TEST(LegendrePolynomial, P15_EndpointValues)
   {
     // P_15(1) = 1, P_15(-1) = -1 (odd degree)
@@ -393,6 +413,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, -1.0, 1e-11);
   }
 
+  /// @brief P_15(0) = 0 (odd polynomial).
   TEST(LegendrePolynomial, P15_AtZero)
   {
     // P_15(0) = 0 (odd polynomial)
@@ -402,6 +423,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P, 0.0, 1e-12);
   }
 
+  /// @brief P_15(-x) = -P_15(x) for odd K.
   TEST(LegendrePolynomial, P15_Symmetry_OddDegree)
   {
     // P_15(-x) = -P_15(x) for odd K
@@ -417,6 +439,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verify no NaN/Inf at various points.
   TEST(LegendrePolynomial, P15_Value_NoNaN)
   {
     // Verify no NaN/Inf at various points
@@ -434,6 +457,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies P 15 derivative no na N for legendre polynomial by checking false predicates.
   TEST(LegendrePolynomial, P15_Derivative_NoNaN)
   {
     Real P, dP;
@@ -448,6 +472,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies the orthogonality integral @f$ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 @f$.
   TEST(LegendrePolynomial, Orthogonality_P5_P15)
   {
     // \int_{-1}^{1} P_5(x) P_15(x) dx = 0

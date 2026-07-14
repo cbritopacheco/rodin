@@ -5,6 +5,14 @@
  *          https://www.boost.org/LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Lagrangian advection manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Lagrangian advection manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the Advection finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -92,12 +100,15 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
     }
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Advectiion Test 16.
   using ManufacturedAdvectiionTest_16 = ManufacturedAdvectionTest<16>;
+  /// @brief Helper used by the manufactured tests to Manufactured Advectiion Test 32.
   using ManufacturedAdvectiionTest_32 = ManufacturedAdvectionTest<32>;
 
   // One-step manufactured check with constant velocity.
   // u0(x,y) = sin(pi x) sin(pi y)
   // u(x,y,dt) = u0(x - vx dt, y - vy dt)
+  /// @brief Verifies constant velocity one step L 2 interior for manufactured advectiion test 32 by checking manufactured-solution convergence.
   TEST_P(ManufacturedAdvectiionTest_32, ConstantVelocity_OneStep_L2Interior)
   {
     auto mesh = this->getMesh();
@@ -131,6 +142,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
   }
 
   // Two smaller steps should not be worse than one larger step for the same total time.
+  /// @brief Verifies constant velocity two half steps vs one full step for manufactured advectiion test 32 by checking manufactured-solution convergence.
   TEST_P(ManufacturedAdvectiionTest_32, ConstantVelocity_TwoHalfSteps_vs_OneFullStep)
   {
     auto mesh = this->getMesh();
@@ -208,6 +220,7 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
   }
 
   // REPLACE the failing test with a spatial-refinement check.
+  /// @brief Coarse mesh.
   TEST_P(ManufacturedAdvectiionTest_16, ConstantVelocity_SpatialRefinement_DecreasesError)
   {
     // coarse mesh
@@ -271,12 +284,14 @@ namespace Rodin::Tests::Manufactured::AdvectionLagrangian2D
     EXPECT_LT(eF, 0.7 * eC);
   }
 
+  /// @brief Instantiates Manufactured Advectiion Test 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     ManufacturedAdvectiionTest_16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Advectiion Test 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     ManufacturedAdvectiionTest_32,

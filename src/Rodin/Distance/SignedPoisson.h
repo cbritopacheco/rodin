@@ -11,8 +11,8 @@
  * This file provides a signed distance function computation method using
  * the Poisson equation with region-specific forcing terms.
  */
-#ifndef RODIN_MODELS_DISTANCE_SIGNEDPOISSON_H
-#define RODIN_MODELS_DISTANCE_SIGNEDPOISSON_H
+#ifndef RODIN_DISTANCE_SIGNEDPOISSON_H
+#define RODIN_DISTANCE_SIGNEDPOISSON_H
 
 #include "Rodin/Solver/CG.h"
 

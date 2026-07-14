@@ -51,10 +51,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for SparseQR solvers.
   template <class LinearSystem>
   struct Traits<Solver::SparseQR<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -168,6 +170,3 @@ namespace Rodin::Solver
 }
 
 #endif
-
-
-

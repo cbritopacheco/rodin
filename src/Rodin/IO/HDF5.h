@@ -106,6 +106,7 @@
 #include "Rodin/Geometry/AttributeIndex.h"
 #include "Rodin/Geometry/PolytopeTransformationIndex.h"
 #include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Geometry/Shard.h"
 #include "Rodin/Geometry/Point.h"
 #include "Rodin/IO/MeshLoader.h"
 #include "Rodin/IO/MeshPrinter.h"
@@ -246,6 +247,10 @@ namespace Rodin::IO
         Handle(const Handle&) = delete;
         Handle& operator=(const Handle&) = delete;
 
+        /**
+         * @brief Move constructor.
+         * @param[in,out] other Handle whose identifier is transferred.
+         */
         Handle(Handle&& other) noexcept
           : m_id(other.m_id),
             m_close(other.m_close)
@@ -254,6 +259,11 @@ namespace Rodin::IO
           other.m_close = nullptr;
         }
 
+        /**
+         * @brief Move assignment operator.
+         * @param[in,out] other Handle whose identifier is transferred.
+         * @returns Reference to this handle.
+         */
         Handle& operator=(Handle&& other) noexcept
         {
           if (this != &other)
@@ -309,8 +319,7 @@ namespace Rodin::IO
      * @param[in] id  File identifier returned by `H5Fcreate` or `H5Fopen`.
      * @returns Handle that calls `H5Fclose` on destruction.
      */
-    inline
-    Handle File(hid_t id)
+    inline Handle File(hid_t id)
     {
       return Handle(id, H5Fclose);
     }
@@ -320,8 +329,7 @@ namespace Rodin::IO
      * @param[in] id  Group identifier returned by `H5Gcreate2` or `H5Gopen2`.
      * @returns Handle that calls `H5Gclose` on destruction.
      */
-    inline
-    Handle Group(hid_t id)
+    inline Handle Group(hid_t id)
     {
       return Handle(id, H5Gclose);
     }
@@ -331,8 +339,7 @@ namespace Rodin::IO
      * @param[in] id  Dataset identifier returned by `H5Dcreate2` or `H5Dopen2`.
      * @returns Handle that calls `H5Dclose` on destruction.
      */
-    inline
-    Handle DataSet(hid_t id)
+    inline Handle DataSet(hid_t id)
     {
       return Handle(id, H5Dclose);
     }
@@ -342,8 +349,7 @@ namespace Rodin::IO
      * @param[in] id  Dataspace identifier returned by `H5Screate_simple` etc.
      * @returns Handle that calls `H5Sclose` on destruction.
      */
-    inline
-    Handle Space(hid_t id)
+    inline Handle Space(hid_t id)
     {
       return Handle(id, H5Sclose);
     }
@@ -358,28 +364,36 @@ namespace Rodin::IO
 
     template <>
     inline
-    hid_t getNativeType<U64>()
+      /// @brief Returns the native HDF5 type for unsigned 64-bit integers.
+      hid_t
+      getNativeType<U64>()
     {
       return H5T_NATIVE_ULLONG;
     }
 
     template <>
     inline
-    hid_t getNativeType<I32>()
+      /// @brief Returns the native HDF5 type for signed 32-bit integers.
+      hid_t
+      getNativeType<I32>()
     {
       return H5T_NATIVE_INT;
     }
 
     template <>
     inline
-    hid_t getNativeType<F64>()
+      /// @brief Returns the native HDF5 type for 64-bit floating point values.
+      hid_t
+      getNativeType<F64>()
     {
       return H5T_NATIVE_DOUBLE;
     }
 
     template <>
     inline
-    hid_t getNativeType<U8>()
+      /// @brief Returns the native HDF5 type for unsigned 8-bit integers.
+      hid_t
+      getNativeType<U8>()
     {
       return H5T_NATIVE_UCHAR;
     }
@@ -621,6 +635,386 @@ namespace Rodin::IO
     }
 
     /**
+     * @brief Maps a Rodin polytope type to its quadratic XDMF mixed-topology id.
+     * @param[in] t Polytope geometry type.
+     * @returns XDMF quadratic topology id for order-2 visualization.
+     *
+     * Only XDMF-supported quadratic topologies are returned. The coordinates
+     * are sampled from the transformation at XDMF reference nodes, so the
+     * exported node count/order is independent of Rodin's internal geometry
+     * basis and node layout.
+     */
+    inline
+    U64 getXDMFQuadraticMixedTopologyId(Geometry::Polytope::Type t)
+    {
+      using PT = Geometry::Polytope::Type;
+      switch (t)
+      {
+        case PT::Segment:       return 34; // Edge_3
+        case PT::Triangle:      return 36; // Triangle_6
+        case PT::Quadrilateral: return 35; // Quadrilateral_9
+        case PT::Tetrahedron:   return 38; // Tetrahedron_10
+        case PT::Pyramid:       return 39; // Pyramid_13
+        case PT::Wedge:         return 41; // Wedge_18
+        case PT::Hexahedron:    return 50; // Hexahedron_27
+        case PT::Point:
+          return getXDMFMixedTopologyId(t);
+      }
+
+      Alert::Exception()
+        << "XDMF curved visualization does not support quadratic Rodin "
+        << "polytope type " << static_cast<int>(t) << "."
+        << Alert::Raise;
+      return std::numeric_limits<U64>::max();
+    }
+
+    /**
+     * @brief Returns the XDMF uniform topology name for a quadratic cell type.
+     * @param[in] t Polytope geometry type.
+     * @returns XDMF topology name string.
+     */
+    inline
+    const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
+    {
+      using PT = Geometry::Polytope::Type;
+      switch (t)
+      {
+        case PT::Segment:       return "Edge_3";
+        case PT::Triangle:      return "Triangle_6";
+        case PT::Quadrilateral: return "Quadrilateral_9";
+        case PT::Tetrahedron:   return "Tetrahedron_10";
+        case PT::Pyramid:       return "Pyramid_13";
+        case PT::Wedge:         return "Wedge_18";
+        case PT::Hexahedron:    return "Hexahedron_27";
+        case PT::Point:
+          return "Polyvertex";
+      }
+
+      Alert::Exception()
+        << "XDMF curved visualization does not support quadratic Rodin "
+        << "polytope type " << static_cast<int>(t) << "."
+        << Alert::Raise;
+      return nullptr;
+    }
+
+    /**
+     * @brief Layout metadata for XDMF topology dataset emission.
+     *
+     * Uniform topologies are written as a dense node table; mixed topologies
+     * are written as the flat XDMF mixed stream.
+     */
+    struct XDMFTopologyLayout
+    {
+        /// @brief Whether the topology can be written as a uniform XDMF topology.
+        bool isUniform = false;
+        /// @brief XDMF topology type name.
+        std::string topologyType = "Mixed";
+        /// @brief Number of rows for uniform topology datasets.
+        size_t rowCount = 0;
+        /// @brief Number of columns for uniform topology datasets.
+        size_t columnCount = 0;
+        /// @brief Total number of entries in the topology dataset.
+        size_t entryCount = 0;
+    };
+
+    /**
+     * @brief Builds a spatial reference point from coordinate values.
+     * @param[in] values Coordinate values in reference-cell coordinates.
+     * @returns Spatial point with the same dimension as @p values.
+     */
+    inline
+    Math::SpatialPoint xdmfReferencePoint(std::initializer_list<Real> values)
+    {
+      Math::SpatialPoint p;
+      p.resize(static_cast<Eigen::Index>(values.size()));
+      Eigen::Index i = 0;
+      for (Real v : values)
+        p(i++) = v;
+      return p;
+    }
+
+    /**
+     * @brief Reference nodes used by the XDMF topology for a cell.
+     *
+     * If order <= 1, the linear XDMF nodes are returned. If order > 1, the
+     * transformation is sampled at XDMF's quadratic node locations. This keeps
+     * visualization independent of Rodin's internal finite-element node layout
+     * while intentionally approximating higher-order geometry by quadratic XDMF.
+     */
+    inline
+    std::vector<Math::SpatialPoint> getXDMFReferenceNodes(
+        Geometry::Polytope::Type t,
+        size_t order)
+    {
+      using PT = Geometry::Polytope::Type;
+      if (order <= 1)
+      {
+        switch (t)
+        {
+          case PT::Point:
+            return { xdmfReferencePoint({}) };
+          case PT::Segment:
+            return { xdmfReferencePoint({0}), xdmfReferencePoint({1}) };
+          case PT::Triangle:
+            return {
+              xdmfReferencePoint({0, 0}),
+              xdmfReferencePoint({1, 0}),
+              xdmfReferencePoint({0, 1}) };
+          case PT::Quadrilateral:
+            return {
+              xdmfReferencePoint({0, 0}),
+              xdmfReferencePoint({1, 0}),
+              xdmfReferencePoint({1, 1}),
+              xdmfReferencePoint({0, 1}) };
+          case PT::Tetrahedron:
+            return {
+              xdmfReferencePoint({0, 0, 0}),
+              xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({0, 0, 1}) };
+          case PT::Pyramid:
+            return {
+              xdmfReferencePoint({0, 0, 0}),
+              xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({1, 1, 0}),
+              xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({0, 0, 1}) };
+          case PT::Wedge:
+            return {
+              xdmfReferencePoint({0, 0, 0}),
+              xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({0, 0, 1}),
+              xdmfReferencePoint({1, 0, 1}),
+              xdmfReferencePoint({0, 1, 1}) };
+          case PT::Hexahedron:
+            return {
+              xdmfReferencePoint({0, 0, 0}),
+              xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({1, 1, 0}),
+              xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({0, 0, 1}),
+              xdmfReferencePoint({1, 0, 1}),
+              xdmfReferencePoint({1, 1, 1}),
+              xdmfReferencePoint({0, 1, 1}) };
+        }
+      }
+
+      switch (t)
+      {
+        case PT::Point:
+          return { xdmfReferencePoint({}) };
+        case PT::Segment:
+          return {
+            xdmfReferencePoint({0}),
+            xdmfReferencePoint({1}),
+            xdmfReferencePoint({0.5}) };
+        case PT::Triangle:
+          return {
+            xdmfReferencePoint({0, 0}),
+            xdmfReferencePoint({1, 0}),
+            xdmfReferencePoint({0, 1}),
+            xdmfReferencePoint({0.5, 0}),
+            xdmfReferencePoint({0.5, 0.5}),
+            xdmfReferencePoint({0, 0.5}) };
+        case PT::Quadrilateral:
+          return {
+            xdmfReferencePoint({0, 0}),
+            xdmfReferencePoint({1, 0}),
+            xdmfReferencePoint({1, 1}),
+            xdmfReferencePoint({0, 1}),
+            xdmfReferencePoint({0.5, 0}),
+            xdmfReferencePoint({1, 0.5}),
+            xdmfReferencePoint({0.5, 1}),
+            xdmfReferencePoint({0, 0.5}),
+            xdmfReferencePoint({0.5, 0.5}) };
+        case PT::Tetrahedron:
+          return {
+            xdmfReferencePoint({0, 0, 0}),
+            xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({0.5, 0, 0}),
+            xdmfReferencePoint({0.5, 0.5, 0}),
+            xdmfReferencePoint({0, 0.5, 0}),
+            xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0, 0.5}),
+            xdmfReferencePoint({0, 0.5, 0.5}) };
+        case PT::Wedge:
+          return {
+            xdmfReferencePoint({0, 0, 0}),
+            xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({1, 0, 1}),
+            xdmfReferencePoint({0, 1, 1}),
+            xdmfReferencePoint({0.5, 0, 0}),
+            xdmfReferencePoint({0.5, 0.5, 0}),
+            xdmfReferencePoint({0, 0.5, 0}),
+            xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({1, 0, 0.5}),
+            xdmfReferencePoint({0, 1, 0.5}),
+            xdmfReferencePoint({0.5, 0, 1}),
+            xdmfReferencePoint({0.5, 0.5, 1}),
+            xdmfReferencePoint({0, 0.5, 1}),
+            xdmfReferencePoint({0.5, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0.5, 0.5}),
+            xdmfReferencePoint({0, 0.5, 0.5}) };
+        case PT::Pyramid:
+          return {
+            xdmfReferencePoint({0, 0, 0}),
+            xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({1, 1, 0}),
+            xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({0.5, 0, 0}),
+            xdmfReferencePoint({1, 0.5, 0}),
+            xdmfReferencePoint({0.5, 1, 0}),
+            xdmfReferencePoint({0, 0.5, 0}),
+            xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0.5, 0.5}),
+            xdmfReferencePoint({0, 0.5, 0.5}) };
+        case PT::Hexahedron:
+          return {
+            xdmfReferencePoint({0, 0, 0}),
+            xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({1, 1, 0}),
+            xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({1, 0, 1}),
+            xdmfReferencePoint({1, 1, 1}),
+            xdmfReferencePoint({0, 1, 1}),
+            xdmfReferencePoint({0.5, 0, 0}),
+            xdmfReferencePoint({1, 0.5, 0}),
+            xdmfReferencePoint({0.5, 1, 0}),
+            xdmfReferencePoint({0, 0.5, 0}),
+            xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({1, 0, 0.5}),
+            xdmfReferencePoint({1, 1, 0.5}),
+            xdmfReferencePoint({0, 1, 0.5}),
+            xdmfReferencePoint({0.5, 0, 1}),
+            xdmfReferencePoint({1, 0.5, 1}),
+            xdmfReferencePoint({0.5, 1, 1}),
+            xdmfReferencePoint({0, 0.5, 1}),
+            xdmfReferencePoint({0.5, 0.5, 0}),
+            xdmfReferencePoint({0.5, 0, 0.5}),
+            xdmfReferencePoint({1, 0.5, 0.5}),
+            xdmfReferencePoint({0.5, 1, 0.5}),
+            xdmfReferencePoint({0, 0.5, 0.5}),
+            xdmfReferencePoint({0.5, 0.5, 1}),
+            xdmfReferencePoint({0.5, 0.5, 0.5}) };
+      }
+
+      Alert::Exception()
+        << "Unsupported order-2 XDMF reference nodes for polytope type "
+        << static_cast<int>(t) << "."
+        << Alert::Raise;
+      return {};
+    }
+
+    /**
+     * @brief Tests whether the mesh needs curved XDMF visualization geometry.
+     * @param[in] mesh Mesh to inspect.
+     * @returns True when at least one exported cell has order greater than one.
+     */
+    inline
+    bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
+    {
+      for (auto it = mesh.getCell(); !it.end(); ++it)
+      {
+        const size_t order = it->getTransformation().getOrder();
+        if (order > 1)
+          return true;
+      }
+      return false;
+    }
+
+    /**
+     * @brief Returns a non-null `Shard*` iff `mesh` is a partition shard.
+     *
+     * The per-rank XDMF writers must filter out non-owned cells so that
+     * stitched visualization in ParaView does not show the same cell
+     * twice (once from the owning rank, once from each rank carrying it
+     * as a ghost). For a plain `Mesh<Context::Local>` this returns
+     * nullptr and the writers iterate every cell.
+     */
+    inline
+    const Geometry::Shard* asShard(const Geometry::MeshBase& mesh)
+    {
+      return dynamic_cast<const Geometry::Shard*>(&mesh);
+    }
+
+    /**
+     * @brief True iff cell `i` should appear in the per-rank XDMF stream.
+     *
+     * On a `Shard` this means `isOwned(D, i)`. On a non-shard local mesh
+     * the predicate is identically true.
+     */
+    inline
+    bool isXDMFOwnedCell(
+        const Geometry::Shard* shard, std::size_t D, Index i)
+    {
+      return !shard || shard->isOwned(D, i);
+    }
+
+    /**
+     * @brief Number of cells the per-rank XDMF stream renders.
+     *
+     * Equals the shard's owned-cell count when `mesh` is a `Shard`,
+     * otherwise `mesh.getCellCount()`.
+     */
+    inline
+    std::size_t getXDMFRenderedCellCount(const Geometry::MeshBase& mesh)
+    {
+      const auto* shard = asShard(mesh);
+      if (!shard)
+        return mesh.getCellCount();
+      const std::size_t D = mesh.getDimension();
+      const std::size_t n = mesh.getCellCount();
+      std::size_t count = 0;
+      for (Index i = 0; i < static_cast<Index>(n); ++i)
+        if (shard->isOwned(D, i))
+          ++count;
+      return count;
+    }
+
+    /**
+     * @brief Counts visualization vertices emitted for XDMF geometry.
+     * @param[in] mesh Mesh to inspect.
+     * @returns Vertex count for the XDMF geometry dataset.
+     */
+    inline
+    size_t getXDMFVisualizationVertexCount(const Geometry::MeshBase& mesh)
+    {
+      // Linear meshes share vertices across cells; vertex emission is
+      // by vertex index, not per-cell. We deliberately do NOT filter the
+      // shard's vertex count here, because cell topology written by
+      // writeXDMFTopology still references those shared vertex indices
+      // even from owned cells. Some vertices may be redundantly emitted
+      // on multiple ranks, but they will carry identical coordinates so
+      // ParaView superposes them harmlessly.
+      if (!hasCurvedXDMFGeometry(mesh))
+        return mesh.getVertexCount();
+
+      // Curved meshes pack per-cell reference-node coordinates in
+      // cell-iteration order; the curved topology indexes them as
+      // `nextNode++`. The cell stream is filtered to OWNED cells, so the
+      // vertex stream must be too, or the indices will desynchronise.
+      const auto* shard = asShard(mesh);
+      const std::size_t D = mesh.getDimension();
+      size_t count = 0;
+      for (auto it = mesh.getCell(); !it.end(); ++it)
+      {
+        if (!isXDMFOwnedCell(shard, D, it->getIndex()))
+          continue;
+        const size_t order = it->getTransformation().getOrder();
+        count += getXDMFReferenceNodes(it->getGeometry(), order).size();
+      }
+      return count;
+    }
+
+    /**
      * @brief Computes the total length of the XDMF mixed-topology stream
      *        for the given mesh.
      * @param[in] mesh  Mesh whose cells contribute to the stream.
@@ -631,9 +1025,29 @@ namespace Rodin::IO
     inline
     size_t getXDMFMixedTopologySize(const Geometry::MeshBase& mesh)
     {
+      const auto* shard = asShard(mesh);
+      const std::size_t D = mesh.getDimension();
+      if (hasCurvedXDMFGeometry(mesh))
+      {
+        size_t size = 0;
+        for (auto it = mesh.getCell(); !it.end(); ++it)
+        {
+          if (!isXDMFOwnedCell(shard, D, it->getIndex()))
+            continue;
+          const size_t order = it->getTransformation().getOrder();
+          const auto nodes = getXDMFReferenceNodes(it->getGeometry(), order);
+          size += 1 + nodes.size();
+          if (it->getGeometry() == Geometry::Polytope::Type::Segment && order <= 1)
+            size += 1;
+        }
+        return size;
+      }
+
       size_t size = 0;
       for (auto it = mesh.getCell(); !it.end(); ++it)
       {
+        if (!isXDMFOwnedCell(shard, D, it->getIndex()))
+          continue;
         const auto geometry = it->getGeometry();
         const size_t nv = it->getVertices().size();
         size += 1 + nv;
@@ -641,6 +1055,74 @@ namespace Rodin::IO
           size += 1;
       }
       return size;
+    }
+
+    /**
+     * @brief Computes the XDMF topology dataset layout for a mesh.
+     * @param[in] mesh Mesh whose cells define the topology.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
+     * @returns Topology layout metadata.
+     */
+    inline
+    XDMFTopologyLayout getXDMFTopologyLayout(
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
+    {
+      XDMFTopologyLayout layout;
+      layout.entryCount = getXDMFMixedTopologySize(mesh);
+
+      if (!allowUniformCurvedTopology || !hasCurvedXDMFGeometry(mesh))
+        return layout;
+
+      const auto& localMesh =
+          static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
+      const auto& connectivity = localMesh.getConnectivity();
+      const size_t D = connectivity.getDimension();
+      const auto* shard = asShard(mesh);
+
+      bool first = true;
+      Geometry::Polytope::Type firstGeometry = Geometry::Polytope::Type::Point;
+      size_t nodesPerCell = 0;
+      size_t ownedCount = 0;
+
+      for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+      {
+        if (!isXDMFOwnedCell(shard, D, i))
+          continue;
+        ++ownedCount;
+
+        const auto geometry = connectivity.getGeometry(D, i);
+        const auto& trans = localMesh.getPolytopeTransformation(D, i);
+        const size_t order = trans.getOrder();
+
+        // Uniform high-order XDMF is used only when every cell is exported
+        // through the same quadratic topology. Mixed remains the robust
+        // fallback for hybrid or partially curved meshes.
+        if (order <= 1)
+          return layout;
+
+        const auto nodes = getXDMFReferenceNodes(geometry, order);
+        if (first)
+        {
+          first = false;
+          firstGeometry = geometry;
+          nodesPerCell = nodes.size();
+          continue;
+        }
+
+        if (geometry != firstGeometry || nodes.size() != nodesPerCell)
+          return layout;
+      }
+
+      if (first)
+        return layout;
+
+      layout.isUniform = true;
+      layout.topologyType = getXDMFQuadraticTopologyName(firstGeometry);
+      layout.rowCount = ownedCount;
+      layout.columnCount = nodesPerCell;
+      layout.entryCount = layout.rowCount * layout.columnCount;
+      return layout;
     }
 
     /**
@@ -729,14 +1211,8 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      const auto dset = DataSet(H5Dcreate2(
-          file,
-          path.c_str(),
-          getNativeType<T>(),
-          space.get(),
-          H5P_DEFAULT,
-          H5P_DEFAULT,
-          H5P_DEFAULT));
+      const auto dset = DataSet(H5Dcreate2(file, path.c_str(), getNativeType<T>(),
+        space.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
       if (!dset)
       {
         Alert::Exception()
@@ -808,14 +1284,8 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      const auto dset = DataSet(H5Dcreate2(
-          file,
-          path.c_str(),
-          getNativeType<T>(),
-          space.get(),
-          H5P_DEFAULT,
-          H5P_DEFAULT,
-          H5P_DEFAULT));
+      const auto dset = DataSet(H5Dcreate2(file, path.c_str(), getNativeType<T>(),
+        space.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
       if (!dset)
       {
         Alert::Exception()
@@ -945,12 +1415,17 @@ namespace Rodin::IO
      *
      * @param[in] file  Open HDF5 file identifier with write access.
      * @param[in] mesh  Local mesh whose cells provide the topology data.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
     inline
-    void writeXDMFTopology(hid_t file, const Geometry::MeshBase& mesh)
+    void writeXDMFTopology(
+        hid_t file,
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
     {
       {
-        const auto g = Group(H5Gcreate2(file, Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g =
+          Group(H5Gcreate2(file, Path::MeshXDMF, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -962,12 +1437,68 @@ namespace Rodin::IO
       const auto& connectivity =
           static_cast<const Geometry::Mesh<Context::Local>&>(mesh).getConnectivity();
       const size_t D = connectivity.getDimension();
+      const auto layout =
+        getXDMFTopologyLayout(mesh, allowUniformCurvedTopology);
+      const auto* shard = asShard(mesh);
+
+      if (layout.isUniform)
+      {
+        std::vector<U64> topology(layout.entryCount);
+        U64 nextNode = 0;
+        for (size_t i = 0; i < layout.rowCount; ++i)
+          for (size_t k = 0; k < layout.columnCount; ++k)
+            topology[i * layout.columnCount + k] = nextNode++;
+
+        writeMatrixDataset(
+            file,
+            Path::MeshXDMFTopology,
+            topology,
+            static_cast<hsize_t>(layout.rowCount),
+            static_cast<hsize_t>(layout.columnCount));
+        writeScalarDataset(
+            file,
+            Path::MeshXDMFTopologySize,
+            static_cast<U64>(layout.entryCount));
+        return;
+      }
 
       std::vector<U64> topology;
       topology.reserve(getXDMFMixedTopologySize(mesh));
 
+      if (hasCurvedXDMFGeometry(mesh))
+      {
+        U64 nextNode = 0;
+        for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+        {
+          if (!isXDMFOwnedCell(shard, D, i))
+            continue;
+
+          const auto geometry = connectivity.getGeometry(D, i);
+          const auto& trans = mesh.getPolytopeTransformation(D, i);
+          const size_t order = trans.getOrder();
+          const auto nodes = getXDMFReferenceNodes(geometry, order);
+
+          topology.push_back(order > 1
+              ? getXDMFQuadraticMixedTopologyId(geometry)
+              : getXDMFMixedTopologyId(geometry));
+
+          if (geometry == Geometry::Polytope::Type::Segment && order <= 1)
+            topology.push_back(static_cast<U64>(nodes.size()));
+
+          for (size_t k = 0; k < nodes.size(); ++k)
+            topology.push_back(nextNode++);
+        }
+
+        writeVectorDataset(file, Path::MeshXDMFTopology, topology);
+        writeScalarDataset(file, Path::MeshXDMFTopologySize, static_cast<U64>(topology.size()));
+        return;
+      }
+
       for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
       {
+        if (!isXDMFOwnedCell(shard, D, i))
+          continue;
+
         const auto geometry = connectivity.getGeometry(D, i);
         const auto& key = connectivity.getPolytope(D, i);
 
@@ -996,11 +1527,13 @@ namespace Rodin::IO
      *
      * @param[in] filename  Path to an existing HDF5 mesh file.
      * @param[in] mesh      Local mesh whose cells provide the topology data.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
     inline
     void writeXDMFTopology(
         const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh)
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
     {
       const auto file = File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
       if (!file)
@@ -1010,7 +1543,7 @@ namespace Rodin::IO
           << Alert::Raise;
       }
 
-      writeXDMFTopology(file.get(), mesh);
+      writeXDMFTopology(file.get(), mesh, allowUniformCurvedTopology);
     }
 
     /**
@@ -1027,7 +1560,8 @@ namespace Rodin::IO
     void writeXDMFVertices(hid_t file, const Geometry::MeshBase& mesh)
     {
       {
-        const auto g = Group(H5Gcreate2(file, Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(
+          H5Gcreate2(file, Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1037,8 +1571,46 @@ namespace Rodin::IO
       }
 
       const auto& localMesh = static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
-      const size_t nv = localMesh.getVertexCount();
       const size_t sdim = localMesh.getSpaceDimension();
+
+      if (hasCurvedXDMFGeometry(mesh))
+      {
+        const size_t nv = getXDMFVisualizationVertexCount(mesh);
+        std::vector<F64> packed(nv * sdim);
+        size_t out = 0;
+
+        const auto& connectivity = localMesh.getConnectivity();
+        const size_t D = connectivity.getDimension();
+        const auto* shard = asShard(mesh);
+        for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+        {
+          if (!isXDMFOwnedCell(shard, D, i))
+            continue;
+
+          const auto geometry = connectivity.getGeometry(D, i);
+          const auto& trans = localMesh.getPolytopeTransformation(D, i);
+          const auto nodes = getXDMFReferenceNodes(geometry, trans.getOrder());
+
+          for (const auto& rc : nodes)
+          {
+            Math::SpatialPoint pc;
+            trans.transform(pc, rc);
+            for (size_t d = 0; d < sdim; ++d)
+              packed[out * sdim + d] = static_cast<F64>(pc(static_cast<Eigen::Index>(d)));
+            ++out;
+          }
+        }
+
+        writeMatrixDataset(
+            file,
+            Path::MeshGeometryVertices,
+            packed,
+            static_cast<hsize_t>(nv),
+            static_cast<hsize_t>(sdim));
+        return;
+      }
+
+      const size_t nv = localMesh.getVertexCount();
 
       std::vector<F64> packed(nv * sdim);
       for (Index i = 0; i < static_cast<Index>(nv); ++i)
@@ -1070,7 +1642,8 @@ namespace Rodin::IO
     void writeXDMFRegionAttribute(hid_t file, const Geometry::MeshBase& mesh)
     {
       {
-        const auto g = Group(H5Gcreate2(file, Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(
+          H5Gcreate2(file, Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1083,8 +1656,30 @@ namespace Rodin::IO
       const auto& connectivity = localMesh.getConnectivity();
       const size_t D = connectivity.getDimension();
 
+      // Per-rank XDMF only attaches the dim=D region attribute to the
+      // cell topology (ParaView reads it as the cell-attribute "region").
+      // Lower-dimensional region arrays are written for Rodin's own
+      // bookkeeping and are unchanged. The dim=D array MUST match the
+      // filtered cell topology written by writeXDMFTopology, otherwise
+      // ParaView would associate region values with the wrong cells.
+      const auto* shard = asShard(mesh);
       for (size_t d = 0; d <= D; ++d)
       {
+        if (shard && d == D)
+        {
+          std::vector<U64> attrs;
+          attrs.reserve(getXDMFRenderedCellCount(mesh));
+          for (Index i = 0; i < static_cast<Index>(connectivity.getCount(D)); ++i)
+          {
+            if (!shard->isOwned(D, i))
+              continue;
+            const auto a = localMesh.getAttribute(D, i);
+            attrs.push_back(a ? static_cast<U64>(*a) : NullAttributeMarker);
+          }
+          writeVectorDataset(file, attributePath(d), attrs);
+          continue;
+        }
+
         std::vector<U64> attrs(connectivity.getCount(d), NullAttributeMarker);
         for (Index i = 0; i < static_cast<Index>(connectivity.getCount(d)); ++i)
         {
@@ -1111,6 +1706,7 @@ namespace Rodin::IO
      *
      * @param[in] filename  Output HDF5 file path.
      * @param[in] mesh      Local mesh to export for visualization.
+     * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      *
      * @see writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute,
      *      MeshPrinter<FileFormat::HDF5, Context::Local>
@@ -1118,9 +1714,11 @@ namespace Rodin::IO
     inline
     void writeXDMFMesh(
         const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh)
+        const Geometry::MeshBase& mesh,
+        bool allowUniformCurvedTopology = true)
     {
-      const auto file = File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
       {
         Alert::Exception()
@@ -1129,7 +1727,8 @@ namespace Rodin::IO
       }
 
       {
-        const auto g = Group(H5Gcreate2(file.get(), Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto g = Group(
+          H5Gcreate2(file.get(), Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!g)
         {
           Alert::Exception()
@@ -1139,18 +1738,48 @@ namespace Rodin::IO
       }
 
       writeXDMFVertices(file.get(), mesh);
-      writeXDMFTopology(file.get(), mesh);
+      writeXDMFTopology(file.get(), mesh, allowUniformCurvedTopology);
       writeXDMFRegionAttribute(file.get(), mesh);
     }
+
+    /// @cond
+    // Forward declaration of the explicit-mesh overload, defined below.
+    template <class GridFunctionType>
+    void writeXDMFNodeAttribute(
+        const GridFunctionType& gf,
+        const Geometry::MeshBase& visMesh,
+        const boost::filesystem::path& filename);
+    /// @endcond
 
     /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
      *        HDF5 file for XDMF visualization.
      *
-     * Evaluates the grid function at each vertex of the mesh and stores
-     * the result in the `/GridFunction/Values/Data` dataset. For scalar
-     * functions, a flat `[nv]` vector is written; for vector functions, a
-     * `[nv × vdim]` matrix is written.
+     * Convenience overload that uses the grid function's own FES mesh as
+     * the visualization mesh. It delegates to the explicit-mesh overload,
+     * which carries the curved-vs-linear branch logic that aligns the
+     * emitted geometry / topology cardinality with the data cardinality.
+     *
+     * Writing a node attribute on a curved mesh through a hand-rolled
+     * vertex iteration would silently produce `mesh.getVertexCount()`
+     * values while `writeXDMFVertices` / `writeXDMFTopology` emit
+     * `Σ_K |refNodes(K)|` per-cell visualization nodes — a cardinality
+     * mismatch that ParaView either rejects or, worse, plots silently
+     * misaligned. Routing through the explicit-mesh overload eliminates
+     * that pitfall.
+     *
+     * @note The visualization mesh MUST be a `Mesh<Context::Local>` (the
+     *       mesh-level XDMF writers cast unconditionally to it). In MPI
+     *       mode, `MeshBase::getCellCount()` / `getVertexCount()` on the
+     *       parent `MPIMesh` return the GLOBAL allreduce'd counts while
+     *       its iterators range only over shard-local indices — so
+     *       sizing a values buffer by the global count and writing only
+     *       the shard prefix silently corrupts the HDF5 dataset. We
+     *       therefore guard the one-arg path with a `dynamic_cast` and
+     *       fail loudly if the GF's FES is built on a non-local mesh;
+     *       in that case the caller must either use `IO::XDMF` with
+     *       `setMesh(mpiMesh)` (which forwards the shard automatically)
+     *       or call the explicit-mesh overload with `mpiMesh.getShard()`.
      *
      * @tparam GridFunctionType  Concrete grid function type.
      * @param[in] gf        Grid function to export.
@@ -1159,227 +1788,88 @@ namespace Rodin::IO
     template <class GridFunctionType>
     void writeXDMFNodeAttribute(const GridFunctionType& gf, const boost::filesystem::path& filename)
     {
-      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-      using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
-
-      const auto& fes = gf.getFiniteElementSpace();
-      const auto& mesh = fes.getMesh();
-
-      const size_t nv = mesh.getVertexCount();
-      const size_t vdim = gf.getDimension();
-
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
-      if (!file)
+      const auto& fesMesh = gf.getFiniteElementSpace().getMesh();
+      const auto* localMesh =
+          dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
+      if (!localMesh)
       {
         Alert::Exception()
-          << "Failed to create HDF5 XDMF node attribute file: " << filename
+          << "writeXDMFNodeAttribute(gf, path): the grid function's FES "
+             "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
+             "shard explicitly via writeXDMFNodeAttribute(gf, "
+             "mpiMesh.getShard(), path), or use IO::XDMF with "
+             "setMesh(mpiMesh) which forwards the shard automatically."
           << Alert::Raise;
       }
-
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Meta group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Values group."
-            << Alert::Raise;
-        }
-      }
-
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nv));
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
-
-      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
-
-      if constexpr (std::is_same_v<RangeType, ScalarType>)
-      {
-        std::vector<HDF5::F64> values(nv);
-        for (auto it = mesh.getVertex(); !it.end(); ++it)
-        {
-          const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
-          values[static_cast<size_t>(i)] = static_cast<HDF5::F64>(gf(p));
-        }
-
-        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
-      }
-      else
-      {
-        std::vector<HDF5::F64> values(nv * vdim);
-        for (auto it = mesh.getVertex(); !it.end(); ++it)
-        {
-          const Index i = it->getIndex();
-          const Geometry::Point p(*it, ts.getVertex(0), it->getCoordinates());
-          const auto value = gf(p);
-
-          for (size_t c = 0; c < vdim; ++c)
-            values[static_cast<size_t>(i) * vdim + c] = static_cast<HDF5::F64>(value[c]);
-        }
-
-        HDF5::writeMatrixDataset(
-            file.get(),
-            Path::GridFunctionValuesData,
-            values,
-            static_cast<hsize_t>(nv),
-            static_cast<hsize_t>(vdim));
-      }
+      writeXDMFNodeAttribute(gf, *localMesh, filename);
     }
 
+    /// @cond
     /**
      * @brief Writes a grid function as cell-centered data to an HDF5 file
      *        for XDMF visualization.
      *
-     * Evaluates the grid function at the vertices of each cell and averages
-     * the values to produce a single value per cell. The result is stored in
-     * the `/GridFunction/Values/Data` dataset.
+     * Evaluates the grid function at the cell CENTROID — a single
+     * `Geometry::Point` per cell with that cell's polytope and the
+     * polytope's reference centroid — and stores the result in the
+     * `/GridFunction/Values/Data` dataset.
+     *
+     * This is correct for true cell-centered FE spaces (e.g. P0, where
+     * the centroid evaluation returns the cell's single DOF value) as
+     * well as for nodal FE spaces sampled at the centroid (e.g. P1,
+     * where it returns the interpolated value at the geometric centre
+     * of the cell). The previous implementation averaged values at the
+     * cell's vertices, which is meaningless for P0 (vertex evaluation
+     * of a cell-centered field is not well defined) and yielded
+     * silently incorrect XDMF output for any cell-centered scalar /
+     * vector field.
      *
      * @tparam GridFunctionType  Concrete grid function type.
      * @param[in] gf        Grid function to export.
      * @param[in] filename  Output HDF5 file path.
      */
+    // Forward declaration of the explicit-mesh overload, defined below.
+    template <class GridFunctionType>
+    void writeXDMFCellAttribute(
+        const GridFunctionType& gf,
+        const Geometry::MeshBase& visMesh,
+        const boost::filesystem::path& filename);
+    /// @endcond
+
+    /**
+     * @brief Writes a grid function as cell-centered data using its own mesh.
+     * @tparam GridFunctionType Concrete grid function type.
+     * @param[in] gf Grid function to export.
+     * @param[in] filename Output HDF5 file path.
+     */
     template <class GridFunctionType>
     void writeXDMFCellAttribute(
         const GridFunctionType& gf, const boost::filesystem::path& filename)
     {
-      using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
-      using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
-      using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
-
-      const auto& fes = gf.getFiniteElementSpace();
-      const auto& mesh = fes.getMesh();
-
-      const size_t nc = mesh.getCellCount();
-      const size_t vdim = gf.getDimension();
-      const size_t D = mesh.getDimension();
-      const auto& c2v = mesh.getConnectivity().getIncidence(D, 0);
-
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
-      if (!file)
+      // Convenience overload: delegate to the explicit-mesh variant with
+      // visMesh == gfMesh so that both code paths share a single
+      // implementation. Keeps the per-cell centroid evaluation logic in
+      // exactly one place.
+      //
+      // Same MPI guard as writeXDMFNodeAttribute (see that overload for
+      // the detailed rationale): MeshBase::getCellCount() on an MPIMesh
+      // returns the global allreduce'd count while iteration is
+      // shard-local, so a one-arg call with an MPI-backed GF would
+      // silently emit a malformed dataset. Fail loudly instead.
+      const auto& fesMesh = gf.getFiniteElementSpace().getMesh();
+      const auto* localMesh =
+          dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
+      if (!localMesh)
       {
         Alert::Exception()
-          << "Failed to create HDF5 XDMF cell attribute file: " << filename
+          << "writeXDMFCellAttribute(gf, path): the grid function's FES "
+             "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
+             "shard explicitly via writeXDMFCellAttribute(gf, "
+             "mpiMesh.getShard(), path), or use IO::XDMF with "
+             "setMesh(mpiMesh) which forwards the shard automatically."
           << Alert::Raise;
       }
-
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Meta group."
-            << Alert::Raise;
-        }
-      }
-      {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-        if (!group)
-        {
-          Alert::Exception()
-            << "Failed to create /GridFunction/Values group."
-            << Alert::Raise;
-        }
-      }
-
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
-      HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
-
-      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
-
-      if constexpr (std::is_same_v<RangeType, ScalarType>)
-      {
-        std::vector<HDF5::F64> values(nc, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
-        {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          ScalarType accum = ScalarType(0);
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = mesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            accum += gf(p);
-          }
-
-          values[static_cast<size_t>(cell)] =
-            static_cast<HDF5::F64>(accum / static_cast<Real>(vertices.size()));
-        }
-
-        HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
-      }
-      else
-      {
-        std::vector<HDF5::F64> values(nc * vdim, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
-        {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          std::vector<ScalarType> accum(vdim, ScalarType(0));
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = mesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            const auto value = gf(p);
-
-            for (size_t c = 0; c < vdim; ++c)
-              accum[c] += value[c];
-          }
-
-          for (size_t c = 0; c < vdim; ++c)
-          {
-            values[static_cast<size_t>(cell) * vdim + c] =
-              static_cast<HDF5::F64>(accum[c] / static_cast<Real>(vertices.size()));
-          }
-        }
-
-        HDF5::writeMatrixDataset(
-            file.get(),
-            Path::GridFunctionValuesData,
-            values,
-            static_cast<hsize_t>(nc),
-            static_cast<hsize_t>(vdim));
-      }
+      writeXDMFCellAttribute(gf, *localMesh, filename);
     }
     /**
      * @brief Writes a grid function as vertex-centered (nodal) data to an
@@ -1401,14 +1891,18 @@ namespace Rodin::IO
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename)
     {
+      /// @brief Finite element space type.
       using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
-      const size_t nv = visMesh.getVertexCount();
+      const size_t nv = getXDMFVisualizationVertexCount(visMesh);
       const size_t vdim = gf.getDimension();
 
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
       {
         Alert::Exception()
@@ -1417,7 +1911,8 @@ namespace Rodin::IO
       }
 
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1426,7 +1921,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1435,7 +1931,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1453,6 +1950,88 @@ namespace Rodin::IO
       // the GF is defined on the parent MPI mesh.
       const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
       const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+
+      if (hasCurvedXDMFGeometry(visMesh))
+      {
+        const size_t D = visMesh.getDimension();
+        const auto* shard = asShard(visMesh);
+        // Curved-mesh node values are packed per-cell ref-node, in the
+        // same cell-iteration order as writeXDMFVertices and
+        // writeXDMFTopology — which both filter ghost cells. The
+        // attribute stream must filter identically or indices will
+        // desync between geometry / topology / attribute datasets.
+        if constexpr (std::is_same_v<RangeType, ScalarType>)
+        {
+          std::vector<HDF5::F64> values(nv);
+          size_t out = 0;
+          for (Index i = 0; i < static_cast<Index>(visMesh.getCellCount()); ++i)
+          {
+            if (!isXDMFOwnedCell(shard, D, i))
+              continue;
+            const auto visCell = visMesh.getPolytope(D, i);
+            const auto gfCell = gfMesh.getPolytope(D, i);
+            const auto nodes = getXDMFReferenceNodes(
+                visCell->getGeometry(),
+                visCell->getTransformation().getOrder());
+            for (const auto& rc : nodes)
+            {
+              Math::SpatialPoint pc;
+              visCell->getTransformation().transform(pc, rc);
+              const Geometry::Point p(*gfCell, rc, pc);
+              values[out++] = static_cast<HDF5::F64>(gf(p));
+            }
+          }
+          if (out != nv)
+          {
+            Alert::Exception()
+              << "writeXDMFNodeAttribute (curved): emitted " << out
+              << " values but expected " << nv
+              << " — visMesh and gfMesh cardinalities disagree."
+              << Alert::Raise;
+          }
+          HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
+        }
+        else
+        {
+          std::vector<HDF5::F64> values(nv * vdim);
+          size_t out = 0;
+          for (Index i = 0; i < static_cast<Index>(visMesh.getCellCount()); ++i)
+          {
+            if (!isXDMFOwnedCell(shard, D, i))
+              continue;
+            const auto visCell = visMesh.getPolytope(D, i);
+            const auto gfCell = gfMesh.getPolytope(D, i);
+            const auto nodes = getXDMFReferenceNodes(
+                visCell->getGeometry(),
+                visCell->getTransformation().getOrder());
+            for (const auto& rc : nodes)
+            {
+              Math::SpatialPoint pc;
+              visCell->getTransformation().transform(pc, rc);
+              const Geometry::Point p(*gfCell, rc, pc);
+              const auto value = gf(p);
+              for (size_t c = 0; c < vdim; ++c)
+                values[out * vdim + c] = static_cast<HDF5::F64>(value[c]);
+              ++out;
+            }
+          }
+          if (out != nv)
+          {
+            Alert::Exception()
+              << "writeXDMFNodeAttribute (curved): emitted " << out
+              << " values but expected " << nv
+              << " — visMesh and gfMesh cardinalities disagree."
+              << Alert::Raise;
+          }
+          HDF5::writeMatrixDataset(
+              file.get(),
+              Path::GridFunctionValuesData,
+              values,
+              static_cast<hsize_t>(nv),
+              static_cast<hsize_t>(vdim));
+        }
+        return;
+      }
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
       {
@@ -1510,16 +2089,27 @@ namespace Rodin::IO
         const Geometry::MeshBase& visMesh,
         const boost::filesystem::path& filename)
     {
+      /// @brief Finite element space type.
       using FESType = typename FormLanguage::Traits<GridFunctionType>::FESType;
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
-      const size_t nc = visMesh.getCellCount();
+      // In distributed mode `visMesh` is the per-rank shard; emit only
+      // OWNED cells so that neighbouring ranks do not redraw the same
+      // cell. The ordering must agree with writeXDMFTopology (also
+      // shard-aware) so that XDMF associates each value with the right
+      // cell.
+      const auto* shard = asShard(visMesh);
+      const size_t nc = shard
+        ? getXDMFRenderedCellCount(visMesh)
+        : visMesh.getCellCount();
       const size_t vdim = gf.getDimension();
       const size_t D = visMesh.getDimension();
-      const auto& c2v = visMesh.getConnectivity().getIncidence(D, 0);
 
-      const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+      const auto file =
+        HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
       if (!file)
       {
         Alert::Exception()
@@ -1528,7 +2118,8 @@ namespace Rodin::IO
       }
 
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1537,7 +2128,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1546,7 +2138,8 @@ namespace Rodin::IO
         }
       }
       {
-        const auto group = HDF5::Group(H5Gcreate2(file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+        const auto group = HDF5::Group(H5Gcreate2(
+          file.get(), Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
         if (!group)
         {
           Alert::Exception()
@@ -1558,71 +2151,60 @@ namespace Rodin::IO
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaSize, static_cast<HDF5::U64>(nc));
       HDF5::writeScalarDataset(file.get(), Path::GridFunctionMetaDimension, static_cast<HDF5::U64>(vdim));
 
-      // Same rationale as writeXDMFNodeAttribute: use the GF's mesh for
-      // polytope lookup so polytopeMesh == fesMesh holds in getValue().
+      // Evaluate at the cell centroid (NOT averaged at vertices), so the
+      // result is exact for P0 (the cell DOF) and consistent for higher-
+      // order nodal spaces. The grid function's FES mesh is used for the
+      // polytope lookup so that polytopeMesh == fesMesh in getValue().
       const auto& gfMesh = gf.getFiniteElementSpace().getMesh();
-      const Geometry::Polytope::Traits ts(Geometry::Polytope::Type::Point);
+      const std::size_t totalCells = visMesh.getCellCount();
 
       if constexpr (std::is_same_v<RangeType, ScalarType>)
       {
-        std::vector<HDF5::F64> values(nc, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        std::vector<HDF5::F64> values;
+        values.reserve(nc);
+        for (Index cell = 0; cell < static_cast<Index>(totalCells); ++cell)
         {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          ScalarType accum = ScalarType(0);
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = gfMesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            accum += gf(p);
-          }
-
-          values[static_cast<size_t>(cell)] =
-            static_cast<HDF5::F64>(accum / static_cast<Real>(vertices.size()));
+          if (!isXDMFOwnedCell(shard, D, cell))
+            continue;
+          const auto polytope = gfMesh.getPolytope(D, cell);
+          const Geometry::Polytope::Traits ts(polytope->getGeometry());
+          const Geometry::Point centroid(*polytope, ts.getCentroid());
+          values.push_back(static_cast<HDF5::F64>(gf(centroid)));
         }
-
+        // Defensive: invariant on (visMesh, gfMesh) cardinality (T2).
+        if (values.size() != nc)
+        {
+          Alert::Exception()
+            << "writeXDMFCellAttribute: emitted " << values.size()
+            << " values but expected " << nc
+            << " — visMesh and gfMesh cell cardinalities disagree."
+            << Alert::Raise;
+        }
         HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
       }
       else
       {
-        std::vector<HDF5::F64> values(nc * vdim, 0.0);
-
-        for (Index cell = 0; cell < static_cast<Index>(nc); ++cell)
+        std::vector<HDF5::F64> values;
+        values.reserve(nc * vdim);
+        for (Index cell = 0; cell < static_cast<Index>(totalCells); ++cell)
         {
-          const auto& vertices = c2v[cell];
-          if (vertices.size() == 0)
-          {
-            Alert::Exception()
-              << "Cell with no vertices encountered during XDMF cell export."
-              << Alert::Raise;
-          }
-
-          std::vector<ScalarType> accum(vdim, ScalarType(0));
-          for (size_t k = 0; k < vertices.size(); ++k)
-          {
-            const auto vit = gfMesh.getVertex(vertices[k]);
-            const Geometry::Point p(*vit, ts.getVertex(0), vit->getCoordinates());
-            const auto value = gf(p);
-
-            for (size_t c = 0; c < vdim; ++c)
-              accum[c] += value[c];
-          }
-
+          if (!isXDMFOwnedCell(shard, D, cell))
+            continue;
+          const auto polytope = gfMesh.getPolytope(D, cell);
+          const Geometry::Polytope::Traits ts(polytope->getGeometry());
+          const Geometry::Point centroid(*polytope, ts.getCentroid());
+          const auto value = gf(centroid);
           for (size_t c = 0; c < vdim; ++c)
-          {
-            values[static_cast<size_t>(cell) * vdim + c] =
-              static_cast<HDF5::F64>(accum[c] / static_cast<Real>(vertices.size()));
-          }
+            values.push_back(static_cast<HDF5::F64>(value[c]));
         }
-
+        if (values.size() != nc * vdim)
+        {
+          Alert::Exception()
+            << "writeXDMFCellAttribute: emitted " << values.size()
+            << " values but expected " << (nc * vdim)
+            << " — visMesh and gfMesh cell cardinalities disagree."
+            << Alert::Raise;
+        }
         HDF5::writeMatrixDataset(
             file.get(),
             Path::GridFunctionValuesData,
@@ -1697,7 +2279,8 @@ namespace Rodin::IO
        */
       void load(const boost::filesystem::path& filename) override
       {
-        const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -1967,7 +2550,7 @@ namespace Rodin::IO
        *
        * Always raises an exception. Use the file-path overload instead.
        */
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 mesh printing requires file-path based printing."
@@ -1985,7 +2568,8 @@ namespace Rodin::IO
       {
         const auto& mesh = this->getObject();
 
-        const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+        const auto file = HDF5::File(
+          H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2010,47 +2594,59 @@ namespace Rodin::IO
       void createBaseGroups(hid_t file) const
       {
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(
+            H5Gcreate2(file, HDF5::Path::Mesh, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Meta group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshGeometry, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Geometry group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshConnectivity, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityMeta,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Meta group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityCounts, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityCounts,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Counts group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file,
+            HDF5::Path::MeshConnectivityEntities, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Entities group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityState, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityState,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/State group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityIncidence, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g =
+            HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshConnectivityIncidence,
+              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Connectivity/Incidence group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(
+            file, HDF5::Path::MeshAttributes, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Attributes group." << Alert::Raise; }
         }
         {
-          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshTransformations, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto g = HDF5::Group(H5Gcreate2(file, HDF5::Path::MeshTransformations,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!g) { Alert::Exception() << "Failed to create /Mesh/Transformations group." << Alert::Raise; }
         }
       }
@@ -2113,7 +2709,8 @@ namespace Rodin::IO
 
         for (size_t d = 1; d <= Dmax; ++d)
         {
-          const auto group = HDF5::Group(H5Gcreate2(file, HDF5::entityGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file,
+            HDF5::entityGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2167,7 +2764,9 @@ namespace Rodin::IO
             if (!present[flat])
               continue;
 
-            const auto group = HDF5::Group(H5Gcreate2(file, HDF5::incidenceGroupPath(d, dp).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+            const auto group =
+              HDF5::Group(H5Gcreate2(file, HDF5::incidenceGroupPath(d, dp).c_str(),
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
             if (!group)
             {
               Alert::MemberFunctionException(*this, __func__)
@@ -2222,7 +2821,9 @@ namespace Rodin::IO
 
         for (size_t d = 0; d <= Dmax; ++d)
         {
-          const auto group = HDF5::Group(H5Gcreate2(file, HDF5::transformationGroupPath(d).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group =
+            HDF5::Group(H5Gcreate2(file, HDF5::transformationGroupPath(d).c_str(),
+              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2308,7 +2909,8 @@ namespace Rodin::IO
       void load(const boost::filesystem::path& filename) override
       {
         auto& gf = this->getObject();
-        const auto file = HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
+        const auto file =
+          HDF5::File(H5Fopen(filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2407,7 +3009,7 @@ namespace Rodin::IO
        *
        * Always raises an exception. Use the file-path overload instead.
        */
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction printing is file-path based."
@@ -2424,7 +3026,8 @@ namespace Rodin::IO
       {
         const auto& gf = this->getObject();
 
-        const auto file = HDF5::File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
+        const auto file = HDF5::File(
+          H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
         if (!file)
         {
           Alert::MemberFunctionException(*this, __func__)
@@ -2433,7 +3036,8 @@ namespace Rodin::IO
         }
 
         {
-          const auto group = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(
+            file.get(), HDF5::Path::GridFunction, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2442,7 +3046,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto group = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file.get(),
+            HDF5::Path::GridFunctionMeta, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)
@@ -2451,7 +3056,8 @@ namespace Rodin::IO
           }
         }
         {
-          const auto group = HDF5::Group(H5Gcreate2(file.get(), HDF5::Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+          const auto group = HDF5::Group(H5Gcreate2(file.get(),
+            HDF5::Path::GridFunctionValues, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
           if (!group)
           {
             Alert::MemberFunctionException(*this, __func__)

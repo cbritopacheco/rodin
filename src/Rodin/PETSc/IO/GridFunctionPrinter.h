@@ -32,7 +32,7 @@ namespace Rodin::IO
 {
   /**
    * @brief Partial specialization of @ref Rodin::IO::GridFunctionPrinter
-   * for PETSc vector data (`::Vec`).
+   * for PETSc vector data (@c Vec).
    *
    * @tparam Fmt  File format enumerator.
    * @tparam FES  Finite element space type.

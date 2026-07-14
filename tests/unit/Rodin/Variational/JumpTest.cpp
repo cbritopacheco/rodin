@@ -15,6 +15,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Jump of a constant across any interior face should be zero.
   TEST(Rodin_Variational_Jump, ConstantFunction_JumpIsZero)
   {
     // Jump of a constant across any interior face should be zero
@@ -28,6 +29,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(jump_f.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Jump of a constant vector function should be a zero vector.
   TEST(Rodin_Variational_Jump, ConstantVectorFunction_JumpIsZero)
   {
     // Jump of a constant vector function should be a zero vector
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(1), 0.0, 1e-10);
   }
 
+  /// @brief Jump of a continuous P1 grid function across an interior face should be zero.
   TEST(Rodin_Variational_Jump, GridFunction_ContinuousFunction_JumpIsZero)
   {
     // Jump of a continuous P1 grid function across an interior face should be zero
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(jump_gf.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies copy construction for variational jump by checking tolerance-based numerical results, true predicates, copy semantics.
   TEST(Rodin_Variational_Jump, CopyConstruction)
   {
     RealFunction f(7.0);
@@ -72,6 +76,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(jump_copy.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies move construction for variational jump by checking tolerance-based numerical results, true predicates, move semantics.
   TEST(Rodin_Variational_Jump, MoveConstruction)
   {
     RealFunction f(7.0);
@@ -85,6 +90,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(jump_moved.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies polymorphic copy for variational jump by checking tolerance-based numerical results, true predicates, copy semantics.
   TEST(Rodin_Variational_Jump, PolymorphicCopy)
   {
     RealFunction f(3.0);

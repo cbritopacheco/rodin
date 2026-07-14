@@ -114,7 +114,9 @@ namespace Rodin::Solid
         : m_a0(a0)
       {}
 
+      /// @brief Copy constructor.
       FiberInvariants(const FiberInvariants&) = default;
+      /// @brief Move constructor.
       FiberInvariants(FiberInvariants&&) = default;
 
       /**

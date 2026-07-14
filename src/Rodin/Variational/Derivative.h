@@ -33,7 +33,7 @@
  * ```cpp
  * // Normal derivative on boundary
  * auto n = BoundaryNormal();
- * auto normal_deriv = Derivative(u, n);  // \partialu/\partialn = \nablau\cdotn
+ * auto normal_deriv = Derivative(u, n);  // \partialu/\partialn = \nabla u\cdotn
  * ```
  */
 #ifndef RODIN_VARIATIONAL_DERIVATIVE_H
@@ -46,17 +46,27 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Derivative<Variational::ShapeFunction<NestedDerived, FES, Space>>>
   {
     static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
     using FESType = FES;
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+    /// @brief Operand type.
     using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
+
+/**
+ * @defgroup DerivativeSpecializations Derivative Template Specializations
+ * @brief Template specializations of the Derivative class.
+ * @see Derivative
+ */
 
 namespace Rodin::Variational
 {
@@ -82,12 +92,16 @@ namespace Rodin::Variational
         typename FormLanguage::Traits<FES>::ScalarType, DerivativeBase<GridFunction<FES, Data>, Derived>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = ScalarFunctionBase<ScalarType, DerivativeBase<OperandType, Derived>>;
 
       DerivativeBase(const OperandType& u)
@@ -118,44 +132,6 @@ namespace Rodin::Variational
         return m_u.get().getFiniteElementSpace().getMesh().getSpaceDimension();
       }
 
-    protected:
-      /**
-       * @brief Evaluation cache keyed by (mesh, polytope, quadrature point).
-       *
-       * Populated by getValue(IntegrationPoint) on a hit-miss path. Invalidated
-       * whenever evaluation falls back to inclusion / submesh restriction.
-       */
-      struct Cache
-      {
-        struct Key
-        {
-          const void* mesh = nullptr;
-          Geometry::Polytope::Type geom = Geometry::Polytope::Type::Point;
-          size_t dim = 0;
-          Index cell = 0;
-          const QF::QuadratureFormulaBase* qf = nullptr;
-          size_t qp = 0;
-          bool valid = false;
-
-          bool operator==(const Key& o) const noexcept
-          {
-            if (!valid || !o.valid)
-              return false;
-            return mesh == o.mesh
-                && geom == o.geom
-                && dim  == o.dim
-                && cell == o.cell
-                && qf   == o.qf
-                && qp   == o.qp;
-          }
-        };
-
-        Key key;
-        ScalarType value = ScalarType(0);
-      };
-
-      mutable Cache m_cache;
-
     public:
       /**
        * @brief Evaluates the partial derivative at a Point.
@@ -169,78 +145,64 @@ namespace Rodin::Variational
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
-        m_cache.key.valid = false;
+        ScalarType value = ScalarType(0);
         if (fesMesh.isLocalPoint(p))
         {
-          this->interpolate(m_cache.value, p);
+          this->interpolate(value, p);
         }
         else if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(m_cache.value, *inclusion);
+          this->interpolate(value, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(m_cache.value, *restriction);
+          this->interpolate(value, *restriction);
         }
         else
         {
           assert(false);
         }
-        return m_cache.value;
+        return value;
       }
 
       /**
        * @brief Evaluates the partial derivative at an IntegrationPoint.
        *
-       * If the polytope is owned by the FES mesh, performs a cache lookup
-       * keyed by (mesh, polytope, qf, qp); on a miss it dispatches to
-       * @c interpolate(out, ip) and caches the result. Falls back to
-       * inclusion / submesh restriction otherwise.
+       * If the polytope is owned by the FES mesh, dispatches to
+       * @c interpolate(out, ip). Otherwise falls back to inclusion / submesh
+       * restriction.
        */
       ScalarType getValue(const IntegrationPoint& ip) const
       {
         const auto& p = ip.getPoint();
-        const auto& polytope = p.getPolytope();
         const auto& fes = getOperand().getFiniteElementSpace();
         const auto& fesMesh = fes.getMesh();
 
         if (fesMesh.isLocalPoint(p))
         {
-          typename Cache::Key key;
-          key.mesh = static_cast<const void*>(&fesMesh);
-          key.geom = polytope.getGeometry();
-          key.dim  = polytope.getDimension();
-          key.cell = polytope.getIndex();
-          key.qf   = ip.getQuadratureFormula();
-          key.qp   = ip.getIndex();
-          key.valid = true;
-
-          if (m_cache.key == key)
-            return m_cache.value;
-
-          m_cache.key = key;
-          this->interpolate(m_cache.value, ip);
-          return m_cache.value;
+          ScalarType value = ScalarType(0);
+          this->interpolate(value, ip);
+          return value;
         }
 
-        m_cache.key.valid = false;
+        ScalarType value = ScalarType(0);
         if (const auto inclusion = fesMesh.inclusion(p))
         {
-          this->interpolate(m_cache.value, *inclusion);
+          this->interpolate(value, *inclusion);
         }
         else if (fesMesh.isSubMesh())
         {
           const auto& submesh = fesMesh.asSubMesh();
           const auto restriction = submesh.restriction(p);
-          this->interpolate(m_cache.value, *restriction);
+          this->interpolate(value, *restriction);
         }
         else
         {
           assert(false);
         }
-        return m_cache.value;
+        return value;
       }
 
       /**
@@ -288,6 +250,7 @@ namespace Rodin::Variational
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       /// Operand type
@@ -426,4 +389,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

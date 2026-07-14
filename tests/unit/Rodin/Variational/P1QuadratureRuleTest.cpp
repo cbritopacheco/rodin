@@ -10,6 +10,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies linear form scalar linear coefficient uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, LinearForm_ScalarLinearCoefficient_UsesMultiPointQuadrature)
   {
     Mesh mesh =
@@ -41,6 +42,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(b.sum(), 1.0 / 3.0, 1e-12);
   }
 
+  /// @brief Verifies bilinear form linear coefficient mass uses multi point quadrature for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, BilinearForm_LinearCoefficientMass_UsesMultiPointQuadrature)
   {
     Mesh mesh =
@@ -74,6 +76,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(A.coeff(2, 2), 1.0 / 15.0, 1e-12);
   }
 
+  /// @brief Verifies mixed spaces grad grad assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, MixedSpaces_GradGrad_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -93,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies mixed spaces vector mass assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, MixedSpaces_VectorMass_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -115,6 +119,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies mixed spaces vector mass no coeff assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, MixedSpaces_VectorMass_NoCoeff_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -135,6 +140,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, VectorMass_MatchesGridFunctionLinearForm)
   {
     Mesh mesh =
@@ -170,6 +176,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(residual.norm(), 0.0, 1e-14);
   }
 
+  /// @brief Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
     Mesh mesh =
@@ -207,6 +214,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(residual.norm(), 0.0, 1e-14);
   }
 
+  /// @brief Verifies outer scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, OuterScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
     Mesh mesh =
@@ -244,6 +252,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(residual.norm(), 0.0, 1e-14);
   }
 
+  /// @brief Verifies matrix weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, MatrixWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
     Mesh mesh =
@@ -286,6 +295,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(residual.norm(), 0.0, 1e-14);
   }
 
+  /// @brief Verifies vector potential constant kernel uses separate trial and test basis values for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, VectorPotentialConstantKernel_UsesSeparateTrialAndTestBasisValues)
   {
     Mesh mesh =
@@ -358,6 +368,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies divergence pressure coupling assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, DivergencePressureCoupling_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -378,6 +389,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies pressure divergence assembles for variational P1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, PressureDivergence_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});

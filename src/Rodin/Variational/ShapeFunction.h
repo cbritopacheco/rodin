@@ -26,6 +26,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -33,15 +34,19 @@ namespace Rodin::FormLanguage
   {
     using DerivedType = Derived;
 
+    /// @brief Finite element space type.
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    /// @brief Result type of the evaluation.
     using ResultType =
       typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    /// @brief Range (evaluation value) type.
     using RangeType =
       typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
@@ -50,19 +55,23 @@ namespace Rodin::FormLanguage
   {
     using DerivedType = Derived;
 
+    /// @brief Finite element space type.
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    /// @brief Result type of the evaluation.
     using ResultType =
       typename ResultOf<
         Variational::ShapeFunctionBase<
           Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
+    /// @brief Range (evaluation value) type.
     using RangeType =
       typename RangeOf<
         Variational::ShapeFunctionBase<
           Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
@@ -364,7 +373,7 @@ namespace Rodin::Variational
        * - Returns std::nullopt for non-polynomial expressions.
        * - The value is not guaranteed to be sharp.
        *
-       * @param geom Reference geometry type.
+       * @param poly Polytope on which the order is queried.
        * @return Polynomial order bound, or std::nullopt if not polynomial.
        */
       constexpr
@@ -388,4 +397,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

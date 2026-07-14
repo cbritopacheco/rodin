@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_GEOMETRY_TRANSFORMATION_H
-#define RODIN_GEOMETRY_TRANSFORMATION_H
+#ifndef RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
+#define RODIN_GEOMETRY_POLYTOPETRANSFORMATION_H
 
 /**
  * @file
@@ -54,7 +54,7 @@ namespace Rodin::Geometry
    *
    * Concrete implementations include:
    * - IdentityTransformation: @f$ x(r) = r @f$ (identity map)
-   * - IsoparametricTransformation: Uses finite element basis functions
+   * - ParametricTransformation: Uses finite element basis functions
    *
    * # Thread Safety
    *
@@ -62,7 +62,7 @@ namespace Rodin::Geometry
    * for concurrent read access. The transform(), jacobian(), and inverse()
    * methods can be called concurrently from multiple threads.
    *
-   * @see IdentityTransformation, IsoparametricTransformation, Point
+   * @see IdentityTransformation, ParametricTransformation, Point
    */
   class PolytopeTransformation : public Copyable
   {

@@ -20,6 +20,7 @@ class RandomIntegerTest : public ::testing::Test
 };
 
 // Test basic construction and type constraints
+/// @brief Test default construction.
 TEST_F(RandomIntegerTest, Construction)
 {
   // Test default construction
@@ -44,6 +45,7 @@ TEST_F(RandomIntegerTest, Construction)
 }
 
 // Test range constraints
+/// @brief Test that values are within specified range.
 TEST_F(RandomIntegerTest, RangeConstraints)
 {
   // Test that values are within specified range
@@ -61,6 +63,7 @@ TEST_F(RandomIntegerTest, RangeConstraints)
 }
 
 // Test seed functionality
+/// @brief Test getSeed.
 TEST_F(RandomIntegerTest, SeedFunctionality)
 {
   // Test getSeed
@@ -84,6 +87,7 @@ TEST_F(RandomIntegerTest, SeedFunctionality)
 }
 
 // Test deterministic behavior with fixed seed
+/// @brief Verifies deterministic behavior for random integer test by checking exact expected values.
 TEST_F(RandomIntegerTest, DeterministicBehavior)
 {
   unsigned int seed = 12345;
@@ -104,6 +108,7 @@ TEST_F(RandomIntegerTest, DeterministicBehavior)
 }
 
 // Test different range scenarios
+/// @brief Test positive range.
 TEST_F(RandomIntegerTest, DifferentRanges)
 {
   // Test positive range
@@ -143,6 +148,7 @@ TEST_F(RandomIntegerTest, DifferentRanges)
 }
 
 // Test with different integer types
+/// @brief Test with short.
 TEST_F(RandomIntegerTest, DifferentTypes)
 {
   // Test with short
@@ -183,6 +189,7 @@ TEST_F(RandomIntegerTest, DifferentTypes)
 }
 
 // Test statistical properties (basic distribution test)
+/// @brief Verifies statistical properties for random integer test by checking tolerance-based numerical results.
 TEST_F(RandomIntegerTest, StatisticalProperties)
 {
   RandomInteger<int> ri(0, 9, 999);  // 10 possible values (0-9)
@@ -211,6 +218,7 @@ TEST_F(RandomIntegerTest, StatisticalProperties)
 }
 
 // Test edge cases
+/// @brief Test with very large range.
 TEST_F(RandomIntegerTest, EdgeCases)
 {
   // Test with very large range
@@ -244,6 +252,7 @@ TEST_F(RandomIntegerTest, EdgeCases)
 }
 
 // Test operator() multiple calls
+/// @brief Verifies operator call for random integer test.
 TEST_F(RandomIntegerTest, OperatorCall)
 {
   RandomInteger<int> ri(-50, 50, 104);
@@ -268,6 +277,7 @@ TEST_F(RandomIntegerTest, OperatorCall)
 }
 
 // Test copy and assignment behavior
+/// @brief Verifies copy and assignment for random integer test by checking exact expected values, copy semantics.
 TEST_F(RandomIntegerTest, CopyAndAssignment)
 {
   RandomInteger<int> ri1(0, 100, 105);
@@ -283,6 +293,7 @@ TEST_F(RandomIntegerTest, CopyAndAssignment)
 }
 
 // Test boundary values
+/// @brief Test that boundary values can be generated.
 TEST_F(RandomIntegerTest, BoundaryValues)
 {
   // Test that boundary values can be generated
@@ -302,6 +313,7 @@ TEST_F(RandomIntegerTest, BoundaryValues)
 }
 
 // Test with bool-like range
+/// @brief Verifies boolean like range for random integer test by checking exact expected values, true predicates.
 TEST_F(RandomIntegerTest, BooleanLikeRange)
 {
   RandomInteger<int> ri(0, 1, 107);  // Binary values
@@ -321,6 +333,7 @@ TEST_F(RandomIntegerTest, BooleanLikeRange)
 }
 
 // Test unsigned types specifically
+/// @brief Test unsigned char.
 TEST_F(RandomIntegerTest, UnsignedTypes)
 {
   // Test unsigned char
@@ -343,6 +356,7 @@ TEST_F(RandomIntegerTest, UnsignedTypes)
 }
 
 // Test type safety (compile-time test)
+/// @brief These should compile fine.
 TEST_F(RandomIntegerTest, TypeSafety)
 {
   // These should compile fine
@@ -367,6 +381,7 @@ TEST_F(RandomIntegerTest, TypeSafety)
 }
 
 // Test large range efficiency
+/// @brief Test with a very large range to ensure no overflow issues.
 TEST_F(RandomIntegerTest, LargeRange)
 {
   // Test with a very large range to ensure no overflow issues

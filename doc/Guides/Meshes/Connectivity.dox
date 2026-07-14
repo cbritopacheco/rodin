@@ -213,6 +213,6 @@
   - @ref guides-meshes "Meshes overview"
   - @ref guides-connectivity "Connectivity guide (detailed)"
   - @ref Rodin::Geometry::Connectivity "Connectivity class reference"
-  - Example: @ref examples/Geometry/Connectivity.cpp
+  - Example: `examples/Geometry/Connectivity.cpp`
 
   */

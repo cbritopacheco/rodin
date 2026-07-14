@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <cassert>
 #include <boost/multi_array.hpp>
 
@@ -12,6 +18,7 @@
 
 namespace Rodin::Geometry
 {
+  /// @cond
   Sharder<Context::MPI>::Sharder(const Context::MPI& context)
     : Parent(context)
   {}
@@ -40,7 +47,7 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  MPIMesh Sharder<Context::MPI>::gather(int root)
+  Mesh<Context::MPI> Sharder<Context::MPI>::gather(int root)
   {
     const auto& ctx = this->getContext();
     const auto& comm = ctx.getCommunicator();
@@ -60,4 +67,5 @@ namespace Rodin::Geometry
       return build.finalize();
     }
   }
+  /// @endcond
 }

@@ -36,6 +36,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -44,8 +45,10 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P1Element<Range>>
   {
-    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    using RangeType = Range;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -84,6 +87,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Scalar>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -885,6 +889,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -1183,4 +1188,5 @@ namespace Rodin::Variational
 
 #include "P1Element.hpp"
 
+/// @endcond
 #endif

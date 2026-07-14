@@ -87,13 +87,16 @@ namespace Rodin::FormLanguage
        */
       class Iterator
       {
-        using internal_iterator = typename std::vector<std::unique_ptr<T>>::iterator;
+          using InternalIterator = typename std::vector<std::unique_ptr<T>>::iterator;
+
         public:
           /**
            * @brief Constructs an iterator from an internal iterator.
            * @param[in] it Internal vector iterator
            */
-          explicit constexpr Iterator(internal_iterator it) : m_it(it) {}
+          explicit constexpr Iterator(InternalIterator it)
+            : m_it(it)
+          {}
 
           /**
            * @brief Pre-increment operator.
@@ -127,7 +130,7 @@ namespace Rodin::FormLanguage
            */
           constexpr reference operator*() const { assert(*m_it); return static_cast<reference>(**m_it); }
         private:
-          internal_iterator m_it;
+          InternalIterator m_it;
       };
 
       /**
@@ -138,13 +141,17 @@ namespace Rodin::FormLanguage
        */
       class ConstIterator
       {
-        using internal_const_iterator = typename std::vector<std::unique_ptr<T>>::const_iterator;
+          using InternalConstIterator =
+            typename std::vector<std::unique_ptr<T>>::const_iterator;
+
         public:
           /**
            * @brief Constructs a const iterator from an internal const iterator.
            * @param[in] it Internal vector const iterator
            */
-          explicit constexpr ConstIterator(internal_const_iterator it) : m_it(it) {}
+          explicit constexpr ConstIterator(InternalConstIterator it)
+            : m_it(it)
+          {}
 
           /**
            * @brief Pre-increment operator.
@@ -178,7 +185,7 @@ namespace Rodin::FormLanguage
            */
           constexpr const_reference operator*() const { assert(*m_it); return static_cast<const_reference>(**m_it); }
         private:
-          internal_const_iterator m_it;
+          InternalConstIterator m_it;
       };
 
       /**

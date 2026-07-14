@@ -37,18 +37,28 @@ namespace Rodin::Solid
   class ActiveContraction final : public HyperElasticLaw<ActiveContraction<PassiveLaw, ActiveLaw>>
   {
     public:
+      /// @brief Cached passive and active quantities at a quadrature point.
       struct Cache
       {
-        typename PassiveLaw::Cache passive;
-        FiberKinematics fiber;
-        Real strain = 0.0;
-        Real activeExtension = 0.0;
-        typename ActiveLaw::Response active;
-        typename ActiveLaw::State newState;
-        bool dynamic = false;
-        size_t localIterations = 0;
+        /// @brief Passive law cache.
+          typename PassiveLaw::Cache passive;
+        /// @brief Fiber kinematics built from the constitutive point.
+          FiberKinematics fiber;
+        /// @brief Fiber strain driving the active branch.
+          Real strain = 0.0;
+        /// @brief Current active extension.
+          Real activeExtension = 0.0;
+        /// @brief Active branch response.
+          typename ActiveLaw::Response active;
+        /// @brief Updated active branch internal state.
+          typename ActiveLaw::State newState;
+        /// @brief Whether the dynamic active update was used.
+          bool dynamic = false;
+        /// @brief Number of local Newton iterations used.
+          size_t localIterations = 0;
       };
 
+      /// @brief Constructs the coupled active contraction law.
       ActiveContraction(
           const PassiveLaw& passiveLaw,
           const ActiveLaw& activeLaw = ActiveLaw())
@@ -73,16 +83,19 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns the passive hyperelastic law.
       const PassiveLaw& getPassiveLaw() const
       {
         return m_passiveLaw;
       }
 
+      /// @brief Returns the active fiber law.
       const ActiveLaw& getActiveLaw() const
       {
         return m_activeLaw;
       }
 
+      /// @brief Populates cached passive and active quantities.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         m_passiveLaw.setCache(cache.passive, cp);
@@ -102,20 +115,18 @@ namespace Rodin::Solid
           oldState.gamma = cp.get<Tags::PreviousActiveGamma>();
           oldState.beta = cp.get<Tags::PreviousActiveBeta>();
           const Real dt = cp.get<Tags::TimeStep>();
-          const Real ec_n = cp.get<Tags::PreviousActiveExtension>();
+          const Real ecN = cp.get<Tags::PreviousActiveExtension>();
           const Real activation = cp.get<Tags::ElectricalActivation>();
 
           // Initial guess: previous extension, optionally overridden by the
           // input via Tags::ActiveExtension (warm start).
-          Real c = cp.has<Tags::ActiveExtension>()
-            ? cp.get<Tags::ActiveExtension>()
-            : ec_n;
+          Real c =
+            cp.has<Tags::ActiveExtension>() ? cp.get<Tags::ActiveExtension>() : ecN;
 
           typename ActiveLaw::State newState =
-            m_activeLaw.update(dt, oldState, ec_n, c, activation);
-          typename ActiveLaw::Response resp =
-            m_activeLaw.evaluateDynamic(
-                dt, oldState, newState, cache.strain, ec_n, c, activation);
+            m_activeLaw.update(dt, oldState, ecN, c, activation);
+          typename ActiveLaw::Response resp = m_activeLaw.evaluateDynamic(
+            dt, oldState, newState, cache.strain, ecN, c, activation);
 
           size_t it = 0;
           for (; it < m_localMaxIterations; ++it)
@@ -124,11 +135,9 @@ namespace Rodin::Solid
             // dc = -residual.  Stop when the update is below tolerance.
             const Real dc = -resp.residual;
             c += dc;
-            newState =
-              m_activeLaw.update(dt, oldState, ec_n, c, activation);
-            resp =
-              m_activeLaw.evaluateDynamic(
-                  dt, oldState, newState, cache.strain, ec_n, c, activation);
+            newState = m_activeLaw.update(dt, oldState, ecN, c, activation);
+            resp = m_activeLaw.evaluateDynamic(
+              dt, oldState, newState, cache.strain, ecN, c, activation);
             if (std::abs(dc) < m_localTolerance)
               break;
           }
@@ -151,6 +160,7 @@ namespace Rodin::Solid
         }
       }
 
+      /// @brief Returns the sum of passive and active strain-energy densities.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real passiveEnergy =
@@ -164,6 +174,7 @@ namespace Rodin::Solid
         return passiveEnergy + activeEnergy;
       }
 
+      /// @brief Adds the active contribution to the first Piola-Kirchhoff stress.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -175,6 +186,7 @@ namespace Rodin::Solid
               * cache.fiber.tensor();
       }
 
+      /// @brief Adds the active contribution to the material tangent action.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_P0g_P0GELEMENT_H
-#define RODIN_VARIATIONAL_P0g_P0GELEMENT_H
+#ifndef RODIN_VARIATIONAL_P0G_P0GELEMENT_H
+#define RODIN_VARIATIONAL_P0G_P0GELEMENT_H
 
 /**
  * @file
@@ -35,13 +35,16 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range>
   struct Traits<Variational::P0gElement<Range>>
   {
-    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    using RangeType = Range;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -56,8 +59,11 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
   public:
+    /// @brief Parent class type.
     using Parent = FiniteElementBase<P0gElement<Scalar>>;
+    /// @brief Scalar value type.
     using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
     using RangeType = Scalar;
 
     class LinearForm
@@ -211,8 +217,11 @@ namespace Rodin::Variational
     using G = Geometry::Polytope::Type;
 
   public:
+    /// @brief Parent class type.
     using Parent = FiniteElementBase<P0gElement<Math::SpatialVector<Scalar>>>;
+    /// @brief Scalar value type.
     using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
     using RangeType = Math::SpatialVector<Scalar>;
 
     class LinearForm
@@ -377,4 +386,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

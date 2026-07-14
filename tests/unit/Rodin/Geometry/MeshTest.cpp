@@ -20,6 +20,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies 2 D square build for geometry mesh by checking exact expected values.
   TEST(Rodin_Geometry_Mesh, 2D_Square_Build)
   {
     constexpr const size_t sdim = 2;
@@ -41,6 +42,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getCellCount(), 2);
   }
 
+  /// @brief Verifies 2 D square boundary for geometry mesh by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_Geometry_Mesh, 2D_Square_Boundary)
   {
     constexpr const size_t sdim = 2;
@@ -74,6 +76,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 4);
   }
 
+  /// @brief Verifies 2 D square interface for geometry mesh by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_Geometry_Mesh, 2D_Square_Interface)
   {
     constexpr const size_t sdim = 2;
@@ -107,6 +110,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, 1);
   }
 
+  /// @brief Verifies 2 D square polytope transformation 1 for geometry mesh fuzzy test by checking tolerance-based numerical results.
   TEST(Rodin_Geometry_Mesh_FuzzyTest, 2D_Square_PolytopeTransformation_1)
   {
     constexpr const size_t rdim = 2;
@@ -289,6 +293,7 @@ namespace Rodin::Tests::Unit
 
   // Additional comprehensive tests
 
+  /// @brief Verifies multiple triangles for geometry mesh by checking exact expected values.
   TEST(Rodin_Geometry_Mesh, MultipleTriangles)
   {
     constexpr const size_t sdim = 2;
@@ -312,6 +317,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getCellCount(), 4);
   }
 
+  /// @brief Verifies 3 D tetrahedron for geometry mesh by checking exact expected values.
   TEST(Rodin_Geometry_Mesh, 3D_Tetrahedron)
   {
     constexpr const size_t sdim = 3;

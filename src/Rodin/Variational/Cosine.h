@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_COS_H
-#define RODIN_VARIATIONAL_COS_H
+#ifndef RODIN_VARIATIONAL_COSINE_H
+#define RODIN_VARIATIONAL_COSINE_H
 
 /**
  * @file Cosine.h
@@ -18,6 +18,7 @@
 #include "Function.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -52,8 +53,10 @@ namespace Rodin::Variational
     : public RealFunctionBase<Cos<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Cos<FunctionBase<NestedDerived>>>;
 
       /**
@@ -154,4 +157,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

@@ -46,16 +46,20 @@ namespace Rodin::FormLanguage
       std::is_base_of_v<Eigen::EigenBase<typename std::decay<T>::type>, typename std::decay<T>::type>;
   };
 
+  /// @brief Compile-time column count of a type; -1 when unavailable.
   template <class T, class = void>
   struct ColsAtCompileTime
   {
-    static constexpr int Value = -1;
+    /// @brief The column count, or -1 if the type does not expose one.
+      static constexpr int Value = -1;
   };
 
+  /// @brief Compile-time column count for Eigen-like types exposing ColsAtCompileTime.
   template <class T>
   struct ColsAtCompileTime<T, std::void_t<decltype(std::decay_t<T>::ColsAtCompileTime)>>
   {
-    static constexpr int Value = std::decay_t<T>::ColsAtCompileTime;
+    /// @brief The type's compile-time column count.
+      static constexpr int Value = std::decay_t<T>::ColsAtCompileTime;
   };
 
   /**
@@ -64,7 +68,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Boolean>
   {
-    using ScalarType = Boolean;  ///< Scalar type is Boolean itself
+    /// @brief Scalar value type.
+      using ScalarType = Boolean;  ///< Scalar type is Boolean itself
   };
 
   /**
@@ -73,7 +78,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Integer>
   {
-    using ScalarType = Integer;  ///< Scalar type is Integer itself
+    /// @brief Scalar value type.
+      using ScalarType = Integer;  ///< Scalar type is Integer itself
   };
 
   /**
@@ -82,7 +88,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Real>
   {
-    using ScalarType = Real;  ///< Scalar type is Real itself
+    /// @brief Scalar value type.
+      using ScalarType = Real;  ///< Scalar type is Real itself
   };
 
   /**
@@ -91,7 +98,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Complex>
   {
-    using ScalarType = Complex;  ///< Scalar type is Complex itself
+    /// @brief Scalar value type.
+      using ScalarType = Complex;  ///< Scalar type is Complex itself
   };
 
   /**
@@ -103,7 +111,7 @@ namespace Rodin::FormLanguage
    * @tparam RHS Type of right-hand side operand
    */
 
-
+  /// @brief Categorization of a value's range (scalar, vector or matrix kind).
   enum class RangeKind
   {
     Boolean,
@@ -115,18 +123,40 @@ namespace Rodin::FormLanguage
     Unknown
   };
 
+  /// @brief Type trait: whether @c T is a Math::SpatialVector.
   template <class T>
-  struct IsSpatialVector : std::false_type { static constexpr bool Value = false; };
+  struct IsSpatialVector : std::false_type
+  {
+    /// @brief False for non-spatial-vector types.
+      static constexpr bool Value = false;
+  };
 
+  /// @brief Type trait specialization for Math::SpatialVector.
   template <class Scalar>
-  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type { static constexpr bool Value = true; };
+  struct IsSpatialVector<Math::SpatialVector<Scalar>> : std::true_type
+  {
+    /// @brief True for Math::SpatialVector specializations.
+      static constexpr bool Value = true;
+  };
 
+  /// @brief Type trait: whether @c T is a Math::SpatialMatrix.
   template <class T>
-  struct IsSpatialMatrix : std::false_type { static constexpr bool Value = false; };
+  struct IsSpatialMatrix : std::false_type
+  {
+    /// @brief False for non-spatial-matrix types.
+      static constexpr bool Value = false;
+  };
 
+  /// @brief Type trait specialization for Math::SpatialMatrix.
   template <class Scalar>
-  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type { static constexpr bool Value = true; };
+  struct IsSpatialMatrix<Math::SpatialMatrix<Scalar>> : std::true_type
+  {
+    /// @brief True for Math::SpatialMatrix specializations.
+      static constexpr bool Value = true;
+  };
 
+  /// @brief Type trait: whether @c T has vector range (a spatial vector or a
+  /// single-column Eigen object).
   template <class T>
   struct IsVectorRange
     : std::bool_constant<
@@ -136,14 +166,14 @@ namespace Rodin::FormLanguage
           && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
         )>
   {
-    static constexpr bool Value =
-      IsSpatialVector<std::decay_t<T>>::Value
-      || (
-        IsEigenObject<std::decay_t<T>>::Value
-        && (ColsAtCompileTime<std::decay_t<T>>::Value == 1)
-      );
+    /// @brief True if @c T has vector range.
+      static constexpr bool Value = IsSpatialVector<std::decay_t<T>>::Value ||
+        (IsEigenObject<std::decay_t<T>>::Value &&
+          (ColsAtCompileTime<std::decay_t<T>>::Value == 1));
   };
 
+  /// @brief Type trait: whether @c T has matrix range (a spatial matrix or a
+  /// multi-column Eigen object).
   template <class T>
   struct IsMatrixRange
     : std::bool_constant<
@@ -153,29 +183,32 @@ namespace Rodin::FormLanguage
           && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
         )>
   {
-    static constexpr bool Value =
-      IsSpatialMatrix<std::decay_t<T>>::Value
-      || (
-        IsEigenObject<std::decay_t<T>>::Value
-        && (ColsAtCompileTime<std::decay_t<T>>::Value != 1)
-      );
+    /// @brief True if @c T has matrix range.
+      static constexpr bool Value = IsSpatialMatrix<std::decay_t<T>>::Value ||
+        (IsEigenObject<std::decay_t<T>>::Value &&
+          (ColsAtCompileTime<std::decay_t<T>>::Value != 1));
   };
 
+  /// @brief Deduces the RangeKind of a type @c T.
   template <class T>
   struct RangeKindOf
   {
-    static constexpr RangeKind Value =
-      std::is_same_v<std::decay_t<T>, Boolean> ? RangeKind::Boolean
-      : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer
-      : std::is_same_v<std::decay_t<T>, Real> ? RangeKind::Real
-      : std::is_same_v<std::decay_t<T>, Complex> ? RangeKind::Complex
-      : IsVectorRange<std::decay_t<T>>::Value ? RangeKind::Vector
-      : IsMatrixRange<std::decay_t<T>>::Value ? RangeKind::Matrix
-      : RangeKind::Unknown;
+    /// @brief The deduced range kind.
+      static constexpr RangeKind Value = std::is_same_v<std::decay_t<T>, Boolean>
+        ? RangeKind::Boolean
+        : std::is_same_v<std::decay_t<T>, Integer> ? RangeKind::Integer
+        : std::is_same_v<std::decay_t<T>, Real>    ? RangeKind::Real
+        : std::is_same_v<std::decay_t<T>, Complex> ? RangeKind::Complex
+        : IsVectorRange<std::decay_t<T>>::Value    ? RangeKind::Vector
+        : IsMatrixRange<std::decay_t<T>>::Value    ? RangeKind::Matrix
+                                                   : RangeKind::Unknown;
   };
 
+  /// @brief Convenience variable template for RangeKindOf<T>::Value.
   template <class T>
   inline constexpr auto RangeKindOfV = RangeKindOf<T>::Value;
+
+  /// @brief Type trait for deducing the result type of addition.
   template <class LHS, class RHS>
   struct Sum
   {

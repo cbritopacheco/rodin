@@ -11,9 +11,11 @@
   @section examples-mmg-meshopt-intro Introduction
 
   Mesh quality is critical for accurate finite element solutions. The
-  @ref Rodin::External::MMG "MMG::Optimizer" provides automatic mesh
-  improvement: it refines, coarsens, and improves element shapes according
-  to user-specified size parameters.
+  @ref Rodin::MMG "MMG::Optimizer" wraps MMG optimization mode: it improves
+  poorly shaped elements while keeping the mesh close to the local size
+  distribution already present in the input mesh. This is different from
+  metric-driven adaptation, where an external size map prescribes where the
+  mesh should be refined or coarsened.
 
   @section examples-mmg-meshopt-basic Basic Usage
 
@@ -53,14 +55,37 @@
 
   @section examples-mmg-meshopt-params Optimizer Parameters
 
-  The @ref Rodin::External::MMG "MMG::Optimizer" supports several parameters:
+  The @ref Rodin::MMG "MMG::Optimizer" supports several parameters:
 
   | Method | Description |
   |--------|-------------|
-  | `setHMax(h)` | Maximum edge length |
-  | `setHMin(h)` | Minimum edge length |
+  | `setHMax(h)` | Upper edge-size bound passed to MMG |
+  | `setHMin(h)` | Lower edge-size bound passed to MMG |
   | `setHausdorff(h)` | Hausdorff distance for curved boundaries |
   | `setAngleDetection(b)` | Enable/disable automatic ridge detection |
+
+  @note `MMG::Optimizer` is a quality-improvement operator. Use
+  @ref Rodin::MMG::Adapt "MMG::Adapt" when a computed size field should drive
+  refinement and coarsening.
+
+  @section examples-mmg-meshopt-required Required Entities
+
+  Required vertices, edges, triangles, and tetrahedra can be marked on
+  @ref Rodin::MMG::Mesh "MMG::Mesh" before optimization. The Rodin wrapper
+  passes them to MMG as required entities and restores the required index sets
+  after optimization when the corresponding indices still exist in the output:
+
+  @code{.cpp}
+  mesh.setRequiredVertex(vertexIndex);
+  mesh.setRequiredEdge(edgeIndex);
+  mesh.setRequiredTriangle(triangleIndex);
+  mesh.setRequiredTetrahedron(tetrahedronIndex);
+
+  MMG::Optimizer().setHMax(0.1).optimize(mesh);
+  @endcode
+
+  See @ref examples-mmg-behavior-required "Required entity behavior" for the
+  tested preservation guarantees and the important level-set limitations.
 
   Typical settings for shape optimization:
 
@@ -79,10 +104,11 @@
 
   @section examples-mmg-meshopt-see-also See Also
 
-  - @ref examples-mmg-simple_io "MMG I/O" — Loading and saving MMG meshes
+  - @ref examples-mmg-simple_io "MMG I/O" - Loading and saving MMG meshes
+  - @ref examples-mmg-behavior "MMG behavior and guarantees"
   - @ref examples-shapeoptimization-simple_cantilever "Shape optimization" —
     Uses MMG in an optimization loop
-  - @ref Rodin::External::MMG "MMG namespace"
+  - @ref Rodin::MMG "MMG namespace"
 
   @example MMG/MeshOptimization.cpp
   @m_examplenavigation{examples-mmg-mesh_optimization,MMG/}

@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Poisson manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Poisson manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -51,12 +59,15 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Poisson 3 D H1 Test 8.
   using Manufactured_Poisson3D_H1_Test_8 =
     Manufactured_Poisson3D_H1_Test<8>;
 
+  /// @brief Helper used by the manufactured tests to Manufactured Poisson 3 D H1 Test 16.
   using Manufactured_Poisson3D_H1_Test_16 =
     Manufactured_Poisson3D_H1_Test<16>;
 
+  /// @brief Verifies poisson 3 D P1 exact residual H1 for manufactured poisson 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_H1_Test_8, Poisson3D_P1ExactResidual_H1)
   {
     constexpr auto order = std::integral_constant<size_t, 1>{};
@@ -98,6 +109,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       << "Geometry = " << this->getGeometry();
   }
 
+  /// @brief Verifies manufactured poisson 3 D H1 2 for manufactured poisson 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_H1_Test_8, Manufactured_Poisson3D_H1_2)
   {
     const auto pi = Rodin::Math::Constants::pi();
@@ -127,6 +139,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       << "Geometry = " << this->getGeometry();
   }
 
+  /// @brief Verifies manufactured poisson 3 D H1 4 for manufactured poisson 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_H1_Test_8, Manufactured_Poisson3D_H1_4)
   {
     const auto pi = Rodin::Math::Constants::pi();
@@ -156,6 +169,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       << "Geometry = " << this->getGeometry();
   }
 
+  /// @brief Verifies manufactured poisson 3 D H1 5 for manufactured poisson 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_H1_Test_8, Manufactured_Poisson3D_H1_5)
   {
     const auto pi = Rodin::Math::Constants::pi();
@@ -185,6 +199,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       << "Geometry = " << this->getGeometry();
   }
 
+  /// @brief Verifies manufactured poisson 3 D H1 2 refined mesh for manufactured poisson 3 D H1 test 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_H1_Test_16, Manufactured_Poisson3D_H1_2_RefinedMesh)
   {
     const auto pi = Rodin::Math::Constants::pi();
@@ -214,6 +229,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
       << "Geometry = " << this->getGeometry();
   }
 
+  /// @brief Instantiates Manufactured Poisson 3 D H1 Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_Poisson3D_H1_Test_8,
@@ -225,6 +241,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
     )
   );
 
+  /// @brief Instantiates Manufactured Poisson 3 D H1 Test 16 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_Poisson3D_H1_Test_16,

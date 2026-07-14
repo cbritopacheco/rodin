@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file Eikonal.h
  * @brief Eikonal equation-based distance function computation.
@@ -10,8 +16,8 @@
  * @f]
  * where @f$ d @f$ is the distance function.
  */
-#ifndef RODIN_MODELS_DISTANCE_EIKONAL_H
-#define RODIN_MODELS_DISTANCE_EIKONAL_H
+#ifndef RODIN_DISTANCE_EIKONAL_H
+#define RODIN_DISTANCE_EIKONAL_H
 
 #include <functional>
 

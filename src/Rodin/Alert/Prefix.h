@@ -5,6 +5,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file Prefix.h
+ * @brief Prefix decorator for alert message output.
+ */
 #ifndef RODIN_ALERT_PREFIX_H
 #define RODIN_ALERT_PREFIX_H
 

@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Hyperelasticity manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a hyperelasticity manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -121,15 +129,12 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       P1 scalar(mesh);
       GridFunction err2(scalar);
       err2 = Pow(Frobenius(uCurrent - uExact), 2);
-      return {
-        Integral(err2).compute(),
-        newton.converged(),
-        newton.getReport().initial_residual,
-        newton.getReport().final_residual
-      };
+      return {Integral(err2).compute(), newton.converged(),
+        newton.getReport().initialResidual, newton.getReport().finalResidual};
     }
   }
 
+  /// @brief Verifies hyper elasticity neo hookean affine newton solver for manufactured P1 by checking tolerance-based numerical results, true predicates, manufactured-solution convergence.
   TEST(Rodin_Manufactured_P1, HyperElasticity_NeoHookean_Affine_NewtonSolver)
   {
     const auto result = solveAffineHyperElasticity(ResidualSign::Correct);
@@ -138,6 +143,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     EXPECT_NEAR(result.l2ErrorSquared, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies hyper elasticity neo hookean wrong residual sign regresses for manufactured P1 by checking false predicates, manufactured-solution convergence.
   TEST(Rodin_Manufactured_P1, HyperElasticity_NeoHookean_WrongResidualSignRegresses)
   {
     const auto result = solveAffineHyperElasticity(ResidualSign::Wrong);

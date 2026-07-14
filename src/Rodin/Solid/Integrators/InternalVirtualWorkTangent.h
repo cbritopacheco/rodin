@@ -56,10 +56,61 @@
 #include "Rodin/Solid/Local/ConstitutivePoint.h"
 #include "Rodin/Solid/Local/Input.h"
 
+<<<<<<< HEAD
 namespace Rodin::Solid {
 
 template <class... Args>
 class InternalVirtualWorkTangent;
+=======
+namespace Rodin::Solid
+{
+  /**
+   * @brief Local bilinear form integrator for the internal virtual work tangent
+   * in hyperelastic problems.
+   *
+   * Computes the element-level tangent stiffness matrix:
+   * @f[
+   *   K^e_{ij} = \int_{K} D\mathbf{P}[\nabla_0 \phi_j] : \nabla_0 \phi_i \, dX
+   * @f]
+   *
+   * The material tangent action @f$ \mathbf{A} : \delta\mathbf{F} @f$ encodes
+   * both material and geometric stiffness (no separate geometric-stiffness
+   * integrator is needed when using the first Piola-Kirchhoff formulation).
+   *
+   * Typically constructed via @c InternalVirtualWork::Tangent(u, v) rather
+   * than directly.
+   *
+   * @tparam LawDerived The hyperelastic constitutive law type
+   * @tparam TrialFunctionType The trial function type (backend-generic)
+   * @tparam TestFunctionType The test function type (backend-generic)
+   * @tparam DisplacementType The current displacement grid-function type
+   */
+  template <class LawDerived, class TrialFunctionType,
+            class TestFunctionType, class DisplacementType>
+  class InternalVirtualWorkTangent final
+    : public Variational::LocalBilinearFormIntegratorBase<Real>
+  {
+    public:
+      /// @brief Scalar value type.
+      using ScalarType = Real;
+      /// @brief Parent class type.
+      using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      /// @brief Constitutive law type.
+      using LawType = LawDerived;
+      /// @brief Trial function type.
+      using TrialType = TrialFunctionType;
+      /// @brief Test function type.
+      using TestType = TestFunctionType;
+      /// @brief Current displacement state type.
+      using StateType = DisplacementType;
+
+      /// @brief Trial finite element space type.
+      using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+      /// @brief Test finite element space type.
+      using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief State finite element space type.
+      using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
+>>>>>>> origin/develop
 
 /**
  * @brief Displacement tangent (pure displacement formulation).
@@ -200,8 +251,24 @@ public:
       }
     }
 
+<<<<<<< HEAD
     return *this;
   }
+=======
+      /// @brief Copy constructor.
+      InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
+        : Parent(other),
+          m_law(other.m_law),
+          m_trial(other.m_trial),
+          m_test(other.m_test),
+          m_displacement(other.m_displacement),
+          m_trialfes(other.m_trialfes),
+          m_testfes(other.m_testfes),
+          m_statefes(other.m_statefes),
+          m_quadOrder(other.m_quadOrder),
+          m_input(other.m_input)
+      {}
+>>>>>>> origin/develop
 
   ScalarType integrate(size_t tr, size_t te) final override {
     return m_matrix(te, tr);
@@ -216,9 +283,16 @@ public:
     return Geometry::Region::Cells;
   }
 
+<<<<<<< HEAD
   InternalVirtualWorkTangent *copy() const noexcept final override {
     return new InternalVirtualWorkTangent(*this);
   }
+=======
+      /// @brief Sets the current polytope and assembles the element tangent matrix.
+      InternalVirtualWorkTangent& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = polytope;
+>>>>>>> origin/develop
 
   const LawType &getLaw() const { return m_law; }
 
@@ -437,6 +511,7 @@ public:
       }
     }
 
+<<<<<<< HEAD
     return *this;
   }
 
@@ -610,9 +685,16 @@ public:
           const ScalarType dp = trialFE.getBasis(tr)(rc);
           m_matrix(te, tr) += wq * distortion * dp * J * FinvTG;
         }
+=======
+      /// @brief Returns an entry of the current element tangent matrix.
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_matrix(te, tr);
+>>>>>>> origin/develop
       }
     }
 
+<<<<<<< HEAD
     return *this;
   }
 
@@ -778,15 +860,36 @@ public:
           const ScalarType qv = testFE.getBasis(te)(rc);
           m_matrix(te, tr) += wq * distortion * qv * dJ;
         }
+=======
+      /// @brief Returns the current polytope.
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return m_polytope->get();
+>>>>>>> origin/develop
       }
     }
 
+<<<<<<< HEAD
     return *this;
   }
 
   ScalarType integrate(size_t tr, size_t te) final override {
     return m_matrix(te, tr);
   }
+=======
+      /// @brief Returns the integration region.
+      Geometry::Region getRegion() const final override
+      {
+        return Geometry::Region::Cells;
+      }
+
+      /// @brief Polymorphically copies this tangent integrator.
+      InternalVirtualWorkTangent* copy() const noexcept final override
+      {
+        return new InternalVirtualWorkTangent(*this);
+      }
+>>>>>>> origin/develop
 
   const Geometry::Polytope &getPolytope() const final override {
     assert(m_polytope);

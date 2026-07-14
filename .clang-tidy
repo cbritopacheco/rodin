@@ -1,0 +1,107 @@
+# Rodin naming and idiom enforcement. Focused on identifier naming — the
+# part of the house style clang-format cannot check. Extend cautiously:
+# broad check bundles create noise that drowns the signal.
+#
+# House naming (see CONTRIBUTING.md and doc/agents/philosophy.md):
+#   Types, namespaces, template parameters   CamelCase
+#   Functions and methods                    camelBack (getX/setX accessors)
+#   Private/protected members                m_camelBack
+#   Public data members, parameters, locals  camelBack
+#   Enum constants                           CamelCase
+#   Macros                                   RODIN_UPPER_CASE
+#
+# Mathematical notation is deliberately allowed where identifiers denote
+# mathematical objects (F, Jinv, FinvT_dF, I1, Es, m_I4, dW_dJ1, mu_0):
+# variables carry a simple math-style IgnoredRegexp. The tool does not try
+# to distinguish math names from word-like CamelCase variables — when a
+# flagged (or reviewed) variable is not mathematical, fix the name rather
+# than extending the rules. CamelCase FUNCTIONS are allowed house style.
+# Static data members may use the historical s_ prefix. STL-protocol
+# member functions (push_back, begin, ...) are exempt by name.
+Checks: >-
+  -*,
+  readability-identifier-naming
+
+WarningsAsErrors: 'readability-identifier-naming'
+
+HeaderFilterRegex: '(^|.*/)src/Rodin/.*'
+
+CheckOptions:
+  - key: readability-identifier-naming.NamespaceCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  # UPPER_CASE enum constants mirror external file-format keyword tables
+  # (XDMF topology types TRIANGLE_6, MEDIT keywords, ...).
+  - key: readability-identifier-naming.EnumConstantIgnoredRegexp
+    value: '^[A-Z][A-Z0-9_]*$'
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
+  # STL-compatibility aliases (iterator protocols) are exempt.
+  - key: readability-identifier-naming.TypeAliasIgnoredRegexp
+    value: '^(iterator|const_iterator|reverse_iterator|const_reverse_iterator|value_type|reference|const_reference|pointer|const_pointer|size_type|difference_type|type)$'
+  - key: readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  # Exemptions: STL protocol names keep their standard spelling, and
+  # CamelCase function names are allowed house style (mathematical
+  # operators like T(), named constructors like Hooke::YoungPoisson,
+  # API-concept factories like HDF5 File/Group/DataSet).
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: '^(push_back|emplace_back|pop_back|push_front|pop_front|begin|end|cbegin|cend|rbegin|rend|crbegin|crend|size|max_size|empty|clear|insert|erase|find|count|contains|swap|data|reserve|resize|capacity|front|back|at|get_allocator|[A-Z][a-zA-Z0-9]*)$'
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: 'm_'
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: camelBack
+  # m_ + mathematical notation (m_I4, m_J, ...).
+  - key: readability-identifier-naming.PrivateMemberIgnoredRegexp
+    value: '^m_[A-Z][a-zA-Z0-9]*$'
+  - key: readability-identifier-naming.ProtectedMemberPrefix
+    value: 'm_'
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PublicMemberCase
+    value: camelBack
+  # Mathematical notation: tensors (J, X, I1, I2bar), derivative chains with
+  # underscore as the fraction bar (dW_dJ1, d2W_dJ1dJ2), and greek-letter
+  # subscripts from the literature (mu_0, mu_Inf, gamma_c).
+  - key: readability-identifier-naming.PublicMemberIgnoredRegexp
+    value: '^([A-Z][a-zA-Z0-9]*(_d[a-zA-Z0-9]+)*|d[0-9]?[a-zA-Z0-9]*(_d[a-zA-Z0-9]+)+|(alpha|beta|gamma|delta|eps|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|k)_[A-Za-z0-9]+)$'
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  # Mathematical notation: tensors, derivative chains, greek subscripts.
+  - key: readability-identifier-naming.ParameterIgnoredRegexp
+    value: '^([A-Z][a-zA-Z0-9]*(_d[a-zA-Z0-9]+)*|d[0-9]?[a-zA-Z0-9]*(_d[a-zA-Z0-9]+)+|(alpha|beta|gamma|delta|eps|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|k)_[A-Za-z0-9]+)$'
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelBack
+  # Mathematical notation: tensors, derivative chains, greek subscripts.
+  - key: readability-identifier-naming.LocalVariableIgnoredRegexp
+    value: '^([A-Z][a-zA-Z0-9]*(_d[a-zA-Z0-9]+)*|d[0-9]?[a-zA-Z0-9]*(_d[a-zA-Z0-9]+)+|(alpha|beta|gamma|delta|eps|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|k)_[A-Za-z0-9]+)$'
+  # Statics accept camelBack, the historical s_ prefix, or math CamelCase.
+  - key: readability-identifier-naming.StaticConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.StaticConstantIgnoredRegexp
+    value: '^(s_[a-zA-Z0-9_]+|[A-Z][a-zA-Z0-9]*)$'
+  - key: readability-identifier-naming.StaticVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.StaticVariableIgnoredRegexp
+    value: '^(s_[a-zA-Z0-9_]+|[A-Z][a-zA-Z0-9]*)$'
+  # constexpr values accept camelBack (epsG) or math/type-level CamelCase (Space).
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstexprVariableIgnoredRegexp
+    value: '^[A-Z][a-zA-Z0-9]*$'
+  # Rodin macros are RODIN_UPPER_CASE.
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE

@@ -22,7 +22,7 @@ namespace Rodin::Utility
    * @tparam T The type to potentially unwrap.
    *
    * For non-reference_wrapper types, the result is T itself.
-   * For std::reference_wrapper<U>, the result is U&.
+   * For @c std::reference_wrapper&lt;U&gt;, the result is @c U&.
    *
    * Example usage:
    * @code{.cpp}

@@ -37,6 +37,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies caches single formula per polytope for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, CachesSingleFormulaPerPolytope)
   {
     auto mesh = makeTriangleMesh();
@@ -63,6 +64,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&q1.getQuadratureFormula(), &qf);
   }
 
+  /// @brief Verifies distinguishes quadrature formula keys for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, DistinguishesQuadratureFormulaKeys)
   {
     auto mesh = makeTriangleMesh();
@@ -98,6 +100,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&qg.getQuadratureFormula(), &qf2);
   }
 
+  /// @brief Verifies clear drops cached entries for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, ClearDropsCachedEntries)
   {
     auto mesh = makeTriangleMesh();
@@ -127,6 +130,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&q2.getQuadratureFormula(), &qf);
   }
 
+  /// @brief Verifies mesh move constructor drops stale entries for geometry polytope quadrature index by checking exact expected values, move semantics.
   TEST(Geometry_PolytopeQuadratureIndex, MeshMoveConstructorDropsStaleEntries)
   {
     auto mesh = makeTriangleMesh();
@@ -143,6 +147,7 @@ namespace Rodin::Tests::Unit
       &static_cast<const MeshBase&>(moved));
   }
 
+  /// @brief Verifies mesh move assignment drops stale entries for geometry polytope quadrature index by checking exact expected values, move semantics.
   TEST(Geometry_PolytopeQuadratureIndex, MeshMoveAssignmentDropsStaleEntries)
   {
     auto mesh = makeTriangleMesh();
@@ -160,6 +165,7 @@ namespace Rodin::Tests::Unit
       &static_cast<const MeshBase&>(moved));
   }
 
+  /// @brief Verifies throws on invalid dimension for geometry polytope quadrature index by checking exception behavior.
   TEST(Geometry_PolytopeQuadratureIndex, ThrowsOnInvalidDimension)
   {
     auto mesh = makeTriangleMesh();
@@ -182,6 +188,7 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
+  /// @brief Verifies throws on out of range polytope index for geometry polytope quadrature index by checking exception behavior.
   TEST(Geometry_PolytopeQuadratureIndex, ThrowsOnOutOfRangePolytopeIndex)
   {
     auto mesh = makeTriangleMesh();
@@ -205,6 +212,7 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
+  /// @brief Verifies exceeding capacity does not throw for geometry polytope quadrature index by checking no-throw behavior.
   TEST(Geometry_PolytopeQuadratureIndex, ExceedingCapacityDoesNotThrow)
   {
     auto mesh = makeTriangleMesh();
@@ -236,6 +244,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies rebuilds evicted formula after capacity exceeded for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, RebuildsEvictedFormulaAfterCapacityExceeded)
   {
     auto mesh = makeTriangleMesh();
@@ -308,6 +317,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 2);
   }
 
+  /// @brief Verifies hot entry preserves immediate repeat after overflow for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, HotEntryPreservesImmediateRepeatAfterOverflow)
   {
     auto mesh = makeTriangleMesh();

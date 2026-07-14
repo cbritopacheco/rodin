@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include "Rodin/Alert/MemberFunctionException.h"
 #include "Rodin/Utility/Overloaded.h"
 
@@ -274,12 +280,19 @@ namespace Rodin::MMG
           ids.push_back(i);
       }
       size_t newna = ids.size();
+      // MMG treats a non-null edge array as holding at least one entry, so an
+      // empty result must leave the pointer null. Likewise, namax must stay
+      // positive as MMG uses it to size internal allocations.
       MMG5_pEdge edges = nullptr;
-      MMG5_SAFE_MALLOC(edges, newna + 1, MMG5_Edge,
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to reallocate edge memory." << Alert::Raise);
-      for (int i = 1; i <= newna; i++)
-        edges[i] = mesh->edge[ids[i - 1]];
+      if (newna > 0)
+      {
+        MMG5_SAFE_CALLOC(edges, newna + 1, MMG5_Edge,
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to reallocate edge memory." << Alert::Raise);
+        for (size_t i = 1; i <= newna; i++)
+          edges[i] = mesh->edge[ids[i - 1]];
+        mesh->namax = newna;
+      }
       MMG5_SAFE_FREE(mesh->edge);
       mesh->na = newna;
       mesh->edge = edges;
@@ -295,12 +308,19 @@ namespace Rodin::MMG
           ids.push_back(i);
       }
       size_t newnt = ids.size();
+      // MMG treats a non-null triangle array as holding at least one entry,
+      // so an empty result must leave the pointer null. Likewise, ntmax must
+      // stay positive as MMG5_bdrySet sizes xtetra from it.
       MMG5_pTria triangles = nullptr;
-      MMG5_SAFE_MALLOC(triangles, newnt + 1, MMG5_Tria,
-          Alert::MemberFunctionException(*this, __func__)
-            << "Failed to reallocate triangles." << Alert::Raise);
-      for (int i = 1; i <= newnt; i++)
-        triangles[i] = mesh->tria[ids[i - 1]];
+      if (newnt > 0)
+      {
+        MMG5_SAFE_CALLOC(triangles, newnt + 1, MMG5_Tria,
+            Alert::MemberFunctionException(*this, __func__)
+              << "Failed to reallocate triangles." << Alert::Raise);
+        for (size_t i = 1; i <= newnt; i++)
+          triangles[i] = mesh->tria[ids[i - 1]];
+        mesh->ntmax = newnt;
+      }
       MMG5_SAFE_FREE(mesh->tria);
       mesh->nt = newnt;
       mesh->tria = triangles;
@@ -315,6 +335,18 @@ namespace Rodin::MMG
   {
     const auto& fes = ls.getFiniteElementSpace();
     const auto& mesh = fes.getMesh();
+    IndexSet requiredVertices;
+    IndexSet requiredEdges;
+    IndexSet requiredTriangles;
+    IndexSet requiredTetrahedra;
+    if (const auto* inputMesh = dynamic_cast<const MMG::Mesh*>(&mesh))
+    {
+      requiredVertices = inputMesh->getRequiredVertices();
+      requiredEdges = inputMesh->getRequiredEdges();
+      requiredTriangles = inputMesh->getRequiredTriangles();
+      requiredTetrahedra = inputMesh->getRequiredTetrahedra();
+    }
+
     MMG5_pMesh mmgMesh = nullptr;
     mmgMesh = rodinToMesh(ls.getFiniteElementSpace().getMesh());
 
@@ -370,6 +402,37 @@ namespace Rodin::MMG
     // deleteBoundaryRef(mmgMesh, 0);
 
     auto rodinMesh = meshToRodin(mmgMesh);
+    rodinMesh.getRequiredVertices().clear();
+    const size_t vertexCount = rodinMesh.getVertexCount();
+    for (const auto& idx : requiredVertices)
+    {
+      if (idx < vertexCount)
+        rodinMesh.setRequiredVertex(idx);
+    }
+    rodinMesh.getRequiredEdges().clear();
+    const size_t edgeCount =
+      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Segment);
+    for (const auto& idx : requiredEdges)
+    {
+      if (idx < edgeCount)
+        rodinMesh.setRequiredEdge(idx);
+    }
+    rodinMesh.getRequiredTriangles().clear();
+    const size_t triangleCount =
+      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Triangle);
+    for (const auto& idx : requiredTriangles)
+    {
+      if (idx < triangleCount)
+        rodinMesh.setRequiredTriangle(idx);
+    }
+    rodinMesh.getRequiredTetrahedra().clear();
+    const size_t tetrahedronCount =
+      rodinMesh.getPolytopeCount(Geometry::Polytope::Type::Tetrahedron);
+    for (const auto& idx : requiredTetrahedra)
+    {
+      if (idx < tetrahedronCount)
+        rodinMesh.setRequiredTetrahedron(idx);
+    }
     destroySolution(sol);
     destroyMesh(mmgMesh);
 

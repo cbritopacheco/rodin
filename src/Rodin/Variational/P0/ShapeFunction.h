@@ -1,3 +1,13 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file ShapeFunction.h
+ * @brief Shape function specializations for the P0 finite element space.
+ */
 #ifndef RODIN_VARIATIONAL_P0_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_P0_SHAPEFUNCTION_H
 
@@ -9,6 +19,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
@@ -16,13 +27,16 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<ShapeFunction<Derived, P0<Range, Mesh>, Space>, P0<Range, Mesh>, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P0<Range, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,
@@ -181,6 +195,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif
-
-

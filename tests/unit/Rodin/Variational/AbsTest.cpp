@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function positive value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_PositiveValue)
   {
     RealFunction f(3.14);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 3.14, 1e-10);
   }
 
+  /// @brief Verifies real function negative value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_NegativeValue)
   {
     RealFunction f(-2.71);
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 2.71, 1e-10);
   }
 
+  /// @brief Verifies real function zero value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_ZeroValue)
   {
     RealFunction f(0.0);
@@ -56,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function large positive value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_LargePositiveValue)
   {
     RealFunction f(1000.0);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 1000.0, 1e-10);
   }
 
+  /// @brief Verifies real function large negative value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_LargeNegativeValue)
   {
     RealFunction f(-999.0);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 999.0, 1e-10);
   }
 
+  /// @brief Verifies real function small positive value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_SmallPositiveValue)
   {
     RealFunction f(1e-6);
@@ -101,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 1e-6, 1e-16);
   }
 
+  /// @brief Verifies real function small negative value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, RealFunction_SmallNegativeValue)
   {
     RealFunction f(-1e-6);
@@ -116,6 +123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 1e-6, 1e-16);
   }
 
+  /// @brief Verifies grid function absolute value for variational abs by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Abs, GridFunction_AbsoluteValue)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -137,6 +145,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies chained operations for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, ChainedOperations)
   {
     RealFunction f1(3.0);
@@ -154,6 +163,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_diff.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies double absolute value for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, DoubleAbsoluteValue)
   {
     RealFunction f(-42.0);
@@ -172,6 +182,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs1.getValue(p), abs2.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies absolute value identity for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, AbsoluteValueIdentity)
   {
     RealFunction pos_f(15.0);
@@ -192,6 +203,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_pos.getValue(p), 15.0, 1e-10);
   }
 
+  /// @brief Verifies triangle inequality for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, TriangleInequality)
   {
     RealFunction f1(3.0);
@@ -217,6 +229,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum_abs.getValue(p), 8.0, 1e-10);
   }
 
+  /// @brief Verifies absolute value of product for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, AbsoluteValueOfProduct)
   {
     RealFunction f1(-2.0);
@@ -241,6 +254,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_product.getValue(p), 6.0, 1e-10);
   }
 
+  /// @brief Verifies fractional values for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, FractionalValues)
   {
     RealFunction f(-0.5);
@@ -256,6 +270,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies absolute value non negativity for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, AbsoluteValueNonNegativity)
   {
     RealFunction f(-100.0);
@@ -273,6 +288,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(abs_result.getValue(p), 100.0, 1e-10);
   }
 
+  /// @brief Verifies absolute value of difference for variational abs by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Abs, AbsoluteValueOfDifference)
   {
     RealFunction f1(10.0);

@@ -1425,6 +1425,7 @@ namespace Rodin::Tests::Unit
     : public ::testing::TestWithParam<Polytope::Type>
   {};
 
+  /// @brief Verifies save load round trip for H1 degree 2 round trip 3 D geometry coverage by checking tolerance-based numerical results, exact expected values, grid-function projection.
   TEST_P(H1Degree2RoundTrip3DGeometryCoverage, SaveLoadRoundTrip)
   {
     const auto geometry = GetParam();
@@ -1467,6 +1468,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
   }
 
+  /// @brief Instantiates H1 Degree 2 Round Trip 3 D Geometry Coverage over the All 3 D Polytopes parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     All3DPolytopes,
     H1Degree2RoundTrip3DGeometryCoverage,
@@ -1480,6 +1482,7 @@ namespace Rodin::Tests::Unit
       return geometryName(info.param);
     });
 
+  /// @brief Verifies save load round trip H1 degree 1 triangle large for IO MFEM H1 grid function by checking tolerance-based numerical results, exact expected values, grid-function projection.
   TEST(Rodin_IO_MFEM_H1_GridFunction, SaveLoadRoundTrip_H1_Degree1_Triangle_Large)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1879,6 +1882,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies load MFEM string fixture H1 degree 1 triangle scalar by nodes for IO MFEM H1 grid function by checking grid-function projection.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMStringFixture_H1_Degree1_Triangle_Scalar_ByNodes)
   {
     Mesh mesh =
@@ -1920,181 +1924,217 @@ Ordering: 0
     expectGridFunctionNear(gf, expected, 1e-12);
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 1 scalar by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree1_Scalar_ByNodes)
   {
     loadMFEMScalarFileFixtureFamilyAndCompare<1>();
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 2 scalar by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree2_Scalar_ByNodes)
   {
     loadMFEMScalarFileFixtureFamilyAndCompare<2>();
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 3 scalar by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree3_Scalar_ByNodes)
   {
     loadMFEMScalarFileFixtureFamilyAndCompare<3>();
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 4 scalar by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree4_Scalar_ByNodes)
   {
     loadMFEMScalarFileFixtureFamilyAndCompare<4>();
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 5 scalar by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree5_Scalar_ByNodes)
   {
     loadMFEMScalarFileFixtureFamilyAndCompare<5>();
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 6 scalar by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree6_Scalar_ByNodes)
   {
     loadMFEMScalarFileFixtureFamilyAndCompare<6>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 1 scalar for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree1_Scalar)
   {
     roundTripMFEMScalarFileFixtureFamilyAndCompare<1>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 2 scalar for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree2_Scalar)
   {
     roundTripMFEMScalarFileFixtureFamilyAndCompare<2>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 3 scalar for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree3_Scalar)
   {
     roundTripMFEMScalarFileFixtureFamilyAndCompare<3>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 4 scalar for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree4_Scalar)
   {
     roundTripMFEMScalarFileFixtureFamilyAndCompare<4>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 5 scalar for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree5_Scalar)
   {
     roundTripMFEMScalarFileFixtureFamilyAndCompare<5>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 6 scalar for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree6_Scalar)
   {
     roundTripMFEMScalarFileFixtureFamilyAndCompare<6>();
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 1 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree1_Vector_ByNodes)
   {
     loadMFEMVectorFileFixtureFamilyAndCompare<1>("by_nodes");
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 2 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree2_Vector_ByNodes)
   {
     loadMFEMVectorFileFixtureFamilyAndCompare<2>("by_nodes");
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 3 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree3_Vector_ByNodes)
   {
     loadMFEMVectorFileFixtureFamilyAndCompare<3>("by_nodes");
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 4 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree4_Vector_ByNodes)
   {
     loadMFEMVectorFileFixtureFamilyAndCompare<4>("by_nodes");
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 5 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree5_Vector_ByNodes)
   {
     loadMFEMVectorFileFixtureFamilyAndCompare<5>("by_nodes");
   }
 
+  /// @brief Verifies load MFEM file fixtures H1 degree 6 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadMFEMFileFixtures_H1_Degree6_Vector_ByNodes)
   {
     loadMFEMVectorFileFixtureFamilyAndCompare<6>("by_nodes");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 1 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree1_Vector_ByNodes)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<1>("by_nodes");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 2 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree2_Vector_ByNodes)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<2>("by_nodes");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 3 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree3_Vector_ByNodes)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<3>("by_nodes");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 4 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree4_Vector_ByNodes)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<4>("by_nodes");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 5 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree5_Vector_ByNodes)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<5>("by_nodes");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 6 vector by nodes for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree6_Vector_ByNodes)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<6>("by_nodes");
   }
 
+  /// @brief Verifies load by V dim print by nodes MFEM file fixtures H1 degree 1 vector for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree1_Vector)
   {
     loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<1>();
   }
 
+  /// @brief Verifies load by V dim print by nodes MFEM file fixtures H1 degree 2 vector for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree2_Vector)
   {
     loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<2>();
   }
 
+  /// @brief Verifies load by V dim print by nodes MFEM file fixtures H1 degree 3 vector for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree3_Vector)
   {
     loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<3>();
   }
 
+  /// @brief Verifies load by V dim print by nodes MFEM file fixtures H1 degree 4 vector for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree4_Vector)
   {
     loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<4>();
   }
 
+  /// @brief Verifies load by V dim print by nodes MFEM file fixtures H1 degree 5 vector for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree5_Vector)
   {
     loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<5>();
   }
 
+  /// @brief Verifies load by V dim print by nodes MFEM file fixtures H1 degree 6 vector for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, LoadByVDimPrintByNodesMFEMFileFixtures_H1_Degree6_Vector)
   {
     loadAndPrintMFEMVectorFileFixtureFamilyAndCompare<6>();
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 1 vector by V dim for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree1_Vector_ByVDim)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<1>("by_vdim");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 2 vector by V dim for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree2_Vector_ByVDim)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<2>("by_vdim");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 3 vector by V dim for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree3_Vector_ByVDim)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<3>("by_vdim");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 4 vector by V dim for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree4_Vector_ByVDim)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<4>("by_vdim");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 5 vector by V dim for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree5_Vector_ByVDim)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<5>("by_vdim");
   }
 
+  /// @brief Verifies round trip MFEM file fixtures H1 degree 6 vector by V dim for IO MFEM H1 grid function.
   TEST(Rodin_IO_MFEM_H1_GridFunction, RoundTripMFEMFileFixtures_H1_Degree6_Vector_ByVDim)
   {
     roundTripMFEMVectorFileFixtureFamilyAndCompare<6>("by_vdim");

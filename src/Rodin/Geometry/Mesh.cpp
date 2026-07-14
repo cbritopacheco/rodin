@@ -23,8 +23,9 @@
 
 #include "Polytope.h"
 #include "PolytopeIterator.h"
-#include "IsoparametricTransformation.h"
+#include "ParametricTransformation.h"
 
+/// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
 namespace Rodin::Geometry
 {
   // ---- MeshBase ----------------------------------------------------------
@@ -40,7 +41,16 @@ namespace Rodin::Geometry
       m_vertices(other.m_vertices),
       m_connectivity(other.m_connectivity),
       m_attributes(other.m_attributes)
-  {}
+  {
+    m_transformations.initialize(m_sdim);
+    m_quadratures.initialize(m_sdim);
+    for (size_t d = 0; d <= getDimension(); ++d)
+    {
+      const size_t count = m_connectivity.getCount(d);
+      m_transformations.resize(d, count);
+      m_quadratures.resize(d, count);
+    }
+  }
 
   Mesh<Context::Local>::Mesh(Mesh&& other)
     : MeshBase(std::move(other)),
@@ -427,7 +437,7 @@ namespace Rodin::Geometry
       PointCloud pm(sdim, 1);
       for (size_t i = 0; i < sdim; ++i)
         pm(i, 0) = m_vertices(i, idx);
-      return new IsoparametricTransformation(std::move(pm), std::move(fe));
+      return new ParametricTransformation(std::move(pm), std::move(fe));
     }
     else
     {
@@ -444,7 +454,7 @@ namespace Rodin::Geometry
           pm(i, v.index()) = m_vertices(i, v.value());
       }
       Variational::RealP1Element fe(g);
-      return new IsoparametricTransformation(std::move(pm), std::move(fe));
+      return new ParametricTransformation(std::move(pm), std::move(fe));
     }
   }
 
@@ -1600,3 +1610,4 @@ namespace Rodin::Geometry
     }
   }
 }
+/// @endcond

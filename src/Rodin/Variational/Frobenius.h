@@ -23,6 +23,7 @@
 #include "RealFunction.h"
 #include "Function.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -55,12 +56,16 @@ namespace Rodin::Variational
     : public RealFunctionBase<Frobenius<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<OperandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Frobenius<OperandType>>;
 
       /**
@@ -143,4 +148,5 @@ namespace Rodin::Variational
   Frobenius(const FunctionBase<NestedDerived>&) -> Frobenius<FunctionBase<NestedDerived>>;
 }
 
+/// @endcond
 #endif

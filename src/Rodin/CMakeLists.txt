@@ -33,12 +33,12 @@ endforeach()
 # Configure generated header
 configure_file(Configure.h.in ${CMAKE_CURRENT_BINARY_DIR}/Configure.h @ONLY)
 
-# Use only the **root** include dir in the interface; DO NOT export .../include/Rodin
+# Use only the root include dir in the interface; DO NOT export .../include/Rodin
 target_include_directories(Rodin
   INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>          # e.g. src/Rodin/Math.h reachable as <Rodin/Math.h>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>          # for generated Configure.h
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>      # installs headers under include/Rodin/**
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>      # installs headers under include/Rodin
 )
 
 # Link header-only deps via interface
@@ -63,6 +63,7 @@ add_subdirectory(Variational)
 add_subdirectory(FormLanguage)
 add_subdirectory(Serialization)
 
+add_subdirectory(Adaptation)
 add_subdirectory(Advection)
 add_subdirectory(Eikonal)
 add_subdirectory(Solid)
@@ -90,7 +91,7 @@ install(TARGETS Rodin
   EXPORT RodinTargets
 )
 
-# Install headers on disk under include/Rodin/**
+# Install headers on disk under include/Rodin
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Rodin
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"

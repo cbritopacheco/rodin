@@ -10,7 +10,7 @@
 
   @section examples-mmg-io-intro Introduction
 
-  The @ref Rodin::External::MMG "MMG" module provides a mesh class
+  The @ref Rodin::MMG "MMG" module provides a mesh class
   (`MMG::Mesh`) that extends the standard @ref Rodin::Geometry::Mesh "Mesh"
   with remeshing capabilities. This example shows how to load and save
   MMG meshes in the supported formats.
@@ -18,9 +18,10 @@
   @section examples-mmg-io-create Creating an MMG Mesh
 
   An `MMG::Mesh` can be created using the same
-  @ref Rodin::Geometry::Mesh::UniformGrid "UniformGrid()" method as a
+  @ref Rodin::Geometry::Mesh "UniformGrid()" method as a
   regular mesh. The key difference is that `MMG::Mesh` stores additional
-  metadata (corners, ridges) that MMG uses during remeshing:
+  metadata (corners, ridges, and required entities) that MMG uses during
+  remeshing:
 
   @code{.cpp}
   #include <Rodin/Geometry.h>
@@ -45,6 +46,11 @@
     for (auto it = mesh.getBoundary(); !it.end(); ++it)
       mesh.setRidge(it->getIndex());
 
+    // Required entities are serialized in MEDIT and passed to MMG as MG_REQ.
+    mesh.setRequiredVertex(0);
+    mesh.setRequiredEdge(0);
+    mesh.setRequiredTriangle(0);
+
     return 0;
   }
   @endcode
@@ -57,6 +63,10 @@
   @code{.cpp}
   mesh.save("output.medit.mesh", IO::FileFormat::MEDIT);
   @endcode
+
+  Rodin writes and reads the MMG-specific `RequiredVertices`,
+  `RequiredEdges`, `RequiredTriangles`, and `RequiredTetrahedra` sections when
+  they are present.
 
   @section examples-mmg-io-load Loading and Re-saving
 
@@ -77,9 +87,10 @@
 
   @section examples-mmg-io-see-also See Also
 
-  - @ref examples-mmg-mesh_optimization "Mesh optimization" — Remeshing with MMG
-  - @ref guides-io "I/O in Rodin" — Format reference
-  - @ref Rodin::External::MMG "MMG namespace"
+  - @ref examples-mmg-mesh_optimization "Mesh optimization" - Remeshing with MMG
+  - @ref examples-mmg-behavior "MMG behavior and guarantees"
+  - @ref guides-io "I/O in Rodin" - Format reference
+  - @ref Rodin::MMG "MMG namespace"
 
   @example MMG/MeshIO.cpp
   @m_examplenavigation{examples-mmg-simple_io,MMG/}

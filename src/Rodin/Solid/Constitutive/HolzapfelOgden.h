@@ -42,36 +42,58 @@ namespace Rodin::Solid
   class HolzapfelOgden final : public HyperElasticLaw<HolzapfelOgden>
   {
     public:
+      /// @brief Material parameters for the Holzapfel-Ogden law.
       struct Parameters
       {
-        Real mu1 = 0.0;
-        Real mu2 = 0.0;
-        Real C0 = 0.0;
-        Real C1 = 0.0;
-        Real C2 = 0.0;
-        Real C3 = 0.0;
-        Real kappa = 0.0;
+        /// @brief Isochoric first-invariant coefficient.
+          Real mu1 = 0.0;
+        /// @brief Isochoric second-invariant coefficient.
+          Real mu2 = 0.0;
+        /// @brief Exponential first-invariant scale.
+          Real C0 = 0.0;
+        /// @brief Exponential first-invariant stiffness.
+          Real C1 = 0.0;
+        /// @brief Fiber exponential scale.
+          Real C2 = 0.0;
+        /// @brief Fiber exponential stiffness.
+          Real C3 = 0.0;
+        /// @brief Volumetric penalty coefficient.
+          Real kappa = 0.0;
       };
 
+      /// @brief Cached invariant values and fiber direction.
       struct Cache
       {
-        Real I1 = 0.0;
-        Real I2 = 0.0;
-        Real I3 = 1.0;
-        Real I4 = 1.0;
-        Real J = 1.0;
-        Real I3m13 = 1.0;
-        Real I3m23 = 1.0;
-        Real I1bar = 0.0;
-        Real I2bar = 0.0;
-        Real I4bar = 1.0;
-        Math::SpatialVector<Real> direction;
+        /// @brief First invariant of the right Cauchy-Green tensor.
+          Real I1 = 0.0;
+        /// @brief Second invariant of the right Cauchy-Green tensor.
+          Real I2 = 0.0;
+        /// @brief Third invariant of the right Cauchy-Green tensor.
+          Real I3 = 1.0;
+        /// @brief Fiber invariant.
+          Real I4 = 1.0;
+        /// @brief Jacobian determinant.
+          Real J = 1.0;
+        /// @brief Cached @f$I_3^{-1/3}@f$.
+          Real I3m13 = 1.0;
+        /// @brief Cached @f$I_3^{-2/3}@f$.
+          Real I3m23 = 1.0;
+        /// @brief Isochoric first invariant.
+          Real I1bar = 0.0;
+        /// @brief Isochoric second invariant.
+          Real I2bar = 0.0;
+        /// @brief Isochoric fiber invariant.
+          Real I4bar = 1.0;
+        /// @brief Reference fiber direction.
+          Math::SpatialVector<Real> direction;
       };
 
+      /// @brief Constructs the law from a parameter object.
       explicit HolzapfelOgden(const Parameters& params)
         : m_params(params)
       {}
 
+      /// @brief Constructs the law from scalar material parameters.
       HolzapfelOgden(
           Real mu1,
           Real mu2,
@@ -83,16 +105,19 @@ namespace Rodin::Solid
         : m_params{mu1, mu2, C0, C1, C2, C3, kappa}
       {}
 
+      /// @brief Returns the material parameters.
       const Parameters& getParameters() const
       {
         return m_params;
       }
 
+      /// @brief Populates invariant caches at a constitutive point.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         setCache(cache, cp.getKinematicState(), FiberKinematics::direction(cp));
       }
 
+      /// @brief Returns the stored strain-energy density.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
       {
         return m_params.mu1 * (cache.I1bar - 3.0)
@@ -102,6 +127,7 @@ namespace Rodin::Solid
              + m_params.kappa * (cache.J - 1.0 - std::log(cache.J));
       }
 
+      /// @brief Computes the first Piola-Kirchhoff stress.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -110,6 +136,7 @@ namespace Rodin::Solid
         computeFirstPiolaKirchhoffStress(P, cache, cp.getKinematicState());
       }
 
+      /// @brief Computes the material tangent action by directional differencing.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

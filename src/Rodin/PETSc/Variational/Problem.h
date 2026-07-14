@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_VARIATIONAL_PROBLEM_H
 #define RODIN_PETSC_VARIATIONAL_PROBLEM_H
 
@@ -6,7 +12,7 @@
  * @brief PETSc specialization of variational problems.
  *
  * Provides two partial specializations of @ref Rodin::Variational::Problem
- * that assemble into a @ref Rodin::PETSc::Math::LinearSystem:
+ * that assemble into a @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem":
  *
  * 1. **Two-field** (`Problem<LinearSystem, U, V>`): A single trial / test
  *    function pair producing a scalar linear system @f$ A\mathbf{x} = \mathbf{b} @f$.
@@ -231,11 +237,13 @@ namespace Rodin::Variational
         return *this;
       }
 
-      Problem& assemble(AssemblyTarget) override
+      /// @brief Assembles only the requested target into the linear system.
+      /// @param[in] target Assembly target to update.
+      /// @returns Reference to this problem.
+      Problem& assemble(AssemblyTarget target) override
       {
-        Alert::MemberFunctionException(*this, __func__)
-          << "Targeted assembly is not implemented for PETSc two-field problems."
-          << Alert::Raise;
+        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+        m_assembled = true;
         return *this;
       }
 
@@ -603,31 +611,24 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Assembles only the requested target into the block linear system.
+      /// @param[in] target Assembly target to update.
+      /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
-        if constexpr (std::is_same_v<U1FESMeshContextType, Context::MPI>)
-        {
-          computeOffsets();
+        computeOffsets();
 
-          AssemblyInput in{
-            m_pb, m_us, m_vs,
-            m_trialOffsets, m_testOffsets,
-            m_trialUUIDMap, m_testUUIDMap,
-            m_totalTrial, m_totalTest
-          };
+        AssemblyInput in{
+          m_pb, m_us, m_vs,
+          m_trialOffsets, m_testOffsets,
+          m_trialUUIDMap, m_testUUIDMap,
+          m_totalTrial, m_totalTest
+        };
 
-          m_assembly.execute(m_axb, in, target);
+        m_assembly.execute(m_axb, in, target);
 
-          m_assembled = true;
-          return *this;
-        }
-        else
-        {
-          Alert::MemberFunctionException(*this, __func__)
-            << "Targeted assembly is not implemented for this PETSc problem."
-            << Alert::Raise;
-          return *this;
-        }
+        m_assembled = true;
+        return *this;
       }
 
       /**
@@ -844,6 +845,7 @@ namespace Rodin::Variational
             const auto& fes  = uref.get().getFiniteElementSpace();
             const auto& mesh = fes.getMesh();
 
+            /// @brief Mesh type.
             using MeshType = std::decay_t<decltype(mesh)>;
             using Ctx      = typename FormLanguage::Traits<MeshType>::ContextType;
 

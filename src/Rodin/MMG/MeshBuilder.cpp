@@ -14,6 +14,8 @@ namespace Rodin::MMG
     m_cornerIndex = std::move(other.m_cornerIndex);
     m_ridgeIndex = std::move(other.m_ridgeIndex);
     m_requiredEdgeIndex = std::move(other.m_requiredEdgeIndex);
+    m_requiredTriangleIndex = std::move(other.m_requiredTriangleIndex);
+    m_requiredTetrahedronIndex = std::move(other.m_requiredTetrahedronIndex);
     m_requiredVertexIndex = std::move(other.m_requiredVertexIndex);
     return *this;
   }
@@ -36,6 +38,18 @@ namespace Rodin::MMG
     return *this;
   }
 
+  Mesh::Builder& Mesh::Builder::requiredTriangle(Index triangleIdx)
+  {
+    m_requiredTriangleIndex.insert(triangleIdx);
+    return *this;
+  }
+
+  Mesh::Builder& Mesh::Builder::requiredTetrahedron(Index tetrahedronIdx)
+  {
+    m_requiredTetrahedronIndex.insert(tetrahedronIdx);
+    return *this;
+  }
+
   Mesh::Builder& Mesh::Builder::requiredVertex(Index vertexIdx)
   {
     m_requiredVertexIndex.insert(vertexIdx);
@@ -49,8 +63,9 @@ namespace Rodin::MMG
     res.m_cornerIndex = std::move(m_cornerIndex);
     res.m_ridgeIndex = std::move(m_ridgeIndex);
     res.m_requiredEdgeIndex = std::move(m_requiredEdgeIndex);
+    res.m_requiredTriangleIndex = std::move(m_requiredTriangleIndex);
+    res.m_requiredTetrahedronIndex = std::move(m_requiredTetrahedronIndex);
     res.m_requiredVertexIndex = std::move(m_requiredVertexIndex);
     return res;
   }
 }
-

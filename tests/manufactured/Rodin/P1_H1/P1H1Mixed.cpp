@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Mixed-space manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a mixed-space manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1_H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <type_traits>
@@ -80,15 +88,20 @@ namespace Rodin::Tests::Manufactured::P1H1
       Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured P1 H1 Mixed Test 10 x 10 K 1.
   using Manufactured_P1H1_Mixed_Test_10x10_K1 =
     Manufactured_P1H1_Mixed_Test<10, 10, 1, 1>;
+  /// @brief Helper used by the manufactured tests to Manufactured P1 H1 Mixed Test 10 x 10 K 2.
   using Manufactured_P1H1_Mixed_Test_10x10_K2 =
     Manufactured_P1H1_Mixed_Test<10, 10, 1, 2>;
+  /// @brief Helper used by the manufactured tests to Manufactured P1 H1 Mixed Test 20 K 1.
   using Manufactured_P1H1_Mixed_Test_20_K1 =
     Manufactured_P1H1_Mixed_Test<20, 20, 20, 1>;
+  /// @brief Helper used by the manufactured tests to Manufactured P1 H1 Mixed Test 6 x 6 x 6 K 2.
   using Manufactured_P1H1_Mixed_Test_6x6x6_K2 =
     Manufactured_P1H1_Mixed_Test<6, 6, 6, 2>;
 
+  /// @brief Verifies P1 H1 mixed P1 exact manufactured solution for manufactured P1 H1 mixed test 10 x 10 K 1 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_10x10_K1, P1H1_Mixed_P1ExactManufacturedSolution)
   {
     const auto& mesh = getMesh();
@@ -148,6 +161,7 @@ namespace Rodin::Tests::Manufactured::P1H1
   }
 
   template <class Fixture, class FHandle>
+  /// @brief Helper used by the manufactured tests to Run Mixed Test.
   void runMixedTest(const Fixture& fixture, const FHandle& rhs)
   {
     const auto& mesh = fixture.getMesh();
@@ -187,37 +201,44 @@ namespace Rodin::Tests::Manufactured::P1H1
   }
 
   // K=1
+  /// @brief Verifies P1 H1 mixed polynomial RHS for manufactured P1 H1 mixed test 10 x 10 K 1 by checking manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_10x10_K1, P1H1_Mixed_PolynomialRHS)
   {
     runMixedTest(*this, rhs_polynomial_2d);
   }
 
+  /// @brief Verifies P1 H1 mixed polynomial RHS 3 D for manufactured P1 H1 mixed test 20 K 1 by checking manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_20_K1, P1H1_Mixed_PolynomialRHS_3D)
   {
     runMixedTest(*this, rhs_polynomial_3d);
   }
 
+  /// @brief Verifies P1 H1 mixed sine RHS 3 D for manufactured P1 H1 mixed test 20 K 1 by checking manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_20_K1, P1H1_Mixed_SineRHS_3D)
   {
     runMixedTest(*this, rhs_sine_3d);
   }
 
   // K=2
+  /// @brief Verifies P1 H1 mixed polynomial RHS K 2 for manufactured P1 H1 mixed test 10 x 10 K 2 by checking manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_10x10_K2, P1H1_Mixed_PolynomialRHS_K2)
   {
     runMixedTest(*this, rhs_polynomial_2d);
   }
 
+  /// @brief Verifies P1 H1 mixed polynomial RHS 3 D K 2 for manufactured P1 H1 mixed test 6 x 6 x 6 K 2 by checking manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_6x6x6_K2, P1H1_Mixed_PolynomialRHS_3D_K2)
   {
     runMixedTest(*this, rhs_polynomial_3d);
   }
 
+  /// @brief Verifies P1 H1 mixed sine RHS 3 D K 2 for manufactured P1 H1 mixed test 6 x 6 x 6 K 2 by checking manufactured-solution convergence.
   TEST_P(Manufactured_P1H1_Mixed_Test_6x6x6_K2, P1H1_Mixed_SineRHS_3D_K2)
   {
     runMixedTest(*this, rhs_sine_3d);
   }
 
+  /// @brief Instantiates Manufactured P1 H1 Mixed Test 10 x 10 K 1 over the Polytope Coverage 2 D K 1 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage2D_K1,
     Manufactured_P1H1_Mixed_Test_10x10_K1,
@@ -226,6 +247,7 @@ namespace Rodin::Tests::Manufactured::P1H1
       Polytope::Type::Quadrilateral)
   );
 
+  /// @brief Instantiates Manufactured P1 H1 Mixed Test 20 K 1 over the Polytope Coverage 3 D K 1 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D_K1,
     Manufactured_P1H1_Mixed_Test_20_K1,
@@ -237,6 +259,7 @@ namespace Rodin::Tests::Manufactured::P1H1
       )
   );
 
+  /// @brief Instantiates Manufactured P1 H1 Mixed Test 10 x 10 K 2 over the Polytope Coverage 2 D K 2 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage2D_K2,
     Manufactured_P1H1_Mixed_Test_10x10_K2,
@@ -245,6 +268,7 @@ namespace Rodin::Tests::Manufactured::P1H1
       Polytope::Type::Quadrilateral)
   );
 
+  /// @brief Instantiates Manufactured P1 H1 Mixed Test 6 x 6 x 6 K 2 over the Polytope Coverage 3 D K 2 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D_K2,
     Manufactured_P1H1_Mixed_Test_6x6x6_K2,

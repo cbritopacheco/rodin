@@ -12,7 +12,7 @@
  * @brief HDF5 IO support for PETSc-backed grid functions.
  *
  * Provides `GridFunctionPrinter` and `GridFunctionLoader` specializations
- * that serialise the locally-owned portion of a PETSc `Vec` to/from HDF5
+ * that serialise the locally-owned portion of a PETSc @c Vec to/from HDF5
  * files.  This enables checkpoint/restart workflows and post-processing
  * with external HDF5-compatible tools.
  *
@@ -145,7 +145,7 @@ namespace Rodin::IO
     : public GridFunctionLoaderBase<FES, ::Vec>
   {
     public:
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType = ::Vec;
       /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FES, DataType>;
@@ -242,7 +242,7 @@ namespace Rodin::IO
     : public GridFunctionPrinterBase<FileFormat::HDF5, FES, ::Vec>
   {
     public:
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType = ::Vec;
       /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, DataType>;
@@ -260,7 +260,7 @@ namespace Rodin::IO
        * @brief Stream-based overload — not supported for HDF5.
        * @throws Alert::MemberFunctionException Always; use print(path) instead.
        */
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::MemberFunctionException(*this, __func__)
           << "HDF5 GridFunction printing is file-path based."

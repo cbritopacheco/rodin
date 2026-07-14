@@ -56,6 +56,7 @@ namespace
     return sharder.gather(0);
   }
 
+  /// @brief Verifies distributed linear form uses mesh communicator and assembles for PET sc MPI form by checking exact expected values, form assembly, MPI behavior.
   TEST(PETSc_MPI_Form, DistributedLinearFormUsesMeshCommunicatorAndAssembles)
   {
     const auto& world = *g_world;
@@ -93,6 +94,7 @@ namespace
     EXPECT_EQ(globalSize, static_cast<PetscInt>(fes.getSize()));
   }
 
+  /// @brief Verifies distributed bilinear form uses mesh communicator and assembles for PET sc MPI form by checking exact expected values, form assembly, MPI behavior.
   TEST(PETSc_MPI_Form, DistributedBilinearFormUsesMeshCommunicatorAndAssembles)
   {
     const auto& world = *g_world;
@@ -136,6 +138,7 @@ namespace
     EXPECT_EQ(globalCols, static_cast<PetscInt>(fes.getSize()));
   }
 
+  /// @brief Verifies distributed identification projects owned slave row for PET sc MPI form by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(PETSc_MPI_Form, DistributedIdentificationProjectsOwnedSlaveRow)
   {
     const auto& world = *g_world;
@@ -252,6 +255,7 @@ namespace
     }
   }
 
+  /// @brief Verifies distributed self identification matches zero value constraint for PET sc MPI form by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(PETSc_MPI_Form, DistributedSelfIdentificationMatchesZeroValueConstraint)
   {
     const auto& world = *g_world;
@@ -313,6 +317,7 @@ namespace
     }
   }
 
+  /// @brief Verifies distributed vector master identification projects owned slave row for PET sc MPI form by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(PETSc_MPI_Form, DistributedVectorMasterIdentificationProjectsOwnedSlaveRow)
   {
     const auto& world = *g_world;
