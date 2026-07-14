@@ -14,6 +14,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Trace of the 2x2 identity matrix should be 2.
   TEST(Rodin_Variational_Trace, IdentityMatrix_2D)
   {
     // Trace of the 2x2 identity matrix should be 2
@@ -28,6 +29,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tr.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Trace of the 3x3 identity matrix should be 3.
   TEST(Rodin_Variational_Trace, IdentityMatrix_3D)
   {
     // Trace of the 3x3 identity matrix should be 3
@@ -42,6 +44,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tr.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Trace of alpha * I should be alpha * n.
   TEST(Rodin_Variational_Trace, ScaledIdentityMatrix)
   {
     // Trace of alpha * I should be alpha * n
@@ -58,6 +61,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tr.getValue(p), 10.0, 1e-10);
   }
 
+  /// @brief Verifies copy construction for variational trace by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_Trace, CopyConstruction)
   {
     auto I = IdentityMatrix(2);
@@ -72,6 +76,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tr_copy.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies move construction for variational trace by checking tolerance-based numerical results, move semantics.
   TEST(Rodin_Variational_Trace, MoveConstruction)
   {
     auto I = IdentityMatrix(2);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tr_moved.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies polymorphic copy for variational trace by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_Trace, PolymorphicCopy)
   {
     auto I = IdentityMatrix(3);

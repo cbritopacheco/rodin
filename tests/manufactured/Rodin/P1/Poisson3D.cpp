@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Poisson manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Poisson manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -76,13 +84,17 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the tests to Manufactured Poisson 3 D Test 8.
   using Manufactured_Poisson3D_Test_8 =
     Rodin::Tests::Manufactured::Poisson3D::Manufactured_Poisson3D_Test<8>;
+  /// @brief Helper used by the tests to Manufactured Poisson 3 D Test 16.
   using Manufactured_Poisson3D_Test_16 =
     Rodin::Tests::Manufactured::Poisson3D::Manufactured_Poisson3D_Test<16>;
+  /// @brief Helper used by the tests to Manufactured Poisson 3 D Test 32.
   using Manufactured_Poisson3D_Test_32 =
     Rodin::Tests::Manufactured::Poisson3D::Manufactured_Poisson3D_Test<32>;
 
+  /// @brief Verifies mesh volume is one for manufactured poisson 3 D test 16 by checking tolerance-based numerical results, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_Test_16, MeshVolumeIsOne)
   {
     const auto& mesh = this->getMesh();
@@ -95,6 +107,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     EXPECT_NEAR(vol, 1.0, 1e-12);
   }
 
+  /// @brief Verifies poisson 3 D P1 exact residual for manufactured poisson 3 D test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson3D_Test_8, Poisson3D_P1ExactResidual)
   {
     const auto& mesh = this->getMesh();
@@ -667,6 +680,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured Poisson 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_Poisson3D_Test_8,
@@ -677,6 +691,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Manufactured Poisson 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_Poisson3D_Test_16,
@@ -687,6 +702,7 @@ namespace Rodin::Tests::Manufactured::Poisson3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Manufactured Poisson 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_Poisson3D_Test_32,

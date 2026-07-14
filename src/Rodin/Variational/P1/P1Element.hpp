@@ -48,6 +48,7 @@
 
 #include "P1Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Scalar>
@@ -1008,4 +1009,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

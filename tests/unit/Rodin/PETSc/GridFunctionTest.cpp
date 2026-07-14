@@ -18,6 +18,7 @@ using namespace Rodin::Variational;
 
 namespace
 {
+  /// @brief Verifies sequential operator bracket read write for PET sc grid function by checking tolerance-based numerical results.
   TEST(PETSc_GridFunction, SequentialOperatorBracketReadWrite)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -38,6 +39,7 @@ namespace
     cgf.flush();
   }
 
+  /// @brief Verifies sequential vec set keeps operator bracket readable for PET sc grid function by checking tolerance-based numerical results.
   TEST(PETSc_GridFunction, SequentialVecSetKeepsOperatorBracketReadable)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, { 3, 3 });
@@ -52,6 +54,7 @@ namespace
     cgf.flush();
   }
 
+  /// @brief Verifies sequential min returns value and index for PET sc grid function by checking tolerance-based numerical results, exact expected values.
   TEST(PETSc_GridFunction, SequentialMinReturnsValueAndIndex)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -71,6 +74,7 @@ namespace
     EXPECT_DOUBLE_EQ(static_cast<double>(PetscRealPart(value)), -2.5);
   }
 
+  /// @brief Verifies sequential max returns value and index for PET sc grid function by checking tolerance-based numerical results, exact expected values.
   TEST(PETSc_GridFunction, SequentialMaxReturnsValueAndIndex)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });

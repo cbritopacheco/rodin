@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, RealFunction_Multiplication)
   {
     RealFunction f1(3.0);
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 21.0, 1e-10);
   }
 
+  /// @brief Verifies real function zero multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, RealFunction_ZeroMultiplication)
   {
     RealFunction f1(42.0);
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function one multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, RealFunction_OneMultiplication)
   {
     RealFunction f1(15.0);
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 15.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, RealFunction_NegativeMultiplication)
   {
     RealFunction f1(4.0);
@@ -75,6 +79,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), -12.0, 1e-10);
   }
 
+  /// @brief Verifies scalar vector multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, ScalarVectorMultiplication)
   {
     RealFunction scalar(2.0);
@@ -94,6 +99,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(2), 10.0, 1e-10);
   }
 
+  /// @brief Verifies vector scalar multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, VectorScalarMultiplication)
   {
     VectorFunction vector{1.5, 2.5};
@@ -112,6 +118,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(1), 10.0, 1e-10);
   }
 
+  /// @brief Verifies grid function multiplication for variational mult by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Mult, GridFunction_Multiplication)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -136,6 +143,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 6.0, 1e-10);
   }
 
+  /// @brief Verifies trial function scalar multiplication for variational mult.
   TEST(Rodin_Variational_Mult, TrialFunction_ScalarMultiplication)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -149,6 +157,7 @@ namespace Rodin::Tests::Unit
     // Detailed mathematical testing would require assembly context
   }
 
+  /// @brief Verifies test function scalar multiplication for variational mult.
   TEST(Rodin_Variational_Mult, TestFunction_ScalarMultiplication)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -162,6 +171,7 @@ namespace Rodin::Tests::Unit
     // Detailed mathematical testing would require assembly context
   }
 
+  /// @brief Verifies chained multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, ChainedMultiplication)
   {
     RealFunction f1(2.0);
@@ -179,6 +189,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 30.0, 1e-10);
   }
 
+  /// @brief Verifies associativity test for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, AssociativityTest)
   {
     RealFunction f1(2.0);
@@ -199,6 +210,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product1.getValue(p), 42.0, 1e-10);
   }
 
+  /// @brief Verifies commutativity test for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, CommutativityTest)
   {
     RealFunction f1(6.0);
@@ -218,6 +230,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product1.getValue(p), 54.0, 1e-10);
   }
 
+  /// @brief Verifies fractional multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, FractionalMultiplication)
   {
     RealFunction f1(0.5);
@@ -234,6 +247,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 0.125, 1e-10);
   }
 
+  /// @brief Verifies large value multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, LargeValueMultiplication)
   {
     RealFunction f1(1e3);
@@ -250,6 +264,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product.getValue(p), 2e6, 1e-3);
   }
 
+  /// @brief Verifies vector component multiplication for variational mult by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Mult, VectorComponentMultiplication)
   {
     VectorFunction vector{2.0, 3.0, 4.0};

@@ -22,6 +22,7 @@ class CentroidTest : public ::testing::Test
 };
 
 // Test centroid (Single-point quadrature)
+/// @brief Verifies basic properties for centroid test by checking exact expected values.
 TEST_F(CentroidTest, BasicProperties)
 {
   Centroid qf_triangle(Polytope::Type::Triangle);
@@ -36,6 +37,7 @@ TEST_F(CentroidTest, BasicProperties)
   EXPECT_EQ(qf_quad.getGeometry(), Polytope::Type::Quadrilateral);
 }
 
+/// @brief Verifies weights for centroid test by checking no-throw behavior.
 TEST_F(CentroidTest, Weights)
 {
   Centroid qf_triangle(Polytope::Type::Triangle);
@@ -53,6 +55,7 @@ TEST_F(CentroidTest, Weights)
   EXPECT_GT(qf_line.getWeight(0), 0.0);
 }
 
+/// @brief Verifies points for centroid test by checking no-throw behavior.
 TEST_F(CentroidTest, Points)
 {
   Centroid qf_triangle(Polytope::Type::Triangle);
@@ -71,6 +74,7 @@ TEST_F(CentroidTest, Points)
 }
 
 // Test different geometry types
+/// @brief Test that QF1P1 works with various geometry types.
 TEST_F(CentroidTest, DifferentGeometryTypes)
 {
   // Test that QF1P1 works with various geometry types
@@ -97,6 +101,7 @@ TEST_F(CentroidTest, DifferentGeometryTypes)
 }
 
 // Integration test: verify quadrature accuracy for simple functions
+/// @brief Test that constant function integration is exact.
 TEST_F(CentroidTest, QuadratureAccuracy)
 {
   // Test that constant function integration is exact
@@ -110,6 +115,7 @@ TEST_F(CentroidTest, QuadratureAccuracy)
   EXPECT_LT(integral_approx, 1.0);  // Should not be too large
 }
 
+/// @brief Verifies pyramid for centroid test by checking tolerance-based numerical results, exact expected values.
 TEST_F(CentroidTest, Pyramid)
 {
   Centroid qf(Polytope::Type::Pyramid);
@@ -123,6 +129,7 @@ TEST_F(CentroidTest, Pyramid)
 }
 
 // Error handling tests
+/// @brief Verifies out of bounds access for centroid test by checking no-throw behavior.
 TEST_F(CentroidTest, OutOfBoundsAccess)
 {
   Centroid qf(Polytope::Type::Triangle);

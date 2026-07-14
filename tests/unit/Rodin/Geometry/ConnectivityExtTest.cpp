@@ -18,6 +18,7 @@ namespace Rodin::Tests::Unit
   // Multi-step connectivity chain tests
   // ==================================================================
 
+  /// @brief Verifies chain 2 D edges then vertices for geometry connectivity ext by checking exact expected values, mesh connectivity computation.
   TEST(Geometry_ConnectivityExt, Chain_2D_Edges_Then_Vertices)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -34,6 +35,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getPolytopeCount(0), mesh.getVertexCount());
   }
 
+  /// @brief Verifies chain 3 D faces then edges for geometry connectivity ext by checking exact expected values, mesh connectivity computation.
   TEST(Geometry_ConnectivityExt, Chain_3D_Faces_Then_Edges)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -52,6 +54,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getPolytopeCount(0), mesh.getVertexCount());
   }
 
+  /// @brief Verifies chain 2 D compute then adjacency for geometry connectivity ext by checking mesh connectivity computation.
   TEST(Geometry_ConnectivityExt, Chain_2D_Compute_Then_Adjacency)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -77,6 +80,7 @@ namespace Rodin::Tests::Unit
   // Connectivity::local() tests
   // ==================================================================
 
+  /// @brief Verifies local edge vertices for geometry connectivity ext by checking exact expected values, mesh connectivity computation.
   TEST(Geometry_ConnectivityExt, Local_EdgeVertices)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -93,6 +97,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(inc.size(), 2);
   }
 
+  /// @brief Verifies local triangle vertices for geometry connectivity ext by checking exact expected values.
   TEST(Geometry_ConnectivityExt, Local_TriangleVertices)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -104,6 +109,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(inc.size(), 3);
   }
 
+  /// @brief Verifies local quad vertices for geometry connectivity ext by checking exact expected values.
   TEST(Geometry_ConnectivityExt, Local_QuadVertices)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
@@ -114,6 +120,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(inc.size(), 4);
   }
 
+  /// @brief Verifies local tet vertices for geometry connectivity ext by checking exact expected values.
   TEST(Geometry_ConnectivityExt, Local_TetVertices)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -128,6 +135,7 @@ namespace Rodin::Tests::Unit
   // Connectivity clear tests across dimensions
   // ==================================================================
 
+  /// @brief Verifies clear edge incidence for geometry connectivity ext by checking mesh connectivity computation.
   TEST(Geometry_ConnectivityExt, Clear_EdgeIncidence)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -147,6 +155,7 @@ namespace Rodin::Tests::Unit
   // Count methods for convenience
   // ==================================================================
 
+  /// @brief Verifies polytope count all dimensions for geometry connectivity ext by checking mesh connectivity computation.
   TEST(Geometry_ConnectivityExt, PolytopeCount_AllDimensions)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});

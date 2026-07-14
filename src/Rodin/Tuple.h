@@ -76,7 +76,8 @@ namespace Rodin
       /**
        * @brief Computes the Cartesian product of two empty tuples.
        *
-       * @param other The other empty tuple.
+       * The ignored argument is the other empty tuple.
+       *
        * @return An empty Tuple.
        */
       constexpr
@@ -136,11 +137,19 @@ namespace Rodin
         return 0;
       }
 
+      /**
+       * @brief Serializes the empty tuple.
+       * @tparam Archive Serialization archive type.
+       *
+       * The archive and version arguments are ignored because an empty tuple
+       * has no state.
+       */
       template<class Archive>
       void serialize(Archive&, const unsigned int)
       {}
   };
 
+  /// @brief Deduction guide for the empty tuple.
   Tuple() -> Tuple<>;
 
   /**
@@ -459,6 +468,12 @@ namespace Rodin
             std::index_sequence_for<T, Ts...>(), std::index_sequence_for<Gs...>());
       }
 
+      /**
+       * @brief Serializes each tuple element.
+       * @tparam Archive Serialization archive type.
+       * @param ar Archive used for serialization.
+       * @param version Serialization version.
+       */
       template <class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {
@@ -618,8 +633,13 @@ namespace Rodin
       }
   };
 
-  template <class ... Params>
-  Tuple(Params...) -> Tuple<Params...>;
+  /**
+   * @brief Deduction guide for a tuple from its constructor arguments.
+   * @tparam Params Element types.
+   * @param params Tuple element values.
+   */
+  template <class... Params>
+  Tuple(Params... params) -> Tuple<Params...>;
 
   /**
    * @brief Generates a tuple of indices.
@@ -652,5 +672,3 @@ namespace Rodin
 #include "Pair.h"
 
 #endif
-
-

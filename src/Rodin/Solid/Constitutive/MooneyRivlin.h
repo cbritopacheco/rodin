@@ -65,11 +65,15 @@ namespace Rodin::Solid
        * @param c2 Second material constant
        * @param kappa Bulk modulus @f$ \kappa @f$
        */
-      MooneyRivlin(Real c1, Real c2, Real bulkModulus)
-        : m_c1(c1), m_c2(c2), m_kappa(bulkModulus)
+      MooneyRivlin(Real c1, Real c2, Real kappa)
+        : m_c1(c1),
+          m_c2(c2),
+          m_kappa(kappa)
       {}
 
+      /// @brief Copy constructor.
       MooneyRivlin(const MooneyRivlin&) = default;
+      /// @brief Move constructor.
       MooneyRivlin(MooneyRivlin&&) = default;
 
       /// @brief Gets @f$ c_1 @f$.
@@ -81,6 +85,7 @@ namespace Rodin::Solid
       /// @brief Gets the bulk modulus @f$ \kappa @f$.
       Real getBulkModulus() const { return m_kappa; }
 
+      /// @brief Populates the invariant cache at a constitutive point.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -99,6 +104,7 @@ namespace Rodin::Solid
         cache.I2bar = cache.Jm4d * cache.I2;
       }
 
+      /// @brief Returns the stored strain-energy density.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint& cp) const
       {
         const Real dd = static_cast<Real>(cp.getKinematicState().getDimension());
@@ -107,6 +113,7 @@ namespace Rodin::Solid
              + 0.5 * m_kappa * (cache.J - 1.0) * (cache.J - 1.0);
       }
 
+      /// @brief Computes the first Piola-Kirchhoff stress.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -140,6 +147,7 @@ namespace Rodin::Solid
         P = m_c1 * dI1bar_dF + m_c2 * dI2bar_dF + dJvol_dF;
       }
 
+      /// @brief Computes the material tangent action.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

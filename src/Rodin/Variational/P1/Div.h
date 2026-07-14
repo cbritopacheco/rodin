@@ -28,14 +28,20 @@
 #include "Rodin/Variational/Div.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Scalar, class Data, class Mesh>
   struct Traits<Variational::Div<Variational::GridFunction<Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
-    using FESType = Variational::P1<Math::SpatialVector<Scalar>, Mesh>;
-    using ScalarType = Scalar;
-    using OperandType = Variational::GridFunction<Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Math::SpatialVector<Scalar>, Mesh>;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Operand type.
+      using OperandType =
+        Variational::GridFunction<Variational::P1<Math::SpatialVector<Scalar>, Mesh>,
+          Data>;
   };
 
   template <class NestedDerived, class Scalar, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -43,11 +49,14 @@ namespace Rodin::FormLanguage
     Variational::Div<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
-    using FESType = Variational::P1<Math::SpatialVector<Scalar>, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using ScalarType = Scalar;
-    using OperandType =
-      Variational::ShapeFunction<NestedDerived, Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Space>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Math::SpatialVector<Scalar>, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived,
+        Variational::P1<Math::SpatialVector<Scalar>, Mesh>, Space>;
   };
 }
 
@@ -75,9 +84,13 @@ namespace Rodin::Variational
         Div<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
+      /// @brief Parent class type.
       using Parent = DivBase<OperandType, Div<OperandType>>;
 
       Div(const OperandType& u)
@@ -162,8 +175,8 @@ namespace Rodin::Variational
         assert(vdim == d); // divergence is defined as trace of Jacobian: requires vdim == spatial dim.
 
         const auto geom = polytope.getGeometry();
-        const P1Element<ScalarType> fe_scalar(geom);
-        const size_t nv = fe_scalar.getCount();
+        const P1Element<ScalarType> feScalar(geom);
+        const size_t nv = feScalar.getCount();
 
         const auto& rc = p.getReferenceCoordinates();
         const auto& Jinv = p.getJacobianInverse();
@@ -178,18 +191,18 @@ namespace Rodin::Variational
           // \nabla_hat φ_v
           Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)
-            ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+            ghat(k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
 
           // phys grad components: gphys(j) = Σ_k Jinv(k,j) * ghat(k)
           // and add u(v)\cdotgphys
           for (size_t j = 0; j < d; ++j)
           {
-            ScalarType gphys_j = ScalarType(0);
+            ScalarType gphysJ = ScalarType(0);
             for (size_t k = 0; k < d; ++k)
-              gphys_j += Jinv(k, j) * ghat(k);
+              gphysJ += Jinv(k, j) * ghat(k);
 
             const size_t local = v * vdim + j; // component j at vertex v
-            out += gf[fes.getGlobalIndex({d, i}, local)] * gphys_j;
+            out += gf[fes.getGlobalIndex({d, i}, local)] * gphysJ;
           }
         }
       }
@@ -231,13 +244,17 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Div<ShapeFunction<NestedDerived, P1<Math::SpatialVector<Scalar>, Mesh>, Space>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Div<OperandType>, FESType, SpaceType>;
 
       struct Cache
@@ -383,8 +400,8 @@ namespace Rodin::Variational
         ckey.vdim = vdim;
         ckey.valid = true;
 
-        const bool cell_changed = !(m_cache.cellKey == ckey);
-        if (cell_changed)
+        const bool cellChanged = !(m_cache.cellKey == ckey);
+        if (cellChanged)
         {
           m_cache.cellKey = ckey;
           m_cache.qpKey = {};
@@ -393,10 +410,10 @@ namespace Rodin::Variational
           m_cache.div.resize(vdim * nv);
         }
 
-        const bool needs_qp = (transOrder > 1) || isTensorGeom(geom);
+        const bool needsQp = (transOrder > 1) || isTensorGeom(geom);
 
         typename Cache::QpKey qkey;
-        if (needs_qp)
+        if (needsQp)
         {
           qkey.qf = qf;
           qkey.qp = qf ? ip.getIndex() : 0;
@@ -409,13 +426,13 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !qf || !(m_cache.qpKey == qkey);
-        if (cell_changed || qp_changed)
+        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
+        if (cellChanged || qpChanged)
         {
           m_cache.qpKey = qkey;
 
-          const P1Element<ScalarType> fe_scalar(geom);
-          const size_t nv = fe_scalar.getCount();
+          const P1Element<ScalarType> feScalar(geom);
+          const size_t nv = feScalar.getCount();
 
           const auto& rc =
             qf
@@ -431,15 +448,15 @@ namespace Rodin::Variational
             Math::SpatialVector<ScalarType> ghat;
             ghat.resize(d);
             for (size_t k = 0; k < d; ++k)
-              ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+              ghat(k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
 
             for (size_t c = 0; c < d; ++c)
             {
-              ScalarType gphys_c = ScalarType(0);
+              ScalarType gphysC = ScalarType(0);
               for (size_t k = 0; k < d; ++k)
-                gphys_c += Jinv(k, c) * ghat(k);
+                gphysC += Jinv(k, c) * ghat(k);
 
-              m_cache.div[v * vdim + c] = gphys_c;
+              m_cache.div[v * vdim + c] = gphysC;
             }
           }
         }
@@ -479,4 +496,5 @@ namespace Rodin::Variational
     -> Div<ShapeFunction<NestedDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

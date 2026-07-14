@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MODELS_EIKONAL_FMM_H
-#define RODIN_MODELS_EIKONAL_FMM_H
+#ifndef RODIN_EIKONAL_FMM_H
+#define RODIN_EIKONAL_FMM_H
 
 /**
  * @file FMM.h

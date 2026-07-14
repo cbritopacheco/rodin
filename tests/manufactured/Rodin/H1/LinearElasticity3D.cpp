@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Linear-elasticity manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a linear-elasticity manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -61,15 +69,19 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Linear Elasticity 3 D H1 Test 8.
   using Manufactured_LinearElasticity3D_H1_Test_8 =
     Manufactured_LinearElasticity3D_H1_Test<8>;
 
+  /// @brief Helper used by the manufactured tests to Manufactured Linear Elasticity 3 D H1 Test 16.
   using Manufactured_LinearElasticity3D_H1_Test_16 =
     Manufactured_LinearElasticity3D_H1_Test<16>;
 
+  /// @brief Helper used by the manufactured tests to Manufactured Linear Elasticity 3 D H1 Test 32.
   using Manufactured_LinearElasticity3D_H1_Test_32 =
     Manufactured_LinearElasticity3D_H1_Test<32>;
 
+  /// @brief Verifies linear elasticity 3 D P1 exact residual for manufactured linear elasticity 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_LinearElasticity3D_H1_Test_8, LinearElasticity3D_P1ExactResidual)
   {
     constexpr auto order = std::integral_constant<size_t, 1>{};
@@ -116,6 +128,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
   }
 
+  /// @brief Verifies manufactured linear elasticity 3 D H1 2 for manufactured linear elasticity 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_LinearElasticity3D_H1_Test_8, Manufactured_LinearElasticity3D_H1_2)
   {
     constexpr auto order = std::integral_constant<size_t, 2>{};
@@ -182,9 +195,12 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Constant Linear Elasticity 3 D H1 Test 8.
   using Constant_LinearElasticity3D_H1_Test_8  = Constant_LinearElasticity3D_H1_Test<8>;
+  /// @brief Helper used by the manufactured tests to Constant Linear Elasticity 3 D H1 Test 16.
   using Constant_LinearElasticity3D_H1_Test_16 = Constant_LinearElasticity3D_H1_Test<16>;
 
+  /// @brief Verifies constant solution H1 1 for constant linear elasticity 3 D H1 test 8 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Constant_LinearElasticity3D_H1_Test_8, ConstantSolution_H1_1)
   {
     constexpr auto order = std::integral_constant<size_t, 1>{};
@@ -219,6 +235,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies constant solution H1 2 for constant linear elasticity 3 D H1 test 16 by checking tolerance-based numerical results, solver behavior.
   TEST_P(Constant_LinearElasticity3D_H1_Test_16, ConstantSolution_H1_2)
   {
     constexpr auto order = std::integral_constant<size_t, 2>{};
@@ -253,6 +270,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured Linear Elasticity 3 D H1 Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_LinearElasticity3D_H1_Test_8,
@@ -263,6 +281,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Constant Linear Elasticity 3 D H1 Test 8 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Constant_LinearElasticity3D_H1_Test_8,
@@ -273,6 +292,7 @@ namespace Rodin::Tests::Manufactured::H1LinearElasticity3D
       Polytope::Type::Wedge)
   );
 
+  /// @brief Instantiates Constant Linear Elasticity 3 D H1 Test 16 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Constant_LinearElasticity3D_H1_Test_16,

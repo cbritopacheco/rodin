@@ -80,15 +80,24 @@ namespace Rodin::Solid
     : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
+      /// @brief Constitutive law type.
       using LawType = LawDerived;
+      /// @brief Trial function type.
       using TrialType = TrialFunctionType;
+      /// @brief Test function type.
       using TestType = TestFunctionType;
+      /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = typename FormLanguage::Traits<TrialType>::FESType;
+      /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief State finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
       static_assert(Variational::IsTrialFunction<TrialType>::Value,
@@ -121,6 +130,7 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
+      /// @brief Copy constructor.
       InternalVirtualWorkTangent(const InternalVirtualWorkTangent& other)
         : Parent(other),
           m_law(other.m_law),
@@ -180,6 +190,7 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Sets the current polytope and assembles the element tangent matrix.
       InternalVirtualWorkTangent& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -270,22 +281,26 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns an entry of the current element tangent matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
       }
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this tangent integrator.
       InternalVirtualWorkTangent* copy() const noexcept final override
       {
         return new InternalVirtualWorkTangent(*this);

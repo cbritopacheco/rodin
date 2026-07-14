@@ -24,26 +24,40 @@ namespace Rodin::Geometry
   class MinSTCut
   {
     public:
+      /// @brief Label value for cells inside the level set.
       static constexpr int Inside = -1;
+      /// @brief Label value for cells outside the level set.
       static constexpr int Outside = 1;
+      /// @brief Sentinel index denoting an absent edge/index.
       static constexpr Index InvalidIndex =
         std::numeric_limits<Index>::max();
 
+      /// @brief A weighted graph edge between two cells.
       struct Edge
       {
-        Index first;
-        Index second;
-        Real capacity;
-        Index index = InvalidIndex;
+        /// @brief Index of the first incident cell.
+          Index first;
+        /// @brief Index of the second incident cell.
+          Index second;
+        /// @brief Edge capacity (pairwise smoothing weight).
+          Real capacity;
+        /// @brief Optional index of this edge in the caller's edge list.
+          Index index = InvalidIndex;
       };
 
+      /// @brief Result of a classification: per-cell labels and cut data.
       struct Result
       {
-        std::vector<int> labels;
-        std::vector<Index> insideCells;
-        std::vector<Index> outsideCells;
-        std::vector<Edge> cutEdges;
-        Real energy = 0;
+        /// @brief Per-cell label (Inside or Outside).
+          std::vector<int> labels;
+        /// @brief Indices of the cells labeled Inside.
+          std::vector<Index> insideCells;
+        /// @brief Indices of the cells labeled Outside.
+          std::vector<Index> outsideCells;
+        /// @brief Edges crossing the cut (the interface skeleton).
+          std::vector<Edge> cutEdges;
+        /// @brief Total energy (cut cost) of the solution.
+          Real energy = 0;
       };
 
       /**
@@ -81,21 +95,31 @@ namespace Rodin::Geometry
         std::vector<Boolean> cellInBand;
       };
 
+      /// @brief Returns the unary cost of labeling a cell Inside, given its
+      /// volume and signed moment.
       static Real getInsideCost(Real volume, Real moment) noexcept;
 
+      /// @brief Returns the unary cost of labeling a cell Outside, given its
+      /// volume and signed moment.
       static Real getOutsideCost(Real volume, Real moment) noexcept;
 
+      /// @brief Classifies cells into Inside/Outside via a Potts min s-t cut
+      /// built from per-cell volumes and moments.
       Result classify(
           const std::vector<Real>& volumes,
           const std::vector<Real>& moments,
           const std::vector<Edge>& edges) const;
 
+      /// @brief Classifies cells with additional @ref Options (narrow-band
+      /// restriction, far-field pinning, per-edge weighting).
       Result classify(
           const std::vector<Real>& volumes,
           const std::vector<Real>& moments,
           const std::vector<Edge>& edges,
           const Options& options) const;
 
+      /// @brief Solves the s-t min cut directly from precomputed unary costs
+      /// and edges.
       Result solve(
           const std::vector<Real>& insideCosts,
           const std::vector<Real>& outsideCosts,

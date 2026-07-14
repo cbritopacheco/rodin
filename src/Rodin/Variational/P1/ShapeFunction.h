@@ -1,3 +1,13 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file ShapeFunction.h
+ * @brief Shape function specializations for the P1 finite element space.
+ */
 #ifndef RODIN_VARIATIONAL_P1_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_P1_SHAPEFUNCTION_H
 
@@ -12,6 +22,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Derived, class Range, class Mesh, ShapeFunctionSpaceType Space>
@@ -19,13 +30,16 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<ShapeFunction<Derived, P1<Range, Mesh>, Space>, P1<Range, Mesh>, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,
@@ -164,8 +178,8 @@ namespace Rodin::Variational
         skey.vdim  = vdim;
         skey.valid = true;
 
-        const bool structure_changed = !(m_cache.skey == skey);
-        if (structure_changed)
+        const bool structureChanged = !(m_cache.skey == skey);
+        if (structureChanged)
         {
           m_cache.skey = skey;
           m_cache.vkey = {}; // invalidate value cache
@@ -198,8 +212,8 @@ namespace Rodin::Variational
         vkey.qp    = qp;
         vkey.valid = true;
 
-        const bool value_changed = !qf || !(m_cache.vkey == vkey);
-        if (value_changed)
+        const bool valueChanged = !qf || !(m_cache.vkey == vkey);
+        if (valueChanged)
         {
           m_cache.vkey = vkey;
 
@@ -207,11 +221,11 @@ namespace Rodin::Variational
             qf ? qf->getPoint(qp) : p.getReferenceCoordinates();
 
           // Cheap scalar P1 element (no allocations)
-          const P1Element<ScalarType> fe_scalar(geom);
-          const size_t nv = fe_scalar.getCount();
+          const P1Element<ScalarType> feScalar(geom);
+          const size_t nv = feScalar.getCount();
 
           for (size_t a = 0; a < nv; ++a)
-            m_cache.phi_vertex[a] = fe_scalar.getBasis(a)(rq);
+            m_cache.phi_vertex[a] = feScalar.getBasis(a)(rq);
 
           if constexpr (std::is_same_v<RangeType, ScalarType>)
           {
@@ -270,4 +284,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

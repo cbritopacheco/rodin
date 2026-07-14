@@ -41,12 +41,14 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sign conventions for geometry min ST cut by checking exact expected values.
   TEST(Rodin_Geometry_MinSTCut, SignConventions)
   {
     EXPECT_EQ(MinSTCut::Inside, -1);
     EXPECT_EQ(MinSTCut::Outside, +1);
   }
 
+  /// @brief Verifies all negative moments are inside for geometry min ST cut by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_MinSTCut, AllNegativeMomentsAreInside)
   {
     const std::vector<Real> volumes(4, 1);
@@ -63,6 +65,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.cutEdges.empty());
   }
 
+  /// @brief Verifies all positive moments are outside for geometry min ST cut by checking exact expected values.
   TEST(Rodin_Geometry_MinSTCut, AllPositiveMomentsAreOutside)
   {
     const std::vector<Real> volumes(4, 1);
@@ -77,6 +80,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.insideCells.size(), 0u);
   }
 
+  /// @brief Single isolated cell with a negative moment is labelled Inside.
   TEST(Rodin_Geometry_MinSTCut, NegativeMomentIsInside)
   {
     // Single isolated cell with a negative moment is labelled Inside.
@@ -88,6 +92,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.labels[0], MinSTCut::Inside);
   }
 
+  /// @brief Single isolated cell with a positive moment is labelled Outside.
   TEST(Rodin_Geometry_MinSTCut, PositiveMomentIsOutside)
   {
     // Single isolated cell with a positive moment is labelled Outside.
@@ -99,6 +104,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.labels[0], MinSTCut::Outside);
   }
 
+  /// @brief Two cells with conflicting moments (one negative, one positive).
   TEST(Rodin_Geometry_MinSTCut, TwoCellStrongEdgeForcesCommonLabel)
   {
     // Two cells with conflicting moments (one negative, one positive)
@@ -115,6 +121,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(result.cutEdges.empty());
   }
 
+  /// @brief Same conflicting-moment setup as above but with a weak smoothing.
   TEST(Rodin_Geometry_MinSTCut, TwoCellWeakEdgeFollowsData)
   {
     // Same conflicting-moment setup as above but with a weak smoothing
@@ -131,6 +138,7 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(result.cutEdges.size(), 1u);
   }
 
+  /// @brief 2x2 grid with checkerboard sign pattern:.
   TEST(Rodin_Geometry_MinSTCut, Checkerboard2x2SmoothsForLargeLambda)
   {
     // 2x2 grid with checkerboard sign pattern:
@@ -176,6 +184,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Inside cost charges only positive moments, outside only negative.
   TEST(Rodin_Geometry_MinSTCut, UnaryCostMatchesAdvertisedConvention)
   {
     // Inside cost charges only positive moments, outside only negative.
@@ -185,6 +194,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(MinSTCut::getOutsideCost(2.0, +0.5), 0.0);
   }
 
+  /// @brief 3x3 grid: center cell has near-zero negative moment, surrounded by.
   TEST(Rodin_Geometry_MinSTCut, SingleInteriorFlipIsHealedByStrongLambda)
   {
     // 3x3 grid: center cell has near-zero negative moment, surrounded by
@@ -211,6 +221,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(strongResult.labels[center], MinSTCut::Outside);
   }
 
+  /// @brief Two cells: moment +0.9 (definitely Outside) and moment -0.9.
   TEST(Rodin_Geometry_MinSTCut, FarFieldThresholdPinsLabels)
   {
     // Two cells: moment +0.9 (definitely Outside) and moment -0.9
@@ -234,6 +245,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(pinnedResult.cutEdges.size(), 1u);
   }
 
+  /// @brief Three cells in a row. Outer cells are out-of-band (fixed to their.
   TEST(Rodin_Geometry_MinSTCut, CellInBandFixesFarFieldCells)
   {
     // Three cells in a row. Outer cells are out-of-band (fixed to their
@@ -254,6 +266,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.labels[1], MinSTCut::Inside);
   }
 
+  /// @brief 1x4 row with a clean sign change between cells 1 and 2.
   TEST(Rodin_Geometry_MinSTCut, PerEdgeLambdaSteersCutToWeakestFacets)
   {
     // 1x4 row with a clean sign change between cells 1 and 2.
@@ -278,6 +291,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.cutEdges[0].second, 2u);
   }
 
+  /// @brief Two cells with weak moments straddling zero, joined by a small.
   TEST(Rodin_Geometry_MinSTCut, UnaryScaleShiftsDataVsSmoothingBalance)
   {
     // Two cells with weak moments straddling zero, joined by a small
@@ -302,6 +316,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(split.labels[1], MinSTCut::Outside);
   }
 
+  /// @brief Verifies mismatched input sizes throw for geometry min ST cut by checking exception behavior.
   TEST(Rodin_Geometry_MinSTCut, MismatchedInputSizesThrow)
   {
     EXPECT_THROW(
@@ -321,6 +336,7 @@ namespace Rodin::Tests::Unit
         std::invalid_argument);
   }
 
+  /// @brief Verifies negative capacities throw for geometry min ST cut by checking exception behavior.
   TEST(Rodin_Geometry_MinSTCut, NegativeCapacitiesThrow)
   {
     EXPECT_THROW(
@@ -341,6 +357,7 @@ namespace Rodin::Tests::Unit
         std::invalid_argument);
   }
 
+  /// @brief Verifies out of range edge throws for geometry min ST cut by checking exception behavior.
   TEST(Rodin_Geometry_MinSTCut, OutOfRangeEdgeThrows)
   {
     EXPECT_THROW(
@@ -351,6 +368,7 @@ namespace Rodin::Tests::Unit
         std::out_of_range);
   }
 
+  /// @brief Without edges the unary contribution equals the sum of the.
   TEST(Rodin_Geometry_MinSTCut, EnergyMatchesLabelChoiceForUnconnectedCells)
   {
     // Without edges the unary contribution equals the sum of the

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_SOLID_LINEAR_P1_LINEARELASTICITYINTEGRAL_H
 #define RODIN_SOLID_LINEAR_P1_LINEARELASTICITYINTEGRAL_H
 
@@ -64,14 +70,20 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Range, Mesh>>::ScalarType;
 
+      /// @brief Trial finite element space type.
       using TrialFESType = P1<Range, Mesh>;
+      /// @brief Test finite element space type.
       using TestFESType  = P1<Range, Mesh>;
 
+      /// @brief Shear modulus function type.
       using MuType     = FunctionBase<MuDerived>;
+      /// @brief First Lamé parameter function type.
       using LambdaType = FunctionBase<LambdaDerived>;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -85,6 +97,7 @@ namespace Rodin::Variational
       static_assert(FormLanguage::IsVectorRange<Range>::Value);
 
     public:
+      /// @brief Constructs the P1 linear elasticity integrator.
       LinearElasticityIntegrator(
           const TrialFunction<Solution, TrialFESType>& u,
           const TestFunction<TestFESType>& v,
@@ -99,6 +112,7 @@ namespace Rodin::Variational
           m_quadrature(nullptr)
       {}
 
+      /// @brief Copy constructor.
       LinearElasticityIntegrator(const LinearElasticityIntegrator& other)
         : Parent(other),
           m_lambda(other.m_lambda ? other.m_lambda->copy() : nullptr),
@@ -111,6 +125,7 @@ namespace Rodin::Variational
           m_matrix()
       {}
 
+      /// @brief Move constructor.
       LinearElasticityIntegrator(LinearElasticityIntegrator&& other)
         : Parent(std::move(other)),
           m_lambda(std::move(other.m_lambda)),
@@ -123,11 +138,13 @@ namespace Rodin::Variational
           m_matrix(std::move(other.m_matrix))
       {}
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         return m_polytope.value().get();
       }
 
+      /// @brief Sets the current polytope and assembles the local matrix.
       LinearElasticityIntegrator& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -180,49 +197,43 @@ namespace Rodin::Variational
 
             for (size_t i = 0; i < nte; ++i)
             {
-              const auto& basis_i = testfe.getBasis(i);
+              const auto& basisI = testfe.getBasis(i);
 
-              Math::SpatialMatrix<ScalarType> jac_i;
-              jac_i.resize(d, d);
+              Math::SpatialMatrix<ScalarType> jacI;
+              jacI.resize(d, d);
               for (size_t r = 0; r < d; ++r)
               {
                 for (size_t c = 0; c < d; ++c)
-                  jac_i(r, c) = basis_i.template getDerivative<1>(r, c)(rc);
+                  jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
               }
-              jac_i *= p.getJacobianInverse();
+              jacI *= p.getJacobianInverse();
 
-              const auto sym_i = jac_i + jac_i.adjoint();
-              const ScalarType div_i = jac_i.trace();
+              const auto symI = jacI + jacI.adjoint();
+              const ScalarType divI = jacI.trace();
 
-              m_matrix(i, i) +=
-                  wdet
-                * (
-                    Math::dot(lambda * div_i, div_i)
-                    + static_cast<ScalarType>(0.5) * Math::dot(mu * sym_i, sym_i)
-                  );
+              m_matrix(i, i) += wdet *
+                (Math::dot(lambda * divI, divI) +
+                  static_cast<ScalarType>(0.5) * Math::dot(mu * symI, symI));
 
               for (size_t j = 0; j < i; ++j)
               {
-                const auto& basis_j = trialfe.getBasis(j);
+                const auto& basisJ = trialfe.getBasis(j);
 
-                Math::SpatialMatrix<ScalarType> jac_j;
-                jac_j.resize(d, d);
+                Math::SpatialMatrix<ScalarType> jacJ;
+                jacJ.resize(d, d);
                 for (size_t r = 0; r < d; ++r)
                 {
                   for (size_t c = 0; c < d; ++c)
-                    jac_j(r, c) = basis_j.template getDerivative<1>(r, c)(rc);
+                    jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
                 }
-                jac_j *= p.getJacobianInverse();
+                jacJ *= p.getJacobianInverse();
 
-                const auto sym_j = jac_j + jac_j.adjoint();
-                const ScalarType div_j = jac_j.trace();
+                const auto symJ = jacJ + jacJ.adjoint();
+                const ScalarType divJ = jacJ.trace();
 
-                m_matrix(i, j) +=
-                    wdet
-                  * (
-                      Math::dot(lambda * div_j, div_i)
-                      + static_cast<ScalarType>(0.5) * Math::dot(mu * sym_j, sym_i)
-                    );
+                m_matrix(i, j) += wdet *
+                  (Math::dot(lambda * divJ, divI) +
+                    static_cast<ScalarType>(0.5) * Math::dot(mu * symJ, symI));
               }
             }
           }
@@ -246,42 +257,39 @@ namespace Rodin::Variational
 
             for (size_t i = 0; i < nte; ++i)
             {
-              const auto& basis_i = testfe.getBasis(i);
+              const auto& basisI = testfe.getBasis(i);
 
-              Math::SpatialMatrix<ScalarType> jac_i;
-              jac_i.resize(d, d);
+              Math::SpatialMatrix<ScalarType> jacI;
+              jacI.resize(d, d);
               for (size_t r = 0; r < d; ++r)
               {
                 for (size_t c = 0; c < d; ++c)
-                  jac_i(r, c) = basis_i.template getDerivative<1>(r, c)(rc);
+                  jacI(r, c) = basisI.template getDerivative<1>(r, c)(rc);
               }
-              jac_i *= p.getJacobianInverse();
+              jacI *= p.getJacobianInverse();
 
-              const auto sym_i = jac_i + jac_i.adjoint();
-              const ScalarType div_i = jac_i.trace();
+              const auto symI = jacI + jacI.adjoint();
+              const ScalarType divI = jacI.trace();
 
               for (size_t j = 0; j < ntr; ++j)
               {
-                const auto& basis_j = trialfe.getBasis(j);
+                const auto& basisJ = trialfe.getBasis(j);
 
-                Math::SpatialMatrix<ScalarType> jac_j;
-                jac_j.resize(d, d);
+                Math::SpatialMatrix<ScalarType> jacJ;
+                jacJ.resize(d, d);
                 for (size_t r = 0; r < d; ++r)
                 {
                   for (size_t c = 0; c < d; ++c)
-                    jac_j(r, c) = basis_j.template getDerivative<1>(r, c)(rc);
+                    jacJ(r, c) = basisJ.template getDerivative<1>(r, c)(rc);
                 }
-                jac_j *= p.getJacobianInverse();
+                jacJ *= p.getJacobianInverse();
 
-                const auto sym_j = jac_j + jac_j.adjoint();
-                const ScalarType div_j = jac_j.trace();
+                const auto symJ = jacJ + jacJ.adjoint();
+                const ScalarType divJ = jacJ.trace();
 
-                m_matrix(i, j) +=
-                    wdet
-                  * (
-                      Math::dot(lambda * div_j, div_i)
-                      + static_cast<ScalarType>(0.5) * Math::dot(mu * sym_j, sym_i)
-                    );
+                m_matrix(i, j) += wdet *
+                  (Math::dot(lambda * divJ, divI) +
+                    static_cast<ScalarType>(0.5) * Math::dot(mu * symJ, symI));
               }
             }
           }
@@ -290,6 +298,7 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /// @brief Returns an entry of the current element stiffness matrix.
       ScalarType integrate(size_t tr, size_t te) final override
       {
         return m_matrix(te, tr);
@@ -317,11 +326,13 @@ namespace Rodin::Variational
         return *m_lambda;
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this linear-elasticity integrator.
       LinearElasticityIntegrator* copy() const noexcept override
       {
         return new LinearElasticityIntegrator(*this);

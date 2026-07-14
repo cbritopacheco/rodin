@@ -1,11 +1,16 @@
 /**
-  @dir rodin/src/
+  Directory src/
   @brief Source directory for Rodin.
  */
 
 /**
-  @dir rodin/src/Rodin
+  Directory src/Rodin
   @brief Namespace @ref Rodin
+ */
+
+/**
+  @defgroup RodinVariational Variational module
+  @brief Finite element spaces, form-language nodes, and variational problems.
  */
 
 /**
@@ -25,7 +30,7 @@
  */
 
 /**
-  @dir Rodin/Context
+  Directory src/Rodin/Context
   @brief Namespace @ref Rodin::Context
  */
 
@@ -45,7 +50,7 @@
  */
 
 /**
-  @dir Rodin/Alert
+  Directory src/Rodin/Alert
   @brief Namespace @ref Rodin::Alert
  */
 
@@ -91,7 +96,7 @@
  */
 
 /**
-  @dir Rodin/Geometry
+  Directory src/Rodin/Geometry
   @brief Namespace @ref Rodin::Geometry
  */
 
@@ -163,7 +168,7 @@
  */
 
 /**
-  @dir Rodin/Assembly
+  Directory src/Rodin/Assembly
   @brief Namespace @ref Rodin::Assembly
  */
 
@@ -223,7 +228,7 @@
  */
 
 /**
-  @dir Rodin/Threads
+  Directory Rodin/Threads
   @brief Namespace @ref Rodin::Threads
  */
 
@@ -233,7 +238,7 @@
  */
 
 /**
-  @dir Rodin/Geometry/Euclidean
+  Directory src/Rodin/Geometry/Euclidean
   @brief Namespace @ref Rodin::Geometry::Euclidean
  */
 
@@ -243,7 +248,7 @@
  */
 
 /**
-  @dir Rodin/IO
+  Directory src/Rodin/IO
   @brief Namespace @ref Rodin::IO
  */
 
@@ -296,7 +301,7 @@
  */
 
 /**
-  @dir Rodin/Plot
+  Directory Rodin/Plot
   @brief Namespace @ref Rodin::Plot
  */
 
@@ -306,7 +311,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist
+  Directory Rodin/Plot/Artist
   @brief Namespace @ref Rodin::Plot::Artist
  */
 
@@ -316,7 +321,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist/Axes
+  Directory Rodin/Plot/Artist/Axes
   @brief Namespace @ref Rodin::Plot::Artist::Axes
  */
 
@@ -326,7 +331,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist/Axis
+  Directory Rodin/Plot/Artist/Axis
   @brief Namespace @ref Rodin::Plot::Artist::Axis
  */
 
@@ -336,7 +341,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Artist/Lines
+  Directory Rodin/Plot/Artist/Lines
   @brief Namespace @ref Rodin::Plot::Artist::Lines
  */
 
@@ -346,7 +351,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend
+  Directory Rodin/Plot/Backend
   @brief Namespace @ref Rodin::Plot::Backend
  */
 
@@ -356,7 +361,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Bases
+  Directory Rodin/Plot/Backend/Bases
   @brief Namespace @ref Rodin::Plot::Backend::Bases
  */
 
@@ -366,7 +371,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Renderer
+  Directory Rodin/Plot/Backend/Renderer
   @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
@@ -376,7 +381,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Renderer/Drawables
+  Directory Rodin/Plot/Backend/Renderer/Drawables
   @brief Namespace @ref Rodin::Plot::Backend::Renderer::Drawables
  */
 
@@ -386,7 +391,7 @@
  */
 
 /**
-  @dir Rodin/Plot/Backend/Event
+  Directory Rodin/Plot/Backend/Event
   @brief Namespace @ref Rodin::Plot::Backend::Event
  */
 
@@ -396,7 +401,7 @@
  */
 
 /**
-  @dir Rodin/Plot/GUI
+  Directory Rodin/Plot/GUI
   @brief Namespace @ref Rodin::Plot::GUI
  */
 
@@ -407,7 +412,7 @@
 
 
 /**
-  @dir Rodin/Variational
+  Directory src/Rodin/Variational
   @brief Namespace @ref Rodin::Variational
  */
 
@@ -422,21 +427,21 @@
 
   ## Finite Element Spaces
 
-  - @ref Rodin::Variational::P0 "P0" — Piecewise constant (discontinuous)
+  - `P0` — Piecewise constant (discontinuous)
     finite element space
-  - @ref Rodin::Variational::P0g "P0g" — Global constant space (1 DOF for scalar, vdim for vector)
-  - @ref Rodin::Variational::P1 "P1" — Piecewise linear (continuous)
+  - `P0g` — Global constant space (1 DOF for scalar, vdim for vector)
+  - `P1` — Piecewise linear (continuous)
     finite element space
-  - @ref Rodin::Variational::H1 "H1" — Higher-order @f$ H^1 @f$-conforming
+  - `H1` — Higher-order @f$ H^1 @f$-conforming
     finite element space (arbitrary polynomial order)
 
   ## Functions
 
-  - @ref Rodin::Variational::TrialFunction "TrialFunction" — Represents the
+  - `TrialFunction` — Represents the
     unknown solution @f$ u @f$ in a variational formulation
-  - @ref Rodin::Variational::TestFunction "TestFunction" — Represents the
+  - `TestFunction` — Represents the
     weighting function @f$ v @f$
-  - @ref Rodin::Variational::GridFunction "GridFunction" — A concrete function
+  - `GridFunction` — A concrete function
     storing DOF values in a finite element space
 
   ## Variational Forms
@@ -496,7 +501,7 @@
 
   ## Problem
 
-  The @ref Rodin::Variational::Problem "Problem" class assembles all forms
+  The `Problem` class assembles all forms
   and boundary conditions into a solvable linear system.
 
   @code{.cpp}
@@ -516,7 +521,7 @@
  */
 
 /**
-  @dir Rodin/Distance
+  Directory src/Rodin/Distance
   @brief Namespace @ref Rodin::Distance
  */
 
@@ -532,11 +537,11 @@
 
   | Method | Class | Equation | Properties |
   |--------|-------|----------|------------|
-  | **Eikonal** | `Distance::Eikonal` | @f$ \|\nabla d\| = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
-  | **Poisson** | `Distance::Poisson` | @f$ -\Delta u = 1, \; u\|_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
-  | **SignedPoisson** | `Distance::SignedPoisson` | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\|_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
-  | **Rvachev** | `Distance::Rvachev` | @f$ d = \frac{u}{\sqrt{u^2 + \|\nabla u\|^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
-  | **SpaldingTucker** | `Distance::SpaldingTucker` | @f$ d = \frac{2u}{\|\nabla u\| + \sqrt{\|\nabla u\|^2 + 2|u|}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
+  | **Eikonal** | `Distance::Eikonal` | @f$ \lVert\nabla d\rVert = 1 @f$ | Exact distances via FMM; supports signed distance with interior/interface regions |
+  | **Poisson** | `Distance::Poisson` | @f$ -\Delta u = 1, \; u\vert_{\partial\Omega} = 0 @f$ | Smooth approximation; fast (one linear solve); does not give exact distances |
+  | **SignedPoisson** | `Distance::SignedPoisson` | @f$ -\Delta u = 2\chi_\Omega - 1, \; u\vert_\Gamma = 0 @f$ | Region-dependent forcing yields a signed smooth distance |
+  | **Rvachev** | `Distance::Rvachev` | @f$ d = \frac{u}{\sqrt{u^2 + \lVert\nabla u\rVert^2}} @f$ | Normalizes a level-set field to approximate distance; preserves zero set and sign |
+  | **SpaldingTucker** | `Distance::SpaldingTucker` | @f$ d = \frac{2u}{\lVert\nabla u\rVert + \sqrt{\lVert\nabla u\rVert^2 + 2\lvert u\rvert}} @f$ | Better gradient normalization than Rvachev; more accurate near the interface |
 
   All methods except `Rvachev` and `SpaldingTucker` inherit from a common CRTP
   `Base<Derived>` that provides `setInterior()` and `setInterface()` methods for
@@ -599,7 +604,7 @@
  */
 
 /**
-  @dir Rodin/Hilbert
+  Directory src/Rodin/Hilbert
   @brief Namespace @ref Rodin::Hilbert
  */
 
@@ -637,7 +642,7 @@
  */
 
 /**
-  @dir Rodin/Advection
+  Directory src/Rodin/Advection
   @brief Namespace @ref Rodin::Advection
  */
 
@@ -709,11 +714,11 @@
 
   @note The module is header-only (`Rodin::Advection` INTERFACE library).
 
-  @see @ref Rodin::Variational::Flow "Flow" for the characteristic tracer.
+  @see `Flow` for the characteristic tracer.
  */
 
 /**
-  @dir Rodin/Eikonal
+  Directory src/Rodin/Eikonal
   @brief Namespace @ref Rodin::Eikonal
  */
 
@@ -766,7 +771,7 @@
  */
 
 /**
-  @dir Rodin/Elasticity
+  Directory Rodin/Elasticity
   @brief Namespace @ref Rodin::Elasticity
  */
 
@@ -776,7 +781,7 @@
 
   This module implements the linearized elasticity bilinear form for small
   deformations. The primary class is
-  @ref Rodin::Variational::LinearElasticityIntegrator "LinearElasticityIntegral",
+  `LinearElasticityIntegral`,
   which assembles:
   @f[
     a(\mathbf{u}, \mathbf{v}) = \int_\Omega \bigl[\lambda (\nabla \cdot \mathbf{u})(\nabla \cdot \mathbf{v})
@@ -961,7 +966,7 @@
  */
 
 /**
-  @dir Rodin/QF
+  Directory src/Rodin/QF
   @brief Namespace @ref Rodin::QF
  */
 
@@ -1010,7 +1015,7 @@
  */
 
 /**
-  @dir Rodin/FormLanguage
+  Directory src/Rodin/FormLanguage
   @brief Namespace @ref Rodin::FormLanguage
  */
 
@@ -1063,7 +1068,7 @@
  */
 
 /**
-  @dir Rodin/Math
+  Directory src/Rodin/Math
   @brief Namespace @ref Rodin::Math
  */
 
@@ -1133,7 +1138,7 @@
 
 
 /**
-  @dir Rodin/Solver
+  Directory src/Rodin/Solver
   @brief Namespace @ref Rodin::Solver
  */
 
@@ -1147,12 +1152,12 @@
 
   **Direct solvers** (exact up to floating-point precision):
   - @ref Rodin::Solver::SparseLU "SparseLU" — General-purpose sparse LU factorization
-  - @ref Rodin::Solver::UMFPack "UMFPack" — SuiteSparse UMFPACK solver
-  - @ref Rodin::Solver::CHOLMOD "CHOLMOD" — SuiteSparse Cholesky for SPD systems
+  - `UMFPack` — SuiteSparse UMFPACK solver
+  - `CHOLMOD` — SuiteSparse Cholesky for SPD systems
   - @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" — Simplicial @f$ LL^T @f$
   - @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" — Simplicial @f$ LDL^T @f$
   - @ref Rodin::Solver::SparseQR "SparseQR" — Sparse QR factorization
-  - @ref Rodin::Solver::SPQR "SPQR" — SuiteSparse sparse QR
+  - `SPQR` — SuiteSparse sparse QR
   - @ref Rodin::Solver::HouseholderQR "HouseholderQR" — Dense Householder QR
   - @ref Rodin::Solver::LDLT "LDLT" — Dense @f$ LDL^T @f$
 
@@ -1197,7 +1202,7 @@
  */
 
 /**
-  @dir Rodin/Test
+  Directory src/Rodin/Test
   @brief Namespace @ref Rodin::Test
  */
 
@@ -1208,7 +1213,7 @@
  */
 
 /**
-  @dir Rodin/Utility
+  Directory src/Rodin/Utility
   @brief Namespace @ref Rodin::Utility
  */
 
@@ -1218,48 +1223,54 @@
  */
 
 /**
-  @dir Rodin/Traits
+  Directory Rodin/Traits
   @brief Namespace @ref Rodin::Traits
  */
 
 /**
-  @dir rodin/src/RodinExternal
-  @brief Namespace @ref Rodin::External
+  Directory src/Rodin/MMG
+  @brief Namespace @ref Rodin::MMG
  */
 
 /**
-  @namespace Rodin::External
-  @brief Third-party library integrations with Rodin
- */
-
-/**
-  @dir RodinExternal/MMG
-  @brief Namespace @ref Rodin::External::MMG
- */
-
-/**
-  @namespace Rodin::External::MMG
+  @namespace Rodin::MMG
   @brief MMG integration with Rodin
 
-  The `Rodin::External::MMG` module provides C++ wrappers for the
+  The `Rodin::MMG` module provides C++ wrappers for the
   [Mmg Platform](https://www.mmgtools.org/), enabling metric-based mesh
-  adaptation, mesh-quality optimization, and implicit-domain discretization
-  directly from Rodin objects.
+  adaptation, mesh-quality optimization, and level-set discretization directly
+  from Rodin objects.
 
   ## Key Classes
 
   | Class | Purpose |
   |-------|---------|
-  | `MMG::Mesh` | MMG-specific mesh type (extends `Geometry::Mesh<Local>`) with ridge, corner, and required-entity metadata. Loaded and saved via MEDIT format. |
-  | `MMG::Adapt` | Metric-based adaptation: remeshes a mesh according to a nodal size map. |
-  | `MMG::MeshOptimizer` | Mesh-quality optimization: improves element shapes without a metric field. |
-  | `MMG::LevelSetDiscretizer` | Implicit-domain meshing: cuts a background mesh along a level-set isovalue. |
-  | `MMG::MMG5` | Base class providing shared remeshing controls. |
+  | `MMG::Mesh` | Local mesh type extending `Geometry::Mesh<Local>` with corner, ridge, and required-entity metadata. |
+  | `MMG::Adapt` | Metric-based adaptation from a nodal size map. |
+  | `MMG::Optimizer` | Mesh-quality optimization without an external metric field. |
+  | `MMG::LevelSetDiscretizer` | Level-set meshing: cuts a background mesh along an isovalue or extracts the isosurface. |
+  | `MMG::MMG5` | Base class providing shared MMG configuration and native conversion helpers. |
+
+  ## Workflow Semantics
+
+  `Optimizer`, `Adapt`, and `LevelSetDiscretizer` are intentionally different
+  operations:
+
+  | Workflow | Expected behavior |
+  |----------|-------------------|
+  | `Optimizer` | Improves element quality while keeping the mesh close to the existing local size distribution. |
+  | `Adapt` | Refines, coarsens, moves, and reconnects elements according to a size field. |
+  | `LevelSetDiscretizer` | Alters topology as needed to conform the output mesh to the selected level-set isovalue. |
+
+  All workflows convert an `MMG::Mesh` to native MMG structures, run MMG, and
+  convert the result back. The output is a remeshed object; input element
+  indices should be treated as stable only where the wrapper or tests
+  explicitly document preservation.
 
   ## Auto-Dispatch
 
-  `Adapt`, `MeshOptimizer`, and `LevelSetDiscretizer` all auto-dispatch to the
-  appropriate MMG backend based on the mesh type:
+  The wrappers auto-dispatch to the appropriate MMG backend based on the mesh
+  type:
 
   | Mesh type | Backend |
   |-----------|---------|
@@ -1269,16 +1280,50 @@
 
   ## Shared Configuration (MMG5 base)
 
-  All three classes inherit from `MMG5` and share these configuration methods
-  (each returns `*this` for chaining):
+  The MMG wrappers inherit common configuration methods from `MMG5`; each
+  returns `*this` for chaining:
 
-  | Method | Default | Description |
-  |--------|---------|-------------|
-  | `setHMin(hmin)` | ~0.01× bounding box | Minimal allowed edge size |
-  | `setHMax(hmax)` | ~2× bounding box | Maximal allowed edge size |
-  | `setHausdorff(hausd)` | 0.01 | Hausdorff distance tolerance for boundary approximation |
-  | `setGradation(hgrad)` | 1.3 | Edge-size gradation ratio between adjacent elements |
-  | `setAngleDetection(bool)` | true | Enable ridge angle detection for feature preservation |
+  | Method | Description |
+  |--------|-------------|
+  | `setHMin(hmin)` | Minimal allowed edge size |
+  | `setHMax(hmax)` | Maximal allowed edge size |
+  | `setHausdorff(hausd)` | Hausdorff distance tolerance for boundary approximation |
+  | `setGradation(hgrad)` | Edge-size gradation ratio between adjacent elements |
+  | `setAngleDetection(bool)` | Enable ridge angle detection for feature preservation |
+
+  ## Required Entities
+
+  `MMG::Mesh` stores MMG-specific metadata:
+
+  | Method | Description |
+  |--------|-------------|
+  | `setCorner(vertexIdx)` | Mark a vertex as a geometric corner |
+  | `setRidge(edgeIdx)` | Mark an edge as a geometric ridge |
+  | `setRequiredVertex(idx)` | Mark a vertex as required (`MG_REQ`) |
+  | `setRequiredEdge(idx)` | Mark an edge as required (`MG_REQ`) |
+  | `setRequiredTriangle(idx)` | Mark a triangle as required (`MG_REQ`) |
+  | `setRequiredTetrahedron(idx)` | Mark a tetrahedron as required (`MG_REQ`) |
+
+  Required vertices, edges, triangles, and tetrahedra are serialized through
+  MEDIT, converted to native MMG `MG_REQ` tags, and restored from native MMG
+  output. The optimizer and level-set wrappers restore required index sets when
+  the original indices are still valid after remeshing.
+  In MMG3D, `setRequiredTriangle(idx)` applies to boundary triangles exported
+  to MMG's triangle table; interior faces of a tetrahedral mesh are not exported
+  as MMG boundary triangles when face-cell incidence is available.
+
+  For level-set discretization, the tested behavior is:
+
+  - required entities not crossed by the level set retain their required
+    metadata and original geometry in the 2D/3D cases covered by the test
+    suite;
+  - required entities crossed by the level set are not guaranteed to remain
+    intact. MMG may replace them to conform the mesh to the isovalue, even when
+    `MG_REQ`, individual labels, adjacent tetrahedron labels, local closure
+    requirements, or `noSplit(ref)` are used.
+
+  See @ref examples-mmg-behavior "MMG behavior and guarantees" for the full
+  characterization.
 
   ## LevelSetDiscretizer API
 
@@ -1288,54 +1333,23 @@
   |--------|-------------|
   | `setLevelSet(ls)` | Isovalue to extract (default: 0.0) |
   | `surface(bool)` | When true, discretize the isosurface; when false, discretize the subdomain volume |
-  | `setRMC(rmc)` | Removal threshold for small parasitic components (default: @f$ 10^{-5} @f$) |
-  | `setBoundaryReference(ref)` | Material reference for the discretized boundary (default: 10) |
+  | `setRMC(rmc)` | Removal threshold for small parasitic components |
+  | `setBoundaryReference(ref)` | Material reference for the discretized boundary |
   | `setBaseReferences(refs)` | Restrict level-set splitting to specified base materials |
-  | `split(ref, split)` / `noSplit(ref)` | Per-material splitting policy |
+  | `split(ref, split)` | Split one material reference into inside/outside references |
+  | `noSplit(ref)` | Keep one material reference from being split by the material policy |
 
-  The `discretize()` method takes an `MMG::RealGridFunction` and returns a
-  new `MMG::Mesh`:
-
-  @code{.cpp}
-  MMG::LevelSetDiscretizer lsd;
-  lsd.setLevelSet(0.0)
-     .setBoundaryReference(10)
-     .setHausdorff(0.005);
-  MMG::Mesh cut = lsd.discretize(phi);
-  @endcode
-
-  ## Typical Usage
+  `noSplit(ref)` is a material-reference splitting policy. It is not an
+  element-integrity guarantee for an individual edge, triangle, or tetrahedron
+  that the level set cuts.
 
   @code{.cpp}
-  #include <Rodin/MMG.h>
-
-  // Adapt: remesh from a size map
-  MMG::Mesh mesh;
-  mesh.load("domain.mesh", IO::FileFormat::MEDIT);
-  P1 Vh(mesh);
-  GridFunction sizeMap(Vh);
-  // ... define sizeMap ...
-  MMG::Adapt().setHMax(0.5).setGradation(1.2).adapt(mesh, sizeMap);
-
-  // Optimize: improve element quality
-  MMG::MeshOptimizer().setHMax(0.5).optimize(mesh);
-
-  // Level-set discretization: cut mesh along phi = 0
-  MMG::LevelSetDiscretizer lsd;
-  MMG::Mesh cut = lsd.setLevelSet(0.0).discretize(phi);
+  MMG::Mesh cut = MMG::LevelSetDiscretizer()
+    .setLevelSet(0.0)
+    .split(interior, { interior, exterior })
+    .setBoundaryReference(interface)
+    .discretize(phi);
   @endcode
-
-  ## MMG::Mesh Extras
-
-  `MMG::Mesh` extends the base `Geometry::Mesh<Local>` with MMG-specific
-  boundary metadata:
-
-  | Method | Description |
-  |--------|-------------|
-  | `setCorner(vertexIdx)` | Mark a vertex as a geometric corner |
-  | `setRidge(edgeIdx)` | Mark an edge as a geometric ridge |
-  | `setRequiredVertex(idx)` | Mark a vertex as required (fixed during remeshing) |
-  | `setRequiredEdge(idx)` | Mark an edge as required |
 
   Use `MMG::Mesh::Build()` to construct meshes programmatically via the
   builder pattern.
@@ -1343,6 +1357,7 @@
   @note Requires the MMG library and Rodin configured with `RODIN_USE_MMG=ON`.
 
   @see @ref examples-mmg-index "MMG examples"
+  @see @ref examples-mmg-behavior "MMG behavior and guarantees"
  */
 
 /**
@@ -1456,44 +1471,8 @@
   Krylov solvers, and nonlinear solver frameworks within Rodin's finite element
   pipeline.
 
-  ## Key Components
-
-  **Math types** (@ref Rodin::PETSc::Math):
-  - @ref Rodin::PETSc::Math::LinearSystem "LinearSystem" — Couples a PETSc
-    `Mat` (operator @f$ A @f$), right-hand side `Vec` (@f$ \mathbf{b} @f$), and
-    solution `Vec` (@f$ \mathbf{x} @f$).  Supports Dirichlet elimination via
-    `eliminate()` and block-preconditioner field splits via `setFieldSplits()`.
-  - `Vector` (`::Vec`) and `Matrix` (`::Mat`) — PETSc handle aliases.
-
-  **Solvers** (@ref Rodin::PETSc::Solver):
-  - @ref Rodin::Solver::KSP "KSP" — Wraps the PETSc KSP (Krylov subspace)
-    context.  Configurable via `setType()`, `setTolerances()`,
-    `setPreconditioner()`, and PETSc command-line options (`-ksp_type`,
-    `-ksp_rtol`, `-ksp_monitor`, etc.).
-  - @ref Rodin::Solver::CG<PETSc::Math::LinearSystem> "CG" — CG specialization
-    setting `KSPCG`.  For symmetric positive-definite systems.
-  - @ref Rodin::Solver::GMRES<PETSc::Math::LinearSystem> "GMRES" — GMRES
-    specialization setting `KSPGMRES`.  For non-symmetric/indefinite systems.
-  - @ref Rodin::Solver::SNES "SNES" — Wraps the PETSc SNES (Scalable Nonlinear
-    Equations Solvers) for Newton-type methods.  The inner linear solve uses
-    `KSP`.
-
-  **Variational** (@ref Rodin::PETSc::Variational):
-  - `PETSc::Variational::TrialFunction` / `TestFunction` — Thin wrappers
-    that trigger PETSc-specific CTAD so that `Problem`, `BilinearForm`, and
-    `LinearForm` automatically use PETSc storage.
-  - `PETSc::Variational::GridFunction` — Stores DOF coefficients in a PETSc
-    `Vec`.  In MPI mode, the vector is created with `VecMPISetGhost` for
-    transparent ghost-layer synchronization.
-  - `Problem` — Assembles into a PETSc `LinearSystem`.  Supports both
-    single-field (`Problem(u, v)`) and multi-field block systems
-    (`Problem(u, p, l, v, q, m)`) with field-split preconditioning.
-  - `BilinearForm` / `LinearForm` — Assemble into PETSc `Mat` / `Vec`.
-
-  **Assembly** (@ref Rodin::PETSc::Assembly):
-  - `Sequential` — Single-rank assembly into PETSc objects.
-  - `MPI` — Distributed assembly where each rank contributes owned elements.
-  - `OpenMP` — Shared-memory parallel assembly on a single rank.
+  PETSc-specific linear algebra, solver, variational, and assembly adapters
+  are documented in their corresponding headers.
 
   ## Typical Usage (Sequential)
 
@@ -1595,12 +1574,27 @@
  */
 
 /**
+  @namespace Rodin::PETSc::Math
+  @brief PETSc-backed linear algebra adapters.
+ */
+
+/**
+  @namespace Rodin::PETSc::Solver
+  @brief PETSc-backed linear and nonlinear solver adapters.
+ */
+
+/**
+  @namespace Rodin::PETSc::Variational
+  @brief PETSc-backed variational form adapters.
+ */
+
+/**
   @namespace Rodin::Tests
   @brief %Tests of the Rodin library
  */
 
 /**
-  @dir Rodin/tests
+  Directory Rodin/tests
   @brief Namespace @ref Rodin::Tests
  */
 
@@ -1610,7 +1604,7 @@
  */
 
 /**
-  @dir Rodin/tests/unit
+  Directory Rodin/tests/unit
   @brief Namespace @ref Rodin::Tests::Unit
  */
 
@@ -1620,7 +1614,7 @@
  */
 
 /**
-  @dir Rodin/tests/manufactured
+  Directory Rodin/tests/manufactured
   @brief Namespace @ref Rodin::Tests::Manufactured
  */
 
@@ -1630,6 +1624,102 @@
  */
 
 /**
-  @dir Rodin/tests/benchmarks
+  Directory Rodin/tests/benchmarks
   @brief Namespace @ref Rodin::Tests::Benchmarks
+ */
+
+/**
+  Directory src/Rodin/Adaptation
+  @brief Namespace @ref Rodin::Adaptation
+ */
+
+/**
+  @namespace Rodin::Adaptation
+  @brief Module for moving-interface mesh adaptation.
+
+  The Adaptation module provides tools for fitting and adapting meshes to
+  moving interfaces described by level set functions. Its centerpiece is
+  WNGIR (Welsch natural-gradient interface registration): a variational
+  method that displaces mesh vertices so that a discrete interface tracks
+  the zero set of a level set function @f$ \phi @f$, while preserving
+  element quality.
+
+  ## Design
+
+  The module follows a strict separation of concerns:
+  - The **level set** @f$ \phi @f$ owns the topology of the tracked domain
+    (@f$ \phi < 0 @f$ inside, @f$ \phi > 0 @f$ outside).
+  - **Classification** converts @f$ \phi @f$ into discrete cell attributes
+    (see @ref Rodin::Geometry "Geometry" utilities such as the min s-t cut
+    classifier).
+  - **Geometry fitting** (WNGIR) moves and curves the mesh. It never
+    decides topology.
+
+  The WNGIR step solves a metric-preconditioned (natural-gradient) problem
+  built entirely in the variational form language: a surface force
+  (the Welsch first variation, assembled on interface facets) balanced
+  against bulk, observation, and admissibility metrics. Hard admissibility
+  (element validity) is enforced by a nonlinear line search.
+
+  ## Key classes
+  - WNGIRParameters — solve configuration (budgets, tolerances, weights)
+  - WNGIRReport — per-solve diagnostics
+  - WNGIRSolver — backend-independent solver driver
+
+  @note Interface-fitting constraints are formulated as smooth penalties;
+  the module deliberately avoids hard geometric projections inside the
+  solve, which break line-search continuity.
+ */
+
+/**
+  Directory src/Rodin/Heart
+  @brief Namespace @ref Rodin::Heart
+ */
+
+/**
+  @namespace Rodin::Heart
+  @brief Module for reduced-order (0D) cardiac models.
+
+  Provides lumped-parameter ventricular models used to calibrate and
+  validate the 3D constitutive laws of the @ref Rodin::Solid "Solid"
+  module. The main component is the CCMLC2014 0D ventricular model: a
+  cardiac-cycle stepper driven by a reduced Holzapfel-type passive energy
+  (reduced invariants with first and second derivatives) coupled to an
+  active contraction law.
+
+  0D models integrate ordinary differential equations over a heartbeat and
+  are orders of magnitude cheaper than 3D simulations; parameters should
+  round-trip between the 0D cycle and the corresponding 3D laws before
+  debugging full simulations.
+ */
+
+/**
+  Directory Rodin/Location
+  @brief Namespace @ref Rodin::Location
+ */
+
+/**
+  @namespace Rodin::Location
+  @brief Module for spatial search and point location.
+
+  Provides acceleration structures for locating points within meshes. The
+  main component is a bounding-volume hierarchy over axis-aligned bounding
+  boxes (AABB) supporting point-in-mesh queries, used by operations that
+  must evaluate fields at arbitrary physical coordinates.
+ */
+
+/**
+  Directory src/Rodin/Serialization
+  @brief Namespace support for serialization of Rodin types.
+ */
+
+/**
+  @namespace Rodin::Serialization
+  @brief Module providing boost::serialization support for Rodin types.
+
+  Contains serialization adapters for Rodin, Eigen, and Boost container
+  types (connectivity, arrays, flat maps/sets, dense matrices, optionals),
+  enabling binary checkpointing of meshes and fields. Polymorphic types
+  (such as polytope transformations) are registered through export headers
+  so they can be serialized through base-class pointers.
  */

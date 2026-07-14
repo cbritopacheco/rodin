@@ -15,7 +15,7 @@
 
   - A @ref Rodin::Context::MPI "Context::MPI" execution context wrapping a
     Boost.MPI environment and communicator.
-  - A @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>"
+  - A @ref Rodin::Geometry::MPIMesh "Mesh\<Context::MPI\>"
     distributed mesh that stores a rank-local shard with ownership and ghost
     metadata.
   - A @ref Rodin::Geometry::Sharder<Context::MPI> "Sharder" that partitions a
@@ -56,7 +56,7 @@
 
   @section guides-mpi-mesh Distributed Mesh
 
-  @ref Rodin::Geometry::Mesh<Context::MPI> "Mesh\<Context::MPI\>" (aliased as
+  @ref Rodin::Geometry::MPIMesh "Mesh\<Context::MPI\>" (aliased as
   `Geometry::MPIMesh`) stores a rank-local
   @ref Rodin::Geometry::Shard "Shard" together with an MPI context.  Geometric
   queries that require global information (polytope counts, volume, perimeter)

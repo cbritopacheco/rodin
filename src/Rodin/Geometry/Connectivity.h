@@ -295,11 +295,11 @@ namespace Rodin::Geometry
           void save(Archive& ar, const unsigned int /*version*/) const
           {
             ar & right;
-            std::vector<Polytope::Key> left_keys;
-            left_keys.reserve(left.size());
+            std::vector<Polytope::Key> leftKeys;
+            leftKeys.reserve(left.size());
             for (const Polytope::Key* p : left)
-              left_keys.push_back(*p);
-            ar & left_keys;
+              leftKeys.push_back(*p);
+            ar & leftKeys;
           }
 
           /**
@@ -310,11 +310,11 @@ namespace Rodin::Geometry
           void load(Archive& ar, const unsigned int /*version*/)
           {
             ar & right;
-            std::vector<Polytope::Key> left_keys;
-            ar & left_keys;
+            std::vector<Polytope::Key> leftKeys;
+            ar & leftKeys;
             left.clear();
-            left.reserve(left_keys.size());
-            for (const auto& k : left_keys)
+            left.reserve(leftKeys.size());
+            for (const auto& k : leftKeys)
             {
               auto it = right.find(k);
               assert(it != right.end());
@@ -444,12 +444,25 @@ namespace Rodin::Geometry
         return this->polytope(t, Polytope::Key(p));
       }
 
+      /**
+       * @brief Adds a polytope from an initializer list and returns its index.
+       * @param[in] t Geometry type
+       * @param[in] p Initializer list of vertex indices
+       * @param[out] index Index assigned to the inserted or existing polytope
+       * @returns Reference to this object for method chaining
+       */
       Connectivity& polytope(
           Geometry::Polytope::Type t, std::initializer_list<Index> p, Index& index)
       {
         return this->polytope(t, Polytope::Key(p), index);
       }
 
+      /**
+       * @brief Adds a polytope from an index array.
+       * @param[in] t Geometry type
+       * @param[in] polytope Vertex indices defining the polytope
+       * @returns Reference to this object for method chaining
+       */
       Connectivity& polytope(
           Geometry::Polytope::Type t, const IndexArray& polytope)
       {
@@ -459,6 +472,13 @@ namespace Rodin::Geometry
         return this->polytope(t, std::move(key));
       }
 
+      /**
+       * @brief Adds a polytope from an index array and returns its index.
+       * @param[in] t Geometry type
+       * @param[in] polytope Vertex indices defining the polytope
+       * @param[out] index Index assigned to the inserted or existing polytope
+       * @returns Reference to this object for method chaining
+       */
       Connectivity& polytope(
           Geometry::Polytope::Type t, const IndexArray& polytope, Index& index)
       {
@@ -477,12 +497,32 @@ namespace Rodin::Geometry
       Connectivity& polytope(
           Geometry::Polytope::Type t, const Polytope::Key& polytope);
 
+      /**
+       * @brief Adds a polytope by moving its vertex key.
+       * @param[in] t Geometry type
+       * @param[in] polytope Vertex-key representation of the polytope
+       * @returns Reference to this object for method chaining
+       */
       Connectivity& polytope(
           Geometry::Polytope::Type t, Polytope::Key&& polytope);
 
+      /**
+       * @brief Adds a polytope and returns its connectivity index.
+       * @param[in] t Geometry type
+       * @param[in] polytope Vertex-key representation of the polytope
+       * @param[out] index Index assigned to the inserted or existing polytope
+       * @returns Reference to this object for method chaining
+       */
       Connectivity& polytope(
           Geometry::Polytope::Type t, const Polytope::Key& polytope, Index& index);
 
+      /**
+       * @brief Adds a moved polytope key and returns its connectivity index.
+       * @param[in] t Geometry type
+       * @param[in] polytope Vertex-key representation of the polytope
+       * @param[out] index Index assigned to the inserted or existing polytope
+       * @returns Reference to this object for method chaining
+       */
       Connectivity& polytope(
           Geometry::Polytope::Type t, Polytope::Key&& polytope, Index& index);
 
@@ -563,8 +603,20 @@ namespace Rodin::Geometry
        */
       Connectivity& compute(size_t d, size_t dp, Mode mode = Mode::Discover);
 
+      /**
+       * @brief Computes a dimension-to-dimension relation by discovering missing entities.
+       * @param[in] d Source dimension
+       * @param[in] dp Target dimension
+       * @returns Reference to this connectivity object
+       */
       Connectivity& discover(size_t d, size_t dp);
 
+      /**
+       * @brief Computes a dimension-to-dimension relation using existing entities only.
+       * @param[in] d Source dimension
+       * @param[in] dp Target dimension
+       * @returns Reference to this connectivity object
+       */
       Connectivity& restrict(size_t d, size_t dp);
 
       /**
@@ -635,12 +687,34 @@ namespace Rodin::Geometry
 
       const IndexVector& getIncidence(const std::pair<size_t, size_t> p, Index idx) const override;
 
+      /**
+       * @brief Tests whether a cached incidence relation needs recomputation.
+       * @param[in] d Source dimension
+       * @param[in] dp Target dimension
+       * @returns True when the relation is marked dirty
+       */
       bool isDirty(size_t d, size_t dp) const;
 
+      /**
+       * @brief Marks a cached incidence relation as dirty or clean.
+       * @param[in] d Source dimension
+       * @param[in] dp Target dimension
+       * @param[in] dirty Dirty flag to assign
+       * @returns Reference to this connectivity object
+       */
       Connectivity& setDirty(size_t d, size_t dp, bool dirty = true);
 
+      /**
+       * @brief Returns the maximal polytope dimension present in this connectivity.
+       */
       size_t getMaximalDimension() const;
 
+      /**
+       * @brief Serializes the connectivity tables.
+       * @tparam Archive Boost.Serialization archive type
+       * @param[in,out] ar Archive receiving or providing state
+       * @param[in] version Serialization version
+       */
       template<class Archive>
       void serialize(Archive& ar, const unsigned int version)
       {

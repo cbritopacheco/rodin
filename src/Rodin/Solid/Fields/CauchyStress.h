@@ -51,7 +51,9 @@ namespace Rodin::Solid
   class CauchyStress
   {
     public:
+      /// @brief Constitutive law type.
       using LawType = LawDerived;
+      /// @brief Cache type used by the constitutive law.
       using CacheType = typename LawType::Cache;
 
       /**
@@ -62,7 +64,9 @@ namespace Rodin::Solid
         : m_law(law)
       {}
 
+      /// @brief Copy constructor.
       CauchyStress(const CauchyStress&) = default;
+      /// @brief Move constructor.
       CauchyStress(CauchyStress&&) = default;
 
       /**

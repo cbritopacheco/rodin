@@ -1,0 +1,24 @@
+# EditorConfig (editorconfig.org) — baseline whitespace rules for all
+# editors. Full C++ style: .clang-format / .clang-tidy / CONTRIBUTING.md.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{h,hpp,cpp,dox}]
+indent_style = space
+indent_size = 2
+
+[*.{py,cmake,txt}]
+indent_style = space
+indent_size = 4
+
+[CMakeLists.txt]
+indent_size = 2
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2

@@ -263,11 +263,13 @@ namespace Rodin::Tests::Unit
   class MeshFormatCoverage : public ::testing::TestWithParam<Polytope::Type>
   {};
 
+  /// @brief Verifies MEDIT round trip for mesh format coverage.
   TEST_P(MeshFormatCoverage, MEDITRoundTrip)
   {
     expectMeshStringRoundTrip<FileFormat::MEDIT>(GetParam());
   }
 
+  /// @brief Verifies MFEM round trip for mesh format coverage.
   TEST_P(MeshFormatCoverage, MFEMRoundTrip)
   {
     expectMeshStringRoundTrip<FileFormat::MFEM>(GetParam());
@@ -276,16 +278,19 @@ namespace Rodin::Tests::Unit
   class MeshAttributeRegression : public ::testing::TestWithParam<size_t>
   {};
 
+  /// @brief Verifies MEDIT preserves dimension attributes for mesh attribute regression.
   TEST_P(MeshAttributeRegression, MEDITPreservesDimensionAttributes)
   {
     expectAttributeRegressionStringRoundTrip<FileFormat::MEDIT>(GetParam());
   }
 
+  /// @brief Verifies MFEM preserves dimension attributes for mesh attribute regression.
   TEST_P(MeshAttributeRegression, MFEMPreservesDimensionAttributes)
   {
     expectAttributeRegressionStringRoundTrip<FileFormat::MFEM>(GetParam());
   }
 
+  /// @brief Verifies MEDIT load save load preserves canonical attributes for IO mesh loader by checking exact expected values.
   TEST(Rodin_IO_MeshLoader, MEDITLoadSaveLoadPreservesCanonicalAttributes)
   {
     const std::string input =
@@ -335,6 +340,7 @@ namespace Rodin::Tests::Unit
     expectSameMeshWithAttributes(second, first);
   }
 
+  /// @brief Instantiates Mesh Attribute Regression over the Dimensions parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       Dimensions,
       MeshAttributeRegression,
@@ -344,6 +350,7 @@ namespace Rodin::Tests::Unit
         return "Dim" + std::to_string(info.param) + "D";
       });
 
+  /// @brief Instantiates Mesh Format Coverage over the All Supported Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       AllSupportedGeometries,
       MeshFormatCoverage,
@@ -361,6 +368,7 @@ namespace Rodin::Tests::Unit
         return geometryName(info.param);
       });
 
+  /// @brief Verifies sanity test MEDIT 2 D square for IO mesh loader by checking exact expected values.
   TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)
   {
     static constexpr const char* filename = "medit/Square.medit.mesh";
@@ -397,6 +405,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getAttribute(d, 1), 2);
   }
 
+  /// @brief Verifies sanity test MFEM 2 D square for IO mesh loader by checking exact expected values.
   TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_Square)
   {
     static constexpr const char* filename = "mfem/Square.mfem.mesh";
@@ -432,6 +441,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mesh.getAttribute(d, 1), 2);
   }
 
+  /// @brief Verifies sanity test MFEM 2 D star square for IO mesh loader by checking exact expected values.
   TEST(Rodin_IO_MeshLoader, SanityTest_MFEM_2D_StarSquare)
   {
     static constexpr const char* filename = "mfem/StarSquare.mfem.mesh";

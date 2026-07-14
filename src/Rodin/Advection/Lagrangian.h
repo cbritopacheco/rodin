@@ -11,8 +11,8 @@
  * This file provides the Lagrangian class, which implements semi-Lagrangian
  * advection schemes for scalar fields in variational form.
  */
-#ifndef RODIN_MODELS_ADVECTION_LAGRANGIAN_H
-#define RODIN_MODELS_ADVECTION_LAGRANGIAN_H
+#ifndef RODIN_ADVECTION_LAGRANGIAN_H
+#define RODIN_ADVECTION_LAGRANGIAN_H
 
 #include <functional>
 
@@ -100,7 +100,6 @@ namespace Rodin::Advection
        *
        * @param[in] dt          Signed time step used by the tracer (kept for API symmetry).
        * @param[in] mesh        Mesh on which tracing occurs.
-       * @param[in] velocity    Velocity field functor (kept for API symmetry; not used by this policy).
        * @param[in] eps_in_phys Inward physical offset used to place the footpoint strictly inside.
        */
       StopInsideBoundaryPolicy(
@@ -277,6 +276,13 @@ namespace Rodin::Advection
   class TaylorBoundaryShiftPolicy
   {
     public:
+      /**
+       * @brief Constructs the boundary policy.
+       * @param dt Signed time step used by the tracer.
+       * @param mesh Mesh on which tracing occurs.
+       * @param phi Scalar field used for the Taylor correction.
+       * @param eps_in_phys Inward physical offset used after a boundary hit.
+       */
       TaylorBoundaryShiftPolicy(
           Real dt,
           const Geometry::Mesh<Context::Local>& mesh,
@@ -288,6 +294,11 @@ namespace Rodin::Advection
           m_eps_in_phys(eps_in_phys)
       {}
 
+      /**
+       * @brief Handles a boundary hit and accumulates the Taylor correction.
+       * @param hit Boundary hit record updated in place.
+       * @return Always returns @c true after handling the hit.
+       */
       bool operator()(const Variational::BoundaryHit& hit) const
       {
         if (!(hit.tau > Real(0)))

@@ -19,8 +19,10 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Helper used by the tests to Point Traits.
   const Geometry::Polytope::Traits pointTraits(Geometry::Polytope::Type::Point);
 
+  /// @brief Verifies triangle vertex nodes match connectivity for variational H1 space by checking exact expected values, mesh connectivity computation.
   TEST(Rodin_Variational_H1_Space, Triangle_VertexNodes_MatchConnectivity)
   {
     Mesh mesh =
@@ -92,6 +94,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies global index matches get DO fs for vertices for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs_ForVertices)
   {
     Mesh mesh =
@@ -125,6 +128,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies pushforward point basis is one at vertex for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Pushforward_PointBasis_IsOneAtVertex)
   {
     Mesh mesh =
@@ -163,6 +167,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief 1 element mesh, triangle with vertices (0,0), (1,0), (0,1).
   TEST(Rodin_Variational_H1_Space, Project_OneTriangle_AtNodes)
   {
     // 1 element mesh, triangle with vertices (0,0), (1,0), (0,1)
@@ -216,6 +221,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Basic construction test for H1<1> (equivalent to P1)
+  /// @brief Verifies sanity test H1 1 2 D square build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_1_2D_Square_Build)
   {
     constexpr size_t vdim = 1;
@@ -248,6 +254,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), 4);
   }
 
+  /// @brief Verifies pyramid H1 2 uniform grid build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Pyramid_H1_2_UniformGrid_Build)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });
@@ -272,6 +279,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test H1<2> on a simple mesh
+  /// @brief Verifies sanity test H1 2 2 D square build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_2_2D_Square_Build)
   {
     constexpr size_t sdim = 2;
@@ -310,6 +318,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test H1<3> on a simple mesh
+  /// @brief Verifies sanity test H1 3 2 D square build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_3_2D_Square_Build)
   {
     constexpr size_t sdim = 2;
@@ -346,6 +355,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test H1<2> DOF structure on uniform grid
+  /// @brief Verifies sanity test H1 2 uniform grid for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_2_UniformGrid)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -362,6 +372,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test finite element retrieval
+  /// @brief Verifies finite element H1 2 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, FiniteElement_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -378,6 +389,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test DOF structure (closures) for H1<2> on a simple 2D mesh
+  /// @brief Verifies get DO fs H1 2 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, GetDOFs_H1_2)
   {
     using Mesh     = Geometry::Mesh<Context::Local>;
@@ -485,6 +497,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test that H1<1> size matches P1 size
+  /// @brief Verifies H1 1 matches P1 size for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, H1_1_MatchesP1_Size)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -498,6 +511,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector H1 space
+  /// @brief Verifies vector H1 2 build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_2_Build)
   {
     constexpr size_t vdim = 2;
@@ -529,6 +543,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test that H1<1> can be used with TrialFunction and TestFunction
+  /// @brief Verifies H1 1 trial test function for variational H1 space.
   TEST(Rodin_Variational_H1_Space, H1_1_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -541,6 +556,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test that H1<2> can be used with TrialFunction and TestFunction
+  /// @brief Verifies H1 2 trial test function for variational H1 space.
   TEST(Rodin_Variational_H1_Space, H1_2_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -552,6 +568,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test DOF count consistency for various polynomial degrees
+  /// @brief Verifies DOF count consistency for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, DOFCount_Consistency)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -584,6 +601,7 @@ namespace Rodin::Tests::Unit
   }
 
   // GlobalIndex must match getDOFs entry for every (d,i,local)
+  /// @brief Verifies global index matches get DO fs for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -614,6 +632,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Union of closures over all entities must cover all global DOFs exactly once (in set sense)
+  /// @brief Verifies closures cover all global DO fs H1 2 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, ClosuresCoverAllGlobalDOFs_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -642,6 +661,7 @@ namespace Rodin::Tests::Unit
   }
 
   // For H1<3> on triangles: cell closure = vertices + edges + 1 interior DOF
+  /// @brief Verifies cell closure decomposes into subentities H1 3 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_3)
   {
     Mesh mesh =
@@ -714,6 +734,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Vector H1: DOFs per entity should be vdim times scalar DOFs per entity
+  /// @brief Verifies vector H1 entity DOF scaling H1 2 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_EntityDOFScaling_H1_2)
   {
     constexpr size_t vdim = 3;
@@ -753,6 +774,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Helper function to compute expected DOF count for H1<K> on a 2D triangle mesh
+  /// @brief Helper used by the tests to Expected DOF Count 2 D.
   inline size_t expectedDOFCount2D(size_t K, size_t vertexCount, size_t edgeCount, size_t cellCount)
   {
     // DOF formula for H1<K> on 2D triangular meshes:
@@ -768,6 +790,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test H1<4> construction and DOF count
+  /// @brief Verifies sanity test H1 4 2 D square build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_4_2D_Square_Build)
   {
     Mesh mesh =
@@ -802,6 +825,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test H1<5> construction and DOF count
+  /// @brief Verifies sanity test H1 5 2 D square build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_5_2D_Square_Build)
   {
     Mesh mesh =
@@ -835,6 +859,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test H1<6> construction and DOF count
+  /// @brief Verifies sanity test H1 6 2 D square build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, SanityTest_H1_6_2D_Square_Build)
   {
     Mesh mesh =
@@ -869,6 +894,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Comprehensive DOF count test for K = 1 to 6 on larger uniform grid
+  /// @brief Verifies DOF count K 1 to K 6 uniform grid for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, DOFCount_K1_to_K6_UniformGrid)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -917,6 +943,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test finite element retrieval for K = 4, 5, 6
+  /// @brief Verifies finite element K 4 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, FiniteElement_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -952,6 +979,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test closure decomposition for K = 4
+  /// @brief Verifies cell closure decomposes into subentities H1 4 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_4)
   {
     Mesh mesh =
@@ -1019,6 +1047,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test closure decomposition for K = 5
+  /// @brief Verifies cell closure decomposes into subentities H1 5 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_5)
   {
     Mesh mesh =
@@ -1083,6 +1112,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test closure decomposition for K = 6
+  /// @brief Verifies cell closure decomposes into subentities H1 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, CellClosure_DecomposesIntoSubentities_H1_6)
   {
     Mesh mesh =
@@ -1147,6 +1177,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test GlobalIndex matches getDOFs for K = 4, 5, 6
+  /// @brief Verifies global index matches get DO fs K 4 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, GlobalIndex_MatchesGetDOFs_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -1179,6 +1210,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test closures cover all global DOFs for K = 4, 5, 6
+  /// @brief Verifies closures cover all global DO fs K 4 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, ClosuresCoverAllGlobalDOFs_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -1209,6 +1241,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test TrialFunction and TestFunction creation for K = 4, 5, 6
+  /// @brief Verifies trial test function K 4 to K 6 for variational H1 space.
   TEST(Rodin_Variational_H1_Space, TrialTestFunction_K4_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1238,6 +1271,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test Vector H1 DOF scaling for K = 4, 5, 6
+  /// @brief Verifies vector H1 entity DOF scaling K 4 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_EntityDOFScaling_K4_to_K6)
   {
     constexpr size_t vdim = 2;
@@ -1282,6 +1316,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test edge DOF structure for K = 1 to 6
+  /// @brief Verifies edge DOF count K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, EdgeDOFCount_K1_to_K6)
   {
     using LocalMesh = Geometry::Mesh<Context::Local>;
@@ -1347,6 +1382,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test vertex DOF count per entity for K = 1 to 6
+  /// @brief Verifies vertex DOF count K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VertexDOFCount_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -1373,6 +1409,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test that DOF indices are contiguous and range from 0 to size-1
+  /// @brief Verifies DOF indices contiguous K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, DOFIndices_Contiguous_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -1413,6 +1450,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test cell closure size matches element DOF count for K = 1 to 6
+  /// @brief Verifies cell closure size matches element DOF count K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, CellClosureSize_MatchesElementDOFCount_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 12, 16 });
@@ -1445,6 +1483,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Interpolation test for H1<2>: Linear function (degree 1) should be exact
+  /// @brief Verifies interpolation grid function H1 2 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1500,6 +1539,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Interpolation test for H1<3>: Quadratic function (degree 2) should be exact
+  /// @brief Verifies interpolation grid function H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1537,6 +1577,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Interpolation test for H1<4>: Cubic function (degree 3) should be exact
+  /// @brief Verifies interpolation grid function H1 4 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1574,6 +1615,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Interpolation test for H1<5>: Quartic function (degree 4) should be exact
+  /// @brief Verifies interpolation grid function H1 5 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_5)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1611,6 +1653,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Interpolation test for H1<6>: Quintic function (degree 5) should be exact
+  /// @brief Verifies interpolation grid function H1 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_GridFunction_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1654,6 +1697,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Test DOF count on 16x16 mesh for K = 1 to 6
+  /// @brief Verifies DOF count 16 x 16 mesh K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, DOFCount_16x16_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
@@ -1702,6 +1746,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test indexing on 16x16 mesh
+  /// @brief Verifies global index 16 x 16 mesh K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, GlobalIndex_16x16_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
@@ -1737,6 +1782,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test interpolation on 16x16 mesh - verify GridFunction values
+  /// @brief Verifies interpolation 16 x 16 mesh H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_16x16_Mesh_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
@@ -1782,6 +1828,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Vector H1 DOF count test for K = 1 to 6
+  /// @brief Verifies vector H1 DOF count K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_DOFCount_K1_to_K6)
   {
     constexpr size_t vdim = 2;
@@ -1809,6 +1856,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Vector H1 GridFunction creation and value verification test
+  /// @brief Verifies vector H1 grid function K 1 to K 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_GridFunction_K1_to_K6)
   {
     constexpr size_t vdim = 2;
@@ -1862,6 +1910,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Vector H1 16x16 mesh test
+  /// @brief Verifies vector H1 16 x 16 mesh K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_16x16_Mesh_K1_to_K6)
   {
     constexpr size_t vdim = 2;
@@ -1889,6 +1938,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Vector H1 with 3D vector dimension
+  /// @brief Verifies vector H1 3 D vector K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_3D_Vector_K1_to_K6)
   {
     constexpr size_t vdim = 3;
@@ -1920,6 +1970,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Complex H1 construction and DOF count tests
+  /// @brief Verifies complex H1 construction K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, ComplexH1_Construction_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -1975,6 +2026,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Complex H1 indexing test
+  /// @brief Verifies complex H1 global index K 2 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, ComplexH1_GlobalIndex_K2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -2004,6 +2056,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Complex H1 16x16 mesh test
+  /// @brief Verifies complex H1 16 x 16 mesh K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, ComplexH1_16x16_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 16, 16 });
@@ -2062,6 +2115,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Single cell mesh edge case
+  /// @brief Verifies edge case single cell K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, EdgeCase_SingleCell_K1_to_K6)
   {
     Mesh mesh =
@@ -2133,6 +2187,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Very small mesh (2 cells) edge case
+  /// @brief Verifies edge case two cells K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, EdgeCase_TwoCells_K1_to_K6)
   {
     Mesh mesh =
@@ -2196,6 +2251,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Boundary cells edge case test - 8x8 mesh DOF verification
+  /// @brief Verifies edge case 8 x 8 mesh K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, EdgeCase_8x8_Mesh_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
@@ -2243,6 +2299,7 @@ namespace Rodin::Tests::Unit
   // ============================================================================
 
   // Test that all indices are valid and within range
+  /// @brief Verifies indexing range K 1 to K 6 for variational H1 space.
   TEST(Rodin_Variational_H1_Space, IndexingRange_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -2278,6 +2335,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test element DOF count consistency for all cells
+  /// @brief Verifies element DOF count all cells K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, ElementDOFCount_AllCells_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
@@ -2305,6 +2363,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test TrialFunction and TestFunction with various mesh sizes
+  /// @brief 2x2 mesh.
   TEST(Rodin_Variational_H1_Space, TrialTestFunction_VariousMeshSizes)
   {
     // 2x2 mesh
@@ -2343,6 +2402,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Vector H1 indexing test
+  /// @brief Verifies vector H1 indexing K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_Indexing_K1_to_K6)
   {
     constexpr size_t vdim = 2;
@@ -2390,6 +2450,7 @@ namespace Rodin::Tests::Unit
   // Segment (1D) Geometry Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies segment H1 1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Segment_H1_1_DOFCount)
   {
     // Create a 1D mesh with 4 segments (5 vertices)
@@ -2422,6 +2483,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), 1);
   }
 
+  /// @brief Verifies segment H1 2 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Segment_H1_2_DOFCount)
   {
     constexpr size_t sdim = 1;
@@ -2451,6 +2513,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), 9);
   }
 
+  /// @brief Verifies segment H1 3 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Segment_H1_3_DOFCount)
   {
     constexpr size_t sdim = 1;
@@ -2480,6 +2543,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), 13);
   }
 
+  /// @brief Verifies segment H1 K 1 to K 6 indexing for variational H1 space.
   TEST(Rodin_Variational_H1_Space, Segment_H1_K1_to_K6_Indexing)
   {
     constexpr size_t sdim = 1;
@@ -2529,6 +2593,7 @@ namespace Rodin::Tests::Unit
     testIndexing(H1(std::integral_constant<size_t, 6>{}, mesh));
   }
 
+  /// @brief Verifies segment trial test function for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Segment_TrialTestFunction)
   {
     constexpr size_t sdim = 1;
@@ -2557,6 +2622,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&v.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Verifies segment vector H1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Segment_VectorH1_DOFCount)
   {
     constexpr size_t sdim = 1;
@@ -2589,6 +2655,7 @@ namespace Rodin::Tests::Unit
   // Quadrilateral (2D) Geometry Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies quadrilateral H1 1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -2605,6 +2672,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), 1);
   }
 
+  /// @brief Verifies quadrilateral H1 2 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_2_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -2625,6 +2693,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), expectedDOFs);
   }
 
+  /// @brief Verifies quadrilateral H1 3 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_3_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -2644,6 +2713,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), expectedDOFs);
   }
 
+  /// @brief Verifies quadrilateral H1 K 1 to K 6 indexing for variational H1 space.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_H1_K1_to_K6_Indexing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -2679,6 +2749,7 @@ namespace Rodin::Tests::Unit
     testIndexing(H1(std::integral_constant<size_t, 6>{}, mesh));
   }
 
+  /// @brief Verifies quadrilateral 8 x 8 DOF count K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_8x8_DOFCount_K1_to_K6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 8, 8 });
@@ -2726,6 +2797,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies quadrilateral trial test function for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -2740,6 +2812,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&v.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Verifies quadrilateral vector H1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_VectorH1_DOFCount)
   {
     constexpr size_t vdim = 2;
@@ -2757,6 +2830,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), vdim);
   }
 
+  /// @brief Verifies quadrilateral complex H1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Quadrilateral_ComplexH1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -2777,6 +2851,7 @@ namespace Rodin::Tests::Unit
   // Tetrahedron (3D) Geometry Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies tetrahedron H1 1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2793,6 +2868,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), 1);
   }
 
+  /// @brief Verifies tetrahedron H1 2 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_2_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2811,6 +2887,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), expectedDOFs);
   }
 
+  /// @brief Verifies tetrahedron H1 3 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_3_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2831,6 +2908,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), expectedDOFs);
   }
 
+  /// @brief Verifies tetrahedron H1 4 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_4_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2853,6 +2931,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), expectedDOFs);
   }
 
+  /// @brief Verifies tetrahedron H1 K 1 to K 6 indexing for variational H1 space.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_H1_K1_to_K6_Indexing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2889,6 +2968,7 @@ namespace Rodin::Tests::Unit
     testIndexing(H1(std::integral_constant<size_t, 6>{}, mesh));
   }
 
+  /// @brief Verifies tetrahedron trial test function for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2904,6 +2984,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&v.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Verifies tetrahedron vector H1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_VectorH1_DOFCount)
   {
     constexpr size_t vdim = 3;
@@ -2921,6 +3002,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), vdim);
   }
 
+  /// @brief Verifies tetrahedron complex H1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Tetrahedron_ComplexH1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 12, 16, 2 });
@@ -2941,6 +3023,7 @@ namespace Rodin::Tests::Unit
   // Wedge (3D) Geometry Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies wedge H1 1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Wedge_H1_1_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
@@ -2957,6 +3040,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), 1);
   }
 
+  /// @brief Verifies wedge H1 2 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Wedge_H1_2_DOFCount)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 2, 2, 2 });
@@ -2978,6 +3062,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getSize(), expectedWedgeH1_2_DOFs);
   }
 
+  /// @brief Verifies wedge H1 K 1 to K 6 indexing for variational H1 space.
   TEST(Rodin_Variational_H1_Space, Wedge_H1_K1_to_K6_Indexing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
@@ -3014,6 +3099,7 @@ namespace Rodin::Tests::Unit
     testIndexing(H1(std::integral_constant<size_t, 6>{}, mesh));
   }
 
+  /// @brief Verifies wedge trial test function for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Wedge_TrialTestFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 12, 16, 2 });
@@ -3029,6 +3115,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&v.getFiniteElementSpace(), &fes);
   }
 
+  /// @brief Verifies wedge vector H1 DOF count for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Wedge_VectorH1_DOFCount)
   {
     constexpr size_t vdim = 3;
@@ -3050,6 +3137,7 @@ namespace Rodin::Tests::Unit
   // Multi-Geometry Comparison Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Test that H1<1> always gives 1 DOF per vertex across all geometries.
   TEST(Rodin_Variational_H1_Space, AllGeometries_H1_1_ConsistentVertexDOF)
   {
     // Test that H1<1> always gives 1 DOF per vertex across all geometries
@@ -3113,6 +3201,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test that H1<2> gives correct DOF counts across all geometries.
   TEST(Rodin_Variational_H1_Space, AllGeometries_H1_2_VertexPlusEdge)
   {
     // Test that H1<2> gives correct DOF counts across all geometries
@@ -3182,6 +3271,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test that GridFunction can be created across all geometries.
   TEST(Rodin_Variational_H1_Space, AllGeometries_GridFunction_Creation)
   {
     // Test that GridFunction can be created across all geometries
@@ -3260,6 +3350,7 @@ namespace Rodin::Tests::Unit
   // Segment (1D) Interpolation Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies interpolation segment H1 2 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Segment_H1_2)
   {
     constexpr size_t sdim = 1;
@@ -3309,6 +3400,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation segment H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Segment_H1_3)
   {
     constexpr size_t sdim = 1;
@@ -3358,6 +3450,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation segment H1 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Segment_H1_6)
   {
     constexpr size_t sdim = 1;
@@ -3412,6 +3505,7 @@ namespace Rodin::Tests::Unit
   // Quadrilateral (2D) Interpolation Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies interpolation quadrilateral H1 2 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -3447,6 +3541,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation quadrilateral H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -3482,6 +3577,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation quadrilateral H1 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 4, 4 });
@@ -3523,6 +3619,7 @@ namespace Rodin::Tests::Unit
   // Tetrahedron (3D) Interpolation Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies interpolation tetrahedron H1 2 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 8, 4, 8 });
@@ -3559,6 +3656,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation tetrahedron H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 7, 9 });
@@ -3595,6 +3693,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation tetrahedron H1 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 4, 7, 9 });
@@ -3638,6 +3737,7 @@ namespace Rodin::Tests::Unit
   // Wedge (3D) Interpolation Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies interpolation wedge H1 2 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
@@ -3674,6 +3774,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation wedge H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
@@ -3710,6 +3811,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation wedge H1 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Wedge, { 4, 7, 9 });
@@ -3753,6 +3855,7 @@ namespace Rodin::Tests::Unit
   // Hexahedron (3D) Interpolation Tests
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies interpolation hexahedron H1 2 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Hexahedron_H1_2)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, { 4, 7, 9 });
@@ -3789,6 +3892,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation hexahedron H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Hexahedron_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, { 8, 8, 8 });
@@ -3825,6 +3929,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation hexahedron H1 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Hexahedron_H1_6)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Hexahedron, { 6, 6, 6 });
@@ -3868,6 +3973,7 @@ namespace Rodin::Tests::Unit
   // Triangle (2D) Interpolation Tests - Additional coverage for K=2,3,6
   // --------------------------------------------------------------------------
 
+  /// @brief Verifies interpolation triangle H1 2 4 x 4 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_2_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -3903,6 +4009,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation triangle H1 3 4 x 4 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_3_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -3938,6 +4045,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation triangle H1 6 4 x 4 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_6_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -3980,6 +4088,7 @@ namespace Rodin::Tests::Unit
   // Test interpolation on 8x8 grids for all supported geometries
   // ============================================================================
 
+  /// @brief Verifies interpolation triangle 8 x 8 H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_8x8_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
@@ -4015,6 +4124,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation quadrilateral 8 x 8 H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_8x8_H1_3)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, { 8, 8 });
@@ -4050,6 +4160,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interpolation segment 8 x 8 H1 3 for variational H1 space by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_H1_Space, Interpolation_Segment_8x8_H1_3)
   {
     // Create an 8-segment 1D mesh
@@ -4113,6 +4224,7 @@ namespace Rodin::Tests::Unit
   // Test interpolation on single cell meshes for all supported geometries
   // ============================================================================
 
+  /// @brief Single triangle mesh.
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Triangle_H1_3)
   {
     // Single triangle mesh
@@ -4161,6 +4273,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Small 3x3 quadrilateral mesh (9 cells) for edge case testing.
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Quadrilateral_H1_3)
   {
     // Small 3x3 quadrilateral mesh (9 cells) for edge case testing
@@ -4198,6 +4311,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Single segment mesh.
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Segment_H1_3)
   {
     // Single segment mesh
@@ -4244,6 +4358,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Small tetrahedron mesh for edge case testing.
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Tetrahedron_H1_3)
   {
     // Small tetrahedron mesh for edge case testing
@@ -4282,6 +4397,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Small wedge mesh for edge case testing.
   TEST(Rodin_Variational_H1_Space, Interpolation_SingleCell_Wedge_H1_3)
   {
     // Small wedge mesh for edge case testing
@@ -4325,6 +4441,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Segment (1D) projection and interpolation tests
+  /// @brief Non-trivial 1D mesh with 10 segments.
   TEST(Rodin_Variational_H1_Space, Projection_Segment_H1_2_NonTrivialMesh)
   {
     // Non-trivial 1D mesh with 10 segments
@@ -4360,6 +4477,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 1D mesh with 12 segments.
   TEST(Rodin_Variational_H1_Space, Interpolation_Segment_H1_3_NonTrivialMesh)
   {
     // Non-trivial 1D mesh with 12 segments
@@ -4395,6 +4513,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Triangle (2D) projection and interpolation tests
+  /// @brief Non-trivial 2D triangle mesh (6x6 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Triangle_H1_2_NonTrivialMesh)
   {
     // Non-trivial 2D triangle mesh (6x6 grid)
@@ -4431,6 +4550,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 2D triangle mesh (5x5 grid).
   TEST(Rodin_Variational_H1_Space, Interpolation_Triangle_H1_3_NonTrivialMesh)
   {
     // Non-trivial 2D triangle mesh (5x5 grid)
@@ -4466,6 +4586,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 2D triangle mesh (4x4 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Triangle_H1_4_NonTrivialMesh)
   {
     // Non-trivial 2D triangle mesh (4x4 grid)
@@ -4503,6 +4624,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Quadrilateral (2D) projection and interpolation tests
+  /// @brief Non-trivial 2D quadrilateral mesh (6x6 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Quadrilateral_H1_2_NonTrivialMesh)
   {
     // Non-trivial 2D quadrilateral mesh (6x6 grid)
@@ -4539,6 +4661,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 2D quadrilateral mesh (5x5 grid).
   TEST(Rodin_Variational_H1_Space, Interpolation_Quadrilateral_H1_3_NonTrivialMesh)
   {
     // Non-trivial 2D quadrilateral mesh (5x5 grid)
@@ -4575,6 +4698,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Tetrahedron (3D) projection and interpolation tests
+  /// @brief Non-trivial 3D tetrahedron mesh (3x3x3 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_2_NonTrivialMesh)
   {
     // Non-trivial 3D tetrahedron mesh (3x3x3 grid)
@@ -4612,6 +4736,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 3D tetrahedron mesh (3x3x3 grid).
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3_NonTrivialMesh)
   {
     // Non-trivial 3D tetrahedron mesh (3x3x3 grid)
@@ -4648,6 +4773,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 3D tetrahedron mesh (2x2x2 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_4_NonTrivialMesh)
   {
     // Non-trivial 3D tetrahedron mesh (2x2x2 grid)
@@ -4686,6 +4812,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Wedge (3D) projection and interpolation tests
+  /// @brief Non-trivial 3D wedge mesh (3x3x3 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_2_NonTrivialMesh)
   {
     // Non-trivial 3D wedge mesh (3x3x3 grid)
@@ -4723,6 +4850,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Non-trivial 3D wedge mesh (3x3x3 grid).
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3_NonTrivialMesh)
   {
     // Non-trivial 3D wedge mesh (3x3x3 grid)
@@ -4760,6 +4888,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Additional test with larger non-trivial meshes
+  /// @brief Large non-trivial 2D triangle mesh (12x12 grid).
   TEST(Rodin_Variational_H1_Space, Projection_Triangle_H1_3_LargeNonTrivialMesh)
   {
     // Large non-trivial 2D triangle mesh (12x12 grid)
@@ -4797,6 +4926,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Large non-trivial 3D tetrahedron mesh (4x4x4 grid).
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_2_LargeNonTrivialMesh)
   {
     // Large non-trivial 3D tetrahedron mesh (4x4x4 grid)
@@ -4836,6 +4966,7 @@ namespace Rodin::Tests::Unit
 
   // Non-trivial 3D mesh tests with refined meshes (>=16 elements)
 
+  /// @brief Refined non-trivial 3D tetrahedron mesh (5x5x5 grid, 750 tets).
   TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_2_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D tetrahedron mesh (5x5x5 grid, 750 tets)
@@ -4876,6 +5007,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Refined non-trivial 3D tetrahedron mesh (4x4x4 grid, 384 tets).
   TEST(Rodin_Variational_H1_Space, Interpolation_Tetrahedron_H1_3_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D tetrahedron mesh (4x4x4 grid, 384 tets)
@@ -4917,6 +5049,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Refined non-trivial 3D tetrahedron mesh (3x3x3 grid, 162 tets).
   TEST(Rodin_Variational_H1_Space, Projection_Tetrahedron_H1_4_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D tetrahedron mesh (3x3x3 grid, 162 tets)
@@ -4958,6 +5091,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Refined non-trivial 3D wedge mesh (5x5x5 grid, 250 wedges).
   TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_2_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D wedge mesh (5x5x5 grid, 250 wedges)
@@ -4998,6 +5132,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Refined non-trivial 3D wedge mesh (4x4x4 grid, 128 wedges).
   TEST(Rodin_Variational_H1_Space, Interpolation_Wedge_H1_3_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D wedge mesh (4x4x4 grid, 128 wedges)
@@ -5039,6 +5174,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Refined non-trivial 3D wedge mesh (3x3x3 grid, 54 wedges).
   TEST(Rodin_Variational_H1_Space, Projection_Wedge_H1_4_RefinedNonTrivialMesh)
   {
     // Refined non-trivial 3D wedge mesh (3x3x3 grid, 54 wedges)
@@ -5084,6 +5220,7 @@ namespace Rodin::Tests::Unit
   // Non-trivial geometry tests (L-shapes, circles, etc.)
   // ============================================================================
 
+  /// @brief Load SquareWithHole mesh (2D - square with circular hole).
   TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_SquareWithHole_H1_2_Projection)
   {
     // Load SquareWithHole mesh (2D - square with circular hole)
@@ -5127,6 +5264,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Load SquareWithHole mesh (2D - square with circular hole).
   TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_SquareWithHole_H1_3_Interpolation)
   {
     // Load SquareWithHole mesh (2D - square with circular hole)
@@ -5167,6 +5305,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Load StarSquare mesh (2D - star-shaped domain with quadrilateral elements).
   TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_StarSquare_H1_2_Projection)
   {
     // Load StarSquare mesh (2D - star-shaped domain with quadrilateral elements)
@@ -5210,6 +5349,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Load StarSquare mesh (2D - star-shaped domain).
   TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_StarSquare_H1_3_Interpolation)
   {
     // Load StarSquare mesh (2D - star-shaped domain)
@@ -5250,6 +5390,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Load LevelSetCantilever mesh (2D - cantilever beam geometry).
   TEST(Rodin_Variational_H1_Space, NonTrivialGeometry_LevelSetCantilever_H1_3_Interpolation)
   {
     // Load LevelSetCantilever mesh (2D - cantilever beam geometry)

@@ -26,9 +26,11 @@ namespace Rodin::Tests::Unit
   //==========================================================================
 
   // Tolerance for geometric comparisons (whether a point is on an edge)
+  /// @brief Helper used by the tests to EDGE TOL.
   constexpr Real EDGE_TOL = 1e-10;
 
   // Epsilon for division by zero protection
+  /// @brief Helper used by the tests to EDGE EPS.
   const Real EDGE_EPS = std::numeric_limits<Real>::epsilon() * 100;
 
   //==========================================================================
@@ -37,6 +39,7 @@ namespace Rodin::Tests::Unit
 
   // Compute parameter t along edge from (start) to (end) for point p
   // Returns t in [0,1] if point is on edge, or NaN if edge is degenerate
+  /// @brief Helper used by the tests to Compute Edge Parameter 2 D.
   inline Real computeEdgeParameter2D(
       Real px, Real py,
       Real x0, Real y0,
@@ -71,6 +74,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Compute parameter t along edge in 3D
+  /// @brief Helper used by the tests to Compute Edge Parameter 3 D.
   inline Real computeEdgeParameter3D(
       Real px, Real py, Real pz,
       Real x0, Real y0, Real z0,
@@ -115,6 +119,7 @@ namespace Rodin::Tests::Unit
   // Extract 1D coordinates of nodes lying on a specific edge
   // Returns sorted coordinates in [0,1]
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Segment Nodes.
   std::vector<Real> extractSegmentNodes()
   {
     std::vector<Real> coords;
@@ -129,6 +134,7 @@ namespace Rodin::Tests::Unit
 
   // Extract nodes on Triangle edge from vertex (x0,y0) to (x1,y1)
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Triangle Edge Nodes.
   std::vector<Real> extractTriangleEdgeNodes(Real x0, Real y0, Real x1, Real y1)
   {
     std::vector<Real> coords;
@@ -149,6 +155,7 @@ namespace Rodin::Tests::Unit
 
   // Extract nodes on Quadrilateral edge
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Quadrilateral Edge Nodes.
   std::vector<Real> extractQuadrilateralEdgeNodes(Real x0, Real y0, Real x1, Real y1)
   {
     std::vector<Real> coords;
@@ -169,9 +176,9 @@ namespace Rodin::Tests::Unit
 
   // Extract nodes on Tetrahedron edge
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Tetrahedron Edge Nodes.
   std::vector<Real> extractTetrahedronEdgeNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1)
   {
     std::vector<Real> coords;
     const auto& nodes = FeketeTetrahedron<K>::getNodes();
@@ -191,9 +198,9 @@ namespace Rodin::Tests::Unit
 
   // Extract nodes on Wedge edge
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Wedge Edge Nodes.
   std::vector<Real> extractWedgeEdgeNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1)
   {
     std::vector<Real> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);
@@ -212,6 +219,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Compare two vectors of 1D coordinates
+  /// @brief Helper used by the tests to Compare Edge Coordinates.
   inline void compareEdgeCoordinates(
       const std::vector<Real>& edge1,
       const std::vector<Real>& edge2,
@@ -234,6 +242,7 @@ namespace Rodin::Tests::Unit
   // Segment matches GLL01 nodes
   //==========================================================================
 
+  /// @brief Verifies segment matches GLL 01 K 2 for edge conformity by checking tolerance-based numerical results, exact expected values.
   TEST(EdgeConformity, Segment_MatchesGLL01_K2)
   {
     auto seg_nodes = extractSegmentNodes<2>();
@@ -246,6 +255,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies segment matches GLL 01 K 3 for edge conformity by checking tolerance-based numerical results, exact expected values.
   TEST(EdgeConformity, Segment_MatchesGLL01_K3)
   {
     auto seg_nodes = extractSegmentNodes<3>();
@@ -258,6 +268,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies segment matches GLL 01 K 5 for edge conformity by checking tolerance-based numerical results, exact expected values.
   TEST(EdgeConformity, Segment_MatchesGLL01_K5)
   {
     auto seg_nodes = extractSegmentNodes<5>();
@@ -274,6 +285,7 @@ namespace Rodin::Tests::Unit
   // Triangle edges match GLL01 nodes
   //==========================================================================
 
+  /// @brief Edge from (0,0) to (1,0).
   TEST(EdgeConformity, Triangle_Edge01_MatchesGLL01_K2)
   {
     // Edge from (0,0) to (1,0)
@@ -284,6 +296,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, gll_vec, "Triangle edge (0,0)-(1,0)", "GLL01");
   }
 
+  /// @brief Edge from (0,0) to (0,1).
   TEST(EdgeConformity, Triangle_Edge02_MatchesGLL01_K2)
   {
     // Edge from (0,0) to (0,1)
@@ -294,6 +307,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, gll_vec, "Triangle edge (0,0)-(0,1)", "GLL01");
   }
 
+  /// @brief Edge from (1,0) to (0,1).
   TEST(EdgeConformity, Triangle_Edge12_MatchesGLL01_K2)
   {
     // Edge from (1,0) to (0,1)
@@ -304,6 +318,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, gll_vec, "Triangle edge (1,0)-(0,1)", "GLL01");
   }
 
+  /// @brief Verifies triangle all edges match GLL 01 K 3 for edge conformity.
   TEST(EdgeConformity, Triangle_AllEdges_MatchGLL01_K3)
   {
     const auto& gll = GLL01<3>::getNodes();
@@ -322,6 +337,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(edge12, gll_vec, "Triangle edge (1,0)-(0,1)", "GLL01 K=3");
   }
 
+  /// @brief Verifies triangle all edges match GLL 01 K 5 for edge conformity.
   TEST(EdgeConformity, Triangle_AllEdges_MatchGLL01_K5)
   {
     const auto& gll = GLL01<5>::getNodes();
@@ -341,6 +357,7 @@ namespace Rodin::Tests::Unit
   // Quadrilateral edges match GLL01 nodes
   //==========================================================================
 
+  /// @brief Verifies quadrilateral all edges match GLL 01 K 2 for edge conformity.
   TEST(EdgeConformity, Quadrilateral_AllEdges_MatchGLL01_K2)
   {
     const auto& gll = GLL01<2>::getNodes();
@@ -363,6 +380,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(edge_left, gll_vec, "Quad left edge", "GLL01 K=2");
   }
 
+  /// @brief Verifies quadrilateral all edges match GLL 01 K 4 for edge conformity.
   TEST(EdgeConformity, Quadrilateral_AllEdges_MatchGLL01_K4)
   {
     const auto& gll = GLL01<4>::getNodes();
@@ -385,6 +403,7 @@ namespace Rodin::Tests::Unit
   // Tetrahedron edges match GLL01 nodes
   //==========================================================================
 
+  /// @brief Verifies tetrahedron all edges match GLL 01 K 2 for edge conformity.
   TEST(EdgeConformity, Tetrahedron_AllEdges_MatchGLL01_K2)
   {
     const auto& gll = GLL01<2>::getNodes();
@@ -416,6 +435,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(edge23, gll_vec, "Tet edge 23", "GLL01 K=2");
   }
 
+  /// @brief Verifies tetrahedron all edges match GLL 01 K 4 for edge conformity.
   TEST(EdgeConformity, Tetrahedron_AllEdges_MatchGLL01_K4)
   {
     const auto& gll = GLL01<4>::getNodes();
@@ -444,6 +464,7 @@ namespace Rodin::Tests::Unit
   // Wedge edges match appropriately
   //==========================================================================
 
+  /// @brief Wedge: triangle at z=0 and z=1, reference triangle (0,0)-(1,0)-(0,1).
   TEST(EdgeConformity, Wedge_VerticalEdges_MatchGLL01_K2)
   {
     // Wedge: triangle at z=0 and z=1, reference triangle (0,0)-(1,0)-(0,1)
@@ -464,6 +485,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(edge_v3, gll_vec, "Wedge vertical edge at (0,1)", "GLL01 K=2");
   }
 
+  /// @brief Triangle edges on z=0 face should match the triangle Fekete edge nodes.
   TEST(EdgeConformity, Wedge_TriangleEdges_MatchTriangle_K3)
   {
     // Triangle edges on z=0 face should match the triangle Fekete edge nodes
@@ -491,6 +513,7 @@ namespace Rodin::Tests::Unit
   // Cross-geometry conformity tests
   //==========================================================================
 
+  /// @brief Both triangle and quadrilateral have edge from (0,0) to (1,0).
   TEST(EdgeConformity, Triangle_Quadrilateral_SharedEdge_K3)
   {
     // Both triangle and quadrilateral have edge from (0,0) to (1,0)
@@ -501,6 +524,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, quad_edge, "Triangle edge", "Quadrilateral edge");
   }
 
+  /// @brief Triangle edge (0,0)-(1,0) should match tetrahedron edge (0,0,0)-(1,0,0).
   TEST(EdgeConformity, Triangle_Tetrahedron_SharedEdge_K3)
   {
     // Triangle edge (0,0)-(1,0) should match tetrahedron edge (0,0,0)-(1,0,0)
@@ -510,6 +534,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, tet_edge, "Triangle edge", "Tetrahedron edge");
   }
 
+  /// @brief Triangle edge (0,0)-(1,0) should match wedge edge (0,0,0)-(1,0,0).
   TEST(EdgeConformity, Triangle_Wedge_SharedEdge_K4)
   {
     // Triangle edge (0,0)-(1,0) should match wedge edge (0,0,0)-(1,0,0)
@@ -519,6 +544,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_edge, wedge_edge, "Triangle edge", "Wedge triangle edge");
   }
 
+  /// @brief Segment nodes should match quadrilateral bottom edge.
   TEST(EdgeConformity, Segment_Quadrilateral_SharedEdge_K4)
   {
     // Segment nodes should match quadrilateral bottom edge
@@ -528,6 +554,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(seg, quad_edge, "Segment", "Quadrilateral bottom edge");
   }
 
+  /// @brief Segment nodes should match wedge vertical edge.
   TEST(EdgeConformity, Segment_Wedge_VerticalEdge_K5)
   {
     // Segment nodes should match wedge vertical edge
@@ -541,6 +568,7 @@ namespace Rodin::Tests::Unit
   // Higher order conformity tests (K = 6)
   //==========================================================================
 
+  /// @brief Verifies all geometries edge nodes match K 6 for edge conformity.
   TEST(EdgeConformity, AllGeometries_EdgeNodes_Match_K6)
   {
     const auto& gll = GLL01<6>::getNodes();
@@ -575,6 +603,7 @@ namespace Rodin::Tests::Unit
   // 3D-3D Cross-geometry conformity tests (Tetrahedron vs Wedge)
   //==========================================================================
 
+  /// @brief Both tetrahedron and wedge share edge (0,0,0)-(1,0,0) along x-axis.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_SharedEdge_K3)
   {
     // Both tetrahedron and wedge share edge (0,0,0)-(1,0,0) along x-axis
@@ -584,6 +613,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron edge", "Wedge edge");
   }
 
+  /// @brief Both tetrahedron and wedge share edge (0,0,0)-(0,1,0) along y-axis.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_SharedEdge_YAxis_K3)
   {
     // Both tetrahedron and wedge share edge (0,0,0)-(0,1,0) along y-axis
@@ -593,6 +623,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron edge (y-axis)", "Wedge edge (y-axis)");
   }
 
+  /// @brief Both share the diagonal edge (1,0,0)-(0,1,0) on the xy-plane face.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_DiagonalEdge_K3)
   {
     // Both share the diagonal edge (1,0,0)-(0,1,0) on the xy-plane face
@@ -602,6 +633,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron diagonal edge", "Wedge diagonal edge");
   }
 
+  /// @brief Test all edges that can be shared between tetrahedron and wedge base face.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_AllSharedEdges_K4)
   {
     // Test all edges that can be shared between tetrahedron and wedge base face
@@ -624,6 +656,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_12, wedge_12, "Tet-Wedge edge 12 K=4", "same");
   }
 
+  /// @brief High-order test for tetrahedron-wedge shared edges.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_HighOrder_K5)
   {
     // High-order test for tetrahedron-wedge shared edges
@@ -633,6 +666,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron edge K=5", "Wedge edge K=5");
   }
 
+  /// @brief All shared edges at K=6.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_HighOrder_K6)
   {
     // All shared edges at K=6
@@ -653,6 +687,7 @@ namespace Rodin::Tests::Unit
   // 3D-2D Cross-geometry conformity tests
   //==========================================================================
 
+  /// @brief Triangle can be a face of tetrahedron - all 3 edges should match.
   TEST(EdgeConformity3D2D, Triangle_Tetrahedron_AllSharedEdges_K3)
   {
     // Triangle can be a face of tetrahedron - all 3 edges should match
@@ -675,6 +710,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_12, tet_12, "Triangle edge 12", "Tetrahedron edge 12");
   }
 
+  /// @brief Triangle can be top or bottom face of wedge - all 3 edges should match.
   TEST(EdgeConformity3D2D, Triangle_Wedge_AllSharedEdges_K3)
   {
     // Triangle can be top or bottom face of wedge - all 3 edges should match
@@ -701,6 +737,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tri_01, wedge_top_01, "Triangle edge 01", "Wedge top edge 01");
   }
 
+  /// @brief Wedge has 3 quadrilateral faces - edges on these should match quadrilateral edges.
   TEST(EdgeConformity3D2D, Quadrilateral_Wedge_QuadFaces_K3)
   {
     // Wedge has 3 quadrilateral faces - edges on these should match quadrilateral edges
@@ -717,6 +754,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(quad_left, wedge_vert, "Quad left edge", "Wedge vertical edge");
   }
 
+  /// @brief Quadrilateral cannot be a face of tetrahedron, but edges can still match.
   TEST(EdgeConformity3D2D, Quadrilateral_Tetrahedron_NoSharedFace)
   {
     // Quadrilateral cannot be a face of tetrahedron, but edges can still match
@@ -733,6 +771,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(quad_left, tet_left, "Quad left edge", "Tet left edge");
   }
 
+  /// @brief 1D segment should match any tetrahedron edge when parameterized.
   TEST(EdgeConformity3D2D, Segment_Tetrahedron_SharedEdge_K4)
   {
     // 1D segment should match any tetrahedron edge when parameterized
@@ -745,6 +784,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(seg, tet_edge2, "Segment", "Tetrahedron z-edge");
   }
 
+  /// @brief Segment should match all edge types on wedge.
   TEST(EdgeConformity3D2D, Segment_Wedge_AllEdgeTypes_K4)
   {
     // Segment should match all edge types on wedge
@@ -763,6 +803,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(seg, wedge_diag, "Segment", "Wedge diagonal edge");
   }
 
+  /// @brief Comprehensive test: all geometry combinations at K=5.
   TEST(EdgeConformity3D2D, AllGeometries_HighOrder_K5)
   {
     // Comprehensive test: all geometry combinations at K=5
@@ -793,6 +834,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron edge", "Wedge edge");
   }
 
+  /// @brief Comprehensive test: all geometry combinations at K=6.
   TEST(EdgeConformity3D2D, AllGeometries_HighOrder_K6)
   {
     // Comprehensive test: all geometry combinations at K=6
@@ -817,6 +859,7 @@ namespace Rodin::Tests::Unit
   // Very high-order conformity tests (K = 15)
   //==========================================================================
 
+  /// @brief Comprehensive test: all geometry combinations at K=15.
   TEST(EdgeConformity3D2D, AllGeometries_HighOrder_K15)
   {
     // Comprehensive test: all geometry combinations at K=15
@@ -847,6 +890,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_edge, wedge_edge, "Tetrahedron K=15", "Wedge K=15");
   }
 
+  /// @brief Verifies all geometries edge nodes match K 15 for edge conformity.
   TEST(EdgeConformity, AllGeometries_EdgeNodes_Match_K15)
   {
     const auto& gll = GLL01<15>::getNodes();
@@ -877,6 +921,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(wedge_vert_edge, gll_vec, "Wedge vertical edge K=15", "GLL01");
   }
 
+  /// @brief Test all edges that can be shared between tetrahedron and wedge base face.
   TEST(EdgeConformity3D, Tetrahedron_Wedge_AllSharedEdges_K15)
   {
     // Test all edges that can be shared between tetrahedron and wedge base face
@@ -899,6 +944,7 @@ namespace Rodin::Tests::Unit
     compareEdgeCoordinates(tet_12, wedge_12, "Tet-Wedge edge 12 K=15", "same");
   }
 
+  /// @brief Segment should have K+1 = 16 nodes at K=15.
   TEST(EdgeConformity, EdgeNodeCount_K15)
   {
     // Segment should have K+1 = 16 nodes at K=15

@@ -20,26 +20,37 @@
 #include "ForwardDecls.h"
 #include "P0Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Number, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Number;
-    using RangeType = ScalarType;
-    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-    using ElementType = Variational::P0Element<RangeType>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
+    /// @brief Range (evaluation value) type.
+      using RangeType = ScalarType;
+    /// @brief Execution context type.
+      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    /// @brief Finite element type.
+      using ElementType = Variational::P0Element<RangeType>;
   };
 
   template <class Number, class Mesh>
   struct Traits<Variational::P0<Math::Vector<Number>, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Number;
-    using RangeType = Math::SpatialVector<ScalarType>;
-    using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
-    using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+    /// @brief Execution context type.
+      using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    /// @brief Finite element type.
+      using ElementType = Variational::P0Element<Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -100,6 +111,7 @@ namespace Rodin::Variational
     using IndexMap = FlatMap<Index, Index>;
 
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
       /// Range type of value
@@ -229,48 +241,56 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Point);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Point);
+            return sElement;
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Segment);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Segment);
+            return sElement;
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Triangle);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Triangle);
+            return sElement;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Quadrilateral);
+            return sElement;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Tetrahedron);
+            return sElement;
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Pyramid);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Pyramid);
+            return sElement;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Wedge);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Wedge);
+            return sElement;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local constexpr ElementType s_element(Geometry::Polytope::Type::Hexahedron);
-            return s_element;
+            static thread_local constexpr ElementType sElement(
+              Geometry::Polytope::Type::Hexahedron);
+            return sElement;
           }
         }
         assert(false);
-        static thread_local constexpr ElementType s_null(Geometry::Polytope::Type::Point);
-        return s_null;
+        static thread_local constexpr ElementType sNull(Geometry::Polytope::Type::Point);
+        return sNull;
       }
 
       /**
@@ -389,4 +409,5 @@ namespace Rodin::Variational
   using ComplexP0 = P0<Complex, Mesh>;
 }
 
+/// @endcond
 #endif

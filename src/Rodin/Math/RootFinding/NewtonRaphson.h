@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file NewtonRaphson.h
  * @brief Newton-Raphson method for root finding.
@@ -60,20 +66,17 @@ namespace Rodin::Math::RootFinding
       /**
        * @brief Constructs a Newton-Raphson solver with specified tolerances.
        *
-       * @param[in] abs_t_tol Absolute tolerance for interval width (default: @f$ 10^{-12} @f$)
-       * @param[in] rel_t_tol Relative tolerance for interval width (default: @f$ 10^{-9} @f$)
-       * @param[in] abs_g_tol Absolute tolerance for function value (default: @f$ 10^{-12} @f$)
-       * @param[in] max_iter Maximum number of iterations (default: 25)
+       * @param[in] absTTol Absolute tolerance for interval width (default: @f$ 10^{-12} @f$)
+       * @param[in] relTTol Relative tolerance for interval width (default: @f$ 10^{-9} @f$)
+       * @param[in] absGTol Absolute tolerance for function value (default: @f$ 10^{-12} @f$)
+       * @param[in] maxIter Maximum number of iterations (default: 25)
        */
-      NewtonRaphson(
-          Scalar abs_t_tol = 1e-12,
-          Scalar rel_t_tol = 1e-9,
-          Scalar abs_g_tol = 1e-12,
-          std::size_t max_iter = 25)
-        : m_abs_t_tol(abs_t_tol),
-          m_rel_t_tol(rel_t_tol),
-          m_abs_g_tol(abs_g_tol),
-          m_max_iter(max_iter)
+      NewtonRaphson(Scalar absTTol = 1e-12, Scalar relTTol = 1e-9, Scalar absGTol = 1e-12,
+        std::size_t maxIter = 25)
+        : m_absTTol(absTTol),
+          m_relTTol(relTTol),
+          m_absGTol(absGTol),
+          m_maxIter(maxIter)
       {}
 
       /**
@@ -123,11 +126,11 @@ namespace Rodin::Math::RootFinding
         if (!(t0 > a && t0 < b))
           t0 = 0.5 * (a + b);
 
-        Scalar t = t0, t_prev = t;
-        Scalar g_prev = std::numeric_limits<Scalar>::quiet_NaN();
-        bool have_prev = false;
+        Scalar t = t0, tPrev = t;
+        Scalar gPrev = std::numeric_limits<Scalar>::quiet_NaN();
+        bool havePrev = false;
 
-        for (std::size_t it = 0; it < m_max_iter; ++it)
+        for (std::size_t it = 0; it < m_maxIter; ++it)
         {
           const auto ft = f(t);
           const Scalar fv = ft.first;
@@ -137,9 +140,10 @@ namespace Rodin::Math::RootFinding
           assert(std::isfinite(fv));
           assert(std::isfinite(fg) || std::isnan(fg)); // allow NaN to trigger safeguards
 
-          if (std::fabs(fv) < m_abs_g_tol) return t;
+          if (std::fabs(fv) < m_absGTol)
+            return t;
 
-          const Scalar at = m_abs_t_tol + m_rel_t_tol * std::fabs(t);
+          const Scalar at = m_absTTol + m_relTTol * std::fabs(t);
           if ((b - a) < at)
             return 0.5 * (a + b);
 
@@ -155,10 +159,10 @@ namespace Rodin::Math::RootFinding
             fav = fv;
           }
 
-          if (std::fabs(fav) < m_abs_g_tol)
+          if (std::fabs(fav) < m_absGTol)
             return a;
 
-          if (std::fabs(fbv) < m_abs_g_tol)
+          if (std::fabs(fbv) < m_absGTol)
             return b;
 
           if (fav * fbv > 0)
@@ -166,16 +170,17 @@ namespace Rodin::Math::RootFinding
 
           // Newton step with scale-aware guard on gp
           Scalar dt;
-          const Scalar gp_tol = std::numeric_limits<Scalar>::epsilon() * (static_cast<Scalar>(1) + std::fabs(fg));
-          if (std::fabs(fg) > gp_tol)
+          const Scalar gpTol = std::numeric_limits<Scalar>::epsilon() *
+            (static_cast<Scalar>(1) + std::fabs(fg));
+          if (std::fabs(fg) > gpTol)
           {
             dt = -fv / fg;
           }
-          else if (have_prev)
+          else if (havePrev)
           {
-            const Scalar denom = (fv - g_prev);
-            if (std::fabs(denom) > gp_tol)
-              dt = -fv * (t - t_prev) / denom; // secant
+            const Scalar denom = (fv - gPrev);
+            if (std::fabs(denom) > gpTol)
+              dt = -fv * (t - tPrev) / denom; // secant
             else
               dt = 0;
           }
@@ -184,31 +189,31 @@ namespace Rodin::Math::RootFinding
             dt = 0;
           }
 
-          Scalar t_new = t + dt;
+          Scalar tNew = t + dt;
 
           // Safeguard: keep inside (a,b). If outside or too big, bisect.
           const Scalar mid = 0.5 * (a + b);
           const Scalar half = 0.5 * (b - a);
 
-          if (t_new <= a || t_new >= b || std::fabs(t_new - t) > half)
-            t_new = mid;
+          if (tNew <= a || tNew >= b || std::fabs(tNew - t) > half)
+            tNew = mid;
 
-          if (std::fabs(t_new - t) < at)
-            return t_new;
+          if (std::fabs(tNew - t) < at)
+            return tNew;
 
-          t_prev = t;
-          g_prev = fv;
-          have_prev = true;
-          t = t_new;
+          tPrev = t;
+          gPrev = fv;
+          havePrev = true;
+          t = tNew;
         }
         return {};
       }
 
     private:
-      Scalar m_abs_t_tol;      ///< Absolute tolerance for interval width
-      Scalar m_rel_t_tol;      ///< Relative tolerance for interval width
-      Scalar m_abs_g_tol;      ///< Absolute tolerance for function value
-      std::size_t m_max_iter;  ///< Maximum number of iterations
+      Scalar m_absTTol; ///< Absolute tolerance for interval width
+      Scalar m_relTTol; ///< Relative tolerance for interval width
+      Scalar m_absGTol; ///< Absolute tolerance for function value
+      std::size_t m_maxIter; ///< Maximum number of iterations
   };
 }
 

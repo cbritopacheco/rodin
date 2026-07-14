@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <algorithm>
 #include <memory>
 
@@ -18,6 +24,7 @@
 
 namespace Rodin::Geometry
 {
+  /// @cond
   MPIMesh::Builder::Builder(const Context::MPI& context)
     : m_context(context)
   {}
@@ -35,6 +42,7 @@ namespace Rodin::Geometry
     mesh.m_quadratures.initialize(mesh.getSpaceDimension());
     return mesh;
   }
+  /// @endcond
 
   MPIMesh::Mesh(const Mesh& other)
     : MeshBase(other),

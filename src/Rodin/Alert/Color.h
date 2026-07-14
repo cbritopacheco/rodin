@@ -133,15 +133,19 @@ namespace Rodin::Alert
     constexpr
     RGB() = default;
 
+    /// @brief Copy constructor.
     constexpr
     RGB(const RGB&) = default;
 
+    /// @brief Move constructor.
     constexpr
     RGB(RGB&&) = default;
 
+    /// @brief Copy assignment operator.
     constexpr
     RGB& operator=(const RGB&) = default;
 
+    /// @brief Move assignment operator.
     constexpr
     RGB& operator=(RGB&&) = default;
 
@@ -202,9 +206,11 @@ namespace Rodin::Alert
     constexpr
     NoColorT() = default;
 
+    /// @brief Copy constructor.
     constexpr
     NoColorT(const NoColorT&) = default;
 
+    /// @brief Move constructor.
     constexpr
     NoColorT(NoColorT&&) = default;
   };
@@ -239,15 +245,19 @@ namespace Rodin::Alert
         : m_code(code)
       {}
 
+      /// @brief Copy constructor.
       constexpr
       Color(const Color&) = default;
 
+      /// @brief Move constructor.
       constexpr
       Color(Color&&) = default;
 
+      /// @brief Copy assignment operator.
       constexpr
       Color& operator=(const Color&) = default;
 
+      /// @brief Move assignment operator.
       constexpr
       Color& operator=(Color&&) = default;
 
@@ -492,4 +502,3 @@ namespace Rodin::Alert
 }
 
 #endif
-

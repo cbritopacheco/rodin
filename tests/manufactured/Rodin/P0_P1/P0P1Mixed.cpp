@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Mixed-space manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a mixed-space manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P0_P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -67,11 +75,14 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     Mesh<Context::Local> m_mesh;
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured P0 P1 Mixed Test 10 x 10.
   using Manufactured_P0P1_Mixed_Test_10x10 =
     Manufactured_P0P1_Mixed_Test<10, 10>;
+  /// @brief Helper used by the manufactured tests to Manufactured P0 P1 Mixed Test 6 x 6 x 6.
   using Manufactured_P0P1_Mixed_Test_6x6x6 =
     Manufactured_P0P1_Mixed_Test<6, 6, 6>;
 
+  /// @brief Verifies P0 P1 mixed constant exact solution residual for manufactured P0 P1 mixed test 10 x 10 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_P0P1_Mixed_Test_10x10, P0P1_Mixed_ConstantExactSolutionResidual)
   {
     const auto& mesh = getMesh();
@@ -129,6 +140,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     EXPECT_NEAR(Integral(diff_p).compute(), 0, 1e-12);
   }
 
+  /// @brief Verifies P0 P1 mixed problem polynomial RHS for manufactured P0 P1 mixed test 10 x 10 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_P0P1_Mixed_Test_10x10, P0P1_MixedProblem_PolynomialRHS)
   {
     const auto& mesh = getMesh();
@@ -175,6 +187,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies P0 P1 mixed problem sine RHS for manufactured P0 P1 mixed test 6 x 6 x 6 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_P0P1_Mixed_Test_6x6x6, P0P1_MixedProblem_SineRHS)
   {
     const auto& mesh = getMesh();
@@ -216,6 +229,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured P0 P1 Mixed Test 10 x 10 over the Polytope Coverage 2 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage2D,
     Manufactured_P0P1_Mixed_Test_10x10,
@@ -224,6 +238,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
       Polytope::Type::Quadrilateral)
   );
 
+  /// @brief Instantiates Manufactured P0 P1 Mixed Test 6 x 6 x 6 over the Polytope Coverage 3 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage3D,
     Manufactured_P0P1_Mixed_Test_6x6x6,

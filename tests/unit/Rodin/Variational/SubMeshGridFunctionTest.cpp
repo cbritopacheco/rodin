@@ -42,6 +42,7 @@ namespace Rodin::Tests::Unit
   // Group 1 — P1 FES on SubMesh (child mesh as support)
   // ==========================================================================
 
+  /// @brief Verifies FES construction for variational P1 sub mesh by checking exact expected values.
   TEST(Rodin_Variational_P1_SubMesh, FES_Construction)
   {
     Mesh mesh = buildSplitMesh();
@@ -55,6 +56,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&fes.getMesh(), &static_cast<const Mesh<Context::Local>&>(sub));
   }
 
+  /// @brief Verifies grid function project constant for variational P1 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P1_SubMesh, GridFunction_ProjectConstant)
   {
     Mesh mesh = buildSplitMesh();
@@ -69,6 +71,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], 7.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function project linear for variational P1 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P1_SubMesh, GridFunction_ProjectLinear)
   {
     Mesh mesh = buildSplitMesh();
@@ -91,6 +94,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies grid function evaluate at local point for variational P1 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P1_SubMesh, GridFunction_EvaluateAtLocalPoint)
   {
     Mesh mesh = buildSplitMesh();
@@ -109,6 +113,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(gf.getValue(p), 3.5, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief The FES mesh is a SubMesh; we evaluate using a Point whose polytope.
   TEST(Rodin_Variational_P1_SubMesh, GridFunction_EvaluateAtParentPoint_Restriction)
   {
     // The FES mesh is a SubMesh; we evaluate using a Point whose polytope
@@ -148,6 +153,7 @@ namespace Rodin::Tests::Unit
   // Group 2 — P1 FES on parent mesh, evaluated at SubMesh points (inclusion)
   // ==========================================================================
 
+  /// @brief The FES mesh is the full parent mesh; we evaluate using a Point whose.
   TEST(Rodin_Variational_P1_ParentMesh, GridFunction_EvaluateAtSubMeshPoint_Inclusion)
   {
     // The FES mesh is the full parent mesh; we evaluate using a Point whose
@@ -179,6 +185,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(gf.getValue(subPoint), expected, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Skin SubMesh: (d-1)-dimensional boundary of the full 2D mesh.
   TEST(Rodin_Variational_P1_ParentMesh, GridFunction_EvaluateAtBoundarySubMeshPoint_Inclusion)
   {
     // Skin SubMesh: (d-1)-dimensional boundary of the full 2D mesh.
@@ -212,6 +219,7 @@ namespace Rodin::Tests::Unit
   // Group 3 — P0 FES on SubMesh (child mesh as support)
   // ==========================================================================
 
+  /// @brief Verifies FES construction for variational P0 sub mesh by checking exact expected values.
   TEST(Rodin_Variational_P0_SubMesh, FES_Construction)
   {
     Mesh mesh = buildSplitMesh();
@@ -225,6 +233,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&fes.getMesh(), &static_cast<const Mesh<Context::Local>&>(sub));
   }
 
+  /// @brief Verifies grid function project constant for variational P0 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P0_SubMesh, GridFunction_ProjectConstant)
   {
     Mesh mesh = buildSplitMesh();
@@ -239,6 +248,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], 4.2, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function project spatial function for variational P0 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P0_SubMesh, GridFunction_ProjectSpatialFunction)
   {
     Mesh mesh = buildSplitMesh();
@@ -256,6 +266,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(gf[i], 1.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function evaluate at parent point restriction for variational P0 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_P0_SubMesh, GridFunction_EvaluateAtParentPoint_Restriction)
   {
     Mesh mesh = buildSplitMesh();
@@ -281,6 +292,7 @@ namespace Rodin::Tests::Unit
   // Group 4 — Vector-valued P1 FES on SubMesh
   // ==========================================================================
 
+  /// @brief Verifies FES construction for variational vector P1 sub mesh by checking exact expected values.
   TEST(Rodin_Variational_Vector_P1_SubMesh, FES_Construction)
   {
     Mesh mesh = buildSplitMesh();
@@ -293,6 +305,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getVectorDimension(), vdim);
   }
 
+  /// @brief Verifies grid function project vector constant for variational vector P1 sub mesh by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Vector_P1_SubMesh, GridFunction_ProjectVectorConstant)
   {
     Mesh mesh = buildSplitMesh();

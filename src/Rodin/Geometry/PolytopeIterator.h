@@ -188,6 +188,10 @@ namespace Rodin::Geometry
         return *m_gen;
       }
 
+      /**
+       * @brief Gets the current polytope key.
+       * @returns Pair of topological dimension and current polytope index.
+       */
       std::pair<size_t, Index> key() const
       {
         return { this->getDimension(), *this->getIndexGenerator() };

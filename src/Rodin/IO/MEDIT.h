@@ -61,6 +61,8 @@ namespace Rodin::IO::MEDIT
     SolAtHexahedra,        ///< Solution at hexahedra
     RequiredVertices,      ///< Required vertices section
     RequiredEdges,         ///< Required edges section
+    RequiredTriangles,     ///< Required triangles section
+    RequiredTetrahedra,    ///< Required tetrahedra section
     Normals,               ///< Normal vectors section
     NormalAtVertices,      ///< Normals at vertices
     Tangents,              ///< Tangent vectors section
@@ -121,6 +123,10 @@ namespace Rodin::IO::MEDIT
         return "RequiredVertices";
       case Keyword::RequiredEdges:
         return "RequiredEdges";
+      case Keyword::RequiredTriangles:
+        return "RequiredTriangles";
+      case Keyword::RequiredTetrahedra:
+        return "RequiredTetrahedra";
       case Keyword::Normals:
         return "Normals";
       case Keyword::NormalAtVertices:
@@ -236,6 +242,10 @@ namespace Rodin::IO::MEDIT
       res = Keyword::RequiredVertices;
     else if (str == Keyword::RequiredEdges)
       res = Keyword::RequiredEdges;
+    else if (str == Keyword::RequiredTriangles)
+      res = Keyword::RequiredTriangles;
+    else if (str == Keyword::RequiredTetrahedra)
+      res = Keyword::RequiredTetrahedra;
     else if (str == Keyword::Normals)
       res = Keyword::Normals;
     else if (str == Keyword::NormalAtVertices)
@@ -307,9 +317,13 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::repeat;
         size_t i = 0;
         Data res{ Array<Index>(m_n), ~Geometry::Attribute(0) };
-        const auto get_vertex = [&](auto& ctx) { assert(i < m_n); res.vertices(i++) = _attr(ctx); };
-        const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
-        const auto p = uint_[get_vertex] >> repeat(m_n - 1)[uint_[get_vertex]] >> uint_[get_attribute];
+        const auto getVertex = [&](auto& ctx) {
+          assert(i < m_n);
+          res.vertices(i++) = _attr(ctx);
+        };
+        const auto getAttribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
+        const auto p =
+          uint_[getVertex] >> repeat(m_n - 1)[uint_[getVertex]] >> uint_[getAttribute];
         const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
         if (begin != end)
           return {};
@@ -323,6 +337,7 @@ namespace Rodin::IO::MEDIT
       size_t m_n;
   };
 
+  /// @cond
   class ParseVertex
   {
     public:
@@ -347,14 +362,18 @@ namespace Rodin::IO::MEDIT
         using boost::spirit::x3::repeat;
         size_t i = 0;
         Data res{ Math::SpatialPoint(m_sdim), ~Geometry::Attribute(0) };
-        const auto get_x = [&](auto& ctx) { assert(i < m_sdim); res.vertex(i++) = _attr(ctx); };
-        const auto get_attribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
+        const auto getX = [&](auto& ctx) {
+          assert(i < m_sdim);
+          res.vertex(i++) = _attr(ctx);
+        };
+        const auto getAttribute = [&](auto& ctx) { res.attribute = _attr(ctx); };
         const bool r = [&]()
         {
           if (m_sdim == 0)
-            return boost::spirit::x3::phrase_parse(begin, end, uint_[get_attribute], space);
+            return boost::spirit::x3::phrase_parse(
+              begin, end, uint_[getAttribute], space);
           const auto p =
-            double_[get_x] >> repeat(m_sdim - 1)[double_[get_x]] >> uint_[get_attribute];
+            double_[getX] >> repeat(m_sdim - 1)[double_[getX]] >> uint_[getAttribute];
           return boost::spirit::x3::phrase_parse(begin, end, p, space);
         }();
         if (begin != end)
@@ -410,8 +429,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::alpha;
 
       std::string kw;
-      const auto get_keyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto p = (+alpha)[get_keyword];
+      const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
+      const auto p = (+alpha)[getKeyword];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -433,8 +452,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
 
       int v;
-      const auto get_integer = [&](auto& ctx) { v = _attr(ctx); };
-      const auto p = int_[get_integer];
+      const auto getInteger = [&](auto& ctx) { v = _attr(ctx); };
+      const auto p = int_[getInteger];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -456,8 +475,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
 
       unsigned int v;
-      const auto get_unsigned_integer = [&](auto& ctx) { v = _attr(ctx); };
-      const auto p = uint_[get_unsigned_integer];
+      const auto getUnsignedInteger = [&](auto& ctx) { v = _attr(ctx); };
+      const auto p = uint_[getUnsignedInteger];
       const bool r = boost::spirit::x3::phrase_parse(begin, end, p, space);
       if (begin != end)
         return {};
@@ -480,8 +499,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
       using boost::spirit::x3::alpha;
       std::string kw;
-      const auto get_keyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto pkw = (+alpha)[get_keyword];
+      const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
+      const auto pkw = (+alpha)[getKeyword];
       const bool rkw = boost::spirit::x3::phrase_parse(begin, end, pkw, space);
       if (rkw)
       {
@@ -489,8 +508,8 @@ namespace Rodin::IO::MEDIT
         if (kw == expected)
         {
           unsigned int version;
-          const auto get_version = [&](auto& ctx) { version = _attr(ctx); };
-          const auto pversion = uint_[get_version];
+          const auto getVersion = [&](auto& ctx) { version = _attr(ctx); };
+          const auto pversion = uint_[getVersion];
           const bool rversion = boost::spirit::x3::phrase_parse(begin, end, pversion, space);
           if (begin != end)
             return {};
@@ -526,8 +545,8 @@ namespace Rodin::IO::MEDIT
       using boost::spirit::x3::_attr;
       using boost::spirit::x3::alpha;
       std::string kw;
-      const auto get_keyword = [&](auto& ctx) { kw = _attr(ctx); };
-      const auto pkw = (+alpha)[get_keyword];
+      const auto getKeyword = [&](auto& ctx) { kw = _attr(ctx); };
+      const auto pkw = (+alpha)[getKeyword];
       const bool rkw = boost::spirit::x3::phrase_parse(begin, end, pkw, space);
       if (rkw)
       {
@@ -535,8 +554,8 @@ namespace Rodin::IO::MEDIT
         if (kw == expected)
         {
           unsigned int dimension;
-          const auto get_dimension = [&](auto& ctx) { dimension = _attr(ctx); };
-          const auto pdimension = uint_[get_dimension];
+          const auto getDimension = [&](auto& ctx) { dimension = _attr(ctx); };
+          const auto pdimension = uint_[getDimension];
           const bool rdimension = boost::spirit::x3::phrase_parse(begin, end, pdimension, space);
           if (begin != end)
             return {};
@@ -559,6 +578,7 @@ namespace Rodin::IO::MEDIT
       return {};
     }
   };
+  /// @endcond
 }
 
 namespace Rodin::IO
@@ -576,38 +596,75 @@ namespace Rodin::IO
     : public MeshLoaderBase<Context::Local>
   {
     public:
+      /// @brief Mesh type loaded by this specialization.
       using ObjectType = Rodin::Geometry::Mesh<Context::Local>;
 
+      /// @brief Parent class type.
       using Parent = MeshLoaderBase<Context::Local>;
 
+      /**
+       * @brief Constructs a MEDIT loader bound to a local mesh.
+       * @param[in,out] mesh Mesh object populated by load().
+       */
       MeshLoader(ObjectType& mesh)
         : Parent(mesh),
           m_currentLineNumber(0)
       {}
 
+      /**
+       * @brief Loads a local mesh from a MEDIT input stream.
+       * @param[in,out] is Input stream containing MEDIT data.
+       */
       void load(std::istream& is) override;
 
+      /**
+       * @brief Reads one logical line while tracking line numbers.
+       */
       std::istream& getline(std::istream& is, std::string& line);
+      /**
+       * @brief Skips blank lines and returns the next non-empty line.
+       */
       std::string skipEmptyLines(std::istream& is);
+      /**
+       * @brief Reads and validates the MEDIT version section.
+       */
       void readVersion(std::istream& is);
+      /**
+       * @brief Reads and validates the MEDIT dimension section.
+       */
       void readDimension(std::istream& is);
+      /**
+       * @brief Reads vertex and element entities from the MEDIT stream.
+       */
       void readEntities(std::istream& is);
 
+      /**
+       * @brief Returns mutable counts collected for each MEDIT keyword.
+       */
       std::unordered_map<MEDIT::Keyword, size_t>& getCountMap()
       {
         return m_count;
       }
 
+      /**
+       * @brief Returns counts collected for each MEDIT keyword.
+       */
       const std::unordered_map<MEDIT::Keyword, size_t>& getCountMap() const
       {
         return m_count;
       }
 
+      /**
+       * @brief Returns mutable stream positions for parsed MEDIT sections.
+       */
       std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap()
       {
         return m_pos;
       }
 
+      /**
+       * @brief Returns stream positions for parsed MEDIT sections.
+       */
       const std::unordered_map<MEDIT::Keyword, std::istream::pos_type>& getPositionMap() const
       {
         return m_pos;
@@ -624,17 +681,27 @@ namespace Rodin::IO
       std::unordered_map<MEDIT::Keyword, size_t> m_count;
   };
 
+  /**
+   * @brief MEDIT mesh printer for local meshes.
+   */
   template <>
   class MeshPrinter<FileFormat::MEDIT, Context::Local>
     : public MeshPrinterBase<Context::Local>
   {
     public:
+      /// @brief Execution context type.
       using ContextType = Context::Local;
 
+      /// @brief Mesh type being printed.
       using ObjectType = Geometry::Mesh<ContextType>;
 
+      /// @brief Parent class type.
       using Parent = MeshPrinterBase<ContextType>;
 
+      /**
+       * @brief Constructs a MEDIT mesh printer.
+       * @param[in] mesh Mesh to print.
+       */
       MeshPrinter(const ObjectType& mesh)
         : MeshPrinterBase(mesh)
       {}
@@ -644,13 +711,21 @@ namespace Rodin::IO
         printMesh(os, true);
       }
 
+      /// @brief Prints the full MEDIT mesh body.
       void printMesh(std::ostream& os, bool printEnd);
+      /// @brief Prints the MEDIT file version section.
       void printVersion(std::ostream& os);
+      /// @brief Prints the MEDIT dimension section.
       void printDimension(std::ostream& os);
+      /// @brief Prints all supported mesh entity sections.
       void printEntities(std::ostream& os);
+      /// @brief Prints the MEDIT end marker.
       void printEnd(std::ostream& os);
   };
 
+  /**
+   * @brief MEDIT grid-function loader for local P1 finite element spaces.
+   */
   template <class Range>
   class GridFunctionLoader<
     FileFormat::MEDIT,
@@ -661,16 +736,25 @@ namespace Rodin::IO
         Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = Variational::P1<Range, Geometry::Mesh<Context::Local>>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
+      /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
+      /// @brief Parent class type.
       using Parent = GridFunctionLoaderBase<FESType, DataType>;
 
+      /**
+       * @brief Constructs a MEDIT P1 grid-function loader.
+       * @param[in,out] gf Grid function to populate.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf),
           m_currentLineNumber(0)
@@ -683,12 +767,14 @@ namespace Rodin::IO
         readData(is);
       }
 
+      /// @brief Reads one input line and advances the line counter.
       std::istream& getline(std::istream& is, std::string& line)
       {
         m_currentLineNumber++;
         return std::getline(is, line);
       }
 
+      /// @brief Skips blank lines and returns the first nonblank line.
       std::string skipEmptyLines(std::istream& is)
       {
         std::string line;
@@ -700,6 +786,7 @@ namespace Rodin::IO
         return line;
       }
 
+      /// @brief Reads the MEDIT solution-file version section.
       void readVersion(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -720,6 +807,7 @@ namespace Rodin::IO
         }
       }
 
+      /// @brief Reads the MEDIT solution-file dimension section.
       void readDimension(std::istream& is)
       {
         auto line = skipEmptyLines(is);
@@ -737,6 +825,7 @@ namespace Rodin::IO
         }
       }
 
+      /// @brief Reads the MEDIT SolAtVertices data section.
       void readData(std::istream& is)
       {
         auto& gf = this->getObject();
@@ -767,9 +856,9 @@ namespace Rodin::IO
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
         using boost::spirit::x3::repeat;
-        const auto get_sol_count = [&](auto& ctx) { solCount = _attr(ctx); };
-        const auto get_solution_type = [&](auto& ctx) { solutionType = _attr(ctx); };
-        const auto p = uint_[get_sol_count] >> uint_[get_solution_type];
+        const auto getSolCount = [&](auto& ctx) { solCount = _attr(ctx); };
+        const auto getSolutionType = [&](auto& ctx) { solutionType = _attr(ctx); };
+        const auto p = uint_[getSolCount] >> uint_[getSolutionType];
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
@@ -811,6 +900,9 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
+  /**
+   * @brief MEDIT grid-function loader for local H1 finite element spaces.
+   */
   template <size_t K, class Range>
   class GridFunctionLoader<
     FileFormat::MEDIT,
@@ -821,12 +913,21 @@ namespace Rodin::IO
         Math::Vector<typename FormLanguage::Traits<Range>::ScalarType>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType    = Variational::H1<K, Range, Geometry::Mesh<Context::Local>>;
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+      /// @brief Coefficient data storage type.
       using DataType   = Math::Vector<ScalarType>;
+      /// @brief Grid function type being loaded.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
+      /// @brief Parent loader base type.
       using Parent     = GridFunctionLoaderBase<FESType, DataType>;
 
+      /**
+       * @brief Constructs a MEDIT H1 grid-function loader.
+       * @param[in,out] gf Grid function to populate.
+       */
       GridFunctionLoader(ObjectType& gf)
         : Parent(gf),
           m_version(0),
@@ -959,10 +1060,10 @@ namespace Rodin::IO
         using boost::spirit::x3::uint_;
         using boost::spirit::x3::_attr;
 
-        const auto get_sol_count = [&](auto& ctx) { solCount  = _attr(ctx); };
-        const auto get_solution_type = [&](auto& ctx) { solutionType = _attr(ctx); };
+        const auto getSolCount = [&](auto& ctx) { solCount = _attr(ctx); };
+        const auto getSolutionType = [&](auto& ctx) { solutionType = _attr(ctx); };
 
-        const auto p = uint_[get_sol_count] >> uint_[get_solution_type];
+        const auto p = uint_[getSolCount] >> uint_[getSolutionType];
         auto it = line.begin();
         const bool r = boost::spirit::x3::phrase_parse(it, line.end(), p, space);
 
@@ -1046,16 +1147,12 @@ namespace Rodin::IO
 
         // P1/Q1 evaluators on reference elements
 
-        auto evalP1_on_segment = [&](Real x,
-                                     const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnSegment = [&](Real x, const ScalarType* u) -> ScalarType {
           // Reference segment [0,1]; vertex 0 at x=0, vertex 1 at x=1
           return (ScalarType(1) - x) * u[0] + x * u[1];
         };
 
-        auto evalP1_on_triangle = [&](Real x, Real y,
-                                      const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnTriangle = [&](Real x, Real y, const ScalarType* u) -> ScalarType {
           // Ref triangle (0,0)-(1,0)-(0,1)
           const Real l0 = Real(1) - x - y;
           const Real l1 = x;
@@ -1063,25 +1160,22 @@ namespace Rodin::IO
           return l0 * u[0] + l1 * u[1] + l2 * u[2];
         };
 
-        auto evalQ1_on_quad = [&](Real x, Real y,
-                                  const ScalarType* u) -> ScalarType
-        {
+        auto evalQ1OnQuad = [&](Real x, Real y, const ScalarType* u) -> ScalarType {
           // Ref quad [0,1]^2 with vertices:
           // 0:(0,0), 1:(1,0), 2:(1,1), 3:(0,1)
-          const Real one_x = Real(1) - x;
-          const Real one_y = Real(1) - y;
+          const Real oneX = Real(1) - x;
+          const Real oneY = Real(1) - y;
 
-          const Real psi0 = one_x * one_y;
-          const Real psi1 = x      * one_y;
+          const Real psi0 = oneX * oneY;
+          const Real psi1 = x * oneY;
           const Real psi2 = x      * y;
-          const Real psi3 = one_x  * y;
+          const Real psi3 = oneX * y;
 
           return psi0 * u[0] + psi1 * u[1] + psi2 * u[2] + psi3 * u[3];
         };
 
-        auto evalP1_on_tet = [&](Real x, Real y, Real z,
-                                 const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnTet = [&](
+                             Real x, Real y, Real z, const ScalarType* u) -> ScalarType {
           // Ref tet (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1)
           const Real l0 = Real(1) - x - y - z;
           const Real l1 = x;
@@ -1090,9 +1184,8 @@ namespace Rodin::IO
           return l0 * u[0] + l1 * u[1] + l2 * u[2] + l3 * u[3];
         };
 
-        auto evalP1_on_wedge = [&](Real x, Real y, Real z,
-                                   const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnWedge = [&](Real x, Real y, Real z,
+                               const ScalarType* u) -> ScalarType {
           // Ref wedge = triangle(x,y) × segment(z)
           //
           // Triangle barycentric:
@@ -1106,11 +1199,11 @@ namespace Rodin::IO
           const Real l1 = x;
           const Real l2 = y;
 
-          const Real one_z = Real(1) - z;
+          const Real oneZ = Real(1) - z;
 
-          const Real psi0 = l0 * one_z;
-          const Real psi1 = l1 * one_z;
-          const Real psi2 = l2 * one_z;
+          const Real psi0 = l0 * oneZ;
+          const Real psi1 = l1 * oneZ;
+          const Real psi2 = l2 * oneZ;
           const Real psi3 = l0 * z;
           const Real psi4 = l1 * z;
           const Real psi5 = l2 * z;
@@ -1119,9 +1212,8 @@ namespace Rodin::IO
                + psi3 * u[3] + psi4 * u[4] + psi5 * u[5];
         };
 
-        auto evalP1_on_pyramid = [&](Real x, Real y, Real z,
-                                     const ScalarType* u) -> ScalarType
-        {
+        auto evalP1OnPyramid = [&](Real x, Real y, Real z,
+                                 const ScalarType* u) -> ScalarType {
           const Real q = Real(1) - z;
           if (q == Real(0))
             return u[4];
@@ -1187,47 +1279,46 @@ namespace Rodin::IO
           for (size_t comp = 0; comp < vdim; ++comp)
           {
             // Gather vertex values u_vert[0..nCellVertices-1]
-            ScalarType u_vert[8];
+            ScalarType uVert[8];
             for (size_t lv = 0; lv < nCellVertices; ++lv)
             {
               const Index vIdx = verts[lv];
               assert(static_cast<size_t>(vIdx) < nVertices);
-              u_vert[lv] =
-                vertexValues[comp * nVertices + static_cast<size_t>(vIdx)];
+              uVert[lv] = vertexValues[comp * nVertices + static_cast<size_t>(vIdx)];
             }
 
             // Interpolate at each H1 nodal point of this cell
             for (size_t j = 0; j < nLocal; ++j)
             {
               const auto& pt = nodes[j];
-              ScalarType u_val{};
+              ScalarType uVal{};
 
               switch (geom)
               {
                 case Geometry::Polytope::Type::Point:
                 {
                   // Single vertex, nothing to interpolate
-                  u_val = u_vert[0];
+                  uVal = uVert[0];
                   break;
                 }
                 case Geometry::Polytope::Type::Segment:
                 {
                   const Real x = pt.x();
-                  u_val = evalP1_on_segment(x, u_vert);
+                  uVal = evalP1OnSegment(x, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Triangle:
                 {
                   const Real x = pt.x();
                   const Real y = pt.y();
-                  u_val = evalP1_on_triangle(x, y, u_vert);
+                  uVal = evalP1OnTriangle(x, y, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Quadrilateral:
                 {
                   const Real x = pt.x();
                   const Real y = pt.y();
-                  u_val = evalQ1_on_quad(x, y, u_vert);
+                  uVal = evalQ1OnQuad(x, y, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Tetrahedron:
@@ -1235,7 +1326,7 @@ namespace Rodin::IO
                   const Real x = pt.x();
                   const Real y = pt.y();
                   const Real z = pt.z();
-                  u_val = evalP1_on_tet(x, y, z, u_vert);
+                  uVal = evalP1OnTet(x, y, z, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Pyramid:
@@ -1243,7 +1334,7 @@ namespace Rodin::IO
                   const Real x = pt.x();
                   const Real y = pt.y();
                   const Real z = pt.z();
-                  u_val = evalP1_on_pyramid(x, y, z, u_vert);
+                  uVal = evalP1OnPyramid(x, y, z, uVert);
                   break;
                 }
                 case Geometry::Polytope::Type::Wedge:
@@ -1251,7 +1342,7 @@ namespace Rodin::IO
                   const Real x = pt.x();
                   const Real y = pt.y();
                   const Real z = pt.z();
-                  u_val = evalP1_on_wedge(x, y, z, u_vert);
+                  uVal = evalP1OnWedge(x, y, z, uVert);
                   break;
                 }
                 default:
@@ -1260,7 +1351,7 @@ namespace Rodin::IO
 
               const Index gdof = cdofs(static_cast<Index>(j));
               assert(static_cast<size_t>(gdof) < scalarSize);
-              data.coeffRef(gdof + static_cast<Index>(comp * scalarSize)) = u_val;
+              data.coeffRef(gdof + static_cast<Index>(comp * scalarSize)) = uVal;
             }
           }
         }
@@ -1271,25 +1362,42 @@ namespace Rodin::IO
       size_t m_currentLineNumber;
   };
 
+  /**
+   * @brief Base class for MEDIT grid-function printers.
+   *
+   * Emits the common MEDIT solution-file header and footer and delegates the
+   * actual coefficient stream to @ref printData().
+   */
   template <class FES, class Data>
   class GridFunctionPrinterBase<FileFormat::MEDIT, FES, Data>
     : public Printer<Variational::GridFunction<FES, Data>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief File format handled by this printer base.
       static constexpr FileFormat Format = FileFormat::MEDIT;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
+      /// @brief Coefficient data storage type.
       using DataType = Data;
 
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FESType, DataType>;
 
+      /// @brief Parent class type.
       using Parent = Printer<ObjectType>;
 
+      /**
+       * @brief Constructs a MEDIT grid-function printer base.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinterBase(const ObjectType& gf)
         : m_gf(gf)
       {}
@@ -1317,11 +1425,13 @@ namespace Rodin::IO
         printEnd(os);
       }
 
+      /// @brief Prints the MEDIT solution-file version section.
       void printVersion(std::ostream& os)
       {
         os << MEDIT::Keyword::MeshVersionFormatted << "\n2" << "\n\n";
       }
 
+      /// @brief Prints the MEDIT solution-file dimension section.
       void printDimension(std::ostream& os)
       {
         const auto& gf = this->getObject();
@@ -1330,6 +1440,7 @@ namespace Rodin::IO
         os << MEDIT::Keyword::Dimension << '\n' << mesh.getSpaceDimension() << "\n\n";
       }
 
+      /// @brief Prints the MEDIT end marker.
       void printEnd(std::ostream& os)
       {
         os << '\n' << IO::MEDIT::Keyword::End;
@@ -1340,12 +1451,16 @@ namespace Rodin::IO
         return m_gf.get();
       }
 
+      /// @brief Prints the concrete grid-function coefficient data.
       virtual void printData(std::ostream& os) = 0;
 
     private:
       std::reference_wrapper<const ObjectType> m_gf;
   };
 
+  /**
+   * @brief MEDIT grid-function printer for vector-backed grid functions.
+   */
   template <class FES>
   class GridFunctionPrinter<
     FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
@@ -1353,20 +1468,27 @@ namespace Rodin::IO
         FileFormat::MEDIT, FES, Math::Vector<typename FormLanguage::Traits<FES>::ScalarType>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief File format handled by this printer.
       static constexpr FileFormat Format = FileFormat::MEDIT;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = typename FormLanguage::Traits<FES>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
+      /// @brief Coefficient data storage type.
       using DataType = Math::Vector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = GridFunctionPrinterBase<Format, FES, DataType>;
 
       using Parent::Parent;
 
+      /// @brief Prints one value per mesh vertex in MEDIT solution order.
       void printData(std::ostream& os)
       {
         const auto& gf = this->getObject();

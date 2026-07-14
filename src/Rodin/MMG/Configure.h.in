@@ -22,6 +22,9 @@ namespace Rodin::MMG
   inline constexpr const char* ISCD_MSHDIST_EXECUTABLE =
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
+  /**
+   * @brief Path to the Mshdist executable used by MMG helpers.
+   */
   inline constexpr const char* MSHDIST_EXECUTABLE =
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
@@ -31,6 +34,9 @@ namespace Rodin::MMG
   inline constexpr const char* ISCD_ADVECTION_EXECUTABLE =
     "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 
+  /**
+   * @brief Path to the ISCD advection executable used by MMG helpers.
+   */
   inline constexpr const char* ADVECTION_EXECUTABLE =
     "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 

@@ -10,7 +10,7 @@
 
   @section examples-geom-ug-intro Introduction
 
-  The @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()" method
+  The @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" method
   creates structured grids of various polytope types. This is the quickest
   way to get started with Rodin — no mesh files needed.
 
@@ -38,7 +38,7 @@
 
   The grid is created on the unit square @f$ [0, N_x] \times [0, N_y] @f$
   where @f$ N_x, N_y @f$ are the subdivision counts. Use
-  @ref Rodin::Geometry::Mesh::scale "Mesh::scale()" to rescale to a
+  @ref Rodin::Geometry::Mesh "Mesh::scale()" to rescale to a
   different domain:
 
   @code{.cpp}

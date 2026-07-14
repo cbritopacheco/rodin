@@ -25,6 +25,7 @@
 #include "PolytopeIterator.h"
 #include "ParametricTransformation.h"
 
+/// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
 namespace Rodin::Geometry
 {
   // ---- MeshBase ----------------------------------------------------------
@@ -1609,3 +1610,4 @@ namespace Rodin::Geometry
     }
   }
 }
+/// @endcond

@@ -14,7 +14,8 @@
 
 namespace Rodin::QF
 {
-  void GaussLegendre::gl_1d_unit(size_t n, std::vector<Real>& x, std::vector<Real>& w, size_t maxIt, Real tol)
+  void GaussLegendre::gl1dUnit(
+    size_t n, std::vector<Real>& x, std::vector<Real>& w, size_t maxIt, Real tol)
   {
     assert(n >= 1);
     std::vector<Real> xi(n), wi(n);
@@ -77,18 +78,34 @@ namespace Rodin::QF
   {
     switch (this->getGeometry())
     {
-      case Geometry::Polytope::Type::Point:         build_point();                 break;
-      case Geometry::Polytope::Type::Segment:       build_segment(m_nx);           break;
-      case Geometry::Polytope::Type::Quadrilateral: build_quad(m_nx, m_ny);        break;
-      case Geometry::Polytope::Type::Triangle:      build_tri(m_nx, m_ny);         break;
-      case Geometry::Polytope::Type::Tetrahedron:   build_tet(m_nx, m_ny, m_nz);   break;
-      case Geometry::Polytope::Type::Pyramid:       build_pyramid(m_nx, m_ny, m_nz); break;
-      case Geometry::Polytope::Type::Wedge:         build_wedge(m_nx, m_ny);       break;
-      case Geometry::Polytope::Type::Hexahedron:    build_hex(m_nx, m_ny, m_nz);   break;
+      case Geometry::Polytope::Type::Point:
+        buildPoint();
+        break;
+      case Geometry::Polytope::Type::Segment:
+        buildSegment(m_nx);
+        break;
+      case Geometry::Polytope::Type::Quadrilateral:
+        buildQuad(m_nx, m_ny);
+        break;
+      case Geometry::Polytope::Type::Triangle:
+        buildTri(m_nx, m_ny);
+        break;
+      case Geometry::Polytope::Type::Tetrahedron:
+        buildTet(m_nx, m_ny, m_nz);
+        break;
+      case Geometry::Polytope::Type::Pyramid:
+        buildPyramid(m_nx, m_ny, m_nz);
+        break;
+      case Geometry::Polytope::Type::Wedge:
+        buildWedge(m_nx, m_ny);
+        break;
+      case Geometry::Polytope::Type::Hexahedron:
+        buildHex(m_nx, m_ny, m_nz);
+        break;
     }
   }
 
-  void GaussLegendre::build_point()
+  void GaussLegendre::buildPoint()
   {
     m_points.clear();
     m_weights.resize(1);
@@ -99,10 +116,10 @@ namespace Rodin::QF
     m_weights[0] = 1.0;
   }
 
-  void GaussLegendre::build_segment(size_t n)
+  void GaussLegendre::buildSegment(size_t n)
   {
     std::vector<Real> x, w;
-    gl_1d_unit(n, x, w);
+    gl1dUnit(n, x, w);
     m_points.clear();
     m_points.reserve(n);
     m_weights.resize(n);
@@ -117,11 +134,11 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::build_quad(size_t nx, size_t ny)
+  void GaussLegendre::buildQuad(size_t nx, size_t ny)
   {
     std::vector<Real> x, wx, y, wy;
-    gl_1d_unit(nx, x, wx);
-    gl_1d_unit(ny, y, wy);
+    gl1dUnit(nx, x, wx);
+    gl1dUnit(ny, y, wy);
 
     const size_t N = nx * ny;
     m_points.clear();
@@ -143,11 +160,11 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::build_tri(size_t nu, size_t nv)
+  void GaussLegendre::buildTri(size_t nu, size_t nv)
   {
     std::vector<Real> u, wu, v, wv;
-    gl_1d_unit(nu, u, wu);
-    gl_1d_unit(nv, v, wv);
+    gl1dUnit(nu, u, wu);
+    gl1dUnit(nv, v, wv);
 
     const size_t N = nu * nv;
     m_points.clear();
@@ -171,12 +188,12 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::build_tet(size_t nu, size_t nv, size_t nw)
+  void GaussLegendre::buildTet(size_t nu, size_t nv, size_t nw)
   {
     std::vector<Real> u, wu, v, wv, w, ww;
-    gl_1d_unit(nu, u, wu);
-    gl_1d_unit(nv, v, wv);
-    gl_1d_unit(nw, w, ww);
+    gl1dUnit(nu, u, wu);
+    gl1dUnit(nv, v, wv);
+    gl1dUnit(nw, w, ww);
 
     const size_t N = nu * nv * nw;
     m_points.clear();
@@ -208,12 +225,12 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::build_wedge(size_t ntri, size_t nz)
+  void GaussLegendre::buildWedge(size_t ntri, size_t nz)
   {
     std::vector<Real> u, wu, v, wv, z, wz;
-    gl_1d_unit(ntri, u, wu);
-    gl_1d_unit(ntri, v, wv);
-    gl_1d_unit(nz, z, wz);
+    gl1dUnit(ntri, u, wu);
+    gl1dUnit(ntri, v, wv);
+    gl1dUnit(nz, z, wz);
 
     const size_t N = ntri * ntri * nz;
     m_points.clear();
@@ -244,12 +261,12 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::build_pyramid(size_t nx, size_t ny, size_t nz)
+  void GaussLegendre::buildPyramid(size_t nx, size_t ny, size_t nz)
   {
     std::vector<Real> u, wu, v, wv, z, wz;
-    gl_1d_unit(nx, u, wu);
-    gl_1d_unit(ny, v, wv);
-    gl_1d_unit(nz, z, wz);
+    gl1dUnit(nx, u, wu);
+    gl1dUnit(ny, v, wv);
+    gl1dUnit(nz, z, wz);
 
     const size_t N = nx * ny * nz;
     m_points.clear();
@@ -277,12 +294,12 @@ namespace Rodin::QF
     }
   }
 
-  void GaussLegendre::build_hex(size_t nx, size_t ny, size_t nz)
+  void GaussLegendre::buildHex(size_t nx, size_t ny, size_t nz)
   {
     std::vector<Real> x, wx, y, wy, z, wz;
-    gl_1d_unit(nx, x, wx);
-    gl_1d_unit(ny, y, wy);
-    gl_1d_unit(nz, z, wz);
+    gl1dUnit(nx, x, wx);
+    gl1dUnit(ny, y, wy);
+    gl1dUnit(nz, z, wz);
 
     const size_t N = nx * ny * nz;
     m_points.clear();

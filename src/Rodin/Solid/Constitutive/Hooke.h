@@ -50,11 +50,14 @@ namespace Rodin::Solid
        * @param lambda First Lamé parameter @f$ \lambda @f$
        * @param mu Second Lamé parameter (shear modulus) @f$ \mu @f$
        */
-      Hooke(Real lameFirstParameter, Real shearModulus)
-        : m_lambda(lameFirstParameter), m_mu(shearModulus)
+      Hooke(Real lambda, Real mu)
+        : m_lambda(lambda),
+          m_mu(mu)
       {}
 
+      /// @brief Copy constructor.
       Hooke(const Hooke&) = default;
+      /// @brief Move constructor.
       Hooke(Hooke&&) = default;
 
       /// @brief Gets the first Lamé parameter.

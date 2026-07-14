@@ -314,6 +314,7 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
 {
   bool isSurface = src.isSurface();
   assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
+  const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
 
   MMG5_pMesh res = createMesh(
       s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
@@ -502,6 +503,14 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   else if (src.getDimension() == 3) // Use MMG3D
   {
     constexpr size_t edgeDim = 1;
+    constexpr size_t faceDim = 2;
+    constexpr size_t cellDim = 3;
+    const bool hasFaceCellIncidence =
+      src.getConnectivity().getIncidence(faceDim, cellDim).size() > 0;
+    const auto isMMG3DBoundaryTriangle = [&](Index faceIdx)
+    {
+      return !hasFaceCellIncidence || src.isBoundary(faceIdx);
+    };
 
     // Always convert cells (tets)
     res->ne = src.getCellCount();
@@ -518,12 +527,19 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       edgeRemap.assign(rodinEdgeCount, 0);
     }
 
-    // Only convert boundary triangles if they have an attribute
+    // Only convert boundary triangles if they have an attribute or MMG metadata
     {
       size_t nt = 0;
       for (auto it = src.getFace(); !it.end(); ++it)
-        if ((*it).getAttribute().has_value())
+      {
+        const auto& face = *it;
+        if (!isMMG3DBoundaryTriangle(face.getIndex()))
+          continue;
+        const bool isRequired =
+          ptr && ptr->getRequiredTriangles().count(face.getIndex()) > 0;
+        if (face.getAttribute().has_value() || isRequired)
           ++nt;
+      }
       res->nt = nt;
 
       triRemap.assign(src.getFaceCount(), 0);
@@ -575,7 +591,12 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       const auto& face = *it;
       assert(face.getGeometry() == Geometry::Polytope::Type::Triangle);
 
-      if (!face.getAttribute().has_value())
+      if (!isMMG3DBoundaryTriangle(face.getIndex()))
+        continue;
+
+      const bool isRequired =
+        ptr && ptr->getRequiredTriangles().count(face.getIndex()) > 0;
+      if (!face.getAttribute().has_value() && !isRequired)
         continue;
 
       const Index old = face.getIndex();
@@ -588,7 +609,7 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
       pt->v[0] = vertices[0] + 1;
       pt->v[1] = vertices[1] + 1;
       pt->v[2] = vertices[2] + 1;
-      pt->ref = *face.getAttribute();
+      pt->ref = face.getAttribute().value_or(0);
     }
 
     // Copy tetrahedra with correct orientation (cells always)
@@ -626,7 +647,6 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     return nullptr;
   }
 
-  const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
   if (ptr)
   {
     // Tag corners (vertices always exist)
@@ -684,6 +704,38 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
         if (old + 1 <= res->na)
           res->edge[old + 1].tag |= MG_REQ;
       }
+    }
+
+    // Tag required triangles
+    for (const auto& r : ptr->getRequiredTriangles())
+    {
+      assert(r >= 0);
+      const Index old = r;
+
+      Index i = 0;
+      if (!triRemap.empty() && old >= 0 && (size_t)old < triRemap.size())
+      {
+        i = triRemap[old];
+      }
+      else if (old + 1 <= res->nt)
+      {
+        i = old + 1;
+      }
+
+      if (i > 0)
+      {
+        res->tria[i].tag[0] |= MG_REQ;
+        res->tria[i].tag[1] |= MG_REQ;
+        res->tria[i].tag[2] |= MG_REQ;
+      }
+    }
+
+    // Tag required tetrahedra (tetrahedra are always copied densely)
+    for (const auto& r : ptr->getRequiredTetrahedra())
+    {
+      assert(r >= 0);
+      if (r + 1 <= res->ne)
+        res->tetra[r + 1].tag |= MG_REQ;
     }
   }
 
@@ -773,6 +825,10 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
             static_cast<size_t>(src->tria[i].v[1] - 1),
             static_cast<size_t>(src->tria[i].v[2] - 1) });
       build.attribute({ 2, i - 1 }, src->tria[i].ref );
+      if ((src->tria[i].tag[0] & MG_REQ) &&
+          (src->tria[i].tag[1] & MG_REQ) &&
+          (src->tria[i].tag[2] & MG_REQ))
+        build.requiredTriangle(i - 1);
     }
     // Add tetrahedra
     build.reserve(3, src->ne);
@@ -788,6 +844,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
             static_cast<size_t>(src->tetra[i].v[2] - 1),
             static_cast<size_t>(src->tetra[i].v[3] - 1) });
       build.attribute({ 3, i - 1 }, src->tetra[i].ref );
+      if (src->tetra[i].tag & MG_REQ)
+        build.requiredTetrahedron(i - 1);
     }
     return build.finalize();
   }
@@ -987,4 +1045,3 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     return *this;
   }
 }
-

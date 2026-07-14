@@ -17,6 +17,14 @@
  * The manufactured systems are deliberately free of Dirichlet boundary
  * conditions so that the targeted/full equivalence is exact to roundoff.
  */
+
+/**
+ * @file
+ * @brief Targeted assembly test manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Targeted Assembly Test manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the assembly backends and targeted element assembly path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <array>
 
 #include <boost/bimap.hpp>
@@ -35,9 +43,11 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Manufactured::Assembly
 {
+  /// @brief Helper used by the manufactured tests to Linear System Type.
   using LinearSystemType =
     Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
+  /// @brief Helper used by the manufactured tests to Expect Same Vector.
   void expectSameVector(const Math::Vector<Real>& expected,
                         const Math::Vector<Real>& actual)
   {
@@ -47,6 +57,7 @@ namespace Rodin::Tests::Manufactured::Assembly
         << "row " << i;
   }
 
+  /// @brief Helper used by the manufactured tests to Expect Same Matrix.
   void expectSameMatrix(const Math::SparseMatrix<Real>& expected,
                         const Math::SparseMatrix<Real>& actual)
   {
@@ -64,8 +75,8 @@ namespace Rodin::Tests::Manufactured::Assembly
   // Single-field: -Delta u = 1 weak form (mass + stiffness), no BCs.
   // -------------------------------------------------------------------------
   template <template <class, class> class Assembler>
-  LinearSystemType assembleSingleField(
-      Variational::AssemblyTarget target, bool targeted)
+  /// @brief Helper used by the manufactured tests to Assemble Single Field.
+  LinearSystemType assembleSingleField(Variational::AssemblyTarget target, bool targeted)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -94,6 +105,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   }
 
   template <template <class, class> class Assembler>
+  /// @brief Helper used by the manufactured tests to Check Single Field Targeted.
   void checkSingleFieldTargeted()
   {
     const auto full =
@@ -107,12 +119,14 @@ namespace Rodin::Tests::Manufactured::Assembly
     expectSameVector(full.getVector(), rhs.getVector());
   }
 
+  /// @brief Verifies sequential single field LHS and RHS for eigen targeted assembly by checking form assembly.
   TEST(Eigen_TargetedAssembly, SequentialSingleFieldLHSAndRHS)
   {
     checkSingleFieldTargeted<::Rodin::Assembly::Sequential>();
   }
 
 #ifdef RODIN_USE_OPENMP
+  /// @brief Verifies open MP single field LHS and RHS for eigen targeted assembly by checking form assembly.
   TEST(Eigen_TargetedAssembly, OpenMPSingleFieldLHSAndRHS)
   {
     checkSingleFieldTargeted<::Rodin::Assembly::OpenMP>();
@@ -127,8 +141,8 @@ namespace Rodin::Tests::Manufactured::Assembly
   // it. BC-free so targeted/full equivalence is exact.
   // -------------------------------------------------------------------------
   template <template <class, class> class Assembler>
-  LinearSystemType assembleBlock(
-      Variational::AssemblyTarget target, bool targeted)
+  /// @brief Helper used by the manufactured tests to Assemble Block.
+  LinearSystemType assembleBlock(Variational::AssemblyTarget target, bool targeted)
   {
     auto mesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -185,6 +199,7 @@ namespace Rodin::Tests::Manufactured::Assembly
   }
 
   template <template <class, class> class Assembler>
+  /// @brief Helper used by the manufactured tests to Check Block Targeted.
   void checkBlockTargeted()
   {
     const auto full =
@@ -198,12 +213,14 @@ namespace Rodin::Tests::Manufactured::Assembly
     expectSameVector(full.getVector(), rhs.getVector());
   }
 
+  /// @brief Verifies sequential block LHS and RHS for eigen targeted assembly by checking form assembly.
   TEST(Eigen_TargetedAssembly, SequentialBlockLHSAndRHS)
   {
     checkBlockTargeted<::Rodin::Assembly::Sequential>();
   }
 
 #ifdef RODIN_USE_OPENMP
+  /// @brief Verifies open MP block LHS and RHS for eigen targeted assembly by checking form assembly.
   TEST(Eigen_TargetedAssembly, OpenMPBlockLHSAndRHS)
   {
     checkBlockTargeted<::Rodin::Assembly::OpenMP>();
@@ -212,6 +229,7 @@ namespace Rodin::Tests::Manufactured::Assembly
 
   // Block targeted assembly through the high-level Problem API (Default
   // backend), covering the Problem::assemble(target) wiring end-to-end.
+  /// @brief Verifies block problem APILHS and RHS for eigen targeted assembly by checking form assembly.
   TEST(Eigen_TargetedAssembly, BlockProblemAPILHSAndRHS)
   {
     auto mesh =

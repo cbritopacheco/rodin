@@ -12,6 +12,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies test function construction for variational integral by checking exact expected values.
   TEST(Rodin_Variational_Integral, TestFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -23,6 +24,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_v.getRegion(), Region::Cells);
   }
 
+  /// @brief Verifies test function copy for variational integral by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Integral, TestFunction_Copy)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -38,6 +40,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies grid function construction for variational integral by checking exact expected values.
   TEST(Rodin_Variational_Integral, GridFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -49,6 +52,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_gf.getRegion(), Region::Cells);
   }
 
+  /// @brief Verifies grid function copy for variational integral by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Integral, GridFunction_Copy)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -64,6 +68,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies dot shape functions construction for variational integral by checking exact expected values.
   TEST(Rodin_Variational_Integral, Dot_ShapeFunctions_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -76,6 +81,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_dot.getRegion(), Region::Cells);
   }
 
+  /// @brief Verifies dot shape functions copy for variational integral by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Integral, Dot_ShapeFunctions_Copy)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -92,6 +98,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies in linear form assembly for variational integral by checking form assembly.
   TEST(Rodin_Variational_Integral, InLinearForm_Assembly)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -110,6 +117,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(total_integral, 0.0);
   }
 
+  /// @brief Verifies in bilinear form mass matrix for variational integral by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Integral, InBilinearForm_MassMatrix)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -134,6 +142,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies in bilinear form stiffness matrix for variational integral by checking exact expected values, form assembly.
   TEST(Rodin_Variational_Integral, InBilinearForm_StiffnessMatrix)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -142,7 +151,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Stiffness matrix: \int \nablau \cdot \nablav dx
+    // Stiffness matrix: \int \nabla u \cdot \nabla v dx
     bf = Integral(Grad(u), Grad(v));
     bf.assemble();
 
@@ -152,6 +161,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(op.rows(), op.cols());
   }
 
+  /// @brief Verifies grid function constant function for variational integral by checking exact expected values.
   TEST(Rodin_Variational_Integral, GridFunction_ConstantFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -167,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_gf.getRegion(), Region::Cells);
   }
 
+  /// @brief Verifies vector function components for variational integral by checking exact expected values.
   TEST(Rodin_Variational_Integral, VectorFunction_Components)
   {
     constexpr size_t vdim = 2;
@@ -183,6 +194,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_comp.getRegion(), Region::Cells);
   }
 
+  /// @brief Verifies move constructor for variational integral by checking exact expected values, move semantics.
   TEST(Rodin_Variational_Integral, MoveConstructor)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -196,6 +208,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_moved.getRegion(), region);
   }
 
+  /// @brief Verifies copy constructor for variational integral by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Integral, CopyConstructor)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -208,6 +221,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(integral_copy.getRegion(), integral_v.getRegion());
   }
 
+  /// @brief Verifies with real function in linear form for variational integral by checking form assembly.
   TEST(Rodin_Variational_Integral, WithRealFunction_InLinearForm)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -229,6 +243,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies multiple integrators for variational integral by checking form assembly.
   TEST(Rodin_Variational_Integral, MultipleIntegrators)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -237,7 +252,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Combine mass and stiffness: \int (u v + \nablau \cdot \nablav) dx
+    // Combine mass and stiffness: \int (u v + \nabla u \cdot \nabla v) dx
     bf = Integral(u, v) + Integral(Grad(u), Grad(v));
     bf.assemble();
 
@@ -252,6 +267,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies linear form with vector function for variational integral by checking form assembly.
   TEST(Rodin_Variational_Integral, LinearForm_WithVectorFunction)
   {
     constexpr size_t vdim = 2;

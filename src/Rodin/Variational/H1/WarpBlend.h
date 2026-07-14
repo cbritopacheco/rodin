@@ -21,6 +21,7 @@
 
 #define RODIN_VARIATIONAL_H1_WARPBLEND_TOLERANCE 1e-14
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -91,9 +92,9 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief Optimized blending parameter \alpha for triangular warp-blend.
+   * @brief Optimized blending parameter α for triangular warp-blend.
    *
-   * Provides the blending parameter \alpha for different polynomial degrees,
+   * Provides the blending parameter α for different polynomial degrees,
    * empirically optimized to minimize the Lebesgue constant.
    * Values follow Hesthaven & Warburton, "Nodal DG Methods" (2008).
    *
@@ -139,9 +140,9 @@ namespace Rodin::Variational
   };
 
   /**
-   * @brief Optimized blending parameter \alpha for tetrahedral warp-blend.
+   * @brief Optimized blending parameter α for tetrahedral warp-blend.
    *
-   * Provides the blending parameter \alpha for different polynomial degrees,
+   * Provides the blending parameter α for different polynomial degrees,
    * empirically optimized for tetrahedra.
    *
    * @tparam K Polynomial degree.
@@ -270,7 +271,7 @@ namespace Rodin::Variational
    * The algorithm:
    * 1. Converts reference coordinates to equilateral triangle coordinates
    * 2. Computes edge-based warp contributions using 1D GLL warping
-   * 3. Blends contributions using barycentric weights with parameter \alpha
+   * 3. Blends contributions using barycentric weights with parameter α
    * 4. Converts back to reference triangle coordinates
    *
    * @tparam K Polynomial degree.
@@ -311,7 +312,7 @@ namespace Rodin::Variational
         };
 
         constexpr Real SQRT3     = static_cast<Real>(1.7320508075688772);
-        constexpr Real INV_SQRT3 = static_cast<Real>(1.0) / SQRT3;
+        constexpr Real invSqrT3 = static_cast<Real>(1.0) / SQRT3;
 
         const Real alpha = TriangleBlend<K>::getAlpha();
 
@@ -342,17 +343,17 @@ namespace Rodin::Variational
           for (size_t i = 0; i <= K - j; ++i, ++idx)
           {
             // Skip vertices
-            const bool is_v1 = (i == 0   && j == 0);
-            const bool is_v2 = (i == K   && j == 0);
-            const bool is_v3 = (i == 0   && j == K);
-            if (is_v1 || is_v2 || is_v3)
+            const bool isV1 = (i == 0 && j == 0);
+            const bool isV2 = (i == K && j == 0);
+            const bool isV3 = (i == 0 && j == K);
+            if (isV1 || isV2 || isV3)
               continue;
 
             // Skip edge nodes (we will overwrite them with exact GLL nodes)
-            const bool on_e12 = (j == 0);         // v1–v2
-            const bool on_e31 = (i == 0);         // v3–v1
-            const bool on_e23 = (i + j == K);     // v2–v3
-            if (on_e12 || on_e31 || on_e23)
+            const bool onE12 = (j == 0);         // v1–v2
+            const bool onE31 = (i == 0);         // v3–v1
+            const bool onE23 = (i + j == K);     // v2–v3
+            if (onE12 || onE31 || onE23)
               continue;
 
             // Strictly interior node: apply full 2D warp–blend.
@@ -368,7 +369,7 @@ namespace Rodin::Variational
 
             // To equilateral coordinates
             Real x = -L2 + L3;
-            Real y = (-L2 - L3 + static_cast<Real>(2.0) * L1) * INV_SQRT3;
+            Real y = (-L2 - L3 + static_cast<Real>(2.0) * L1) * invSqrT3;
 
             // 2D warp–blend shift
             const auto d = WarpShiftFace2D<K>::apply(L1, L2, L3, alpha);
@@ -379,13 +380,11 @@ namespace Rodin::Variational
             y += dy;
 
             // Back: equilateral → barycentric (inverse mapping)
-            L1 =  y * INV_SQRT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
-            L2 = -static_cast<Real>(0.5) * x
-               - static_cast<Real>(0.5) * y * INV_SQRT3
-               + static_cast<Real>(1.0) / static_cast<Real>(3.0);
-            L3 =  static_cast<Real>(0.5) * x
-               - static_cast<Real>(0.5) * y * INV_SQRT3
-               + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+            L1 = y * invSqrT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+            L2 = -static_cast<Real>(0.5) * x - static_cast<Real>(0.5) * y * invSqrT3 +
+              static_cast<Real>(1.0) / static_cast<Real>(3.0);
+            L3 = static_cast<Real>(0.5) * x - static_cast<Real>(0.5) * y * invSqrT3 +
+              static_cast<Real>(1.0) / static_cast<Real>(3.0);
 
             // Normalize barycentric (should be very close to 1)
             const Real sumL = L1 + L2 + L3;
@@ -411,33 +410,33 @@ namespace Rodin::Variational
 
         // Edge e12: from v1=(0,0) to v2=(1,0), j=0, i=0..K
         // Param t ∈ [0,1], t = x = L2; L1 = 1 - t, L3 = 0.
-        for (size_t i_edge = 0; i_edge <= K; ++i_edge)
+        for (size_t iEdge = 0; iEdge <= K; ++iEdge)
         {
-          const size_t idx_edge = i_edge; // rowOffset(0) + i_edge = i_edge
-          const Real t = gll01[i_edge];
+          const size_t idxEdge = iEdge; // rowOffset(0) + i_edge = i_edge
+          const Real t = gll01[iEdge];
           const Real L2 = t;
           const Real L3 = static_cast<Real>(0.0);
 
-          assert(idx_edge < nodes.size());
-          assert(nodes[idx_edge].size() == 2);
-          nodes[idx_edge][0] = L2;
-          nodes[idx_edge][1] = L3;
+          assert(idxEdge < nodes.size());
+          assert(nodes[idxEdge].size() == 2);
+          nodes[idxEdge][0] = L2;
+          nodes[idxEdge][1] = L3;
         }
 
         // Edge e31: from v1=(0,0) to v3=(0,1), i=0, j=0..K
         // Param t ∈ [0,1], t = y = L3; L1 = 1 - t, L2 = 0.
-        for (size_t j_edge = 0; j_edge <= K; ++j_edge)
+        for (size_t jEdge = 0; jEdge <= K; ++jEdge)
         {
-          const size_t idx_edge = rowOffset(j_edge); // i=0
-          const Real t = gll01[j_edge];
+          const size_t idxEdge = rowOffset(jEdge); // i=0
+          const Real t = gll01[jEdge];
 
           const Real L2 = static_cast<Real>(0.0);
           const Real L3 = t;
 
-          assert(idx_edge < nodes.size());
-          assert(nodes[idx_edge].size() == 2);
-          nodes[idx_edge][0] = L2;
-          nodes[idx_edge][1] = L3;
+          assert(idxEdge < nodes.size());
+          assert(nodes[idxEdge].size() == 2);
+          nodes[idxEdge][0] = L2;
+          nodes[idxEdge][1] = L3;
         }
 
         // Edge e23: from v2=(1,0) to v3=(0,1), nodes with i+j=K.
@@ -445,19 +444,19 @@ namespace Rodin::Variational
         // On this edge: L1 = 0, L2 = 1 - t, L3 = t.
         //
         // Equispaced enumeration: for each j in [0..K], i = K - j.
-        for (size_t j_edge = 0; j_edge <= K; ++j_edge)
+        for (size_t jEdge = 0; jEdge <= K; ++jEdge)
         {
-          const size_t i_edge = K - j_edge;
-          const size_t idx_edge = rowOffset(j_edge) + i_edge;
-          const Real t = gll01[j_edge];
+          const size_t iEdge = K - jEdge;
+          const size_t idxEdge = rowOffset(jEdge) + iEdge;
+          const Real t = gll01[jEdge];
 
           const Real L3 = t;
           const Real L2 = static_cast<Real>(1.0) - t;
 
-          assert(idx_edge < nodes.size());
-          assert(nodes[idx_edge].size() == 2);
-          nodes[idx_edge][0] = L2;
-          nodes[idx_edge][1] = L3;
+          assert(idxEdge < nodes.size());
+          assert(nodes[idxEdge].size() == 2);
+          nodes[idxEdge][0] = L2;
+          nodes[idxEdge][1] = L3;
         }
       }
   };
@@ -512,8 +511,7 @@ namespace Rodin::Variational
         return layerOffset(k) + rowOffsetWithinLayer(k, j) + i;
       }
 
-      static inline void set_from_bary(
-        Math::SpatialPoint& p, Real L2, Real L3, Real L4)
+      static inline void setFromBary(Math::SpatialPoint& p, Real L2, Real L3, Real L4)
       {
         assert(p.size() == 3);
         p[0] = L2;
@@ -759,7 +757,7 @@ namespace Rodin::Variational
         //    (exactly one barycentric integer is 0, others > 0)
         // -------------------------------------------------------------------
         constexpr Real SQRT3     = static_cast<Real>(1.7320508075688772);
-        constexpr Real INV_SQRT3 = static_cast<Real>(1.0) / SQRT3;
+        constexpr Real invSqrT3 = static_cast<Real>(1.0) / SQRT3;
 
         for (size_t k = 0; k <= K; ++k)
         {
@@ -801,16 +799,35 @@ namespace Rodin::Variational
               L[2] = static_cast<Real>(l3) * invK;
               L[3] = static_cast<Real>(l4) * invK;
 
-              int i_zero = -1;
-              if (l1 == 0) i_zero = 0;
-              else if (l2 == 0) i_zero = 1;
-              else if (l3 == 0) i_zero = 2;
-              else i_zero = 3;
+              int iZero = -1;
+              if (l1 == 0)
+                iZero = 0;
+              else if (l2 == 0)
+                iZero = 1;
+              else if (l3 == 0)
+                iZero = 2;
+              else
+                iZero = 3;
 
               int ia, ib, ic;
-              if (i_zero == 0) { ia = 1; ib = 2; ic = 3; }       // face v2-v3-v4 (L1=0)
-              else if (i_zero == 1) { ia = 0; ib = 2; ic = 3; }  // face v1-v3-v4 (L2=0)
-              else if (i_zero == 2) { ia = 0; ib = 1; ic = 3; }  // face v1-v2-v4 (L3=0)
+              if (iZero == 0)
+              {
+                ia = 1;
+                ib = 2;
+                ic = 3;
+              } // face v2-v3-v4 (L1=0)
+              else if (iZero == 1)
+              {
+                ia = 0;
+                ib = 2;
+                ic = 3;
+              } // face v1-v3-v4 (L2=0)
+              else if (iZero == 2)
+              {
+                ia = 0;
+                ib = 1;
+                ic = 3;
+              } // face v1-v2-v4 (L3=0)
               else { ia = 0; ib = 1; ic = 2; }                   // face v1-v2-v3 (L4=0)
 
               Real La = L[ia];
@@ -826,7 +843,7 @@ namespace Rodin::Variational
 
               // Map to equilateral triangle coordinates
               Real x = -Lb + Lc;
-              Real y = (-Lb - Lc + static_cast<Real>(2.0) * La) * INV_SQRT3;
+              Real y = (-Lb - Lc + static_cast<Real>(2.0) * La) * invSqrT3;
 
               // 2D warp–blend on face
               const auto d = WarpShiftFace2D<K>::apply(La, Lb, Lc, alphaT);
@@ -837,25 +854,25 @@ namespace Rodin::Variational
               y += dy;
 
               // Back: equilateral → barycentric (La_new,Lb_new,Lc_new)
-              Real La_new = y * INV_SQRT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
-              Real Lb_new = -static_cast<Real>(0.5) * x
-                          - static_cast<Real>(0.5) * y * INV_SQRT3
-                          + static_cast<Real>(1.0) / static_cast<Real>(3.0);
-              Real Lc_new =  static_cast<Real>(0.5) * x
-                          - static_cast<Real>(0.5) * y * INV_SQRT3
-                          + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+              Real laNew = y * invSqrT3 + static_cast<Real>(1.0) / static_cast<Real>(3.0);
+              Real lbNew = -static_cast<Real>(0.5) * x -
+                static_cast<Real>(0.5) * y * invSqrT3 +
+                static_cast<Real>(1.0) / static_cast<Real>(3.0);
+              Real lcNew = static_cast<Real>(0.5) * x -
+                static_cast<Real>(0.5) * y * invSqrT3 +
+                static_cast<Real>(1.0) / static_cast<Real>(3.0);
 
-              La_new = std::max(static_cast<Real>(0.0), La_new);
-              Lb_new = std::max(static_cast<Real>(0.0), Lb_new);
-              Lc_new = std::max(static_cast<Real>(0.0), Lc_new);
+              laNew = std::max(static_cast<Real>(0.0), laNew);
+              lbNew = std::max(static_cast<Real>(0.0), lbNew);
+              lcNew = std::max(static_cast<Real>(0.0), lcNew);
 
-              Real sumL = La_new + Lb_new + Lc_new;
+              Real sumL = laNew + lbNew + lcNew;
               if (sumL > TOL)
               {
                 const Real invSumL = static_cast<Real>(1.0) / sumL;
-                La_new *= invSumL;
-                Lb_new *= invSumL;
-                Lc_new *= invSumL;
+                laNew *= invSumL;
+                lbNew *= invSumL;
+                lcNew *= invSumL;
               }
 
               // Update barycentrics: zero stays 0, others get (La_new,Lb_new,Lc_new)
@@ -864,9 +881,9 @@ namespace Rodin::Variational
                               static_cast<Real>(0.0),
                               static_cast<Real>(0.0)};
 
-              Lnew[ia] = La_new;
-              Lnew[ib] = Lb_new;
-              Lnew[ic] = Lc_new;
+              Lnew[ia] = laNew;
+              Lnew[ib] = lbNew;
+              Lnew[ic] = lcNew;
 
               // Back to reference tetra: (x,y,z) = (L2,L3,L4)
               assert(idx < nodes.size());
@@ -893,7 +910,7 @@ namespace Rodin::Variational
           const Real L4 = static_cast<Real>(0.0);
 
           assert(id < nodes.size());
-          set_from_bary(nodes[id], L2, L3, L4);
+          setFromBary(nodes[id], L2, L3, L4);
         }
 
         // Edge v1-v3: (0,0,0)–(0,1,0): i=0, k=0, j=0..K
@@ -906,7 +923,7 @@ namespace Rodin::Variational
           const Real L4 = static_cast<Real>(0.0);
 
           assert(id < nodes.size());
-          set_from_bary(nodes[id], L2, L3, L4);
+          setFromBary(nodes[id], L2, L3, L4);
         }
 
         // Edge v1-v4: (0,0,0)–(0,0,1): i=0, j=0, k=0..K
@@ -919,7 +936,7 @@ namespace Rodin::Variational
           const Real L4 = t;
 
           assert(id < nodes.size());
-          set_from_bary(nodes[id], L2, L3, L4);
+          setFromBary(nodes[id], L2, L3, L4);
         }
 
         // Edge v2-v3: (1,0,0)–(0,1,0): k=0, i+j=K
@@ -935,7 +952,7 @@ namespace Rodin::Variational
           const Real L4 = static_cast<Real>(0.0);
 
           assert(id < nodes.size());
-          set_from_bary(nodes[id], L2, L3, L4);
+          setFromBary(nodes[id], L2, L3, L4);
         }
 
         // Edge v2-v4: (1,0,0)–(0,0,1): j=0, i+k=K
@@ -951,7 +968,7 @@ namespace Rodin::Variational
           const Real L4 = t;
 
           assert(id < nodes.size());
-          set_from_bary(nodes[id], L2, L3, L4);
+          setFromBary(nodes[id], L2, L3, L4);
         }
 
         // Edge v3-v4: (0,1,0)–(0,0,1): i=0, j+k=K
@@ -967,10 +984,11 @@ namespace Rodin::Variational
           const Real L4 = t;
 
           assert(id < nodes.size());
-          set_from_bary(nodes[id], L2, L3, L4);
+          setFromBary(nodes[id], L2, L3, L4);
         }
       }
   };
 }
 
+/// @endcond
 #endif // RODIN_VARIATIONAL_H1_WARPBLEND_H

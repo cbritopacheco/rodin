@@ -8,8 +8,8 @@
  * @file Mesh.h
  * @brief MMG-aware mesh type extending Rodin local meshes.
  */
-#ifndef RODIN_EXTERNAL_MMG_MESH_H
-#define RODIN_EXTERNAL_MMG_MESH_H
+#ifndef RODIN_MMG_MESH_H
+#define RODIN_MMG_MESH_H
 
 #include "Rodin/Geometry.h"
 
@@ -19,14 +19,30 @@ namespace Rodin::MMG
    * @brief Local mesh enriched with MMG boundary tags and constraints.
    *
    * This class extends @ref Rodin::Geometry::Mesh<Context::Local> with index
-   * sets required by MMG workflows:
+   * sets used by MMG workflows:
    * - corners (`MG_CRN`),
    * - ridges (`MG_GEO`),
    * - required vertices (`MG_REQ`),
-   * - required edges (`MG_REQ` on edges).
+   * - required edges (`MG_REQ` on edges),
+   * - required triangles (`MG_REQ` on triangle entities),
+   * - required tetrahedra (`MG_REQ` on tetrahedra).
    *
    * These sets are preserved when converting to/from native MMG structures via
-   * @ref MMG5::rodinToMesh and @ref MMG5::meshToRodin.
+   * @ref MMG5::rodinToMesh and @ref MMG5::meshToRodin. The optimizer and
+   * level-set wrappers also restore the required index sets when the original
+   * indices are still valid in the remeshed output.
+   * In MMG3D, required triangles refer to boundary triangles exported to MMG's
+   * triangle table; interior faces of a tetrahedral mesh are not exported as
+   * MMG boundary triangles when face-cell incidence is available.
+   *
+   * @note Required entities are MMG constraints, not an unconditional
+   * element-integrity promise for every workflow. In level-set discretization,
+   * required entities that are not crossed by the level set are tested to keep
+   * their metadata and geometry in Rodin's 2D/3D test cases. If the level set
+   * crosses a required entity, MMG may alter that entity in order to conform
+   * the output mesh to the isovalue.
+   *
+   * @see @ref examples-mmg-behavior
    */
   class Mesh : public Geometry::Mesh<Context::Local>
   {
@@ -48,6 +64,12 @@ namespace Rodin::MMG
 
       /// Index set of required edges in the mesh.
       using RequiredEdgeIndex = IndexSet;
+
+      /// Index set of required triangles in the mesh.
+      using RequiredTriangleIndex = IndexSet;
+
+      /// Index set of required tetrahedra in the mesh.
+      using RequiredTetrahedronIndex = IndexSet;
 
       /**
        * @brief Class used to build MMG::Mesh instances.
@@ -73,7 +95,9 @@ namespace Rodin::MMG
               m_cornerIndex(std::move(other.m_cornerIndex)),
               m_ridgeIndex(std::move(other.m_ridgeIndex)),
               m_requiredVertexIndex(std::move(other.m_requiredVertexIndex)),
-              m_requiredEdgeIndex(std::move(other.m_requiredEdgeIndex))
+              m_requiredEdgeIndex(std::move(other.m_requiredEdgeIndex)),
+              m_requiredTriangleIndex(std::move(other.m_requiredTriangleIndex)),
+              m_requiredTetrahedronIndex(std::move(other.m_requiredTetrahedronIndex))
           {}
 
           /**
@@ -88,49 +112,79 @@ namespace Rodin::MMG
           // any inherited builder method.
           // ----------------------------------------------------------------
 
-          /** @copydoc Parent::Builder::reserve */
+          /**
+           * @brief Reserves storage for entities of a given dimension.
+           * @param d Entity dimension.
+           * @param count Number of entities to reserve.
+           * @returns Reference to this builder.
+           */
           Builder& reserve(size_t d, size_t count)
           {
             Parent::Builder::reserve(d, count);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::initialize */
+          /**
+           * @brief Initializes the builder for a space dimension.
+           * @param sdim Space dimension.
+           * @returns Reference to this builder.
+           */
           Builder& initialize(size_t sdim)
           {
             Parent::Builder::initialize(sdim);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::nodes */
+          /**
+           * @brief Sets the number of mesh nodes.
+           * @param n Number of nodes.
+           * @returns Reference to this builder.
+           */
           Builder& nodes(size_t n)
           {
             Parent::Builder::nodes(n);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(std::initializer_list<Real>) */
+          /**
+           * @brief Adds a vertex from an initializer list.
+           * @param l Vertex coordinates.
+           * @returns Reference to this builder.
+           */
           Builder& vertex(std::initializer_list<Real> l)
           {
             Parent::Builder::vertex(l);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(const Real*) */
+          /**
+           * @brief Adds a vertex from a coordinate pointer.
+           * @param data Pointer to vertex coordinates.
+           * @returns Reference to this builder.
+           */
           Builder& vertex(const Real* data)
           {
             Parent::Builder::vertex(data);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(const Math::SpatialPoint&) */
+          /**
+           * @brief Adds a vertex from a spatial point.
+           * @param x Vertex coordinates.
+           * @returns Reference to this builder.
+           */
           Builder& vertex(const Math::SpatialPoint& x)
           {
             Parent::Builder::vertex(x);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::vertex(const Real (&)[Size]) */
+          /**
+           * @brief Adds a vertex from a fixed-size coordinate array.
+           * @tparam Size Number of coordinates in the array.
+           * @param data Vertex coordinates.
+           * @returns Reference to this builder.
+           */
           template <size_t Size>
           Builder& vertex(const Real (&data)[Size])
           {
@@ -138,7 +192,12 @@ namespace Rodin::MMG
             return *this;
           }
 
-          /** @copydoc Parent::Builder::attribute */
+          /**
+           * @brief Assigns an attribute to a mesh entity.
+           * @param p Pair containing entity dimension and index.
+           * @param attr Optional attribute value.
+           * @returns Reference to this builder.
+           */
           Builder& attribute(
               const std::pair<size_t, Index>& p,
               const Optional<Geometry::Attribute>& attr)
@@ -147,21 +206,36 @@ namespace Rodin::MMG
             return *this;
           }
 
-          /** @copydoc Parent::Builder::polytope(Polytope::Type, std::initializer_list<Index>) */
+          /**
+           * @brief Adds a polytope from an initializer list of vertex indices.
+           * @param t Polytope type.
+           * @param vs Vertex indices.
+           * @returns Reference to this builder.
+           */
           Builder& polytope(Geometry::Polytope::Type t, std::initializer_list<Index> vs)
           {
             Parent::Builder::polytope(t, vs);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::polytope(Polytope::Type, const IndexArray&) */
+          /**
+           * @brief Adds a polytope from an index array.
+           * @param t Polytope type.
+           * @param vs Vertex indices.
+           * @returns Reference to this builder.
+           */
           Builder& polytope(Geometry::Polytope::Type t, const IndexArray& vs)
           {
             Parent::Builder::polytope(t, vs);
             return *this;
           }
 
-          /** @copydoc Parent::Builder::polytope(Polytope::Type, IndexArray&&) */
+          /**
+           * @brief Adds a polytope from a moved index array.
+           * @param t Polytope type.
+           * @param vs Vertex indices.
+           * @returns Reference to this builder.
+           */
           Builder& polytope(Geometry::Polytope::Type t, IndexArray&& vs)
           {
             Parent::Builder::polytope(t, std::move(vs));
@@ -194,6 +268,20 @@ namespace Rodin::MMG
           Builder& requiredEdge(Index edgeIdx);
 
           /**
+           * @brief Marks a triangle as required.
+           * @param[in] triangleIdx Triangle index in the mesh.
+           * @returns Reference to this builder.
+           */
+          Builder& requiredTriangle(Index triangleIdx);
+
+          /**
+           * @brief Marks a tetrahedron as required.
+           * @param[in] tetrahedronIdx Tetrahedron index in the mesh.
+           * @returns Reference to this builder.
+           */
+          Builder& requiredTetrahedron(Index tetrahedronIdx);
+
+          /**
            * @brief Marks a vertex as required.
            * @param[in] vertexIdx Vertex index in the mesh.
            * @returns Reference to this builder.
@@ -212,6 +300,8 @@ namespace Rodin::MMG
           RidgeIndex  m_ridgeIndex; ///< Ridge edge set accumulated during build.
           RequiredVertexIndex m_requiredVertexIndex; ///< Required-vertex set accumulated during build.
           RequiredEdgeIndex m_requiredEdgeIndex; ///< Required-edge set accumulated during build.
+          RequiredTriangleIndex m_requiredTriangleIndex; ///< Required-triangle set accumulated during build.
+          RequiredTetrahedronIndex m_requiredTetrahedronIndex; ///< Required-tetrahedron set accumulated during build.
       };
 
       /**
@@ -242,6 +332,8 @@ namespace Rodin::MMG
         : Parent(other),
           m_cornerIndex(other.m_cornerIndex),
           m_requiredVertexIndex(other.m_requiredVertexIndex),
+          m_requiredTriangleIndex(other.m_requiredTriangleIndex),
+          m_requiredTetrahedronIndex(other.m_requiredTetrahedronIndex),
           m_ridgeIndex(other.m_ridgeIndex),
           m_requiredEdgeIndex(other.m_requiredEdgeIndex)
       {}
@@ -253,6 +345,8 @@ namespace Rodin::MMG
         : Parent(std::move(other)),
           m_cornerIndex(std::move(other.m_cornerIndex)),
           m_requiredVertexIndex(std::move(other.m_requiredVertexIndex)),
+          m_requiredTriangleIndex(std::move(other.m_requiredTriangleIndex)),
+          m_requiredTetrahedronIndex(std::move(other.m_requiredTetrahedronIndex)),
           m_ridgeIndex(std::move(other.m_ridgeIndex)),
           m_requiredEdgeIndex(std::move(other.m_requiredEdgeIndex))
       {}
@@ -265,6 +359,8 @@ namespace Rodin::MMG
         Parent::operator=(std::move(other));
         m_cornerIndex = std::move(other.m_cornerIndex);
         m_requiredVertexIndex = std::move(other.m_requiredVertexIndex);
+        m_requiredTriangleIndex = std::move(other.m_requiredTriangleIndex);
+        m_requiredTetrahedronIndex = std::move(other.m_requiredTetrahedronIndex);
         m_ridgeIndex = std::move(other.m_ridgeIndex);
         m_requiredEdgeIndex = std::move(other.m_requiredEdgeIndex);
         return *this;
@@ -284,11 +380,15 @@ namespace Rodin::MMG
       {
         m_cornerIndex.clear();
         m_requiredVertexIndex.clear();
+        m_requiredTriangleIndex.clear();
+        m_requiredTetrahedronIndex.clear();
         m_ridgeIndex.clear();
         m_requiredEdgeIndex.clear();
         Parent::operator=(std::move(other));
         m_cornerIndex.clear();
         m_requiredVertexIndex.clear();
+        m_requiredTriangleIndex.clear();
+        m_requiredTetrahedronIndex.clear();
         m_ridgeIndex.clear();
         m_requiredEdgeIndex.clear();
         return *this;
@@ -314,6 +414,20 @@ namespace Rodin::MMG
        * @returns Reference to this mesh.
        */
       Mesh& setRequiredEdge(Index edgeIdx);
+
+      /**
+       * @brief Marks a triangle as required.
+       * @param[in] triangleIdx Triangle index.
+       * @returns Reference to this mesh.
+       */
+      Mesh& setRequiredTriangle(Index triangleIdx);
+
+      /**
+       * @brief Marks a tetrahedron as required.
+       * @param[in] tetrahedronIdx Tetrahedron index.
+       * @returns Reference to this mesh.
+       */
+      Mesh& setRequiredTetrahedron(Index tetrahedronIdx);
 
       /**
        * @brief Marks a vertex as required.
@@ -377,6 +491,42 @@ namespace Rodin::MMG
       }
 
       /**
+       * @brief Gets the required-triangle index set.
+       * @returns Mutable set of required triangle indices.
+       */
+      RequiredTriangleIndex& getRequiredTriangles()
+      {
+        return m_requiredTriangleIndex;
+      }
+
+      /**
+       * @brief Gets the required-triangle index set (const).
+       * @returns Immutable set of required triangle indices.
+       */
+      const RequiredTriangleIndex& getRequiredTriangles() const
+      {
+        return m_requiredTriangleIndex;
+      }
+
+      /**
+       * @brief Gets the required-tetrahedron index set.
+       * @returns Mutable set of required tetrahedron indices.
+       */
+      RequiredTetrahedronIndex& getRequiredTetrahedra()
+      {
+        return m_requiredTetrahedronIndex;
+      }
+
+      /**
+       * @brief Gets the required-tetrahedron index set (const).
+       * @returns Immutable set of required tetrahedron indices.
+       */
+      const RequiredTetrahedronIndex& getRequiredTetrahedra() const
+      {
+        return m_requiredTetrahedronIndex;
+      }
+
+      /**
        * @brief Gets the required-vertex index set.
        * @returns Mutable set of required vertex indices.
        */
@@ -424,6 +574,8 @@ namespace Rodin::MMG
     private:
       CornerIndex m_cornerIndex; ///< Corner vertex indices (`MG_CRN`).
       RequiredVertexIndex m_requiredVertexIndex; ///< Required vertex indices (`MG_REQ` on vertices).
+      RequiredTriangleIndex m_requiredTriangleIndex; ///< Required triangle indices (`MG_REQ` on triangle entities).
+      RequiredTetrahedronIndex m_requiredTetrahedronIndex; ///< Required tetrahedron indices (`MG_REQ` on tetrahedra).
 
       RidgeIndex  m_ridgeIndex; ///< Ridge edge indices (`MG_GEO`).
       RequiredEdgeIndex m_requiredEdgeIndex; ///< Required edge indices (`MG_REQ` on edges).

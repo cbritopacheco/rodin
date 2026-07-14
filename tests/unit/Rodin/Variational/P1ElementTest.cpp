@@ -12,6 +12,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test 1 D reference segment for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, SanityTest_1D_Reference_Segment)
   {
     RealP1Element k(Polytope::Type::Segment);
@@ -32,6 +33,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies fuzzy test 1 D reference segment for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, FuzzyTest_1D_Reference_Segment)
   {
     constexpr size_t n = 25;
@@ -50,6 +52,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sanity test 2 D reference triangle for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, SanityTest_2D_Reference_Triangle)
   {
     RealP1Element k(Polytope::Type::Triangle);
@@ -91,6 +94,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies fuzzy test 2 D reference triangle for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, FuzzyTest_2D_Reference_Triangle)
   {
     constexpr size_t n = 25;
@@ -111,6 +115,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P1 element properties: DOF count, order, nodes
+  /// @brief Verifies element properties segment for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, ElementProperties_Segment)
   {
     RealP1Element k(Polytope::Type::Segment);
@@ -128,6 +133,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(node1.x(), 1, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies element properties triangle for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, ElementProperties_Triangle)
   {
     RealP1Element k(Polytope::Type::Triangle);
@@ -151,6 +157,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P1 element derivatives on Segment
+  /// @brief Verifies derivative test 1 D reference segment for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, DerivativeTest_1D_Reference_Segment)
   {
     RealP1Element k(Polytope::Type::Segment);
@@ -173,6 +180,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P1 element derivatives on Triangle
+  /// @brief Verifies derivative test 2 D reference triangle for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, DerivativeTest_2D_Reference_Triangle)
   {
     RealP1Element k(Polytope::Type::Triangle);
@@ -205,6 +213,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test gradient function on Triangle
+  /// @brief Verifies gradient test 2 D reference triangle for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, GradientTest_2D_Reference_Triangle)
   {
     RealP1Element k(Polytope::Type::Triangle);
@@ -240,6 +249,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test partition of unity property: sum of basis functions = 1
+  /// @brief Verifies partition of unity segment for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, PartitionOfUnity_Segment)
   {
     constexpr size_t n = 25;
@@ -255,6 +265,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity triangle for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, PartitionOfUnity_Triangle)
   {
     constexpr size_t n = 25;
@@ -275,6 +286,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P1 element on Tetrahedron
+  /// @brief Verifies sanity test 3 D reference tetrahedron for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, SanityTest_3D_Reference_Tetrahedron)
   {
     RealP1Element k(Polytope::Type::Tetrahedron);
@@ -316,6 +328,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test partition of unity on Tetrahedron
+  /// @brief Verifies partition of unity tetrahedron for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, PartitionOfUnity_Tetrahedron)
   {
     constexpr size_t n = 25;
@@ -336,6 +349,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sanity test 3 D reference pyramid for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, SanityTest_3D_Reference_Pyramid)
   {
     RealP1Element k(Polytope::Type::Pyramid);
@@ -368,6 +382,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(grad_sum(2), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies linear reproduction pyramid for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, LinearReproduction_Pyramid)
   {
     RealP1Element elem(Polytope::Type::Pyramid);
@@ -385,6 +400,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P1 element on Quadrilateral
+  /// @brief Verifies sanity test 2 D reference quadrilateral for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, SanityTest_2D_Reference_Quadrilateral)
   {
     RealP1Element k(Polytope::Type::Quadrilateral);
@@ -412,6 +428,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test partition of unity on Quadrilateral
+  /// @brief Verifies partition of unity quadrilateral for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, PartitionOfUnity_Quadrilateral)
   {
     constexpr size_t n = 25;
@@ -428,6 +445,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity all geometries for final test P1 element real by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Real, PartitionOfUnity_AllGeometries)
   {
     constexpr size_t n = 20;
@@ -479,6 +497,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Segment.
   TEST(FinalTest_P1Element_Real, LagrangeProperty_AllGeometries)
   {
     // Segment
@@ -524,6 +543,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies linear reproduction segment for final test P1 element real by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Real, LinearReproduction_Segment)
   {
     RealP1Element elem(Polytope::Type::Segment);
@@ -541,6 +561,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies linear reproduction triangle for final test P1 element real by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Real, LinearReproduction_Triangle)
   {
     RealP1Element elem(Polytope::Type::Triangle);
@@ -557,6 +578,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated, exact, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies constant derivatives segment for final test P1 element real by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Real, ConstantDerivatives_Segment)
   {
     RealP1Element elem(Polytope::Type::Segment);
@@ -573,6 +595,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(deriv0(p1) + deriv1(p1), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies partition of unity segment for final test P1 element complex by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Complex, PartitionOfUnity_Segment)
   {
     using Complex = std::complex<Real>;
@@ -590,6 +613,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies complex linear reproduction for final test P1 element complex by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Complex, ComplexLinearReproduction)
   {
     using Complex = std::complex<Real>;
@@ -606,6 +630,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated.imag(), exact.imag(), RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies component structure 2 D segment for final test P1 element vector by checking tolerance-based numerical results, exact expected values.
   TEST(FinalTest_P1Element_Vector, ComponentStructure_2D_Segment)
   {
     VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
@@ -626,6 +651,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies linear vector field reproduction for final test P1 element vector by checking tolerance-based numerical results.
   TEST(FinalTest_P1Element_Vector, LinearVectorFieldReproduction)
   {
     VectorP1Element<Real> elem(Polytope::Type::Segment, 2);
@@ -654,6 +680,7 @@ namespace Rodin::Tests::Unit
   // ========================================================================
 
   // Test P1 element on Wedge geometry (3D prismatic element)
+  /// @brief Verifies sanity test 3 D reference wedge for variational real P1 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP1Element, SanityTest_3D_Reference_Wedge)
   {
     RealP1Element k(Polytope::Type::Wedge);
@@ -705,6 +732,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity wedge for variational real P1 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP1Element, PartitionOfUnity_Wedge)
   {
     constexpr size_t n = 25;
@@ -727,6 +755,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies derivative test 3 D reference wedge for variational real P1 element by checking true predicates.
   TEST(Rodin_Variational_RealP1Element, DerivativeTest_3D_Reference_Wedge)
   {
     RealP1Element k(Polytope::Type::Wedge);
@@ -754,6 +783,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test vector P1 element with explicit vector dimensions
+  /// @brief Test vdim=1 (scalar-like).
   TEST(FinalTest_P1Element_Vector, VectorDimensions_1D_2D_3D_Segment)
   {
     // Test vdim=1 (scalar-like)
@@ -804,6 +834,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test vdim=1 on Triangle.
   TEST(FinalTest_P1Element_Vector, VectorDimensions_Triangle)
   {
     // Test vdim=1 on Triangle
@@ -825,6 +856,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test vdim=3 on Tetrahedron (typical 3D case).
   TEST(FinalTest_P1Element_Vector, VectorDimensions_Tetrahedron)
   {
     // Test vdim=3 on Tetrahedron (typical 3D case)
@@ -847,6 +879,7 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(sum_per_component[j], 1.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Test vdim=3 on Wedge.
   TEST(FinalTest_P1Element_Vector, VectorDimensions_Wedge)
   {
     // Test vdim=3 on Wedge
@@ -854,6 +887,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(elem.getCount(), 18);  // 3 components × 6 nodes
   }
 
+  /// @brief Verifies vector dimensions pyramid for final test P1 element vector by checking exact expected values.
   TEST(FinalTest_P1Element_Vector, VectorDimensions_Pyramid)
   {
     VectorP1Element<Real> elem(Polytope::Type::Pyramid, 3);
@@ -864,6 +898,7 @@ namespace Rodin::Tests::Unit
   // LINEARFORM TESTS FOR P1ELEMENT
   // ========================================================================
 
+  /// @brief Test LinearForm evaluation for P1 elements across all geometries.
   TEST(FinalTest_P1Element_LinearForm, ScalarLinearForm_AllGeometries)
   {
     // Test LinearForm evaluation for P1 elements across all geometries
@@ -905,6 +940,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test LinearForm for vector P1 elements.
   TEST(FinalTest_P1Element_LinearForm, VectorLinearForm_AllVectorDimensions)
   {
     // Test LinearForm for vector P1 elements
@@ -940,6 +976,7 @@ namespace Rodin::Tests::Unit
   // GRADIENTFUNCTION TESTS FOR P1ELEMENT
   // ========================================================================
 
+  /// @brief Test that gradient functions work correctly across geometries.
   TEST(FinalTest_P1Element_GradientFunction, GradientConsistency_AllGeometries)
   {
     // Test that gradient functions work correctly across geometries
@@ -987,6 +1024,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test that sum of gradients equals zero (partition of unity property).
   TEST(FinalTest_P1Element_GradientFunction, GradientPartitionProperty)
   {
     // Test that sum of gradients equals zero (partition of unity property)
@@ -1011,6 +1049,7 @@ namespace Rodin::Tests::Unit
   // JACOBIANFUNCTION TESTS FOR P1ELEMENT (VECTOR)
   // ========================================================================
 
+  /// @brief Test Jacobian function structure for vector P1 elements.
   TEST(FinalTest_P1Element_JacobianFunction, JacobianStructure_AllVectorDimensions)
   {
     // Test Jacobian function structure for vector P1 elements
@@ -1039,6 +1078,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test Jacobian for 2D vector field on triangle.
   TEST(FinalTest_P1Element_JacobianFunction, Jacobian2D_Triangle)
   {
     // Test Jacobian for 2D vector field on triangle
@@ -1077,6 +1117,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test Jacobian for 3D vector field on tetrahedron.
   TEST(FinalTest_P1Element_JacobianFunction, Jacobian3D_Tetrahedron)
   {
     // Test Jacobian for 3D vector field on tetrahedron
@@ -1103,6 +1144,7 @@ namespace Rodin::Tests::Unit
   // INTERPOLATION TESTS FOR P1ELEMENT
   // ========================================================================
 
+  /// @brief Test that P1 element exactly interpolates linear functions.
   TEST(FinalTest_P1Element_Interpolation, LinearFunctionInterpolation_AllGeometries)
   {
     // Test that P1 element exactly interpolates linear functions
@@ -1178,6 +1220,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test vector field interpolation.
   TEST(FinalTest_P1Element_Interpolation, VectorLinearFieldInterpolation)
   {
     // Test vector field interpolation
@@ -1211,6 +1254,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test that gradient of interpolant matches expected gradient.
   TEST(FinalTest_P1Element_Interpolation, GradientInterpolationConsistency)
   {
     // Test that gradient of interpolant matches expected gradient

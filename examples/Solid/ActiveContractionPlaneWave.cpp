@@ -373,24 +373,20 @@ int main(int, char**)
           .setAbsoluteTolerance(1e-9)
           .setRelativeTolerance(1e-7);
     Real previousNewtonResidual = std::numeric_limits<Real>::quiet_NaN();
-    solver.setMonitor([&](const auto& report)
-    {
-      std::cout
-        << "  Newton " << std::setw(2) << report.iterations
-        << " residual = " << report.final_residual
-        << " step = " << report.final_step_norm
-        << " damping = " << report.damping_factor;
+    solver.setMonitor([&](const auto& report) {
+      std::cout << "  Newton " << std::setw(2) << report.iterations
+                << " residual = " << report.finalResidual
+                << " step = " << report.finalStepNorm
+                << " damping = " << report.dampingFactor;
       if (std::isfinite(previousNewtonResidual)
           && previousNewtonResidual > 0.0)
       {
-        std::cout
-          << " ratio = "
-          << report.final_residual / previousNewtonResidual;
+        std::cout << " ratio = " << report.finalResidual / previousNewtonResidual;
       }
       if (report.converged)
         std::cout << " converged";
       std::cout << std::endl;
-      previousNewtonResidual = report.final_residual;
+      previousNewtonResidual = report.finalResidual;
     });
 
     solver.solve(u);
@@ -410,19 +406,16 @@ int main(int, char**)
       + bdfA1 * uPrevious.getData()
       + bdfA2 * uPreviousPrevious.getData();
 
-    std::cout
-      << "  summary:"
-      << " converged = " << (report.converged ? "yes" : "no")
-      << " iterations = " << report.iterations
-      << " final_residual = " << report.final_residual
-      << " |u| = " << u.getData().norm()
-      << " |BDF(u)| = " << bdfData.norm()
-      << " ec = [" << diagnostics.minActiveExtension
-      << ", " << diagnostics.maxActiveExtension << "]"
-      << " max|gamma| = " << diagnostics.maxGamma
-      << " max|beta| = " << diagnostics.maxBeta
-      << " max_local_newton = " << diagnostics.maxLocalIterations
-      << std::endl;
+    std::cout << "  summary:"
+              << " converged = " << (report.converged ? "yes" : "no")
+              << " iterations = " << report.iterations
+              << " finalResidual = " << report.finalResidual
+              << " |u| = " << u.getData().norm() << " |BDF(u)| = " << bdfData.norm()
+              << " ec = [" << diagnostics.minActiveExtension << ", "
+              << diagnostics.maxActiveExtension << "]"
+              << " max|gamma| = " << diagnostics.maxGamma
+              << " max|beta| = " << diagnostics.maxBeta
+              << " max_local_newton = " << diagnostics.maxLocalIterations << std::endl;
 
     uPreviousPrevious = uPrevious;
     uPrevious = u;

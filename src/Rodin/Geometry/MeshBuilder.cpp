@@ -10,6 +10,7 @@
 #include "Rodin/Geometry/PointCloud.h"
 #include "Rodin/Math/Vector.h"
 
+/// @cond RODIN_DOXYGEN_SKIP_IMPLEMENTATION
 namespace Rodin::Geometry
 {
   Mesh<Context::Local>::Builder&
@@ -191,3 +192,4 @@ namespace Rodin::Geometry
     return *this;
   }
 }
+/// @endcond

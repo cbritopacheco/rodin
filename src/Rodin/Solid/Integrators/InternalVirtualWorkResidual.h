@@ -78,13 +78,20 @@ namespace Rodin::Solid
     : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+      /// @brief Constitutive law type.
       using LawType = LawDerived;
+      /// @brief Test function type.
       using TestType = TestFunctionType;
+      /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
+      /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief State finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
       static_assert(Variational::IsTestFunction<TestType>::Value,
@@ -111,6 +118,7 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
+      /// @brief Copy constructor.
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
           m_law(other.m_law),
@@ -167,6 +175,7 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Sets the current polytope and assembles the element residual.
       InternalVirtualWorkResidual& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
@@ -241,22 +250,26 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns an entry of the current element residual vector.
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this residual integrator.
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);

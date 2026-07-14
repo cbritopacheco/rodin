@@ -62,10 +62,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for CG solvers.
   template <class LinearSystem>
   struct Traits<Solver::CG<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -323,4 +325,3 @@ namespace Rodin::Solver
 }
 
 #endif
-

@@ -63,11 +63,14 @@ namespace Rodin::Solid
        * @param lambda First Lamé parameter @f$ \lambda @f$
        * @param mu Second Lamé parameter (shear modulus) @f$ \mu @f$
        */
-      SaintVenantKirchhoff(Real lameFirstParameter, Real shearModulus)
-        : m_lambda(lameFirstParameter), m_mu(shearModulus)
+      SaintVenantKirchhoff(Real lambda, Real mu)
+        : m_lambda(lambda),
+          m_mu(mu)
       {}
 
+      /// @brief Copy constructor.
       SaintVenantKirchhoff(const SaintVenantKirchhoff&) = default;
+      /// @brief Move constructor.
       SaintVenantKirchhoff(SaintVenantKirchhoff&&) = default;
 
       /// @brief Gets the first Lamé parameter.
@@ -76,6 +79,7 @@ namespace Rodin::Solid
       /// @brief Gets the shear modulus.
       Real getShearModulus() const { return m_mu; }
 
+      /// @brief Populates the Green-Lagrange strain and stress cache.
       void setCache(Cache& cache, const ConstitutivePoint& cp) const
       {
         const auto& state = cp.getKinematicState();
@@ -93,12 +97,14 @@ namespace Rodin::Solid
         cache.S = m_lambda * cache.trE * I + 2.0 * m_mu * cache.E;
       }
 
+      /// @brief Returns the stored strain-energy density.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
       {
         return 0.5 * m_lambda * cache.trE * cache.trE
              + m_mu * cache.E.dot(cache.E);
       }
 
+      /// @brief Computes the first Piola-Kirchhoff stress.
       void getFirstPiolaKirchhoffStress(
           Math::SpatialMatrix<Real>& P,
           const Cache& cache,
@@ -108,6 +114,7 @@ namespace Rodin::Solid
         P = cp.getKinematicState().getDeformationGradient() * cache.S;
       }
 
+      /// @brief Computes the material tangent action.
       void getMaterialTangent(
           Math::SpatialMatrix<Real>& dP,
           const Cache& cache,

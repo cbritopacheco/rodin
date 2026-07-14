@@ -162,6 +162,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — Triangle mesh distribution
   // =========================================================================
 
+  /// @brief Verifies distribute triangle each rank has cells and vertices for MPI geometry sharder by checking MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_EachRankHasCellsAndVertices)
   {
     const auto& world = *g_world;
@@ -178,6 +179,7 @@ namespace Rodin::Tests::Unit
       << "Rank " << world.rank() << " has no vertices.";
   }
 
+  /// @brief Verifies distribute triangle global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -214,6 +216,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedGlobal, totalCells);
   }
 
+  /// @brief Verifies distribute triangle global vertex ownership for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_GlobalVertexOwnership)
   {
     const auto& world = *g_world;
@@ -250,6 +253,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — isLocal invariant on each rank
   // =========================================================================
 
+  /// @brief Verifies distribute triangle is local invariant for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_IsLocalInvariant)
   {
     const auto& world = *g_world;
@@ -285,6 +289,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — PolytopeMap bidirectionality on each rank
   // =========================================================================
 
+  /// @brief Verifies distribute triangle polytope map consistency for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_PolytopeMapConsistency)
   {
     const auto& world = *g_world;
@@ -318,6 +323,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — Owner map consistency on each rank
   // =========================================================================
 
+  /// @brief Verifies distribute triangle owner map consistency for MPI geometry sharder by checking MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_OwnerMapConsistency)
   {
     const auto& world = *g_world;
@@ -351,6 +357,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — Dimension and space dimension consistency
   // =========================================================================
 
+  /// @brief Verifies distribute triangle dimension consistency for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Triangle_DimensionConsistency)
   {
     const auto& world = *g_world;
@@ -368,6 +375,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — Quadrilateral mesh
   // =========================================================================
 
+  /// @brief Verifies distribute quadrilateral global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Quadrilateral_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -407,6 +415,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — 1D Segment mesh
   // =========================================================================
 
+  /// @brief Verifies distribute segment global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Segment_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -444,6 +453,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — 3D Tetrahedron mesh
   // =========================================================================
 
+  /// @brief Verifies distribute tetrahedron global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Tetrahedron_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -479,6 +489,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedGlobal, totalCells);
   }
 
+  /// @brief Verifies distribute tetrahedron dimension consistency for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Tetrahedron_DimensionConsistency)
   {
     const auto& world = *g_world;
@@ -496,6 +507,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — 3D Hexahedron mesh
   // =========================================================================
 
+  /// @brief Verifies distribute hexahedron global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Hexahedron_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -535,6 +547,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — 3D Pyramid mesh
   // =========================================================================
 
+  /// @brief Verifies distribute pyramid global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Pyramid_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -574,6 +587,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — 3D Wedge mesh
   // =========================================================================
 
+  /// @brief Verifies distribute wedge global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Wedge_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -613,6 +627,7 @@ namespace Rodin::Tests::Unit
   // MPI Sharder — Mixed 2D mesh (triangles + quadrilaterals)
   // =========================================================================
 
+  /// @brief Verifies distribute mixed 2 D global cell count for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Mixed2D_GlobalCellCount)
   {
     const auto& world = *g_world;
@@ -657,6 +672,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedGlobal, totalCells);
   }
 
+  /// @brief Verifies distribute mixed 2 D global vertex ownership for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Mixed2D_GlobalVertexOwnership)
   {
     const auto& world = *g_world;
@@ -698,6 +714,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedGlobal, totalVerts);
   }
 
+  /// @brief Verifies distribute mixed 2 D is local invariant for MPI geometry sharder by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Sharder, Distribute_Mixed2D_IsLocalInvariant)
   {
     const auto& world = *g_world;
@@ -1385,6 +1402,7 @@ namespace Rodin::Tests::Unit
   // MPIMesh API — asSubMesh, getQuadrature, boundary, perimeter
   // =========================================================================
 
+  /// @brief Verifies as sub mesh throws for MPI geometry mesh by checking exception behavior, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, AsSubMesh_Throws)
   {
     const auto& world = *g_world;
@@ -1404,6 +1422,7 @@ namespace Rodin::Tests::Unit
       << ": const asSubMesh() should throw std::runtime_error.";
   }
 
+  /// @brief Verifies get quadrature for MPI geometry mesh by checking exact expected values, true predicates, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, GetQuadrature)
   {
     const auto& world = *g_world;
@@ -1431,6 +1450,7 @@ namespace Rodin::Tests::Unit
       << ": distributed meshes should accept MPI-attached quadrature points.";
   }
 
+  /// @brief Verifies get boundary face count for MPI geometry mesh by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, GetBoundary_FaceCount)
   {
     const auto& world = *g_world;
@@ -1458,6 +1478,7 @@ namespace Rodin::Tests::Unit
       << ": global owned boundary face count should match parent.";
   }
 
+  /// @brief Verifies is boundary is interface for MPI geometry mesh by checking false predicates, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, IsBoundary_IsInterface)
   {
     const auto& world = *g_world;
@@ -1489,6 +1510,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies get perimeter triangle 2 D for MPI geometry mesh by checking tolerance-based numerical results, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, GetPerimeter_Triangle2D)
   {
     const auto& world = *g_world;
@@ -1508,6 +1530,7 @@ namespace Rodin::Tests::Unit
       << ": distributed perimeter does not match parent.";
   }
 
+  /// @brief Verifies uniform grid triangle for MPI geometry mesh by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, UniformGrid_Triangle)
   {
     const auto& world = *g_world;
@@ -1546,6 +1569,7 @@ namespace Rodin::Tests::Unit
       << ": Manual owned cell sum should match getPolytopeCount(D).";
   }
 
+  /// @brief Verifies uniform grid pyramid for MPI geometry mesh by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, UniformGrid_Pyramid)
   {
     const auto& world = *g_world;
@@ -1589,6 +1613,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies save load round trip for MPI geometry mesh by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, SaveLoad_RoundTrip)
   {
     const auto& world = *g_world;
@@ -1622,6 +1647,7 @@ namespace Rodin::Tests::Unit
     boost::filesystem::remove(tmpPath);
   }
 
+  /// @brief Verifies get interface with faces for MPI geometry mesh by checking MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, GetInterface_WithFaces)
   {
     const auto& world = *g_world;
@@ -2159,6 +2185,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies reconcile options presets for MPI geometry mesh by checking exact expected values, false predicates, MPI behavior.
   TEST(Rodin_MPI_Geometry_Mesh, ReconcileOptions_Presets)
   {
     const auto legacy = Mesh<Context::MPI>::ReconcileOptions();

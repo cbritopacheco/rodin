@@ -16,6 +16,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- Construction ----
 
+  /// @brief Verifies default construction for geometry point cloud by checking exact expected values.
   TEST(Geometry_PointCloud, DefaultConstruction)
   {
     PointCloud pc;
@@ -24,6 +25,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(pc.cols(), 0);
   }
 
+  /// @brief Verifies sized construction 2 D for geometry point cloud by checking exact expected values.
   TEST(Geometry_PointCloud, SizedConstruction2D)
   {
     PointCloud pc(2, 10);
@@ -33,6 +35,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(pc.cols(), 10);
   }
 
+  /// @brief Verifies sized construction 3 D for geometry point cloud by checking exact expected values.
   TEST(Geometry_PointCloud, SizedConstruction3D)
   {
     PointCloud pc(3, 5);
@@ -42,6 +45,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Push back ----
 
+  /// @brief Verifies push back 1 D for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, PushBack1D)
   {
     PointCloud pc;
@@ -51,6 +55,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pc(0, 0), 1.5, 1e-14);
   }
 
+  /// @brief Verifies push back 2 D for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, PushBack2D)
   {
     PointCloud pc;
@@ -61,6 +66,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pc(1, 0), 2.0, 1e-14);
   }
 
+  /// @brief Verifies push back 3 D for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, PushBack3D)
   {
     PointCloud pc;
@@ -72,6 +78,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pc(2, 0), 3.0, 1e-14);
   }
 
+  /// @brief Verifies push back spatial point for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, PushBackSpatialPoint)
   {
     PointCloud pc;
@@ -85,6 +92,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Element access ----
 
+  /// @brief Verifies element access read write for geometry point cloud by checking tolerance-based numerical results.
   TEST(Geometry_PointCloud, ElementAccessReadWrite)
   {
     PointCloud pc(2, 3);
@@ -102,6 +110,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Copy and move ----
 
+  /// @brief Verifies copy construction for geometry point cloud by checking tolerance-based numerical results, exact expected values, copy semantics.
   TEST(Geometry_PointCloud, CopyConstruction)
   {
     PointCloud pc(2, 2);
@@ -115,6 +124,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(copy(1, 1), 4.0, 1e-14);
   }
 
+  /// @brief Verifies move construction for geometry point cloud by checking tolerance-based numerical results, exact expected values, move semantics.
   TEST(Geometry_PointCloud, MoveConstruction)
   {
     PointCloud pc(2, 2);
@@ -128,6 +138,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Resize and reserve ----
 
+  /// @brief Verifies resize for geometry point cloud by checking exact expected values.
   TEST(Geometry_PointCloud, Resize)
   {
     PointCloud pc;
@@ -136,6 +147,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(pc.getCount(), 10);
   }
 
+  /// @brief Verifies clear for geometry point cloud by checking exact expected values.
   TEST(Geometry_PointCloud, Clear)
   {
     PointCloud pc(2, 5);
@@ -146,6 +158,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Matrix views ----
 
+  /// @brief Verifies get matrix for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, GetMatrix)
   {
     PointCloud pc(2, 3);
@@ -160,6 +173,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(mat(1, 2), 6.0, 1e-14);
   }
 
+  /// @brief Verifies get packed matrix for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, GetPackedMatrix)
   {
     PointCloud pc(2, 2);
@@ -175,6 +189,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Multiple push_backs ----
 
+  /// @brief Verifies multiple push backs for geometry point cloud by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PointCloud, MultiplePushBacks)
   {
     PointCloud pc;

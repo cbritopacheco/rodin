@@ -10,6 +10,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies identity is symmetric for variational transpose by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Transpose, IdentityIsSymmetric)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -26,6 +27,7 @@ TEST(Rodin_Variational_Transpose, IdentityIsSymmetric)
   EXPECT_NEAR((val - orig).norm(), 0.0, 1e-10);
 }
 
+/// @brief Verifies copy for variational transpose by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Transpose, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

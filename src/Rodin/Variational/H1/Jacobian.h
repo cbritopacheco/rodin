@@ -35,6 +35,7 @@
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Exceptions/UndeterminedTraceDomainException.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Range, class Data, class Mesh>
@@ -43,8 +44,10 @@ namespace Rodin::FormLanguage
       Variational::GridFunction<
         Variational::H1<K, Range, Mesh>, Data>>>
   {
-    using FESType = Variational::H1<K, Range, Mesh>;
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::H1<K, Range, Mesh>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   template <size_t K, class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -52,9 +55,11 @@ namespace Rodin::FormLanguage
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::H1<K, Range, Mesh>, Space>>>
   {
-    using FESType = Variational::H1<K, Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+      using FESType = Variational::H1<K, Range, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -89,14 +94,19 @@ namespace Rodin::Variational
         Jacobian<GridFunction<H1<K, Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<Scalar>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
@@ -277,9 +287,11 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, SpaceType>;
 
       using Parent      =
@@ -334,7 +346,8 @@ namespace Rodin::Variational
         };
 
         // minimal cache: physical gradients for scalar basis indices alpha
-        std::vector<SpatialVectorType> grad_phys; // size = nscalar, each size = dim
+        /// @brief Cached physical gradients per scalar DOF (size = nscalar).
+        std::vector<SpatialVectorType> gradPhys;
         Key key;
       };
 
@@ -419,10 +432,10 @@ namespace Rodin::Variational
         const H1Element<K, ScalarType> feS(geom);
         const size_t nscalar = feS.getCount();
 
-        if (m_cache.grad_phys.size() != nscalar)
-          m_cache.grad_phys.resize(nscalar);
+        if (m_cache.gradPhys.size() != nscalar)
+          m_cache.gradPhys.resize(nscalar);
 
-        for (auto& g : m_cache.grad_phys)
+        for (auto& g : m_cache.gradPhys)
           if (g.size() != d) g.resize(d);
 
         const auto* tab = qf ? &feS.getTabulation(*qf) : nullptr;
@@ -439,7 +452,7 @@ namespace Rodin::Variational
                 ? tab->getGradient(qp, alpha)[j]
                 : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
-          m_cache.grad_phys[alpha] = JinvT * ref;
+          m_cache.gradPhys[alpha] = JinvT * ref;
         }
 
         return *this;
@@ -458,7 +471,7 @@ namespace Rodin::Variational
         const size_t alpha = local / vdim;
         const size_t comp  = local % vdim;
 
-        assert(alpha < m_cache.grad_phys.size());
+        assert(alpha < m_cache.gradPhys.size());
         assert(vdim <= RangeType::MaxSize);
         assert(d <= RangeType::MaxSize);
 
@@ -466,7 +479,7 @@ namespace Rodin::Variational
         J.setZero();
 
         for (std::uint8_t j = 0; j < d; ++j)
-          J(comp, j) = m_cache.grad_phys[alpha](j);
+          J(comp, j) = m_cache.gradPhys[alpha](j);
 
         return J;
       }
@@ -497,4 +510,5 @@ namespace Rodin::Variational
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, H1<K, Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

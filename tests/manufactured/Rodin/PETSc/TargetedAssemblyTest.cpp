@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Targeted assembly test manufactured regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Targeted Assembly Test manufactured regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the PETSc-backed assembly and solve path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <cassert>
 
 #include <gtest/gtest.h>
@@ -332,32 +340,38 @@ namespace
   }
 #endif
 
+  /// @brief Verifies sequential backend assembles LHS and RHS for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialBackendAssemblesLHSAndRHS)
   {
     checkLocalBackendTargetedAssembly<Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential reassembly keeps nonzero pattern for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialReassemblyKeepsNonzeroPattern)
   {
     checkReassemblyKeepsPattern<Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential reassembly changes nonzero pattern for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialReassemblyChangesNonzeroPattern)
   {
     checkReassemblyChangesPattern<Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential honors new nonzero option before reassembly for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialHonorsNewNonzeroOptionBeforeReassembly)
   {
     checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::Sequential>();
   }
 
+  /// @brief Verifies sequential reuses vectors correctly for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialReusesVectorsCorrectly)
   {
     checkVectorReuse<Assembly::Sequential>();
   }
 
 #ifndef NDEBUG
+  /// @brief Verifies sequential forbids new nonzero before reassembly for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialForbidsNewNonzeroBeforeReassembly)
   {
     checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly<
@@ -366,26 +380,31 @@ namespace
 #endif
 
 #ifdef RODIN_USE_OPENMP
+  /// @brief Verifies open MP backend assembles LHS and RHS for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, OpenMPBackendAssemblesLHSAndRHS)
   {
     checkLocalBackendTargetedAssembly<Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP reassembly keeps nonzero pattern for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, OpenMPReassemblyKeepsNonzeroPattern)
   {
     checkReassemblyKeepsPattern<Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP reassembly changes nonzero pattern for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, OpenMPReassemblyChangesNonzeroPattern)
   {
     checkReassemblyChangesPattern<Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP honors new nonzero option before reassembly for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, OpenMPHonorsNewNonzeroOptionBeforeReassembly)
   {
     checkNewNonzeroOptionHonoredBeforeReassembly<Assembly::OpenMP>();
   }
 
+  /// @brief Verifies open MP reuses vectors correctly for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, OpenMPReusesVectorsCorrectly)
   {
     checkVectorReuse<Assembly::OpenMP>();
@@ -394,6 +413,7 @@ namespace
 #endif
 }
 
+/// @brief Initializes the test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   [[maybe_unused]] PetscErrorCode ierr =

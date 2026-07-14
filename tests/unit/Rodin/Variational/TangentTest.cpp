@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function zero for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, RealFunction_Zero)
   {
     RealFunction f(0.0);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over four for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, RealFunction_PiOverFour)
   {
     RealFunction f(M_PI / 4.0);
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, RealFunction_Pi)
   {
     RealFunction f(M_PI);
@@ -56,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function minus pi over four for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, RealFunction_MinusPiOverFour)
   {
     RealFunction f(-M_PI / 4.0);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), -1.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over six for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, RealFunction_PiOverSix)
   {
     RealFunction f(M_PI / 6.0);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 1.0 / std::sqrt(3.0), 1e-10);
   }
 
+  /// @brief Verifies real function pi over three for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, RealFunction_PiOverThree)
   {
     RealFunction f(M_PI / 3.0);
@@ -101,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), std::sqrt(3.0), 1e-10);
   }
 
+  /// @brief Verifies grid function tan for variational tan by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Tan, GridFunction_Tan)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -122,6 +129,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies chained operations for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, ChainedOperations)
   {
     RealFunction f(M_PI / 6.0);
@@ -138,6 +146,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_tan_f.getValue(p), std::tan(1.0 / std::sqrt(3.0)), 1e-10);
   }
 
+  /// @brief Verifies periodicity for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, Periodicity)
   {
     RealFunction f1(M_PI / 6.0);
@@ -156,6 +165,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan1.getValue(p), tan2.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies small angle for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, SmallAngle)
   {
     RealFunction f(0.1);  // Small angle in radians
@@ -173,6 +183,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 0.1, 1e-2);  // Approximate equality
   }
 
+  /// @brief Verifies tan of sum for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanOfSum)
   {
     RealFunction f1(M_PI / 6.0);  // π/6
@@ -190,6 +201,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_sum.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies tan odd function for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanOddFunction)
   {
     RealFunction f(M_PI / 6.0);
@@ -208,6 +220,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_neg_f.getValue(p), -tan_f.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies tan sin cos identity for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanSinCosIdentity)
   {
     RealFunction f(M_PI / 6.0);
@@ -227,6 +240,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_f.getValue(p), sin_over_cos.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies tan with multiplication for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanWithMultiplication)
   {
     RealFunction f(M_PI / 8.0);
@@ -244,6 +258,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_product.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies tan large angle for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanLargeAngle)
   {
     RealFunction f(3.0 * M_PI);
@@ -260,6 +275,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies tan positive negative for variational tan.
   TEST(Rodin_Variational_Tan, TanPositiveNegative)
   {
     RealFunction f1(M_PI / 6.0);   // First quadrant: positive
@@ -278,6 +294,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(tan2.getValue(p), 0.0);  // tan(5π/6) < 0
   }
 
+  /// @brief Verifies tan secant identity for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanSecantIdentity)
   {
     RealFunction f(M_PI / 6.0);
@@ -299,6 +316,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(identity.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies tan with abs for variational tan by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Tan, TanWithAbs)
   {
     RealFunction f(-M_PI / 4.0);
@@ -315,6 +333,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(tan_abs.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Test multiple special angles.
   TEST(Rodin_Variational_Tan, TanSpecialAngles)
   {
     // Test multiple special angles
@@ -341,6 +360,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test values approaching but not at π/2 where Tan has asymptotes.
   TEST(Rodin_Variational_Tan, TanContinuity)
   {
     // Test values approaching but not at π/2 where Tan has asymptotes

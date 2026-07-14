@@ -71,24 +71,45 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for assembling tuples of bilinear forms.
+   *
+   * Provides the polymorphic interface used by block assembly routines that
+   * collect several bilinear forms into one operator.
+   */
   template <class OperatorType, class ... Solution, class ... TrialFES, class ... TestFES, class ... BlockType>
   class AssemblyBase<OperatorType, Tuple<Variational::BilinearForm<Solution, TrialFES, TestFES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(TrialFES) == sizeof...(TestFES));
+
+      /// @brief Tuple input data type.
       using InputType =
         BilinearFormTupleAssemblyInput<BilinearFormAssemblyInput<TrialFES, TestFES>...>;
 
+      /// @brief Default constructor.
       AssemblyBase() = default;
 
+      /// @brief Copy constructor.
       AssemblyBase(const AssemblyBase&) = default;
 
+      /// @brief Move constructor.
       AssemblyBase(AssemblyBase&&) = default;
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes tuple bilinear form assembly.
+       * @param out Output operator.
+       * @param data Tuple assembly input.
+       */
       virtual void execute(OperatorType& out, const InputType& data) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
@@ -143,27 +164,54 @@ namespace Rodin::Assembly
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for assembling tuples of linear forms.
+   *
+   * Provides the polymorphic interface used by block assembly routines that
+   * collect several linear forms into one vector.
+   */
   template <class VectorType, class ... FES, class ... BlockType>
   class AssemblyBase<VectorType, Tuple<Variational::LinearForm<FES, BlockType>...>>
   {
     public:
       static_assert(sizeof...(FES) == sizeof...(FES));
+
+      /// @brief Tuple input data type.
       using InputType =
         LinearFormTupleAssemblyInput<LinearFormAssemblyInput<FES>...>;
 
+      /// @brief Default constructor.
       AssemblyBase() = default;
 
+      /// @brief Copy constructor.
       AssemblyBase(const AssemblyBase&) = default;
 
+      /// @brief Move constructor.
       AssemblyBase(AssemblyBase&&) = default;
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes tuple linear form assembly.
+       * @param out Output vector.
+       * @param data Tuple assembly input.
+       */
       virtual void execute(VectorType& out, const InputType& data) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for value Dirichlet boundary condition assembly.
+   *
+   * The output map stores constrained DOF indices and their prescribed scalar
+   * values.
+   */
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class AssemblyBase<
     IndexMap<Scalar>,
@@ -172,22 +220,38 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Boundary value function type.
       using ValueType = Variational::FunctionBase<ValueDerived>;
 
+      /// @brief Input data type.
       using InputType = DirichletBCAssemblyInput<Scalar, Solution, FES, ValueType>;
 
+      /// @brief Default constructor.
       AssemblyBase() = default;
 
+      /// @brief Copy constructor.
       AssemblyBase(const AssemblyBase&) = default;
 
+      /// @brief Move constructor.
       AssemblyBase(AssemblyBase&&) = default;
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes Dirichlet value assembly.
+       * @param out Output index map of prescribed values.
+       * @param data Boundary condition input.
+       */
       virtual void execute(IndexMap<ScalarType>& out, const InputType& data) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
@@ -209,105 +273,166 @@ namespace Rodin::Assembly
     : public FormLanguage::Base
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Shape-function expression type.
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
 
+      /// @brief Input data type.
       using InputType =
         DirichletBCShapeFunctionAssemblyInput<Scalar, Sol1, FES1, Derived2, FES2, Sp>;
 
+      /// @brief Output map for slave-to-master identifications.
       using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
 
+      /// @brief Default constructor.
       AssemblyBase() = default;
 
+      /// @brief Copy constructor.
       AssemblyBase(const AssemblyBase&) = default;
 
+      /// @brief Move constructor.
       AssemblyBase(AssemblyBase&&) = default;
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes identification Dirichlet assembly.
+       * @param out Output map of slave DOFs to master DOF coefficients.
+       * @param data Boundary condition input.
+       */
       virtual void execute(OutputType& out, const InputType& data) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for complete single-field problem assembly.
+   */
   template <class LinearSystem, class TrialFunction, class TestFunction>
   class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, TrialFunction, TestFunction>>
     : public FormLanguage::Base
   {
     public:
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Problem body type storing the forms and boundary conditions.
       using ProblemBodyType =
         Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Input data type.
       using InputType =
         ProblemAssemblyInput<ProblemBodyType, TrialFunction, TestFunction>;
 
+      /// @brief Parent class type.
       using Parent =
         FormLanguage::Base;
 
+      /// @brief Default constructor.
       AssemblyBase() = default;
 
+      /// @brief Copy constructor.
       AssemblyBase(const AssemblyBase& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       AssemblyBase(AssemblyBase&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes complete problem assembly.
+       * @param out Output linear system.
+       * @param input Problem assembly input.
+       */
       virtual void execute(LinearSystem& out, const InputType& input) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 
+  /**
+   * @brief Base class for complete mixed problem assembly.
+   */
   template <class LinearSystem, class U1, class U2, class U3, class... Us>
   class AssemblyBase<LinearSystem, Variational::Problem<LinearSystem, U1, U2, U3, Us...>>
     : public FormLanguage::Base
   {
     public:
+      /// @brief Assembled operator type.
       using OperatorType =
         typename FormLanguage::Traits<LinearSystem>::OperatorType;
 
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename FormLanguage::Traits<LinearSystem>::VectorType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<LinearSystem>::ScalarType;
 
+      /// @brief Problem body type storing the forms and boundary conditions.
       using ProblemBodyType =
         Variational::ProblemBody<OperatorType, VectorType, ScalarType>;
 
+      /// @brief Input data type.
       using InputType =
         ProblemAssemblyInput<ProblemBodyType, U1, U2, U3, Us...>;
 
+      /// @brief Parent class type.
       using Parent =
         FormLanguage::Base;
 
+      /// @brief Default constructor.
       AssemblyBase() = default;
 
+      /// @brief Copy constructor.
       AssemblyBase(const AssemblyBase& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       AssemblyBase(AssemblyBase&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Virtual destructor.
       virtual ~AssemblyBase() = default;
 
+      /**
+       * @brief Executes complete mixed problem assembly.
+       * @param out Output linear system.
+       * @param input Mixed problem assembly input.
+       */
       virtual void execute(LinearSystem& out, const InputType& input) const = 0;
 
+      /**
+       * @brief Creates a polymorphic copy.
+       * @return Pointer to a new copy.
+       */
       virtual AssemblyBase* copy() const noexcept = 0;
   };
 }

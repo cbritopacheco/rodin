@@ -1,0 +1,103 @@
+/**
+  @page guides-thread-safety Thread safety and parallelism
+  @brief The thread-safety model of Rodin: what is safe, what is not, and how parallel assembly works
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-threads-model The thread-safety model
+
+  Rodin's model is *coarse-grained*: parallelism happens at the level of
+  mesh iteration inside the assembly backends, not at the level of
+  individual objects. The rules:
+
+  - **Form-language objects are NOT thread-safe.**
+    Every node in the variational language derives from
+    @ref Rodin::FormLanguage::Base "FormLanguage::Base", which is
+    explicitly documented as single-threaded: only one thread may call
+    methods of a given object at a time. Integrators, functions, shape
+    functions, and problems all inherit this contract.
+  - **Sharing is by cloning, not by locking.** Expression trees deep-copy
+    their operands on construction (`copy()`); when parallel code needs
+    per-thread access to an integrator or function, it clones one per
+    thread rather than synchronizing a shared instance. This is the
+    idiomatic pattern — prefer it to adding mutexes.
+  - **Reads of immutable data are safe.** Meshes, connectivity, and
+    finite element spaces are safe to *read* concurrently once fully
+    constructed and computed. Lazily-computed caches inside logically
+    const objects are the exception — they are guarded through the
+    @ref Rodin::Threads "Threads" utilities (below) when
+    `RODIN_THREAD_SAFE` is enabled.
+  - **Mutation is exclusive.** Any operation that mutates a mesh
+    (`setVertexCoordinates`, transformation attachment, connectivity
+    `compute`, builders) or a grid function's data must be externally
+    synchronized. Compute all needed connectivity *before* entering
+    parallel regions.
+
+  @section guides-threads-module The Threads utilities
+
+  The @ref Rodin::Threads "Threads" module provides the primitives the
+  library itself uses:
+
+  - `Threads::Mutex` — mutual exclusion wrapper;
+  - `Threads::Mutable` — guarded mutable state inside logically const
+    objects (lazy caches);
+  - `Threads::Unsafe` — an explicit marker wrapping state that is
+    *deliberately* not synchronized, documenting the single-thread
+    assumption at the type level.
+
+  The `RODIN_THREAD_SAFE` CMake option controls whether guarded paths
+  compile to real synchronization.
+
+  @section guides-threads-assembly Parallel assembly
+
+  The @ref Rodin::Assembly "Assembly" module provides sequential and
+  OpenMP backends (selected by `Assembly/Default.h` according to the
+  build configuration). The OpenMP backend parallelizes the *evaluation*
+  phase — each thread iterates a share of the polytopes, evaluating local
+  integrators into thread-local storage — followed by a merge into the
+  global matrix/vector. Two practical consequences:
+
+  - **Determinism.** Floating-point sums may be reordered between runs
+    with different thread counts; bit-identical reproducibility across
+    thread counts is not guaranteed (equality of results to solver
+    tolerance is).
+  - **Scaling is memory-bound.** Integrand evaluation is
+    bandwidth-limited on typical meshes: speedups plateau at a modest
+    thread count (measurements on laptop-class hardware plateau around
+    4–5 threads and can regress beyond). If assembly is slow, the
+    high-value fix is reducing per-quadrature-point work — hoisting
+    (cell, quadrature)-only quantities into the integrator's bind step —
+    not adding threads.
+
+  MPI-distributed assembly lives in the mirrored `MPI/` module tree and
+  composes with the above (see @ref guides-mpi).
+
+  @section guides-threads-petsc External libraries
+
+  - **PETSc** objects follow PETSc's own threading rules (PETSc is not
+    thread-safe per object); Rodin's PETSc backend drives it from a
+    single thread per rank. Be conservative when combining OpenMP-enabled
+    Rodin assembly with PETSc-backed solves in the same process — when in
+    doubt, pin `OMP_NUM_THREADS=1` for PETSc-dominated runs and let MPI
+    provide the parallelism.
+  - **Eigen** is thread-safe for const operations; its internal
+    OpenMP-parallel products can *nest* with Rodin's OpenMP regions —
+    control nesting with the usual OpenMP environment variables if you
+    observe oversubscription.
+
+  @section guides-threads-writing Writing parallel-friendly code
+
+  When designing a new mesh-sweeping algorithm, follow the house pattern:
+  a read-only **evaluate** phase over polytopes producing independent
+  proposals (parallelizable), then a deterministic **commit** phase
+  applying a non-conflicting subset. This yields order-independent
+  results and makes the parallelism optional rather than structural.
+
+  @section guides-threads-seealso See also
+
+  - @ref guides-mpi — distributed meshes and assembly
+  - @ref guides-petsc — PETSc-backed solves
+  - @ref Rodin::Assembly "Assembly" — backend selection
+*/

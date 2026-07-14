@@ -71,6 +71,27 @@ namespace Rodin::MMG
         mesh.setRequiredVertex(std::stoul(line) - 1);
       }
     }
+
+    find = pos.find(IO::MEDIT::Keyword::RequiredTriangles);
+    if (find != pos.end())
+    {
+      is.seekg(find->second);
+      for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredTriangles); i++)
+      {
+        std::getline(is, line);
+        mesh.setRequiredTriangle(std::stoul(line) - 1);
+      }
+    }
+
+    find = pos.find(IO::MEDIT::Keyword::RequiredTetrahedra);
+    if (find != pos.end())
+    {
+      is.seekg(find->second);
+      for (size_t i = 0; i < count.at(IO::MEDIT::Keyword::RequiredTetrahedra); i++)
+      {
+        std::getline(is, line);
+        mesh.setRequiredTetrahedron(std::stoul(line) - 1);
+      }
+    }
   }
 }
-

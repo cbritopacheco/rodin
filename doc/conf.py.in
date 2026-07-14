@@ -11,6 +11,8 @@ THEME_COLOR = '#22272e'
 
 FAVICON = 'favicon.ico'
 
+SEARCH_NAME_SIZE_BYTES = 2
+
 LINKS_NAVBAR1 = [
     ("Pages", 'pages', [
         ('General concepts', 'guides-index'),

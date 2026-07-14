@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_OBJECT_H
 #define RODIN_PETSC_OBJECT_H
 
@@ -19,12 +25,12 @@ namespace Rodin::PETSc
   /**
    * @brief RAII base class for wrappers around PETSc opaque handles.
    *
-   * Derived classes (e.g. @ref Rodin::Solver::KSP "KSP",
-   * @ref Rodin::Solver::SNES "SNES") must implement getHandle() to expose
+   * Derived classes such as the KSP and SNES solver wrappers must implement
+   * getHandle() to expose
    * their PETSc object, which is used by getComm() to retrieve the
    * associated communicator.
    *
-   * @tparam Handle PETSc handle type (e.g. `::KSP`, `::SNES`).
+   * @tparam Handle PETSc opaque handle type.
    */
   template <class Handle>
   class Object

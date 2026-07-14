@@ -16,6 +16,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- Vertex coordinate access for 2D meshes ----
 
+  /// @brief Verifies XY 2 D mesh for geometry vertex ext by checking false predicates.
   TEST(Geometry_VertexExt, XY_2DMesh)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -29,6 +30,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(y, 0.0);
   }
 
+  /// @brief Verifies operator paren index 2 D for geometry vertex ext by checking exact expected values, false predicates.
   TEST(Geometry_VertexExt, Operator_ParenIndex_2D)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(c1, v.y());
   }
 
+  /// @brief Verifies get coordinates 2 D for geometry vertex ext by checking exact expected values, false predicates.
   TEST(Geometry_VertexExt, GetCoordinates_2D)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -55,6 +58,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Vertex coordinate access for 3D meshes ----
 
+  /// @brief Verifies XYZ 3 D mesh for geometry vertex ext by checking false predicates.
   TEST(Geometry_VertexExt, XYZ_3DMesh)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -69,6 +73,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(z, 0.0);
   }
 
+  /// @brief Verifies get coordinates 3 D for geometry vertex ext by checking exact expected values, false predicates.
   TEST(Geometry_VertexExt, GetCoordinates_3D)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -84,6 +89,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Multiple vertex traversal ----
 
+  /// @brief Verifies traverse all triangle for geometry vertex ext by checking exact expected values.
   TEST(Geometry_VertexExt, TraverseAll_Triangle)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -98,6 +104,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, mesh.getVertexCount());
   }
 
+  /// @brief Verifies traverse all tetrahedron for geometry vertex ext by checking exact expected values.
   TEST(Geometry_VertexExt, TraverseAll_Tetrahedron)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -114,6 +121,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Face access ----
 
+  /// @brief Verifies boundary face triangle for geometry face ext by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_FaceExt, BoundaryFace_Triangle)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -126,6 +134,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(face.getDimension(), 1);
   }
 
+  /// @brief Verifies interface face triangle for geometry face ext by checking true predicates, false predicates.
   TEST(Geometry_FaceExt, InterfaceFace_Triangle)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -139,6 +148,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Cell access ----
 
+  /// @brief Verifies cell iteration triangle for geometry cell ext by checking exact expected values, true predicates.
   TEST(Geometry_CellExt, CellIteration_Triangle)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -153,6 +163,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, mesh.getCellCount());
   }
 
+  /// @brief Verifies cell iteration quadrilateral for geometry cell ext by checking exact expected values.
   TEST(Geometry_CellExt, CellIteration_Quadrilateral)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {4, 4});
@@ -166,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(count, mesh.getCellCount());
   }
 
+  /// @brief Verifies cell adjacency triangle for geometry cell ext by checking false predicates.
   TEST(Geometry_CellExt, CellAdjacency_Triangle)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -184,6 +196,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Polytope geometry type ----
 
+  /// @brief Triangle mesh.
   TEST(Geometry_PolytopeExt, GetGeometry_AllTypes)
   {
     // Triangle mesh
@@ -211,6 +224,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Polytope isCell/isFace/isVertex ----
 
+  /// @brief Verifies is cell is face is vertex for geometry polytope ext by checking true predicates, false predicates.
   TEST(Geometry_PolytopeExt, IsCell_IsFace_IsVertex)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -244,6 +258,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Polytope getVertices ----
 
+  /// @brief Verifies get vertices triangle for geometry polytope ext by checking exact expected values, false predicates.
   TEST(Geometry_PolytopeExt, GetVertices_Triangle)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -253,6 +268,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(key.size(), 3); // Triangle has 3 vertices
   }
 
+  /// @brief Verifies get vertices quadrilateral for geometry polytope ext by checking exact expected values, false predicates.
   TEST(Geometry_PolytopeExt, GetVertices_Quadrilateral)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
@@ -262,6 +278,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(key.size(), 4); // Quad has 4 vertices
   }
 
+  /// @brief Verifies get vertices tetrahedron for geometry polytope ext by checking exact expected values, false predicates.
   TEST(Geometry_PolytopeExt, GetVertices_Tetrahedron)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});

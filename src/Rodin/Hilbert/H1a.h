@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MODELS_DISTANCE_H1A_H
-#define RODIN_MODELS_DISTANCE_H1A_H
+#ifndef RODIN_HILBERT_H1A_H
+#define RODIN_HILBERT_H1A_H
 
 #include "Rodin/Solver/CG.h"
 

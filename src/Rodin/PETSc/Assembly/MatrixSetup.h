@@ -54,20 +54,47 @@ namespace Rodin::PETSc::Assembly
   class MatrixSetup
   {
     public:
+      /**
+       * @brief Requested PETSc matrix layout and setup policy.
+       *
+       * The sizes are passed directly to @c MatSetSizes when the wrapped
+       * matrix has not yet been assembled. Optional type and options processing
+       * are applied only during that first structural setup.
+       */
       struct Options
       {
-        PetscInt localRows;
-        PetscInt localCols;
-        PetscInt globalRows;
-        PetscInt globalCols;
-        MatType type = nullptr;
-        bool setFromOptions = false;
+        /// @brief Local row count owned by this MPI rank, or @c PETSC_DECIDE.
+          PetscInt localRows;
+          /// @brief Local column count owned by this MPI rank, or @c PETSC_DECIDE.
+          PetscInt localCols;
+          /// @brief Global row count of the matrix.
+          PetscInt globalRows;
+          /// @brief Global column count of the matrix.
+          PetscInt globalCols;
+          /// @brief Optional PETSc matrix type to set during initial setup.
+          MatType type = nullptr;
+          /// @brief Whether to call @c MatSetFromOptions during initial setup.
+          bool setFromOptions = false;
       };
 
+      /**
+       * @brief Wraps an existing PETSc matrix handle.
+       * @param[in] matrix Matrix to prepare before assembly.
+       */
       explicit MatrixSetup(::Mat matrix)
         : m_matrix(matrix)
       {}
 
+      /**
+       * @brief Prepares the matrix for a fresh assembly pass.
+       *
+       * Virgin matrices receive their sizes, optional type, optional command
+       * line options, and @c MatSetUp. Already-assembled compatible matrices
+       * keep their structure and are zeroed for reuse.
+       *
+       * @param[in] options Requested layout and setup policy.
+       * @returns PETSc error code from the final zeroing operation.
+       */
       PetscErrorCode prepare(const Options& options) const
       {
         PetscInt curRows = 0;

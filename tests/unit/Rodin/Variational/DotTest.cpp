@@ -12,6 +12,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies vector functions construction for variational dot.
   TEST(Rodin_Variational_Dot, VectorFunctions_Construction)
   {
     VectorFunction vf1{1.0, 2.0};
@@ -20,6 +21,7 @@ namespace Rodin::Tests::Unit
     auto dot_product = Dot(vf1, vf2);
   }
 
+  /// @brief Verifies vector functions value for variational dot by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Dot, VectorFunctions_Value)
   {
     VectorFunction vf1{3.0, 4.0};
@@ -39,6 +41,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 10.0, 1e-10);
   }
 
+  /// @brief Verifies shape functions construction for variational dot.
   TEST(Rodin_Variational_Dot, ShapeFunctions_Construction)
   {
     constexpr size_t vdim = 2;
@@ -50,6 +53,7 @@ namespace Rodin::Tests::Unit
     auto dot_uv = Dot(u, v);
   }
 
+  /// @brief Verifies gradients construction for variational dot.
   TEST(Rodin_Variational_Dot, Gradients_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -60,6 +64,7 @@ namespace Rodin::Tests::Unit
     auto dot_grads = Dot(Grad(u), Grad(v));
   }
 
+  /// @brief Verifies copy for variational dot by checking copy semantics.
   TEST(Rodin_Variational_Dot, Copy)
   {
     VectorFunction vf1{1.0, 2.0};
@@ -73,6 +78,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies with vector function and shape function for variational dot.
   TEST(Rodin_Variational_Dot, WithVectorFunctionAndShapeFunction)
   {
     constexpr size_t vdim = 2;
@@ -84,6 +90,7 @@ namespace Rodin::Tests::Unit
     auto dot_force_v = Dot(force, v);
   }
 
+  /// @brief Verifies in linear form for variational dot by checking form assembly.
   TEST(Rodin_Variational_Dot, InLinearForm)
   {
     constexpr size_t vdim = 2;
@@ -100,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(vector.size(), 0);
   }
 
+  /// @brief Verifies in bilinear form for variational dot by checking form assembly.
   TEST(Rodin_Variational_Dot, InBilinearForm)
   {
     constexpr size_t vdim = 2;
@@ -118,6 +126,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.cols(), 0);
   }
 
+  /// @brief Verifies zero vectors for variational dot by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Dot, ZeroVectors)
   {
     VectorFunction vf1{0.0, 0.0};
@@ -136,6 +145,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 0.0, 1e-10);
   }
 
+  /// @brief Verifies orthogonal vectors for variational dot by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Dot, OrthogonalVectors)
   {
     VectorFunction vf1{1.0, 0.0};
@@ -154,6 +164,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 0.0, 1e-10);
   }
 
+  /// @brief Verifies parallel vectors for variational dot by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Dot, ParallelVectors)
   {
     VectorFunction vf1{2.0, 3.0};
@@ -173,6 +184,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 26.0, 1e-10);
   }
 
+  /// @brief Verifies 3 D vectors for variational dot by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Dot, 3D_Vectors)
   {
     VectorFunction vf1{1.0, 2.0, 3.0};
@@ -192,6 +204,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value, 32.0, 1e-10);
   }
 
+  /// @brief Verifies copy constructor for variational dot by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_Dot, CopyConstructor)
   {
     VectorFunction vf1{7.5, -2.3};

@@ -12,6 +12,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies to stringstream for serialization mesh by checking exact expected values, serialization round trips.
   TEST(Rodin_Serialization_Mesh, to_stringstream)
   {
     Mesh original;

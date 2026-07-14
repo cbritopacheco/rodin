@@ -18,8 +18,8 @@
  * boundary tags and provides high-level operators that internally dispatch to
  * MMG2D, MMG3D, or MMGS depending on mesh dimension and manifold type.
  */
-#ifndef RODIN_EXTERNAL_MMG_H
-#define RODIN_EXTERNAL_MMG_H
+#ifndef RODIN_MMG_H
+#define RODIN_MMG_H
 
 #include "MMG/MMG5.h"
 

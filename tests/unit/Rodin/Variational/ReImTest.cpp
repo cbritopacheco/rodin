@@ -14,6 +14,7 @@ using namespace Rodin::Variational;
 
 // --- Re tests ---
 
+/// @brief Verifies real part for variational re by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Re, RealPart)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -27,6 +28,7 @@ TEST(Rodin_Variational_Re, RealPart)
   EXPECT_NEAR(re.getValue(p), 3.0, 1e-10);
 }
 
+/// @brief Verifies pure imaginary for variational re by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Re, PureImaginary)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -40,6 +42,7 @@ TEST(Rodin_Variational_Re, PureImaginary)
   EXPECT_NEAR(re.getValue(p), 0.0, 1e-10);
 }
 
+/// @brief Verifies negative values for variational re by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Re, NegativeValues)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -53,6 +56,7 @@ TEST(Rodin_Variational_Re, NegativeValues)
   EXPECT_NEAR(re.getValue(p), -2.5, 1e-10);
 }
 
+/// @brief Verifies copy for variational re by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Re, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -69,6 +73,7 @@ TEST(Rodin_Variational_Re, Copy)
 
 // --- Im tests ---
 
+/// @brief Verifies imaginary part for variational im by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Im, ImaginaryPart)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -82,6 +87,7 @@ TEST(Rodin_Variational_Im, ImaginaryPart)
   EXPECT_NEAR(im.getValue(p), 4.0, 1e-10);
 }
 
+/// @brief Verifies pure real for variational im by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Im, PureReal)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -95,6 +101,7 @@ TEST(Rodin_Variational_Im, PureReal)
   EXPECT_NEAR(im.getValue(p), 0.0, 1e-10);
 }
 
+/// @brief Verifies negative values for variational im by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Im, NegativeValues)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -108,6 +115,7 @@ TEST(Rodin_Variational_Im, NegativeValues)
   EXPECT_NEAR(im.getValue(p), -6.0, 1e-10);
 }
 
+/// @brief Verifies copy for variational im by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Im, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -124,6 +132,7 @@ TEST(Rodin_Variational_Im, Copy)
 
 // --- Re + Im identity test ---
 
+/// @brief Test: Re(f)^2 + Im(f)^2 = |f|^2.
 TEST(Rodin_Variational_ReIm, ReImReconstruct)
 {
   // Test: Re(f)^2 + Im(f)^2 = |f|^2

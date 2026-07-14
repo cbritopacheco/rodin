@@ -15,6 +15,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Average of a constant function across any face should equal the constant.
   TEST(Rodin_Variational_Average, ConstantFunction_AverageEqualsConstant)
   {
     // Average of a constant function across any face should equal the constant
@@ -28,6 +29,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(avg_f.getValue(p), 42.0, 1e-10);
   }
 
+  /// @brief Average of a constant vector function should equal the same vector.
   TEST(Rodin_Variational_Average, ConstantVectorFunction_AverageEqualsConstant)
   {
     // Average of a constant vector function should equal the same vector
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(1), 7.0, 1e-10);
   }
 
+  /// @brief Average of a continuous P1 grid function should equal the function value.
   TEST(Rodin_Variational_Average, GridFunction_ContinuousFunction_AverageEqualsValue)
   {
     // Average of a continuous P1 grid function should equal the function value
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(avg_gf.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies copy construction for variational average by checking tolerance-based numerical results, true predicates, copy semantics.
   TEST(Rodin_Variational_Average, CopyConstruction)
   {
     RealFunction f(9.0);
@@ -72,6 +76,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(avg_copy.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies move construction for variational average by checking tolerance-based numerical results, true predicates, move semantics.
   TEST(Rodin_Variational_Average, MoveConstruction)
   {
     RealFunction f(9.0);
@@ -85,6 +90,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(avg_moved.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies polymorphic copy for variational average by checking tolerance-based numerical results, true predicates, copy semantics.
   TEST(Rodin_Variational_Average, PolymorphicCopy)
   {
     RealFunction f(11.0);
@@ -98,6 +104,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(copy->getValue(p), 11.0, 1e-10);
   }
 
+  /// @brief For a constant function, Jump=0 and Average=constant.
   TEST(Rodin_Variational_Average, JumpAndAverage_Consistency)
   {
     // For a constant function, Jump=0 and Average=constant

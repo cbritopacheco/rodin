@@ -10,6 +10,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies mixed order grad grad assembles for variational H1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_H1QuadratureRule, MixedOrder_GradGrad_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -30,6 +31,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies mixed order jacobian assembles for variational H1 quadrature rule by checking exact expected values, form assembly.
   TEST(Rodin_Variational_H1QuadratureRule, MixedOrder_Jacobian_Assembles)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -51,6 +53,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mat.norm(), 0.0);
   }
 
+  /// @brief Verifies vector mass matches grid function linear form for variational H1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_H1QuadratureRule, VectorMass_MatchesGridFunctionLinearForm)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});

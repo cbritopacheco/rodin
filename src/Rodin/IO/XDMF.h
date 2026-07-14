@@ -304,7 +304,9 @@ namespace Rodin::IO
       class Grid
       {
         public:
+          /// @brief Copy constructor.
           Grid(const Grid&) = default;
+          /// @brief Copy assignment operator.
           Grid& operator=(const Grid&) = default;
 
           /**
@@ -419,6 +421,7 @@ namespace Rodin::IO
       explicit
       XDMF(const boost::filesystem::path& stem);
 
+#ifdef RODIN_USE_MPI
       /**
        * @brief Constructs an XDMF writer in distributed (MPI) mode.
        *
@@ -445,7 +448,6 @@ namespace Rodin::IO
        * xdmf.close();
        * ```
        */
-#ifdef RODIN_USE_MPI
       XDMF(MPI_Comm comm,
            const boost::filesystem::path& stem,
            size_t rootRank = 0);
@@ -629,6 +631,7 @@ namespace Rodin::IO
        */
       size_t getRootRank() const noexcept;
 
+      /// @brief Flushes the XDMF XML document without closing the writer.
       void flush() const;
 
     private:
@@ -647,30 +650,33 @@ namespace Rodin::IO
       /// @brief Internal record for one temporal snapshot.
       struct SnapshotRecord
       {
-        struct AttributeRecord
-        {
-          std::string name;
-          Center center = Center::Node;
-          size_t dimension = 1;
-          boost::filesystem::path file;
-          bool isStatic = false;  ///< True when the attribute uses a static (once-written) HDF5 file.
-        };
+          /// @brief Attribute metadata recorded for one snapshot.
+          struct AttributeRecord
+          {
+              std::string name; ///< Attribute display name.
+              Center center = Center::Node; ///< Attribute centering.
+              size_t dimension = 1; ///< Attribute vector dimension.
+              boost::filesystem::path file; ///< Attribute HDF5 file path.
+              bool isStatic =
+                false; ///< True when the attribute uses a static (once-written) HDF5 file.
+          };
 
-        struct MeshAttributeRecord
-        {
-          std::string name;
-          Center center = Center::Cell;
-          size_t topologicalDimension = 0;
-        };
+          /// @brief Mesh-attached attribute metadata recorded for one snapshot.
+          struct MeshAttributeRecord
+          {
+              std::string name; ///< Attribute display name.
+              Center center = Center::Cell; ///< Attribute centering.
+              size_t topologicalDimension = 0; ///< Mesh topological dimension.
+          };
 
         /// @brief Per-rank mesh metadata cached during write().
         struct PieceMeta
         {
-          std::uint64_t vertexCount = 0;
-          std::uint64_t cellCount = 0;
-          std::uint64_t meshDimension = 0;
-          std::uint64_t spaceDimension = 0;
-          std::uint64_t topologySize = 0;
+            std::uint64_t vertexCount = 0; ///< Number of visualization vertices.
+            std::uint64_t cellCount = 0; ///< Number of visualization cells.
+            std::uint64_t meshDimension = 0; ///< Topological mesh dimension.
+            std::uint64_t spaceDimension = 0; ///< Spatial embedding dimension.
+            std::uint64_t topologySize = 0; ///< Number of topology entries.
         };
 
         Real time = 0;
@@ -734,6 +740,7 @@ namespace Rodin::IO
 
   // ---- template method implementations ------------------------------------
 
+  /// @copydoc XDMF::Grid::setMesh
   template <class MeshType>
   XDMF::Grid& XDMF::Grid::setMesh(const MeshType& mesh, MeshPolicy policy)
   {
@@ -752,6 +759,7 @@ namespace Rodin::IO
     return *this;
   }
 
+  /// @copydoc XDMF::Grid::add(const GridFunctionType&, Center, AttributePolicy)
   template <class GridFunctionType>
   XDMF::Grid& XDMF::Grid::add(const GridFunctionType& gf, Center center, AttributePolicy policy)
   {
@@ -765,6 +773,7 @@ namespace Rodin::IO
     return add(std::string(name->data(), name->size()), gf, center, policy);
   }
 
+  /// @copydoc XDMF::Grid::add(const std::string&, const GridFunctionType&, Center, AttributePolicy)
   template <class GridFunctionType>
   XDMF::Grid& XDMF::Grid::add(
       const std::string& name,
