@@ -47,6 +47,7 @@ namespace Rodin::Location
   class AABB
   {
     public:
+      /// @brief Builds a locator bound to a fixed mesh.
       explicit AABB(const MeshType& mesh)
         : m_mesh(mesh),
           m_tolerance(Real(1e-10)),
@@ -78,6 +79,7 @@ namespace Rodin::Location
         return m_referenceTolerance;
       }
 
+      /// @brief Sets the reference-space containment slack.
       AABB& setReferenceTolerance(Real tolerance)
       {
         m_referenceTolerance = tolerance;
@@ -98,6 +100,13 @@ namespace Rodin::Location
         return *this;
       }
 
+      /**
+       * @brief Locates a physical point on a polytope of the requested dimension.
+       *
+       * Returns an empty optional when the point is outside every candidate
+       * polytope, when the coordinate dimension is incompatible with the mesh,
+       * or when the inverse transformation does not pass the residual checks.
+       */
       Optional<Geometry::Point> locate(
         size_t dimension, const Math::SpatialPoint& x) const
       {
@@ -116,6 +125,7 @@ namespace Rodin::Location
         return {};
       }
 
+      /// @brief Locates a physical point on a cell of the mesh dimension.
       Optional<Geometry::Point> locate(const Math::SpatialPoint& x) const
       {
         return locate(m_mesh.get().getDimension(), x);

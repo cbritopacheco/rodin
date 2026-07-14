@@ -11,9 +11,12 @@
 
 namespace Rodin::Adaptation
 {
+  /// @brief Activation rule for quality and admissibility metric terms.
   enum class WNGIRMetricActivation
   {
+    /// @brief Activate the metric contribution with a sharp threshold.
     Hard,
+    /// @brief Activate the metric contribution with a smooth transition.
     Smooth
   };
 
@@ -28,8 +31,9 @@ namespace Rodin::Adaptation
       Real gammaObs = 1;          ///< surface observation metric weight.
       bool residualStabilizedObservationMetric =
         true; ///< Add residual damping to observation metric.
-      Real initialGuessGamma = 1000;
-      Real initialGuessCapH = 2;
+      Real initialGuessGamma = 1000; ///< Normal-offset initializer metric weight.
+      Real initialGuessCapH =
+        2; ///< Cap normal-offset initialization by this multiple of h.
       Real gammaJ = 1;            ///< j-barrier weight.
       Real gammaQ = 1;            ///< Q-barrier weight.
       Real jSafe = 1e-2;          ///< barrier floor on j.
@@ -41,19 +45,21 @@ namespace Rodin::Adaptation
     /// This changes the Riesz metric only; no quality force is added to the
     /// right-hand side.
     /// gammaQual ≤ 0 disables the Q hinge.
-      Real gammaQual = 1;
+      Real gammaQual = 1; ///< Relative-distortion quality metric weight.
       Real qStar = Real(1.75); ///< Relative-distortion hinge threshold.
     /// Optional one-sided size hinge:
     ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
     /// Disabled by default. Inversion is handled by the near-zero j barrier
     /// and the true-geometry line search, allowing small well-shaped cells.
-      Real gammaSize = 0;
+      Real gammaSize = 0; ///< Jacobian size-hinge metric weight.
       Real jStar = Real(0.3); ///< Jacobian size-hinge threshold.
-      WNGIRMetricActivation metricActivation = WNGIRMetricActivation::Hard;
-      Real qualitySmoothDelta = Real(0.1);
-      Real jBarrierSmoothDelta = Real(0.05);
-      Real qBarrierSmoothDelta = Real(0.1);
-      Real metricActivationEpsilon = Real(1e-8);
+      WNGIRMetricActivation metricActivation =
+        WNGIRMetricActivation::Hard; ///< Activation rule for metric hinges.
+      Real qualitySmoothDelta = Real(0.1); ///< Smooth quality-hinge transition width.
+      Real jBarrierSmoothDelta = Real(0.05); ///< Smooth j-barrier transition width.
+      Real qBarrierSmoothDelta = Real(0.1); ///< Smooth Q-barrier transition width.
+      Real metricActivationEpsilon =
+        Real(1e-8); ///< Positive guard for smooth activation.
       Real omegaMin = 0.1;        ///< active-set threshold on ω.
       Real alphaMin = 1e-4;       ///< line-search floor.
       bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
@@ -63,13 +69,15 @@ namespace Rodin::Adaptation
       Real activeSupTol = 0;      ///< ≤0 ⇒ 10h².
       Real activeRMSOverHTol = 0; ///< >0 enables scale-aware RMS stopping.
       Real activeSupOverHTol = 0; ///< >0 enables scale-aware sup stopping.
-      bool geometryAwareTolerances = true;
-      Real rmsFloor2D = Real(0.05);
-      Real supFloor2D = Real(0.25);
-      Real rmsFloor3D = Real(0.03);
-      Real supFloor3D = Real(0.20);
-      Real rmsNormalJumpFactor = Real(0.03);
-      Real supNormalJumpFactor = Real(0.05);
+      bool geometryAwareTolerances = true; ///< Enable dimension-aware residual floors.
+      Real rmsFloor2D = Real(0.05); ///< Minimum RMS residual floor in 2D, divided by h.
+      Real supFloor2D = Real(0.25); ///< Minimum sup residual floor in 2D, divided by h.
+      Real rmsFloor3D = Real(0.03); ///< Minimum RMS residual floor in 3D, divided by h.
+      Real supFloor3D = Real(0.20); ///< Minimum sup residual floor in 3D, divided by h.
+      Real rmsNormalJumpFactor =
+        Real(0.03); ///< RMS tolerance factor multiplying the normal-jump estimate.
+      Real supNormalJumpFactor =
+        Real(0.05); ///< Sup tolerance factor multiplying the normal-jump estimate.
       Real energyStagTol = 1e-4; ///< Relative energy stagnation tolerance.
       Real stepTol = 0;           ///< ≤0 ⇒ 1e-4·h.
       Real acceptedStepOverHTol =

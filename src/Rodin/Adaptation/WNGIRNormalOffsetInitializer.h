@@ -16,6 +16,7 @@
 
 namespace Rodin::Adaptation::Detail
 {
+  /// @cond RODIN_INTERNAL
   template <class PhiDerived, class GradDerived, class TrialFunction, class TestFunction>
   class WNGIRNormalOffsetMetric final
     : public Variational::LocalBilinearFormIntegratorBase<
@@ -250,6 +251,7 @@ namespace Rodin::Adaptation::Detail
       const Geometry::Polytope* m_polytope = nullptr;
       Math::Vector<Real> m_vector;
   };
+  /// @endcond
 }
 
 #endif
