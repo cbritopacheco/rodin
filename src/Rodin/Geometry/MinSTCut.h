@@ -71,27 +71,27 @@ namespace Rodin::Geometry
       {
         /// Multiplicative scale applied to every pairwise capacity
         /// (Potts smoothing strength lambda).
-          Real lambdaScale = 1;
+        Real lambdaScale = 1;
 
         /// Multiplicative scale applied to every unary cost.
-          Real unaryScale = 1;
+        Real unaryScale = 1;
 
         /// If `|moment[i]| >= farFieldThreshold` the cell `i` is pinned
         /// to `sign(-moment[i])` by injecting a large unary on the
         /// opposite terminal. Disabled when negative.
-          Real farFieldThreshold = -1;
+        Real farFieldThreshold = -1;
 
         /// Per-edge multiplier replacing `lambdaScale` on the i-th edge.
         /// Use for zero-level-aware facet weighting (e.g. down-weight
         /// pairwise term where |phi| is small so the cut prefers to
         /// align with the actual interface).
         /// Size must be `edges.size()` or `0` (disabled).
-          std::vector<Real> perEdgeLambda;
+        std::vector<Real> perEdgeLambda;
 
         /// Per-cell free/fixed mask. `cellInBand[i] == false` pins cell
         /// `i` to `sign(-moment[i])` via a large unary. Size must be
         /// `volumes.size()` or `0` (disabled, all cells free).
-          std::vector<Boolean> cellInBand;
+        std::vector<Boolean> cellInBand;
       };
 
       /// @brief Returns the unary cost of labeling a cell Inside, given its

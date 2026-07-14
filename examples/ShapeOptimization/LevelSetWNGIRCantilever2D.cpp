@@ -68,7 +68,7 @@ namespace
   constexpr Attribute Gamma0 = 1;               // free outer       (bdr attr 1)
   constexpr Attribute GammaD = 2;               // clamped left     (bdr attr 2)
   constexpr Attribute GammaN = 3;               // loaded right-mid (bdr attr 3)
-  constexpr Attribute Gamma = 4;               // free interface   (bdr attr 4)
+  constexpr Attribute Gamma = 4; // free interface   (bdr attr 4)
 
   // Lame coefficients (plane, matching LevelSetCantilever2D).
   constexpr Real muLame = 0.3846;
@@ -512,7 +512,7 @@ int main(int argc, char** argv)
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");      // WNGIR fit
   GridFunction dJ(vh);
-  dJ.setName("dJ");            // shape velocity
+  dJ.setName("dJ"); // shape velocity
 
   // Reusable background-space objects. The background mesh connectivity is
   // fixed; only coefficients, attributes, and vertex coordinates are updated.

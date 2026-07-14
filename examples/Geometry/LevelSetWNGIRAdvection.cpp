@@ -150,70 +150,69 @@ namespace
 
     // grad phi = (dx/r, dy/r) - dR/dtheta * grad(theta).
     // grad(theta) = (-dy / r^2, dx / r^2).
-      Vec2 grad(const Vec2& p) const
-      {
-        const Real dx = p(0) - cx;
-        const Real dy = p(1) - cy;
-        const Real r2 = dx * dx + dy * dy;
-        const Real r = std::max(std::sqrt(r2), Real(1e-14));
-        const Real theta = std::atan2(dy, dx);
-        const Real dRdtheta = -amp * k * std::sin(k * theta + phase);
-        const Real r2safe = std::max(r2, Real(1e-28));
-        return vec2(
-          dx / r - dRdtheta * (-dy / r2safe), dy / r - dRdtheta * (dx / r2safe));
-      }
+    Vec2 grad(const Vec2& p) const
+    {
+      const Real dx = p(0) - cx;
+      const Real dy = p(1) - cy;
+      const Real r2 = dx * dx + dy * dy;
+      const Real r = std::max(std::sqrt(r2), Real(1e-14));
+      const Real theta = std::atan2(dy, dx);
+      const Real dRdtheta = -amp * k * std::sin(k * theta + phase);
+      const Real r2safe = std::max(r2, Real(1e-28));
+      return vec2(dx / r - dRdtheta * (-dy / r2safe), dy / r - dRdtheta * (dx / r2safe));
+    }
 
-      // Hess phi = Hess(r) - R'(theta) Hess(theta) - R''(theta) grad(theta) grad(theta)^T.
-      //
-      //   Hess(r)_ij = (delta_ij - dx_i dx_j / r^2) / r,
-      //
-      //   grad(theta) = (-dy, dx) / r^2,
-      //
-      //   Hess(theta)_xx = 2 dx dy / r^4,
-      //   Hess(theta)_yy = -2 dx dy / r^4,
-      //   Hess(theta)_xy = (dy^2 - dx^2) / r^4.
-      //
-      // Consumed by the PSD-projected full-Newton tangent.
-      Math::SpatialMatrix<Real> hess(const Vec2& p) const
-      {
-        const Real dx = p(0) - cx;
-        const Real dy = p(1) - cy;
-        const Real r2 = dx * dx + dy * dy;
-        const Real r = std::max(std::sqrt(r2), Real(1e-14));
-        const Real r3 = r * r * r;
-        const Real r4 = r2 * r2;
+    // Hess phi = Hess(r) - R'(theta) Hess(theta) - R''(theta) grad(theta) grad(theta)^T.
+    //
+    //   Hess(r)_ij = (delta_ij - dx_i dx_j / r^2) / r,
+    //
+    //   grad(theta) = (-dy, dx) / r^2,
+    //
+    //   Hess(theta)_xx = 2 dx dy / r^4,
+    //   Hess(theta)_yy = -2 dx dy / r^4,
+    //   Hess(theta)_xy = (dy^2 - dx^2) / r^4.
+    //
+    // Consumed by the PSD-projected full-Newton tangent.
+    Math::SpatialMatrix<Real> hess(const Vec2& p) const
+    {
+      const Real dx = p(0) - cx;
+      const Real dy = p(1) - cy;
+      const Real r2 = dx * dx + dy * dy;
+      const Real r = std::max(std::sqrt(r2), Real(1e-14));
+      const Real r3 = r * r * r;
+      const Real r4 = r2 * r2;
 
-        const Real theta = std::atan2(dy, dx);
-        const Real ka = k * theta + phase;
-        const Real Rpp = -amp * k * std::sin(ka);
-        const Real Rpp2 = -amp * k * k * std::cos(ka);
+      const Real theta = std::atan2(dy, dx);
+      const Real ka = k * theta + phase;
+      const Real Rpp = -amp * k * std::sin(ka);
+      const Real Rpp2 = -amp * k * k * std::cos(ka);
 
-        // Hess(r)
-        Math::SpatialMatrix<Real> Hr(2, 2);
-        Hr(0, 0) = (Real(1) - dx * dx / r2) / r; // = dy^2 / r^3
-        Hr(1, 1) = (Real(1) - dy * dy / r2) / r;
-        Hr(0, 1) = -dx * dy / r3;
-        Hr(1, 0) = Hr(0, 1);
+      // Hess(r)
+      Math::SpatialMatrix<Real> Hr(2, 2);
+      Hr(0, 0) = (Real(1) - dx * dx / r2) / r; // = dy^2 / r^3
+      Hr(1, 1) = (Real(1) - dy * dy / r2) / r;
+      Hr(0, 1) = -dx * dy / r3;
+      Hr(1, 0) = Hr(0, 1);
 
-        // Hess(theta)
-        Math::SpatialMatrix<Real> Ht(2, 2);
-        Ht(0, 0) = Real(2) * dx * dy / r4;
-        Ht(1, 1) = -Real(2) * dx * dy / r4;
-        Ht(0, 1) = (dy * dy - dx * dx) / r4;
-        Ht(1, 0) = Ht(0, 1);
+      // Hess(theta)
+      Math::SpatialMatrix<Real> Ht(2, 2);
+      Ht(0, 0) = Real(2) * dx * dy / r4;
+      Ht(1, 1) = -Real(2) * dx * dy / r4;
+      Ht(0, 1) = (dy * dy - dx * dx) / r4;
+      Ht(1, 0) = Ht(0, 1);
 
-        // grad(theta) outer product
-        const Vec2 gth = vec2(-dy / r2, dx / r2);
-        Math::SpatialMatrix<Real> GG(2, 2);
-        GG(0, 0) = gth(0) * gth(0);
-        GG(0, 1) = gth(0) * gth(1);
-        GG(1, 0) = GG(0, 1);
-        GG(1, 1) = gth(1) * gth(1);
+      // grad(theta) outer product
+      const Vec2 gth = vec2(-dy / r2, dx / r2);
+      Math::SpatialMatrix<Real> GG(2, 2);
+      GG(0, 0) = gth(0) * gth(0);
+      GG(0, 1) = gth(0) * gth(1);
+      GG(1, 0) = GG(0, 1);
+      GG(1, 1) = gth(1) * gth(1);
 
-        Math::SpatialMatrix<Real> H(2, 2);
-        H = Hr - Rpp * Ht - Rpp2 * GG;
-        return H;
-      }
+      Math::SpatialMatrix<Real> H(2, 2);
+      H = Hr - Rpp * Ht - Rpp2 * GG;
+      return H;
+    }
   };
 
   // -------------------------------------------------------------------------
