@@ -53,8 +53,8 @@ namespace Rodin::Solid
   template <class LawDerived, class TestFunctionType, class DisplacementType>
   class InternalVirtualWorkResidual;
 
-  template <class LawDerived, class TrialFunctionType,
-            class TestFunctionType, class DisplacementType>
+  template <class LawDerived, class TrialFunctionType, class TestFunctionType,
+    class DisplacementType>
   class InternalVirtualWorkTangent;
 
   template <class Law, class State>

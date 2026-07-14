@@ -29,9 +29,7 @@ namespace
 
       template <class TrialFunctionType, class TestFunctionType>
       ToggleLocalBilinearIntegrator(
-          const TrialFunctionType& u,
-          const TestFunctionType& v,
-          const PetscScalar* offdiag)
+        const TrialFunctionType& u, const TestFunctionType& v, const PetscScalar* offdiag)
         : Parent(u, v),
           m_offdiag(offdiag)
       {}
@@ -78,16 +76,16 @@ namespace
   void checkPETScReassemblyKeepsExplicitZeroStructuralEntries()
   {
     auto mesh = Mesh<Context::Local>::Builder()
-      .initialize(1)
-      .nodes(2)
-      .vertex({0.0})
-      .vertex({1.0})
-      .polytope(Polytope::Type::Segment, {0, 1})
-      .finalize();
+                  .initialize(1)
+                  .nodes(2)
+                  .vertex({0.0})
+                  .vertex({1.0})
+                  .polytope(Polytope::Type::Segment, {0, 1})
+                  .finalize();
 
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
 
     PetscScalar offdiag = 0;
     using LinearSystemType = PETSc::Math::LinearSystem;
@@ -97,17 +95,15 @@ namespace
     ToggleLocalBilinearIntegrator integrator(u, v, &offdiag);
     ProblemBodyType body(integrator);
 
-    Assembly::ProblemAssemblyInput<
-      ProblemBodyType,
-      decltype(u), decltype(v)> input(body, u, v);
+    Assembly::ProblemAssemblyInput<ProblemBodyType, decltype(u), decltype(v)> input(
+      body, u, v);
 
     LinearSystemType ls(PETSC_COMM_SELF);
     Assembler<LinearSystemType, ProblemType> assembler;
     assembler.execute(ls, input);
 
     auto& A = ls.getOperator();
-    PetscErrorCode ierr =
-      MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    PetscErrorCode ierr = MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
 
     offdiag = 2;
@@ -613,12 +609,12 @@ namespace
 
   void checkPETScStandaloneOpenMPFormsMatchSequential()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
 
     LinearForm lf(v);
     lf = Integral(RealFunction(2.0), v);
@@ -633,8 +629,8 @@ namespace
 
     PETSc::Assembly::Sequential<::Vec, LFType> seqLF;
     PETSc::Assembly::OpenMP<::Vec, LFType> ompLF;
-    seqLF.execute(seqVec, { fes, lf.getIntegrators() });
-    ompLF.execute(ompVec, { fes, lf.getIntegrators() });
+    seqLF.execute(seqVec, {fes, lf.getIntegrators()});
+    ompLF.execute(ompVec, {fes, lf.getIntegrators()});
     expectSameStandaloneVector(seqVec, ompVec);
 
     ierr = VecDestroy(&seqVec);
@@ -655,10 +651,10 @@ namespace
 
     PETSc::Assembly::Sequential<::Mat, BFType> seqBF;
     PETSc::Assembly::OpenMP<::Mat, BFType> ompBF;
-    seqBF.execute(seqMat, {
-        fes, fes, bf.getLocalIntegrators(), bf.getGlobalIntegrators() });
-    ompBF.execute(ompMat, {
-        fes, fes, bf.getLocalIntegrators(), bf.getGlobalIntegrators() });
+    seqBF.execute(
+      seqMat, {fes, fes, bf.getLocalIntegrators(), bf.getGlobalIntegrators()});
+    ompBF.execute(
+      ompMat, {fes, fes, bf.getLocalIntegrators(), bf.getGlobalIntegrators()});
     expectSameStandaloneMatrix(seqMat, ompMat);
 
     ierr = MatDestroy(&seqMat);

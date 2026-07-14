@@ -65,48 +65,45 @@ namespace Rodin::Tests::Unit
       {
         case 1:
         {
-          builder
-            .nodes(3)
-            .vertex({ 0.0 })
-            .vertex({ 1.0 })
-            .vertex({ 2.0 })
-            .polytope(Polytope::Type::Segment, { 0, 1 })
-            .attribute({ 1, 0 }, 11)
-            .polytope(Polytope::Type::Segment, { 1, 2 })
-            .attribute({ 1, 1 }, 22);
+          builder.nodes(3)
+            .vertex({0.0})
+            .vertex({1.0})
+            .vertex({2.0})
+            .polytope(Polytope::Type::Segment, {0, 1})
+            .attribute({1, 0}, 11)
+            .polytope(Polytope::Type::Segment, {1, 2})
+            .attribute({1, 1}, 22);
           break;
         }
         case 2:
         {
-          builder
-            .nodes(5)
-            .vertex({ 0.0, 0.0 })
-            .vertex({ 1.0, 0.0 })
-            .vertex({ 0.0, 1.0 })
-            .vertex({ 2.0, 0.0 })
-            .vertex({ 2.0, 1.0 })
-            .polytope(Polytope::Type::Triangle, { 0, 1, 2 })
-            .attribute({ 2, 0 }, 11)
-            .polytope(Polytope::Type::Quadrilateral, { 1, 3, 4, 2 })
-            .attribute({ 2, 1 }, 22);
+          builder.nodes(5)
+            .vertex({0.0, 0.0})
+            .vertex({1.0, 0.0})
+            .vertex({0.0, 1.0})
+            .vertex({2.0, 0.0})
+            .vertex({2.0, 1.0})
+            .polytope(Polytope::Type::Triangle, {0, 1, 2})
+            .attribute({2, 0}, 11)
+            .polytope(Polytope::Type::Quadrilateral, {1, 3, 4, 2})
+            .attribute({2, 1}, 22);
           break;
         }
         case 3:
         {
-          builder
-            .nodes(8)
-            .vertex({ 0.0, 0.0, 0.0 })
-            .vertex({ 1.0, 0.0, 0.0 })
-            .vertex({ 1.0, 1.0, 0.0 })
-            .vertex({ 0.0, 1.0, 0.0 })
-            .vertex({ 0.0, 0.0, 1.0 })
-            .vertex({ 1.0, 0.0, 1.0 })
-            .vertex({ 1.0, 1.0, 1.0 })
-            .vertex({ 0.0, 1.0, 1.0 })
-            .polytope(Polytope::Type::Tetrahedron, { 0, 1, 2, 4 })
-            .attribute({ 3, 0 }, 11)
-            .polytope(Polytope::Type::Hexahedron, { 0, 1, 2, 3, 4, 5, 6, 7 })
-            .attribute({ 3, 1 }, 22);
+          builder.nodes(8)
+            .vertex({0.0, 0.0, 0.0})
+            .vertex({1.0, 0.0, 0.0})
+            .vertex({1.0, 1.0, 0.0})
+            .vertex({0.0, 1.0, 0.0})
+            .vertex({0.0, 0.0, 1.0})
+            .vertex({1.0, 0.0, 1.0})
+            .vertex({1.0, 1.0, 1.0})
+            .vertex({0.0, 1.0, 1.0})
+            .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 4})
+            .attribute({3, 0}, 11)
+            .polytope(Polytope::Type::Hexahedron, {0, 1, 2, 3, 4, 5, 6, 7})
+            .attribute({3, 1}, 22);
           break;
         }
         default:
@@ -173,8 +170,7 @@ namespace Rodin::Tests::Unit
     }
 
     void expectSameMeshWithAttributes(
-        const Mesh<Context::Local>& actual,
-        const Mesh<Context::Local>& expected)
+      const Mesh<Context::Local>& actual, const Mesh<Context::Local>& expected)
     {
       expectSameMeshShape(actual, expected);
 
@@ -184,8 +180,8 @@ namespace Rodin::Tests::Unit
         {
           EXPECT_EQ(actual.getGeometry(d, i), expected.getGeometry(d, i))
             << "polytope (" << d << ", " << i << ")";
-          EXPECT_TRUE(Polytope::Key::SymmetricEquality()(
-              actual.getConnectivity().getPolytope(d, i),
+          EXPECT_TRUE(
+            Polytope::Key::SymmetricEquality()(actual.getConnectivity().getPolytope(d, i),
               expected.getConnectivity().getPolytope(d, i)))
             << "polytope (" << d << ", " << i << ")";
           EXPECT_EQ(actual.getAttribute(d, i), expected.getAttribute(d, i))
@@ -194,9 +190,7 @@ namespace Rodin::Tests::Unit
       }
     }
 
-    void expectAttributeRegressionMesh(
-        const Mesh<Context::Local>& mesh,
-        size_t dim)
+    void expectAttributeRegressionMesh(const Mesh<Context::Local>& mesh, size_t dim)
     {
       ASSERT_EQ(mesh.getSpaceDimension(), dim);
       ASSERT_EQ(mesh.getDimension(), dim);
@@ -293,28 +287,27 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies MEDIT load save load preserves canonical attributes for IO mesh loader by checking exact expected values.
   TEST(Rodin_IO_MeshLoader, MEDITLoadSaveLoadPreservesCanonicalAttributes)
   {
-    const std::string input =
-      "MeshVersionFormatted 1\n"
-      "Dimension 3\n"
-      "\n"
-      "Vertices\n"
-      "4\n"
-      "0 0 0 0\n"
-      "1 0 0 0\n"
-      "0 1 0 0\n"
-      "0 0 1 0\n"
-      "\n"
-      "Tetrahedra\n"
-      "1\n"
-      "1 2 3 4 7\n"
-      "\n"
-      "Triangles\n"
-      "3\n"
-      "1 2 3 11\n"
-      "1 2 3 22\n"
-      "1 2 4 33\n"
-      "\n"
-      "End\n";
+    const std::string input = "MeshVersionFormatted 1\n"
+                              "Dimension 3\n"
+                              "\n"
+                              "Vertices\n"
+                              "4\n"
+                              "0 0 0 0\n"
+                              "1 0 0 0\n"
+                              "0 1 0 0\n"
+                              "0 0 1 0\n"
+                              "\n"
+                              "Tetrahedra\n"
+                              "1\n"
+                              "1 2 3 4 7\n"
+                              "\n"
+                              "Triangles\n"
+                              "3\n"
+                              "1 2 3 11\n"
+                              "1 2 3 22\n"
+                              "1 2 4 33\n"
+                              "\n"
+                              "End\n";
 
     Mesh first;
     std::stringstream in(input);
@@ -341,14 +334,10 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates Mesh Attribute Regression over the Dimensions parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      Dimensions,
-      MeshAttributeRegression,
-      ::testing::Values(1, 2, 3),
-      [](const ::testing::TestParamInfo<size_t>& info)
-      {
-        return "Dim" + std::to_string(info.param) + "D";
-      });
+  INSTANTIATE_TEST_SUITE_P(Dimensions, MeshAttributeRegression,
+    ::testing::Values(1, 2, 3), [](const ::testing::TestParamInfo<size_t>& info) {
+      return "Dim" + std::to_string(info.param) + "D";
+    });
 
   /// @brief Instantiates Mesh Format Coverage over the All Supported Geometries parameter coverage.
   INSTANTIATE_TEST_SUITE_P(

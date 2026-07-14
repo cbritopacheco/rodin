@@ -535,65 +535,61 @@ int main(int argc, char** argv)
 
   fsi =
       /* Fully nonlinear ALE Navier--Stokes tangent over fluid cells. */
-        (rhoF / dt) * Integral(du, v).over(Volume::Fluid)
-      + rhoF * Integral(Dot(convTangentVelocity, v)).over(Volume::Fluid)
-      + rhoF * Integral(Dot(convTangentTransportU, v)).over(Volume::Fluid)
-      - (rhoF / dt) * Integral(Dot(convTangentTransportEta, v)).over(Volume::Fluid)
-      + 0.5 * rhoF * Integral(divTransport * Dot(du, v)).over(Volume::Fluid)
-      + 0.5 * rhoF * Integral(Dot(Div(du) * uState, v)).over(Volume::Fluid)
-      - (0.5 * rhoF / dt) * Integral(Dot(Div(deta) * uState, v)).over(Volume::Fluid)
-      + muF * Integral(Jacobian(du), Jacobian(v)).over(Volume::Fluid)
-      - Integral(dp, Div(v)).over(Volume::Fluid)
-      + Integral(Div(du), q).over(Volume::Fluid)
-      + Integral(dlambda, q).over(Volume::Fluid)
-      + Integral(dp, m).over(Volume::Fluid)
-      + BoundaryIntegral(0.5 * rhoF * beta * Dot(du, v)).over(Boundary::Outlet)
-      + 1e-10 * Integral(dp, q).over(Volume::Fluid)
-      + 1e-10 * Integral(dlambda, m)
+    (rhoF / dt) * Integral(du, v).over(Volume::Fluid) +
+    rhoF * Integral(Dot(convTangentVelocity, v)).over(Volume::Fluid) +
+    rhoF * Integral(Dot(convTangentTransportU, v)).over(Volume::Fluid) -
+    (rhoF / dt) * Integral(Dot(convTangentTransportEta, v)).over(Volume::Fluid) +
+    0.5 * rhoF * Integral(divTransport * Dot(du, v)).over(Volume::Fluid) +
+    0.5 * rhoF * Integral(Dot(Div(du) * uState, v)).over(Volume::Fluid) -
+    (0.5 * rhoF / dt) * Integral(Dot(Div(deta) * uState, v)).over(Volume::Fluid) +
+    muF * Integral(Jacobian(du), Jacobian(v)).over(Volume::Fluid) -
+    Integral(dp, Div(v)).over(Volume::Fluid) + Integral(Div(du), q).over(Volume::Fluid) +
+    Integral(dlambda, q).over(Volume::Fluid) + Integral(dp, m).over(Volume::Fluid) +
+    BoundaryIntegral(0.5 * rhoF * beta * Dot(du, v)).over(Boundary::Outlet) +
+    1e-10 * Integral(dp, q).over(Volume::Fluid) +
+    1e-10 * Integral(dlambda, m)
 
       /* Fully nonlinear ALE Navier--Stokes residual over fluid cells. */
-      + (rhoF / dt) * Integral(uState - uOld, v).over(Volume::Fluid)
-      + rhoF * Integral(Dot(convState, v)).over(Volume::Fluid)
-      + 0.5 * rhoF * Integral(Dot(divTransport * uState, v)).over(Volume::Fluid)
-      + muF * Integral(Jacobian(uState), Jacobian(v)).over(Volume::Fluid)
-      - Integral(pState, Div(v)).over(Volume::Fluid)
-      + Integral(Div(uState), q).over(Volume::Fluid)
-      + Integral(lambdaState, q).over(Volume::Fluid)
-      + Integral(pState, m).over(Volume::Fluid)
-      + BoundaryIntegral(0.5 * rhoF * Dot(beta * uState, v)).over(Boundary::Outlet)
-      + 1e-10 * Integral(pState, q).over(Volume::Fluid)
-      + 1e-10 * Integral(lambdaState, m)
+    + (rhoF / dt) * Integral(uState - uOld, v).over(Volume::Fluid) +
+    rhoF * Integral(Dot(convState, v)).over(Volume::Fluid) +
+    0.5 * rhoF * Integral(Dot(divTransport * uState, v)).over(Volume::Fluid) +
+    muF * Integral(Jacobian(uState), Jacobian(v)).over(Volume::Fluid) -
+    Integral(pState, Div(v)).over(Volume::Fluid) +
+    Integral(Div(uState), q).over(Volume::Fluid) +
+    Integral(lambdaState, q).over(Volume::Fluid) +
+    Integral(pState, m).over(Volume::Fluid) +
+    BoundaryIntegral(0.5 * rhoF * Dot(beta * uState, v)).over(Boundary::Outlet) +
+    1e-10 * Integral(pState, q).over(Volume::Fluid) +
+    1e-10 * Integral(lambdaState, m)
 
       /* Harmonic ALE displacement in the fluid. */
-      + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid)
-      + Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
+    + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid) +
+    Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
 
       /* Solid BDF1/Newmark-like displacement increment equation. */
-      + (rhoS / (dt * dt)) * Integral(deta, z).over(Volume::Solid)
-      + (solidRayleighAlpha * rhoS / dt) * Integral(deta, z).over(Volume::Solid)
-      + ivw.Tangent(deta, z).over(Volume::Solid)
+    + (rhoS / (dt * dt)) * Integral(deta, z).over(Volume::Solid) +
+    (solidRayleighAlpha * rhoS / dt) * Integral(deta, z).over(Volume::Solid) +
+    ivw.Tangent(deta, z).over(Volume::Solid)
 
-      + (rhoS / (dt * dt)) * Integral(etaState - etaOld, z).over(Volume::Solid)
-      + (solidRayleighAlpha * rhoS / dt) * Integral(etaState, z).over(Volume::Solid)
-      + ivw.Residual(z).over(Volume::Solid)
+    + (rhoS / (dt * dt)) * Integral(etaState - etaOld, z).over(Volume::Solid) +
+    (solidRayleighAlpha * rhoS / dt) * Integral(etaState, z).over(Volume::Solid) +
+    ivw.Residual(z).over(Volume::Solid)
 
       /* Temporary inactive-region regularization for globally-defined fluid
        * variables.  Replace by subdomain-restricted spaces when available.
        */
-      + inactive * Integral(du, v).over(Volume::Solid)
-      + inactive * Integral(uState, v).over(Volume::Solid)
-      + inactive * Integral(dp, q).over(Volume::Solid)
-      + inactive * Integral(pState, q).over(Volume::Solid)
+    + inactive * Integral(du, v).over(Volume::Solid) +
+    inactive * Integral(uState, v).over(Volume::Solid) +
+    inactive * Integral(dp, q).over(Volume::Solid) +
+    inactive * Integral(pState, q).over(Volume::Solid)
 
       /* Boundary and interface constraints. */
-      + DirichletBC(du, inletVelocity - uState).on(Boundary::Inlet)
-      + DirichletBC(du, -uState).on(Boundary::FluidWall)
-      + DirichletBC(deta, -etaState).on(Boundary::Inlet, Boundary::Outlet, Boundary::FluidWall)
-      + DirichletBC(deta, -etaState).on(Boundary::SolidClampLeft, Boundary::SolidClampRight)
-      + DirichletBC(
-          du,
-          (1.0 / dt) * deta,
-          (1.0 / dt) * etaState - uState).on(Boundary::FSI);
+    + DirichletBC(du, inletVelocity - uState).on(Boundary::Inlet) +
+    DirichletBC(du, -uState).on(Boundary::FluidWall) +
+    DirichletBC(deta, -etaState)
+      .on(Boundary::Inlet, Boundary::Outlet, Boundary::FluidWall) +
+    DirichletBC(deta, -etaState).on(Boundary::SolidClampLeft, Boundary::SolidClampRight) +
+    DirichletBC(du, (1.0 / dt) * deta, (1.0 / dt) * etaState - uState).on(Boundary::FSI);
 
   fsi.assemble().setFieldSplits();
 

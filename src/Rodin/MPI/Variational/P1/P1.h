@@ -803,7 +803,7 @@ namespace Rodin::Variational
         const auto& [d, i] = p;
         const auto& mesh = getMesh();
         return CallablePullback<CallableType>(
-            *mesh.getPolytope(d, i), std::forward<CallableType>(v));
+          *mesh.getPolytope(d, i), std::forward<CallableType>(v));
       }
 
       /**
@@ -817,7 +817,7 @@ namespace Rodin::Variational
       auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
         return typename FESType::template Pushforward<CallableType>(
-            std::forward<CallableType>(v));
+          std::forward<CallableType>(v));
       }
 
       /**
@@ -831,7 +831,7 @@ namespace Rodin::Variational
       auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
         return typename FESType::template Pushforward<CallableType>(
-            std::forward<CallableType>(v));
+          std::forward<CallableType>(v));
       }
 
     private:

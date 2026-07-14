@@ -32,8 +32,7 @@ namespace
   }
 
   Math::SpatialPoint physicalCentroid(
-      const Mesh<Context::Local>& mesh,
-      const Polytope& polytope)
+    const Mesh<Context::Local>& mesh, const Polytope& polytope)
   {
     Math::SpatialPoint x;
     Polytope::Traits traits(polytope.getGeometry());
@@ -45,12 +44,11 @@ namespace
 
 TEST(Location_AABB, Locates0DVertex)
 {
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(2)
-    .nodes(1)
-    .vertex({0.25, 0.75})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(1)
+                .vertex({0.25, 0.75})
+                .finalize();
 
   AABB locator(mesh);
   const auto p = locator.locate(0, point({0.25, 0.75}));
@@ -61,14 +59,13 @@ TEST(Location_AABB, Locates0DVertex)
 
 TEST(Location_AABB, Locates1DSegment)
 {
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(1)
-    .nodes(2)
-    .vertex({0.0})
-    .vertex({1.0})
-    .polytope(Polytope::Type::Segment, {0, 1})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(1)
+                .nodes(2)
+                .vertex({0.0})
+                .vertex({1.0})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
 
   AABB locator(mesh);
   const auto p = locator.locate(point({0.4}));
@@ -79,17 +76,16 @@ TEST(Location_AABB, Locates1DSegment)
 
 TEST(Location_AABB, Locates2DTriangles)
 {
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(2)
-    .nodes(4)
-    .vertex({0.0, 0.0})
-    .vertex({1.0, 0.0})
-    .vertex({0.0, 1.0})
-    .vertex({1.0, 1.0})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Triangle, {1, 3, 2})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(4)
+                .vertex({0.0, 0.0})
+                .vertex({1.0, 0.0})
+                .vertex({0.0, 1.0})
+                .vertex({1.0, 1.0})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                .finalize();
 
   AABB locator(mesh);
   const auto p0 = locator.locate(point({0.2, 0.2}));
@@ -103,16 +99,15 @@ TEST(Location_AABB, Locates2DTriangles)
 
 TEST(Location_AABB, Locates3DTetrahedron)
 {
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(3)
-    .nodes(4)
-    .vertex({0.0, 0.0, 0.0})
-    .vertex({1.0, 0.0, 0.0})
-    .vertex({0.0, 1.0, 0.0})
-    .vertex({0.0, 0.0, 1.0})
-    .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(3)
+                .nodes(4)
+                .vertex({0.0, 0.0, 0.0})
+                .vertex({1.0, 0.0, 0.0})
+                .vertex({0.0, 1.0, 0.0})
+                .vertex({0.0, 0.0, 1.0})
+                .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 3})
+                .finalize();
 
   AABB locator(mesh);
   const auto p = locator.locate(point({0.2, 0.2, 0.2}));
@@ -125,19 +120,18 @@ TEST(Location_AABB, Locates3DTetrahedron)
 
 TEST(Location_AABB, LocatesMixed2DCells)
 {
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(2)
-    .nodes(6)
-    .vertex({0.0, 0.0})
-    .vertex({1.0, 0.0})
-    .vertex({0.0, 1.0})
-    .vertex({1.0, 1.0})
-    .vertex({2.0, 0.0})
-    .vertex({2.0, 1.0})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .polytope(Polytope::Type::Quadrilateral, {1, 4, 5, 3})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(6)
+                .vertex({0.0, 0.0})
+                .vertex({1.0, 0.0})
+                .vertex({0.0, 1.0})
+                .vertex({1.0, 1.0})
+                .vertex({2.0, 0.0})
+                .vertex({2.0, 1.0})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .polytope(Polytope::Type::Quadrilateral, {1, 4, 5, 3})
+                .finalize();
 
   AABB locator(mesh);
   const auto tri = locator.locate(point({0.2, 0.2}));
@@ -151,8 +145,7 @@ TEST(Location_AABB, LocatesMixed2DCells)
 
 TEST(Location_AABB, LocatesModerateUniformGridCentroids)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {12, 12});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {12, 12});
   AABB locator(mesh);
 
   size_t count = 0;
@@ -169,8 +162,7 @@ TEST(Location_AABB, LocatesModerateUniformGridCentroids)
 
 TEST(Location_AABB, MissesOutsidePoint)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {3, 3});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
   AABB locator(mesh);
 
   const auto p = locator.locate(point({4.0, 4.0}));
@@ -179,8 +171,7 @@ TEST(Location_AABB, MissesOutsidePoint)
 
 TEST(Location_AABB, RejectsNonFiniteQuery)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {3, 3});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
   AABB locator(mesh);
 
   const Real nan = std::numeric_limits<Real>::quiet_NaN();
@@ -193,8 +184,7 @@ TEST(Location_AABB, RejectsNonFiniteQuery)
 
 TEST(Location_AABB, RejectsWrongDimensionQuery)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {3, 3});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
   AABB locator(mesh);
 
   EXPECT_FALSE(locator.locate(point({0.5})).has_value());
@@ -207,14 +197,13 @@ TEST(Location_AABB, RejectsOffManifoldSurfaceQuery)
   // A single segment embedded in 2D: locating against the segment must
   // reject points off the line even when their projection parameter is
   // inside [0, 1].
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(2)
-    .nodes(2)
-    .vertex({0.0, 0.0})
-    .vertex({1.0, 0.0})
-    .polytope(Polytope::Type::Segment, {0, 1})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(2)
+                .vertex({0.0, 0.0})
+                .vertex({1.0, 0.0})
+                .polytope(Polytope::Type::Segment, {0, 1})
+                .finalize();
 
   AABB locator(mesh);
   EXPECT_FALSE(locator.locate(1, point({0.5, 0.5})).has_value());
@@ -229,16 +218,15 @@ TEST(Location_AABB, LocatesInsideNonParallelogramQuad)
 {
   // The bilinear map of a trapezoid is not affine; the narrow phase must
   // invert it exactly (Newton), not by linearization.
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(2)
-    .nodes(4)
-    .vertex({0.0, 0.0})
-    .vertex({2.0, 0.0})
-    .vertex({1.5, 1.0})
-    .vertex({0.5, 1.0})
-    .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(4)
+                .vertex({0.0, 0.0})
+                .vertex({2.0, 0.0})
+                .vertex({1.5, 1.0})
+                .vertex({0.5, 1.0})
+                .polytope(Polytope::Type::Quadrilateral, {0, 1, 3, 2})
+                .finalize();
 
   AABB locator(mesh);
   const auto p = locator.locate(point({1.0, 0.9}));
@@ -246,8 +234,7 @@ TEST(Location_AABB, LocatesInsideNonParallelogramQuad)
 
   // Verify the inverse by mapping the reference coordinates forward.
   Math::SpatialPoint mapped;
-  p->getPolytope().getTransformation().transform(
-      mapped, p->getReferenceCoordinates());
+  p->getPolytope().getTransformation().transform(mapped, p->getReferenceCoordinates());
   EXPECT_NEAR(mapped[0], 1.0, 1e-10);
   EXPECT_NEAR(mapped[1], 0.9, 1e-10);
 
@@ -261,15 +248,14 @@ TEST(Location_AABB, LocatesInsideCurvedP2Bulge)
   // (P2) transformation. Points inside the bulge lie outside the straight
   // triangle: the broad phase must be conservative for the curved box and
   // the narrow phase must converge on the curved geometry.
-  Mesh mesh =
-    Mesh<Context::Local>::Builder()
-    .initialize(2)
-    .nodes(3)
-    .vertex({0.0, 0.0})
-    .vertex({1.0, 0.0})
-    .vertex({0.0, 1.0})
-    .polytope(Polytope::Type::Triangle, {0, 1, 2})
-    .finalize();
+  Mesh mesh = Mesh<Context::Local>::Builder()
+                .initialize(2)
+                .nodes(3)
+                .vertex({0.0, 0.0})
+                .vertex({1.0, 0.0})
+                .vertex({0.0, 1.0})
+                .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                .finalize();
 
   const auto cell = mesh.getCell(0);
   Variational::RealH1Element<2> geomFe(Polytope::Type::Triangle);
@@ -284,10 +270,9 @@ TEST(Location_AABB, LocatesInsideCurvedP2Bulge)
     pm(0, a) = x[0];
     pm(1, a) = x[1];
   }
-  mesh.setPolytopeTransformation(
-      {2, 0},
-      new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
-        std::move(pm), geomFe));
+  mesh.setPolytopeTransformation({2, 0},
+    new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+      std::move(pm), geomFe));
 
   AABB locator(mesh);
 
@@ -295,8 +280,7 @@ TEST(Location_AABB, LocatesInsideCurvedP2Bulge)
   const auto p = locator.locate(point({0.5, -0.1}));
   ASSERT_TRUE(p.has_value());
   Math::SpatialPoint mapped;
-  p->getPolytope().getTransformation().transform(
-      mapped, p->getReferenceCoordinates());
+  p->getPolytope().getTransformation().transform(mapped, p->getReferenceCoordinates());
   EXPECT_NEAR(mapped[0], 0.5, 1e-9);
   EXPECT_NEAR(mapped[1], -0.1, 1e-9);
 
@@ -308,8 +292,7 @@ TEST(Location_AABB, LocatesAtExtremeMeshScales)
 {
   for (const Real scale : {Real(1e-6), Real(1e+6)})
   {
-    Mesh mesh = Mesh<Context::Local>::UniformGrid(
-        Polytope::Type::Triangle, {8, 8});
+    Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {8, 8});
     mesh.scale(scale);
 
     AABB locator(mesh);
@@ -318,16 +301,14 @@ TEST(Location_AABB, LocatesAtExtremeMeshScales)
       found += locator.locate(physicalCentroid(mesh, *it)).has_value();
     EXPECT_EQ(found, mesh.getCellCount()) << "scale=" << scale;
 
-    EXPECT_FALSE(
-        locator.locate(point({Real(20) * scale, Real(-3) * scale})).has_value())
+    EXPECT_FALSE(locator.locate(point({Real(20) * scale, Real(-3) * scale})).has_value())
       << "scale=" << scale;
   }
 }
 
 TEST(Location_AABB, SharedFacetPointIsDeterministicAndValid)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {4, 4});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
   AABB locator(mesh);
 
   // A point on the shared diagonal of two triangles.
@@ -337,7 +318,7 @@ TEST(Location_AABB, SharedFacetPointIsDeterministicAndValid)
 
   Math::SpatialPoint mapped;
   first->getPolytope().getTransformation().transform(
-      mapped, first->getReferenceCoordinates());
+    mapped, first->getReferenceCoordinates());
   EXPECT_NEAR(mapped[0], x[0], 1e-10);
   EXPECT_NEAR(mapped[1], x[1], 1e-10);
 
@@ -351,14 +332,11 @@ TEST(Location_AABB, SharedFacetPointIsDeterministicAndValid)
 
 TEST(Location_AABB, MatchesBruteForceOnRandomPoints)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {12, 12});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {12, 12});
   AABB locator(mesh);
 
   // Independent ground truth for straight triangles: barycentric containment.
-  const auto inTriangle =
-    [&](Index cell, const Math::SpatialPoint& x, Real tol) -> bool
-  {
+  const auto inTriangle = [&](Index cell, const Math::SpatialPoint& x, Real tol) -> bool {
     const auto& v = mesh.getCell(cell)->getVertices();
     const auto a = mesh.getVertexCoordinates(v[0]);
     const auto b = mesh.getVertexCoordinates(v[1]);
@@ -401,8 +379,7 @@ TEST(Location_AABB, MatchesBruteForceOnRandomPoints)
 
 TEST(Location_AABB, ConcurrentQueriesAreSafe)
 {
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {24, 24});
+  const Mesh mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {24, 24});
   AABB locator(mesh);
 
   std::vector<Math::SpatialPoint> queries;
@@ -414,8 +391,7 @@ TEST(Location_AABB, ConcurrentQueriesAreSafe)
   std::vector<std::thread> threads;
   for (int t = 0; t < 4; ++t)
   {
-    threads.emplace_back([&]
-    {
+    threads.emplace_back([&] {
       size_t local = 0;
       for (const auto& x : queries)
         local += locator.locate(x).has_value();
@@ -430,14 +406,13 @@ TEST(Location_AABB, ConcurrentQueriesAreSafe)
 TEST(Location_AABB, PerfSmoke)
 {
   using Clock = std::chrono::steady_clock;
-  const auto usPerQuery = [](Clock::time_point t0, Clock::time_point t1, size_t n)
-  {
-    return std::chrono::duration<double, std::micro>(t1 - t0).count()
-      / static_cast<double>(n);
+  const auto usPerQuery = [](Clock::time_point t0, Clock::time_point t1, size_t n) {
+    return std::chrono::duration<double, std::micro>(t1 - t0).count() /
+      static_cast<double>(n);
   };
 
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Triangle, {100, 100});
+  const Mesh mesh =
+    Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {100, 100});
 
   const auto tBuild0 = Clock::now();
   AABB locator(mesh);
@@ -482,21 +457,20 @@ TEST(Location_AABB, PerfSmoke)
             << std::chrono::duration<double, std::milli>(tBuild1 - tBuild0).count()
             << "ms  hit=" << usPerQuery(tHit0, tHit1, hits.size())
             << "us/q  farMiss=" << usPerQuery(tMiss0, tMiss1, missCount)
-            << "us/q  nearMiss=" << usPerQuery(tNear0, tNear1, nearCount)
-            << "us/q  (" << mesh.getCellCount() << " cells)\n";
+            << "us/q  nearMiss=" << usPerQuery(tNear0, tNear1, nearCount) << "us/q  ("
+            << mesh.getCellCount() << " cells)\n";
 }
 
 TEST(Location_AABB, PerfSmoke3D)
 {
   using Clock = std::chrono::steady_clock;
-  const auto usPerQuery = [](Clock::time_point t0, Clock::time_point t1, size_t n)
-  {
-    return std::chrono::duration<double, std::micro>(t1 - t0).count()
-      / static_cast<double>(n);
+  const auto usPerQuery = [](Clock::time_point t0, Clock::time_point t1, size_t n) {
+    return std::chrono::duration<double, std::micro>(t1 - t0).count() /
+      static_cast<double>(n);
   };
 
-  const Mesh mesh = Mesh<Context::Local>::UniformGrid(
-      Polytope::Type::Tetrahedron, {20, 20, 20});
+  const Mesh mesh =
+    Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {20, 20, 20});
 
   const auto tBuild0 = Clock::now();
   AABB locator(mesh);
@@ -529,6 +503,6 @@ TEST(Location_AABB, PerfSmoke3D)
   std::cout << "[ PERF 3D  ] build="
             << std::chrono::duration<double, std::milli>(tBuild1 - tBuild0).count()
             << "ms  hit=" << usPerQuery(tHit0, tHit1, hits.size())
-            << "us/q  nearMiss=" << usPerQuery(tNear0, tNear1, nearCount)
-            << "us/q  (" << mesh.getCellCount() << " cells)\n";
+            << "us/q  nearMiss=" << usPerQuery(tNear0, tNear1, nearCount) << "us/q  ("
+            << mesh.getCellCount() << " cells)\n";
 }

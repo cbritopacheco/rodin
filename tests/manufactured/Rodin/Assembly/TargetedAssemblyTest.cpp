@@ -48,18 +48,17 @@ namespace Rodin::Tests::Manufactured::Assembly
     Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
 
   /// @brief Helper used by the manufactured tests to Expect Same Vector.
-  void expectSameVector(const Math::Vector<Real>& expected,
-                        const Math::Vector<Real>& actual)
+  void expectSameVector(
+    const Math::Vector<Real>& expected, const Math::Vector<Real>& actual)
   {
     ASSERT_EQ(expected.size(), actual.size());
     for (Eigen::Index i = 0; i < expected.size(); ++i)
-      EXPECT_LE(std::abs(expected.coeff(i) - actual.coeff(i)), 1e-12)
-        << "row " << i;
+      EXPECT_LE(std::abs(expected.coeff(i) - actual.coeff(i)), 1e-12) << "row " << i;
   }
 
   /// @brief Helper used by the manufactured tests to Expect Same Matrix.
-  void expectSameMatrix(const Math::SparseMatrix<Real>& expected,
-                        const Math::SparseMatrix<Real>& actual)
+  void expectSameMatrix(
+    const Math::SparseMatrix<Real>& expected, const Math::SparseMatrix<Real>& actual)
   {
     ASSERT_EQ(expected.rows(), actual.rows());
     ASSERT_EQ(expected.cols(), actual.cols());
@@ -78,22 +77,20 @@ namespace Rodin::Tests::Manufactured::Assembly
   /// @brief Helper used by the manufactured tests to Assemble Single Field.
   LinearSystemType assembleSingleField(Variational::AssemblyTarget target, bool targeted)
   {
-    auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     P1 fes(mesh);
     TrialFunction u(fes);
-    TestFunction  v(fes);
+    TestFunction v(fes);
 
     using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
     typename ProblemType::ProblemBodyType body =
-      Integral(Grad(u), Grad(v)) + Integral(u, v)
-        - Integral(RealFunction(1.0), v);
+      Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(RealFunction(1.0), v);
 
-    ::Rodin::Assembly::ProblemAssemblyInput<
-      typename ProblemType::ProblemBodyType,
-      decltype(u), decltype(v)> input(body, u, v);
+    ::Rodin::Assembly::ProblemAssemblyInput<typename ProblemType::ProblemBodyType,
+      decltype(u), decltype(v)>
+      input(body, u, v);
 
     LinearSystemType ls;
     Assembler<LinearSystemType, ProblemType> assembler;
@@ -144,50 +141,46 @@ namespace Rodin::Tests::Manufactured::Assembly
   /// @brief Helper used by the manufactured tests to Assemble Block.
   LinearSystemType assembleBlock(Variational::AssemblyTarget target, bool targeted)
   {
-    auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     P1 vh(mesh);
     P0 ph(mesh);
     TrialFunction u(vh);
-    TestFunction  v(vh);
+    TestFunction v(vh);
     TrialFunction p(ph);
-    TestFunction  q(ph);
+    TestFunction q(ph);
 
     using ProblemType =
       Problem<LinearSystemType, decltype(u), decltype(v), decltype(p), decltype(q)>;
-    typename ProblemType::ProblemBodyType body =
-      Integral(Grad(u), Grad(v)) + Integral(u, v)
-        - Integral(p, v) - Integral(u, q) + Integral(p, q)
-        - Integral(RealFunction(1.0), v) - Integral(RealFunction(2.0), q);
+    typename ProblemType::ProblemBodyType body = Integral(Grad(u), Grad(v)) +
+      Integral(u, v) - Integral(p, v) - Integral(u, q) + Integral(p, q) -
+      Integral(RealFunction(1.0), v) - Integral(RealFunction(2.0), q);
 
     // Trial blocks: [u, p]; test blocks: [v, q].
-    auto us = Tuple{ std::ref(u), std::ref(p) };
-    auto vs = Tuple{ std::ref(v), std::ref(q) };
+    auto us = Tuple{std::ref(u), std::ref(p)};
+    auto vs = Tuple{std::ref(v), std::ref(q)};
 
     const size_t uSize = static_cast<size_t>(vh.getSize());
     const size_t pSize = static_cast<size_t>(ph.getSize());
 
-    std::array<size_t, 2> trialOffsets{ 0, uSize };
-    std::array<size_t, 2> testOffsets{ 0, uSize };
+    std::array<size_t, 2> trialOffsets{0, uSize};
+    std::array<size_t, 2> testOffsets{0, uSize};
 
     boost::bimap<Rodin::FormLanguage::Base::UUID, size_t> trialUUIDMap;
     boost::bimap<Rodin::FormLanguage::Base::UUID, size_t> testUUIDMap;
-    trialUUIDMap.right.insert({ 0, u.getUUID() });
-    trialUUIDMap.right.insert({ 1, p.getUUID() });
-    testUUIDMap.right.insert({ 0, v.getUUID() });
-    testUUIDMap.right.insert({ 1, q.getUUID() });
+    trialUUIDMap.right.insert({0, u.getUUID()});
+    trialUUIDMap.right.insert({1, p.getUUID()});
+    testUUIDMap.right.insert({0, v.getUUID()});
+    testUUIDMap.right.insert({1, q.getUUID()});
 
     const size_t totalTrial = uSize + pSize;
-    const size_t totalTest  = uSize + pSize;
+    const size_t totalTest = uSize + pSize;
 
-    ::Rodin::Assembly::ProblemAssemblyInput<
-      typename ProblemType::ProblemBodyType,
+    ::Rodin::Assembly::ProblemAssemblyInput<typename ProblemType::ProblemBodyType,
       decltype(u), decltype(v), decltype(p), decltype(q)>
-      input(
-        body, us, vs, trialOffsets, testOffsets,
-        trialUUIDMap, testUUIDMap, totalTrial, totalTest);
+      input(body, us, vs, trialOffsets, testOffsets, trialUUIDMap, testUUIDMap,
+        totalTrial, totalTest);
 
     LinearSystemType ls;
     Assembler<LinearSystemType, ProblemType> assembler;
@@ -202,12 +195,9 @@ namespace Rodin::Tests::Manufactured::Assembly
   /// @brief Helper used by the manufactured tests to Check Block Targeted.
   void checkBlockTargeted()
   {
-    const auto full =
-      assembleBlock<Assembler>(Variational::AssemblyTarget::LHS, false);
-    const auto lhs =
-      assembleBlock<Assembler>(Variational::AssemblyTarget::LHS, true);
-    const auto rhs =
-      assembleBlock<Assembler>(Variational::AssemblyTarget::RHS, true);
+    const auto full = assembleBlock<Assembler>(Variational::AssemblyTarget::LHS, false);
+    const auto lhs = assembleBlock<Assembler>(Variational::AssemblyTarget::LHS, true);
+    const auto rhs = assembleBlock<Assembler>(Variational::AssemblyTarget::RHS, true);
 
     expectSameMatrix(full.getOperator(), lhs.getOperator());
     expectSameVector(full.getVector(), rhs.getVector());
@@ -232,31 +222,29 @@ namespace Rodin::Tests::Manufactured::Assembly
   /// @brief Verifies block problem APILHS and RHS for eigen targeted assembly by checking form assembly.
   TEST(Eigen_TargetedAssembly, BlockProblemAPILHSAndRHS)
   {
-    auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     P1 vh(mesh);
     P0 ph(mesh);
     TrialFunction u(vh);
     TrialFunction p(ph);
-    TestFunction  v(vh);
-    TestFunction  q(ph);
+    TestFunction v(vh);
+    TestFunction q(ph);
 
     Problem prob(u, v, p, q);
-    prob = Integral(Grad(u), Grad(v)) + Integral(u, v)
-         - Integral(p, v) - Integral(u, q) + Integral(p, q)
-         - Integral(RealFunction(1.0), v) - Integral(RealFunction(2.0), q);
+    prob = Integral(Grad(u), Grad(v)) + Integral(u, v) - Integral(p, v) - Integral(u, q) +
+      Integral(p, q) - Integral(RealFunction(1.0), v) - Integral(RealFunction(2.0), q);
 
     prob.assemble();
     const Math::SparseMatrix<Real> Afull = prob.getLinearSystem().getOperator();
-    const Math::Vector<Real>       bfull = prob.getLinearSystem().getVector();
+    const Math::Vector<Real> bfull = prob.getLinearSystem().getVector();
 
     prob.assemble(Variational::AssemblyTarget::LHS);
     const Math::SparseMatrix<Real> Alhs = prob.getLinearSystem().getOperator();
 
     prob.assemble(Variational::AssemblyTarget::RHS);
-    const Math::Vector<Real>       brhs = prob.getLinearSystem().getVector();
+    const Math::Vector<Real> brhs = prob.getLinearSystem().getVector();
 
     expectSameMatrix(Afull, Alhs);
     expectSameVector(bfull, brhs);

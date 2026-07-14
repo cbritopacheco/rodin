@@ -857,7 +857,7 @@ int main(int argc, char** argv)
       TrialFunction du(solidVh);
       TestFunction  w(solidVh);
 
-      auto ivw    = Solid::InternalVirtualWork(law, solidDisplacement);
+      auto ivw = Solid::InternalVirtualWork(law, solidDisplacement);
       auto ivwOld = Solid::InternalVirtualWork(law, solidDisplacementOld);
 
       /*
@@ -938,21 +938,18 @@ int main(int argc, char** argv)
        */
       Problem solid(du, w);
 
-      solid =
-          ivw.Tangent(du, w)
-        + solidMassCoeff * Integral(du, w)
-        + (solidRayleighBeta / dt) * ivw.Tangent(du, w)
+      solid = ivw.Tangent(du, w) + solidMassCoeff * Integral(du, w) +
+        (solidRayleighBeta / dt) * ivw.Tangent(du, w)
 
-        + ivw.Residual(w)
-        + solidMassCoeff * Integral(solidDisplacement, w)
-        - solidMassCoeff * Integral(solidDisplacementOld, w)
-        - (rhoS / dt) * Integral(solidVelocityOld, w)
-        + (solidRayleighBeta / dt) * ivw.Residual(w)
-        - (solidRayleighBeta / dt) * ivwOld.Residual(w)
-        - BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
+        + ivw.Residual(w) + solidMassCoeff * Integral(solidDisplacement, w) -
+        solidMassCoeff * Integral(solidDisplacementOld, w) -
+        (rhoS / dt) * Integral(solidVelocityOld, w) +
+        (solidRayleighBeta / dt) * ivw.Residual(w) -
+        (solidRayleighBeta / dt) * ivwOld.Residual(w) -
+        BoundaryIntegral(solidFluidTraction, w).over(SolidBoundary::FSI)
 
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft)
-        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampRight);
+        + DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampLeft) +
+        DirichletBC(du, Zero(dim)).on(SolidBoundary::ClampRight);
 
       Alert::Info()
         << "Solid BDF1 hyperelastic step " << step << " / " << Nt

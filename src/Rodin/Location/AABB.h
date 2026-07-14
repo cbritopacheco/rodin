@@ -99,8 +99,7 @@ namespace Rodin::Location
       }
 
       Optional<Geometry::Point> locate(
-          size_t dimension,
-          const Math::SpatialPoint& x) const
+        size_t dimension, const Math::SpatialPoint& x) const
       {
         if (dimension >= m_index.size())
           return {};
@@ -154,20 +153,20 @@ namespace Rodin::Location
 
       struct Node
       {
-        Bound lo;
-        Bound hi;
-        int32_t left;    ///< Left child, or -1 for a leaf
-        int32_t right;   ///< Right child (valid when left >= 0)
-        uint32_t begin;  ///< First entry (valid for leaves)
-        uint32_t end;    ///< One past last entry (valid for leaves)
+          Bound lo;
+          Bound hi;
+          int32_t left;    ///< Left child, or -1 for a leaf
+          int32_t right;   ///< Right child (valid when left >= 0)
+          uint32_t begin;  ///< First entry (valid for leaves)
+          uint32_t end;    ///< One past last entry (valid for leaves)
       };
 
       struct DimensionIndex
       {
-        std::vector<Node> nodes;
-        std::vector<Index> entries;      ///< Polytope indices, leaf-ordered
-        std::atomic<bool> built{false};
-        mutable std::mutex mutex;
+          std::vector<Node> nodes;
+          std::vector<Index> entries;      ///< Polytope indices, leaf-ordered
+          std::atomic<bool> built{false};
+          mutable std::mutex mutex;
       };
 
       void invalidate()
@@ -269,14 +268,9 @@ namespace Rodin::Location
         index.entries = std::move(reordered);
       }
 
-      int32_t buildNode(
-          DimensionIndex& index,
-          std::vector<uint32_t>& order,
-          uint32_t begin, uint32_t end,
-          const std::vector<Bound>& lo,
-          const std::vector<Bound>& hi,
-          const std::vector<Bound>& mid,
-          size_t sdim) const
+      int32_t buildNode(DimensionIndex& index, std::vector<uint32_t>& order,
+        uint32_t begin, uint32_t end, const std::vector<Bound>& lo,
+        const std::vector<Bound>& hi, const std::vector<Bound>& mid, size_t sdim) const
       {
         const int32_t self = static_cast<int32_t>(index.nodes.size());
         index.nodes.emplace_back();
@@ -319,15 +313,19 @@ namespace Rodin::Location
         for (size_t i = 0; i < sdim; ++i)
         {
           const Real e = chi[i] - clo[i];
-          if (e > extent) { extent = e; axis = i; }
+          if (e > extent)
+          {
+            extent = e;
+            axis = i;
+          }
         }
         if (!(extent > Real(0)))
           return self;
 
         const uint32_t midIdx = (begin + end) / 2;
-        std::nth_element(
-            order.begin() + begin, order.begin() + midIdx, order.begin() + end,
-            [&](uint32_t a, uint32_t b) { return mid[a][axis] < mid[b][axis]; });
+        std::nth_element(order.begin() + begin, order.begin() + midIdx,
+          order.begin() + end,
+          [&](uint32_t a, uint32_t b) { return mid[a][axis] < mid[b][axis]; });
 
         const int32_t left = buildNode(index, order, begin, midIdx, lo, hi, mid, sdim);
         const int32_t right = buildNode(index, order, midIdx, end, lo, hi, mid, sdim);
@@ -361,8 +359,7 @@ namespace Rodin::Location
 
         Math::SpatialPoint x;
         std::vector<Math::SpatialPoint> vertex(nv);
-        auto add = [&](const Math::SpatialPoint& p)
-        {
+        auto add = [&](const Math::SpatialPoint& p) {
           for (size_t i = 0; i < sdim; ++i)
           {
             lo[i] = std::min(lo[i], p[static_cast<Eigen::Index>(i)]);
@@ -389,10 +386,10 @@ namespace Rodin::Location
           for (size_t j = i + 1; j < nv; ++j)
           {
             transformation.transform(
-                x, Real(0.5) * (traits.getVertex(i) + traits.getVertex(j)));
+              x, Real(0.5) * (traits.getVertex(i) + traits.getVertex(j)));
             add(x);
-            deviation = std::max(deviation,
-                (x - Real(0.5) * (vertex[i] + vertex[j])).norm());
+            deviation =
+              std::max(deviation, (x - Real(0.5) * (vertex[i] + vertex[j])).norm());
           }
         }
 
@@ -416,8 +413,7 @@ namespace Rodin::Location
       }
 
       bool containsReference(
-          const Geometry::Polytope::Traits& traits,
-          const Math::SpatialPoint& rc) const
+        const Geometry::Polytope::Traits& traits, const Math::SpatialPoint& rc) const
       {
         if (traits.getDimension() == 0)
           return rc.size() == 0;
@@ -441,11 +437,9 @@ namespace Rodin::Location
        * off-manifold points (facet queries) and diverged iterations are
        * rejected.
        */
-      bool invert(
-          const Geometry::PolytopeTransformation& transformation,
-          const Geometry::Polytope::Traits& traits,
-          const Math::SpatialPoint& x,
-          Math::SpatialPoint& rc) const
+      bool invert(const Geometry::PolytopeTransformation& transformation,
+        const Geometry::Polytope::Traits& traits, const Math::SpatialPoint& x,
+        Math::SpatialPoint& rc) const
       {
         const Real physTol = physicalTolerance();
         const size_t rdim = traits.getDimension();
@@ -491,16 +485,15 @@ namespace Rodin::Location
       }
 
       Optional<Geometry::Point> narrowPhase(
-          size_t dimension, Index polytopeIndex, const Math::SpatialPoint& x) const
+        size_t dimension, Index polytopeIndex, const Math::SpatialPoint& x) const
       {
         const auto& mesh = m_mesh.get();
-        const Geometry::Polytope polytope =
-          *mesh.getPolytope(dimension, polytopeIndex);
+        const Geometry::Polytope polytope = *mesh.getPolytope(dimension, polytopeIndex);
 
         if (dimension == 0)
         {
-          if ((mesh.getVertexCoordinates(polytopeIndex) - x).norm()
-              <= physicalTolerance())
+          if ((mesh.getVertexCoordinates(polytopeIndex) - x).norm() <=
+            physicalTolerance())
             return Geometry::Point(polytope, Math::SpatialPoint(0), x);
           return {};
         }
@@ -515,9 +508,7 @@ namespace Rodin::Location
       }
 
       Optional<Geometry::Point> traverse(
-          const DimensionIndex& index,
-          size_t dimension,
-          const Math::SpatialPoint& x) const
+        const DimensionIndex& index, size_t dimension, const Math::SpatialPoint& x) const
       {
         if (index.nodes.empty())
           return {};
@@ -548,9 +539,7 @@ namespace Rodin::Location
       }
 
       Optional<Geometry::Point> exhaustive(
-          const DimensionIndex& index,
-          size_t dimension,
-          const Math::SpatialPoint& x) const
+        const DimensionIndex& index, size_t dimension, const Math::SpatialPoint& x) const
       {
         for (const Index polytopeIndex : index.entries)
         {

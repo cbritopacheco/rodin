@@ -72,9 +72,8 @@ namespace
 
   Vec3 cross3(const Vec3& a, const Vec3& b)
   {
-    return vec3(a(1) * b(2) - a(2) * b(1),
-                a(2) * b(0) - a(0) * b(2),
-                a(0) * b(1) - a(1) * b(0));
+    return vec3(
+      a(1) * b(2) - a(2) * b(1), a(2) * b(0) - a(0) * b(2), a(0) * b(1) - a(1) * b(0));
   }
 
   Real det3(const Vec3& a, const Vec3& b, const Vec3& c)
@@ -120,10 +119,9 @@ namespace
           for (std::size_t c = 0; c < sdim; ++c)
             pm(c, a) = X(c);
         }
-        mesh.setPolytopeTransformation(
-            {d, polytope.getIndex()},
-            new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
-              std::move(pm), geomFe));
+        mesh.setPolytopeTransformation({d, polytope.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
       }
     }
   }
@@ -131,16 +129,17 @@ namespace
 
   // Squared distance to a triangle, following the Voronoi-region test of
   // Christer Ericson, Real-Time Collision Detection, Section 5.1.5.
-  Real pointTriangleDistance(
-      const Vec3& p, const Vec3& a, const Vec3& b, const Vec3& c)
+  Real pointTriangleDistance(const Vec3& p, const Vec3& a, const Vec3& b, const Vec3& c)
   {
     const Vec3 ab = b - a, ac = c - a, ap = p - a;
     const Real d1 = ab.dot(ap), d2 = ac.dot(ap);
-    if (d1 <= 0 && d2 <= 0) return ap.norm();
+    if (d1 <= 0 && d2 <= 0)
+      return ap.norm();
 
     const Vec3 bp = p - b;
     const Real d3 = ab.dot(bp), d4 = ac.dot(bp);
-    if (d3 >= 0 && d4 <= d3) return bp.norm();
+    if (d3 >= 0 && d4 <= d3)
+      return bp.norm();
 
     const Real vc = d1 * d4 - d3 * d2;
     if (vc <= 0 && d1 >= 0 && d3 <= 0)
@@ -148,7 +147,8 @@ namespace
 
     const Vec3 cp = p - c;
     const Real d5 = ab.dot(cp), d6 = ac.dot(cp);
-    if (d6 >= 0 && d5 <= d6) return cp.norm();
+    if (d6 >= 0 && d5 <= d6)
+      return cp.norm();
 
     const Real vb = d5 * d2 - d1 * d6;
     if (vb <= 0 && d2 >= 0 && d6 <= 0)
@@ -164,18 +164,16 @@ namespace
 
   struct FittedInterface3D
   {
-    struct Face
-    {
-      std::array<Vec3, 3> x;
-      Vec3 normal;
-    };
-    std::vector<Face> faces;
+      struct Face
+      {
+          std::array<Vec3, 3> x;
+          Vec3 normal;
+      };
+      std::vector<Face> faces;
   };
 
-  FittedInterface3D buildFittedInterface(
-      const WNGIRMesh& background,
-      const WNGIRMesh& fitted,
-      const std::vector<Index>& interfaceFacets)
+  FittedInterface3D buildFittedInterface(const WNGIRMesh& background,
+    const WNGIRMesh& fitted, const std::vector<Index>& interfaceFacets)
   {
     FittedInterface3D out;
     out.faces.reserve(interfaceFacets.size());
@@ -207,8 +205,7 @@ namespace
   }
 
   Real signedDistanceToFittedInterface(
-      const Vec3& x,
-      const FittedInterface3D& fittedInterface)
+    const Vec3& x, const FittedInterface3D& fittedInterface)
   {
     Real dmin = std::numeric_limits<Real>::infinity();
     std::size_t nearest = 0;
@@ -229,28 +226,24 @@ namespace
     return (x - fc).dot(f.normal) >= 0 ? dmin : -dmin;
   }
 
-  constexpr std::array<std::array<Real, 4>, 4> TetraQuadrature = {{
-    {{ 0.5854101966249685, 0.1381966011250105,
-       0.1381966011250105, 0.1381966011250105 }},
-    {{ 0.1381966011250105, 0.5854101966249685,
-       0.1381966011250105, 0.1381966011250105 }},
-    {{ 0.1381966011250105, 0.1381966011250105,
-       0.5854101966249685, 0.1381966011250105 }},
-    {{ 0.1381966011250105, 0.1381966011250105,
-       0.1381966011250105, 0.5854101966249685 }}
-  }};
+  constexpr std::array<std::array<Real, 4>, 4> TetraQuadrature = {
+    {{{0.5854101966249685, 0.1381966011250105, 0.1381966011250105, 0.1381966011250105}},
+      {{0.1381966011250105, 0.5854101966249685, 0.1381966011250105, 0.1381966011250105}},
+      {{0.1381966011250105, 0.1381966011250105, 0.5854101966249685, 0.1381966011250105}},
+      {{0.1381966011250105, 0.1381966011250105, 0.1381966011250105,
+        0.5854101966249685}}}};
 
   struct CellMomentInfo
   {
-    Index index = 0;
-    Real volume = 0;
-    Real moment = 0;
-    std::array<Vec3, 4> x;
+      Index index = 0;
+      Real volume = 0;
+      Real moment = 0;
+      std::array<Vec3, 4> x;
   };
 
   template <class Phi>
   std::vector<CellMomentInfo> collectCellMoments(
-      const WNGIRMesh& mesh, const Phi& phi, Real epsilon)
+    const WNGIRMesh& mesh, const Phi& phi, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -261,9 +254,9 @@ namespace
       const auto& v = it->getVertices();
       for (std::size_t i = 0; i < 4; ++i)
         info.x[i] = mesh.getVertexCoordinates(v[i]);
-      info.volume = std::abs(det3(info.x[1] - info.x[0],
-                                  info.x[2] - info.x[0],
-                                  info.x[3] - info.x[0])) / Real(6);
+      info.volume = std::abs(det3(info.x[1] - info.x[0], info.x[2] - info.x[0],
+                      info.x[3] - info.x[0])) /
+        Real(6);
       for (const auto& l : TetraQuadrature)
       {
         Math::SpatialPoint rc(3);
@@ -279,8 +272,7 @@ namespace
   }
 
   template <class Displacement>
-  void updateMovedMesh(
-      const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
+  void updateMovedMesh(const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
   {
     const auto& fes = u.getFiniteElementSpace();
     for (Index v = 0; v < mesh.getVertexCount(); ++v)
@@ -311,17 +303,16 @@ namespace
             pm(c, a) = X(c) + uc;
           }
         }
-        moved.setPolytopeTransformation(
-            {d, polytope.getIndex()},
-            new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
-              std::move(pm), geomFe));
+        moved.setPolytopeTransformation({d, polytope.getIndex()},
+          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+            std::move(pm), geomFe));
       }
     }
 #endif
   }
 
   std::size_t sizeOption(
-      int argc, char** argv, const std::string& name, std::size_t fallback)
+    int argc, char** argv, const std::string& name, std::size_t fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -330,8 +321,7 @@ namespace
     return fallback;
   }
 
-  Real realOption(
-      int argc, char** argv, const std::string& name, Real fallback)
+  Real realOption(int argc, char** argv, const std::string& name, Real fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -341,7 +331,7 @@ namespace
   }
 
   std::string stringOption(
-      int argc, char** argv, const std::string& name, std::string fallback)
+    int argc, char** argv, const std::string& name, std::string fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -361,17 +351,17 @@ namespace
 
   struct StageTimer
   {
-    using Clock = std::chrono::steady_clock;
+      using Clock = std::chrono::steady_clock;
 
-    Clock::time_point t = Clock::now();
+      Clock::time_point t = Clock::now();
 
-    Real reset()
-    {
-      const auto now = Clock::now();
-      const Real out = std::chrono::duration<Real>(now - t).count();
-      t = now;
-      return out;
-    }
+      Real reset()
+      {
+        const auto now = Clock::now();
+        const Real out = std::chrono::duration<Real>(now - t).count();
+        t = now;
+        return out;
+      }
   };
 }
 
@@ -385,22 +375,17 @@ int run(int argc, char** argv)
   const Real h = H / static_cast<Real>(n);
   const Real hmin = realOption(argc, argv, "hmin", Real(0.1) * h);
   const bool initialMMG = sizeOption(argc, argv, "initial-mmg", 0) != 0;
-  const Real initialMMGHMin =
-    realOption(argc, argv, "initial-mmg-hmin", hmin);
-  const Real initialMMGHMax =
-    realOption(argc, argv, "initial-mmg-hmax", h);
-  const Real initialMMGHausd =
-    realOption(argc, argv, "initial-mmg-hausd", Real(0));
+  const Real initialMMGHMin = realOption(argc, argv, "initial-mmg-hmin", hmin);
+  const Real initialMMGHMax = realOption(argc, argv, "initial-mmg-hmax", h);
+  const Real initialMMGHausd = realOption(argc, argv, "initial-mmg-hausd", Real(0));
   const Real ell = realOption(argc, argv, "ell", Real(0.5));
   const Real perimeterWeight =
-    realOption(argc, argv, "perimeter",
-        realOption(argc, argv, "surface", Real(0)));
+    realOption(argc, argv, "perimeter", realOption(argc, argv, "surface", Real(0)));
   const Real alphaReg = realOption(argc, argv, "alpha", Real(2) * h);
   const std::size_t holesX = sizeOption(argc, argv, "holes-x", 6);
   const std::size_t holesY = sizeOption(argc, argv, "holes-y", 2);
   const std::size_t holesZ = sizeOption(argc, argv, "holes-z", 2);
-  const Real holeRadiusFactor =
-    realOption(argc, argv, "hole-radius-factor", Real(0.12));
+  const Real holeRadiusFactor = realOption(argc, argv, "hole-radius-factor", Real(0.12));
   const bool boundaryHoles = sizeOption(argc, argv, "boundary-holes", 1) != 0;
   const Real epsilon = realOption(argc, argv, "classifier-eps", Real(1.25) * h);
   const Real lambdaC = realOption(argc, argv, "classifier-lambda", Real(0.004));
@@ -422,8 +407,7 @@ int run(int argc, char** argv)
   const std::string redistanceTransfer =
     stringOption(argc, argv, "redistance-transfer", "project");
   const std::size_t redistanceEvery = sizeOption(argc, argv, "redistance-every", 0);
-  const bool adaptiveRedistance =
-    sizeOption(argc, argv, "redistance-adaptive", 1) != 0;
+  const bool adaptiveRedistance = sizeOption(argc, argv, "redistance-adaptive", 1) != 0;
   const Real redistanceEikonalTol =
     realOption(argc, argv, "redistance-eikonal-tol", Real(0.35));
   const Real poissonTransferInterfaceWeight =
@@ -437,8 +421,7 @@ int run(int argc, char** argv)
   const std::size_t nx = static_cast<std::size_t>(std::lround(L / h)) + 1;
   const std::size_t ny = n + 1;
   const std::size_t nz = static_cast<std::size_t>(std::lround(W / h)) + 1;
-  WNGIRMesh mesh = WNGIRMesh::UniformGrid(
-      Polytope::Type::Tetrahedron, { nx, ny, nz });
+  WNGIRMesh mesh = WNGIRMesh::UniformGrid(Polytope::Type::Tetrahedron, {nx, ny, nz});
   mesh.scale(h);
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(3, 2);
@@ -446,8 +429,7 @@ int run(int argc, char** argv)
   mesh.getConnectivity().compute(0, 0);
   const std::size_t D = mesh.getDimension();
 
-  auto tagBoundary = [&](WNGIRMesh& m)
-  {
+  auto tagBoundary = [&](WNGIRMesh& m) {
     for (auto it = m.getBoundary(); it; ++it)
     {
       Vec3 c = vec3();
@@ -457,9 +439,8 @@ int run(int argc, char** argv)
       Attribute attr = Gamma0;
       if (c(0) < Real(1e-9))
         attr = GammaD;
-      else if (c(0) > L - Real(1e-9)
-               && std::abs(c(1) - H / 2) < Real(0.15) * H
-               && std::abs(c(2) - W / 2) < Real(0.15) * W)
+      else if (c(0) > L - Real(1e-9) && std::abs(c(1) - H / 2) < Real(0.15) * H &&
+        std::abs(c(2) - W / 2) < Real(0.15) * W)
         attr = GammaN;
       m.setAttribute({D - 1, it->getIndex()}, attr);
     }
@@ -469,14 +450,11 @@ int run(int argc, char** argv)
   if (initialMMG)
   {
     std::cout << "  initial MMG remesh:"
-              << " hmin=" << initialMMGHMin
-              << " hmax=" << initialMMGHMax
+              << " hmin=" << initialMMGHMin << " hmax=" << initialMMGHMax
               << " hausd=" << initialMMGHausd << "\n";
     MMG::Mesh mmgMesh(std::move(mesh));
     MMG::Optimizer optimizer;
-    optimizer.setHMin(initialMMGHMin)
-             .setHMax(initialMMGHMax)
-             .setAngleDetection(false);
+    optimizer.setHMin(initialMMGHMin).setHMax(initialMMGHMax).setAngleDetection(false);
     if (initialMMGHausd > 0)
       optimizer.setHausdorff(initialMMGHausd);
     optimizer.optimize(mmgMesh);
@@ -507,32 +485,31 @@ int run(int argc, char** argv)
   using VectorP1 = P1<Math::SpatialVector<Real>, WNGIRMesh>;
   ScalarFES sh(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-      std::integral_constant<std::size_t, 2>{},
+    std::integral_constant<std::size_t, 2>{},
 #endif
-      mesh);
+    mesh);
   ScalarP0 p0(mesh);
   VectorFES vh(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-      std::integral_constant<std::size_t, 2>{},
+    std::integral_constant<std::size_t, 2>{},
 #endif
-      mesh, 3);
-  GridFunction phiH(sh); phiH.setName("phi");
+    mesh, 3);
+  GridFunction phiH(sh);
+  phiH.setName("phi");
   TrialFunction wngirTrial(vh);
   TestFunction wngirTest(vh);
   auto& u = wngirTrial.getSolution();
   u.setName("fit");
-  GridFunction dJ(vh); dJ.setName("dJ");
+  GridFunction dJ(vh);
+  dJ.setName("dJ");
 
   // A solid box perforated by a regular array of spherical voids.
-  phiH = [&](const Geometry::Point& p) -> Real
-  {
+  phiH = [&](const Geometry::Point& p) -> Real {
     const auto& x = p.getCoordinates();
     Real value = -std::numeric_limits<Real>::infinity();
     const Real radius = holeRadiusFactor * std::min(H, W);
-    auto addVoid = [&](const Vec3& c)
-    {
-      value = std::max(value, radius - (x - c).norm());
-    };
+    auto addVoid = [&](
+                     const Vec3& c) { value = std::max(value, radius - (x - c).norm()); };
     for (std::size_t i = 1; i <= holesX; ++i)
     {
       const Real cx = L * static_cast<Real>(i) / static_cast<Real>(holesX + 1);
@@ -566,9 +543,9 @@ int run(int argc, char** argv)
 
   VectorFES gradFes(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-      std::integral_constant<std::size_t, 2>{},
+    std::integral_constant<std::size_t, 2>{},
 #endif
-      mesh, 3);
+    mesh, 3);
   GridFunction gradPhi(gradFes);
   TrialFunction gp(gradFes);
   TestFunction gq(gradFes);
@@ -604,15 +581,14 @@ int run(int argc, char** argv)
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
-  wngirDefaults.gammaMFactor = Real(0.25);
-  wngirDefaults.gammaHFactor = Real(0.25);
-  wngirDefaults.gammaDivFactor = Real(0.25);
-  wngirDefaults.ellOverH = Real(1.5);
+  wngirDefaults.gammaMFactor = Real(0.0125);
+  wngirDefaults.gammaHFactor = Real(0.0125);
+  wngirDefaults.gammaDivFactor = Real(0.0125);
+  wngirDefaults.ellOverH = Real(0.75);
   wngirDefaults.activeRMSOverHTol = Real(0.12);
   wngirDefaults.activeSupOverHTol = Real(0.65);
   WNGIRParameters wp =
-    Rodin::Examples::makeWNGIRParameters(
-        argc, argv, h, Gamma, wngirDefaults);
+    Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
   Adaptation::WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
@@ -620,9 +596,9 @@ int run(int argc, char** argv)
   WNGIRMesh moved(mesh);
   VectorFES vhMoved(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-      std::integral_constant<std::size_t, 2>{},
+    std::integral_constant<std::size_t, 2>{},
 #endif
-      moved, 3);
+    moved, 3);
   TrialFunction g(vhMoved);
   TestFunction w(vhMoved);
 
@@ -635,112 +611,99 @@ int run(int argc, char** argv)
 
   Math::Vector<Real> phiGood = phiH.getData();
 
-  auto resampleFromMoved =
-    [&](auto& out, const auto& src, const WNGIRMesh& movedMesh)
+  auto resampleFromMoved = [&](auto& out, const auto& src, const WNGIRMesh& movedMesh) {
+    std::size_t misses = 0;
+    out.getData() = src.getData();
+    AABB locator(movedMesh);
+    Math::SpatialPoint x;
+    for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
-      std::size_t misses = 0;
-      out.getData() = src.getData();
-      AABB locator(movedMesh);
-      Math::SpatialPoint x;
-      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+      const Index c = cellIt->getIndex();
+      const auto& fe = sh.getFiniteElement(D, c);
+      const auto& dofs = sh.getDOFs(D, c);
+      for (Index local = 0; local < fe.getCount(); ++local)
       {
-        const Index c = cellIt->getIndex();
+        const Index global = dofs[local];
+        mesh.getPolytopeTransformation(D, c).transform(x, fe.getNode(local));
+        if (const auto p = locator.locate(x))
+          out.getData()(global) = src.getValue(*p);
+        else
+          misses++;
+      }
+    }
+    return misses;
+  };
+  auto addFittedInterfacePenalty = [&](auto& transferSystem,
+                                     const std::vector<Index>& facets) {
+    if (!(poissonTransferInterfaceWeight > Real(0)))
+      return;
+    AABB backgroundLocator(mesh);
+    std::vector<Eigen::Triplet<Real>> triplets;
+    triplets.reserve(facets.size() * 120);
+    std::size_t interfacePenaltyMisses = 0;
+    for (const Index f : facets)
+    {
+      const auto face = moved.getFace(f);
+      const auto& qf = QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
+      const auto& quad = face->getQuadrature(qf);
+      for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
+      {
+        const auto& q = quad.getPoint(qp);
+        const Real ds = qf.getWeight(qp) * q.getDistortion();
+        if (!(ds > Real(0)))
+          continue;
+        const auto p = backgroundLocator.locate(q.getPhysicalCoordinates());
+        if (!p)
+        {
+          interfacePenaltyMisses++;
+          continue;
+        }
+        const Index c = p->getPolytope().getIndex();
         const auto& fe = sh.getFiniteElement(D, c);
         const auto& dofs = sh.getDOFs(D, c);
-        for (Index local = 0; local < fe.getCount(); ++local)
+        const Real wq = poissonTransferInterfaceWeight * ds;
+        for (Index a = 0; a < fe.getCount(); ++a)
         {
-          const Index global = dofs[local];
-          mesh.getPolytopeTransformation(D, c).transform(x, fe.getNode(local));
-          if (const auto p = locator.locate(x))
-            out.getData()(global) = src.getValue(*p);
-          else
-            misses++;
-        }
-      }
-      return misses;
-    };
-  auto addFittedInterfacePenalty =
-    [&](auto& transferSystem, const std::vector<Index>& facets)
-    {
-      if (!(poissonTransferInterfaceWeight > Real(0)))
-        return;
-      AABB backgroundLocator(mesh);
-      std::vector<Eigen::Triplet<Real>> triplets;
-      triplets.reserve(facets.size() * 120);
-      std::size_t interfacePenaltyMisses = 0;
-      for (const Index f : facets)
-      {
-        const auto face = moved.getFace(f);
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(4, face->getGeometry());
-        const auto& quad = face->getQuadrature(qf);
-        for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
-        {
-          const auto& q = quad.getPoint(qp);
-          const Real ds = qf.getWeight(qp) * q.getDistortion();
-          if (!(ds > Real(0)))
+          const Real phiA = fe.getBasis(a)(p->getReferenceCoordinates());
+          if (std::abs(phiA) <= Real(1e-14))
             continue;
-          const auto p =
-            backgroundLocator.locate(q.getPhysicalCoordinates());
-          if (!p)
+          const Index ia = dofs[a];
+          for (Index b = 0; b < fe.getCount(); ++b)
           {
-            interfacePenaltyMisses++;
-            continue;
-          }
-          const Index c = p->getPolytope().getIndex();
-          const auto& fe = sh.getFiniteElement(D, c);
-          const auto& dofs = sh.getDOFs(D, c);
-          const Real wq = poissonTransferInterfaceWeight * ds;
-          for (Index a = 0; a < fe.getCount(); ++a)
-          {
-            const Real phiA = fe.getBasis(a)(p->getReferenceCoordinates());
-            if (std::abs(phiA) <= Real(1e-14))
+            const Real phiB = fe.getBasis(b)(p->getReferenceCoordinates());
+            if (std::abs(phiB) <= Real(1e-14))
               continue;
-            const Index ia = dofs[a];
-            for (Index b = 0; b < fe.getCount(); ++b)
-            {
-              const Real phiB = fe.getBasis(b)(p->getReferenceCoordinates());
-              if (std::abs(phiB) <= Real(1e-14))
-                continue;
-              triplets.emplace_back(ia, dofs[b], wq * phiA * phiB);
-            }
+            triplets.emplace_back(ia, dofs[b], wq * phiA * phiB);
           }
         }
       }
-      Math::SparseMatrix<Real> interfacePenalty(
-          transferSystem.getOperator().rows(),
-          transferSystem.getOperator().cols());
-      interfacePenalty.setFromTriplets(triplets.begin(), triplets.end());
-      transferSystem.getOperator() += interfacePenalty;
-      if (interfacePenaltyMisses > 0)
-        std::cout << "  redistance-interface-penalty:"
-                  << " misses=" << interfacePenaltyMisses << '\n';
-    };
+    }
+    Math::SparseMatrix<Real> interfacePenalty(
+      transferSystem.getOperator().rows(), transferSystem.getOperator().cols());
+    interfacePenalty.setFromTriplets(triplets.begin(), triplets.end());
+    transferSystem.getOperator() += interfacePenalty;
+    if (interfacePenaltyMisses > 0)
+      std::cout << "  redistance-interface-penalty:"
+                << " misses=" << interfacePenaltyMisses << '\n';
+  };
   Real dt = std::min(dt0, dtMax);
   Real lastObjective = std::numeric_limits<Real>::infinity();
   Real complianceCap = std::numeric_limits<Real>::infinity();
 
   std::cout << "3D WNGIR cantilever: " << mesh.getCellCount() << " tetrahedra"
-            << "  grid=" << nx << "x" << ny << "x" << nz
-            << "\n  h=" << h << " ell=" << ell
-            << " perimeter=" << perimeterWeight
-            << " alpha=" << alphaReg
+            << "  grid=" << nx << "x" << ny << "x" << nz << "\n  h=" << h
+            << " ell=" << ell << " perimeter=" << perimeterWeight << " alpha=" << alphaReg
             << " holes=" << holesX << "x" << holesY << "x" << holesZ
             << " holeR=" << holeRadiusFactor * std::min(H, W)
-            << " boundaryHoles=" << boundaryHoles
-            << " dt=" << dt << " classify=" << classifyEvery
-            << " redistance=" << redistanceMode << "/" << redistanceEvery
-            << " transfer=" << redistanceTransfer
-            << " adaptive=" << adaptiveRedistance
-            << " eikTol=" << redistanceEikonalTol
-            << " repair=" << repairEvery
-            << "\n  WNGIR metric: gammaM=" << wp.gammaM
-            << " gammaDev=" << wp.gammaH
-            << " gammaDiv=" << wp.gammaDiv
+            << " boundaryHoles=" << boundaryHoles << " dt=" << dt
+            << " classify=" << classifyEvery << " redistance=" << redistanceMode << "/"
+            << redistanceEvery << " transfer=" << redistanceTransfer
+            << " adaptive=" << adaptiveRedistance << " eikTol=" << redistanceEikonalTol
+            << " repair=" << repairEvery << "\n  WNGIR metric: gammaM=" << wp.gammaM
+            << " gammaDev=" << wp.gammaH << " gammaDiv=" << wp.gammaDiv
             << " ellM=" << wp.ellM << '\n';
 
-  auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real
-  {
+  auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {
     const auto& vv = cell.getVertices();
     const Vec3 x0 = mesh.getVertexCoordinates(vv[0]);
     const Vec3 x1 = mesh.getVertexCoordinates(vv[1]);
@@ -763,8 +726,7 @@ int run(int argc, char** argv)
     dphi(2) = p3 - p0;
     return (J.inverse().transpose() * dphi).norm();
   };
-  auto weightedEikonalDefect = [&](const auto& gf, Real eta) -> Real
-  {
+  auto weightedEikonalDefect = [&](const auto& gf, Real eta) -> Real {
     const Real eta2 = std::max(eta * eta, Real(1e-30));
     Real weightedError = 0;
     Real weightSum = 0;
@@ -779,8 +741,7 @@ int run(int argc, char** argv)
         phiAvg += gf.getData()(sh.getGlobalIndex({0, vv[i]}, 0));
       }
       phiAvg /= Real(4);
-      const Real volume = std::abs(det3(x[1] - x[0], x[2] - x[0], x[3] - x[0]))
-        / Real(6);
+      const Real volume = std::abs(det3(x[1] - x[0], x[2] - x[0], x[3] - x[0])) / Real(6);
       const Real omega = std::exp(-(phiAvg * phiAvg) / eta2);
       const Real gradMag = cellGradientMagnitude(gf, *cit);
       weightedError += volume * omega * (gradMag - Real(1)) * (gradMag - Real(1));
@@ -842,40 +803,46 @@ int run(int argc, char** argv)
       {
         const Index f = fit->getIndex();
         const auto& inc = conn.getIncidence({2, 3}, f);
-        if (inc.size() != 2) continue;
+        if (inc.size() != 2)
+          continue;
         edges.push_back({static_cast<Index>(cellToLocal.at(inc[0])),
-                         static_cast<Index>(cellToLocal.at(inc[1])),
-                         lambdaC * triangleArea(mesh, f), f});
+          static_cast<Index>(cellToLocal.at(inc[1])), lambdaC * triangleArea(mesh, f),
+          f});
       }
       const auto classified = MinSTCut().classify(volumes, moments, edges);
       for (std::size_t i = 0; i < classified.labels.size(); ++i)
         mesh.setAttribute({D, localToCell[i]},
-            classified.labels[i] == MinSTCut::Inside ? Interior : Exterior);
+          classified.labels[i] == MinSTCut::Inside ? Interior : Exterior);
 
       std::vector<char> support(mesh.getCellCount(), 0);
       for (auto bit = mesh.getBoundary(); bit; ++bit)
         if (mesh.getAttribute(D - 1, bit->getIndex()) == Attribute{GammaD})
           for (const Index c : conn.getIncidence({2, 3}, bit->getIndex()))
             support[c] = 1;
-      const auto materialComponents = mesh.ccl(
-            [](const Polytope& a, const Polytope& b)
-            { return a.getAttribute() == b.getAttribute(); });
+      const auto materialComponents = mesh.ccl([](const Polytope& a, const Polytope& b) {
+        return a.getAttribute() == b.getAttribute();
+      });
       for (const auto& component : materialComponents.getComponents())
       {
-        if (component.empty()) continue;
+        if (component.empty())
+          continue;
         const auto attr = mesh.getAttribute(D, *component.begin());
-        if (!attr || *attr != Interior) continue;
+        if (!attr || *attr != Interior)
+          continue;
         bool anchored = false;
-        for (const Index c : component) anchored = anchored || support[c];
+        for (const Index c : component)
+          anchored = anchored || support[c];
         if (!anchored)
-          for (const Index c : component) mesh.setAttribute({D, c}, Exterior);
+          for (const Index c : component)
+            mesh.setAttribute({D, c}, Exterior);
       }
 
       for (auto fit = mesh.getFace(); fit; ++fit)
       {
         const Index f = fit->getIndex();
         const auto& inc = conn.getIncidence({2, 3}, f);
-        if (inc.size() != 2) continue;
+        if (inc.size() != 2)
+          continue;
         const auto a = mesh.getAttribute(D, inc[0]);
         const auto b = mesh.getAttribute(D, inc[1]);
         if ((a && *a == Interior) != (b && *b == Interior))
@@ -897,24 +864,22 @@ int run(int argc, char** argv)
       std::size_t changedCells = 0;
       if (haveClassification)
         for (std::size_t c = 0; c < currentInterior.size(); ++c)
-          if (currentInterior[c] != previousInterior[c]) ++changedCells;
+          if (currentInterior[c] != previousInterior[c])
+            ++changedCells;
       std::vector<Index> oldFacets = cachedInterfaceFacets;
       std::vector<Index> newFacets = interfaceFacets;
       std::sort(oldFacets.begin(), oldFacets.end());
       std::sort(newFacets.begin(), newFacets.end());
       std::vector<Index> changedFacets;
-      std::set_symmetric_difference(
-          oldFacets.begin(), oldFacets.end(),
-          newFacets.begin(), newFacets.end(),
-          std::back_inserter(changedFacets));
+      std::set_symmetric_difference(oldFacets.begin(), oldFacets.end(), newFacets.begin(),
+        newFacets.end(), std::back_inserter(changedFacets));
       previousInterior = std::move(currentInterior);
       cachedInterfaceFacets = interfaceFacets;
       cachedVolume = volume;
       cachedInsideCount = insideCount;
       haveClassification = true;
       std::cout << "  classify: inside=" << insideCount
-                << " interface=" << interfaceFacets.size()
-                << " volume=" << volume
+                << " interface=" << interfaceFacets.size() << " volume=" << volume
                 << " changedCells=" << changedCells
                 << " changedInterface=" << changedFacets.size() << '\n';
     }
@@ -922,8 +887,7 @@ int run(int argc, char** argv)
     {
       interfaceFacets = cachedInterfaceFacets;
       std::cout << "  classify: skipped"
-                << " inside=" << insideCount
-                << " interface=" << interfaceFacets.size()
+                << " inside=" << insideCount << " interface=" << interfaceFacets.size()
                 << " volume=" << volume << '\n';
     }
     if (interfaceFacets.empty())
@@ -940,23 +904,22 @@ int run(int argc, char** argv)
 
     RealFunction phiFn([&](const Geometry::Point& p) { return phiH.getValue(p); });
     AnalyticVectorFunction gradFn(
-        [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
+      [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
     u.getData().setZero();
     const auto report = wngir.solve(mesh, interfaceFacets, phiFn, gradFn);
-    std::cout << "  WNGIR: it=" << report.iterations
-              << " exit=" << report.exitReason
+    std::cout << "  WNGIR: it=" << report.iterations << " exit=" << report.exitReason
               << " activeRMS=" << std::scientific << report.activeRMS
               << " activeRMS/h=" << (h > Real(0) ? report.activeRMS / h : Real(0))
               << " activeSup/h=" << (h > Real(0) ? report.activeSup / h : Real(0))
               << " tolRMS/h=" << report.effectiveRMSOverHTol
               << " tolSup/h=" << report.effectiveSupOverHTol
-              << " nJumpRMS=" << report.normalJumpRMS
-              << '\n';
+              << " nJumpRMS=" << report.normalJumpRMS << '\n';
     tWNGIR = iterTimer.reset();
 
     updateMovedMesh(mesh, moved, u);
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-      if (const auto a = mesh.getAttribute(D, c)) moved.setAttribute({D, c}, *a);
+      if (const auto a = mesh.getAttribute(D, c))
+        moved.setAttribute({D, c}, *a);
     for (auto fit = mesh.getFace(); fit; ++fit)
       if (const auto a = mesh.getAttribute(D - 1, fit->getIndex()))
         moved.setAttribute({D - 1, fit->getIndex()}, *a);
@@ -984,56 +947,55 @@ int run(int argc, char** argv)
     TrialFunction us(vhInterior);
     TestFunction vs(vhInterior);
     Problem elasticity(us, vs);
-    elasticity = LinearElasticityIntegral(us, vs)(lambdaLame, muLame)
-               - BoundaryIntegral(VectorFunction{0, 0, -1}, vs).over(GammaN)
-               + DirichletBC(us, VectorFunction{0, 0, 0}).on(GammaD);
+    elasticity = LinearElasticityIntegral(us, vs)(lambdaLame, muLame) -
+      BoundaryIntegral(VectorFunction{0, 0, -1}, vs).over(GammaN) +
+      DirichletBC(us, VectorFunction{0, 0, 0}).on(GammaD);
     Solver::CG elasticitySolver(elasticity);
     elasticity.assemble();
     elasticity.solve(elasticitySolver);
     tElasticity = iterTimer.reset();
 
-    const Real compliance =
-      elasticity.getLinearSystem().getVector().dot(
-          elasticity.getLinearSystem().getSolution());
-    const Real objective =
-      compliance + ell * volume + perimeterWeight * gammaPerimeter;
-    const bool invalid = !std::isfinite(compliance) || compliance < 0
-                         || compliance > complianceCap;
-    const bool increased = objectiveGuard && std::isfinite(lastObjective)
-      && objective > lastObjective
-                   + objectiveTol * std::max(Real(1), std::abs(lastObjective));
+    const Real compliance = elasticity.getLinearSystem().getVector().dot(
+      elasticity.getLinearSystem().getSolution());
+    const Real objective = compliance + ell * volume + perimeterWeight * gammaPerimeter;
+    const bool invalid =
+      !std::isfinite(compliance) || compliance < 0 || compliance > complianceCap;
+    const bool increased = objectiveGuard && std::isfinite(lastObjective) &&
+      objective >
+        lastObjective + objectiveTol * std::max(Real(1), std::abs(lastObjective));
     if (invalid || increased)
     {
       phiH.getData() = phiGood;
       dt *= Real(0.5);
       std::cout << "  REJECT: J=" << objective << " dt -> " << dt << '\n';
-      if (dt < Real(1e-3) * h) break;
+      if (dt < Real(1e-3) * h)
+        break;
       continue;
     }
     phiGood = phiH.getData();
     lastObjective = objective;
     dt = std::min(dtMax, Real(1.3) * dt);
-    if (itn == 0) complianceCap = Real(50) * compliance;
+    if (itn == 0)
+      complianceCap = Real(50) * compliance;
     objectiveFile << objective << '\n';
     std::cout << "  compliance=" << compliance << " volume=" << volume
-              << " perimeter=" << gammaPerimeter
-              << " J=" << objective << " dt=" << dt << '\n';
+              << " perimeter=" << gammaPerimeter << " J=" << objective << " dt=" << dt
+              << '\n';
 
     auto jac = Jacobian(us.getSolution());
     jac.traceOf(Interior);
     auto strain = Real(0.5) * (jac + jac.T());
-    auto stress = Real(2) * muLame * strain
-                + lambdaLame * Trace(strain) * IdentityMatrix(3);
+    auto stress =
+      Real(2) * muLame * strain + lambdaLame * Trace(strain) * IdentityMatrix(3);
     auto normal = FaceNormal(moved);
     normal.traceOf(Interior);
     auto shapeDensity = Dot(stress, strain) - ell;
     AnalyticMatrixFunction surfaceProjector(
-        [&](const Geometry::Point& p) -> Mat3
-        {
-          const auto n = normal.getValue(p);
-          return Mat3::Identity(3, 3) - n * n.transpose();
-        },
-        3, 3);
+      [&](const Geometry::Point& p) -> Mat3 {
+        const auto n = normal.getValue(p);
+        return Mat3::Identity(3, 3) - n * n.transpose();
+      },
+      3, 3);
     if (trace)
     {
       Real minFaceDist = std::numeric_limits<Real>::infinity();
@@ -1050,8 +1012,7 @@ int run(int argc, char** argv)
         if (!attr || *attr != Gamma)
           continue;
         ++faceCount;
-        const auto& qf =
-          QF::PolytopeQuadratureFormula::get(8, fit->getGeometry());
+        const auto& qf = QF::PolytopeQuadratureFormula::get(8, fit->getGeometry());
         const auto& q = fit->getQuadrature(qf);
         for (std::size_t qp = 0; qp < q.getSize(); ++qp)
         {
@@ -1081,35 +1042,28 @@ int run(int argc, char** argv)
         }
       }
       std::cout << "  hilbertFaceDiag: faces=" << faceCount
-                << " minDist=" << std::scientific << minFaceDist
-                << "@f" << minDistFacet
-                << " maxDist=" << maxFaceDist
-                << " max|rho|=" << maxAbsRho
-                << "@f" << maxRhoFacet
-                << " max|rho|dS=" << maxAbsWeightedRho
-                << "@f" << maxWeightedFacet << '\n';
+                << " minDist=" << std::scientific << minFaceDist << "@f" << minDistFacet
+                << " maxDist=" << maxFaceDist << " max|rho|=" << maxAbsRho << "@f"
+                << maxRhoFacet << " max|rho|dS=" << maxAbsWeightedRho << "@f"
+                << maxWeightedFacet << '\n';
     }
     Problem hilbert(g, w);
     if (shapeDerivativeMode == "volume")
     {
-      auto eshelby =
-        shapeDensity * IdentityMatrix(3)
-        - Real(2) * jac.T() * stress;
-      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
-              + Integral(g, w)
-              - Integral(eshelby, Jacobian(w)).over(Interior)
-              + FaceIntegral(perimeterWeight * surfaceProjector, Jacobian(w)).over(Gamma)
-              + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD)
-              + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
+      auto eshelby = shapeDensity * IdentityMatrix(3) - Real(2) * jac.T() * stress;
+      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) +
+        Integral(g, w) - Integral(eshelby, Jacobian(w)).over(Interior) +
+        FaceIntegral(perimeterWeight * surfaceProjector, Jacobian(w)).over(Gamma) +
+        DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD) +
+        DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     }
     else
     {
-      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
-              + Integral(g, w)
-              - FaceIntegral(shapeDensity, Dot(normal, w)).over(Gamma)
-              + FaceIntegral(perimeterWeight * surfaceProjector, Jacobian(w)).over(Gamma)
-              + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD)
-              + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
+      hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) +
+        Integral(g, w) - FaceIntegral(shapeDensity, Dot(normal, w)).over(Gamma) +
+        FaceIntegral(perimeterWeight * surfaceProjector, Jacobian(w)).over(Gamma) +
+        DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD) +
+        DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     }
     Solver::CG hilbertSolver(hilbert);
     hilbert.assemble();
@@ -1141,34 +1095,32 @@ int run(int argc, char** argv)
     tWrite = iterTimer.reset();
 
     const Real redistanceEta = std::max(report.sigma, Real(3) * h);
-    const Real eikonalDefect =
-      weightedEikonalDefect(phiH, redistanceEta);
-    const bool periodicRedistance = redistanceEvery > 0
-      && ((itn + 1) % redistanceEvery == 0 || itn + 1 == maxIt);
+    const Real eikonalDefect = weightedEikonalDefect(phiH, redistanceEta);
+    const bool periodicRedistance =
+      redistanceEvery > 0 && ((itn + 1) % redistanceEvery == 0 || itn + 1 == maxIt);
     const bool adaptiveRedistanceNow =
       adaptiveRedistance && eikonalDefect > redistanceEikonalTol;
-    const bool doRedistance = redistanceMode != "none"
-      && (periodicRedistance || adaptiveRedistanceNow);
+    const bool doRedistance =
+      redistanceMode != "none" && (periodicRedistance || adaptiveRedistanceNow);
     if (doRedistance)
     {
       bool distanciationApplied = true;
-      if ((redistanceMode == "cp" || redistanceMode == "poisson")
-          && interfaceFacets.empty())
+      if ((redistanceMode == "cp" || redistanceMode == "poisson") &&
+        interfaceFacets.empty())
       {
         dist.getData() = phiH.getData();
         distanciationApplied = false;
         std::cout << "  redistance: skipped-empty-interface"
-                  << " mode=" << redistanceMode
-                  << " eikWelsch=" << std::scientific << eikonalDefect
-                  << '\n';
+                  << " mode=" << redistanceMode << " eikWelsch=" << std::scientific
+                  << eikonalDefect << '\n';
       }
       else if (redistanceMode == "poisson")
       {
         ScalarFES shFit(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-            std::integral_constant<std::size_t, 2>{},
+          std::integral_constant<std::size_t, 2>{},
 #endif
-            moved);
+          moved);
         ScalarP0 p0Fit(moved);
         GridFunction source(p0Fit);
         for (auto cellIt = moved.getCell(); cellIt; ++cellIt)
@@ -1182,14 +1134,11 @@ int run(int argc, char** argv)
         TestFunction qd(shFit);
         RealFunction zero = 0;
         Problem poissonDistance(pd, qd);
-        poissonDistance =
-            Integral(Grad(pd), Grad(qd))
-          - Integral(source, qd)
-          + DirichletBC(pd, zero).on(Gamma);
+        poissonDistance = Integral(Grad(pd), Grad(qd)) - Integral(source, qd) +
+          DirichletBC(pd, zero).on(Gamma);
         Solver::CG(poissonDistance).solve();
         GridFunction nodalDist(sh);
-        const std::size_t misses =
-          resampleFromMoved(nodalDist, pd.getSolution(), moved);
+        const std::size_t misses = resampleFromMoved(nodalDist, pd.getSolution(), moved);
         if (redistanceTransfer == "resample")
         {
           dist.getData() = nodalDist.getData();
@@ -1197,52 +1146,45 @@ int run(int argc, char** argv)
         else if (redistanceTransfer == "project")
         {
           AABB fittedLocator(moved);
-          RealFunction fittedPhi(
-              [&](const Geometry::Point& p) -> Real
-              {
-                if (const auto q =
-                    fittedLocator.locate(p.getPhysicalCoordinates()))
-                  return pd.getSolution().getValue(*q);
-                return nodalDist.getValue(p);
-              });
+          RealFunction fittedPhi([&](const Geometry::Point& p) -> Real {
+            if (const auto q = fittedLocator.locate(p.getPhysicalCoordinates()))
+              return pd.getSolution().getValue(*q);
+            return nodalDist.getValue(p);
+          });
           TrialFunction tp(sh);
           TestFunction tq(sh);
           Problem transfer(tp, tq);
-          transfer =
-              Integral(tp, tq)
-            - Integral(fittedPhi, tq);
+          transfer = Integral(tp, tq) - Integral(fittedPhi, tq);
           transfer.assemble();
           auto& transferSystem = transfer.getLinearSystem();
           addFittedInterfacePenalty(transferSystem, interfaceFacets);
-          Eigen::ConjugateGradient<
-            Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> transferSolver;
+          Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
+            transferSolver;
           transferSystem.getSolution() =
             transferSolver.compute(transferSystem.getOperator())
-                          .solve(transferSystem.getVector());
+              .solve(transferSystem.getVector());
           tp.getSolution().getData() = transferSystem.getSolution();
           dist.getData() = tp.getSolution().getData();
         }
         else
         {
-          std::cerr << "Unsupported redistance transfer: "
-                    << redistanceTransfer << '\n';
+          std::cerr << "Unsupported redistance transfer: " << redistanceTransfer << '\n';
           return 2;
         }
         std::cout << "  distanciation-resample: misses=" << misses << '\n';
       }
       else if (redistanceMode == "cp")
       {
-        const auto fittedInterface =
-          buildFittedInterface(mesh, moved, interfaceFacets);
+        const auto fittedInterface = buildFittedInterface(mesh, moved, interfaceFacets);
         ScalarP1 shP1(mesh);
         GridFunction distP1(shP1);
         distP1 = Real(0);
         Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
-          .setInterior(Interior).setInterface(Gamma).solve().sign();
-        dist = [&](const Geometry::Point& p) -> Real
-        {
-          return distP1.getValue(p);
-        };
+          .setInterior(Interior)
+          .setInterface(Gamma)
+          .solve()
+          .sign();
+        dist = [&](const Geometry::Point& p) -> Real { return distP1.getValue(p); };
         const Real band = Real(6) * h;
         for (Index v = 0; v < mesh.getVertexCount(); ++v)
         {
@@ -1250,8 +1192,7 @@ int run(int argc, char** argv)
           if (std::abs(dist.getData()(dof)) > band)
             continue;
           const Vec3 x = mesh.getVertexCoordinates(v);
-          dist.getData()(dof) =
-            signedDistanceToFittedInterface(x, fittedInterface);
+          dist.getData()(dof) = signedDistanceToFittedInterface(x, fittedInterface);
         }
       }
       else if (redistanceMode == "fmm")
@@ -1260,10 +1201,12 @@ int run(int argc, char** argv)
         GridFunction distP1(shP1);
         distP1 = Real(0);
         Distance::Eikonal<ScalarP1, Math::Vector<Real>>(distP1)
-          .setInterior(Interior).setInterface(Gamma).solve().sign();
+          .setInterior(Interior)
+          .setInterface(Gamma)
+          .solve()
+          .sign();
         GridFunction nodalDist(sh);
-        const std::size_t misses =
-          resampleFromMoved(nodalDist, distP1, moved);
+        const std::size_t misses = resampleFromMoved(nodalDist, distP1, moved);
         if (redistanceTransfer == "resample")
         {
           dist.getData() = nodalDist.getData();
@@ -1271,35 +1214,29 @@ int run(int argc, char** argv)
         else if (redistanceTransfer == "project")
         {
           AABB fittedLocator(moved);
-          RealFunction fittedPhi(
-              [&](const Geometry::Point& p) -> Real
-              {
-                if (const auto q =
-                    fittedLocator.locate(p.getPhysicalCoordinates()))
-                  return distP1.getValue(*q);
-                return nodalDist.getValue(p);
-              });
+          RealFunction fittedPhi([&](const Geometry::Point& p) -> Real {
+            if (const auto q = fittedLocator.locate(p.getPhysicalCoordinates()))
+              return distP1.getValue(*q);
+            return nodalDist.getValue(p);
+          });
           TrialFunction tp(sh);
           TestFunction tq(sh);
           Problem transfer(tp, tq);
-          transfer =
-              Integral(tp, tq)
-            - Integral(fittedPhi, tq);
+          transfer = Integral(tp, tq) - Integral(fittedPhi, tq);
           transfer.assemble();
           auto& transferSystem = transfer.getLinearSystem();
           addFittedInterfacePenalty(transferSystem, interfaceFacets);
-          Eigen::ConjugateGradient<
-            Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper> transferSolver;
+          Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
+            transferSolver;
           transferSystem.getSolution() =
             transferSolver.compute(transferSystem.getOperator())
-                          .solve(transferSystem.getVector());
+              .solve(transferSystem.getVector());
           tp.getSolution().getData() = transferSystem.getSolution();
           dist.getData() = tp.getSolution().getData();
         }
         else
         {
-          std::cerr << "Unsupported redistance transfer: "
-                    << redistanceTransfer << '\n';
+          std::cerr << "Unsupported redistance transfer: " << redistanceTransfer << '\n';
           return 2;
         }
         std::cout << "  distanciation-resample: misses=" << misses << '\n';
@@ -1311,15 +1248,13 @@ int run(int argc, char** argv)
       }
       if (distanciationApplied)
       {
-        const char* label =
-          redistanceMode == "poisson" ? "distanciation" : "redistance";
-        std::cout << "  " << label << ": mode=" << redistanceMode
-                  << " reason="
+        const char* label = redistanceMode == "poisson" ? "distanciation" : "redistance";
+        std::cout << "  " << label << ": mode=" << redistanceMode << " reason="
                   << (periodicRedistance && adaptiveRedistanceNow ? "periodic+adaptive"
-                      : periodicRedistance ? "periodic" : "adaptive")
+                         : periodicRedistance                     ? "periodic"
+                                                                  : "adaptive")
                   << " eikWelsch=" << std::scientific << eikonalDefect
-                  << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
-                  << '\n';
+                  << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0)) << '\n';
       }
     }
     else
@@ -1327,8 +1262,7 @@ int run(int argc, char** argv)
       dist.getData() = phiH.getData();
       std::cout << "  redistance: skipped"
                 << " eikWelsch=" << std::scientific << eikonalDefect
-                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0))
-                << '\n';
+                << " eta/h=" << (h > Real(0) ? redistanceEta / h : Real(0)) << '\n';
     }
     tRedistance = iterTimer.reset();
 
@@ -1343,12 +1277,10 @@ int run(int argc, char** argv)
         std::max(maxPhiChange, std::abs(phiH.getData()(i) - phiBeforeAdvection(i)));
     std::cout << "  advect: dt/h=" << (h > Real(0) ? dt / h : Real(0))
               << " max|dJ|=" << dJMax
-              << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0))
-              << '\n';
+              << " max|dphi|/h=" << (h > Real(0) ? maxPhiChange / h : Real(0)) << '\n';
     tAdvect = iterTimer.reset();
 
-    if (repairEvery > 0
-        && ((itn + 1) % repairEvery == 0 || itn + 1 == maxIt))
+    if (repairEvery > 0 && ((itn + 1) % repairEvery == 0 || itn + 1 == maxIt))
     {
       const Math::Vector<Real> rhs = mass.getOperator() * phiH.getData();
       phiH.getData() = repairCG.solve(rhs);
@@ -1357,34 +1289,25 @@ int run(int argc, char** argv)
 
     if (printTiming)
     {
-      const Real total = tClassify + tGrad + tWNGIR + tMoveTrim
-                       + tElasticity + tHilbert + tWrite + tRedistance
-                       + tAdvect + tRepair;
+      const Real total = tClassify + tGrad + tWNGIR + tMoveTrim + tElasticity + tHilbert +
+        tWrite + tRedistance + tAdvect + tRepair;
       std::cout << "  timing:"
                 << " classify=" << std::scientific << std::setprecision(2) << tClassify
-                << " grad=" << tGrad
-                << " wngir=" << tWNGIR
-                << " wngirSetup=" << report.tSetup
-                << " wngirBulk=" << report.tBulk
-                << " wngirAsm=" << report.tAssembly
-                << " wngirSolve=" << report.tSolve
-                << " wngirLS=" << report.tLineSearch
-                << " moveTrim=" << tMoveTrim
-                << " elas=" << tElasticity
-                << " hilbert=" << tHilbert
-                << " write=" << tWrite
-                << " redist=" << tRedistance
-                << " advect=" << tAdvect
-                << " repair=" << tRepair
-                << " total=" << total << '\n';
+                << " grad=" << tGrad << " wngir=" << tWNGIR
+                << " wngirSetup=" << report.tSetup << " wngirBulk=" << report.tBulk
+                << " wngirAsm=" << report.tAssembly << " wngirSolve=" << report.tSolve
+                << " wngirLS=" << report.tLineSearch << " moveTrim=" << tMoveTrim
+                << " elas=" << tElasticity << " hilbert=" << tHilbert
+                << " write=" << tWrite << " redist=" << tRedistance
+                << " advect=" << tAdvect << " repair=" << tRepair << " total=" << total
+                << '\n';
     }
 
     ++acceptedShapeIterations;
   }
 
-  std::cout << "\nDone. Accepted shape iterations: "
-            << acceptedShapeIterations << " / " << maxIt
-            << "  attempts=" << shapeAttempts
+  std::cout << "\nDone. Accepted shape iterations: " << acceptedShapeIterations << " / "
+            << maxIt << "  attempts=" << shapeAttempts
             << ". Objective history in LevelSetWNGIRCantilever3D.obj.txt\n";
   return 0;
 }

@@ -37,10 +37,10 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
     struct SolveResult
     {
-      Real l2ErrorSquared;
-      bool converged;
-      Real initialResidual;
-      Real finalResidual;
+        Real l2ErrorSquared;
+        bool converged;
+        Real initialResidual;
+        Real finalResidual;
     };
 
     auto makeUnitSquareMesh()
@@ -72,16 +72,13 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       const Real pi = Math::Constants::pi();
       // Affine displacement is represented exactly in P1, making this a strict
       // manufactured test for the nonlinear solver/integrator plumbing.
-      auto uExact = VectorFunction{
-        xDisplacementScale * F::x + xDisplacementOffset,
-        yDisplacementScale * F::y + yDisplacementOffset
-      };
-      auto zero = VectorFunction{ Zero(), Zero() };
+      auto uExact = VectorFunction{xDisplacementScale * F::x + xDisplacementOffset,
+        yDisplacementScale * F::y + yDisplacementOffset};
+      auto zero = VectorFunction{Zero(), Zero()};
       auto perturbation = perturbationScale * sin(pi * F::x) * sin(pi * F::y);
-      uCurrent = VectorFunction{
-        xDisplacementScale * F::x + xDisplacementOffset + perturbation,
-        yDisplacementScale * F::y + yDisplacementOffset - perturbation
-      };
+      uCurrent =
+        VectorFunction{xDisplacementScale * F::x + xDisplacementOffset + perturbation,
+          yDisplacementScale * F::y + yDisplacementOffset - perturbation};
 
       TrialFunction du(Vh);
       TestFunction v(Vh);
@@ -92,23 +89,19 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       Problem newtonProblem(du, v);
       if (residualSign == ResidualSign::Correct)
       {
-        newtonProblem = ivw(du, v)
-                      + DirichletBC(du, zero);
+        newtonProblem = ivw(du, v) + DirichletBC(du, zero);
       }
       else
       {
-        newtonProblem = ivw.Tangent(du, v)
-                      - ivw.Residual(v)
-                      + DirichletBC(du, zero);
+        newtonProblem = ivw.Tangent(du, v) - ivw.Residual(v) + DirichletBC(du, zero);
       }
 
       SparseLU linearSolver(newtonProblem);
       NewtonSolver newton(linearSolver);
       if (residualSign == ResidualSign::Correct)
       {
-        newton.setMaxIterations(12)
-          .setAbsoluteTolerance(1e-12)
-          .setRelativeTolerance(1e-10);
+        newton.setMaxIterations(12).setAbsoluteTolerance(1e-12).setRelativeTolerance(
+          1e-10);
       }
       else
       {

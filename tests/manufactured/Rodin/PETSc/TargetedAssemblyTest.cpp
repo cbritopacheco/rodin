@@ -32,25 +32,23 @@ namespace
 {
   template <template <class, class> class Assembler>
   PETSc::Math::LinearSystem assembleLocal(
-      Variational::AssemblyTarget target,
-      bool targeted)
+    Variational::AssemblyTarget target, bool targeted)
   {
-    auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {3, 3});
     mesh.getConnectivity().compute(1, 2);
 
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
 
     using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemType = Problem<LinearSystemType, decltype(u), decltype(v)>;
     typename ProblemType::ProblemBodyType body =
       Integral(u, v) - Integral(RealFunction(1.0), v);
 
-    Assembly::ProblemAssemblyInput<
-      typename ProblemType::ProblemBodyType,
-      decltype(u), decltype(v)> input(body, u, v);
+    Assembly::ProblemAssemblyInput<typename ProblemType::ProblemBodyType, decltype(u),
+      decltype(v)>
+      input(body, u, v);
 
     LinearSystemType ls(PETSC_COMM_SELF);
     Assembler<LinearSystemType, ProblemType> assembler;
@@ -124,8 +122,7 @@ namespace
         ASSERT_EQ(ierr, PETSC_SUCCESS);
         ierr = MatGetValues(actual, 1, &i, 1, &j, &b);
         ASSERT_EQ(ierr, PETSC_SUCCESS);
-        EXPECT_LE(PetscAbsScalar(a - b), 1e-14)
-          << "entry (" << i << ", " << j << ")";
+        EXPECT_LE(PetscAbsScalar(a - b), 1e-14) << "entry (" << i << ", " << j << ")";
       }
     }
   }
@@ -133,12 +130,9 @@ namespace
   template <template <class, class> class Assembler>
   void checkLocalBackendTargetedAssembly()
   {
-    auto full = assembleLocal<Assembler>(
-        Variational::AssemblyTarget::LHS, false);
-    auto lhs = assembleLocal<Assembler>(
-        Variational::AssemblyTarget::LHS, true);
-    auto rhs = assembleLocal<Assembler>(
-        Variational::AssemblyTarget::RHS, true);
+    auto full = assembleLocal<Assembler>(Variational::AssemblyTarget::LHS, false);
+    auto lhs = assembleLocal<Assembler>(Variational::AssemblyTarget::LHS, true);
+    auto rhs = assembleLocal<Assembler>(Variational::AssemblyTarget::RHS, true);
 
     expectSameMatrix(full.getOperator(), lhs.getOperator());
     expectSameVector(full.getVector(), rhs.getVector());
@@ -151,7 +145,7 @@ namespace
     MatInfo info;
     PetscErrorCode ierr = MatGetInfo(A, MAT_LOCAL, &info);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
     return static_cast<PetscInt>(info.nz_used);
   }
 
@@ -162,7 +156,7 @@ namespace
     MatInfo info;
     PetscErrorCode ierr = MatGetInfo(A, MAT_LOCAL, &info);
     assert(ierr == PETSC_SUCCESS);
-    (void) ierr;
+    (void)ierr;
     return info.mallocs;
   }
 
@@ -171,20 +165,15 @@ namespace
   // same n exercises the MatrixSetup reuse path; changing n forces a full
   // structural setup.
   template <template <class, class> class Assembler>
-  void assembleStiffness(
-      PETSc::Math::LinearSystem& ls,
-      size_t n,
-      double gammaValue,
-      bool emptyLHS,
-      double sourceValue)
+  void assembleStiffness(PETSc::Math::LinearSystem& ls, size_t n, double gammaValue,
+    bool emptyLHS, double sourceValue)
   {
-    auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {n, n});
     mesh.getConnectivity().compute(1, 2);
 
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
     RealFunction gamma(gammaValue);
 
     using LinearSystemType = PETSc::Math::LinearSystem;
@@ -196,9 +185,9 @@ namespace
     typename ProblemType::ProblemBodyType body =
       lhs - Integral(RealFunction(sourceValue), v);
 
-    Assembly::ProblemAssemblyInput<
-      typename ProblemType::ProblemBodyType,
-      decltype(u), decltype(v)> input(body, u, v);
+    Assembly::ProblemAssemblyInput<typename ProblemType::ProblemBodyType, decltype(u),
+      decltype(v)>
+      input(body, u, v);
 
     Assembler<LinearSystemType, ProblemType> assembler;
     assembler.execute(ls, input);
@@ -206,17 +195,13 @@ namespace
 
   template <template <class, class> class Assembler>
   void assembleStiffness(
-      PETSc::Math::LinearSystem& ls,
-      size_t n,
-      double gammaValue,
-      bool emptyLHS)
+    PETSc::Math::LinearSystem& ls, size_t n, double gammaValue, bool emptyLHS)
   {
     assembleStiffness<Assembler>(ls, n, gammaValue, emptyLHS, 1.0);
   }
 
   template <template <class, class> class Assembler>
-  void assembleStiffness(
-      PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
+  void assembleStiffness(PETSc::Math::LinearSystem& ls, size_t n, double gammaValue)
   {
     assembleStiffness<Assembler>(ls, n, gammaValue, false, 1.0);
   }
@@ -314,8 +299,8 @@ namespace
     assembleStiffness<Assembler>(ls, 4, 1.0, true);
     ASSERT_EQ(matrixNonzeros(ls.getOperator()), 0);
 
-    PetscErrorCode ierr = MatSetOption(
-        ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    PetscErrorCode ierr =
+      MatSetOption(ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
     assembleStiffness<Assembler>(ls, 4, 1.0);
     EXPECT_GT(matrixNonzeros(ls.getOperator()), 0);
@@ -333,8 +318,8 @@ namespace
     assembleStiffness<Assembler>(ls, 4, 1.0, true);
     ASSERT_EQ(matrixNonzeros(ls.getOperator()), 0);
 
-    PetscErrorCode ierr = MatSetOption(
-        ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
+    PetscErrorCode ierr =
+      MatSetOption(ls.getOperator(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_TRUE);
     ASSERT_EQ(ierr, PETSC_SUCCESS);
     EXPECT_DEATH(assembleStiffness<Assembler>(ls, 4, 1.0), "");
   }
@@ -374,8 +359,7 @@ namespace
   /// @brief Verifies sequential forbids new nonzero before reassembly for PET sc targeted assembly by checking form assembly.
   TEST(PETSc_TargetedAssembly, SequentialForbidsNewNonzeroBeforeReassembly)
   {
-    checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly<
-      Assembly::Sequential>();
+    checkNewNonzeroOptionForbidsPatternGrowthBeforeReassembly<Assembly::Sequential>();
   }
 #endif
 
@@ -416,8 +400,7 @@ namespace
 /// @brief Initializes the test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
-  [[maybe_unused]] PetscErrorCode ierr =
-    PetscInitialize(&argc, &argv, nullptr, nullptr);
+  [[maybe_unused]] PetscErrorCode ierr = PetscInitialize(&argc, &argv, nullptr, nullptr);
   assert(ierr == PETSC_SUCCESS);
 
   ::testing::InitGoogleTest(&argc, argv);

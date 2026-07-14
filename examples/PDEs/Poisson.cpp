@@ -38,7 +38,7 @@ int main(int, char**)
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))
           // - Integral(f, v)
-          + DirichletBC(u, f).on(17);
+    + DirichletBC(u, f).on(17);
   CG(poisson).solve();
 
   mesh.save("Poisson.mesh", IO::FileFormat::MEDIT);

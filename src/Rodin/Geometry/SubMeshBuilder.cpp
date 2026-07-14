@@ -125,9 +125,8 @@ namespace Rodin::Geometry
       for (size_t child = 0; child < m_s2ps[d].left.size(); ++child)
       {
         const Index parentIdx = m_s2ps[d].left[child];
-        res.setPolytopeTransformation(
-            { d, static_cast<Index>(child) },
-            parent.getPolytopeTransformation(d, parentIdx).copy());
+        res.setPolytopeTransformation({d, static_cast<Index>(child)},
+          parent.getPolytopeTransformation(d, parentIdx).copy());
       }
     }
     res.m_s2ps = std::move(m_s2ps);

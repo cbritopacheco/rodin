@@ -21,20 +21,18 @@ namespace Rodin::Tests::Unit
     // Build the edges of a (rows x cols) 4-connected grid of cells with
     // uniform capacity.
     std::vector<MinSTCut::Edge> gridEdges(
-        std::size_t rows, std::size_t cols, Real capacity)
+      std::size_t rows, std::size_t cols, Real capacity)
     {
       std::vector<MinSTCut::Edge> edges;
-      auto idx = [cols](std::size_t r, std::size_t c) -> Index {
-        return r * cols + c;
-      };
+      auto idx = [cols](std::size_t r, std::size_t c) -> Index { return r * cols + c; };
       for (std::size_t r = 0; r < rows; ++r)
       {
         for (std::size_t c = 0; c < cols; ++c)
         {
           if (c + 1 < cols)
-            edges.push_back({ idx(r, c), idx(r, c + 1), capacity });
+            edges.push_back({idx(r, c), idx(r, c + 1), capacity});
           if (r + 1 < rows)
-            edges.push_back({ idx(r, c), idx(r + 1, c), capacity });
+            edges.push_back({idx(r, c), idx(r + 1, c), capacity});
         }
       }
       return edges;
@@ -84,10 +82,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_MinSTCut, NegativeMomentIsInside)
   {
     // Single isolated cell with a negative moment is labelled Inside.
-    const std::vector<Real> volumes{ 1.0 };
-    const std::vector<Real> moments{ -0.7 };
-    const auto result =
-      MinSTCut().classify(volumes, moments, {});
+    const std::vector<Real> volumes{1.0};
+    const std::vector<Real> moments{-0.7};
+    const auto result = MinSTCut().classify(volumes, moments, {});
     ASSERT_EQ(result.labels.size(), 1u);
     EXPECT_EQ(result.labels[0], MinSTCut::Inside);
   }
@@ -96,10 +93,9 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_MinSTCut, PositiveMomentIsOutside)
   {
     // Single isolated cell with a positive moment is labelled Outside.
-    const std::vector<Real> volumes{ 1.0 };
-    const std::vector<Real> moments{ +0.7 };
-    const auto result =
-      MinSTCut().classify(volumes, moments, {});
+    const std::vector<Real> volumes{1.0};
+    const std::vector<Real> moments{+0.7};
+    const auto result = MinSTCut().classify(volumes, moments, {});
     ASSERT_EQ(result.labels.size(), 1u);
     EXPECT_EQ(result.labels[0], MinSTCut::Outside);
   }
@@ -111,11 +107,10 @@ namespace Rodin::Tests::Unit
     // connected by an edge whose capacity dominates the unary terms.
     // The optimal cut keeps both on the same side of the source/sink
     // partition, i.e. they share a label and no cut edge appears.
-    const std::vector<Real> volumes{ 1.0, 1.0 };
-    const std::vector<Real> moments{ -0.4, +0.4 };
-    const std::vector<MinSTCut::Edge> edges{ { 0, 1, 1e3 } };
-    const auto result =
-      MinSTCut().classify(volumes, moments, edges);
+    const std::vector<Real> volumes{1.0, 1.0};
+    const std::vector<Real> moments{-0.4, +0.4};
+    const std::vector<MinSTCut::Edge> edges{{0, 1, 1e3}};
+    const auto result = MinSTCut().classify(volumes, moments, edges);
     ASSERT_EQ(result.labels.size(), 2u);
     EXPECT_EQ(result.labels[0], result.labels[1]);
     EXPECT_TRUE(result.cutEdges.empty());
@@ -127,11 +122,10 @@ namespace Rodin::Tests::Unit
     // Same conflicting-moment setup as above but with a weak smoothing
     // edge: the data term wins and the labels split along the moment
     // sign, producing one cut edge.
-    const std::vector<Real> volumes{ 1.0, 1.0 };
-    const std::vector<Real> moments{ -0.4, +0.4 };
-    const std::vector<MinSTCut::Edge> edges{ { 0, 1, 1e-3 } };
-    const auto result =
-      MinSTCut().classify(volumes, moments, edges);
+    const std::vector<Real> volumes{1.0, 1.0};
+    const std::vector<Real> moments{-0.4, +0.4};
+    const std::vector<MinSTCut::Edge> edges{{0, 1, 1e-3}};
+    const auto result = MinSTCut().classify(volumes, moments, edges);
     ASSERT_EQ(result.labels.size(), 2u);
     EXPECT_EQ(result.labels[0], MinSTCut::Inside);
     EXPECT_EQ(result.labels[1], MinSTCut::Outside);
@@ -154,17 +148,13 @@ namespace Rodin::Tests::Unit
     constexpr std::size_t rows = 2;
     constexpr std::size_t cols = 2;
     const std::vector<Real> volumes(rows * cols, 1.0);
-    const std::vector<Real> moments{
-      -1.0,  +1.0,
-      +1.0,  -1.0
-    };
+    const std::vector<Real> moments{-1.0, +1.0, +1.0, -1.0};
     const auto edges = gridEdges(rows, cols, 1.0);
 
     {
       MinSTCut::Options weak;
       weak.lambdaScale = 1e-6;
-      const auto result =
-        MinSTCut().classify(volumes, moments, edges, weak);
+      const auto result = MinSTCut().classify(volumes, moments, edges, weak);
       // Checkerboard preserved (each cell matches its own sign).
       EXPECT_EQ(result.labels[0], MinSTCut::Inside);
       EXPECT_EQ(result.labels[1], MinSTCut::Outside);
@@ -174,8 +164,7 @@ namespace Rodin::Tests::Unit
     {
       MinSTCut::Options strong;
       strong.lambdaScale = 1e6;
-      const auto result =
-        MinSTCut().classify(volumes, moments, edges, strong);
+      const auto result = MinSTCut().classify(volumes, moments, edges, strong);
       // Strong smoothing collapses the 2x2 to a single label.
       EXPECT_EQ(result.labels[0], result.labels[1]);
       EXPECT_EQ(result.labels[1], result.labels[2]);
@@ -216,8 +205,7 @@ namespace Rodin::Tests::Unit
 
     MinSTCut::Options strong;
     strong.lambdaScale = 10;
-    const auto strongResult =
-      MinSTCut().classify(volumes, moments, baseEdges, strong);
+    const auto strongResult = MinSTCut().classify(volumes, moments, baseEdges, strong);
     EXPECT_EQ(strongResult.labels[center], MinSTCut::Outside);
   }
 
@@ -227,9 +215,9 @@ namespace Rodin::Tests::Unit
     // Two cells: moment +0.9 (definitely Outside) and moment -0.9
     // (definitely Inside), connected by an enormous edge that would
     // otherwise collapse them onto the same label.
-    const std::vector<Real> volumes{ 1, 1 };
-    const std::vector<Real> moments{ -0.9, +0.9 };
-    const std::vector<MinSTCut::Edge> edges{ { 0, 1, 1e6 } };
+    const std::vector<Real> volumes{1, 1};
+    const std::vector<Real> moments{-0.9, +0.9};
+    const std::vector<MinSTCut::Edge> edges{{0, 1, 1e6}};
 
     // Without pinning, the huge edge forces both labels to whichever
     // side wins on total unary; certainly the cut does not split them.
@@ -238,8 +226,7 @@ namespace Rodin::Tests::Unit
 
     MinSTCut::Options pinned;
     pinned.farFieldThreshold = 0.5;
-    const auto pinnedResult =
-      MinSTCut().classify(volumes, moments, edges, pinned);
+    const auto pinnedResult = MinSTCut().classify(volumes, moments, edges, pinned);
     EXPECT_EQ(pinnedResult.labels[0], MinSTCut::Inside);
     EXPECT_EQ(pinnedResult.labels[1], MinSTCut::Outside);
     EXPECT_EQ(pinnedResult.cutEdges.size(), 1u);
@@ -253,11 +240,11 @@ namespace Rodin::Tests::Unit
     // The fixed cells force the middle to flip along with the smoothing
     // term.
     const std::vector<Real> volumes(3, 1);
-    const std::vector<Real> moments{ -1, +1e-3, -1 };
+    const std::vector<Real> moments{-1, +1e-3, -1};
     const auto edges = gridEdges(1, 3, 10.0);
 
     MinSTCut::Options options;
-    options.cellInBand = { false, true, false };
+    options.cellInBand = {false, true, false};
     options.lambdaScale = 1.0;
 
     const auto result = MinSTCut().classify(volumes, moments, edges, options);
@@ -274,12 +261,12 @@ namespace Rodin::Tests::Unit
     // tiny per-edge lambda on edge (1,2) makes it the cheapest cut, while
     // boosting the other two edges. The cut must land on (1,2).
     const std::vector<Real> volumes(4, 1);
-    const std::vector<Real> moments{ -1, -0.4, +0.4, +1 };
+    const std::vector<Real> moments{-1, -0.4, +0.4, +1};
     const auto edges = gridEdges(1, 4, 1.0);
     ASSERT_EQ(edges.size(), 3u);
 
     MinSTCut::Options options;
-    options.perEdgeLambda = { 5.0, 1e-3, 5.0 };
+    options.perEdgeLambda = {5.0, 1e-3, 5.0};
 
     const auto result = MinSTCut().classify(volumes, moments, edges, options);
     EXPECT_EQ(result.labels[0], MinSTCut::Inside);
@@ -298,19 +285,17 @@ namespace Rodin::Tests::Unit
     // smoothing edge. Tiny unary lets smoothing dominate (same label);
     // large unary lets the data dominate (split).
     const std::vector<Real> volumes(2, 1);
-    const std::vector<Real> moments{ -0.1, +0.1 };
-    const std::vector<MinSTCut::Edge> edges{ { 0, 1, 1.0 } };
+    const std::vector<Real> moments{-0.1, +0.1};
+    const std::vector<MinSTCut::Edge> edges{{0, 1, 1.0}};
 
     MinSTCut::Options dataLight;
     dataLight.unaryScale = 1e-3;
-    const auto smoothed =
-      MinSTCut().classify(volumes, moments, edges, dataLight);
+    const auto smoothed = MinSTCut().classify(volumes, moments, edges, dataLight);
     EXPECT_EQ(smoothed.labels[0], smoothed.labels[1]);
 
     MinSTCut::Options dataHeavy;
     dataHeavy.unaryScale = 1e3;
-    const auto split =
-      MinSTCut().classify(volumes, moments, edges, dataHeavy);
+    const auto split = MinSTCut().classify(volumes, moments, edges, dataHeavy);
     EXPECT_NE(split.labels[0], split.labels[1]);
     EXPECT_EQ(split.labels[0], MinSTCut::Inside);
     EXPECT_EQ(split.labels[1], MinSTCut::Outside);
@@ -319,53 +304,36 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies mismatched input sizes throw for geometry min ST cut by checking exception behavior.
   TEST(Rodin_Geometry_MinSTCut, MismatchedInputSizesThrow)
   {
-    EXPECT_THROW(
-        MinSTCut().classify({ 1.0 }, { 1.0, 1.0 }, {}),
-        std::invalid_argument);
+    EXPECT_THROW(MinSTCut().classify({1.0}, {1.0, 1.0}, {}), std::invalid_argument);
 
     MinSTCut::Options options;
-    options.perEdgeLambda = { 1.0 };
+    options.perEdgeLambda = {1.0};
     EXPECT_THROW(
-        MinSTCut().classify({ 1.0, 1.0 }, { 0.0, 0.0 }, {}, options),
-        std::invalid_argument);
+      MinSTCut().classify({1.0, 1.0}, {0.0, 0.0}, {}, options), std::invalid_argument);
 
     MinSTCut::Options bandOptions;
-    bandOptions.cellInBand = { true };
-    EXPECT_THROW(
-        MinSTCut().classify({ 1.0, 1.0 }, { 0.0, 0.0 }, {}, bandOptions),
-        std::invalid_argument);
+    bandOptions.cellInBand = {true};
+    EXPECT_THROW(MinSTCut().classify({1.0, 1.0}, {0.0, 0.0}, {}, bandOptions),
+      std::invalid_argument);
   }
 
   /// @brief Verifies negative capacities throw for geometry min ST cut by checking exception behavior.
   TEST(Rodin_Geometry_MinSTCut, NegativeCapacitiesThrow)
   {
-    EXPECT_THROW(
-        MinSTCut().classify(
-            { 1.0, 1.0 },
-            { -1.0, +1.0 },
-            { { 0, 1, -1.0 } }),
-        std::invalid_argument);
+    EXPECT_THROW(MinSTCut().classify({1.0, 1.0}, {-1.0, +1.0}, {{0, 1, -1.0}}),
+      std::invalid_argument);
 
     MinSTCut::Options options;
-    options.perEdgeLambda = { -1.0 };
-    EXPECT_THROW(
-        MinSTCut().classify(
-            { 1.0, 1.0 },
-            { -1.0, +1.0 },
-            { { 0, 1, 1.0 } },
-            options),
-        std::invalid_argument);
+    options.perEdgeLambda = {-1.0};
+    EXPECT_THROW(MinSTCut().classify({1.0, 1.0}, {-1.0, +1.0}, {{0, 1, 1.0}}, options),
+      std::invalid_argument);
   }
 
   /// @brief Verifies out of range edge throws for geometry min ST cut by checking exception behavior.
   TEST(Rodin_Geometry_MinSTCut, OutOfRangeEdgeThrows)
   {
     EXPECT_THROW(
-        MinSTCut().classify(
-            { 1.0, 1.0 },
-            { -1.0, +1.0 },
-            { { 0, 5, 1.0 } }),
-        std::out_of_range);
+      MinSTCut().classify({1.0, 1.0}, {-1.0, +1.0}, {{0, 5, 1.0}}), std::out_of_range);
   }
 
   /// @brief Without edges the unary contribution equals the sum of the.
@@ -373,12 +341,11 @@ namespace Rodin::Tests::Unit
   {
     // Without edges the unary contribution equals the sum of the
     // selected-label costs.
-    const std::vector<Real> volumes{ 2.0, 3.0 };
-    const std::vector<Real> moments{ -0.25, +0.5 };
+    const std::vector<Real> volumes{2.0, 3.0};
+    const std::vector<Real> moments{-0.25, +0.5};
     const auto result = MinSTCut().classify(volumes, moments, {});
-    const Real expected =
-      MinSTCut::getInsideCost(volumes[0], moments[0])
-      + MinSTCut::getOutsideCost(volumes[1], moments[1]);
+    const Real expected = MinSTCut::getInsideCost(volumes[0], moments[0]) +
+      MinSTCut::getOutsideCost(volumes[1], moments[1]);
     EXPECT_DOUBLE_EQ(result.energy, expected);
   }
 }

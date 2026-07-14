@@ -16,10 +16,8 @@ namespace Rodin::Adaptation
   namespace Detail
   {
     /// @brief Computes the signed margin to the nearest reference-cell face.
-    inline Real referenceCellMargin(
-        Geometry::Polytope::Type geometry,
-        const Math::SpatialPoint& rc,
-        std::size_t& mostViolatedFace)
+    inline Real referenceCellMargin(Geometry::Polytope::Type geometry,
+      const Math::SpatialPoint& rc, std::size_t& mostViolatedFace)
     {
       const Geometry::Polytope::Traits traits(geometry);
       const auto& hs = traits.getHalfSpace();
@@ -38,30 +36,24 @@ namespace Rodin::Adaptation
     }
 
     /// @brief Builds a geometry point located at a translated physical point.
-    inline Geometry::Point makeTranslatedPoint(
-        const Geometry::Point& source,
-        const Math::SpatialVector<Real>& yPhysical,
-        Real tolerance)
+    inline Geometry::Point makeTranslatedPoint(const Geometry::Point& source,
+      const Math::SpatialVector<Real>& yPhysical, Real tolerance)
     {
       const auto& sourcePolytope = source.getPolytope();
       const auto& mesh = sourcePolytope.getMesh();
       const std::size_t cd = mesh.getDimension();
       const auto& conn = mesh.getConnectivity();
-      const Real tol = tolerance > Real(0)
-        ? tolerance
-        : Real(64) * std::numeric_limits<Real>::epsilon();
+      const Real tol =
+        tolerance > Real(0) ? tolerance : Real(64) * std::numeric_limits<Real>::epsilon();
 
       Index cell = Index(-1);
       Math::SpatialPoint rc;
 
-      auto cellMargin =
-        [&](Index candidate, Math::SpatialPoint& out) -> Real
-        {
-          mesh.getPolytopeTransformation(cd, candidate).inverse(
-              out, yPhysical);
-          std::size_t face = 0;
-          return referenceCellMargin(mesh.getGeometry(cd, candidate), out, face);
-        };
+      auto cellMargin = [&](Index candidate, Math::SpatialPoint& out) -> Real {
+        mesh.getPolytopeTransformation(cd, candidate).inverse(out, yPhysical);
+        std::size_t face = 0;
+        return referenceCellMargin(mesh.getGeometry(cd, candidate), out, face);
+      };
 
       if (sourcePolytope.getDimension() == cd)
       {
@@ -74,7 +66,7 @@ namespace Rodin::Adaptation
         const auto& adjacent = conn.getIncidence(cd - 1, cd).at(face);
         if (adjacent.empty())
           throw std::runtime_error(
-              "WNGIR translated-point evaluation failed: face has no adjacent cell.");
+            "WNGIR translated-point evaluation failed: face has no adjacent cell.");
 
         Real bestMargin = -std::numeric_limits<Real>::infinity();
         Math::SpatialPoint bestRc;
@@ -94,7 +86,7 @@ namespace Rodin::Adaptation
       else
       {
         throw std::runtime_error(
-            "WNGIR translated-point evaluation requires a cell or face source point.");
+          "WNGIR translated-point evaluation requires a cell or face source point.");
       }
 
       for (std::size_t hop = 0; hop < 64; ++hop)
@@ -102,8 +94,8 @@ namespace Rodin::Adaptation
         mesh.getPolytopeTransformation(cd, cell).inverse(rc, yPhysical);
 
         std::size_t mostViolatedFace = 0;
-        const Real margin = referenceCellMargin(
-            mesh.getGeometry(cd, cell), rc, mostViolatedFace);
+        const Real margin =
+          referenceCellMargin(mesh.getGeometry(cd, cell), rc, mostViolatedFace);
         if (margin >= -tol)
         {
           const auto it = mesh.getPolytope(cd, cell);
@@ -135,18 +127,14 @@ namespace Rodin::Adaptation
 
     template <class Function, class Vector>
     /// @brief Evaluates a function at a translated source point.
-    decltype(auto) evaluateTranslatedPoint(
-        const Function& f,
-        const Geometry::Point& source,
-        const Vector& displacement,
-        Real tolerance)
+    decltype(auto) evaluateTranslatedPoint(const Function& f,
+      const Geometry::Point& source, const Vector& displacement, Real tolerance)
     {
       Math::SpatialVector<Real> y(source.getPolytope().getMesh().getDimension());
       const auto& x = source.getPhysicalCoordinates();
       for (std::size_t r = 0; r < static_cast<std::size_t>(y.size()); ++r)
         y(static_cast<Eigen::Index>(r)) =
-          x(static_cast<Eigen::Index>(r))
-          + displacement(static_cast<Eigen::Index>(r));
+          x(static_cast<Eigen::Index>(r)) + displacement(static_cast<Eigen::Index>(r));
       const auto p = makeTranslatedPoint(source, y, tolerance);
       if constexpr (requires { f.getValue(p); })
         return f.getValue(p);
@@ -164,20 +152,16 @@ namespace Rodin::Adaptation
 
     template <class FE, class ReferencePoint, class JacobianInverse>
     /// @brief Computes a basis-function physical Jacobian.
-    Math::SpatialMatrix<Real> physicalJacobian(
-        const FE& fe,
-        std::size_t local,
-        const ReferencePoint& rc,
-        const JacobianInverse& Jinv,
-        std::size_t dim)
+    Math::SpatialMatrix<Real> physicalJacobian(const FE& fe, std::size_t local,
+      const ReferencePoint& rc, const JacobianInverse& Jinv, std::size_t dim)
     {
       const auto jref = fe.getBasis(local).getJacobian()(rc);
       auto jp = makeZeroMatrix(dim);
       for (std::size_t r = 0; r < dim; ++r)
         for (std::size_t c = 0; c < dim; ++c)
           for (std::size_t a = 0; a < dim; ++a)
-            jp(static_cast<Eigen::Index>(r), static_cast<Eigen::Index>(c))
-              += jref(r, a) * Jinv(a, c);
+            jp(static_cast<Eigen::Index>(r), static_cast<Eigen::Index>(c)) +=
+              jref(r, a) * Jinv(a, c);
       return jp;
     }
 
@@ -186,15 +170,12 @@ namespace Rodin::Adaptation
     // alike); the cached interpolation matches the explicit basis contraction.
     template <class Displacement>
     /// @brief Evaluates @f$I+\nabla u@f$ at an integration point.
-    Math::SpatialMatrix<Real> deformationGradient(
-        const Displacement& u,
-        const Geometry::Polytope& polytope,
-        const Variational::IntegrationPoint& ip,
-        std::size_t dim)
+    Math::SpatialMatrix<Real> deformationGradient(const Displacement& u,
+      const Geometry::Polytope& polytope, const Variational::IntegrationPoint& ip,
+      std::size_t dim)
     {
-      (void) polytope;
-      Math::SpatialMatrix<Real> F =
-        Math::SpatialMatrix<Real>::Identity(dim, dim);
+      (void)polytope;
+      Math::SpatialMatrix<Real> F = Math::SpatialMatrix<Real>::Identity(dim, dim);
       F += Variational::Jacobian(u).getValue(ip);
       return F;
     }

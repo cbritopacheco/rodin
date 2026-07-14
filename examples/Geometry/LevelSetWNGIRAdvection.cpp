@@ -77,9 +77,7 @@ namespace
 
   template <class Displacement>
   void updateMovedMeshFromDisplacement(
-      const LocalMesh& mesh,
-      LocalMesh& moved,
-      const Displacement& u)
+    const LocalMesh& mesh, LocalMesh& moved, const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
     const auto& uData = u.getData();
@@ -110,10 +108,9 @@ namespace
         pm(0, a) = X(0) + ux;
         pm(1, a) = X(1) + uy;
       }
-      moved.setPolytopeTransformation(
-          {D, cell.getIndex()},
-          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
-            std::move(pm), geomFe));
+      moved.setPolytopeTransformation({D, cell.getIndex()},
+        new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+          std::move(pm), geomFe));
     }
 #endif
   }
@@ -134,127 +131,123 @@ namespace
   // -------------------------------------------------------------------------
   struct WavyCircleLevelSet
   {
-    Real cx = Real(0.5);
-    Real cy = Real(0.5);
-    Real R0 = Real(0.18);
-    Real amp = Real(0.04);
-    Real k = Real(5);
-    Real phase = Real(0);
+      Real cx = Real(0.5);
+      Real cy = Real(0.5);
+      Real R0 = Real(0.18);
+      Real amp = Real(0.04);
+      Real k = Real(5);
+      Real phase = Real(0);
 
-    Real phi(const Vec2& p) const
-    {
-      const Real dx = p(0) - cx;
-      const Real dy = p(1) - cy;
-      const Real r = std::sqrt(dx * dx + dy * dy);
-      const Real theta = std::atan2(dy, dx);
-      const Real R = R0 + amp * std::cos(k * theta + phase);
-      return r - R;
-    }
+      Real phi(const Vec2& p) const
+      {
+        const Real dx = p(0) - cx;
+        const Real dy = p(1) - cy;
+        const Real r = std::sqrt(dx * dx + dy * dy);
+        const Real theta = std::atan2(dy, dx);
+        const Real R = R0 + amp * std::cos(k * theta + phase);
+        return r - R;
+      }
 
     // grad phi = (dx/r, dy/r) - dR/dtheta * grad(theta).
     // grad(theta) = (-dy / r^2, dx / r^2).
-    Vec2 grad(const Vec2& p) const
-    {
-      const Real dx = p(0) - cx;
-      const Real dy = p(1) - cy;
-      const Real r2 = dx * dx + dy * dy;
-      const Real r = std::max(std::sqrt(r2), Real(1e-14));
-      const Real theta = std::atan2(dy, dx);
-      const Real dRdtheta = -amp * k * std::sin(k * theta + phase);
-      const Real r2safe = std::max(r2, Real(1e-28));
-      return vec2(
-          dx / r - dRdtheta * (-dy / r2safe),
-          dy / r - dRdtheta * ( dx / r2safe));
-    }
+      Vec2 grad(const Vec2& p) const
+      {
+        const Real dx = p(0) - cx;
+        const Real dy = p(1) - cy;
+        const Real r2 = dx * dx + dy * dy;
+        const Real r = std::max(std::sqrt(r2), Real(1e-14));
+        const Real theta = std::atan2(dy, dx);
+        const Real dRdtheta = -amp * k * std::sin(k * theta + phase);
+        const Real r2safe = std::max(r2, Real(1e-28));
+        return vec2(
+          dx / r - dRdtheta * (-dy / r2safe), dy / r - dRdtheta * (dx / r2safe));
+      }
 
-    // Hess phi = Hess(r) - R'(theta) Hess(theta) - R''(theta) grad(theta) grad(theta)^T.
-    //
-    //   Hess(r)_ij = (delta_ij - dx_i dx_j / r^2) / r,
-    //
-    //   grad(theta) = (-dy, dx) / r^2,
-    //
-    //   Hess(theta)_xx = 2 dx dy / r^4,
-    //   Hess(theta)_yy = -2 dx dy / r^4,
-    //   Hess(theta)_xy = (dy^2 - dx^2) / r^4.
-    //
-    // Consumed by the PSD-projected full-Newton tangent.
-    Math::SpatialMatrix<Real> hess(const Vec2& p) const
-    {
-      const Real dx = p(0) - cx;
-      const Real dy = p(1) - cy;
-      const Real r2 = dx * dx + dy * dy;
-      const Real r = std::max(std::sqrt(r2), Real(1e-14));
-      const Real r3 = r * r * r;
-      const Real r4 = r2 * r2;
+      // Hess phi = Hess(r) - R'(theta) Hess(theta) - R''(theta) grad(theta) grad(theta)^T.
+      //
+      //   Hess(r)_ij = (delta_ij - dx_i dx_j / r^2) / r,
+      //
+      //   grad(theta) = (-dy, dx) / r^2,
+      //
+      //   Hess(theta)_xx = 2 dx dy / r^4,
+      //   Hess(theta)_yy = -2 dx dy / r^4,
+      //   Hess(theta)_xy = (dy^2 - dx^2) / r^4.
+      //
+      // Consumed by the PSD-projected full-Newton tangent.
+      Math::SpatialMatrix<Real> hess(const Vec2& p) const
+      {
+        const Real dx = p(0) - cx;
+        const Real dy = p(1) - cy;
+        const Real r2 = dx * dx + dy * dy;
+        const Real r = std::max(std::sqrt(r2), Real(1e-14));
+        const Real r3 = r * r * r;
+        const Real r4 = r2 * r2;
 
-      const Real theta = std::atan2(dy, dx);
-      const Real ka = k * theta + phase;
-      const Real Rpp = -amp * k * std::sin(ka);
-      const Real Rpp2 = -amp * k * k * std::cos(ka);
+        const Real theta = std::atan2(dy, dx);
+        const Real ka = k * theta + phase;
+        const Real Rpp = -amp * k * std::sin(ka);
+        const Real Rpp2 = -amp * k * k * std::cos(ka);
 
-      // Hess(r)
-      Math::SpatialMatrix<Real> Hr(2, 2);
-      Hr(0, 0) = (Real(1) - dx * dx / r2) / r;   // = dy^2 / r^3
-      Hr(1, 1) = (Real(1) - dy * dy / r2) / r;
-      Hr(0, 1) = -dx * dy / r3;
-      Hr(1, 0) = Hr(0, 1);
+        // Hess(r)
+        Math::SpatialMatrix<Real> Hr(2, 2);
+        Hr(0, 0) = (Real(1) - dx * dx / r2) / r; // = dy^2 / r^3
+        Hr(1, 1) = (Real(1) - dy * dy / r2) / r;
+        Hr(0, 1) = -dx * dy / r3;
+        Hr(1, 0) = Hr(0, 1);
 
-      // Hess(theta)
-      Math::SpatialMatrix<Real> Ht(2, 2);
-      Ht(0, 0) =  Real(2) * dx * dy / r4;
-      Ht(1, 1) = -Real(2) * dx * dy / r4;
-      Ht(0, 1) = (dy * dy - dx * dx) / r4;
-      Ht(1, 0) = Ht(0, 1);
+        // Hess(theta)
+        Math::SpatialMatrix<Real> Ht(2, 2);
+        Ht(0, 0) = Real(2) * dx * dy / r4;
+        Ht(1, 1) = -Real(2) * dx * dy / r4;
+        Ht(0, 1) = (dy * dy - dx * dx) / r4;
+        Ht(1, 0) = Ht(0, 1);
 
-      // grad(theta) outer product
-      const Vec2 gth = vec2(-dy / r2, dx / r2);
-      Math::SpatialMatrix<Real> GG(2, 2);
-      GG(0, 0) = gth(0) * gth(0);
-      GG(0, 1) = gth(0) * gth(1);
-      GG(1, 0) = GG(0, 1);
-      GG(1, 1) = gth(1) * gth(1);
+        // grad(theta) outer product
+        const Vec2 gth = vec2(-dy / r2, dx / r2);
+        Math::SpatialMatrix<Real> GG(2, 2);
+        GG(0, 0) = gth(0) * gth(0);
+        GG(0, 1) = gth(0) * gth(1);
+        GG(1, 0) = GG(0, 1);
+        GG(1, 1) = gth(1) * gth(1);
 
-      Math::SpatialMatrix<Real> H(2, 2);
-      H = Hr - Rpp * Ht - Rpp2 * GG;
-      return H;
-    }
+        Math::SpatialMatrix<Real> H(2, 2);
+        H = Hr - Rpp * Ht - Rpp2 * GG;
+        return H;
+      }
   };
 
   // -------------------------------------------------------------------------
   // Triangle-barycentric quadrature for the phase moments (triangle-only,
   // NOT FES-independent — same caveat as the parent example).
   // -------------------------------------------------------------------------
-  constexpr std::array<std::array<Real, 3>, 3> TriangleBarycentricQuadrature = {{
-    {{ Real(2) / 3, Real(1) / 6, Real(1) / 6 }},
-    {{ Real(1) / 6, Real(2) / 3, Real(1) / 6 }},
-    {{ Real(1) / 6, Real(1) / 6, Real(2) / 3 }}
-  }};
+  constexpr std::array<std::array<Real, 3>, 3> TriangleBarycentricQuadrature = {
+    {{{Real(2) / 3, Real(1) / 6, Real(1) / 6}}, {{Real(1) / 6, Real(2) / 3, Real(1) / 6}},
+      {{Real(1) / 6, Real(1) / 6, Real(2) / 3}}}};
 
   Real applyPhaseMomentMap(Real phi, Real epsilon)
   {
     return std::tanh(phi / epsilon);
   }
 
-  Vec2 interpolateVec(const std::array<Vec2, 3>& values,
-                      const std::array<Real, 3>& bary)
+  Vec2 interpolateVec(const std::array<Vec2, 3>& values, const std::array<Real, 3>& bary)
   {
     return bary[0] * values[0] + bary[1] * values[1] + bary[2] * values[2];
   }
 
   struct CellMomentInfo
   {
-    Index index = 0;
-    Real area = 0;
-    Real moment = 0;
-    std::array<Vec2, 3> x;
-    std::array<Index, 3> vertices = {{ 0, 0, 0 }};
+      Index index = 0;
+      Real area = 0;
+      Real moment = 0;
+      std::array<Vec2, 3> x;
+      std::array<Index, 3> vertices = {{0, 0, 0}};
   };
 
   // Templated on a `phi(Vec2)` callable so the helper is reusable across
   // any level set type.
   template <class PhiFn>
   std::vector<CellMomentInfo> collectCellMomentInfo(
-      const LocalMesh& mesh, PhiFn&& phi, Real epsilon)
+    const LocalMesh& mesh, PhiFn&& phi, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -264,8 +257,7 @@ namespace
       const auto& cellPolytope = *cellIt;
       const auto& vertices = cellPolytope.getVertices();
       if (vertices.size() != 3)
-        throw std::runtime_error(
-            "LevelSetWNGIRAdvection expects triangular cells.");
+        throw std::runtime_error("LevelSetWNGIRAdvection expects triangular cells.");
 
       CellMomentInfo info;
       info.index = cellPolytope.getIndex();
@@ -277,8 +269,7 @@ namespace
 
       const Vec2 e1 = info.x[1] - info.x[0];
       const Vec2 e2 = info.x[2] - info.x[0];
-      info.area =
-        std::abs(Real(0.5) * (e1(0) * e2(1) - e1(1) * e2(0)));
+      info.area = std::abs(Real(0.5) * (e1(0) * e2(1) - e1(1) * e2(0)));
 
       Real moment = 0;
       for (const auto& bary : TriangleBarycentricQuadrature)
@@ -315,7 +306,7 @@ namespace
   }
 
   std::size_t parseSizeTOption(
-      int argc, char** argv, const std::string& name, std::size_t fallback)
+    int argc, char** argv, const std::string& name, std::size_t fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -327,8 +318,7 @@ namespace
     return fallback;
   }
 
-  Real parseRealOption(
-      int argc, char** argv, const std::string& name, Real fallback)
+  Real parseRealOption(int argc, char** argv, const std::string& name, Real fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -341,7 +331,7 @@ namespace
   }
 
   std::string parseStringOption(
-      int argc, char** argv, const std::string& name, std::string fallback)
+    int argc, char** argv, const std::string& name, std::string fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -363,47 +353,65 @@ namespace
   //               exactly (modulo discretisation).
   //   None      : v = 0. phi_h stays at its frame-0 reconstruction; the
   //               sweep reduces to a non-advection consistency check.
-  enum class VelocityField { Rotation, None };
+  enum class VelocityField
+  {
+    Rotation,
+    None
+  };
 
-  VelocityField parseVelocityField(
-      int argc, char** argv, const std::string& name)
+  VelocityField parseVelocityField(int argc, char** argv, const std::string& name)
   {
     const std::string value = parseStringOption(argc, argv, name, "rotation");
-    if (value == "rotation") return VelocityField::Rotation;
-    if (value == "none")     return VelocityField::None;
+    if (value == "rotation")
+      return VelocityField::Rotation;
+    if (value == "none")
+      return VelocityField::None;
     throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected rotation or none).");
+      "Unknown --" + name + "=" + value + " (expected rotation or none).");
   }
 
-  enum class PhiInitialRepresentative { Analytic, Screened, Fmm };
+  enum class PhiInitialRepresentative
+  {
+    Analytic,
+    Screened,
+    Fmm
+  };
 
   PhiInitialRepresentative parsePhiInitialRepresentative(
-      int argc, char** argv, const std::string& name)
+    int argc, char** argv, const std::string& name)
   {
     const std::string value = parseStringOption(argc, argv, name, "analytic");
-    if (value == "analytic") return PhiInitialRepresentative::Analytic;
-    if (value == "screened") return PhiInitialRepresentative::Screened;
-    if (value == "fmm")      return PhiInitialRepresentative::Fmm;
+    if (value == "analytic")
+      return PhiInitialRepresentative::Analytic;
+    if (value == "screened")
+      return PhiInitialRepresentative::Screened;
+    if (value == "fmm")
+      return PhiInitialRepresentative::Fmm;
     throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected analytic, screened, or fmm).");
+      "Unknown --" + name + "=" + value + " (expected analytic, screened, or fmm).");
   }
 
-  enum class PhiRedistance { Off, ScreenedMoved, FmmMoved, ProjectedPhiH1Moved };
+  enum class PhiRedistance
+  {
+    Off,
+    ScreenedMoved,
+    FmmMoved,
+    ProjectedPhiH1Moved
+  };
 
-  PhiRedistance parsePhiRedistance(
-      int argc, char** argv, const std::string& name)
+  PhiRedistance parsePhiRedistance(int argc, char** argv, const std::string& name)
   {
     const std::string value = parseStringOption(argc, argv, name, "fmm-moved");
-    if (value == "off") return PhiRedistance::Off;
-    if (value == "screened-moved") return PhiRedistance::ScreenedMoved;
-    if (value == "fmm-moved") return PhiRedistance::FmmMoved;
+    if (value == "off")
+      return PhiRedistance::Off;
+    if (value == "screened-moved")
+      return PhiRedistance::ScreenedMoved;
+    if (value == "fmm-moved")
+      return PhiRedistance::FmmMoved;
     if (value == "projected-phi-h1-moved" || value == "projection-h1-moved")
       return PhiRedistance::ProjectedPhiH1Moved;
-    throw std::runtime_error(
-        "Unknown --" + name + "=" + value
-        + " (expected off, screened-moved, fmm-moved, or projected-phi-h1-moved).");
+    throw std::runtime_error("Unknown --" + name + "=" + value +
+      " (expected off, screened-moved, fmm-moved, or projected-phi-h1-moved).");
   }
 
   bool hasFlag(int argc, char** argv, const std::string& name)
@@ -423,24 +431,19 @@ int main(int argc, char** argv)
   // -------------------------------------------------------------------------
   // Step 0: frame schedule, mesh, and constants.
   // -------------------------------------------------------------------------
-  const std::size_t n =
-    parseSizeTOption(argc, argv, "n", 50);          ///< n x n nodes.
+  const std::size_t n = parseSizeTOption(argc, argv, "n", 50); ///< n x n nodes.
   const std::size_t nFrames =
-    parseSizeTOption(argc, argv, "frames", 200);    ///< orbit snapshots.
-  const Real orbitR =
-    parseRealOption(argc, argv, "orbitR", Real(0.10));
-  const Real            amp =
-    parseRealOption(argc, argv, "amp", Real(0.05)); ///< radial amplitude.
-  const Real R0 =
-    parseRealOption(argc, argv, "R0", Real(0.20));
-  const Real kLobes =
-    parseRealOption(argc, argv, "lobes", Real(6));
+    parseSizeTOption(argc, argv, "frames", 200); ///< orbit snapshots.
+  const Real orbitR = parseRealOption(argc, argv, "orbitR", Real(0.10));
+  const Real amp = parseRealOption(argc, argv, "amp", Real(0.05)); ///< radial amplitude.
+  const Real R0 = parseRealOption(argc, argv, "R0", Real(0.20));
+  const Real kLobes = parseRealOption(argc, argv, "lobes", Real(6));
 
   const Real h = Real(1) / static_cast<Real>(n - 1);
   const Real epsilon = 1.25 * h;
   const Real lambdaC = 0.008;
-  const Real delta   = 1.75 * h;
-  const Real deltaW  = 1.5 * delta;
+  const Real delta = 1.75 * h;
+  const Real deltaW = 1.5 * delta;
 
   const PhiInitialRepresentative phiInitialRepresentative =
     parsePhiInitialRepresentative(argc, argv, "phi-init");
@@ -450,18 +453,15 @@ int main(int argc, char** argv)
   // LevelSetWNGIRReconstruction: phiEll = ellMult * h,
   // M = magMult * psiEll. Calibration rescales |grad phi_h| -> |grad
   // phi_analytic| in the band.
-  const Real kPsiEllMult =
-    parseRealOption(argc, argv, "phi-ell-mult", Real(2));
+  const Real kPsiEllMult = parseRealOption(argc, argv, "phi-ell-mult", Real(2));
   const Real kPsiEll = kPsiEllMult * h;
   const Real kPsiSourceMagMult =
     parseRealOption(argc, argv, "phi-source-mag-mult", Real(5));
   const Real kPsiSourceMagnitude = kPsiSourceMagMult * kPsiEll;
 
   // -----  Advection velocity  ---------------------------------------------
-  const VelocityField velocityField =
-    parseVelocityField(argc, argv, "velocity");
-  const PhiRedistance phiRedistance =
-    parsePhiRedistance(argc, argv, "phi-redistance");
+  const VelocityField velocityField = parseVelocityField(argc, argv, "velocity");
+  const PhiRedistance phiRedistance = parsePhiRedistance(argc, argv, "phi-redistance");
   // dt per frame is one orbit step (T = 1, n frames => dt = 1/n).
   const Real kAdvectionDt = Real(1) / static_cast<Real>(nFrames);
 
@@ -469,7 +469,12 @@ int main(int argc, char** argv)
   //   Residual : classic ||R|| < tol (fails to recognise the GN data-floor).
   //   Geometry : ||phi(X+u)||_RMS < ~h^2 (honest "did we capture Γ?").
   //   Either   : converged if EITHER residual or geometry tolerance holds.
-  enum class ConvergenceMode { Residual, Geometry, Either };
+  enum class ConvergenceMode
+  {
+    Residual,
+    Geometry,
+    Either
+  };
   constexpr ConvergenceMode kConvergenceMode = ConvergenceMode::Either;
   // Knobs are CLI-overridable so convergence settings can be swept without
   // rebuilding.
@@ -478,22 +483,20 @@ int main(int argc, char** argv)
 #else
   constexpr Real kDefaultFitTolMult = Real(4.0);
 #endif
-  const Real        kFitTolMult      =
-    parseRealOption(argc, argv, "fittol-mult", kDefaultFitTolMult); ///< fitTol = mult * h^2
-  const Real        kInterfaceFitTol = kFitTolMult * h * h;
-  constexpr Real    kResidualAbsTol  = Real(1e-6);
-  const Real        kResidualRelTol  =
-    parseRealOption(argc, argv, "rrtol", Real(5e-3));
-  const std::size_t kStallPatience   =
-    parseSizeTOption(argc, argv, "stall", 5);
+  const Real kFitTolMult = parseRealOption(
+    argc, argv, "fittol-mult", kDefaultFitTolMult); ///< fitTol = mult * h^2
+  const Real kInterfaceFitTol = kFitTolMult * h * h;
+  constexpr Real kResidualAbsTol = Real(1e-6);
+  const Real kResidualRelTol = parseRealOption(argc, argv, "rrtol", Real(5e-3));
+  const std::size_t kStallPatience = parseSizeTOption(argc, argv, "stall", 5);
 
-  constexpr Attribute interiorAttribute  = 1;
-  constexpr Attribute exteriorAttribute  = 2;
+  constexpr Attribute interiorAttribute = 1;
+  constexpr Attribute exteriorAttribute = 2;
   constexpr Attribute interfaceAttribute = 10;
-  constexpr Attribute boundaryAttribute  = 20;
+  constexpr Attribute boundaryAttribute = 20;
 
   // Build the background mesh ONCE; only attributes change per frame.
-  LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { n, n });
+  LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {n, n});
   mesh.scale(h);
   mesh.getConnectivity().compute(2, 1);
   mesh.getConnectivity().compute(1, 2);
@@ -503,8 +506,7 @@ int main(int argc, char** argv)
   // Tag the static boundary attribute once; the per-frame loop will
   // re-tag interior / exterior / interface cells from the classifier.
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
-                      boundaryAttribute);
+    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
 
   // -------------------------------------------------------------------------
   // FE spaces and persistent grid functions used across frames.
@@ -536,19 +538,25 @@ int main(int argc, char** argv)
   auto& cellCacheBg = cellGeomBg.first;
 
   // phiGf: analytic phi sampled at original X (diagnostic only).
-  GridFunction phiGf(p1Fes);          phiGf.setName("phi_analytic");
+  GridFunction phiGf(p1Fes);
+  phiGf.setName("phi_analytic");
   // phiH: ADVECTED P1 grid function used by the WNGIR solve. Built
   // from screened Poisson at frame 0, advected one step per subsequent
   // frame. NO analytic dependency once initialised.
-  GridFunction phiH(p1Fes);           phiH.setName("phi");
+  GridFunction phiH(p1Fes);
+  phiH.setName("phi");
   // Diagnostic: pointwise difference phi_h - phi_analytic.
-  GridFunction phiHError(p1Fes);      phiHError.setName("phi_error");
-  GridFunction cellLabel(p0Fes);      cellLabel.setName("cell_label");
-  GridFunction phaseMoment(p0Fes);    phaseMoment.setName("phase_moment");
-  GridFunction sigmaKgf(p0Fes);       sigmaKgf.setName("sigma_K");
+  GridFunction phiHError(p1Fes);
+  phiHError.setName("phi_error");
+  GridFunction cellLabel(p0Fes);
+  cellLabel.setName("cell_label");
+  GridFunction phaseMoment(p0Fes);
+  phaseMoment.setName("phase_moment");
+  GridFunction sigmaKgf(p0Fes);
+  sigmaKgf.setName("sigma_K");
 
   TrialFunction wngirTrial(vectorFes);
-  TestFunction  wngirTest(vectorFes);
+  TestFunction wngirTest(vectorFes);
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
 
@@ -562,25 +570,32 @@ int main(int argc, char** argv)
   ScalarP1 p1FesMoved(moved);
   ScalarP0 p0FesMoved(moved);
 
-  GridFunction cellLabelPhi(p0FesMoved); cellLabelPhi.setName("cell_label");
+  GridFunction cellLabelPhi(p0FesMoved);
+  cellLabelPhi.setName("cell_label");
   // phi_redist : FMM signed distance computed on the WNGIR-displaced
   // (moved) mesh using the classifier interior/skeleton attributes.
   // This IS the WNGIR-reconstructed-domain SDF; it becomes phi_h for the
   // next frame's advection.
-  GridFunction phiRedist(p1FesMoved);    phiRedist.setName("phi_redist");
+  GridFunction phiRedist(p1FesMoved);
+  phiRedist.setName("phi_redist");
   // Background copy of phiRedist for side-by-side visualisation on
   // the background mesh next to phi_analytic and phi_drifted.
-  GridFunction phiRedistBg(p1Fes);       phiRedistBg.setName("phi_redist");
-  GridFunction jKgf(p0FesMoved);        jKgf.setName("j");
+  GridFunction phiRedistBg(p1Fes);
+  phiRedistBg.setName("phi_redist");
+  GridFunction jKgf(p0FesMoved);
+  jKgf.setName("j");
   // q_abs = Q_abs(A_K^u): absolute intrinsic shape quality of the moved
   //                       cell (similarity of REFERENCE cell at value 1).
   // q_rel = Q_rel(F),  F = A_K^u (A_K)^{-1} = I + grad u:
   //                       relative-distortion measure minimised by the
   //                       admissibility barrier; equals 1 at u = 0 for every
   //                       cell regardless of background shape.
-  GridFunction qAbs(p0FesMoved);        qAbs.setName("q_abs");
-  GridFunction qRel(p0FesMoved);        qRel.setName("q_rel");
-  GridFunction phiMoved(p1FesMoved);    phiMoved.setName("phi_moved");
+  GridFunction qAbs(p0FesMoved);
+  qAbs.setName("q_abs");
+  GridFunction qRel(p0FesMoved);
+  qRel.setName("q_rel");
+  GridFunction phiMoved(p1FesMoved);
+  phiMoved.setName("phi_moved");
 
   // -------------------------------------------------------------------------
   // XDMF writer in transient mode (background and moved grids).
@@ -588,23 +603,24 @@ int main(int argc, char** argv)
   IO::XDMF xdmf("LevelSetWNGIRAdvection");
   auto backgroundGrid = xdmf.grid("background");
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
-  backgroundGrid.add(cellLabel,   IO::XDMF::Center::Cell);
+  backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
   backgroundGrid.add(phaseMoment, IO::XDMF::Center::Cell);
-  backgroundGrid.add(sigmaKgf,    IO::XDMF::Center::Cell);
-  backgroundGrid.add(phiGf,        IO::XDMF::Center::Node);  // phi_analytic
-  backgroundGrid.add(phiH,         IO::XDMF::Center::Node);  // phi consumed by WNGIR
-  backgroundGrid.add(phiHError,    IO::XDMF::Center::Node);  // phi - phi_analytic
-  backgroundGrid.add(phiRedistBg,  IO::XDMF::Center::Node);  // phi_redist copied to background DOFs
-  backgroundGrid.add(u,            IO::XDMF::Center::Node);
+  backgroundGrid.add(sigmaKgf, IO::XDMF::Center::Cell);
+  backgroundGrid.add(phiGf, IO::XDMF::Center::Node); // phi_analytic
+  backgroundGrid.add(phiH, IO::XDMF::Center::Node); // phi consumed by WNGIR
+  backgroundGrid.add(phiHError, IO::XDMF::Center::Node); // phi - phi_analytic
+  backgroundGrid.add(
+    phiRedistBg, IO::XDMF::Center::Node); // phi_redist copied to background DOFs
+  backgroundGrid.add(u, IO::XDMF::Center::Node);
 
   auto phiGrid = xdmf.grid("phi");
   phiGrid.setMesh(moved, IO::XDMF::MeshPolicy::Transient);
   phiGrid.add(cellLabelPhi, IO::XDMF::Center::Cell);
-  phiGrid.add(jKgf,        IO::XDMF::Center::Cell);
-  phiGrid.add(qAbs,        IO::XDMF::Center::Cell);
-  phiGrid.add(qRel,        IO::XDMF::Center::Cell);
-  phiGrid.add(phiMoved,    IO::XDMF::Center::Node);
-  phiGrid.add(phiRedist,   IO::XDMF::Center::Node);
+  phiGrid.add(jKgf, IO::XDMF::Center::Cell);
+  phiGrid.add(qAbs, IO::XDMF::Center::Cell);
+  phiGrid.add(qRel, IO::XDMF::Center::Cell);
+  phiGrid.add(phiMoved, IO::XDMF::Center::Node);
+  phiGrid.add(phiRedist, IO::XDMF::Center::Node);
 
   // -------------------------------------------------------------------------
   // Frame loop.
@@ -615,18 +631,16 @@ int main(int argc, char** argv)
             << "  orbit R=" << orbitR << '\n';
   std::cout << "  phi-init="
             << (phiInitialRepresentative == PhiInitialRepresentative::Analytic
-                  ? "analytic"
-                  : phiInitialRepresentative == PhiInitialRepresentative::Fmm
-                      ? "fmm"
-                      : "screened")
+                   ? "analytic"
+                   : phiInitialRepresentative == PhiInitialRepresentative::Fmm
+                   ? "fmm"
+                   : "screened")
             << "  phi-redistance="
-            << (phiRedistance == PhiRedistance::FmmMoved
-                  ? "fmm-moved"
-                  : phiRedistance == PhiRedistance::ProjectedPhiH1Moved
-                      ? "projected-phi-h1-moved"
-                  : phiRedistance == PhiRedistance::ScreenedMoved
-                      ? "screened-moved"
-                      : "off")
+            << (phiRedistance == PhiRedistance::FmmMoved ? "fmm-moved"
+                   : phiRedistance == PhiRedistance::ProjectedPhiH1Moved
+                   ? "projected-phi-h1-moved"
+                   : phiRedistance == PhiRedistance::ScreenedMoved ? "screened-moved"
+                                                                   : "off")
             << '\n';
 
   std::size_t framesConverged = 0;
@@ -644,11 +658,10 @@ int main(int argc, char** argv)
     levelSet.R0 = R0;
     levelSet.amp = amp;
     levelSet.k = kLobes;
-    levelSet.phase = angle;  // co-rotate the lobes for visual variety.
+    levelSet.phase = angle; // co-rotate the lobes for visual variety.
 
-    std::cout << "\n--- Frame " << std::setw(2) << frame
-              << " : c=(" << std::fixed << std::setprecision(4)
-              << levelSet.cx << ", " << levelSet.cy << ")"
+    std::cout << "\n--- Frame " << std::setw(2) << frame << " : c=(" << std::fixed
+              << std::setprecision(4) << levelSet.cx << ", " << levelSet.cy << ")"
               << "  phase=" << std::setprecision(3) << angle << " rad\n";
 
     // Reset attributes so the new classification owns them.
@@ -656,12 +669,10 @@ int main(int argc, char** argv)
 
     // Re-tag static boundary (clearXDMFRegionAttributes wipes it too).
     for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
-                        boundaryAttribute);
+      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
 
     auto stageClock = std::chrono::steady_clock::now();
-    auto stageLap = [&stageClock](const char* name)
-    {
+    auto stageLap = [&stageClock](const char* name) {
       const auto now = std::chrono::steady_clock::now();
       const double s = std::chrono::duration<double>(now - stageClock).count();
       stageClock = now;
@@ -672,25 +683,23 @@ int main(int argc, char** argv)
     if (frame > 0)
     {
       AnalyticVectorFunction velocity(
-          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
+        [&](const Geometry::Point& p) -> Math::SpatialVector<Real> {
+          const auto& X = p.getCoordinates();
+          switch (velocityField)
           {
-            const auto& X = p.getCoordinates();
-            switch (velocityField)
+            case VelocityField::Rotation:
             {
-              case VelocityField::Rotation:
-              {
-                const Real omega = Real(2) * Real(M_PI);
-                return vec2(-omega * (X(1) - Real(0.5)),
-                             omega * (X(0) - Real(0.5)));
-              }
-              case VelocityField::None:
-              default:
-                return vec2(Real(0), Real(0));
+              const Real omega = Real(2) * Real(M_PI);
+              return vec2(-omega * (X(1) - Real(0.5)), omega * (X(0) - Real(0.5)));
             }
-          },
-          /*dimension=*/2);
+            case VelocityField::None:
+            default:
+              return vec2(Real(0), Real(0));
+          }
+        },
+        /*dimension=*/2);
       TrialFunction advect(p1Fes);
-      TestFunction  advectTest(p1Fes);
+      TestFunction advectTest(p1Fes);
       Advection::Lagrangian adv(advect, advectTest, phiH, velocity);
       adv.step(kAdvectionDt);
       phiH.getData() = advect.getSolution().getData();
@@ -707,51 +716,45 @@ int main(int argc, char** argv)
     // The interface skeleton produced here is consumed directly by WNGIR
     // and, when requested, by phi_h initialization/redistance.
     const bool useAnalyticForMoments = (frame == 0);
-    const auto cellMoments =
-      useAnalyticForMoments
-        ? collectCellMomentInfo(
-              mesh,
-              [&](const Vec2& p) { return levelSet.phi(p); },
-              epsilon)
-        : [&]()
+    const auto cellMoments = useAnalyticForMoments
+      ? collectCellMomentInfo(
+          mesh, [&](const Vec2& p) { return levelSet.phi(p); }, epsilon)
+      : [&]() {
+          // Evaluate phi_h at quadrature points by walking cells and
+          // calling GridFunction::getValue at the reference coord.
+          std::vector<CellMomentInfo> cells;
+          cells.reserve(mesh.getCellCount());
+          for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
           {
-            // Evaluate phi_h at quadrature points by walking cells and
-            // calling GridFunction::getValue at the reference coord.
-            std::vector<CellMomentInfo> cells;
-            cells.reserve(mesh.getCellCount());
-            for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+            const auto& cellPolytope = *cellIt;
+            const auto& vertices = cellPolytope.getVertices();
+            if (vertices.size() != 3)
+              throw std::runtime_error("expects triangular cells.");
+            CellMomentInfo info;
+            info.index = cellPolytope.getIndex();
+            for (size_t i = 0; i < 3; ++i)
             {
-              const auto& cellPolytope = *cellIt;
-              const auto& vertices = cellPolytope.getVertices();
-              if (vertices.size() != 3)
-                throw std::runtime_error(
-                    "expects triangular cells.");
-              CellMomentInfo info;
-              info.index = cellPolytope.getIndex();
-              for (size_t i = 0; i < 3; ++i)
-              {
-                info.vertices[i] = vertices[i];
-                info.x[i] = mesh.getVertexCoordinates(vertices[i]);
-              }
-              const Vec2 e1 = info.x[1] - info.x[0];
-              const Vec2 e2 = info.x[2] - info.x[0];
-              info.area =
-                std::abs(Real(0.5) * (e1(0) * e2(1) - e1(1) * e2(0)));
-              Real moment = 0;
-              for (const auto& bary : TriangleBarycentricQuadrature)
-              {
-                Math::SpatialPoint rc(2);
-                rc(0) = bary[1];
-                rc(1) = bary[2];
-                const Geometry::Point pt(cellPolytope, rc);
-                const Real phiq = phiH.getValue(pt);
-                moment += applyPhaseMomentMap(phiq, epsilon);
-              }
-              info.moment = moment / TriangleBarycentricQuadrature.size();
-              cells.push_back(std::move(info));
+              info.vertices[i] = vertices[i];
+              info.x[i] = mesh.getVertexCoordinates(vertices[i]);
             }
-            return cells;
-          }();
+            const Vec2 e1 = info.x[1] - info.x[0];
+            const Vec2 e2 = info.x[2] - info.x[0];
+            info.area = std::abs(Real(0.5) * (e1(0) * e2(1) - e1(1) * e2(0)));
+            Real moment = 0;
+            for (const auto& bary : TriangleBarycentricQuadrature)
+            {
+              Math::SpatialPoint rc(2);
+              rc(0) = bary[1];
+              rc(1) = bary[2];
+              const Geometry::Point pt(cellPolytope, rc);
+              const Real phiq = phiH.getValue(pt);
+              moment += applyPhaseMomentMap(phiq, epsilon);
+            }
+            info.moment = moment / TriangleBarycentricQuadrature.size();
+            cells.push_back(std::move(info));
+          }
+          return cells;
+        }();
 
     std::unordered_map<Index, std::size_t> cellToLocal;
     std::vector<Index> localToCell;
@@ -782,16 +785,12 @@ int main(int argc, char** argv)
       const auto itB = cellToLocal.find(incident[1]);
       if (itA == cellToLocal.end() || itB == cellToLocal.end())
         continue;
-      graphEdges.push_back({
-          static_cast<Index>(itA->second),
-          static_cast<Index>(itB->second),
-          lambdaC * facetLength(mesh, facet),
-          facet});
+      graphEdges.push_back({static_cast<Index>(itA->second),
+        static_cast<Index>(itB->second), lambdaC * facetLength(mesh, facet), facet});
     }
 
     const MinSTCut cut;
-    const MinSTCut::Result classified =
-      cut.classify(volumes, moments, graphEdges);
+    const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
 
     std::vector<Index> interfaceFacets;
     interfaceFacets.reserve(classified.cutEdges.size());
@@ -802,40 +801,31 @@ int main(int argc, char** argv)
     for (std::size_t local = 0; local < classified.labels.size(); ++local)
     {
       const Index cellIdx = localToCell[local];
-      mesh.setAttribute(
-          {mesh.getDimension(), cellIdx},
-          classified.labels[local] == MinSTCut::Inside
-            ? interiorAttribute
-            : exteriorAttribute);
+      mesh.setAttribute({mesh.getDimension(), cellIdx},
+        classified.labels[local] == MinSTCut::Inside ? interiorAttribute
+                                                     : exteriorAttribute);
     }
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
 
-    if (frame == 0
-        && phiInitialRepresentative == PhiInitialRepresentative::Screened)
+    if (frame == 0 && phiInitialRepresentative == PhiInitialRepresentative::Screened)
     {
       TrialFunction phiTrial(p1Fes);
-      TestFunction  phiTest(p1Fes);
-      RealFunction phiSource(
-          [&](const Geometry::Point& p) -> Real
-          {
-            const auto attr = p.getPolytope().getAttribute();
-            if (attr && *attr == interiorAttribute)
-              return -kPsiSourceMagnitude;
-            return kPsiSourceMagnitude;
-          });
+      TestFunction phiTest(p1Fes);
+      RealFunction phiSource([&](const Geometry::Point& p) -> Real {
+        const auto attr = p.getPolytope().getAttribute();
+        if (attr && *attr == interiorAttribute)
+          return -kPsiSourceMagnitude;
+        return kPsiSourceMagnitude;
+      });
       Problem phiProblem(phiTrial, phiTest);
-      phiProblem =
-          Integral((kPsiEll * kPsiEll) * Grad(phiTrial), Grad(phiTest))
-        + Integral(phiTrial, phiTest)
-        - Integral(phiSource, phiTest)
-        + DirichletBC(phiTrial, RealFunction(Real(0)))
-            .on(interfaceAttribute);
+      phiProblem = Integral((kPsiEll * kPsiEll) * Grad(phiTrial), Grad(phiTest)) +
+        Integral(phiTrial, phiTest) - Integral(phiSource, phiTest) +
+        DirichletBC(phiTrial, RealFunction(Real(0))).on(interfaceAttribute);
       Solver::SparseLU(phiProblem).solve();
       phiH.getData() = phiTrial.getSolution().getData();
     }
-    if (frame == 0
-        && phiInitialRepresentative == PhiInitialRepresentative::Fmm)
+    if (frame == 0 && phiInitialRepresentative == PhiInitialRepresentative::Fmm)
     {
       phiH = Real(0);
       Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiH)
@@ -851,10 +841,10 @@ int main(int argc, char** argv)
       std::size_t insideCells = 0;
       for (std::size_t local = 0; local < classified.labels.size(); ++local)
       {
-        if (classified.labels[local] != MinSTCut::Inside) continue;
+        if (classified.labels[local] != MinSTCut::Inside)
+          continue;
         const auto& info = cellMoments[local];
-        const Vec2 ctr =
-          (info.x[0] + info.x[1] + info.x[2]) / Real(3);
+        const Vec2 ctr = (info.x[0] + info.x[1] + info.x[2]) / Real(3);
         wx += info.area * ctr(0);
         wy += info.area * ctr(1);
         wA += info.area;
@@ -866,12 +856,10 @@ int main(int argc, char** argv)
       const Real dyClass = cyClass - levelSet.cy;
       const Real lag = std::sqrt(dxClass * dxClass + dyClass * dyClass);
       std::cout << "    classifier interior: cells=" << insideCells
-                << "  area=" << std::fixed << std::setprecision(4) << wA
-                << "  centroid=(" << cxClass << ", " << cyClass << ")"
-                << "  vs c_analytic=(" << levelSet.cx << ", " << levelSet.cy
-                << ")"
-                << "  lag=" << std::scientific << std::setprecision(3)
-                << lag << '\n';
+                << "  area=" << std::fixed << std::setprecision(4) << wA << "  centroid=("
+                << cxClass << ", " << cyClass << ")"
+                << "  vs c_analytic=(" << levelSet.cx << ", " << levelSet.cy << ")"
+                << "  lag=" << std::scientific << std::setprecision(3) << lag << '\n';
     }
 
     stageLap("phi-init");
@@ -879,11 +867,9 @@ int main(int argc, char** argv)
 
     auto& cellCache = cellCacheBg;
 
-    if (frame == 0
-        && phiInitialRepresentative == PhiInitialRepresentative::Analytic)
+    if (frame == 0 && phiInitialRepresentative == PhiInitialRepresentative::Analytic)
     {
-      phiH = [&](const Geometry::Point& p) -> Real
-      {
+      phiH = [&](const Geometry::Point& p) -> Real {
         const auto& X = p.getCoordinates();
         return levelSet.phi(vec2(X(0), X(1)));
       };
@@ -892,59 +878,51 @@ int main(int argc, char** argv)
     auto gradPhiDiscrete = Grad(phiH);
     {
       TrialFunction gtrial(gradPhiFes);
-      TestFunction  gtest(gradPhiFes);
+      TestFunction gtest(gradPhiFes);
       Problem gpb(gtrial, gtest);
-      gpb = Integral(gtrial, gtest)
-          - Integral(gradPhiDiscrete, gtest);
+      gpb = Integral(gtrial, gtest) - Integral(gradPhiDiscrete, gtest);
       Solver::SparseLU(gpb).solve();
       gradPhiSmoothed.getData() = gtrial.getSolution().getData();
     }
     auto hessFromSmoothedGrad = Jacobian(gradPhiSmoothed);
 
-    RealFunction phi(
-        [&](const Geometry::Point& p) -> Real
-        {
-          return phiH.getValue(p);
-        });
+    RealFunction phi([&](const Geometry::Point& p) -> Real { return phiH.getValue(p); });
     AnalyticVectorFunction gradPhi(
-        [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
-        {
-          return gradPhiSmoothed.getValue(p);
-        },
-        /*dimension=*/2);
+      [&](const Geometry::Point& p) -> Math::SpatialVector<Real> {
+        return gradPhiSmoothed.getValue(p);
+      },
+      /*dimension=*/2);
     AnalyticMatrixFunction hessPhi(
-        [&](const Geometry::Point& p) -> Math::SpatialMatrix<Real>
-        {
-          return hessFromSmoothedGrad.getValue(p);
-        },
-        /*rows=*/2, /*cols=*/2);
+      [&](const Geometry::Point& p) -> Math::SpatialMatrix<Real> {
+        return hessFromSmoothedGrad.getValue(p);
+      },
+      /*rows=*/2, /*cols=*/2);
 
     const bool kVerbose = hasFlag(argc, argv, "verbose");
 
     // Evaluate phi_h at a moved physical point (a + ua) by walking the
     // mesh and using its inverse polytope map. Simple O(N_cells) fallback
     // — fine here because we only sample ~|skeleton| points.
-    auto phiHAtMovedVertex = [&](const Vec2& y) -> Real
-    {
+    auto phiHAtMovedVertex = [&](const Vec2& y) -> Real {
       for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
       {
         const auto& cell = *cellIt;
         Math::SpatialPoint rc(2);
         const auto& trf = cell.getTransformation();
         Math::SpatialPoint Y(2);
-        Y(0) = y(0); Y(1) = y(1);
+        Y(0) = y(0);
+        Y(1) = y(1);
         trf.inverse(rc, Y);
         // Inside-triangle test in reference (xi, eta in [0,1], xi+eta<=1).
-        const Real xi  = rc(0), eta = rc(1);
+        const Real xi = rc(0), eta = rc(1);
         const Real tol = Real(1e-9);
         if (xi >= -tol && eta >= -tol && xi + eta <= Real(1) + tol)
           return phiH.getValue(Geometry::Point(cell, rc, Y));
       }
-      return Real(0);  // outside the mesh — should not happen for moved vertices
+      return Real(0); // outside the mesh — should not happen for moved vertices
     };
 
-    auto computeInterfaceFit = [&](bool discrete) -> Real
-    {
+    auto computeInterfaceFit = [&](bool discrete) -> Real {
       Real interfacePhi = 0;
       Real interfaceLen = 0;
       for (const Index facet : interfaceFacets)
@@ -979,9 +957,9 @@ int main(int argc, char** argv)
 
     Real residualBest = std::numeric_limits<Real>::infinity();
     std::size_t itCount = 0;
-    Real        interfaceFit = 0;
-    bool        convergedFlag    = false;
-    const char* convergedReason  = "no";
+    Real interfaceFit = 0;
+    bool convergedFlag = false;
+    const char* convergedReason = "no";
 
     {
       // Robust WNGIR (Rodin/Adaptation/WNGIR.h). The
@@ -992,21 +970,16 @@ int main(int argc, char** argv)
       Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
       wngirDefaults.maxIterations = 200;
       wngirDefaults.parseLegacyMaxIterations = true;
-      const auto wngir =
-        Rodin::Examples::makeWNGIRParameters(
-            argc, argv, h, interfaceAttribute, wngirDefaults);
+      const auto wngir = Rodin::Examples::makeWNGIRParameters(
+        argc, argv, h, interfaceAttribute, wngirDefaults);
       Rodin::Adaptation::WNGIR wngirSolver(wngirTrial, wngirTest);
       wngirSolver.setParameters(wngir);
-      const auto wngirRep =
-        wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
-      std::cout << "    wngir timing: it=" << wngirRep.iterations
-                << std::scientific << std::setprecision(2)
-                << "  assembly=" << wngirRep.tAssembly
-                << "  setup=" << wngirRep.tFactor
-                << "  solve=" << wngirRep.tSolve
+      const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
+                << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
+                << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
-                << "  cgErr=" << wngirRep.linearError
-                << "  ls=" << wngirRep.tLineSearch
+                << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       itCount = wngirRep.iterations;
       residualBest = wngirRep.activeRMS;
@@ -1017,8 +990,7 @@ int main(int argc, char** argv)
       interfaceFit = computeInterfaceFit(/*discrete=*/true);
     const Real interfaceFitAnalytic = computeInterfaceFit(/*discrete=*/false);
 
-    const bool residualOK =
-         residualBest < kResidualAbsTol;
+    const bool residualOK = residualBest < kResidualAbsTol;
     const bool geometryOK = interfaceFit < kInterfaceFitTol;
     switch (kConvergenceMode)
     {
@@ -1032,34 +1004,26 @@ int main(int argc, char** argv)
         break;
       case ConvergenceMode::Either:
         convergedFlag = geometryOK || residualOK;
-        convergedReason =
-            geometryOK && residualOK ? "yes (both)"
-          : geometryOK               ? "yes (geometry)"
-          : residualOK               ? "yes (residual)"
-                                     : "no";
+        convergedReason = geometryOK && residualOK ? "yes (both)"
+          : geometryOK                             ? "yes (geometry)"
+          : residualOK                             ? "yes (residual)"
+                                                   : "no";
         break;
     }
 
     if (kVerbose)
       std::cout << "      WNGIR:"
-                << " it=" << itCount
-                << "  activeRMS=" << std::scientific << std::setprecision(3)
-                << residualBest
-                << '\n';
+                << " it=" << itCount << "  activeRMS=" << std::scientific
+                << std::setprecision(3) << residualBest << '\n';
     finalFitPerFrame.push_back(interfaceFit);
 
     struct AggregateReport
     {
-      std::size_t iterations;
-      Real        final_residual;
-      Real        interface_fit;
-      bool        converged;
-    } report{
-      itCount,
-      residualBest,
-      interfaceFit,
-      convergedFlag
-    };
+        std::size_t iterations;
+        Real final_residual;
+        Real interface_fit;
+        bool converged;
+    } report{itCount, residualBest, interfaceFit, convergedFlag};
 
     stageLap("solve");
     // ---- Stage 5a: background cell-P0 fields + nodal phi ----
@@ -1070,22 +1034,18 @@ int main(int argc, char** argv)
         const Index cellIdx = cellIt->getIndex();
         const std::size_t local = cellToLocal.at(cellIdx);
         const Index dof = p0Fes.getGlobalIndex({d, cellIdx}, 0);
-        cellLabel.getData()(dof)   =
-          static_cast<Real>(classified.labels[local]);
+        cellLabel.getData()(dof) = static_cast<Real>(classified.labels[local]);
         phaseMoment.getData()(dof) = cellMoments[local].moment;
-        sigmaKgf.getData()(dof)    =
-          static_cast<Real>(cellCache[local].sigmaK);
+        sigmaKgf.getData()(dof) = static_cast<Real>(cellCache[local].sigmaK);
       }
     }
-    phiGf = [&](const Geometry::Point& p) -> Real
-    {
+    phiGf = [&](const Geometry::Point& p) -> Real {
       const auto& X = p.getCoordinates();
       return levelSet.phi(vec2(X(0), X(1)));
     };
     // phiHError = phi_h - phi_analytic at vertices (diagnostic of
     // accumulated advection error).
-    phiHError = [&](const Geometry::Point& p) -> Real
-    {
+    phiHError = [&](const Geometry::Point& p) -> Real {
       const auto& X = p.getCoordinates();
       const Real ana = levelSet.phi(vec2(X(0), X(1)));
       const Real dis = phiH.getValue(p);
@@ -1139,18 +1099,14 @@ int main(int argc, char** argv)
         jKgf.getData()(dof) = jKval;
         const Real dExp = Real(2) / Real(d);
         qAbs.getData()(dof) =
-          dst.A.squaredNorm()
-            / (static_cast<Real>(d) * std::pow(sigDetAu, dExp));
+          dst.A.squaredNorm() / (static_cast<Real>(d) * std::pow(sigDetAu, dExp));
         const Math::SpatialMatrix<Real> F = dst.A * src.A.inverse();
         qRel.getData()(dof) =
-          F.squaredNorm()
-            / (static_cast<Real>(d) * std::pow(jKval, dExp));
-        cellLabelPhi.getData()(dof) =
-          static_cast<Real>(classified.labels[local]);
+          F.squaredNorm() / (static_cast<Real>(d) * std::pow(jKval, dExp));
+        cellLabelPhi.getData()(dof) = static_cast<Real>(classified.labels[local]);
       }
     }
-    phiMoved = [&](const Geometry::Point& p) -> Real
-    {
+    phiMoved = [&](const Geometry::Point& p) -> Real {
       const auto& X = p.getCoordinates();
       return levelSet.phi(vec2(X(0), X(1)));
     };
@@ -1170,13 +1126,12 @@ int main(int argc, char** argv)
         const Real uy = uData(dofs[1]);
         maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
       }
-      std::cout << "    max|u|/h=" << std::scientific << std::setprecision(3)
-                << maxUoverH << '\n';
+      std::cout << "    max|u|/h=" << std::scientific << std::setprecision(3) << maxUoverH
+                << '\n';
     }
 
-    std::cout << "    WNGIR it=" << report.iterations
-              << "  activeRMS=" << std::scientific << std::setprecision(3)
-              << report.final_residual
+    std::cout << "    WNGIR it=" << report.iterations << "  activeRMS=" << std::scientific
+              << std::setprecision(3) << report.final_residual
               << "  fit_h=" << std::setprecision(3) << interfaceFit
               << "  fit_an=" << std::setprecision(3) << interfaceFitAnalytic
               << "  init=cold"
@@ -1203,22 +1158,17 @@ int main(int argc, char** argv)
     if (phiRedistance == PhiRedistance::ScreenedMoved)
     {
       TrialFunction phiTrial(p1FesMoved);
-      TestFunction  phiTest(p1FesMoved);
-      RealFunction phiSource(
-          [&](const Geometry::Point& p) -> Real
-          {
-            const auto attr = p.getPolytope().getAttribute();
-            if (attr && *attr == interiorAttribute)
-              return -kPsiSourceMagnitude;
-            return kPsiSourceMagnitude;
-          });
+      TestFunction phiTest(p1FesMoved);
+      RealFunction phiSource([&](const Geometry::Point& p) -> Real {
+        const auto attr = p.getPolytope().getAttribute();
+        if (attr && *attr == interiorAttribute)
+          return -kPsiSourceMagnitude;
+        return kPsiSourceMagnitude;
+      });
       Problem phiProblem(phiTrial, phiTest);
-      phiProblem =
-          Integral((kPsiEll * kPsiEll) * Grad(phiTrial), Grad(phiTest))
-        + Integral(phiTrial, phiTest)
-        - Integral(phiSource, phiTest)
-        + DirichletBC(phiTrial, RealFunction(Real(0)))
-            .on(interfaceAttribute);
+      phiProblem = Integral((kPsiEll * kPsiEll) * Grad(phiTrial), Grad(phiTest)) +
+        Integral(phiTrial, phiTest) - Integral(phiSource, phiTest) +
+        DirichletBC(phiTrial, RealFunction(Real(0))).on(interfaceAttribute);
       Solver::SparseLU(phiProblem).solve();
       phiRedist.getData() = phiTrial.getSolution().getData();
 
@@ -1227,7 +1177,8 @@ int main(int argc, char** argv)
       {
         const auto& cell = *cellIt;
         const auto& vertices = cell.getVertices();
-        if (vertices.size() != 3) continue;
+        if (vertices.size() != 3)
+          continue;
         std::array<Vec2, 3> x;
         std::array<Real, 3> phiNode;
         for (std::size_t a = 0; a < 3; ++a)
@@ -1235,8 +1186,10 @@ int main(int argc, char** argv)
           x[a] = moved.getVertexCoordinates(vertices[a]);
           Math::SpatialPoint rc(2);
           rc.setZero();
-          if (a == 1) rc(0) = 1;
-          if (a == 2) rc(1) = 1;
+          if (a == 1)
+            rc(0) = 1;
+          if (a == 2)
+            rc(1) = 1;
           phiNode[a] = phiRedist.getValue(Geometry::Point(cell, rc));
         }
         Math::SpatialMatrix<Real> M(2, 2);
@@ -1247,23 +1200,20 @@ int main(int argc, char** argv)
         const Real detM = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
         Vec2 rhs = vec2(phiNode[1] - phiNode[0], phiNode[2] - phiNode[0]);
         Vec2 gradCell(2);
-        gradCell(0) = ( M(1, 1) * rhs(0) - M(0, 1) * rhs(1)) / detM;
+        gradCell(0) = (M(1, 1) * rhs(0) - M(0, 1) * rhs(1)) / detM;
         gradCell(1) = (-M(1, 0) * rhs(0) + M(0, 0) * rhs(1)) / detM;
         const Real gradNorm = gradCell.norm();
         const Vec2 e1 = x[1] - x[0];
         const Vec2 e2 = x[2] - x[0];
-        const Real triangleArea =
-          Real(0.5) * std::abs(e1(0) * e2(1) - e1(1) * e2(0));
+        const Real triangleArea = Real(0.5) * std::abs(e1(0) * e2(1) - e1(1) * e2(0));
         for (const auto& bary : TriangleBarycentricQuadrature)
         {
           const Real phiq =
-            bary[0] * phiNode[0] + bary[1] * phiNode[1]
-          + bary[2] * phiNode[2];
-          const Real wBand =
-            std::exp(-phiq * phiq / (Real(2) * deltaW * deltaW));
+            bary[0] * phiNode[0] + bary[1] * phiNode[1] + bary[2] * phiNode[2];
+          const Real wBand = std::exp(-phiq * phiq / (Real(2) * deltaW * deltaW));
           const Real qw =
             triangleArea / static_cast<Real>(TriangleBarycentricQuadrature.size());
-          gradAcc   += wBand * gradNorm * qw;
+          gradAcc += wBand * gradNorm * qw;
           weightAcc += wBand * qw;
         }
       }
@@ -1281,56 +1231,41 @@ int main(int argc, char** argv)
     if (phiRedistance == PhiRedistance::ProjectedPhiH1Moved)
     {
       auto gradPhiHCurrent = Grad(phiH);
-      auto localizedOnBackground =
-        [&](const Geometry::Point& p, const auto& callback)
+      auto localizedOnBackground = [&](const Geometry::Point& p, const auto& callback) {
+        const auto& Yphys = p.getPhysicalCoordinates();
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
         {
-          const auto& Yphys = p.getPhysicalCoordinates();
-          for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-          {
-            const auto& cell = *cellIt;
-            Math::SpatialPoint rc(2);
-            cell.getTransformation().inverse(rc, Yphys);
-            const Real xi = rc(0), eta = rc(1);
-            const Real tol = Real(1e-9);
-            if (xi >= -tol && eta >= -tol
-                && xi + eta <= Real(1) + tol)
-              return callback(Geometry::Point(cell, rc, Yphys));
-          }
-          return callback(p);
-        };
-      RealFunction phiDataMoved(
-          [&](const Geometry::Point& p) -> Real
-          {
-            return localizedOnBackground(
-                p,
-                [&](const Geometry::Point& q) -> Real
-                {
-                  return phiH.getValue(q);
-                });
-          });
+          const auto& cell = *cellIt;
+          Math::SpatialPoint rc(2);
+          cell.getTransformation().inverse(rc, Yphys);
+          const Real xi = rc(0), eta = rc(1);
+          const Real tol = Real(1e-9);
+          if (xi >= -tol && eta >= -tol && xi + eta <= Real(1) + tol)
+            return callback(Geometry::Point(cell, rc, Yphys));
+        }
+        return callback(p);
+      };
+      RealFunction phiDataMoved([&](const Geometry::Point& p) -> Real {
+        return localizedOnBackground(
+          p, [&](const Geometry::Point& q) -> Real { return phiH.getValue(q); });
+      });
       AnalyticVectorFunction gradPhiDataMoved(
-          [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
-          {
-            return localizedOnBackground(
-                p,
-                [&](const Geometry::Point& q) -> Math::SpatialVector<Real>
-                {
-                  return gradPhiHCurrent.getValue(q);
-                });
-          },
-          /*dimension=*/2);
+        [&](const Geometry::Point& p) -> Math::SpatialVector<Real> {
+          return localizedOnBackground(
+            p, [&](const Geometry::Point& q) -> Math::SpatialVector<Real> {
+              return gradPhiHCurrent.getValue(q);
+            });
+        },
+        /*dimension=*/2);
 
       TrialFunction phiTrial(p1FesMoved);
-      TestFunction  phiTest(p1FesMoved);
+      TestFunction phiTest(p1FesMoved);
       RealFunction<Real> ell2(kPsiEll * kPsiEll);
       Problem phiProblem(phiTrial, phiTest);
-      phiProblem =
-          Integral(phiTrial, phiTest)
-        + Integral(ell2 * Grad(phiTrial), Grad(phiTest))
-        - Integral(phiDataMoved, phiTest)
-        - Integral(ell2 * gradPhiDataMoved, Grad(phiTest))
-        + DirichletBC(phiTrial, RealFunction(Real(0)))
-            .on(interfaceAttribute);
+      phiProblem = Integral(phiTrial, phiTest) +
+        Integral(ell2 * Grad(phiTrial), Grad(phiTest)) - Integral(phiDataMoved, phiTest) -
+        Integral(ell2 * gradPhiDataMoved, Grad(phiTest)) +
+        DirichletBC(phiTrial, RealFunction(Real(0))).on(interfaceAttribute);
       Solver::SparseLU(phiProblem).solve();
       phiRedist.getData() = phiTrial.getSolution().getData();
       phiRedistBg.getData() = phiRedist.getData();
@@ -1367,7 +1302,6 @@ int main(int argc, char** argv)
     // history rather than restarting from a reconstructed surrogate.
     xdmf.write(t).flush();
     stageLap("xdmf");
-
   }
 
   xdmf.close();
@@ -1376,8 +1310,7 @@ int main(int argc, char** argv)
   // Summary.
   // -------------------------------------------------------------------------
   std::cout << "\nSummary\n";
-  std::cout << "  frames converged: " << framesConverged
-            << " / " << nFrames << '\n';
+  std::cout << "  frames converged: " << framesConverged << " / " << nFrames << '\n';
   if (!finalFitPerFrame.empty())
   {
     const Real fitMin =
@@ -1385,12 +1318,11 @@ int main(int argc, char** argv)
     const Real fitMax =
       *std::max_element(finalFitPerFrame.begin(), finalFitPerFrame.end());
     Real fitMean = 0;
-    for (Real x : finalFitPerFrame) fitMean += x;
+    for (Real x : finalFitPerFrame)
+      fitMean += x;
     fitMean /= static_cast<Real>(finalFitPerFrame.size());
-    std::cout << "  ||phi(X+u)||_RMS  min=" << std::scientific
-              << std::setprecision(3) << fitMin
-              << "  mean=" << fitMean
-              << "  max=" << fitMax << '\n';
+    std::cout << "  ||phi(X+u)||_RMS  min=" << std::scientific << std::setprecision(3)
+              << fitMin << "  mean=" << fitMean << "  max=" << fitMax << '\n';
   }
 
   return framesConverged == nFrames ? 0 : 1;

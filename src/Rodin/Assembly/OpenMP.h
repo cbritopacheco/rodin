@@ -1083,7 +1083,8 @@ namespace Rodin::Assembly
         {
           // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
+          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
+            static_cast<size_t>(tc));
 
           auto sparseEntry = [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
                                std::vector<std::pair<Index, ScalarType>>& localRhs,
@@ -1099,9 +1100,7 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs.emplace_back(
-                    r.index,
-                    -r.coefficient * val * colValue);
+                localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
                 localT.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
@@ -1653,10 +1652,8 @@ namespace Rodin::Assembly
        * @param input Problem assembly input.
        * @param target Side of the system to assemble.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -1868,7 +1865,8 @@ namespace Rodin::Assembly
         // Thread-local accumulators
         // ------------------------------------------------------------------
         std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
+        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
+          static_cast<size_t>(tc));
 
         std::vector<OperatorType> Achunks;
         if constexpr (!IsSparse)
@@ -1899,8 +1897,7 @@ namespace Rodin::Assembly
           {
             if (colValue != ScalarType(0))
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                  r.index,
-                  -r.coefficient * val * colValue);
+                r.index, -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
               tchunks[static_cast<size_t>(tid)].emplace_back(
                   r.index, c.index, r.coefficient * val * c.coefficient);
@@ -1983,8 +1980,7 @@ namespace Rodin::Assembly
                         {
                           if (colValue != ScalarType(0))
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                r.index,
-                                -r.coefficient * val * colValue);
+                              r.index, -r.coefficient * val * colValue);
                           for (const auto& c : constraints.expand(J))
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
@@ -2093,8 +2089,7 @@ namespace Rodin::Assembly
                           {
                             if (colValue != ScalarType(0))
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                  r.index,
-                                  -r.coefficient * val * colValue);
+                                r.index, -r.coefficient * val * colValue);
                             for (const auto& c : constraints.expand(J))
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
@@ -2376,10 +2371,8 @@ namespace Rodin::Assembly
        * @param input Mixed problem input.
        * @param target Side of the system to assemble.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         LinearSystemType scratch;
         execute(scratch, input);

@@ -21,8 +21,12 @@ namespace Rodin::Tests::Unit
     constexpr const size_t n = 3;
 
     PointCloud pm(sdim, n);
-    pm(0,0) = 0; pm(0,1) = 1; pm(0,2) = 0;
-    pm(1,0) = 0; pm(1,1) = 0; pm(1,2) = 1;
+    pm(0, 0) = 0;
+    pm(0, 1) = 1;
+    pm(0, 2) = 0;
+    pm(1, 0) = 0;
+    pm(1, 1) = 0;
+    pm(1, 2) = 1;
 
     Variational::RealP1Element fe(Polytope::Type::Triangle);
     ParametricTransformation trans(pm, fe);
@@ -47,8 +51,12 @@ namespace Rodin::Tests::Unit
     constexpr const size_t n = 3;
 
     PointCloud pm(sdim, n);
-    pm(0,0) = -1; pm(0,1) = 1; pm(0,2) = 0;
-    pm(1,0) = -1; pm(1,1) = 1; pm(1,2) = 1;
+    pm(0, 0) = -1;
+    pm(0, 1) = 1;
+    pm(0, 2) = 0;
+    pm(1, 0) = -1;
+    pm(1, 1) = 1;
+    pm(1, 2) = 1;
 
     Variational::RealP1Element fe(Polytope::Type::Triangle);
     ParametricTransformation trans(pm, fe);
@@ -162,8 +170,7 @@ namespace Rodin::Tests::Unit
     for (size_t i = 0; i < fe.getCount(); ++i)
     {
       const auto& rc = fe.getNode(i);
-      Math::SpatialPoint x =
-        (Real(1) - rc[0] - rc[1]) * v0 + rc[0] * v1 + rc[1] * v2;
+      Math::SpatialPoint x = (Real(1) - rc[0] - rc[1]) * v0 + rc[0] * v1 + rc[1] * v2;
       if (std::abs(rc[1]) <= Real(1e-12))
       {
         const Real theta = (Pi / Real(2)) * rc[0];
@@ -179,24 +186,21 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_ParametricTransformation, P2CurvesInterfaceEdge)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
-    ParametricTransformation trans(
-        makeQuarterCircleTrianglePointCloud<2>(), fe);
+    ParametricTransformation trans(makeQuarterCircleTrianglePointCloud<2>(), fe);
 
     Math::SpatialPoint x;
     trans.transform(x, Math::SpatialPoint{Real(0.5), Real(0)});
     EXPECT_NEAR(x.norm(), Real(1), Real(1e-12));
 
     const Math::SpatialPoint linearMidpoint{Real(0.5), Real(0.5)};
-    EXPECT_GT(std::abs(linearMidpoint.norm() - Real(1)),
-              std::abs(x.norm() - Real(1)));
+    EXPECT_GT(std::abs(linearMidpoint.norm() - Real(1)), std::abs(x.norm() - Real(1)));
   }
 
   /// @brief Verifies P 3 curved edge improves fit for geometry parametric transformation.
   TEST(Rodin_Geometry_ParametricTransformation, P3CurvedEdgeImprovesFit)
   {
     Variational::RealH1Element<3> fe(Polytope::Type::Triangle);
-    ParametricTransformation trans(
-        makeQuarterCircleTrianglePointCloud<3>(), fe);
+    ParametricTransformation trans(makeQuarterCircleTrianglePointCloud<3>(), fe);
 
     Real maxError = 0;
     for (Real s : {Real(0.25), Real(0.5), Real(0.75)})
@@ -214,14 +218,13 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_ParametricTransformation, CurvedTriangleJacobianStaysPositive)
   {
     Variational::RealH1Element<2> fe(Polytope::Type::Triangle);
-    ParametricTransformation trans(
-        makeQuarterCircleTrianglePointCloud<2>(), fe);
+    ParametricTransformation trans(makeQuarterCircleTrianglePointCloud<2>(), fe);
 
-    for (const Math::SpatialPoint& rc : {
-          Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)},
-          Math::SpatialPoint{Real(0.25), Real(0.25)},
-          Math::SpatialPoint{Real(0.5), Real(0.25)},
-          Math::SpatialPoint{Real(0.25), Real(0.5)}})
+    for (const Math::SpatialPoint& rc :
+      {Math::SpatialPoint{Real(1) / Real(3), Real(1) / Real(3)},
+        Math::SpatialPoint{Real(0.25), Real(0.25)},
+        Math::SpatialPoint{Real(0.5), Real(0.25)},
+        Math::SpatialPoint{Real(0.25), Real(0.5)}})
     {
       Math::SpatialMatrix<Real> J;
       trans.jacobian(J, rc);

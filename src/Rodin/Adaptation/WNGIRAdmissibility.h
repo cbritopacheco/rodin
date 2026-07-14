@@ -26,27 +26,23 @@ namespace Rodin::Adaptation
   struct WNGIRAdmissibilityReport
   {
     /// @brief Minimum sampled Jacobian determinant.
-    Real minJ = std::numeric_limits<Real>::infinity();
+      Real minJ = std::numeric_limits<Real>::infinity();
     /// @brief Number of sampled points below the admissibility floor.
-    std::size_t inadmissibleCount = 0;
+      std::size_t inadmissibleCount = 0;
     /// @brief Maximum sampled relative distortion.
-    Real maxQRel = Real(0);
+      Real maxQRel = Real(0);
   };
 
   /// @brief Returns the sampled admissibility quadrature order for FE order.
-  inline std::size_t wngirAdmissibilityQuadratureOrder(
-      std::size_t feOrder)
+  inline std::size_t wngirAdmissibilityQuadratureOrder(std::size_t feOrder)
   {
     return std::max<std::size_t>(2, 2 * feOrder);
   }
 
   template <class Displacement>
   /// @brief Evaluates sampled Jacobian and relative-distortion admissibility.
-  WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(
-      Displacement& u,
-      const Math::Vector<Real>& uData,
-      Real jMin,
-      std::size_t quadratureOrder = 0)
+  WNGIRAdmissibilityReport evaluateWNGIRAdmissibilitySampled(Displacement& u,
+    const Math::Vector<Real>& uData, Real jMin, std::size_t quadratureOrder = 0)
   {
     using Variational::IntegrationPoint;
     using Variational::Jacobian;
@@ -61,29 +57,25 @@ namespace Rodin::Adaptation
     const std::size_t vdim = fes.getVectorDimension();
     if (dim != vdim)
       throw std::runtime_error(
-          "evaluateWNGIRAdmissibilitySampled: displacement dimension "
-          "must equal mesh dimension.");
+        "evaluateWNGIRAdmissibilitySampled: displacement dimension "
+        "must equal mesh dimension.");
 
     auto gradU = Jacobian(uMutable);
     for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
     {
       const auto& cell = *cellIt;
-      const auto& fe =
-        fes.getFiniteElement(cell.getDimension(), cell.getIndex());
-      const auto& qf =
-        QF::PolytopeQuadratureFormula::get(
-            quadratureOrder > 0
-              ? quadratureOrder
-              : wngirAdmissibilityQuadratureOrder(fe.getOrder()),
-            cell.getGeometry());
+      const auto& fe = fes.getFiniteElement(cell.getDimension(), cell.getIndex());
+      const auto& qf = QF::PolytopeQuadratureFormula::get(quadratureOrder > 0
+          ? quadratureOrder
+          : wngirAdmissibilityQuadratureOrder(fe.getOrder()),
+        cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       for (std::size_t q = 0; q < quadrature.getSize(); ++q)
       {
         const auto& pt = quadrature.getPoint(q);
         const IntegrationPoint ip(pt, &qf, q);
         const Math::SpatialMatrix<Real> F =
-          Math::SpatialMatrix<Real>::Identity(dim, dim)
-          + gradU.getValue(ip);
+          Math::SpatialMatrix<Real>::Identity(dim, dim) + gradU.getValue(ip);
         const Real j = F.determinant();
 
         rep.minJ = std::min(rep.minJ, j);
@@ -92,10 +84,8 @@ namespace Rodin::Adaptation
 
         if (j > Real(0))
         {
-          const Real qRel =
-            F.squaredNorm()
-            / (static_cast<Real>(dim)
-               * std::pow(j, Real(2) / static_cast<Real>(dim)));
+          const Real qRel = F.squaredNorm() /
+            (static_cast<Real>(dim) * std::pow(j, Real(2) / static_cast<Real>(dim)));
           rep.maxQRel = std::max(rep.maxQRel, qRel);
         }
       }

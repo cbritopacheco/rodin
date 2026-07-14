@@ -359,13 +359,10 @@ int main(int, char**)
     auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
 
     Problem newton(du, v);
-    newton =
-             ivw(du, v)
-           + (rho * bdfA0 / dtStep) * Integral(du, v)
-           + (rho / dtStep)
-             * Integral(bdfA0 * u + bdfA1 * uPrevious
-                        + bdfA2 * uPreviousPrevious, v)
-           + DirichletBC(du, zero).on(topBC);
+    newton = ivw(du, v) + (rho * bdfA0 / dtStep) * Integral(du, v) +
+      (rho / dtStep) *
+        Integral(bdfA0 * u + bdfA1 * uPrevious + bdfA2 * uPreviousPrevious, v) +
+      DirichletBC(du, zero).on(topBC);
 
     SparseLU linearSolver(newton);
     NewtonSolver solver(linearSolver);

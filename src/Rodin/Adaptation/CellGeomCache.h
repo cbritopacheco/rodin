@@ -57,18 +57,18 @@ namespace Rodin::Adaptation
   struct CellGeomCache
   {
     /// @brief Mesh cell index for this cache entry.
-    Index index = 0;
-    Real area = 0;                    ///< |K|
-    Real detAK = 0;                   ///< signed det(A_K), constant on K
-    Real Jscale = 0;                  ///< (1/|Khat|) integral |det A_K| dxhat
-    int  sigmaK = 1;                  ///< verified sign(det A_K(xhat_q))
-    Math::SpatialMatrix<Real> A;      ///< A_K = D F_K
-    Math::SpatialMatrix<Real> Ainv;   ///< A_K^{-1}
-    Math::SpatialMatrix<Real> AinvT;  ///< A_K^{-T}
-    Math::SpatialMatrix<Real> C;      ///< A_K A_K^T
-    Math::Matrix<Real> gradN;         ///< 3x2: rows are spatial grads of P1 basis
+      Index index = 0;
+      Real area = 0;                    ///< |K|
+      Real detAK = 0;                   ///< signed det(A_K), constant on K
+      Real Jscale = 0;                  ///< (1/|Khat|) integral |det A_K| dxhat
+      int sigmaK = 1;                  ///< verified sign(det A_K(xhat_q))
+      Math::SpatialMatrix<Real> A;      ///< A_K = D F_K
+      Math::SpatialMatrix<Real> Ainv;   ///< A_K^{-1}
+      Math::SpatialMatrix<Real> AinvT;  ///< A_K^{-T}
+      Math::SpatialMatrix<Real> C;      ///< A_K A_K^T
+      Math::Matrix<Real> gradN;         ///< 3x2: rows are spatial grads of P1 basis
     /// @brief Vertex indices of the triangular cell.
-    std::array<Index, 3> vertices = {{ 0, 0, 0 }};
+      std::array<Index, 3> vertices = {{0, 0, 0}};
   };
 
   /**
@@ -84,8 +84,7 @@ namespace Rodin::Adaptation
    * (which would mean a curved or inverted element; this 2D affine
    * prototype rejects them).
    */
-  inline std::pair<std::vector<CellGeomCache>,
-                   std::unordered_map<Index, size_t>>
+  inline std::pair<std::vector<CellGeomCache>, std::unordered_map<Index, size_t>>
   precomputeCellGeometry(const Geometry::Mesh<Rodin::Context::Local>& mesh)
   {
     std::vector<CellGeomCache> cache;
@@ -102,13 +101,11 @@ namespace Rodin::Adaptation
       for (size_t i = 0; i < 3; ++i)
         c.vertices[i] = vertices[i];
 
-      const auto& qf =
-        QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
+      const auto& qf = QF::PolytopeQuadratureFormula::get(2, cell.getGeometry());
       const auto& quadrature = cell.getQuadrature(qf);
       const size_t nqp = quadrature.getSize();
       if (nqp == 0)
-        throw std::runtime_error(
-            "precomputeCellGeometry: cell quadrature is empty.");
+        throw std::runtime_error("precomputeCellGeometry: cell quadrature is empty.");
 
       Real khatMeasure = 0;
       Real integralAbsDetA = 0;
@@ -124,16 +121,16 @@ namespace Rodin::Adaptation
         const Real detAq = Aq.determinant();
         if (detAq == Real(0))
           throw std::runtime_error(
-              "precomputeCellGeometry: degenerate A_K(xhat_q) at cell "
-              + std::to_string(c.index));
+            "precomputeCellGeometry: degenerate A_K(xhat_q) at cell " +
+            std::to_string(c.index));
         const int sigmaq = detAq > 0 ? 1 : -1;
         if (q == 0)
           sigmaFirst = sigmaq;
         else if (sigmaq != sigmaFirst)
-          throw std::runtime_error(
-              "precomputeCellGeometry: sigma_Kq inconsistent across "
-              "quadrature points at cell " + std::to_string(c.index)
-              + " (the 2D affine prototype rejects curved/inverted cells).");
+          throw std::runtime_error("precomputeCellGeometry: sigma_Kq inconsistent across "
+                                   "quadrature points at cell " +
+            std::to_string(c.index) +
+            " (the 2D affine prototype rejects curved/inverted cells).");
         integralAbsDetA += wq * std::abs(detAq);
       }
       c.sigmaK = sigmaFirst;

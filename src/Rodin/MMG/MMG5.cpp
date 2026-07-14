@@ -507,8 +507,7 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
     constexpr size_t cellDim = 3;
     const bool hasFaceCellIncidence =
       src.getConnectivity().getIncidence(faceDim, cellDim).size() > 0;
-    const auto isMMG3DBoundaryTriangle = [&](Index faceIdx)
-    {
+    const auto isMMG3DBoundaryTriangle = [&](Index faceIdx) {
       return !hasFaceCellIncidence || src.isBoundary(faceIdx);
     };
 
@@ -825,9 +824,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
             static_cast<size_t>(src->tria[i].v[1] - 1),
             static_cast<size_t>(src->tria[i].v[2] - 1) });
       build.attribute({ 2, i - 1 }, src->tria[i].ref );
-      if ((src->tria[i].tag[0] & MG_REQ) &&
-          (src->tria[i].tag[1] & MG_REQ) &&
-          (src->tria[i].tag[2] & MG_REQ))
+      if ((src->tria[i].tag[0] & MG_REQ) && (src->tria[i].tag[1] & MG_REQ) &&
+        (src->tria[i].tag[2] & MG_REQ))
         build.requiredTriangle(i - 1);
     }
     // Add tetrahedra

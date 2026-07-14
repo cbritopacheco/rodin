@@ -55,13 +55,11 @@ namespace Rodin::Adaptation
       using FESType = std::remove_reference_t<
         decltype(std::declval<Displacement&>().getFiniteElementSpace())>;
       using ProblemType = std::decay_t<decltype(Variational::Problem(
-          std::declval<TrialFunctionType&>(),
-          std::declval<TestFunctionType&>()))>;
+        std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
       using LinearSystemType = typename ProblemType::LinearSystemType;
       using StepSolverType = Solver::CG<LinearSystemType>;
       using BilinearFormType = std::decay_t<decltype(Variational::BilinearForm(
-          std::declval<TrialFunctionType&>(),
-          std::declval<TestFunctionType&>()))>;
+        std::declval<TrialFunctionType&>(), std::declval<TestFunctionType&>()))>;
 
       using SpatialVec = Math::SpatialVector<Real>;
       using SpatialMat = Math::SpatialMatrix<Real>;
@@ -99,11 +97,10 @@ namespace Rodin::Adaptation
 
       template <class Mesh, class PhiDerived, class GradDerived>
       /// @brief Solves the WNGIR fitting problem on marked interface facets.
-      WNGIRReport solve(
-          const Mesh& mesh,
-          const std::vector<Rodin::Index>& interfaceFacets,
-          const Variational::RealFunctionBase<PhiDerived>& phi,
-          const Variational::VectorFunctionBase<Real, GradDerived>& grad)
+      WNGIRReport solve(const Mesh& mesh,
+        const std::vector<Rodin::Index>& interfaceFacets,
+        const Variational::RealFunctionBase<PhiDerived>& phi,
+        const Variational::VectorFunctionBase<Real, GradDerived>& grad)
       {
         using Rodin::Index;
         const WNGIRParameters& p = m_parameters;
@@ -125,8 +122,7 @@ namespace Rodin::Adaptation
         const Real stepTol = p.stepTol > Real(0) ? p.stepTol : Real(1e-4) * h;
         constexpr Real epsG = Real(1e-12);
         using Clock = std::chrono::steady_clock;
-        auto secondsSince = [](Clock::time_point t0) -> Real
-        {
+        auto secondsSince = [](Clock::time_point t0) -> Real {
           return std::chrono::duration<Real>(Clock::now() - t0).count();
         };
         auto setupTic = Clock::now();
@@ -138,14 +134,14 @@ namespace Rodin::Adaptation
         // ============================================================
         struct FacetQP
         {
-          Real w = 0;
-          SpatialVec X;
-          Math::SpatialPoint rc;
+            Real w = 0;
+            SpatialVec X;
+            Math::SpatialPoint rc;
         };
         struct FacetTable
         {
-          Index facet = 0;
-          std::vector<FacetQP> qps;
+            Index facet = 0;
+            std::vector<FacetQP> qps;
         };
         std::vector<FacetTable> facetTables;
         facetTables.reserve(interfaceFacets.size());
@@ -178,12 +174,8 @@ namespace Rodin::Adaptation
           facetTables.push_back(std::move(ft));
         }
 
-        auto clampUnit = [](Real x)
-        {
-          return std::max(Real(-1), std::min(Real(1), x));
-        };
-        auto edgeKey = [](Index a, Index b) -> std::uint64_t
-        {
+        auto clampUnit = [](Real x) { return std::max(Real(-1), std::min(Real(1), x)); };
+        auto edgeKey = [](Index a, Index b) -> std::uint64_t {
           const auto lo = static_cast<std::uint64_t>(std::min(a, b));
           const auto hi = static_cast<std::uint64_t>(std::max(a, b));
           return (lo << 32) ^ hi;
@@ -317,26 +309,21 @@ namespace Rodin::Adaptation
           ? std::sqrt(normalJumpSq / normalJumpWeight)
           : Real(0);
         rep.normalJumpMax = normalJumpMax;
-        const Real floorRMS =
-          meshDim == 3 ? p.rmsFloor3D : p.rmsFloor2D;
-        const Real floorSup =
-          meshDim == 3 ? p.supFloor3D : p.supFloor2D;
+        const Real floorRMS = meshDim == 3 ? p.rmsFloor3D : p.rmsFloor2D;
+        const Real floorSup = meshDim == 3 ? p.supFloor3D : p.supFloor2D;
         Real activeRMSOverHTol = p.activeRMSOverHTol;
         Real activeSupOverHTol = p.activeSupOverHTol;
         if (p.geometryAwareTolerances)
         {
-          activeRMSOverHTol = std::max(
-              std::max(activeRMSOverHTol, floorRMS),
-              p.rmsNormalJumpFactor * rep.normalJumpRMS);
-          activeSupOverHTol = std::max(
-              std::max(activeSupOverHTol, floorSup),
-              p.supNormalJumpFactor * rep.normalJumpMax);
+          activeRMSOverHTol = std::max(std::max(activeRMSOverHTol, floorRMS),
+            p.rmsNormalJumpFactor * rep.normalJumpRMS);
+          activeSupOverHTol = std::max(std::max(activeSupOverHTol, floorSup),
+            p.supNormalJumpFactor * rep.normalJumpMax);
         }
         rep.effectiveRMSOverHTol = activeRMSOverHTol;
         rep.effectiveSupOverHTol = activeSupOverHTol;
 
-        auto facetPoint = [&](const FacetTable& ft, const FacetQP& fq)
-        {
+        auto facetPoint = [&](const FacetTable& ft, const FacetQP& fq) {
           const auto face = mesh.getFace(ft.facet);
           return Geometry::Point(*face, fq.rc, fq.X);
         };
@@ -348,14 +335,14 @@ namespace Rodin::Adaptation
           {
             SpatialVec zero = SpatialVec::Zero(meshDim);
             const auto src = facetPoint(ft, fq);
-            r0abs.push_back(std::abs(Detail::evaluateTranslatedPoint(
-                phi, src, zero, p.pointLocationTolerance)));
+            r0abs.push_back(std::abs(
+              Detail::evaluateTranslatedPoint(phi, src, zero, p.pointLocationTolerance)));
           }
         Real sigma = Real(3) * h;
         if (!r0abs.empty())
         {
-          const std::size_t k90 = static_cast<std::size_t>(
-              Real(0.9) * static_cast<Real>(r0abs.size() - 1));
+          const std::size_t k90 =
+            static_cast<std::size_t>(Real(0.9) * static_cast<Real>(r0abs.size() - 1));
           std::nth_element(r0abs.begin(), r0abs.begin() + k90, r0abs.end());
           sigma = std::max(sigma, r0abs[k90]);
         }
@@ -370,14 +357,14 @@ namespace Rodin::Adaptation
 
         struct CellQP
         {
-          Real w = 0;
-          Math::SpatialPoint rc;
-          SpatialVec X;
+            Real w = 0;
+            Math::SpatialPoint rc;
+            SpatialVec X;
         };
         struct CellTable
         {
-          Index cell = 0;
-          std::vector<CellQP> qps;
+            Index cell = 0;
+            std::vector<CellQP> qps;
         };
         std::vector<CellTable> cellTables;
         cellTables.reserve(mesh.getCellCount());
@@ -413,17 +400,13 @@ namespace Rodin::Adaptation
         // ============================================================
         // Per-iteration field evaluations through the GridFunction.
         // ============================================================
-        auto fieldAtFacetQP =
-          [&](const Displacement& gf, const FacetTable& ft, const FacetQP& fq)
-          -> SpatialVec
-        {
+        auto fieldAtFacetQP = [&](const Displacement& gf, const FacetTable& ft,
+                                const FacetQP& fq) -> SpatialVec {
           return gf.getValue(facetPoint(ft, fq));
         };
 
-        auto deformationAtCellQP =
-          [&](const Displacement& gf, const CellTable& ct, const CellQP& cq)
-          -> SpatialMat
-        {
+        auto deformationAtCellQP = [&](const Displacement& gf, const CellTable& ct,
+                                     const CellQP& cq) -> SpatialMat {
           const auto cell = mesh.getCell(ct.cell);
           const Geometry::Point pt(*cell, cq.rc, cq.X);
           SpatialMat F = SpatialMat::Identity(meshDim, meshDim);
@@ -433,24 +416,26 @@ namespace Rodin::Adaptation
 
         struct FastAdm
         {
-          Real minJ = std::numeric_limits<Real>::infinity();
-          Real maxQ = 0;
-          std::size_t inadmissibleCount = 0;
+            Real minJ = std::numeric_limits<Real>::infinity();
+            Real maxQ = 0;
+            std::size_t inadmissibleCount = 0;
         };
-        auto fastAdmissibility = [&](const Displacement& gf)
-        {
+        auto fastAdmissibility = [&](const Displacement& gf) {
           FastAdm a;
           for (const auto& ct : cellTables)
             for (const auto& cq : ct.qps)
             {
               const SpatialMat F = deformationAtCellQP(gf, ct, cq);
               const Real j = F.determinant();
-              if (j < a.minJ) a.minJ = j;
-              if (j <= p.jMinRatio) ++a.inadmissibleCount;
+              if (j < a.minJ)
+                a.minJ = j;
+              if (j <= p.jMinRatio)
+                ++a.inadmissibleCount;
               if (j > Real(0))
               {
                 const Real q = F.squaredNorm() / (d * std::pow(j, Real(2) / d));
-                if (q > a.maxQ) a.maxQ = q;
+                if (q > a.maxQ)
+                  a.maxQ = q;
               }
             }
           return a;
@@ -458,12 +443,11 @@ namespace Rodin::Adaptation
 
         struct SurfaceState
         {
-          Real energy = 0;
-          Real activeLen = 0, totalLen = 0;
-          Real activeRMS = 0, activeSup = 0;
+            Real energy = 0;
+            Real activeLen = 0, totalLen = 0;
+            Real activeRMS = 0, activeSup = 0;
         };
-        auto surfaceState = [&](const Displacement& gf)
-        {
+        auto surfaceState = [&](const Displacement& gf) {
           SurfaceState s;
           Real sq = 0;
           for (const auto& ft : facetTables)
@@ -473,7 +457,7 @@ namespace Rodin::Adaptation
               const auto src = facetPoint(ft, fq);
               const SpatialVec displacement = y - fq.X;
               const Real r = Detail::evaluateTranslatedPoint(
-                  phi, src, displacement, p.pointLocationTolerance);
+                phi, src, displacement, p.pointLocationTolerance);
               const Real omega = std::exp(-r * r / sigma2);
               s.totalLen += fq.w;
               s.energy += fq.w * Real(0.5) * sigma2 * (Real(1) - omega);
@@ -484,8 +468,7 @@ namespace Rodin::Adaptation
                 s.activeSup = std::max(s.activeSup, std::abs(r));
               }
             }
-          s.activeRMS =
-            s.activeLen > Real(0) ? std::sqrt(sq / s.activeLen) : Real(0);
+          s.activeRMS = s.activeLen > Real(0) ? std::sqrt(sq / s.activeLen) : Real(0);
           return s;
         };
 
@@ -497,22 +480,19 @@ namespace Rodin::Adaptation
         if (!m_bulkFormAssembled)
         {
           auto bulkTic = Clock::now();
-          const auto epsTrial = Real(0.5)
-            * (Variational::Jacobian(m_duStep)
-               + Variational::Jacobian(m_duStep).T());
-          const auto epsTest = Real(0.5)
-            * (Variational::Jacobian(m_vStep)
-               + Variational::Jacobian(m_vStep).T());
+          const auto epsTrial = Real(0.5) *
+            (Variational::Jacobian(m_duStep) + Variational::Jacobian(m_duStep).T());
+          const auto epsTest = Real(0.5) *
+            (Variational::Jacobian(m_vStep) + Variational::Jacobian(m_vStep).T());
           const auto divTrial = Variational::Trace(epsTrial);
           const auto divTest = Variational::Trace(epsTest);
-          const auto devTrial = epsTrial
-            - (Real(1) / d) * divTrial * Variational::IdentityMatrix(meshDim);
-          const auto devTest = epsTest
-            - (Real(1) / d) * divTest * Variational::IdentityMatrix(meshDim);
-          m_bulkForm =
-              Variational::Integral(gammaM * m_duStep, m_vStep)
-              + Variational::Integral(gammaH * ellM * ellM * devTrial, devTest)
-            + Variational::Integral(gammaDiv * ellM * ellM * divTrial, divTest);
+          const auto devTrial =
+            epsTrial - (Real(1) / d) * divTrial * Variational::IdentityMatrix(meshDim);
+          const auto devTest =
+            epsTest - (Real(1) / d) * divTest * Variational::IdentityMatrix(meshDim);
+          m_bulkForm = Variational::Integral(gammaM * m_duStep, m_vStep) +
+            Variational::Integral(gammaH * ellM * ellM * devTrial, devTest) +
+            Variational::Integral(gammaDiv * ellM * ellM * divTrial, divTest);
           m_bulkForm.assemble();
           rep.tBulk = secondsSince(bulkTic);
           m_bulkFormAssembled = true;
@@ -527,10 +507,9 @@ namespace Rodin::Adaptation
         {
           auto tic = Clock::now();
           Detail::WNGIRNormalOffsetMetric initMetric(
-              phi, grad, m_duStep, m_vStep, p, sigma2);
+            phi, grad, m_duStep, m_vStep, p, sigma2);
           initMetric.over(p.interfaceAttribute);
-          Detail::WNGIRNormalOffsetForce initForce(
-              phi, grad, m_vStep, p, sigma2);
+          Detail::WNGIRNormalOffsetForce initForce(phi, grad, m_vStep, p, sigma2);
           initForce.over(p.interfaceAttribute);
           typename ProblemType::ProblemBodyType body(m_bulkForm);
           body = body + initMetric - initForce;
@@ -565,8 +544,7 @@ namespace Rodin::Adaptation
             uTrial *= alpha;
             uTrial += previousU;
             adm = fastAdmissibility(uTrial);
-            const bool jOK =
-              adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+            const bool jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
             const bool qOK = adm.maxQ < p.qMax;
             bool eOK = true;
             if (jOK && qOK && p.energyLineSearch)
@@ -587,14 +565,11 @@ namespace Rodin::Adaptation
           {
             const auto surf = surfaceState(u);
             std::cout << "      wngir init=normal-offset"
-                      << "  accepted=" << (accepted ? 1 : 0)
-                      << "  alpha=" << alpha
+                      << "  accepted=" << (accepted ? 1 : 0) << "  alpha=" << alpha
                       << "  actRMS=" << std::scientific << surf.activeRMS
-                      << "  actRMS/h="
-                      << (h > Real(0) ? surf.activeRMS / h : Real(0))
+                      << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
                       << "  min_j=" << (accepted ? adm.minJ : rep.minJ)
-                      << "  max_Q=" << (accepted ? adm.maxQ : rep.maxQRel)
-                      << '\n';
+                      << "  max_Q=" << (accepted ? adm.maxQ : rep.maxQRel) << '\n';
           }
         }
 
@@ -608,10 +583,9 @@ namespace Rodin::Adaptation
           auto tic = Clock::now();
           Detail::WNGIRAdmissibilityMetric admMetric(m_duStep, m_vStep, u, p);
           Detail::WNGIRSurfaceObservationMetric obsMetric(
-              phi, grad, m_duStep, m_vStep, u, p, sigma2);
+            phi, grad, m_duStep, m_vStep, u, p, sigma2);
           obsMetric.over(p.interfaceAttribute);
-          Detail::WNGIRSurfaceForce surfaceForce(
-              phi, grad, m_vStep, u, p, sigma2);
+          Detail::WNGIRSurfaceForce surfaceForce(phi, grad, m_vStep, u, p, sigma2);
           surfaceForce.over(p.interfaceAttribute);
 
           std::size_t linearIterations = 0;
@@ -626,7 +600,11 @@ namespace Rodin::Adaptation
           tic = Clock::now();
           const bool solveOk = solveStep(vK, linearIterations, linearError);
           rep.tSolve += secondsSince(tic);
-          if (!solveOk) { rep.exitReason = "solve-linear-failed"; break; }
+          if (!solveOk)
+          {
+            rep.exitReason = "solve-linear-failed";
+            break;
+          }
 
           rep.linearIterations += linearIterations;
           rep.linearError = linearError;
@@ -651,12 +629,11 @@ namespace Rodin::Adaptation
                 const auto src = facetPoint(ft, fq);
                 const SpatialVec disp = y - fq.X;
                 const Real r = Detail::evaluateTranslatedPoint(
-                    phi, src, disp, p.pointLocationTolerance);
+                  phi, src, disp, p.pointLocationTolerance);
                 const SpatialVec g = Detail::evaluateTranslatedPoint(
-                    grad, src, disp, p.pointLocationTolerance);
-                const Real obsWeight = g.dot(g) + epsG
-                  + (p.residualStabilizedObservationMetric
-                      ? (r * r) / sigma2 : Real(0));
+                  grad, src, disp, p.pointLocationTolerance);
+                const Real obsWeight = g.dot(g) + epsG +
+                  (p.residualStabilizedObservationMetric ? (r * r) / sigma2 : Real(0));
                 const Real omega = std::exp(-r * r / sigma2);
                 const SpatialVec dVec = (-omega * r / obsWeight) * g;
                 const SpatialVec v = fieldAtFacetQP(vK, ft, fq);
@@ -667,10 +644,8 @@ namespace Rodin::Adaptation
               }
             if (gammaMeasure > Real(0))
             {
-              rawDemonsRMS =
-                std::sqrt(std::max<Real>(Real(0), dDen) / gammaMeasure);
-              liftedTraceRMS =
-                std::sqrt(std::max<Real>(Real(0), bDen) / gammaMeasure);
+              rawDemonsRMS = std::sqrt(std::max<Real>(Real(0), dDen) / gammaMeasure);
+              liftedTraceRMS = std::sqrt(std::max<Real>(Real(0), bDen) / gammaMeasure);
             }
             if (p.betaMax > Real(1) && bDen > Real(0) && std::isfinite(bNum))
             {
@@ -680,8 +655,7 @@ namespace Rodin::Adaptation
             scaledTraceRMS = beta * liftedTraceRMS;
           }
 
-          const Real maxStep =
-            std::max(std::abs(vK.max()), std::abs(vK.min()));
+          const Real maxStep = std::max(std::abs(vK.max()), std::abs(vK.min()));
           if (maxStep <= stepTol)
           {
             rep.exitReason = "best-effort-step-stagnation";
@@ -703,8 +677,7 @@ namespace Rodin::Adaptation
             uTrial *= alpha;
             uTrial += previousU;
             adm = fastAdmissibility(uTrial);
-            const bool jOK =
-              adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+            const bool jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
             const bool qOK = adm.maxQ < p.qMax;
             bool eOK = true;
             if (jOK && qOK && p.energyLineSearch)
@@ -731,15 +704,14 @@ namespace Rodin::Adaptation
 
           FastAdm acceptedAdm = adm;
           SurfaceState acceptedSurf = surfaceState(u);
-          Real acceptedEnergy = p.energyLineSearch && std::isfinite(eTrial)
-            ? eTrial : acceptedSurf.energy;
+          Real acceptedEnergy =
+            p.energyLineSearch && std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
 
           rep.lastAlpha = alpha;
           // acceptedStep = max_i |u_i - previousU_i|
           scratch = u;
           scratch -= previousU;
-          rep.acceptedStep =
-            std::max(std::abs(scratch.max()), std::abs(scratch.min()));
+          rep.acceptedStep = std::max(std::abs(scratch.max()), std::abs(scratch.min()));
           rep.minJ = acceptedAdm.minJ;
           rep.maxQRel = acceptedAdm.maxQ;
 
@@ -752,45 +724,53 @@ namespace Rodin::Adaptation
           rep.energy = eNow;
           if (p.trace)
             std::cout << "      wngir it=" << std::setw(3) << rep.iterations
-                      << "  E=" << std::scientific << std::setprecision(3)
-                      << eNow
+                      << "  E=" << std::scientific << std::setprecision(3) << eNow
                       << "  actRMS=" << surf.activeRMS
-                      << "  actRMS/h="
-                      << (h > Real(0) ? surf.activeRMS / h : Real(0))
+                      << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
                       << "  actSup=" << surf.activeSup
                       << "  actFrac=" << rep.activeFraction
                       << "  dΓ/h=" << (h > Real(0) ? rawDemonsRMS / h : Real(0))
-                      << "  vΓ/h="
-                      << (h > Real(0) ? liftedTraceRMS / h : Real(0))
+                      << "  vΓ/h=" << (h > Real(0) ? liftedTraceRMS / h : Real(0))
                       << "  β=" << beta
-                      << "  step/h="
-                      << (h > Real(0) ? rep.acceptedStep / h : Real(0))
-                      << "  linIt=" << rep.linearIterations
-                      << "  α=" << alpha
-                      << "  bt=" << backtracks
-                      << "  min_j=" << rep.minJ
-                      << "  max_Q=" << rep.maxQRel
-                      << '\n';
+                      << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
+                      << "  linIt=" << rep.linearIterations << "  α=" << alpha
+                      << "  bt=" << backtracks << "  min_j=" << rep.minJ
+                      << "  max_Q=" << rep.maxQRel << '\n';
 
           if (surf.activeRMS <= activeRMSTol)
-          { rep.exitReason = "numerical-rms-converged"; ++rep.iterations; break; }
+          {
+            rep.exitReason = "numerical-rms-converged";
+            ++rep.iterations;
+            break;
+          }
           if (surf.activeSup <= activeSupTol)
-          { rep.exitReason = "numerical-sup-converged"; ++rep.iterations; break; }
-          if (activeRMSOverHTol > Real(0) && h > Real(0)
-              && surf.activeRMS / h <= activeRMSOverHTol)
-          { rep.exitReason = "geometric-rms-converged"; ++rep.iterations; break; }
-          if (activeSupOverHTol > Real(0) && h > Real(0)
-              && surf.activeSup / h <= activeSupOverHTol)
-          { rep.exitReason = "geometric-sup-converged"; ++rep.iterations; break; }
-          if (p.acceptedStepOverHTol > Real(0) && h > Real(0)
-              && rep.acceptedStep / h <= p.acceptedStepOverHTol)
+          {
+            rep.exitReason = "numerical-sup-converged";
+            ++rep.iterations;
+            break;
+          }
+          if (activeRMSOverHTol > Real(0) && h > Real(0) &&
+            surf.activeRMS / h <= activeRMSOverHTol)
+          {
+            rep.exitReason = "geometric-rms-converged";
+            ++rep.iterations;
+            break;
+          }
+          if (activeSupOverHTol > Real(0) && h > Real(0) &&
+            surf.activeSup / h <= activeSupOverHTol)
+          {
+            rep.exitReason = "geometric-sup-converged";
+            ++rep.iterations;
+            break;
+          }
+          if (p.acceptedStepOverHTol > Real(0) && h > Real(0) &&
+            rep.acceptedStep / h <= p.acceptedStepOverHTol)
           {
             rep.exitReason = "best-effort-scale-step-stagnation";
             ++rep.iterations;
             break;
           }
-          const Real eRel =
-            std::abs(ePrev - eNow) / std::max(ePrev, Real(1e-30));
+          const Real eRel = std::abs(ePrev - eNow) / std::max(ePrev, Real(1e-30));
           if (eRel < p.energyStagTol)
           {
             rep.exitReason = "best-effort-energy-stagnation";

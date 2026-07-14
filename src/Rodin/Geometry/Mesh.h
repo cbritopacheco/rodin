@@ -954,9 +954,10 @@ namespace Rodin::Geometry
           }
 
           /// @brief Adds a polytope and returns its index via @p index.
-          Builder& polytope(Polytope::Type t, std::initializer_list<Index> vs, Index& index)
+          Builder& polytope(
+            Polytope::Type t, std::initializer_list<Index> vs, Index& index)
           {
-            return polytope(t, IndexArray({ vs }), index);
+            return polytope(t, IndexArray({vs}), index);
           }
 
           /**

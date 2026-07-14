@@ -33,15 +33,14 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
-static boost::mpi::environment*  g_env = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
   Mesh<Context::Local> makeShardableMesh(size_t n = 5)
   {
-    auto mesh =
-      Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { n, n });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {n, n});
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D, D);
     mesh.getConnectivity().compute(D, 0);
@@ -174,8 +173,7 @@ namespace
         ASSERT_EQ(ierr, PETSC_SUCCESS);
         ierr = MatGetValues(actual, 1, &i, 1, &j, &b);
         ASSERT_EQ(ierr, PETSC_SUCCESS);
-        EXPECT_LE(PetscAbsScalar(a - b), 1e-14)
-          << "entry (" << i << ", " << j << ")";
+        EXPECT_LE(PetscAbsScalar(a - b), 1e-14) << "entry (" << i << ", " << j << ")";
       }
     }
   }
@@ -195,31 +193,29 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 
     P1<Real, Mesh<Context::MPI>> fullFES(mesh);
     PETSc::Variational::TrialFunction uFull(fullFES);
-    PETSc::Variational::TestFunction  vFull(fullFES);
+    PETSc::Variational::TestFunction vFull(fullFES);
     Problem full(uFull, vFull);
     full = Integral(uFull, vFull) - Integral(RealFunction(1.0), vFull);
     full.assemble();
 
     P1<Real, Mesh<Context::MPI>> lhsFES(mesh);
     PETSc::Variational::TrialFunction uLHS(lhsFES);
-    PETSc::Variational::TestFunction  vLHS(lhsFES);
+    PETSc::Variational::TestFunction vLHS(lhsFES);
     Problem lhs(uLHS, vLHS);
     lhs = Integral(uLHS, vLHS) - Integral(RealFunction(1.0), vLHS);
     lhs.assemble(Variational::AssemblyTarget::LHS);
 
     P1<Real, Mesh<Context::MPI>> rhsFES(mesh);
     PETSc::Variational::TrialFunction uRHS(rhsFES);
-    PETSc::Variational::TestFunction  vRHS(rhsFES);
+    PETSc::Variational::TestFunction vRHS(rhsFES);
     Problem rhs(uRHS, vRHS);
     rhs = Integral(uRHS, vRHS) - Integral(RealFunction(1.0), vRHS);
     rhs.assemble(Variational::AssemblyTarget::RHS);
 
     expectSameOwnedMatrix(
-        full.getLinearSystem().getOperator(),
-        lhs.getLinearSystem().getOperator());
+      full.getLinearSystem().getOperator(), lhs.getLinearSystem().getOperator());
     expectSameOwnedVector(
-        full.getLinearSystem().getVector(),
-        rhs.getLinearSystem().getVector());
+      full.getLinearSystem().getVector(), rhs.getLinearSystem().getVector());
   }
 
   // Re-assembling the identical problem into the same distributed matrix must
@@ -235,7 +231,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 
     P1<Real, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
     RealFunction gamma(1.0);
     Problem p(u, v);
     p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
@@ -275,7 +271,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 
     P1<Real, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
     RealFunction gamma(1.0);
 
     auto emptyLHS = Integral(gamma * Grad(u), Grad(v));
@@ -289,8 +285,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     ASSERT_EQ(matrixGlobalNonzeros(A), 0);
 
     ASSERT_EQ(
-        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE),
-        PETSC_SUCCESS);
+      MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE), PETSC_SUCCESS);
     p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
     p.assemble();
 
@@ -311,33 +306,30 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 
     P1<Real, Mesh<Context::MPI>> fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
     RealFunction gamma(1.0);
 
     Problem p(u, v);
-    p = Integral(gamma * Grad(u), Grad(v))
-      - Integral(RealFunction(1.0), v);
+    p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
     p.assemble();
 
     Vec x = p.getLinearSystem().getSolution();
     ASSERT_EQ(VecSet(x, 3.0), PETSC_SUCCESS);
 
-    p = Integral(gamma * Grad(u), Grad(v))
-      - Integral(RealFunction(2.0), v);
+    p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(2.0), v);
     p.assemble();
     expectOwnedVectorConstant(p.getLinearSystem().getSolution(), 3.0);
 
     P1<Real, Mesh<Context::MPI>> expectedFES(mesh);
     PETSc::Variational::TrialFunction uExpected(expectedFES);
-    PETSc::Variational::TestFunction  vExpected(expectedFES);
+    PETSc::Variational::TestFunction vExpected(expectedFES);
     Problem expected(uExpected, vExpected);
-    expected = Integral(gamma * Grad(uExpected), Grad(vExpected))
-             - Integral(RealFunction(2.0), vExpected);
+    expected = Integral(gamma * Grad(uExpected), Grad(vExpected)) -
+      Integral(RealFunction(2.0), vExpected);
     expected.assemble();
 
     expectSameOwnedVector(
-        expected.getLinearSystem().getVector(),
-        p.getLinearSystem().getVector());
+      expected.getLinearSystem().getVector(), p.getLinearSystem().getVector());
   }
 
   // A problem with different global dimensions must produce a different nonzero
@@ -354,11 +346,10 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     auto coarseMesh = distributeFromRoot(ctx, 4);
     P1<Real, Mesh<Context::MPI>> coarseFES(coarseMesh);
     PETSc::Variational::TrialFunction uC(coarseFES);
-    PETSc::Variational::TestFunction  vC(coarseFES);
+    PETSc::Variational::TestFunction vC(coarseFES);
     RealFunction gammaC(1.0);
     Problem coarse(uC, vC);
-    coarse = Integral(gammaC * Grad(uC), Grad(vC))
-           - Integral(RealFunction(1.0), vC);
+    coarse = Integral(gammaC * Grad(uC), Grad(vC)) - Integral(RealFunction(1.0), vC);
     coarse.assemble();
     Mat coarseA = coarse.getLinearSystem().getOperator();
     PetscInt rows1 = 0;
@@ -369,11 +360,10 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     auto fineMesh = distributeFromRoot(ctx, 6);
     P1<Real, Mesh<Context::MPI>> fineFES(fineMesh);
     PETSc::Variational::TrialFunction uF(fineFES);
-    PETSc::Variational::TestFunction  vF(fineFES);
+    PETSc::Variational::TestFunction vF(fineFES);
     RealFunction gammaF(1.0);
     Problem fine(uF, vF);
-    fine = Integral(gammaF * Grad(uF), Grad(vF))
-         - Integral(RealFunction(1.0), vF);
+    fine = Integral(gammaF * Grad(uF), Grad(vF)) - Integral(RealFunction(1.0), vF);
     fine.assemble();
     Mat fineA = fine.getLinearSystem().getOperator();
     PetscInt rows2 = 0;
@@ -394,8 +384,7 @@ int main(int argc, char** argv)
   g_env = &env;
   g_world = &world;
 
-  [[maybe_unused]] PetscErrorCode ierr =
-    PetscInitialize(&argc, &argv, nullptr, nullptr);
+  [[maybe_unused]] PetscErrorCode ierr = PetscInitialize(&argc, &argv, nullptr, nullptr);
   assert(ierr == PETSC_SUCCESS);
 
   ::testing::InitGoogleTest(&argc, argv);

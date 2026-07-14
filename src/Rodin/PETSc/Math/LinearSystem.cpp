@@ -20,7 +20,7 @@ namespace Rodin::Math
       {
         PetscErrorCode ierr = PetscObjectReference(obj);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
       }
     }
 
@@ -37,7 +37,7 @@ namespace Rodin::Math
       ierr = VecDestroy(&b);
       assert(ierr == PETSC_SUCCESS);
 
-      (void) ierr;
+      (void)ierr;
     }
   }
 

@@ -39,10 +39,10 @@ namespace Rodin::Geometry
   template <class FE>
   class ParametricTransformation final : public PolytopeTransformation
   {
-    static_assert(std::is_same_v<typename FE::RangeType, Real>,
+      static_assert(std::is_same_v<typename FE::RangeType, Real>,
         "Type of finite element must be scalar valued.");
 
-    friend class boost::serialization::access;
+      friend class boost::serialization::access;
 
     public:
       /// @brief Parent class type.
@@ -115,9 +115,7 @@ namespace Rodin::Geometry
         return m_fe.getOrder();
       }
 
-      void transform(
-          Math::SpatialPoint& pc,
-          const Math::SpatialPoint& rc) const override
+      void transform(Math::SpatialPoint& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t pdim = getPhysicalDimension();
         assert(static_cast<size_t>(rc.size()) == getReferenceDimension());
@@ -131,8 +129,7 @@ namespace Rodin::Geometry
       }
 
       void jacobian(
-          Math::SpatialMatrix<Real>& pc,
-          const Math::SpatialPoint& rc) const override
+        Math::SpatialMatrix<Real>& pc, const Math::SpatialPoint& rc) const override
       {
         const size_t rdim = getReferenceDimension();
         assert(static_cast<size_t>(rc.size()) == rdim);
@@ -158,10 +155,10 @@ namespace Rodin::Geometry
       }
 
       /// @brief Serializes the transformation (for boost::serialization).
-      template<class Archive>
+      template <class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
-        ar & boost::serialization::base_object<PolytopeTransformation>(*this);
+        ar& boost::serialization::base_object<PolytopeTransformation>(*this);
         ar & m_pm;
         ar & m_fe;
       }

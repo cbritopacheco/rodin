@@ -348,8 +348,7 @@ namespace Rodin::Variational
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        */
       template <class CallableType>
-      auto getPushforward(
-          const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -1304,8 +1303,7 @@ namespace Rodin::Variational
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        */
       template <class CallableType>
-      auto getPushforward(
-          const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }

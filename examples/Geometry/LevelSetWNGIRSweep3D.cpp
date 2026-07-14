@@ -59,18 +59,14 @@ namespace
 
   Real det3(const Vec3& a, const Vec3& b, const Vec3& c)
   {
-    return
-      a(0) * (b(1) * c(2) - b(2) * c(1))
-      - a(1) * (b(0) * c(2) - b(2) * c(0))
-      + a(2) * (b(0) * c(1) - b(1) * c(0));
+    return a(0) * (b(1) * c(2) - b(2) * c(1)) - a(1) * (b(0) * c(2) - b(2) * c(0)) +
+      a(2) * (b(0) * c(1) - b(1) * c(0));
   }
 
   Vec3 cross3(const Vec3& a, const Vec3& b)
   {
     return vec3(
-        a(1) * b(2) - a(2) * b(1),
-        a(2) * b(0) - a(0) * b(2),
-        a(0) * b(1) - a(1) * b(0));
+      a(1) * b(2) - a(2) * b(1), a(2) * b(0) - a(0) * b(2), a(0) * b(1) - a(1) * b(0));
   }
 
   Mat3 edgeMatrix(const std::array<Vec3, 4>& x)
@@ -90,77 +86,71 @@ namespace
 
   struct LobedSphereLevelSet
   {
-    Vec3 c = vec3(Real(0.5), Real(0.5), Real(0.5));
-    Real R0 = Real(0.25);
-    Real amp = Real(0.05);
-    Real lobes = Real(6);
-    Real phase = Real(0);
+      Vec3 c = vec3(Real(0.5), Real(0.5), Real(0.5));
+      Real R0 = Real(0.25);
+      Real amp = Real(0.05);
+      Real lobes = Real(6);
+      Real phase = Real(0);
 
-    Real radius(const Vec3& p) const
-    {
-      const Vec3 d = p - c;
-      const Real r = std::max(d.norm(), Real(1e-14));
-      const Real theta = std::atan2(d(1), d(0));
-      const Real mu = d(2) / r;
-      return R0 + amp * std::cos(lobes * theta + phase)
-        * (Real(1) - mu * mu);
-    }
+      Real radius(const Vec3& p) const
+      {
+        const Vec3 d = p - c;
+        const Real r = std::max(d.norm(), Real(1e-14));
+        const Real theta = std::atan2(d(1), d(0));
+        const Real mu = d(2) / r;
+        return R0 + amp * std::cos(lobes * theta + phase) * (Real(1) - mu * mu);
+      }
 
-    Real phi(const Vec3& p) const
-    {
-      return (p - c).norm() - radius(p);
-    }
+      Real phi(const Vec3& p) const
+      {
+        return (p - c).norm() - radius(p);
+      }
 
-    Vec3 grad(const Vec3& p) const
-    {
-      const Vec3 x = p - c;
-      const Real x0 = x(0);
-      const Real x1 = x(1);
-      const Real x2 = x(2);
-      const Real r2 = x.squaredNorm();
-      const Real r = std::sqrt(r2);
-      if (r <= Real(1e-14))
-        return vec3(0, 0, 0);
+      Vec3 grad(const Vec3& p) const
+      {
+        const Vec3 x = p - c;
+        const Real x0 = x(0);
+        const Real x1 = x(1);
+        const Real x2 = x(2);
+        const Real r2 = x.squaredNorm();
+        const Real r = std::sqrt(r2);
+        if (r <= Real(1e-14))
+          return vec3(0, 0, 0);
 
-      const Real rho2 = x0 * x0 + x1 * x1;
-      const Real theta = std::atan2(x1, x0);
-      const Real angle = lobes * theta + phase;
-      const Real cosA = std::cos(angle);
-      const Real sinA = std::sin(angle);
+        const Real rho2 = x0 * x0 + x1 * x1;
+        const Real theta = std::atan2(x1, x0);
+        const Real angle = lobes * theta + phase;
+        const Real cosA = std::cos(angle);
+        const Real sinA = std::sin(angle);
 
-      const Real invR2 = Real(1) / r2;
-      const Real invR4 = invR2 * invR2;
-      const Vec3 gradR =
-        amp * (
-            -sinA * lobes * vec3(-x1 * invR2, x0 * invR2, 0)
-            + cosA * vec3(
-              Real(2) * x0 * x2 * x2 * invR4,
-              Real(2) * x1 * x2 * x2 * invR4,
-             -Real(2) * x2 * rho2 * invR4));
+        const Real invR2 = Real(1) / r2;
+        const Real invR4 = invR2 * invR2;
+        const Vec3 gradR = amp *
+          (-sinA * lobes * vec3(-x1 * invR2, x0 * invR2, 0) +
+            cosA *
+              vec3(Real(2) * x0 * x2 * x2 * invR4, Real(2) * x1 * x2 * x2 * invR4,
+                -Real(2) * x2 * rho2 * invR4));
 
-      return x / r - gradR;
-    }
+        return x / r - gradR;
+      }
   };
 
-  constexpr std::array<std::array<Real, 4>, 4> TetraBarycentricQuadrature = {{
-    {{ Real(0.5854101966249685), Real(0.1381966011250105),
-       Real(0.1381966011250105), Real(0.1381966011250105) }},
-    {{ Real(0.1381966011250105), Real(0.5854101966249685),
-       Real(0.1381966011250105), Real(0.1381966011250105) }},
-    {{ Real(0.1381966011250105), Real(0.1381966011250105),
-       Real(0.5854101966249685), Real(0.1381966011250105) }},
-    {{ Real(0.1381966011250105), Real(0.1381966011250105),
-       Real(0.1381966011250105), Real(0.5854101966249685) }}
-  }};
+  constexpr std::array<std::array<Real, 4>, 4> TetraBarycentricQuadrature = {
+    {{{Real(0.5854101966249685), Real(0.1381966011250105), Real(0.1381966011250105),
+       Real(0.1381966011250105)}},
+      {{Real(0.1381966011250105), Real(0.5854101966249685), Real(0.1381966011250105),
+        Real(0.1381966011250105)}},
+      {{Real(0.1381966011250105), Real(0.1381966011250105), Real(0.5854101966249685),
+        Real(0.1381966011250105)}},
+      {{Real(0.1381966011250105), Real(0.1381966011250105), Real(0.1381966011250105),
+        Real(0.5854101966249685)}}}};
 
   Real applyPhaseMomentMap(Real phi, Real epsilon)
   {
     return std::tanh(phi / epsilon);
   }
 
-  Vec3 interpolateVec(
-      const std::array<Vec3, 4>& values,
-      const std::array<Real, 4>& bary)
+  Vec3 interpolateVec(const std::array<Vec3, 4>& values, const std::array<Real, 4>& bary)
   {
     Vec3 out = vec3(0, 0, 0);
     for (std::size_t i = 0; i < 4; ++i)
@@ -170,15 +160,15 @@ namespace
 
   struct CellMomentInfo
   {
-    Index index = 0;
-    Real volume = 0;
-    Real moment = 0;
-    std::array<Vec3, 4> x;
+      Index index = 0;
+      Real volume = 0;
+      Real moment = 0;
+      std::array<Vec3, 4> x;
   };
 
   template <class PhiFn>
   std::vector<CellMomentInfo> collectCellMomentInfo(
-      const LocalMesh& mesh, PhiFn&& phi, Real epsilon)
+    const LocalMesh& mesh, PhiFn&& phi, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -187,18 +177,16 @@ namespace
       const auto& cell = *cellIt;
       const auto& vertices = cell.getVertices();
       if (vertices.size() != 4)
-        throw std::runtime_error(
-            "LevelSetWNGIRSweep3D expects tetrahedral cells.");
+        throw std::runtime_error("LevelSetWNGIRSweep3D expects tetrahedral cells.");
 
       CellMomentInfo info;
       info.index = cell.getIndex();
       for (std::size_t i = 0; i < 4; ++i)
         info.x[i] = mesh.getVertexCoordinates(vertices[i]);
 
-      info.volume = std::abs(det3(
-            info.x[1] - info.x[0],
-            info.x[2] - info.x[0],
-            info.x[3] - info.x[0])) / Real(6);
+      info.volume = std::abs(det3(info.x[1] - info.x[0], info.x[2] - info.x[0],
+                      info.x[3] - info.x[0])) /
+        Real(6);
 
       Real moment = 0;
       for (const auto& bary : TetraBarycentricQuadrature)
@@ -249,19 +237,16 @@ namespace
         pm(1, a) = X(1);
         pm(2, a) = X(2);
       }
-      mesh.setPolytopeTransformation(
-          {D, cell.getIndex()},
-          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
-            std::move(pm), geomFe));
+      mesh.setPolytopeTransformation({D, cell.getIndex()},
+        new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+          std::move(pm), geomFe));
     }
   }
 #endif
 
   template <class Displacement>
   void updateMovedMeshFromDisplacement(
-      const LocalMesh& mesh,
-      LocalMesh& moved,
-      const Displacement& u)
+    const LocalMesh& mesh, LocalMesh& moved, const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
     const auto& uData = u.getData();
@@ -270,11 +255,8 @@ namespace
     {
       const Vec3 x = mesh.getVertexCoordinates(vertex);
       const auto& dofs = uFes.getDOFs(0, vertex);
-      moved.setVertexCoordinates(
-          vertex,
-          vec3(x(0) + uData(dofs[0]),
-               x(1) + uData(dofs[1]),
-               x(2) + uData(dofs[2])));
+      moved.setVertexCoordinates(vertex,
+        vec3(x(0) + uData(dofs[0]), x(1) + uData(dofs[1]), x(2) + uData(dofs[2])));
     }
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
@@ -291,26 +273,22 @@ namespace
       {
         const auto& rc = geomFe.getNode(a);
         cell.getTransformation().transform(X, rc);
-        const Real ux =
-          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3));
-        const Real uy =
-          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3 + 1));
-        const Real uz =
-          uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3 + 2));
+        const Real ux = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3));
+        const Real uy = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3 + 1));
+        const Real uz = uData(uFes.getGlobalIndex({D, cell.getIndex()}, a * 3 + 2));
         pm(0, a) = X(0) + ux;
         pm(1, a) = X(1) + uy;
         pm(2, a) = X(2) + uz;
       }
-      moved.setPolytopeTransformation(
-          {D, cell.getIndex()},
-          new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
-            std::move(pm), geomFe));
+      moved.setPolytopeTransformation({D, cell.getIndex()},
+        new Geometry::ParametricTransformation<Variational::RealH1Element<2>>(
+          std::move(pm), geomFe));
     }
 #endif
   }
 
   std::size_t parseSizeTOption(
-      int argc, char** argv, const std::string& name, std::size_t fallback)
+    int argc, char** argv, const std::string& name, std::size_t fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -322,8 +300,7 @@ namespace
     return fallback;
   }
 
-  Real parseRealOption(
-      int argc, char** argv, const std::string& name, Real fallback)
+  Real parseRealOption(int argc, char** argv, const std::string& name, Real fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -348,8 +325,7 @@ namespace
 int main(int argc, char** argv)
 {
   const std::size_t n = parseSizeTOption(argc, argv, "n", 24);
-  const std::size_t nFrames =
-    parseSizeTOption(argc, argv, "frames", 24);
+  const std::size_t nFrames = parseSizeTOption(argc, argv, "frames", 24);
 
   const Real orbitR = parseRealOption(argc, argv, "orbitR", Real(0.08));
   const Real amp = parseRealOption(argc, argv, "amp", Real(0.045));
@@ -357,16 +333,14 @@ int main(int argc, char** argv)
   const Real kLobes = parseRealOption(argc, argv, "lobes", Real(6));
 
   const Real h = Real(1) / static_cast<Real>(n - 1);
-  const Real epsilon =
-    parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
-  const Real lambdaC =
-    parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
+  const Real epsilon = parseRealOption(argc, argv, "classifier-eps", Real(1.25) * h);
+  const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-  wngirDefaults.gammaMFactor = Real(0.25);
-  wngirDefaults.gammaHFactor = Real(0.25);
-  wngirDefaults.gammaDivFactor = Real(0.25);
-  wngirDefaults.ellOverH = Real(1.5);
+  wngirDefaults.gammaMFactor = Real(0.0125);
+  wngirDefaults.gammaHFactor = Real(0.0125);
+  wngirDefaults.gammaDivFactor = Real(0.0125);
+  wngirDefaults.ellOverH = Real(0.75);
   wngirDefaults.activeRMSOverHTol = Real(0.03);
   wngirDefaults.activeSupOverHTol = Real(0.20);
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
@@ -381,16 +355,13 @@ int main(int argc, char** argv)
   constexpr Attribute interfaceAttribute = 10;
   constexpr Attribute boundaryAttribute = 20;
 
-  const auto wngirParams =
-    Rodin::Examples::makeWNGIRParameters(
-        argc, argv, h, interfaceAttribute, wngirDefaults);
-  const Real fitTol =
-    parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
+  const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
+    argc, argv, h, interfaceAttribute, wngirDefaults);
+  const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
 
-  LocalMesh mesh =
-    LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { n, n, n });
+  LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {n, n, n});
   mesh.scale(h);
   mesh.getConnectivity().compute(3, 2);
   mesh.getConnectivity().compute(2, 3);
@@ -404,8 +375,7 @@ int main(int argc, char** argv)
 #endif
 
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
-                      boundaryAttribute);
+    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
   using ScalarFES = H1<2, Real, LocalMesh>;
@@ -418,9 +388,9 @@ int main(int argc, char** argv)
 
   ScalarFES scalarFes(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-      std::integral_constant<std::size_t, 2>{},
+    std::integral_constant<std::size_t, 2>{},
 #endif
-      mesh);
+    mesh);
   ScalarP0 p0Fes(mesh);
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
   VectorFES vectorFes(std::integral_constant<std::size_t, 2>{}, mesh, 3);
@@ -435,7 +405,7 @@ int main(int argc, char** argv)
   GridFunction phaseMoment(p0Fes);
   phaseMoment.setName("phase_moment");
   TrialFunction wngirTrial(vectorFes);
-  TestFunction  wngirTest(vectorFes);
+  TestFunction wngirTest(vectorFes);
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");
   auto wngirSolveParams = wngirParams;
@@ -447,9 +417,9 @@ int main(int argc, char** argv)
   ScalarP0 p0FesMoved(moved);
   ScalarFES scalarFesMoved(
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
-      std::integral_constant<std::size_t, 2>{},
+    std::integral_constant<std::size_t, 2>{},
 #endif
-      moved);
+    moved);
   GridFunction movedLabel(p0FesMoved);
   movedLabel.setName("cell_label");
   GridFunction phiMoved(scalarFesMoved);
@@ -477,8 +447,7 @@ int main(int argc, char** argv)
   std::cout << "Lobed-sphere WNGIR sweep on " << n << "x" << n << "x" << n
             << " tetrahedral unit-cube mesh, " << nFrames << " frames\n";
   std::cout << "  R0=" << R0 << "  amp=" << amp << "  lobes=" << kLobes
-            << "  orbit R=" << orbitR
-            << "  wngirEll=" << wngirParams.ellM
+            << "  orbit R=" << orbitR << "  wngirEll=" << wngirParams.ellM
             << "  betaMax=" << wngirParams.betaMax << '\n';
 
   std::size_t framesConverged = 0;
@@ -491,29 +460,25 @@ int main(int argc, char** argv)
     const Real angle = Real(2) * Real(M_PI) * t;
 
     LobedSphereLevelSet levelSet;
-    levelSet.c = vec3(
-        Real(0.5) + orbitR * std::cos(angle),
-        Real(0.5) + orbitR * std::sin(angle),
+    levelSet.c =
+      vec3(Real(0.5) + orbitR * std::cos(angle), Real(0.5) + orbitR * std::sin(angle),
         Real(0.5) + Real(0.5) * orbitR * std::sin(Real(2) * angle));
     levelSet.R0 = R0;
     levelSet.amp = amp;
     levelSet.lobes = kLobes;
     levelSet.phase = angle;
 
-    std::cout << "\n--- Frame " << std::setw(2) << frame
-              << " : c=(" << std::fixed << std::setprecision(4)
-              << levelSet.c(0) << ", " << levelSet.c(1) << ", "
+    std::cout << "\n--- Frame " << std::setw(2) << frame << " : c=(" << std::fixed
+              << std::setprecision(4) << levelSet.c(0) << ", " << levelSet.c(1) << ", "
               << levelSet.c(2) << ")"
               << "  phase=" << std::setprecision(3) << angle << " rad\n";
 
     clearXDMFRegionAttributes(mesh);
     for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
-                        boundaryAttribute);
+      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
 
-    const auto cellMoments =
-      collectCellMomentInfo(
-          mesh, [&](const Vec3& p) { return levelSet.phi(p); }, epsilon);
+    const auto cellMoments = collectCellMomentInfo(
+      mesh, [&](const Vec3& p) { return levelSet.phi(p); }, epsilon);
 
     std::unordered_map<Index, std::size_t> cellToLocal;
     std::vector<Index> localToCell;
@@ -537,24 +502,19 @@ int main(int argc, char** argv)
     for (auto faceIt = mesh.getFace(); faceIt; ++faceIt)
     {
       const Index facet = faceIt->getIndex();
-      const auto& incident =
-        mesh.getConnectivity().getIncidence({2, 3}, facet);
+      const auto& incident = mesh.getConnectivity().getIncidence({2, 3}, facet);
       if (incident.size() != 2)
         continue;
       const auto itA = cellToLocal.find(incident[0]);
       const auto itB = cellToLocal.find(incident[1]);
       if (itA == cellToLocal.end() || itB == cellToLocal.end())
         continue;
-      graphEdges.push_back({
-          static_cast<Index>(itA->second),
-          static_cast<Index>(itB->second),
-          lambdaC * faceArea(mesh, facet),
-          facet});
+      graphEdges.push_back({static_cast<Index>(itA->second),
+        static_cast<Index>(itB->second), lambdaC * faceArea(mesh, facet), facet});
     }
 
     const MinSTCut cut;
-    const MinSTCut::Result classified =
-      cut.classify(volumes, moments, graphEdges);
+    const MinSTCut::Result classified = cut.classify(volumes, moments, graphEdges);
 
     std::vector<Index> interfaceFacets;
     interfaceFacets.reserve(classified.cutEdges.size());
@@ -565,39 +525,32 @@ int main(int argc, char** argv)
     for (std::size_t local = 0; local < classified.labels.size(); ++local)
     {
       const Index cellIdx = localToCell[local];
-      mesh.setAttribute(
-          {mesh.getDimension(), cellIdx},
-          classified.labels[local] == MinSTCut::Inside
-            ? interiorAttribute
-            : exteriorAttribute);
+      mesh.setAttribute({mesh.getDimension(), cellIdx},
+        classified.labels[local] == MinSTCut::Inside ? interiorAttribute
+                                                     : exteriorAttribute);
     }
     for (const Index facet : interfaceFacets)
       mesh.setAttribute({mesh.getDimension() - 1, facet}, interfaceAttribute);
 
-    phiGf = [&](const Geometry::Point& p) -> Real
-    {
+    phiGf = [&](const Geometry::Point& p) -> Real {
       const auto& X = p.getCoordinates();
       return levelSet.phi(vec3(X(0), X(1), X(2)));
     };
 
-    RealFunction phi(
-        [&](const Geometry::Point& p) -> Real
-        {
-          const auto& X = p.getPhysicalCoordinates();
-          return levelSet.phi(vec3(X(0), X(1), X(2)));
-        });
+    RealFunction phi([&](const Geometry::Point& p) -> Real {
+      const auto& X = p.getPhysicalCoordinates();
+      return levelSet.phi(vec3(X(0), X(1), X(2)));
+    });
     AnalyticVectorFunction gradPhi(
-        [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
-        {
-          const auto& X = p.getPhysicalCoordinates();
-          return levelSet.grad(vec3(X(0), X(1), X(2)));
-        },
-        /*dimension=*/3);
+      [&](const Geometry::Point& p) -> Math::SpatialVector<Real> {
+        const auto& X = p.getPhysicalCoordinates();
+        return levelSet.grad(vec3(X(0), X(1), X(2)));
+      },
+      /*dimension=*/3);
 
     u.getData().setZero();
 
-    auto computeInterfaceFit = [&]() -> Real
-    {
+    auto computeInterfaceFit = [&]() -> Real {
       Real interfacePhi = 0;
       Real interfaceArea = 0;
       const auto& fes = u.getFiniteElementSpace();
@@ -607,8 +560,7 @@ int main(int argc, char** argv)
         const auto face = mesh.getFace(facet);
         const auto& fe = fes.getFiniteElement(meshDim - 1, facet);
         const std::size_t nLocal = fe.getCount();
-        const std::size_t qFitOrder =
-          std::max<std::size_t>(qOrder, 2 * fe.getOrder());
+        const std::size_t qFitOrder = std::max<std::size_t>(qOrder, 2 * fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qFitOrder, face->getGeometry());
         const auto& quad = face->getQuadrature(qf);
@@ -642,7 +594,8 @@ int main(int argc, char** argv)
     {
       std::size_t insideCount = 0;
       for (int lbl : classified.labels)
-        if (lbl == MinSTCut::Inside) ++insideCount;
+        if (lbl == MinSTCut::Inside)
+          ++insideCount;
       std::cout << "    debug: facets=" << interfaceFacets.size()
                 << "  inside=" << insideCount
                 << "  outside=" << (classified.labels.size() - insideCount)
@@ -658,16 +611,12 @@ int main(int argc, char** argv)
     std::size_t iterations = 0;
     const char* exitReason = "iter-budget";
     {
-      const auto wngirRep = wngirSolver.solve(
-          mesh, interfaceFacets, phi, gradPhi);
-      std::cout << "    wngir timing: it=" << wngirRep.iterations
-                << std::scientific << std::setprecision(2)
-                << "  assembly=" << wngirRep.tAssembly
-                << "  setup=" << wngirRep.tFactor
-                << "  solve=" << wngirRep.tSolve
+      const auto wngirRep = wngirSolver.solve(mesh, interfaceFacets, phi, gradPhi);
+      std::cout << "    wngir timing: it=" << wngirRep.iterations << std::scientific
+                << std::setprecision(2) << "  assembly=" << wngirRep.tAssembly
+                << "  setup=" << wngirRep.tFactor << "  solve=" << wngirRep.tSolve
                 << "  cgIt=" << wngirRep.linearIterations
-                << "  cgErr=" << wngirRep.linearError
-                << "  ls=" << wngirRep.tLineSearch
+                << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
                 << "  exit=" << wngirRep.exitReason << '\n';
       iterations = wngirRep.iterations;
       lastAlpha = wngirRep.lastAlpha;
@@ -682,8 +631,8 @@ int main(int argc, char** argv)
         bestU = u.getData();
       }
       if (trace)
-        std::cout << "      wngir sigma=" << wngirRep.sigma
-                  << "  (3h=" << Real(3) * h << ")\n";
+        std::cout << "      wngir sigma=" << wngirRep.sigma << "  (3h=" << Real(3) * h
+                  << ")\n";
     }
 
     u.getData() = bestU;
@@ -700,8 +649,7 @@ int main(int argc, char** argv)
       const Index cellIdx = cellIt->getIndex();
       const std::size_t local = cellToLocal.at(cellIdx);
       const Index dof = p0Fes.getGlobalIndex({D, cellIdx}, 0);
-      cellLabel.getData()(dof) =
-        static_cast<Real>(classified.labels[local]);
+      cellLabel.getData()(dof) = static_cast<Real>(classified.labels[local]);
       phaseMoment.getData()(dof) = cellMoments[local].moment;
     }
 
@@ -747,30 +695,24 @@ int main(int argc, char** argv)
       const Real j = A1.determinant() / A0.determinant();
       const Mat3 F = A1 * A0.inverse();
       jMoved.getData()(dof) = j;
-      qRelMoved.getData()(dof) =
-        j > Real(0)
-          ? F.squaredNorm() / (Real(3) * std::pow(j, Real(2) / Real(3)))
-          : std::numeric_limits<Real>::infinity();
+      qRelMoved.getData()(dof) = j > Real(0)
+        ? F.squaredNorm() / (Real(3) * std::pow(j, Real(2) / Real(3)))
+        : std::numeric_limits<Real>::infinity();
       movedLabel.getData()(dof) =
         static_cast<Real>(classified.labels[cellToLocal.at(cellIdx)]);
     }
 
-    phiMoved = [&](const Geometry::Point& p) -> Real
-    {
+    phiMoved = [&](const Geometry::Point& p) -> Real {
       const auto& X = p.getCoordinates();
       return levelSet.phi(vec3(X(0), X(1), X(2)));
     };
 
-    std::cout << "    WNGIR it=" << iterations
-              << "  fit=" << std::scientific << std::setprecision(3)
-              << interfaceFit
-              << "  alpha=" << lastAlpha
-              << "  step=" << acceptedStep
-              << "  min_j=" << minJ
+    std::cout << "    WNGIR it=" << iterations << "  fit=" << std::scientific
+              << std::setprecision(3) << interfaceFit << "  alpha=" << lastAlpha
+              << "  step=" << acceptedStep << "  min_j=" << minJ
               << "  max_qrel=" << maxQRel
               << "  converged=" << (converged ? "yes" : "best-effort")
-              << "  exit=" << exitReason
-              << '\n';
+              << "  exit=" << exitReason << '\n';
 
     xdmf.write(t).flush();
   }
@@ -778,8 +720,7 @@ int main(int argc, char** argv)
   xdmf.close();
 
   std::cout << "\nSummary\n";
-  std::cout << "  frames converged: " << framesConverged
-            << " / " << nFrames << '\n';
+  std::cout << "  frames converged: " << framesConverged << " / " << nFrames << '\n';
   if (!finalFitPerFrame.empty())
   {
     const Real fitMin =
@@ -790,10 +731,8 @@ int main(int argc, char** argv)
     for (Real x : finalFitPerFrame)
       fitMean += x;
     fitMean /= static_cast<Real>(finalFitPerFrame.size());
-    std::cout << "  ||phi(X+u)||_RMS  min=" << std::scientific
-              << std::setprecision(3) << fitMin
-              << "  mean=" << fitMean
-              << "  max=" << fitMax << '\n';
+    std::cout << "  ||phi(X+u)||_RMS  min=" << std::scientific << std::setprecision(3)
+              << fitMin << "  mean=" << fitMean << "  max=" << fitMax << '\n';
   }
 
   return 0;

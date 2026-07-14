@@ -159,7 +159,6 @@ int main(int argc, char** argv)
 
     std::snprintf(filename, sizeof(filename), "sol.%06d", world.rank());
 
-
     xdmf.write().flush();
     u.getSolution().save(filename, IO::FileFormat::MFEM);
   }

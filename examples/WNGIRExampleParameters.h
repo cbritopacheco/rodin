@@ -19,27 +19,24 @@ namespace Rodin::Examples
 {
   struct WNGIRExampleDefaults
   {
-    std::size_t maxIterations = 60;
-    std::size_t quadratureOrder = 4;
-    Real betaMax = 50;
-    Real gammaMFactor = 1;
-    Real gammaHFactor = 1;
-    Real gammaDivFactor = -1;
-    Real ellOverH = 3;
-    Real gammaJ = 1;
-    Real gammaQ = 1;
-    Real gammaQual = 1;
-    Real activeRMSOverHTol = 0;
-    Real activeSupOverHTol = 0;
-    Real gammaSize = 0;
-    bool parseLegacyMaxIterations = false;
+      std::size_t maxIterations = 60;
+      std::size_t quadratureOrder = 4;
+      Real betaMax = 50;
+      Real gammaMFactor = Real(0.0125);
+      Real gammaHFactor = Real(0.0125);
+      Real gammaDivFactor = -1;
+      Real ellOverH = Real(0.75);
+      Real gammaJ = 1;
+      Real gammaQ = 1;
+      Real gammaQual = 1;
+      Real activeRMSOverHTol = 0;
+      Real activeSupOverHTol = 0;
+      Real gammaSize = 0;
+      bool parseLegacyMaxIterations = false;
   };
 
   inline bool findOption(
-      int argc,
-      char** argv,
-      const std::string& name,
-      std::string* value)
+    int argc, char** argv, const std::string& name, std::string* value)
   {
     const std::string prefix = "--" + name + "=";
     const std::string flag = "--" + name;
@@ -67,11 +64,7 @@ namespace Rodin::Examples
     return false;
   }
 
-  inline Real realOption(
-      int argc,
-      char** argv,
-      const std::string& name,
-      Real fallback)
+  inline Real realOption(int argc, char** argv, const std::string& name, Real fallback)
   {
     std::string value;
     if (!findOption(argc, argv, name, &value) || value.empty())
@@ -80,10 +73,7 @@ namespace Rodin::Examples
   }
 
   inline std::size_t sizeOption(
-      int argc,
-      char** argv,
-      const std::string& name,
-      std::size_t fallback)
+    int argc, char** argv, const std::string& name, std::size_t fallback)
   {
     std::string value;
     if (!findOption(argc, argv, name, &value) || value.empty())
@@ -91,11 +81,7 @@ namespace Rodin::Examples
     return static_cast<std::size_t>(std::strtoull(value.c_str(), nullptr, 10));
   }
 
-  inline bool boolOption(
-      int argc,
-      char** argv,
-      const std::string& name,
-      bool fallback)
+  inline bool boolOption(int argc, char** argv, const std::string& name, bool fallback)
   {
     std::string value;
     if (!findOption(argc, argv, name, &value))
@@ -106,10 +92,7 @@ namespace Rodin::Examples
   }
 
   inline std::string stringOption(
-      int argc,
-      char** argv,
-      const std::string& name,
-      std::string fallback)
+    int argc, char** argv, const std::string& name, std::string fallback)
   {
     std::string value;
     if (!findOption(argc, argv, name, &value) || value.empty())
@@ -117,25 +100,18 @@ namespace Rodin::Examples
     return value;
   }
 
-  inline Adaptation::WNGIRMetricActivation parseMetricActivation(
-      int argc, char** argv)
+  inline Adaptation::WNGIRMetricActivation parseMetricActivation(int argc, char** argv)
   {
-    const auto value =
-      stringOption(argc, argv, "wngir-metric-activation", "hard");
+    const auto value = stringOption(argc, argv, "wngir-metric-activation", "hard");
     if (value == "hard")
       return Adaptation::WNGIRMetricActivation::Hard;
     if (value == "smooth")
       return Adaptation::WNGIRMetricActivation::Smooth;
-    throw std::invalid_argument(
-        "Unknown --wngir-metric-activation value: " + value);
+    throw std::invalid_argument("Unknown --wngir-metric-activation value: " + value);
   }
 
-  inline Adaptation::WNGIRParameters makeWNGIRParameters(
-      int argc,
-      char** argv,
-      Real h,
-      Geometry::Attribute interfaceAttribute,
-      const WNGIRExampleDefaults& defaults = {})
+  inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
+    Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
     Adaptation::WNGIRParameters p;
     p.h = h;
@@ -144,11 +120,8 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-gamma-m", defaults.gammaMFactor);
     const Real gammaHFactor =
       realOption(argc, argv, "wngir-gamma-h", defaults.gammaHFactor);
-    const Real gammaDivFactor =
-      realOption(argc, argv, "wngir-gamma-div",
-          defaults.gammaDivFactor > Real(0)
-            ? defaults.gammaDivFactor
-            : gammaHFactor);
+    const Real gammaDivFactor = realOption(argc, argv, "wngir-gamma-div",
+      defaults.gammaDivFactor > Real(0) ? defaults.gammaDivFactor : gammaHFactor);
     p.gammaM = gammaMFactor / h;
     p.gammaH = gammaHFactor / h;
     p.gammaDiv = gammaDivFactor / h;
@@ -158,10 +131,8 @@ namespace Rodin::Examples
     p.residualStabilizedObservationMetric =
       boolOption(argc, argv, "wngir-residual-stabilized-obs", true);
     p.initialGuessGamma = Real(0);
-    p.initialGuessGamma =
-      realOption(argc, argv, "wngir-init-gamma", p.initialGuessGamma);
-    p.initialGuessCapH =
-      realOption(argc, argv, "wngir-init-cap-h", p.initialGuessCapH);
+    p.initialGuessGamma = realOption(argc, argv, "wngir-init-gamma", p.initialGuessGamma);
+    p.initialGuessCapH = realOption(argc, argv, "wngir-init-cap-h", p.initialGuessCapH);
     p.betaMax = realOption(argc, argv, "wngir-beta-max", defaults.betaMax);
 
     p.gammaJ = realOption(argc, argv, "wngir-gamma-j", defaults.gammaJ);
@@ -197,63 +168,47 @@ namespace Rodin::Examples
       realOption(argc, argv, "wngir-sup-h-tol", defaults.activeSupOverHTol);
     p.geometryAwareTolerances =
       boolOption(argc, argv, "wngir-geometry-aware-tolerances", true);
-    p.rmsFloor2D =
-      realOption(argc, argv, "wngir-rms-floor-2d", p.rmsFloor2D);
-    p.supFloor2D =
-      realOption(argc, argv, "wngir-sup-floor-2d", p.supFloor2D);
-    p.rmsFloor3D =
-      realOption(argc, argv, "wngir-rms-floor-3d", p.rmsFloor3D);
-    p.supFloor3D =
-      realOption(argc, argv, "wngir-sup-floor-3d", p.supFloor3D);
+    p.rmsFloor2D = realOption(argc, argv, "wngir-rms-floor-2d", p.rmsFloor2D);
+    p.supFloor2D = realOption(argc, argv, "wngir-sup-floor-2d", p.supFloor2D);
+    p.rmsFloor3D = realOption(argc, argv, "wngir-rms-floor-3d", p.rmsFloor3D);
+    p.supFloor3D = realOption(argc, argv, "wngir-sup-floor-3d", p.supFloor3D);
     p.rmsNormalJumpFactor =
       realOption(argc, argv, "wngir-rms-normal-jump-factor", p.rmsNormalJumpFactor);
     p.supNormalJumpFactor =
       realOption(argc, argv, "wngir-sup-normal-jump-factor", p.supNormalJumpFactor);
-    const Real defaultRMSTol = p.activeRMSOverHTol > Real(0)
-      ? p.activeRMSOverHTol * h
-      : Real(4) * h * h;
-    const Real defaultSupTol = p.activeSupOverHTol > Real(0)
-      ? p.activeSupOverHTol * h
-      : Real(10) * h * h;
+    const Real defaultRMSTol =
+      p.activeRMSOverHTol > Real(0) ? p.activeRMSOverHTol * h : Real(4) * h * h;
+    const Real defaultSupTol =
+      p.activeSupOverHTol > Real(0) ? p.activeSupOverHTol * h : Real(10) * h * h;
     p.activeRMSTol = realOption(argc, argv, "wngir-rms-tol", defaultRMSTol);
     p.activeSupTol = realOption(argc, argv, "wngir-sup-tol", defaultSupTol);
-    p.energyStagTol =
-      realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
+    p.energyStagTol = realOption(argc, argv, "wngir-energy-stag-tol", Real(1e-4));
     p.stepTol = realOption(argc, argv, "wngir-step-tol", Real(1e-4) * h);
     p.acceptedStepOverHTol =
       realOption(argc, argv, "wngir-step-h-tol", p.acceptedStepOverHTol);
 
-    p.quadratureOrder =
-      sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
-    p.maxIterations =
-      sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
+    p.quadratureOrder = sizeOption(argc, argv, "quad-order", defaults.quadratureOrder);
+    p.maxIterations = sizeOption(argc, argv, "wngir-steps", defaults.maxIterations);
     if (defaults.parseLegacyMaxIterations)
-      p.maxIterations =
-        sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
+      p.maxIterations = sizeOption(argc, argv, "wngir-max-iters", p.maxIterations);
 
     p.cgRelativeTolerance =
       realOption(argc, argv, "wngir-cg-rtol", p.cgRelativeTolerance);
-    p.cgMaxIterations =
-      sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
-    p.andersonMemory =
-      sizeOption(argc, argv, "wngir-aa-memory", p.andersonMemory);
-    p.andersonStart =
-      sizeOption(argc, argv, "wngir-aa-start", p.andersonStart);
-    p.andersonDamping =
-      realOption(argc, argv, "wngir-aa-damping", p.andersonDamping);
+    p.cgMaxIterations = sizeOption(argc, argv, "wngir-cg-max-iters", p.cgMaxIterations);
+    p.andersonMemory = sizeOption(argc, argv, "wngir-aa-memory", p.andersonMemory);
+    p.andersonStart = sizeOption(argc, argv, "wngir-aa-start", p.andersonStart);
+    p.andersonDamping = realOption(argc, argv, "wngir-aa-damping", p.andersonDamping);
     p.andersonMinDamping =
       realOption(argc, argv, "wngir-aa-min-damping", p.andersonMinDamping);
 
-    p.includeQualityMetric =
-      boolOption(argc, argv, "wngir-quality-metric", true);
+    p.includeQualityMetric = boolOption(argc, argv, "wngir-quality-metric", true);
     p.includeAdmissibilityMetric =
       boolOption(argc, argv, "wngir-admissibility-metric", true);
 
     p.hasInterfaceAttribute = true;
     p.interfaceAttribute = interfaceAttribute;
     p.trace =
-      boolOption(argc, argv, "trace",
-        boolOption(argc, argv, "wngir-trace", false));
+      boolOption(argc, argv, "trace", boolOption(argc, argv, "wngir-trace", false));
     return p;
   }
 }
