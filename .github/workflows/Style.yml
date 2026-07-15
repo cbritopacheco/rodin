@@ -78,9 +78,10 @@ jobs:
         # Full-tree analysis of the aggregate TU against the committed
         # findings baseline (dev/clang_tidy.baseline): only NEW naming
         # violations fail; fixing names shrinks the baseline.
-        run: >-
-          python3 dev/check_clang_tidy.py --clang-tidy clang-tidy-18
-          --build-dir build
+        run: |
+          cmake --build build --target copy_mmg_headers
+          python3 dev/check_clang_tidy.py --clang-tidy clang-tidy-18 \
+            --build-dir build
 
   DoxygenRatchet:
     runs-on: ubuntu-24.04
