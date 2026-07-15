@@ -1232,10 +1232,10 @@ namespace Rodin::Assembly
               b.coeffRef(gs) = constraints.getIdentificationValue(gs);
             }
 
-            std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
-            filteredTriplets.reserve(triplets.size() + nrows);
-            for (const auto& t : triplets)
+            size_t write = 0;
+            for (size_t read = 0; read < triplets.size(); ++read)
             {
+              const auto& t = triplets[read];
               const Index row = static_cast<Index>(t.row());
               const Index col = static_cast<Index>(t.col());
               const ScalarType val = t.value();
@@ -1246,20 +1246,23 @@ namespace Rodin::Assembly
                 b.coeffRef(row) -= val * constraints.getFixedValue(col);
                 continue;
               }
-              filteredTriplets.push_back(t);
+              if (write != read)
+                triplets[write] = t;
+              ++write;
             }
+            triplets.resize(write);
 
             for (Index i = 0; i < static_cast<Index>(nrows); ++i)
             {
               if (constraints.isFixed(i))
               {
-                filteredTriplets.emplace_back(i, i, ScalarType(1));
+                triplets.emplace_back(i, i, ScalarType(1));
                 b.coeffRef(i) = constraints.getFixedValue(i);
               }
             }
 
             A.resize(nrows, ncols);
-            A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+            A.setFromTriplets(triplets.begin(), triplets.end());
           }
           else
           {
@@ -1721,10 +1724,10 @@ namespace Rodin::Assembly
                 b.coeffRef(gs) = constraints.getIdentificationValue(gs);
               }
 
-              std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
-              filteredTriplets.reserve(triplets.size() + rows);
-              for (const auto& t : triplets)
+              size_t write = 0;
+              for (size_t read = 0; read < triplets.size(); ++read)
               {
+                const auto& t = triplets[read];
                 const Index row = static_cast<Index>(t.row());
                 const Index col = static_cast<Index>(t.col());
                 const ScalarType val = t.value();
@@ -1735,20 +1738,23 @@ namespace Rodin::Assembly
                   b.coeffRef(row) -= val * constraints.getFixedValue(col);
                   continue;
                 }
-                filteredTriplets.push_back(t);
+                if (write != read)
+                  triplets[write] = t;
+                ++write;
               }
+              triplets.resize(write);
 
               for (Index i = 0; i < static_cast<Index>(rows); ++i)
               {
                 if (constraints.isFixed(i))
                 {
-                  filteredTriplets.emplace_back(i, i, ScalarType(1));
+                  triplets.emplace_back(i, i, ScalarType(1));
                   b.coeffRef(i) = constraints.getFixedValue(i);
                 }
               }
 
               A.resize(rows, cols);
-              A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+              A.setFromTriplets(triplets.begin(), triplets.end());
             }
             else
             {
@@ -1797,19 +1803,22 @@ namespace Rodin::Assembly
             // columns kept), mirroring the PETSc MatZeroRows targeted path.
             if constexpr (IsSparse)
             {
-              std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
-              filteredTriplets.reserve(triplets.size() + rows);
-              for (const auto& t : triplets)
+              size_t write = 0;
+              for (size_t read = 0; read < triplets.size(); ++read)
               {
+                const auto& t = triplets[read];
                 if (constraints.isFixed(static_cast<Index>(t.row())))
                   continue;
-                filteredTriplets.push_back(t);
+                if (write != read)
+                  triplets[write] = t;
+                ++write;
               }
+              triplets.resize(write);
               for (Index i = 0; i < static_cast<Index>(rows); ++i)
                 if (constraints.isFixed(i))
-                  filteredTriplets.emplace_back(i, i, ScalarType(1));
+                  triplets.emplace_back(i, i, ScalarType(1));
               A.resize(rows, cols);
-              A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+              A.setFromTriplets(triplets.begin(), triplets.end());
             }
             else
             {

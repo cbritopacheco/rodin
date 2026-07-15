@@ -1305,7 +1305,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            v0.clear();
+            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -1318,10 +1318,10 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(all.size() + rows);
-          for (const auto& t : all)
+          size_t write = 0;
+          for (size_t read = 0; read < all.size(); ++read)
           {
+            const auto& t = all[read];
             const Index row = static_cast<Index>(t.row());
             const Index col = static_cast<Index>(t.col());
             const ScalarType val = t.value();
@@ -1333,21 +1333,24 @@ namespace Rodin::Assembly
                 val * constraints.getFixedValue(col);
               continue;
             }
-            filtered.push_back(t);
+            if (write != read)
+              all[write] = t;
+            ++write;
           }
+          all.resize(write);
 
           for (Index i = 0; i < static_cast<Index>(rows); ++i)
           {
             if (constraints.isFixed(i))
             {
-              filtered.emplace_back(i, i, ScalarType(1));
+              all.emplace_back(i, i, ScalarType(1));
               b.coeffRef(static_cast<size_t>(i)) =
                 constraints.getFixedValue(i);
             }
           }
 
           A.resize(rows, cols);
-          A.setFromTriplets(filtered.begin(), filtered.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
@@ -2232,7 +2235,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            v0.clear();
+            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -2245,10 +2248,10 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(all.size() + nrows);
-          for (const auto& t : all)
+          size_t write = 0;
+          for (size_t read = 0; read < all.size(); ++read)
           {
+            const auto& t = all[read];
             const Index row = static_cast<Index>(t.row());
             const Index col = static_cast<Index>(t.col());
             const ScalarType val = t.value();
@@ -2260,21 +2263,24 @@ namespace Rodin::Assembly
                 val * constraints.getFixedValue(col);
               continue;
             }
-            filtered.push_back(t);
+            if (write != read)
+              all[write] = t;
+            ++write;
           }
+          all.resize(write);
 
           for (Index I = 0; I < static_cast<Index>(nrows); ++I)
           {
             if (constraints.isFixed(I))
             {
-              filtered.emplace_back(I, I, ScalarType(1));
+              all.emplace_back(I, I, ScalarType(1));
               b.coeffRef(static_cast<size_t>(I)) =
                 constraints.getFixedValue(I);
             }
           }
 
           A.resize(nrows, ncols);
-          A.setFromTriplets(filtered.begin(), filtered.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
