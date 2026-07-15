@@ -412,52 +412,6 @@ CoupledLV0DCoronary3D::outletFlow(const Config &cfg, const CarreauYasuda &visc,
   return {sgn * qAbs, dqAbs};
 }
 
-CoupledLV0DCoronary3D::Real
-CoupledLV0DCoronary3D::calibrateOutletRadius(const Config &cfg,
-                                             const CarreauYasuda &visc,
-                                             Real targetQ, Real dp, Real L) {
-  // Size a surrogate outlet radius so that the non-Newtonian flow law evaluated
-  // at the *calibration* rheology `visc` delivers targetQ at operating pressure
-  // drop dp. Using the shear-thinning law here (instead of the mu0-Poiseuille
-  // closed form) makes the realized outlet resistance dp/targetQ match the
-  // calibration target. When `visc` is a fixed healthy reference, the resulting
-  // geometry is anchored to a physiological baseline while the running rheology
-  // is free to move the flux (see Config::calibrationViscosity).
-  const Real PI = std::numbers::pi_v<Real>;
-  const Real mu0 = visc.mu0;
-
-  const Real q = std::max<Real>(std::abs(targetQ), 1e-300);
-  const Real Rlin = std::abs(dp) / q; // target resistance = 8 mu0 L/(pi r^4)
-
-  // Newtonian (mu0) radius. Because the shear-thinning law passes at least as
-  // much flow at the same radius, this is a strict upper bracket for the root.
-  const Real rHi0 = std::pow(8.0 * mu0 * L / (PI * std::max(Rlin, 1e-300)), 0.25);
-
-  auto f = [&](Real r) -> Real {
-    const auto [qr, dqr] = outletFlow(cfg, visc, dp, L, r);
-    (void)dqr;
-    return std::abs(qr) - q;
-  };
-
-  Real hi = rHi0;
-  // Safety: guarantee f(hi) >= 0 (should already hold).
-  for (int k = 0; k < 60 && f(hi) < 0.0; ++k)
-    hi *= 1.5;
-  Real lo = 1e-6 * hi;
-  for (int k = 0; k < 60 && f(lo) > 0.0; ++k)
-    lo *= 0.5;
-
-  for (int it = 0; it < 100; ++it) {
-    const Real mid = 0.5 * (lo + hi);
-    if (f(mid) > 0.0)
-      hi = mid;
-    else
-      lo = mid;
-  }
-
-  return 0.5 * (lo + hi);
-}
-
 void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
                                             const Attribute &tag,
                                             const Model &model, RCR &bc, Real Q,
@@ -467,6 +421,7 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
 
   const Real cap = bc.C / dt;
   const Real pcOld = bc.pc;
+  const Real pvenOld = bc.pven;
 
   const auto &law = cfg.outletFlowLaw;
 
@@ -527,58 +482,73 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   // (implicit Euler: unconditionally stable) and removes those artifacts.
   const Real alpha = cfg.intramyocardialFraction;
   const Real tauIm = std::max<Real>(cfg.intramyocardialFilterTau, 0.0);
-  const Real pimTarget = alpha * s.pv;
+  // Cavity-induced (alpha*pv) plus shortening-induced (kappa_tau*tau_c) pressure.
+  const Real pimTarget =
+      alpha * s.pv + cfg.intramyocardialActiveFraction * s.tauc;
   const Real pimOld = bc.pimFilt;
   const Real theta = (tauIm > 0.0) ? dt / (dt + tauIm) : 1.0;
   const Real pim = pimOld + theta * (pimTarget - pimOld); // filtered p_im^{n+1}
   const Real dPim = (pim - pimOld) / dt;
-  const Real Qim = bc.C * dPim;
+  const Real Qim = bc.C * dPim;              // arterial-compartment pump
+  const Real Qimv = bc.Cv * cfg.venousIntramyoFraction * dPim; // venous pump
   (void)h;
 
-  auto distalResidual = [&](Real pc) -> std::pair<Real, Real> {
-    const Real x = std::max(pc - pim, Real(0.0));
-    const auto [qd, dqd] = flowLaw(x, lengthD, radiusD);
+  // ---- Coupled arterial + venous capacitor solve (2x2 Newton) -------------
+  // Unknowns (p_c, p_ven). The arterial node p_c (compressed by p_im) drains
+  // through the distal flow law q_d = f_D(p_c - p_ven) into the venous node
+  // p_ven (compressed by beta_v*p_im), which drains to the right atrium P_RA
+  // through the venous resistance R_v: q_v = (p_ven - P_RA)/R_v.
+  //
+  //   R1 = (C/dt)(p_c   - p_c^n)   - Q_im  + q_d      - Q     = 0
+  //   R2 = (C_v/dt)(p_ven - p_ven^n) - Q_imv - q_d + q_v      = 0
+  const Real capv = bc.Cv / dt;
+  const Real Rv = std::max(bc.Rv, 1e-30);
+  const Real Pra = cfg.rightAtrialPressure;
 
-    const Real f = cap * (pc - pcOld) - Qim + qd - Q;
-    const Real df = cap + (pc > pim ? dqd : Real(0.0));
-    return {f, df};
-  };
+  Real pc = pcOld;
+  Real pven = pvenOld;
+  bool converged = false;
 
-  Math::RootFinding::NewtonRaphson<Real> solver(
-      law.flowAbsoluteTolerance, law.flowRelativeTolerance,
-      law.flowStepTolerance, law.flowMaxIterations);
+  for (int it = 0; it < law.flowMaxIterations; ++it) {
+    const auto [qd, dqd] = flowLaw(pc - pven, lengthD, radiusD);
+    const auto [qv, dqv] = flowLaw(pven - Pra, lengthD, Rv);
 
-  Real span = std::max<Real>(std::abs(Q) / cap + law.distalPressureBracketPad,
-                             law.distalPressureBracketPad);
+    const Real R1 = cap * (pc - pcOld) - Qim + qd - Q;
+    const Real R2 = capv * (pven - pvenOld) - Qimv - qd + qv;
 
-  Real lo = std::min(pcOld, s.pv) - span;
-  Real hi = std::max(pcOld, s.pv) + span;
+    const Real J11 = cap + dqd;
+    const Real J12 = -dqd;
+    const Real J21 = -dqd;
+    const Real J22 = capv + dqd + dqv;
 
-  for (int k = 0; k < law.maxBracketIterations &&
-                  distalResidual(lo).first * distalResidual(hi).first > 0.0;
-       ++k) {
-    span *= 2.0;
-    lo = std::min(pcOld, s.pv) - span;
-    hi = std::max(pcOld, s.pv) + span;
-  }
+    const Real det = J11 * J22 - J12 * J21;
+    if (std::abs(det) < 1e-300)
+      break;
 
-  if (distalResidual(lo).first * distalResidual(hi).first > 0.0) {
-    std::cerr << "Warning: failed to bracket distal capacitor pressure. "
-              << "Keeping previous pc.\n";
-    bc.pc = pcOld;
-  } else {
-    const auto pcNew = solver.solve(distalResidual, pcOld, lo, hi);
+    const Real dpc = (-J22 * R1 + J12 * R2) / det;
+    const Real dpven = (J21 * R1 - J11 * R2) / det;
 
-    if (!pcNew) {
-      std::cerr << "Warning: failed to solve distal capacitor equation. "
-                << "Keeping previous pc.\n";
-      bc.pc = pcOld;
-    } else {
-      bc.pc = *pcNew;
+    pc += dpc;
+    pven += dpven;
+
+    if (std::abs(dpc) + std::abs(dpven) <
+        law.flowStepTolerance * (1.0 + std::abs(pc) + std::abs(pven))) {
+      converged = true;
+      break;
     }
   }
 
-  const auto [qd, dqd_f] = flowLaw(std::max(bc.pc - pim, Real(0.0)), lengthD, radiusD);
+  if (!converged || !std::isfinite(pc) || !std::isfinite(pven)) {
+    std::cerr << "Warning: coupled arterial/venous capacitor solve did not "
+              << "converge. Keeping previous states.\n";
+    pc = pcOld;
+    pven = pvenOld;
+  }
+
+  bc.pc = pc;
+  bc.pven = pven;
+
+  const auto [qd, dqd_f] = flowLaw(bc.pc - bc.pven, lengthD, radiusD);
   (void)dqd_f;
   bc.qd = qd;
 
@@ -596,10 +566,6 @@ CoupledLV0DCoronary3D::periodic_activation(const Activation &cfg, Real t) {
   const Real T = cfg.period;
   const Real tau = t - T * std::floor(t / T);
 
-  // C1-continuous (smoothstep) ramps: derivative -> 0 at every segment
-  // junction, so d(activation)/dt has no jumps. The original piecewise-linear
-  // ramps produced discontinuous dP/dt, which the intramyocardial capacitor
-  // turned into coronary flow spikes.
   auto ss = [](Real s) {
     s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
     return s * s * (3.0 - 2.0 * s);
@@ -721,15 +687,17 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
   m_xdmf.add("shearStress", m_shearWall);
 
   m_wk.clear();
-  for (const Attribute tag : m_cfg.outlets)
+  for (const Attribute tag : m_cfg.outlets) {
     m_wk.emplace(tag, m_cfg.defaultRCR);
+    // Venous compartment defaults (overwritten by calibration below when
+    // autoCalibrateOutlets is enabled); guarantees R_v > 0 either way.
+    auto &bc = m_wk.at(tag);
+    bc.Cv = m_cfg.venousComplianceFactor * bc.C;
+    bc.Rv = std::max<Real>(m_cfg.venousResistanceFraction * bc.Rd, 1.0);
+    bc.pven = 0.5 * (bc.pc + m_cfg.rightAtrialPressure);
+  }
 
   // ---- Automatic Murray-law outlet calibration --------------------------
-  // Size each outlet's total resistance so the branch flows split according to
-  // Murray's law (Q_i proportional to r_i^3) and sum to lcaTargetFlow, driven
-  // by the current 0D pressure gradient. The surrogate outlet-law radii are
-  // then backed out (keeping the branch lengths) so updateRCRNonNew stays
-  // consistent, and a uniform time constant tau = Rd*C is imposed.
   if (m_cfg.autoCalibrateOutlets) {
     const Real PI = std::numbers::pi_v<Real>;
     const Real pim = 0.45 * m_model.getState().pv; // alpha * pv (distal level)
@@ -754,21 +722,17 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
       const Real Ri = dP / Qi;         // total branch resistance
       const Real Rd = (1.0 - fp) * Ri; // distal (peripheral)
       const Real Rp = fp * Ri;         // proximal (characteristic)
-      // Size the surrogate radii (keep Lp, Ld) by inverting the non-Newtonian
-      // flow law at each branch's operating point, so the realized outlet
-      // resistance matches Rd/Rp. Calibrating at a fixed reference rheology
-      // (calibrationViscosity) anchors the geometry to a physiological baseline
-      // so that changing the running viscosity/lambda (a pathology) moves the
-      // flux instead of being cancelled by re-tuning the resistance. A
-      // mu0-Poiseuille sizing (r = (8 mu0 L/(pi R))^1/4) instead systematically
-      // under-resists strongly shear-thinning blood, inflating the flow.
-      const CarreauYasuda &calibVisc = m_cfg.calibrateAtReferenceViscosity
-                                           ? m_cfg.calibrationViscosity
-                                           : m_cfg.viscosity;
+
+      const Real muN = m_cfg.newtonianCalibrationViscosity;
       auto &g = m_cfg.outletFlowLaw.geometricParam.at(tag);
-      g.Rd = calibrateOutletRadius(m_cfg, calibVisc, Qi, Rd * Qi, g.Ld);
-      g.Rp = calibrateOutletRadius(m_cfg, calibVisc, Qi, Rp * Qi, g.Lp);
-      m_wk.at(tag).C = m_cfg.rcrTau / Rd; // uniform tau = Rd*C
+      g.Rd = std::pow(8.0 * muN * g.Ld / (PI * std::max(Rd, 1e-300)), 0.25);
+      g.Rp = std::pow(8.0 * muN * g.Lp / (PI * std::max(Rp, 1e-300)), 0.25);
+
+      auto &bc = m_wk.at(tag);
+      bc.C = m_cfg.rcrTau / Rd;                     // uniform tau = Rd*C
+      bc.Cv = m_cfg.venousComplianceFactor * bc.C;  // venous compliance
+      bc.Rv = m_cfg.venousResistanceFraction * Rd;  // venous resistance << Rd
+      bc.pven = 0.5 * (bc.pc + m_cfg.rightAtrialPressure); // init venous state
       if (isRoot())
         Alert::Info() << "  [calib] outlet " << tag
                       << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
@@ -1311,8 +1275,8 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *     ((grad v) u^n).
          */
 
-        + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
-                                          m_cfg.rho)
+      //  + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
+        //                                  m_cfg.rho)
 
         /*
          * VMS linear contribution subtracted from the residual:
@@ -1323,9 +1287,9 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *       ((grad v) u^n).
          */
 
-        - VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
-                                        m_up.getSolution(), m_tau.getSolution(),
-                                        m_cfg.rho, m_cfg.dt)
+        //- VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
+          //                              m_up.getSolution(), m_tau.getSolution(),
+            //                            m_cfg.rho, m_cfg.dt)
 
         /*
          * Inlet normal impedance.
@@ -1632,6 +1596,8 @@ CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const {
     d.qCapChargingSum += qOut - bc.qd;
     d.pc[tag] = bc.pc;
     d.pOut[tag] = bc.pout;
+    d.pven[tag] = bc.pven;
+    d.pim = bc.pimFilt; // ~identical across outlets (same pv, tauc, filter)
   }
 
   return d;
@@ -1686,7 +1652,14 @@ void CoupledLV0DCoronary3D::writeCSVHeader() {
         << "beta,"
         << "w,"
         << "kc,"
-        << "tauc\n";
+        << "tauc,"
+        << "IntramyoPressure,"
+        << "CoronaryOutlet7VenPressure,"
+        << "CoronaryOutlet8VenPressure,"
+        << "CoronaryOutlet9VenPressure,"
+        << "CoronaryOutlet10VenPressure,"
+        << "CoronaryOutlet14VenPressure,"
+        << "CoronaryOutlet15VenPressure\n";
 
   m_csv.flush();
 }
@@ -1717,7 +1690,9 @@ void CoupledLV0DCoronary3D::writeCSVRow() {
         << get(d.pOut, 6) << ',' << get(d.pOut, 7) << ',' << get(d.pOut, 8)
         << ',' << get(d.pOut, 9) << ',' << d.flowBalance << ',' << d.ec << ','
         << d.gamma << ',' << d.beta << ',' << d.w << ',' << d.kc << ','
-        << d.tauc << '\n';
+        << d.tauc << ',' << d.pim << ',' << get(d.pven, 7) << ','
+        << get(d.pven, 8) << ',' << get(d.pven, 9) << ',' << get(d.pven, 10)
+        << ',' << get(d.pven, 14) << ',' << get(d.pven, 15) << '\n';
 
   m_csv.flush();
 }

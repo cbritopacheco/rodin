@@ -116,13 +116,16 @@ public:
     Real pout = 0.0;
     /// @brief Distal branch flow leaving the capacitor.
     Real qd = 0.0;
-    /// @brief Low-pass-filtered intramyocardial pressure state.
-    /// @details Models the finite (non-instantaneous) transmission of LV
-    ///          pressure to the intramyocardial compartment via a series
-    ///          resistance R_a = tau_im / C. Filtering p_im before it drives
-    ///          the capacitor removes the dP/dt flow spikes that a directly
-    ///          applied intramyocardial pressure produces.
+
     Real pimFilt = 0.0;
+    /// @brief Venous compartment pressure state (downstream of the distal
+    ///        resistance, drains to the right atrium through R_v).
+    Real pven = 0.0;
+    /// @brief Venous compartment compliance C_v (set at calibration).
+    Real Cv = 0.0;
+    /// @brief Venous drainage resistance R_v to the right atrium (set at
+    ///        calibration).
+    Real Rv = 0.0;
   };
 
   /**
@@ -277,21 +280,21 @@ public:
     /// @brief Active stiffness scale.
     Real k0 = 1.0e5;
     /// @brief Active stress scale.
-    Real sigma0 = 1.25e5;
+    Real sigma0 = 1.2e5;
     /// @brief Proximal arterial resistance.
     Real Rp = 5e7;
     /// @brief Proximal arterial compliance.
-    Real Cp = 8e-9;
+    Real Cp = 5e-9;
     /// @brief Distal arterial resistance.
     Real Rd = 1.0e8;
     /// @brief Distal arterial compliance.
     Real Cd = 5.0e-10;
     /// @brief Atrial valve coefficient.
-    Real Kat = 2.0e-6;
+    Real Kat = 1.0e-6;
     /// @brief Peripheral valve coefficient.
     Real Kp = 5.0e-10;
     /// @brief Arterial valve coefficient.
-    Real Kar = 1.75e-7;
+    Real Kar = 2.e-7;
     /// @brief LV cavity capacity.
     Real cavityCapacity = 5.0e-12;
     /// @brief Local 0D Newton absolute tolerance.
@@ -422,7 +425,7 @@ public:
     /// @brief Inlet normal impedance coefficient in Pa s / m. Set to 0 to
     /// disable.
     /// @details Defaults to defaultRCR.Rp times the scaled inlet area.
-    Real inletImpedance = 1.e3;
+    Real inletImpedance = 5.e2;
     /// @brief Outlet backflow damping multiplier. Set to 0 to disable.
     Real outletBackflowStabilization = 1.0;
 
@@ -439,23 +442,8 @@ public:
     FlowMode flowMode = FlowMode::Oseen;
     /// @brief Blood viscosity model shared by 3D flow and outlet laws.
     CarreauYasuda viscosity;
-    /// @brief Blood rheology used ONLY to size the outlet surrogate geometry
-    ///        during startup calibration.
-    /// @details Kept independent of @ref viscosity and fixed at a healthy
-    ///          reference by default. This decouples the calibration operating
-    ///          point from the running rheology: perturbing @ref viscosity /
-    ///          lambda to model a rheological pathology is then NOT cancelled
-    ///          out by re-tuning the outlet resistance, so the pathology shows
-    ///          up as an emergent change in coronary flux instead of being
-    ///          pinned back to lcaTargetFlow.
-    CarreauYasuda calibrationViscosity;
-    /// @brief Calibrate outlet geometry at @ref calibrationViscosity (true,
-    ///        recommended) or at the running @ref viscosity (false).
-    /// @details True lets rheological pathologies affect flux while keeping the
-    ///          outlet radii anchored to a physiological baseline. False
-    ///          restores the older self-consistent behaviour that pins the
-    ///          baseline flux to lcaTargetFlow regardless of rheology.
-    bool calibrateAtReferenceViscosity = true;
+
+    Real newtonianCalibrationViscosity = 0.0035;
     /// @brief Non-Newtonian outlet flow-law parameters.
     OutletFlowLaw outletFlowLaw;
     /// @brief Prescribed LV activation waveform parameters.
@@ -475,7 +463,7 @@ public:
     bool autoCalibrateOutlets = true;
     /// @brief Total target coronary inflow distributed across outlets (m^3/s).
     /// @details ~1.0e-6 m^3/s is about 60 mL/min; LCA rest flow ~150-250.
-    Real lcaTargetFlow = 3.0e-6;
+    Real lcaTargetFlow = 2.0e-6;
     /// @brief Uniform coronary RCR time constant tau = Rd*C (s).
     Real rcrTau = 0.2;
     /// @brief Proximal resistance fraction Rp/(Rp+Rd), clamped to [0, 0.5].
@@ -483,15 +471,26 @@ public:
 
     /// @brief Fraction of LV pressure transmitted to the intramyocardial
     ///        compartment (p_im = intramyocardialFraction * pv).
-    Real intramyocardialFraction = 0.5;
+    Real intramyocardialFraction = 0.65;
     /// @brief Time constant (s) of the intramyocardial pressure low-pass
     ///        filter, i.e. the series R_a*C on the intramyocardial branch.
     /// @details Set to 0 to recover the old, directly-applied p_im (spiky).
     ///          ~0.01-0.03 s removes the dP/dt spikes and tames the systolic
     ///          retrograde peak without materially shifting mean flow.
-    Real intramyocardialFilterTau = 0.02;
+    Real intramyocardialFilterTau = 0.0;
 
-    Real inletTangentialDamping = 1e3;
+    /// @brief Shortening-induced intramyocardial pressure gain (SIP): the
+    ///        intramyocardial pressure target becomes
+    ///        p_im = intramyocardialFraction * p_v
+    ///             + intramyocardialActiveFraction * tau_c,
+    ///        with tau_c the 0D active fiber stress.
+    Real intramyocardialActiveFraction = 0.01;
+    Real venousComplianceFactor = 2.5;
+    Real venousResistanceFraction = 0.05;
+    Real rightAtrialPressure = 600.0;
+    Real venousIntramyoFraction = 1.0;
+
+    Real inletTangentialDamping = 5e2;
     Real inletVelocityDamping = 0.0;
   };
 
@@ -543,6 +542,8 @@ private:
     std::map<Attribute, Real> qDistal;
     std::map<Attribute, Real> pc;
     std::map<Attribute, Real> pOut;
+    std::map<Attribute, Real> pven;
+    Real pim = 0.0;
   };
 
   static Model::Input makeInput(const Config &cfg);
@@ -555,19 +556,9 @@ private:
 
   /// @brief Non-Newtonian (Carreau-Yasuda) coronary outlet flow law.
   /// @param visc Blood rheology to evaluate the law with.
-  /// @returns {Q, dQ/d(dp)} through a tube of length @p L and radius
-  ///          @p radius at pressure drop @p dp, via the WRMS relation.
   static std::pair<Real, Real> outletFlow(const Config &cfg,
                                           const CarreauYasuda &visc, Real dp,
                                           Real L, Real radius);
-
-  /// @brief Surrogate outlet radius whose non-Newtonian flow law (evaluated at
-  ///        @p visc) delivers @p targetQ at operating pressure drop @p dp over
-  ///        length @p L. Replaces the mu0-Poiseuille sizing so the realized
-  ///        outlet resistance is consistent with updateRCRNonNew.
-  static Real calibrateOutletRadius(const Config &cfg,
-                                    const CarreauYasuda &visc, Real targetQ,
-                                    Real dp, Real L);
 
   static Real periodic_activation(const Activation &cfg, Real t);
   static Real atrial_pressure(const AtrialPressure &cfg, Real t);
