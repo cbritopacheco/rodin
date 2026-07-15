@@ -4,6 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+#include <atomic>
+#include <thread>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include <Rodin/Geometry.h>
@@ -98,5 +102,46 @@ namespace Rodin::Tests::Unit
     auto attr = mesh.getPolytope(0, 0)->getAttribute();
     EXPECT_TRUE(attr.has_value());
     EXPECT_EQ(*attr, 99);
+  }
+
+  TEST(Geometry_AttributeIndex, ConcurrentReadersAndWriter)
+  {
+    AttributeIndex attributes;
+    attributes.initialize(2);
+    attributes.resize(2, 1);
+    attributes.set({2, 0}, 1, 1);
+
+    std::atomic<bool> start{false};
+    std::atomic<bool> valid{true};
+    std::vector<std::thread> readers;
+    for (size_t t = 0; t < 8; ++t)
+    {
+      readers.emplace_back(
+        [&]
+        {
+          while (!start.load(std::memory_order_acquire))
+          {}
+          for (size_t i = 0; i < 10000; ++i)
+          {
+            const auto attribute = attributes.get({2, 0}, 1);
+            if (!attribute || (*attribute != 1 && *attribute != 2))
+              valid.store(false, std::memory_order_relaxed);
+          }
+        });
+    }
+
+    std::thread writer(
+      [&]
+      {
+        start.store(true, std::memory_order_release);
+        for (size_t i = 0; i < 10000; ++i)
+          attributes.set({2, 0}, 1, i % 2 + 1);
+      });
+
+    writer.join();
+    for (auto& reader : readers)
+      reader.join();
+
+    EXPECT_TRUE(valid.load(std::memory_order_relaxed));
   }
 }
