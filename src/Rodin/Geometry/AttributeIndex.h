@@ -182,27 +182,27 @@ namespace Rodin::Geometry
 
       BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-      private:
-        void assign(const Optional<Attribute>& attribute)
-        {
-          if (attribute)
-            value.store(*attribute, std::memory_order_relaxed);
-          engaged.store(attribute.has_value(), std::memory_order_relaxed);
-        }
+    private:
+      void assign(const Optional<Attribute>& attribute)
+      {
+        if (attribute)
+          value.store(*attribute, std::memory_order_relaxed);
+        engaged.store(attribute.has_value(), std::memory_order_relaxed);
+      }
     };
 
     struct Dimension
     {
-      friend class boost::serialization::access;
+        friend class boost::serialization::access;
 
-      std::deque<Slot> slots; ///< Stable attribute slots indexed by polytope index
-      std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
-      mutable std::mutex mutex; ///< Serializes storage growth and slot writes
+        std::deque<Slot> slots; ///< Stable attribute slots indexed by polytope index
+        std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
+        mutable std::mutex mutex; ///< Serializes storage growth and slot writes
 
       /**
        * @brief Default constructor.
        */
-      Dimension() = default;
+        Dimension() = default;
 
       /**
        * @brief Copy constructor.
@@ -212,12 +212,12 @@ namespace Rodin::Geometry
        * Thread-safety:
        * - Safe w.r.t. concurrent readers/writers of @p other.
        */
-      Dimension(const Dimension& other)
-      {
-        std::lock_guard<std::mutex> lock(other.mutex);
-        slots = other.slots;
-        publishedSize.store(slots.size(), std::memory_order_relaxed);
-      }
+        Dimension(const Dimension& other)
+        {
+          std::lock_guard<std::mutex> lock(other.mutex);
+          slots = other.slots;
+          publishedSize.store(slots.size(), std::memory_order_relaxed);
+        }
 
       /**
        * @brief Copy assignment operator.
@@ -228,17 +228,17 @@ namespace Rodin::Geometry
        * - Safe w.r.t. concurrent readers/writers of either dimension.
        * - Not an atomic snapshot w.r.t. external observers of the whole container.
        */
-      Dimension& operator=(const Dimension& other)
-      {
-        if (this == &other)
+        Dimension& operator=(const Dimension& other)
+        {
+          if (this == &other)
+            return *this;
+
+          std::scoped_lock lock(mutex, other.mutex);
+          slots = other.slots;
+          publishedSize.store(slots.size(), std::memory_order_release);
+
           return *this;
-
-        std::scoped_lock lock(mutex, other.mutex);
-        slots = other.slots;
-        publishedSize.store(slots.size(), std::memory_order_release);
-
-        return *this;
-      }
+        }
 
       /**
        * @brief Move constructor.
@@ -248,12 +248,12 @@ namespace Rodin::Geometry
        * Thread-safety:
        * - Requires that no other thread accesses @p other concurrently.
        */
-      Dimension(Dimension&& other) noexcept
-      {
-        std::lock_guard<std::mutex> lock(other.mutex);
-        slots = std::move(other.slots);
-        publishedSize.store(slots.size(), std::memory_order_relaxed);
-      }
+        Dimension(Dimension&& other) noexcept
+        {
+          std::lock_guard<std::mutex> lock(other.mutex);
+          slots = std::move(other.slots);
+          publishedSize.store(slots.size(), std::memory_order_relaxed);
+        }
 
       /**
        * @brief Move assignment operator.
@@ -264,16 +264,16 @@ namespace Rodin::Geometry
        * - Requires external synchronization: no concurrent access to either
        *   dimension while moving.
        */
-      Dimension& operator=(Dimension&& other) noexcept
-      {
-        if (this == &other)
-          return *this;
+        Dimension& operator=(Dimension&& other) noexcept
+        {
+          if (this == &other)
+            return *this;
 
-        std::scoped_lock lock(mutex, other.mutex);
-        slots = std::move(other.slots);
-        publishedSize.store(slots.size(), std::memory_order_release);
-        return *this;
-      }
+          std::scoped_lock lock(mutex, other.mutex);
+          slots = std::move(other.slots);
+          publishedSize.store(slots.size(), std::memory_order_release);
+          return *this;
+        }
 
       /**
        * @brief Serialization method for Boost.Serialization.
@@ -281,21 +281,21 @@ namespace Rodin::Geometry
        *
        * The serialization version argument is ignored.
        */
-      template <class Archive>
-      void save(Archive& ar, const unsigned int) const
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        ar & slots;
-      }
+        template <class Archive>
+        void save(Archive& ar, const unsigned int) const
+        {
+          std::lock_guard<std::mutex> lock(mutex);
+          ar & slots;
+        }
 
-      template <class Archive>
-      void load(Archive& ar, const unsigned int)
-      {
-        ar & slots;
-        publishedSize.store(slots.size(), std::memory_order_relaxed);
-      }
+        template <class Archive>
+        void load(Archive& ar, const unsigned int)
+        {
+          ar & slots;
+          publishedSize.store(slots.size(), std::memory_order_relaxed);
+        }
 
-      BOOST_SERIALIZATION_SPLIT_MEMBER()
+        BOOST_SERIALIZATION_SPLIT_MEMBER()
     };
 
     public:

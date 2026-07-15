@@ -104,6 +104,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(*attr, 99);
   }
 
+  /// @brief Verifies coherent attribute snapshots during concurrent reads and writes.
   TEST(Geometry_AttributeIndex, ConcurrentReadersAndWriter)
   {
     AttributeIndex attributes;
@@ -116,27 +117,23 @@ namespace Rodin::Tests::Unit
     std::vector<std::thread> readers;
     for (size_t t = 0; t < 8; ++t)
     {
-      readers.emplace_back(
-        [&]
+      readers.emplace_back([&] {
+        while (!start.load(std::memory_order_acquire))
+        {}
+        for (size_t i = 0; i < 10000; ++i)
         {
-          while (!start.load(std::memory_order_acquire))
-          {}
-          for (size_t i = 0; i < 10000; ++i)
-          {
-            const auto attribute = attributes.get({2, 0}, 1);
-            if (!attribute || (*attribute != 1 && *attribute != 2))
-              valid.store(false, std::memory_order_relaxed);
-          }
-        });
+          const auto attribute = attributes.get({2, 0}, 1);
+          if (!attribute || (*attribute != 1 && *attribute != 2))
+            valid.store(false, std::memory_order_relaxed);
+        }
+      });
     }
 
-    std::thread writer(
-      [&]
-      {
-        start.store(true, std::memory_order_release);
-        for (size_t i = 0; i < 10000; ++i)
-          attributes.set({2, 0}, 1, i % 2 + 1);
-      });
+    std::thread writer([&] {
+      start.store(true, std::memory_order_release);
+      for (size_t i = 0; i < 10000; ++i)
+        attributes.set({2, 0}, 1, i % 2 + 1);
+    });
 
     writer.join();
     for (auto& reader : readers)

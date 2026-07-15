@@ -381,6 +381,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
   }
 
+  /// @brief Verifies that concurrent formula lookup constructs each cached entry once.
   TEST(Geometry_PolytopeQuadratureIndex, ConstructsDistinctFormulasConcurrently)
   {
     constexpr size_t formulaCount = 8;
@@ -400,14 +401,11 @@ namespace Rodin::Tests::Unit
     std::vector<std::thread> threads;
     threads.reserve(formulaCount);
     for (size_t i = 0; i < formulaCount; ++i)
-      threads.emplace_back([&, i]()
-      {
+      threads.emplace_back([&, i]() {
         for (size_t repetition = 0; repetition < repetitions; ++repetition)
         {
-          const auto& quadrature = index.get(
-            {2, 0}, mesh.getPolytopeCount(2), *formulas[i],
-            [&]()
-            {
+          const auto& quadrature =
+            index.get({2, 0}, mesh.getPolytopeCount(2), *formulas[i], [&]() {
               ++factoryCalls[i];
               return std::make_unique<PolytopeQuadrature>(polytope, *formulas[i]);
             });

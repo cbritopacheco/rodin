@@ -1015,8 +1015,7 @@ namespace Rodin::Variational
               {
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
                 ReturnType out(
-                  static_cast<std::uint8_t>(m_vdim),
-                  static_cast<std::uint8_t>(dim));
+                  static_cast<std::uint8_t>(m_vdim), static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < m_vdim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)

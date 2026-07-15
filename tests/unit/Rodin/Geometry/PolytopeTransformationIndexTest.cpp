@@ -20,6 +20,7 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies that concurrent lookup constructs each transformation once.
   TEST(Geometry_PolytopeTransformationIndex, ConstructsEachSlotOnceConcurrently)
   {
     constexpr size_t count = 128;
@@ -34,19 +35,15 @@ namespace Rodin::Tests::Unit
     threads.reserve(threadCount);
     for (size_t thread = 0; thread < threadCount; ++thread)
     {
-      threads.emplace_back([&, thread]()
-      {
+      threads.emplace_back([&, thread]() {
         for (size_t repetition = 0; repetition < repetitions; ++repetition)
           for (size_t offset = 0; offset < count; ++offset)
           {
             const Index i = static_cast<Index>((offset + thread) % count);
-            const auto& transformation = index.get(
-              {2, i}, count,
-              [&](size_t, Index idx)
-              {
-                ++factoryCalls[static_cast<size_t>(idx)];
-                return std::make_unique<IdentityTransformation>(2);
-              });
+            const auto& transformation = index.get({2, i}, count, [&](size_t, Index idx) {
+              ++factoryCalls[static_cast<size_t>(idx)];
+              return std::make_unique<IdentityTransformation>(2);
+            });
             EXPECT_EQ(transformation.getReferenceDimension(), 2u);
             EXPECT_EQ(transformation.getPhysicalDimension(), 2u);
           }
@@ -60,14 +57,14 @@ namespace Rodin::Tests::Unit
       EXPECT_EQ(calls.load(), 1u);
   }
 
+  /// @brief Verifies that clearing the index invalidates cached transformations.
   TEST(Geometry_PolytopeTransformationIndex, ClearRebuildsTransformation)
   {
     PolytopeTransformationIndex index;
     index.initialize(2);
 
     size_t factoryCalls = 0;
-    const auto factory = [&](size_t, Index)
-    {
+    const auto factory = [&](size_t, Index) {
       ++factoryCalls;
       return std::make_unique<IdentityTransformation>(2);
     };

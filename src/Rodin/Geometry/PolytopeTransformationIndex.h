@@ -60,7 +60,7 @@ namespace Rodin::Geometry
     {
       std::atomic<PolytopeTransformation*> ptr{nullptr}; ///< Atomic pointer for fast access
       std::unique_ptr<PolytopeTransformation> owner;     ///< Unique pointer owning the transformation
-      mutable std::mutex mutex;                          ///< Serializes construction
+      mutable std::mutex mutex; ///< Serializes construction
 
       /**
        * @brief Serialization save method.
@@ -102,7 +102,7 @@ namespace Rodin::Geometry
     {
       std::deque<Slot> slots;          ///< Storage for transformation slots
       std::atomic<size_t> publishedSize{0}; ///< Lock-free readable slot count
-      mutable std::mutex mutex;        ///< Serializes storage growth
+      mutable std::mutex mutex; ///< Serializes storage growth
 
       /**
        * @brief Default constructor.
@@ -134,8 +134,7 @@ namespace Rodin::Geometry
       {
         slots = std::move(other.slots);
         publishedSize.store(
-          other.publishedSize.load(std::memory_order_relaxed),
-          std::memory_order_relaxed);
+          other.publishedSize.load(std::memory_order_relaxed), std::memory_order_relaxed);
         return *this;
       }
 
@@ -316,13 +315,13 @@ namespace Rodin::Geometry
       auto& dim = m_dimensions[d];
 
       // Fast path: the deque is stable below the atomically published extent.
-      const size_t publishedSize =
-        dim.publishedSize.load(std::memory_order_acquire);
+      const size_t publishedSize = dim.publishedSize.load(std::memory_order_acquire);
       if (idx < publishedSize)
       {
         assert(idx < count);
         const Slot& s = dim.slots[idx];
-        if (auto* q = s.ptr.load(std::memory_order_acquire)) return *q;
+        if (auto* q = s.ptr.load(std::memory_order_acquire))
+          return *q;
       }
 
       // Slow path: grow the stable slot storage if necessary.

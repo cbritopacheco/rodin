@@ -687,90 +687,74 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Point, 0),
-              ElementType(Geometry::Polytope::Type::Point, 1),
-              ElementType(Geometry::Polytope::Type::Point, 2),
-              ElementType(Geometry::Polytope::Type::Point, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Point, 0),
+                ElementType(Geometry::Polytope::Type::Point, 1),
+                ElementType(Geometry::Polytope::Type::Point, 2),
+                ElementType(Geometry::Polytope::Type::Point, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Segment, 0),
-              ElementType(Geometry::Polytope::Type::Segment, 1),
-              ElementType(Geometry::Polytope::Type::Segment, 2),
-              ElementType(Geometry::Polytope::Type::Segment, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Segment, 0),
+                ElementType(Geometry::Polytope::Type::Segment, 1),
+                ElementType(Geometry::Polytope::Type::Segment, 2),
+                ElementType(Geometry::Polytope::Type::Segment, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Triangle, 0),
-              ElementType(Geometry::Polytope::Type::Triangle, 1),
-              ElementType(Geometry::Polytope::Type::Triangle, 2),
-              ElementType(Geometry::Polytope::Type::Triangle, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Triangle, 0),
+                ElementType(Geometry::Polytope::Type::Triangle, 1),
+                ElementType(Geometry::Polytope::Type::Triangle, 2),
+                ElementType(Geometry::Polytope::Type::Triangle, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 2),
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
+                ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
+                ElementType(Geometry::Polytope::Type::Quadrilateral, 2),
+                ElementType(Geometry::Polytope::Type::Quadrilateral, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
+                ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
+                ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
+                ElementType(Geometry::Polytope::Type::Tetrahedron, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Pyramid, 0),
-              ElementType(Geometry::Polytope::Type::Pyramid, 1),
-              ElementType(Geometry::Polytope::Type::Pyramid, 2),
-              ElementType(Geometry::Polytope::Type::Pyramid, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Pyramid, 0),
+                ElementType(Geometry::Polytope::Type::Pyramid, 1),
+                ElementType(Geometry::Polytope::Type::Pyramid, 2),
+                ElementType(Geometry::Polytope::Type::Pyramid, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Wedge, 0),
-              ElementType(Geometry::Polytope::Type::Wedge, 1),
-              ElementType(Geometry::Polytope::Type::Wedge, 2),
-              ElementType(Geometry::Polytope::Type::Wedge, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Wedge, 0),
+                ElementType(Geometry::Polytope::Type::Wedge, 1),
+                ElementType(Geometry::Polytope::Type::Wedge, 2),
+                ElementType(Geometry::Polytope::Type::Wedge, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Hexahedron, 0),
-              ElementType(Geometry::Polytope::Type::Hexahedron, 1),
-              ElementType(Geometry::Polytope::Type::Hexahedron, 2),
-              ElementType(Geometry::Polytope::Type::Hexahedron, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Hexahedron, 0),
+                ElementType(Geometry::Polytope::Type::Hexahedron, 1),
+                ElementType(Geometry::Polytope::Type::Hexahedron, 2),
+                ElementType(Geometry::Polytope::Type::Hexahedron, 3)};
             return s_elements[m_vdim];
           }
         }

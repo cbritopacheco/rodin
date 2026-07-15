@@ -236,8 +236,7 @@ namespace Rodin::Variational
     public:
       static const Math::Matrix<Real>& getMatrix()
       {
-        static const Math::Matrix<Real> s_vandermonde = []
-        {
+        static const Math::Matrix<Real> s_vandermonde = [] {
           constexpr size_t N = PyramidIndex<K>::Count;
           const auto& nodes =
             H1Element<K, Real>::getNodes(Geometry::Polytope::Type::Pyramid);
@@ -256,8 +255,7 @@ namespace Rodin::Variational
 
       static const Math::Matrix<Real>& getInverse()
       {
-        static const Math::Matrix<Real> s_inv = []
-        {
+        static const Math::Matrix<Real> s_inv = [] {
           const auto& V = getMatrix();
           Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
@@ -370,8 +368,7 @@ namespace Rodin::Variational
 
     // These objects depend only on the compile-time order and reference
     // geometry. Sharing their immutable storage avoids per-thread replicas.
-    const auto makeLinearForms = [this, g]
-    {
+    const auto makeLinearForms = [this, g] {
       std::vector<LinearForm> forms;
       const size_t count = getCount();
       forms.reserve(count);
@@ -437,8 +434,7 @@ namespace Rodin::Variational
 
     // Basis descriptors are immutable after construction and are safe to share
     // across concurrent element evaluations.
-    const auto makeBasis = [this, g]
-    {
+    const auto makeBasis = [this, g] {
       std::vector<BasisFunction> basis;
       const size_t count = getCount();
       basis.reserve(count);

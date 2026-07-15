@@ -388,26 +388,28 @@ namespace Rodin::Geometry
     private:
       struct Slot
       {
-        std::atomic<PolytopeQuadrature*> ptr{nullptr};
-        std::unique_ptr<PolytopeQuadrature> owner;
+          std::atomic<PolytopeQuadrature*> ptr{nullptr};
+          std::unique_ptr<PolytopeQuadrature> owner;
       };
 
       struct Formula
       {
-        static constexpr size_t MutexCount = 64;
+          static constexpr size_t MutexCount = 64;
 
-        Formula(const QF::QuadratureFormulaBase* qf, size_t count)
-          : qf(qf), slots(count), publishedSize(count)
-        {}
+          Formula(const QF::QuadratureFormulaBase* qf, size_t count)
+            : qf(qf),
+              slots(count),
+              publishedSize(count)
+          {}
 
-        void resize(size_t count)
-        {
-          if (count <= publishedSize.load(std::memory_order_acquire))
-            return;
-          std::lock_guard<std::mutex> lock(resizeMutex);
-          if (slots.size() < count)
-            slots.resize(count);
-          publishedSize.store(slots.size(), std::memory_order_release);
+          void resize(size_t count)
+          {
+            if (count <= publishedSize.load(std::memory_order_acquire))
+              return;
+            std::lock_guard<std::mutex> lock(resizeMutex);
+            if (slots.size() < count)
+              slots.resize(count);
+            publishedSize.store(slots.size(), std::memory_order_release);
         }
 
         const QF::QuadratureFormulaBase* qf;
@@ -419,17 +421,17 @@ namespace Rodin::Geometry
 
       struct Dimension
       {
-        static constexpr size_t LookupCapacity = 16;
+          static constexpr size_t LookupCapacity = 16;
 
-        Dimension() = default;
-        Dimension(const Dimension&) = delete;
-        Dimension& operator=(const Dimension&) = delete;
+          Dimension() = default;
+          Dimension(const Dimension&) = delete;
+          Dimension& operator=(const Dimension&) = delete;
 
-        Dimension(Dimension&& other) noexcept
-          : formulas(std::move(other.formulas))
-        {
-          rebuildLookup();
-        }
+          Dimension(Dimension&& other) noexcept
+            : formulas(std::move(other.formulas))
+          {
+            rebuildLookup();
+          }
 
         Dimension& operator=(Dimension&& other) noexcept
         {

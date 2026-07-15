@@ -182,8 +182,7 @@ namespace Rodin::Variational
        */
       static const Math::Matrix<Real>& getMatrix()
       {
-        static const Math::Matrix<Real> s_vandermonde = []
-        {
+        static const Math::Matrix<Real> s_vandermonde = [] {
           constexpr size_t N = FeketeTriangle<K>::Count;
           const auto& nodes = FeketeTriangle<K>::getNodes();
           Math::Matrix<Real> vandermonde(N, N);
@@ -212,8 +211,7 @@ namespace Rodin::Variational
 
       static const Math::Matrix<Real>& getInverse()
       {
-        static const Math::Matrix<Real> s_inv = []
-        {
+        static const Math::Matrix<Real> s_inv = [] {
           const auto& V = VandermondeTriangle<K>::getMatrix();
           Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
@@ -368,8 +366,7 @@ namespace Rodin::Variational
     public:
       static const Math::Matrix<Real>& getMatrix()
       {
-        static const Math::Matrix<Real> s_vandermonde = []
-        {
+        static const Math::Matrix<Real> s_vandermonde = [] {
           constexpr size_t N = FeketeTetrahedron<K>::Count;
           const auto& nodes = FeketeTetrahedron<K>::getNodes();
           Math::Matrix<Real> vandermonde(N, N);
@@ -402,8 +399,7 @@ namespace Rodin::Variational
 
       static const Math::Matrix<Real>& getInverse()
       {
-        static const Math::Matrix<Real> s_inv = []
-        {
+        static const Math::Matrix<Real> s_inv = [] {
           const auto& V = VandermondeTetrahedron<K>::getMatrix();
           Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
