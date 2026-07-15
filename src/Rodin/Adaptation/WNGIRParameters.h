@@ -62,6 +62,7 @@ namespace Rodin::Adaptation
         Real(1e-8); ///< Positive guard for smooth activation.
       Real omegaMin = 0.1;        ///< active-set threshold on ω.
       Real alphaMin = 1e-4;       ///< line-search floor.
+      bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds.
       bool energyLineSearch = true; ///< Require WNGIR energy decrease in line search.
       Real jMinRatio = 1e-8;      ///< hard inadmissibility floor.
       Real jLineSearchRatio = 1e-2; ///< Jacobian floor ratio enforced by line search.

@@ -532,33 +532,49 @@ namespace Rodin::Adaptation
           }
 
           tic = Clock::now();
-          previousU = u;
-          const Real eBase = surfaceState(previousU).energy;
+          const bool useLineSearch = p.admissibilityChecks || p.energyLineSearch;
+          Real eBase = 0;
           Real alpha = Real(1);
           bool accepted = false;
           FastAdm adm{};
           Real eTrial = std::numeric_limits<Real>::infinity();
-          while (alpha >= p.alphaMin)
+          if (!useLineSearch)
           {
-            uTrial = vK;
-            uTrial *= alpha;
-            uTrial += previousU;
-            adm = fastAdmissibility(uTrial);
-            const bool jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
-            const bool qOK = adm.maxQ < p.qMax;
-            bool eOK = true;
-            if (jOK && qOK && p.energyLineSearch)
+            u += vK;
+            accepted = true;
+          }
+          else
+          {
+            previousU = u;
+            if (p.energyLineSearch)
+              eBase = surfaceState(previousU).energy;
+            while (alpha >= p.alphaMin)
             {
-              eTrial = surfaceState(uTrial).energy;
-              eOK = std::isfinite(eTrial) && eTrial <= eBase;
+              uTrial = vK;
+              uTrial *= alpha;
+              uTrial += previousU;
+              bool jOK = true;
+              bool qOK = true;
+              if (p.admissibilityChecks)
+              {
+                adm = fastAdmissibility(uTrial);
+                jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+                qOK = adm.maxQ < p.qMax;
+              }
+              bool eOK = true;
+              if (jOK && qOK && p.energyLineSearch)
+              {
+                eTrial = surfaceState(uTrial).energy;
+                eOK = std::isfinite(eTrial) && eTrial <= eBase;
+              }
+              if (jOK && qOK && eOK)
+              {
+                u = uTrial;
+                accepted = true;
+                break;
+              }
+              alpha *= Real(0.5);
             }
-            if (jOK && qOK && eOK)
-            {
-              u = uTrial;
-              accepted = true;
-              break;
-            }
-            alpha *= Real(0.5);
           }
           rep.tLineSearch += secondsSince(tic);
           if (p.trace)
@@ -568,8 +584,10 @@ namespace Rodin::Adaptation
                       << "  accepted=" << (accepted ? 1 : 0) << "  alpha=" << alpha
                       << "  actRMS=" << std::scientific << surf.activeRMS
                       << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
-                      << "  min_j=" << (accepted ? adm.minJ : rep.minJ)
-                      << "  max_Q=" << (accepted ? adm.maxQ : rep.maxQRel) << '\n';
+                      << "  min_j=" << (p.admissibilityChecks && accepted
+                          ? adm.minJ : std::numeric_limits<Real>::quiet_NaN())
+                      << "  max_Q=" << (p.admissibilityChecks && accepted
+                          ? adm.maxQ : std::numeric_limits<Real>::quiet_NaN()) << '\n';
           }
         }
 
@@ -664,35 +682,49 @@ namespace Rodin::Adaptation
 
           // ---- Nonlinear line search on TRUE geometry ----
           tic = Clock::now();
-          previousU = u;
+          const bool useLineSearch = p.admissibilityChecks || p.energyLineSearch;
           Real alpha = Real(1);
           bool accepted = false;
           std::size_t backtracks = 0;
           FastAdm adm{};
           Real eTrial = std::numeric_limits<Real>::infinity();
-          while (alpha >= p.alphaMin)
+          if (!useLineSearch)
           {
-            // uTrial = previousU + alpha * vK
-            uTrial = vK;
-            uTrial *= alpha;
-            uTrial += previousU;
-            adm = fastAdmissibility(uTrial);
-            const bool jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
-            const bool qOK = adm.maxQ < p.qMax;
-            bool eOK = true;
-            if (jOK && qOK && p.energyLineSearch)
+            u += vK;
+            accepted = true;
+          }
+          else
+          {
+            previousU = u;
+            while (alpha >= p.alphaMin)
             {
-              eTrial = surfaceState(uTrial).energy;
-              eOK = std::isfinite(eTrial) && eTrial <= ePrev;
+              // uTrial = previousU + alpha * vK
+              uTrial = vK;
+              uTrial *= alpha;
+              uTrial += previousU;
+              bool jOK = true;
+              bool qOK = true;
+              if (p.admissibilityChecks)
+              {
+                adm = fastAdmissibility(uTrial);
+                jOK = adm.inadmissibleCount == 0 && adm.minJ > p.jLineSearchRatio;
+                qOK = adm.maxQ < p.qMax;
+              }
+              bool eOK = true;
+              if (jOK && qOK && p.energyLineSearch)
+              {
+                eTrial = surfaceState(uTrial).energy;
+                eOK = std::isfinite(eTrial) && eTrial <= ePrev;
+              }
+              if (jOK && qOK && eOK)
+              {
+                u = uTrial;
+                accepted = true;
+                break;
+              }
+              alpha *= Real(0.5);
+              ++backtracks;
             }
-            if (jOK && qOK && eOK)
-            {
-              u = uTrial;
-              accepted = true;
-              break;
-            }
-            alpha *= Real(0.5);
-            ++backtracks;
           }
           rep.tLineSearch += secondsSince(tic);
           if (!accepted)
@@ -708,12 +740,19 @@ namespace Rodin::Adaptation
             p.energyLineSearch && std::isfinite(eTrial) ? eTrial : acceptedSurf.energy;
 
           rep.lastAlpha = alpha;
-          // acceptedStep = max_i |u_i - previousU_i|
-          scratch = u;
-          scratch -= previousU;
-          rep.acceptedStep = std::max(std::abs(scratch.max()), std::abs(scratch.min()));
-          rep.minJ = acceptedAdm.minJ;
-          rep.maxQRel = acceptedAdm.maxQ;
+          if (useLineSearch)
+          {
+            // acceptedStep = max_i |u_i - previousU_i|
+            scratch = u;
+            scratch -= previousU;
+            rep.acceptedStep = std::max(std::abs(scratch.max()), std::abs(scratch.min()));
+          }
+          else
+            rep.acceptedStep = maxStep;
+          rep.minJ = p.admissibilityChecks
+            ? acceptedAdm.minJ : std::numeric_limits<Real>::quiet_NaN();
+          rep.maxQRel = p.admissibilityChecks
+            ? acceptedAdm.maxQ : std::numeric_limits<Real>::quiet_NaN();
 
           const auto surf = acceptedSurf;
           const Real eNow = acceptedEnergy;
