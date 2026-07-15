@@ -66,7 +66,7 @@ jobs:
         run: >-
           sudo apt-get update && sudo apt-get install -y
           clang-tidy-18 libomp-18-dev cmake libboost-all-dev libeigen3-dev
-          libhdf5-dev libsuitesparse-dev libscotch-dev petsc-dev mpich
+          libhdf5-dev libsuitesparse-dev libscotch-dev libmetis-dev petsc-dev mpich
       - name: Configure (generates Configure.h)
         run: >-
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
