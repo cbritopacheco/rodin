@@ -6,7 +6,10 @@
  */
 #include <gtest/gtest.h>
 
+#include <array>
+#include <atomic>
 #include <memory>
+#include <thread>
 #include <vector>
 
 #include <Rodin/Alert/Exception.h>
@@ -244,8 +247,8 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  /// @brief Verifies rebuilds evicted formula after capacity exceeded for geometry polytope quadrature index by checking exact expected values.
-  TEST(Geometry_PolytopeQuadratureIndex, RebuildsEvictedFormulaAfterCapacityExceeded)
+  /// @brief Verifies formula entries remain stable beyond the former bounded-cache capacity.
+  TEST(Geometry_PolytopeQuadratureIndex, RetainsFormulaBeyondFormerCapacity)
   {
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
@@ -280,8 +283,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope);
 
-    // Insert one more distinct formula. This should evict one entry by
-    // round-robin replacement, not throw.
+    // Insert one more distinct formula.
     quadratureFormulas.emplace_back(
       std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
 
@@ -299,9 +301,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
 
-    // The first inserted formula should have been evicted under round-robin
-    // replacement, since the insertion order was sequential and no older entry
-    // was reinserted into the bounded cache.
+    // Stable formula storage retains the first quadrature until clear().
     index.get(
       {2, 0},
       mesh.getPolytopeCount(2),
@@ -314,11 +314,11 @@ namespace Rodin::Tests::Unit
           *quadratureFormulas.front());
       });
 
-    EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 2);
+    EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
   }
 
-  /// @brief Verifies hot entry preserves immediate repeat after overflow for geometry polytope quadrature index by checking exact expected values.
-  TEST(Geometry_PolytopeQuadratureIndex, HotEntryPreservesImmediateRepeatAfterOverflow)
+  /// @brief Verifies immediate repeated access after registering several formulas.
+  TEST(Geometry_PolytopeQuadratureIndex, PreservesImmediateRepeatAcrossFormulas)
   {
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
@@ -352,8 +352,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
 
-    // Immediate repeat of the most recently inserted formula should be served
-    // from the hot entry or the bounded cache without rebuilding.
+    // Immediate repeat of the most recently inserted formula should not rebuild.
     const auto& q1 = index.get(
       {2, 0},
       mesh.getPolytopeCount(2),
@@ -380,5 +379,46 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(&q1, &q2);
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
+  }
+
+  TEST(Geometry_PolytopeQuadratureIndex, ConstructsDistinctFormulasConcurrently)
+  {
+    constexpr size_t formulaCount = 8;
+    constexpr size_t repetitions = 64;
+
+    auto mesh = makeTriangleMesh();
+    const auto polytope = *mesh.getPolytope(2, 0);
+
+    PolytopeQuadratureIndex index;
+    index.initialize(mesh.getDimension());
+
+    std::array<std::unique_ptr<QF::Centroid>, formulaCount> formulas;
+    std::array<std::atomic<size_t>, formulaCount> factoryCalls{};
+    for (auto& formula : formulas)
+      formula = std::make_unique<QF::Centroid>(Polytope::Type::Triangle);
+
+    std::vector<std::thread> threads;
+    threads.reserve(formulaCount);
+    for (size_t i = 0; i < formulaCount; ++i)
+      threads.emplace_back([&, i]()
+      {
+        for (size_t repetition = 0; repetition < repetitions; ++repetition)
+        {
+          const auto& quadrature = index.get(
+            {2, 0}, mesh.getPolytopeCount(2), *formulas[i],
+            [&]()
+            {
+              ++factoryCalls[i];
+              return std::make_unique<PolytopeQuadrature>(polytope, *formulas[i]);
+            });
+          EXPECT_EQ(&quadrature.getQuadratureFormula(), formulas[i].get());
+        }
+      });
+
+    for (auto& thread : threads)
+      thread.join();
+
+    for (const auto& calls : factoryCalls)
+      EXPECT_EQ(calls.load(), 1u);
   }
 }
