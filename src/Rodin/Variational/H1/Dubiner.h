@@ -162,7 +162,7 @@ namespace Rodin::Variational
    * The nodal basis functions @f$ \phi_i @f$ are recovered from the modal
    * basis via @f$ \phi_i(x) = \sum_j V^{-1}_{ij} \psi_j(x) @f$.
    *
-   * Both @f$ V @f$ and @f$ V^{-1} @f$ are cached in thread-local storage.
+   * Both @f$ V @f$ and @f$ V^{-1} @f$ are computed once and shared.
    *
    * @tparam K Polynomial degree.
    *
@@ -176,22 +176,18 @@ namespace Rodin::Variational
       /**
        * @brief Returns the Vandermonde matrix @f$ V @f$.
        *
-       * The matrix is computed once and cached in thread-local storage.
+       * The matrix is computed once and cached in immutable storage.
        *
        * @return Reference to the N×N Vandermonde matrix where N = (K+1)(K+2)/2.
        */
       static const Math::Matrix<Real>& getMatrix()
       {
-        static thread_local Math::Matrix<Real> s_vandermonde;
-
-        constexpr size_t N = FeketeTriangle<K>::Count;
-
-        if (s_vandermonde.size() == 0)
+        static const Math::Matrix<Real> s_vandermonde = []
         {
+          constexpr size_t N = FeketeTriangle<K>::Count;
           const auto& nodes = FeketeTriangle<K>::getNodes();
-          s_vandermonde.resize(N, N);
+          Math::Matrix<Real> vandermonde(N, N);
 
-          // Fill Vandermonde matrix
           size_t modeIdx = 0;
           Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
             constexpr size_t P = pIdx.value;
@@ -204,26 +200,25 @@ namespace Rodin::Variational
                   r, s, nodes[nodeIdx].x(), nodes[nodeIdx].y());
 
                 DubinerTriangle<K>::template getBasis<P, Q>(
-                  s_vandermonde(nodeIdx, modeIdx), r, s);
+                  vandermonde(nodeIdx, modeIdx), r, s);
               }
               ++modeIdx;
             });
           });
-        }
+          return vandermonde;
+        }();
         return s_vandermonde;
       }
 
       static const Math::Matrix<Real>& getInverse()
       {
-        static thread_local Math::Matrix<Real> s_inv;
-
-        if (s_inv.size() == 0)
+        static const Math::Matrix<Real> s_inv = []
         {
           const auto& V = VandermondeTriangle<K>::getMatrix();
           Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
-          s_inv = svd.solve(I); // computes the (pseudo-)inverse applied to I
-        }
+          return svd.solve(I).eval();
+        }();
 
         return s_inv;
       }
@@ -373,14 +368,11 @@ namespace Rodin::Variational
     public:
       static const Math::Matrix<Real>& getMatrix()
       {
-        static thread_local Math::Matrix<Real> s_vandermonde;
-
-        constexpr size_t N = FeketeTetrahedron<K>::Count;
-
-        if (s_vandermonde.size() == 0)
+        static const Math::Matrix<Real> s_vandermonde = []
         {
+          constexpr size_t N = FeketeTetrahedron<K>::Count;
           const auto& nodes = FeketeTetrahedron<K>::getNodes();
-          s_vandermonde.resize(N, N);
+          Math::Matrix<Real> vandermonde(N, N);
 
           size_t modeIdx = 0;
           Rodin::Utility::ForIndex<K + 1>([&](auto pIdx) {
@@ -396,28 +388,27 @@ namespace Rodin::Variational
                     a, b, c, nodes[nodeIdx].x(), nodes[nodeIdx].y(), nodes[nodeIdx].z());
 
                   DubinerTetrahedron<K>::template getBasis<P, Q, R>(
-                    s_vandermonde(nodeIdx, modeIdx), a, b, c);
+                    vandermonde(nodeIdx, modeIdx), a, b, c);
                 }
                 ++modeIdx;
               });
             });
           });
-        }
+          return vandermonde;
+        }();
 
         return s_vandermonde;
       }
 
       static const Math::Matrix<Real>& getInverse()
       {
-        static thread_local Math::Matrix<Real> s_inv;
-
-        if (s_inv.size() == 0)
+        static const Math::Matrix<Real> s_inv = []
         {
           const auto& V = VandermondeTetrahedron<K>::getMatrix();
           Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
-          s_inv = svd.solve(I); // computes the (pseudo-)inverse applied to I
-        }
+          return svd.solve(I).eval();
+        }();
 
         return s_inv;
       }

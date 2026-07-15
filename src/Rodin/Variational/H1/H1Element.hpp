@@ -236,36 +236,33 @@ namespace Rodin::Variational
     public:
       static const Math::Matrix<Real>& getMatrix()
       {
-        static thread_local Math::Matrix<Real> s_vandermonde;
-        constexpr size_t N = PyramidIndex<K>::Count;
-
-        if (s_vandermonde.size() == 0)
+        static const Math::Matrix<Real> s_vandermonde = []
         {
+          constexpr size_t N = PyramidIndex<K>::Count;
           const auto& nodes =
             H1Element<K, Real>::getNodes(Geometry::Polytope::Type::Pyramid);
-          s_vandermonde.resize(N, N);
+          Math::Matrix<Real> vandermonde(N, N);
 
           for (size_t node = 0; node < N; ++node)
           {
             for (size_t mode = 0; mode < N; ++mode)
-              s_vandermonde(node, mode) = PyramidModal<K>::getBasis(mode, nodes[node]);
+              vandermonde(node, mode) = PyramidModal<K>::getBasis(mode, nodes[node]);
           }
-        }
+          return vandermonde;
+        }();
 
         return s_vandermonde;
       }
 
       static const Math::Matrix<Real>& getInverse()
       {
-        static thread_local Math::Matrix<Real> s_inv;
-
-        if (s_inv.size() == 0)
+        static const Math::Matrix<Real> s_inv = []
         {
           const auto& V = getMatrix();
           Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
-          s_inv = svd.solve(I);
-        }
+          return svd.solve(I).eval();
+        }();
 
         return s_inv;
       }
@@ -371,109 +368,62 @@ namespace Rodin::Variational
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
-    // Use switch to create geometry-specific thread_local storage
+    const auto makeLinearForms = [this, g]
+    {
+      std::vector<LinearForm> forms;
+      const size_t count = getCount();
+      forms.reserve(count);
+      for (size_t j = 0; j < count; ++j)
+        forms.emplace_back(j, g);
+      return forms;
+    };
+
     switch (g)
     {
       case Geometry::Polytope::Type::Point:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Segment:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Pyramid:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
-        static thread_local std::vector<LinearForm> s_lfs;
-        if (s_lfs.empty())
-        {
-          const size_t count = getCount();
-          s_lfs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_lfs.emplace_back(j, g);
-        }
+        static const std::vector<LinearForm> s_lfs = makeLinearForms();
         return s_lfs[i];
       }
     }
 
     // Fallback (should never happen)
-    static thread_local LinearForm s_null(0, g);
+    static const LinearForm s_null(0, Geometry::Polytope::Type::Point);
     assert(false);
     return s_null;
   }
@@ -483,109 +433,62 @@ namespace Rodin::Variational
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
-    // Use switch to create geometry-specific thread_local storage
+    const auto makeBasis = [this, g]
+    {
+      std::vector<BasisFunction> basis;
+      const size_t count = getCount();
+      basis.reserve(count);
+      for (size_t j = 0; j < count; ++j)
+        basis.emplace_back(j, g);
+      return basis;
+    };
+
     switch (g)
     {
       case Geometry::Polytope::Type::Point:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Segment:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Triangle:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Quadrilateral:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Tetrahedron:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Pyramid:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Wedge:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
       case Geometry::Polytope::Type::Hexahedron:
       {
-        static thread_local std::vector<BasisFunction> s_bs;
-        if (s_bs.empty())
-        {
-          const size_t count = getCount();
-          s_bs.reserve(count);
-          for (size_t j = 0; j < count; ++j)
-            s_bs.emplace_back(j, g);
-        }
+        static const std::vector<BasisFunction> s_bs = makeBasis();
         return s_bs[i];
       }
     }
 
     // Fallback (should never happen)
-    static thread_local BasisFunction s_null(0, g);
+    static const BasisFunction s_null(0, Geometry::Polytope::Type::Point);
     assert(false);
     return s_null;
   }

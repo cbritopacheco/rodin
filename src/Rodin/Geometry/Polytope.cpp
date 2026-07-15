@@ -884,7 +884,7 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           Math::Matrix<Real>{},
           Math::Vector<Real>{}
@@ -893,7 +893,7 @@ namespace Rodin::Geometry
       }
       case Type::Segment:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // local 0: x=0  -> -x <= 0
           // local 1: x=1  ->  x <= 1
@@ -904,7 +904,7 @@ namespace Rodin::Geometry
       }
       case Type::Triangle:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // local 0: y=0                ->  -y <= 0
           // local 1: x+y=1              ->  (x+y)/√2 <= 1/√2
@@ -920,7 +920,7 @@ namespace Rodin::Geometry
       }
       case Type::Hexahedron:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // local 0: z=0   -> -z <= 0
           // local 1: y=0   -> -y <= 0
@@ -942,7 +942,7 @@ namespace Rodin::Geometry
       }
       case Type::Quadrilateral:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // local 0: y=0   -> -y <= 0
           // local 1: x=1   ->  x <= 1
@@ -960,7 +960,7 @@ namespace Rodin::Geometry
       }
       case Type::Tetrahedron:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // Must match Connectivity::getSubPolytopes tetra face order:
           //
@@ -980,7 +980,7 @@ namespace Rodin::Geometry
       }
       case Type::Pyramid:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // Reference pyramid:
           //   z >= 0, y >= 0, x + z <= 1, y + z <= 1, x >= 0.
@@ -1004,7 +1004,7 @@ namespace Rodin::Geometry
       }
       case Type::Wedge:
       {
-        static thread_local const HalfSpace s_hs =
+        static const HalfSpace s_hs =
         {
           // local 0: z=0                ->  -z <= 0
           // local 1: y=0                ->  -y <= 0
@@ -1024,7 +1024,7 @@ namespace Rodin::Geometry
       }
     }
     assert(false);
-    static thread_local const HalfSpace s_null;
+    static const HalfSpace s_null;
     return s_null;
   }
 

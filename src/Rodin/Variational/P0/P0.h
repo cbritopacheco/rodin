@@ -241,55 +241,55 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Point);
             return sElement;
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Segment);
             return sElement;
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Triangle);
             return sElement;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Quadrilateral);
             return sElement;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Tetrahedron);
             return sElement;
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Pyramid);
             return sElement;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Wedge);
             return sElement;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local constexpr ElementType sElement(
+            static constexpr ElementType sElement(
               Geometry::Polytope::Type::Hexahedron);
             return sElement;
           }
         }
         assert(false);
-        static thread_local constexpr ElementType sNull(Geometry::Polytope::Type::Point);
+        static constexpr ElementType sNull(Geometry::Polytope::Type::Point);
         return sNull;
       }
 

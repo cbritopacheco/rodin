@@ -390,47 +390,47 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Point);
+            static const ElementType s_element(Geometry::Polytope::Type::Point);
             return s_element;
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Segment);
+            static const ElementType s_element(Geometry::Polytope::Type::Segment);
             return s_element;
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Triangle);
+            static const ElementType s_element(Geometry::Polytope::Type::Triangle);
             return s_element;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
+            static const ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
             return s_element;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
+            static const ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
             return s_element;
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Pyramid);
+            static const ElementType s_element(Geometry::Polytope::Type::Pyramid);
             return s_element;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Wedge);
+            static const ElementType s_element(Geometry::Polytope::Type::Wedge);
             return s_element;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Hexahedron);
+            static const ElementType s_element(Geometry::Polytope::Type::Hexahedron);
             return s_element;
           }
         }
         assert(false);
-        static thread_local const ElementType s_null;
+        static const ElementType s_null;
         return s_null;
       }
 
@@ -687,7 +687,7 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Point, 0),
               ElementType(Geometry::Polytope::Type::Point, 1),
@@ -698,7 +698,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Segment, 0),
               ElementType(Geometry::Polytope::Type::Segment, 1),
@@ -709,7 +709,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Triangle, 0),
               ElementType(Geometry::Polytope::Type::Triangle, 1),
@@ -720,7 +720,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
               ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
@@ -731,7 +731,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
               ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
@@ -742,7 +742,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Pyramid:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Pyramid, 0),
               ElementType(Geometry::Polytope::Type::Pyramid, 1),
@@ -753,7 +753,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Wedge, 0),
               ElementType(Geometry::Polytope::Type::Wedge, 1),
@@ -764,7 +764,7 @@ namespace Rodin::Variational
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
             {
               ElementType(Geometry::Polytope::Type::Hexahedron, 0),
               ElementType(Geometry::Polytope::Type::Hexahedron, 1),
@@ -775,7 +775,7 @@ namespace Rodin::Variational
           }
         }
         assert(false);
-        static thread_local ElementType s_null(Geometry::Polytope::Type::Point, 0);
+        static const ElementType s_null(Geometry::Polytope::Type::Point, 0);
         return s_null;
       }
 
