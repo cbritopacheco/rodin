@@ -264,18 +264,26 @@ if (RODIN_BUILD_SRC)
     find_package(Scotch REQUIRED)
   endif()
 
-  # ---- UMFPACK, SPQR, CHOLMOD ----
+  # ---- SuiteSparse ---------------------------------------------------------
+  set(_RODIN_SUITESPARSE_COMPONENTS)
+
   if (RODIN_USE_UMFPACK)
-    find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS UMFPACK)
   endif()
 
   if (RODIN_USE_SPQR)
-    find_package(SuiteSparse REQUIRED COMPONENTS SPQR)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS SPQR)
   endif()
 
   if (RODIN_USE_CHOLMOD)
-    find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS CHOLMOD)
   endif()
+
+  if (_RODIN_SUITESPARSE_COMPONENTS)
+    find_package(SuiteSparse REQUIRED
+      COMPONENTS ${_RODIN_SUITESPARSE_COMPONENTS})
+  endif()
+  unset(_RODIN_SUITESPARSE_COMPONENTS)
 
   # ---- OpenMP ----
   if (RODIN_USE_OPENMP)
