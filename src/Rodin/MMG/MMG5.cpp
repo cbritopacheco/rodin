@@ -316,8 +316,8 @@ MMG5_pMesh MMG5::rodinToMesh(const Rodin::Geometry::LocalMesh& src)
   assert(isSurface || (src.getSpaceDimension() == src.getDimension()));
   const auto* ptr = dynamic_cast<const MMG::Mesh*>(&src);
 
-  MMG5_pMesh res = createMesh(
-      s_meshVersionFormatted, src.getDimension(), src.getSpaceDimension());
+  MMG5_pMesh res =
+    createMesh(sMeshVersionFormatted, src.getDimension(), src.getSpaceDimension());
 
   res->npi = 0;
   res->nai = 0;

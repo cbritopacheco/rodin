@@ -353,8 +353,8 @@ namespace Rodin::Variational
           send[r]; // default-construct empty entry
 
         // owned + non-owned is a good upper bound
-        std::vector<std::pair<Index, Index>> gl_pairs;
-        gl_pairs.reserve(shard.getVertexCount());
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(shard.getVertexCount());
 
         // Number every owned local vertex.
         Index dofIdx = 0;
@@ -367,7 +367,7 @@ namespace Rodin::Variational
           const Index local  = m_fes.getDOFs(0, lv)[0];
           const Index global = m_offset + dofIdx++;
 
-          gl_pairs.push_back({ global, local });
+          globalLocalPairs.push_back({global, local});
 
           // Notify all neighbors that also hold this vertex.
           auto hit = halo.find(lv);
@@ -420,35 +420,33 @@ namespace Rodin::Variational
             assert(!shard.isOwned(0, lv));
 
             const Index local = m_fes.getDOFs(0, lv)[0];
-            gl_pairs.push_back({ global, local });
+            globalLocalPairs.push_back({global, local});
           }
         }
 
-        std::sort(gl_pairs.begin(), gl_pairs.end(),
-                  [](const auto& a, const auto& b) { return a.first < b.first; });
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end(),
+          [](const auto& a, const auto& b) { return a.first < b.first; });
 
-        gl_pairs.erase(
-            std::unique(gl_pairs.begin(), gl_pairs.end(),
-                        [](const auto& a, const auto& b)
-                        {
-                          return a.first == b.first;
-                        }),
-            gl_pairs.end());
+        globalLocalPairs.erase(
+          std::unique(globalLocalPairs.begin(), globalLocalPairs.end(),
+            [](const auto& a, const auto& b) { return a.first == b.first; }),
+          globalLocalPairs.end());
 
-        m_local_to_global.right = FlatMap<Index, Index>(gl_pairs.begin(), gl_pairs.end());
+        m_localToGlobal.right =
+          FlatMap<Index, Index>(globalLocalPairs.begin(), globalLocalPairs.end());
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
-        for (const auto& [global, local] : m_local_to_global.right)
+        for (const auto& [global, local] : m_localToGlobal.right)
         {
           assert(local < localDofCount);
-          m_local_to_global.left[local] = global;
+          m_localToGlobal.left[local] = global;
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -523,7 +521,7 @@ namespace Rodin::Variational
               const Index global = m_offset + dofIdx;
               s_send.push_back(global);
 
-              const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
+              const auto [it, inserted] = m_localToGlobal.right.emplace(global, local);
               assert(inserted);
 
               ++dofIdx;
@@ -580,24 +578,25 @@ namespace Rodin::Variational
 
             for (size_t k = 0; k < global.size(); ++k)
             {
-              const auto [it, inserted] = m_local_to_global.right.emplace(global[k], dofs[k]);
+              const auto [it, inserted] =
+                m_localToGlobal.right.emplace(global[k], dofs[k]);
               assert(inserted);
             }
           }
         }
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
-        for (const auto& [global, local] : m_local_to_global.right)
+        for (const auto& [global, local] : m_localToGlobal.right)
         {
           assert(local < localDofCount);
-          m_local_to_global.left[local] = global;
+          m_localToGlobal.left[local] = global;
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -649,7 +648,7 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(localIdx);
+        return m_localToGlobal.left.at(localIdx);
       }
 
       /**
@@ -663,8 +662,8 @@ namespace Rodin::Variational
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto find = m_local_to_global.right.find(globalIdx);
-        if (find == m_local_to_global.right.end())
+        auto find = m_localToGlobal.right.find(globalIdx);
+        if (find == m_localToGlobal.right.end())
           return std::nullopt;
         else
           return *find;
@@ -840,7 +839,7 @@ namespace Rodin::Variational
 
       size_t m_offset;
       size_t m_owned;
-      IndexBimap m_local_to_global;
+      IndexBimap m_localToGlobal;
   };
 }
 

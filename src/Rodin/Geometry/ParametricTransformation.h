@@ -169,6 +169,11 @@ namespace Rodin::Geometry
       }
 
     private:
+      // Boost constructs this empty state before loading all serialized fields.
+      ParametricTransformation()
+        : Parent(0, 0)
+      {}
+
       PointCloud m_pm;
       FE m_fe;
   };

@@ -275,9 +275,9 @@ namespace Rodin::Assembly
         const auto& u = input.getOperand();
         auto& Av = const_cast<ValueType&>(input.getShapeFunction());
         const auto& essBdr = input.getEssentialBoundary();
-        const auto& fes_u = u.getFiniteElementSpace();
-        const auto& fes_v = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh  = fes_u.getMesh();
+        const auto& fesU = u.getFiniteElementSpace();
+        const auto& fesV = Av.getLeaf().getFiniteElementSpace();
+        const auto& mesh = fesU.getMesh();
         const size_t faceDim = mesh.getDimension() - 1;
 
         res.clear();
@@ -292,16 +292,14 @@ namespace Rodin::Assembly
             if (!a || !essBdr.contains(*a)) return;
           }
 
-          const auto& fe_u = fes_u.getFiniteElement(faceDim, fi);
-          const auto& fe_v = fes_v.getFiniteElement(faceDim, fi);
-          const auto& slaveDOFs  = fes_u.getDOFs(faceDim, fi);
-          const auto& masterDOFs = fes_v.getDOFs(faceDim, fi);
+          const auto& feU = fesU.getFiniteElement(faceDim, fi);
+          const auto& feV = fesV.getFiniteElement(faceDim, fi);
+          const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
+          const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
 
-          const Index nMasters = static_cast<Index>(fe_v.getCount());
+          const Index nMasters = static_cast<Index>(feV.getCount());
 
-          for (Index s = 0;
-               s < static_cast<Index>(fe_u.getCount());
-               s++)
+          for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
           {
             const Index slave = slaveDOFs[s];
             auto pos = res.find(slave);
@@ -322,9 +320,8 @@ namespace Rodin::Assembly
                 return Av.getBasis(static_cast<size_t>(j));
               };
               const auto mapping =
-                fes_u.getPullback({ faceDim, fi }, std::move(basisCallable));
-              const Scalar c =
-                static_cast<Scalar>(fe_u.getLinearForm(s)(mapping));
+                fesU.getPullback({faceDim, fi}, std::move(basisCallable));
+              const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
               if (c != Scalar(0))
               {
                 mIdx.push_back(masterDOFs[j]);
