@@ -368,6 +368,8 @@ namespace Rodin::Variational
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
+    // These objects depend only on the compile-time order and reference
+    // geometry. Sharing their immutable storage avoids per-thread replicas.
     const auto makeLinearForms = [this, g]
     {
       std::vector<LinearForm> forms;
@@ -433,6 +435,8 @@ namespace Rodin::Variational
   {
     const Geometry::Polytope::Type g = this->getGeometry();
 
+    // Basis descriptors are immutable after construction and are safe to share
+    // across concurrent element evaluations.
     const auto makeBasis = [this, g]
     {
       std::vector<BasisFunction> basis;
