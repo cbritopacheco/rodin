@@ -901,7 +901,8 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_matrix(std::move(other.m_matrix))
+          m_matrix(std::move(other.m_matrix)),
+          m_basis(std::move(other.m_basis))
       {}
 
       constexpr
@@ -946,6 +947,20 @@ namespace Rodin::Variational
           m_geometry = geometry;
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+
+          // Reference P1 basis values are shared by every physical cell with
+          // this geometry and quadrature formula.
+          const P1Element<ScalarType> scalarfe(geometry);
+          const size_t nv = scalarfe.getCount();
+          m_basis.resize(
+            static_cast<Eigen::Index>(m_qf->getSize()),
+            static_cast<Eigen::Index>(nv));
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
+            for (size_t a = 0; a < nv; ++a)
+              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
+          }
         }
 
         assert(m_qf);
@@ -956,6 +971,25 @@ namespace Rodin::Variational
 
         assert(ntr == trialfe.getCount());
         assert(nte == testfe.getCount());
+
+        const size_t vdim = [&]()
+        {
+          if constexpr (FormLanguage::IsVectorRange<MultiplicandRangeType>::Value)
+          {
+            const size_t trialVdim = trialfes.getVectorDimension();
+            assert(trialVdim == testfes.getVectorDimension());
+            return trialVdim;
+          }
+          else
+          {
+            return size_t(1);
+          }
+        }();
+        assert(vdim > 0);
+        assert(ntr % vdim == 0);
+        assert(nte % vdim == 0);
+        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
+        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
 
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
@@ -969,8 +1003,6 @@ namespace Rodin::Variational
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          const auto& rc = m_qf->getPoint(qp);
-
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
             const ScalarType csv = coeff.getValue(ip);
@@ -979,11 +1011,11 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testfe.getBasis(ib)(rc);
+                const ScalarType phi_te = m_basis(qp, ib);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
                   const ScalarType kij =
-                    wdet * csv * phi_te * trialfe.getBasis(ia)(rc);
+                    wdet * csv * phi_te * m_basis(qp, ia);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -992,12 +1024,17 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto phi_te = testfe.getBasis(ib)(rc);
+                const size_t vb = ib / vdim;
+                const size_t cb = ib % vdim;
+                const ScalarType phi_te = m_basis(qp, vb);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const auto phi_tr = trialfe.getBasis(ia)(rc);
-                  const ScalarType kij = wdet * csv * Math::dot(phi_te, phi_tr);
-                  m_matrix(ib, ia) += kij;
+                  if (ia % vdim == cb)
+                  {
+                    const ScalarType phi_tr = m_basis(qp, ia / vdim);
+                    m_matrix(ib, ia) +=
+                      wdet * csv * phi_te * phi_tr;
+                  }
                 }
               }
             }
@@ -1012,11 +1049,15 @@ namespace Rodin::Variational
 
             for (size_t ib = 0; ib < nte; ++ib)
             {
-              const auto phi_te = testfe.getBasis(ib)(rc);
+              const size_t vb = ib / vdim;
+              const size_t cb = ib % vdim;
+              const ScalarType phi_te = m_basis(qp, vb);
               for (size_t ia = 0; ia < ntr; ++ia)
               {
-                const auto phi_tr = trialfe.getBasis(ia)(rc);
-                m_matrix(ib, ia) += wdet * Math::dot(phi_te, cmv * phi_tr);
+                const size_t ca = ia % vdim;
+                const ScalarType phi_tr = m_basis(qp, ia / vdim);
+                m_matrix(ib, ia) +=
+                  wdet * phi_te * cmv(cb, ca) * phi_tr;
               }
             }
           }
@@ -1050,6 +1091,7 @@ namespace Rodin::Variational
       Geometry::Polytope::Type m_geometry;
 
       Math::Matrix<ScalarType> m_matrix;
+      Math::Matrix<ScalarType> m_basis;
   };
 
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
