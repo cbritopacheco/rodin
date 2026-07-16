@@ -1909,6 +1909,7 @@ namespace Rodin::Tests::Unit
     testVectorGridFunction(H1(std::integral_constant<size_t, 6>{}, mesh, vdim));
   }
 
+  /// @brief Verifies scalar and vector H1 evaluation at an interior cell point.
   TEST(Rodin_Variational_H1_Space, VectorGridFunctionEvaluationAtCellInterior)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -1932,6 +1933,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value(1), -2.0 + p.x() + 3.0 * p.y(), 1e-11);
   }
 
+  /// @brief Verifies scalar and vector P2 evaluation against mapped-basis expansion.
   TEST(Rodin_Variational_H1_Space, P2EvaluationMatchesMappedBasisExpansion)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});

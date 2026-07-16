@@ -25,6 +25,8 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Benchmarks
 {
+  /// @cond RODIN_TEST_INTERNAL
+
   struct GridFunctionEvaluationBenchmark : public benchmark::Fixture
   {
       void SetUp(const benchmark::State&)
@@ -249,4 +251,6 @@ namespace Rodin::Tests::Benchmarks
       benchmark::DoNotOptimize(value);
     }
   }
+
+  /// @endcond
 }

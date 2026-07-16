@@ -90,9 +90,10 @@ namespace Rodin::Tests::Unit
       mutable size_t m_pushforwardEvaluations = 0;
   };
 
+  /// @brief Verifies that a nontrivial range pushforward is applied once to an expansion.
   TEST(Rodin_Variational_FiniteElementSpace, RangeTransformingPushforwardIsApplied)
   {
-    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {1, 1});
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     RangeTransformingSpace fes(mesh);
     const auto cell = mesh.getCell(0);
     const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
@@ -281,6 +282,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(gf.getSize(), 0);
   }
 
+  /// @brief Verifies vector P1 grid-function evaluation at an interior cell point.
   TEST(Rodin_Variational_Vector_P1_GridFunction, EvaluateAtCellInterior)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -297,6 +299,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(value(1), -2.0 + p.x() + 3.0 * p.y(), 1e-12);
   }
 
+  /// @brief Verifies scalar and vector P1 evaluation against mapped-basis expansion.
   TEST(Rodin_Variational_P1_GridFunction, EvaluationMatchesMappedBasisExpansion)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -346,6 +349,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR((vector(p) - expectedVector).norm(), 0, 1e-14);
   }
 
+  /// @brief Verifies scalar and vector P2 evaluation on a curved cell.
   TEST(Rodin_Variational_H1_GridFunction, CurvedP2EvaluationMatchesMappedBasisExpansion)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});

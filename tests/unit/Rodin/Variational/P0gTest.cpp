@@ -93,6 +93,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs[1], 1);
   }
 
+  /// @brief Verifies scalar and vector P0g grid-function evaluation.
   TEST(Rodin_Variational_P0g, GridFunctionEvaluation)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
