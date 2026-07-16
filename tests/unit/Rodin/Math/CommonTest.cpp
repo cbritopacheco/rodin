@@ -6,6 +6,9 @@
  */
 #include <gtest/gtest.h>
 
+#include <type_traits>
+#include <utility>
+
 #include "Rodin/Math/Common.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialMatrix.h"
@@ -89,8 +92,12 @@ TEST_F(CommonTest, ConjFunction)
 /// @brief Test conjugate of real matrix (should be unchanged).
 TEST_F(CommonTest, ConjMatrixFunction)
 {
+  using MatrixType = Eigen::Matrix<Real, 2, 2>;
+  static_assert(std::is_same_v<
+    decltype(conj(std::declval<const MatrixType&>())), MatrixType>);
+
   // Test conjugate of real matrix (should be unchanged)
-  Eigen::Matrix<Real, 2, 2> realMat;
+  MatrixType realMat;
   realMat << 1.0, 2.0,
              3.0, 4.0;
 
