@@ -142,8 +142,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.count(*a)) continue;
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& dofs = input.getFES().getDOFs(dim, i);
               for (size_t k = 0; k < dofs.size(); ++k)
@@ -360,8 +360,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.count(*a)) continue;
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(dim, i);
               const auto& cols = input.getTrialFES().getDOFs(dim, i);
@@ -421,7 +421,7 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              auto teIt = testseq.getIterator(te);
+              const auto testPolytope = testseq.getPolytope(te);
               const auto& rows = input.getTestFES().getDOFs(tdim, te);
 
               for (PetscInt tr = 0; tr < rcnt; ++tr)
@@ -435,8 +435,8 @@ namespace Rodin::Assembly
                     continue;
                 }
 
-                auto trIt = trialseq.getIterator(tr);
-                integrator->setPolytope(*trIt, *teIt);
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                integrator->setPolytope(trialPolytope, testPolytope);
 
                 const auto& cols = input.getTrialFES().getDOFs(rdim, tr);
                 for (size_t r = 0; r < rows.size(); ++r)
@@ -845,8 +845,8 @@ namespace Rodin::Assembly
                     continue;
                 }
 
-                auto it = seq.getIterator(k);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(k);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(dim, k);
                 const auto& colsDOF = trialFES.getDOFs(dim, k);
@@ -918,7 +918,7 @@ namespace Rodin::Assembly
                     continue;
                 }
 
-                auto teIt = testseq.getIterator(te);
+                const auto testPolytope = testseq.getPolytope(te);
                 const auto& rowsDOF = testFES.getDOFs(tdim, te);
 
                 for (PetscInt tr = 0; tr < rcnt; ++tr)
@@ -932,10 +932,10 @@ namespace Rodin::Assembly
                       continue;
                   }
 
-                  auto trIt = trialseq.getIterator(tr);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
                   const auto& colsDOF = trialFES.getDOFs(rdim, tr);
 
-                  integrator->setPolytope(*trIt, *teIt);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (PetscInt i = 0; i < static_cast<PetscInt>(rowsDOF.size()); ++i)
                   {
@@ -1049,8 +1049,8 @@ namespace Rodin::Assembly
                     continue;
                 }
 
-                auto it = seq.getIterator(k);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(k);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(dim, k);
                 for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
@@ -1691,12 +1691,12 @@ namespace Rodin::Assembly
                 if (!a || !attrs.count(*a)) continue;
               }
 
-              auto it = seq.getIterator(k);
+              const auto polytope = seq.getPolytope(k);
               withTrialFES(uUUID, [&](const auto& uFES)
               {
                 withTestFES(vUUID, [&](const auto& vFES)
                 {
-                  integrator->setPolytope(*it);
+                  integrator->setPolytope(polytope);
                   const auto& rows = vFES.getDOFs(dim, k);
                   const auto& cols = uFES.getDOFs(dim, k);
                   for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
@@ -1772,7 +1772,7 @@ namespace Rodin::Assembly
                 if (!a || !testAttrs.count(*a)) continue;
               }
 
-              auto teIt = testseq.getIterator(te);
+              const auto testPolytope = testseq.getPolytope(te);
               withTrialFES(uUUID, [&](const auto& uFES)
               {
                 withTestFES(vUUID, [&](const auto& vFES)
@@ -1788,10 +1788,10 @@ namespace Rodin::Assembly
                       if (!a || !trialAttrs.count(*a)) continue;
                     }
 
-                    auto trIt = trialseq.getIterator(tr);
+                    const auto trialPolytope = trialseq.getPolytope(tr);
                     const auto& cols = uFES.getDOFs(rdim, tr);
 
-                    integrator->setPolytope(*trIt, *teIt);
+                    integrator->setPolytope(trialPolytope, testPolytope);
 
                     for (PetscInt i = 0; i < static_cast<PetscInt>(rows.size()); ++i)
                     {
@@ -1917,10 +1917,10 @@ namespace Rodin::Assembly
                 if (!a || !attrs.count(*a)) continue;
               }
 
-              auto it = seq.getIterator(k);
+              const auto polytope = seq.getPolytope(k);
               withTestFES(vUUID, [&](const auto& vFES)
               {
-                integrator->setPolytope(*it);
+                integrator->setPolytope(polytope);
                 const auto& dofs = vFES.getDOFs(dim, k);
                 for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)
                 {

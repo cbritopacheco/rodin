@@ -62,12 +62,18 @@ namespace Rodin::Assembly
       OpenMPIteration(const MeshType& mesh, const Geometry::Region& region);
 
       /**
-       * @brief Gets an iterator for a specific thread.
-       *
-       * @param i Thread index
-       * @return PolytopeIterator for the specified thread's element subset
+       * @brief Gets an iterator positioned at a specific polytope.
+       * @param i Polytope index
+       * @return Iterator positioned at @p i
        */
       Geometry::PolytopeIterator getIterator(Index i) const;
+
+      /**
+       * @brief Gets a polytope value for an indexed assembly iteration.
+       * @param i Polytope index
+       * @return Non-owning polytope descriptor
+       */
+      Geometry::Polytope getPolytope(Index i) const;
 
       /**
        * @brief Gets the topological dimension of elements.
@@ -235,8 +241,8 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
@@ -536,8 +542,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
               }
 
-              auto it = seq.getIterator(i);
-              lbfi->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              lbfi->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
@@ -585,21 +591,26 @@ namespace Rodin::Assembly
                 if (!a || !testAttrs.contains(*a)) continue;
               }
 
-              auto teIt = testseq.getIterator(i);
-              SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+              const auto testPolytope = testseq.getPolytope(i);
+              OpenMPIteration trialseq{ mesh, gbfi->getTrialRegion() };
+              const Index rd = trialseq.getDimension();
+              const Index rcount = trialseq.getCount();
 
-              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+              for (Index tr = 0; tr < rcount; ++tr)
               {
+                if (!trialseq.filter(tr))
+                  continue;
                 if (!trialAttrs.empty())
                 {
-                  const auto a = trIt->getAttribute(); // Optional<Attribute>
+                  const auto a = mesh.getAttribute(rd, tr);
                   if (!a || !trialAttrs.contains(*a)) continue; // or trialAttrs.count(*a)==0
                 }
 
-                gbfi->setPolytope(*trIt, *teIt);
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                gbfi->setPolytope(trialPolytope, testPolytope);
 
-                const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
-                const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
+                const auto& rows = input.getTestFES().getDOFs(d, i);
+                const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (size_t r = 0; r < rows.size(); ++r)
                   for (size_t c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
@@ -729,8 +740,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& dofs = input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
@@ -1142,8 +1153,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1193,6 +1204,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
                 const Index rcount = trialseq.getCount();
@@ -1208,10 +1220,8 @@ namespace Rodin::Assembly
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  auto teIt = testseq.getIterator(te);
-                  auto trIt = trialseq.getIterator(tr);
-
-                  integrator->setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1262,8 +1272,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -1396,8 +1406,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1462,6 +1472,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
                 const Index rcount = trialseq.getCount();
@@ -1477,10 +1488,8 @@ namespace Rodin::Assembly
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  auto teIt = testseq.getIterator(te);
-                  auto trIt = trialseq.getIterator(tr);
-
-                  integrator->setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1569,8 +1578,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue;
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -1955,8 +1964,8 @@ namespace Rodin::Assembly
                     if (!a || !attrs.contains(*a)) continue;
                   }
 
-                  auto it = seq.getIterator(p);
-                  integrator->setPolytope(*it);
+                  const auto polytope = seq.getPolytope(p);
+                  integrator->setPolytope(polytope);
 
                   const auto& rows = vFES.getDOFs(d, p);
                   const auto& cols = uFES.getDOFs(d, p);
@@ -2050,6 +2059,7 @@ namespace Rodin::Assembly
                   }
 
                   const auto& rows = vFES.getDOFs(td, te);
+                  const auto testPolytope = testseq.getPolytope(te);
 
                   const Index rd = trialseq.getDimension();
                   const Index rcount = trialseq.getCount();
@@ -2065,10 +2075,8 @@ namespace Rodin::Assembly
 
                     const auto& cols = uFES.getDOFs(rd, tr);
 
-                    auto teIt = testseq.getIterator(te);
-                    auto trIt = trialseq.getIterator(tr);
-
-                    integrator->setPolytope(*trIt, *teIt);
+                    const auto trialPolytope = trialseq.getPolytope(tr);
+                    integrator->setPolytope(trialPolytope, testPolytope);
 
                     for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                     {
@@ -2143,8 +2151,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue;
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = vFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)

@@ -18,24 +18,13 @@ namespace Rodin::Assembly
   Geometry::PolytopeIterator
   OpenMPIteration<Geometry::Mesh<Context::Local>>::getIterator(Index i) const
   {
-    Geometry::PolytopeIterator it;
-    switch (m_region)
-    {
-      case Geometry::Region::Cells:
-      {
-        it = m_mesh.get().getCell(i);
-        return it;
-      }
-      case Geometry::Region::Faces:
-      case Geometry::Region::Boundary:
-      case Geometry::Region::Interface:
-      {
-        it = m_mesh.get().getFace(i);
-        return it;
-      }
-    }
-    assert(false);
-    return it;
+    return m_mesh.get().getPolytope(getDimension(), i);
+  }
+
+  Geometry::Polytope
+  OpenMPIteration<Geometry::Mesh<Context::Local>>::getPolytope(Index i) const
+  {
+    return Geometry::Polytope(getDimension(), i, m_mesh.get());
   }
 
   size_t OpenMPIteration<Geometry::Mesh<Context::Local>>::getDimension() const
@@ -98,5 +87,3 @@ namespace Rodin::Assembly
     return false;
   }
 }
-
-
