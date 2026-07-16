@@ -72,7 +72,7 @@ namespace Rodin::MMG
   {
     public:
       /// MMG mesh version tag used in generated MMG mesh objects.
-      static constexpr int s_meshVersionFormatted = 2;
+      static constexpr int sMeshVersionFormatted = 2;
 
       // ---- Mesh methods ---------------------------------------------------
       /**

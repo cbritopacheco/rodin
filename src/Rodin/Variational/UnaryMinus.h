@@ -106,7 +106,10 @@ namespace Rodin::Variational
       auto getValue(const Point& p) const
       {
         const auto v = getOperand().getValue(p);
-        return -v;
+        if constexpr (requires { (-v).eval(); })
+          return (-v).eval();
+        else
+          return -v;
       }
 
       constexpr
@@ -243,8 +246,11 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto v = getOperand().getBasis(local);
-        return -v;
+        decltype(auto) v = getOperand().getBasis(local);
+        if constexpr (requires { (-v).eval(); })
+          return (-v).eval();
+        else
+          return -v;
       }
 
       const FES& getFiniteElementSpace() const

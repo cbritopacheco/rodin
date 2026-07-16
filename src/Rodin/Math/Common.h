@@ -83,7 +83,7 @@ namespace Rodin::Math
   constexpr
   auto conj(const Eigen::MatrixBase<T>& x)
   {
-    return x.conjugate();
+    return x.conjugate().eval();
   }
 
   /**

@@ -229,10 +229,25 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles the variational formulation into the linear system.
+      /**
+       * @brief Assembles the variational formulation and establishes the
+       *        initial guess.
+       *
+       * After assembly, the linear system's solution vector holds the trial
+       * function data as the initial guess: on entry to a linear solver the
+       * solution vector is the guess, on exit it is the solution. Trial
+       * functions are zero-initialized, so the guess is zero unless set.
+       */
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+
+        const auto& u = this->getTrialFunction().getSolution();
+        u.flush();
+        PetscErrorCode ierr = VecCopy(u.getData(), m_axb.getSolution());
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         m_assembled = true;
         return *this;
       }
@@ -242,7 +257,8 @@ namespace Rodin::Variational
       /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
-        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+        m_assembly.execute(
+          m_axb, {m_pb, this->getTrialFunction(), this->getTestFunction()}, target);
         m_assembled = true;
         return *this;
       }
@@ -593,7 +609,15 @@ namespace Rodin::Variational
       // --------------------------
       // Assembly / solve
       // --------------------------
-      /// @brief Assembles the block-structured variational formulation.
+      /**
+       * @brief Assembles the block-structured variational formulation and
+       *        establishes the initial guess.
+       *
+       * After assembly, the linear system's solution vector holds the trial
+       * function data, gathered at the trial offsets, as the initial guess:
+       * on entry to a linear solver the solution vector is the guess, on
+       * exit it is the solution.
+       */
       Problem& assemble() override
       {
         computeOffsets();
@@ -607,6 +631,29 @@ namespace Rodin::Variational
 
         m_assembly.execute(m_axb, in);
 
+        // Gather the trial function data into the solution vector.
+        PetscErrorCode ierr;
+        m_us.iapply([&](size_t i, const auto& uref) {
+          const auto& u = uref.get().getSolution();
+          u.flush();
+
+          PetscInt n = 0;
+          ierr = VecGetSize(u.getData(), &n);
+          assert(ierr == PETSC_SUCCESS);
+
+          ::IS is = PETSC_NULLPTR;
+          ierr = ISCreateStride(
+            m_axb.getCommunicator(), n, static_cast<PetscInt>(m_trialOffsets[i]), 1, &is);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecISCopy(m_axb.getSolution(), is, SCATTER_FORWARD, u.getData());
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = ISDestroy(&is);
+          assert(ierr == PETSC_SUCCESS);
+        });
+        (void)ierr;
+
         m_assembled = true;
         return *this;
       }
@@ -618,12 +665,8 @@ namespace Rodin::Variational
       {
         computeOffsets();
 
-        AssemblyInput in{
-          m_pb, m_us, m_vs,
-          m_trialOffsets, m_testOffsets,
-          m_trialUUIDMap, m_testUUIDMap,
-          m_totalTrial, m_totalTest
-        };
+        AssemblyInput in{m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets, m_trialUUIDMap,
+          m_testUUIDMap, m_totalTrial, m_totalTest};
 
         m_assembly.execute(m_axb, in, target);
 

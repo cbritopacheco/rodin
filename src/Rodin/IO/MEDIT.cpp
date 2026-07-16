@@ -127,7 +127,7 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             m_build.vertex(std::move(data->vertex));
-            m_build.attribute({ 0, vertex++ }, data->attribute);
+            m_build.attribute({0, vertex++}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -148,8 +148,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Segment, std::move(data->vertices), index);
-            m_build.attribute({ 1, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Segment, std::move(data->vertices), index);
+            m_build.attribute({1, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -170,8 +171,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Triangle, std::move(data->vertices), index);
-            m_build.attribute({ 2, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Triangle, std::move(data->vertices), index);
+            m_build.attribute({2, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -192,8 +194,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices), index);
-            m_build.attribute({ 2, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices), index);
+            m_build.attribute({2, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -214,8 +217,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Wedge, std::move(data->vertices), index);
-            m_build.attribute({ 3, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Wedge, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue;
         }
@@ -236,8 +240,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Pyramid, std::move(data->vertices), index);
-            m_build.attribute({ 3, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Pyramid, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue;
         }
@@ -258,8 +263,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices), index);
-            m_build.attribute({ 3, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -280,8 +286,9 @@ namespace Rodin::IO
             }
             data->vertices -= 1;
             Index index;
-            m_build.polytope(Geometry::Polytope::Type::Hexahedron, std::move(data->vertices), index);
-            m_build.attribute({ 3, index }, data->attribute);
+            m_build.polytope(
+              Geometry::Polytope::Type::Hexahedron, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue; // Continue the while loop
         }

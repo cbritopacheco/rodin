@@ -53,7 +53,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
-#include <Rodin/Solver/SparseLU.h>
+#include <Rodin/Solver/CG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 
 using namespace Rodin;
@@ -462,7 +462,8 @@ int main(int argc, char** argv)
                         + bdfA2 * uPreviousPrevious, v)
            + DirichletBC(du, zero).on(topBC);
 
-    SparseLU linearSolver(newton);
+    CG linearSolver(newton);
+    linearSolver.setTolerance(1e-8).setMaxIterations(2000);
     NewtonSolver solver(linearSolver);
     solver.setMaxIterations(50)
           .setAbsoluteTolerance(1e-9)

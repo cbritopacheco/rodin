@@ -74,8 +74,8 @@ namespace Rodin::Solid
    * @tparam TestFunctionType The test function type (backend-generic)
    * @tparam DisplacementType The current displacement grid-function type
    */
-  template <class LawDerived, class TrialFunctionType,
-            class TestFunctionType, class DisplacementType>
+  template <class LawDerived, class TrialFunctionType, class TestFunctionType,
+    class DisplacementType>
   class InternalVirtualWorkTangent final
     : public Variational::LocalBilinearFormIntegratorBase<Real>
   {
@@ -112,11 +112,8 @@ namespace Rodin::Solid
        * @param v The test function
        * @param displacement Current displacement grid function
        */
-      InternalVirtualWorkTangent(
-          const LawDerived& law,
-          const TrialType& u,
-          const TestType& v,
-          const StateType& displacement)
+      InternalVirtualWorkTangent(const LawDerived& law, const TrialType& u,
+        const TestType& v, const StateType& displacement)
         : Parent(u, v),
           m_law(law),
           m_trial(u),
@@ -191,7 +188,8 @@ namespace Rodin::Solid
       }
 
       /// @brief Sets the current polytope and assembles the element tangent matrix.
-      InternalVirtualWorkTangent& setPolytope(const Geometry::Polytope& polytope) final override
+      InternalVirtualWorkTangent& setPolytope(
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
@@ -211,10 +209,9 @@ namespace Rodin::Solid
         // Determine effective quadrature order
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
-          : 2 * std::max({ trialFE.getOrder(),
-                           testFE.getOrder(),
-                           stateFE.getOrder() });
-        const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          : 2 * std::max({trialFE.getOrder(), testFE.getOrder(), stateFE.getOrder()});
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -307,7 +304,10 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the constitutive law.
-      const LawType& getLaw() const { return m_law; }
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       void checkCompatibility(const StateType& displacement) const
@@ -320,9 +320,9 @@ namespace Rodin::Solid
         assert(&stateFES.getMesh() == &testFES.getMesh());
         assert(trialFES.getVectorDimension() == testFES.getVectorDimension());
         assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
-        (void) trialFES;
-        (void) testFES;
-        (void) stateFES;
+        (void)trialFES;
+        (void)testFES;
+        (void)stateFES;
       }
 
       LawType m_law;
@@ -340,17 +340,12 @@ namespace Rodin::Solid
   };
 
   /// CTAD deduction guide for InternalVirtualWorkTangent
-  template <class LawDerived, class TrialFunctionType,
-            class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkTangent(const LawDerived&,
-                              const TrialFunctionType&,
-                              const TestFunctionType&,
-                              const DisplacementType&)
-    -> InternalVirtualWorkTangent<
-         LawDerived,
-         std::decay_t<TrialFunctionType>,
-         std::decay_t<TestFunctionType>,
-         std::decay_t<DisplacementType>>;
+  template <class LawDerived, class TrialFunctionType, class TestFunctionType,
+    class DisplacementType>
+  InternalVirtualWorkTangent(const LawDerived&, const TrialFunctionType&,
+    const TestFunctionType&, const DisplacementType&)
+    -> InternalVirtualWorkTangent<LawDerived, std::decay_t<TrialFunctionType>,
+      std::decay_t<TestFunctionType>, std::decay_t<DisplacementType>>;
 }
 
 #endif

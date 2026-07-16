@@ -91,7 +91,7 @@ namespace Rodin::Solid
   {
     public:
       /// @brief Constitutive law type.
-      using LawType   = Law;
+      using LawType = Law;
       /// @brief Current displacement state type.
       using StateType = State;
 
@@ -137,7 +137,10 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the constitutive law.
-      const Law& getLaw() const { return m_law; }
+      const Law& getLaw() const
+      {
+        return m_law;
+      }
 
       /**
        * @brief Returns the residual integrator (linear form contribution).
@@ -193,8 +196,8 @@ namespace Rodin::Solid
 
   /// CTAD deduction guide for InternalVirtualWork
   template <class Law, class State>
-  InternalVirtualWork(const Law&, const State&)
-    -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
+  InternalVirtualWork(const Law&,
+    const State&) -> InternalVirtualWork<std::decay_t<Law>, std::decay_t<State>>;
 }
 
 #endif

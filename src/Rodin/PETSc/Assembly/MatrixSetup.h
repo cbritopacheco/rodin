@@ -101,52 +101,47 @@ namespace Rodin::PETSc::Assembly
         PetscInt curCols = 0;
         PetscErrorCode ierr = MatGetSize(m_matrix, &curRows, &curCols);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         PetscBool assembled = PETSC_FALSE;
         ierr = MatAssembled(m_matrix, &assembled);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         // A virgin matrix must be set up. An already-assembled matrix whose
         // dimensions match is reused. Different dimensions violate the
         // constant-space contract: use a fresh LinearSystem for a different
         // finite element space or mesh.
-        assert(
-            (assembled != PETSC_TRUE ||
-             (curRows == options.globalRows && curCols == options.globalCols)) &&
-            "MatrixSetup cannot resize an assembled matrix; use a fresh "
-            "LinearSystem for a different space or mesh.");
+        assert((assembled != PETSC_TRUE ||
+                 (curRows == options.globalRows && curCols == options.globalCols)) &&
+          "MatrixSetup cannot resize an assembled matrix; use a fresh "
+          "LinearSystem for a different space or mesh.");
 
         const bool needsSetup = (assembled != PETSC_TRUE);
         if (needsSetup)
         {
-          ierr = MatSetSizes(
-              m_matrix,
-              options.localRows,
-              options.localCols,
-              options.globalRows,
-              options.globalCols);
+          ierr = MatSetSizes(m_matrix, options.localRows, options.localCols,
+            options.globalRows, options.globalCols);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
 
           if (options.type)
           {
             ierr = MatSetType(m_matrix, options.type);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
 
           if (options.setFromOptions)
           {
             ierr = MatSetFromOptions(m_matrix);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
 
           ierr = MatSetUp(m_matrix);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         return MatZeroEntries(m_matrix);

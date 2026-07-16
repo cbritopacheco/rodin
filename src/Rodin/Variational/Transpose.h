@@ -93,7 +93,10 @@ namespace Rodin::Variational
       auto getValue(const Point& p) const
       {
         const auto v = getOperand().getValue(p);
-        return v.transpose();
+        if constexpr (requires { v.transpose().eval(); })
+          return v.transpose().eval();
+        else
+          return v.transpose();
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -218,8 +221,11 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto v = getOperand().getBasis(local);
-        return v.transpose();
+        decltype(auto) v = getOperand().getBasis(local);
+        if constexpr (requires { v.transpose().eval(); })
+          return v.transpose().eval();
+        else
+          return v.transpose();
       }
 
       /**

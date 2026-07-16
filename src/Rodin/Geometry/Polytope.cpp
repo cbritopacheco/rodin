@@ -884,84 +884,51 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          Math::Matrix<Real>{},
-          Math::Vector<Real>{}
-        };
+        static const HalfSpace s_hs = {Math::Matrix<Real>{}, Math::Vector<Real>{}};
         return s_hs;
       }
       case Type::Segment:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: x=0  -> -x <= 0
+        static const HalfSpace s_hs = {          // local 0: x=0  -> -x <= 0
           // local 1: x=1  ->  x <= 1
-          Math::Matrix<Real>{{ -1 }, { 1 }},
-          Math::Vector<Real>{{ 0, 1 }}
-        };
+          Math::Matrix<Real>{{-1}, {1}}, Math::Vector<Real>{{0, 1}}};
         return s_hs;
       }
       case Type::Triangle:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: y=0                ->  -y <= 0
+        static const HalfSpace s_hs = {// local 0: y=0                ->  -y <= 0
           // local 1: x+y=1              ->  (x+y)/√2 <= 1/√2
           // local 2: x=0                ->  -x <= 0
-          Math::Matrix<Real>{
-            {  0, -1 },
-            {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) },
-            { -1,  0 }
-          },
-          Math::Vector<Real>{{ 0, 1 / std::sqrt(2.0), 0 }}
-        };
+          Math::Matrix<Real>{{0, -1}, {1 / std::sqrt(2.0), 1 / std::sqrt(2.0)}, {-1, 0}},
+          Math::Vector<Real>{{0, 1 / std::sqrt(2.0), 0}}};
         return s_hs;
       }
       case Type::Hexahedron:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: z=0   -> -z <= 0
+        static const HalfSpace s_hs = {// local 0: z=0   -> -z <= 0
           // local 1: y=0   -> -y <= 0
           // local 2: x=1   ->  x <= 1
           // local 3: y=1   ->  y <= 1
           // local 4: x=0   -> -x <= 0
           // local 5: z=1   ->  z <= 1
           Math::Matrix<Real>{
-            {  0,  0, -1 },
-            {  0, -1,  0 },
-            {  1,  0,  0 },
-            {  0,  1,  0 },
-            { -1,  0,  0 },
-            {  0,  0,  1 }
-          },
-          Math::Vector<Real>{{ 0, 0, 1, 1, 0, 1 }}
-        };
+            {0, 0, -1}, {0, -1, 0}, {1, 0, 0}, {0, 1, 0}, {-1, 0, 0}, {0, 0, 1}},
+          Math::Vector<Real>{{0, 0, 1, 1, 0, 1}}};
         return s_hs;
       }
       case Type::Quadrilateral:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: y=0   -> -y <= 0
+        static const HalfSpace s_hs = {// local 0: y=0   -> -y <= 0
           // local 1: x=1   ->  x <= 1
           // local 2: y=1   ->  y <= 1
           // local 3: x=0   -> -x <= 0
-          Math::Matrix<Real>{
-            {  0, -1 },
-            {  1,  0 },
-            {  0,  1 },
-            { -1,  0 }
-          },
-          Math::Vector<Real>{{ 0, 1, 1, 0 }}
-        };
+          Math::Matrix<Real>{{0, -1}, {1, 0}, {0, 1}, {-1, 0}},
+          Math::Vector<Real>{{0, 1, 1, 0}}};
         return s_hs;
       }
       case Type::Tetrahedron:
       {
-        static thread_local const HalfSpace s_hs =
-        {
+        static const HalfSpace s_hs = {
           // Must match Connectivity::getSubPolytopes tetra face order:
           //
           // face 0: (1,2,3)  -> x+y+z=1   ->  (x+y+z)/sqrt(3) <= 1/sqrt(3)
@@ -969,20 +936,17 @@ namespace Rodin::Geometry
           // face 2: (0,1,3)  -> y=0       ->  -y <= 0
           // face 3: (0,2,1)  -> z=0       ->  -z <= 0
           Math::Matrix<Real>{
-            {  1 / std::sqrt(3.0),  1 / std::sqrt(3.0),  1 / std::sqrt(3.0) }, // x+y+z <= 1
-            { -1,  0,  0 },                                                    // x >= 0
-            {  0, -1,  0 },                                                    // y >= 0
-            {  0,  0, -1 }                                                     // z >= 0
+            {1 / std::sqrt(3.0), 1 / std::sqrt(3.0), 1 / std::sqrt(3.0)}, // x+y+z <= 1
+            {-1, 0, 0}, // x >= 0
+            {0, -1, 0}, // y >= 0
+            {0, 0, -1} // z >= 0
           },
-          Math::Vector<Real>{{ 1 / std::sqrt(3.0), 0, 0, 0 }}
-        };
+          Math::Vector<Real>{{1 / std::sqrt(3.0), 0, 0, 0}}};
         return s_hs;
       }
       case Type::Pyramid:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // Reference pyramid:
+        static const HalfSpace s_hs = {// Reference pyramid:
           //   z >= 0, y >= 0, x + z <= 1, y + z <= 1, x >= 0.
           //
           // Face order matches Connectivity::getSubPolytopes:
@@ -991,40 +955,27 @@ namespace Rodin::Geometry
           // local 2: side x+z=1  (1,2,4)
           // local 3: side y+z=1  (2,3,4)
           // local 4: side x = 0  (3,0,4)
-          Math::Matrix<Real>{
-            {  0,  0, -1 },
-            {  0, -1,  0 },
-            {  1 / std::sqrt(2.0),  0,  1 / std::sqrt(2.0) },
-            {  0,  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) },
-            { -1,  0,  0 }
-          },
-          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0 }}
-        };
+          Math::Matrix<Real>{{0, 0, -1}, {0, -1, 0},
+            {1 / std::sqrt(2.0), 0, 1 / std::sqrt(2.0)},
+            {0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0)}, {-1, 0, 0}},
+          Math::Vector<Real>{{0, 0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0}}};
         return s_hs;
       }
       case Type::Wedge:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: z=0                ->  -z <= 0
+        static const HalfSpace s_hs = {// local 0: z=0                ->  -z <= 0
           // local 1: y=0                ->  -y <= 0
           // local 2: x+y=1              ->  (x+y)/√2 <= 1/√2
           // local 3: x=0                ->  -x <= 0
           // local 4: z=1                ->   z <= 1
-          Math::Matrix<Real>{
-            {  0,  0, -1 },
-            {  0, -1,  0 },
-            {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0), 0 },
-            { -1,  0,  0 },
-            {  0,  0,  1 }
-          },
-          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0), 0, 1 }}
-        };
+          Math::Matrix<Real>{{0, 0, -1}, {0, -1, 0},
+            {1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0}, {-1, 0, 0}, {0, 0, 1}},
+          Math::Vector<Real>{{0, 0, 1 / std::sqrt(2.0), 0, 1}}};
         return s_hs;
       }
     }
     assert(false);
-    static thread_local const HalfSpace s_null;
+    static const HalfSpace s_null;
     return s_null;
   }
 
