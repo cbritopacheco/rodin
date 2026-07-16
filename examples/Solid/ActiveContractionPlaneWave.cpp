@@ -33,10 +33,14 @@
  *   - Displacement (transient vector) - warp by vector in ParaView
  *   - Activation   (transient scalar) - Gaussian travelling plane wave
  *   - FiberDirection (static vector)  - constant (1,0) fiber field
+ *
+ * Optional command-line arguments:
+ *   ActiveContractionPlaneWave [nc=64] [nSteps=full]
  */
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <iomanip>
 #include <limits>
 #include <vector>
@@ -74,12 +78,41 @@ namespace
     Real maxBeta = 0.0;
     size_t maxLocalIterations = 0;
   };
+
+  size_t parseSize(const char* value, const char* name)
+  {
+    char* end = nullptr;
+    const auto parsed = std::strtoull(value, &end, 10);
+    if (end == value || *end != '\0')
+    {
+      std::cerr << "Invalid " << name << ": " << value << std::endl;
+      std::exit(2);
+    }
+    return static_cast<size_t>(parsed);
+  }
 }
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+  size_t nc = 64;
+  size_t requestedSteps = 0;
+
+  if (argc > 1)
+    nc = parseSize(argv[1], "mesh resolution");
+  if (argc > 2)
+    requestedSteps = parseSize(argv[2], "step count");
+  if (argc > 3)
+  {
+    std::cerr << "Usage: " << argv[0] << " [nc=64] [nSteps=full]" << std::endl;
+    return 2;
+  }
+  if (nc < 2)
+  {
+    std::cerr << "Mesh resolution must be at least 2." << std::endl;
+    return 2;
+  }
+
   // ---- geometry -----------------------------------------------------------
-  constexpr size_t nc = 16;
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { nc, nc, nc });
   mesh.scale(1.0 / static_cast<Real>(nc - 1));
@@ -119,7 +152,7 @@ int main(int, char**)
   Solid::NeoHookean passive(lambda, mu);
 
   Solid::ActiveFiberLaw::Parameters activeParams;
-  activeParams.stiffness            = 200.0;
+  activeParams.stiffness            = 20.0;
   activeParams.damping              = 300;
   activeParams.destructionRate      = 0.4;
   activeParams.crossBridgeStiffness = 100.0;
@@ -178,7 +211,9 @@ int main(int, char**)
     static_cast<Real>(nWaves - 1) * wave.gap
     + traversalTime
     + 0.4 / wave.speed;
-  const size_t nSteps = static_cast<size_t>(tEnd / dtStep) + 1;
+  const size_t fullSteps = static_cast<size_t>(tEnd / dtStep) + 1;
+  const size_t nSteps =
+    requestedSteps == 0 ? fullSteps : std::min(requestedSteps, fullSteps);
 
   Real currentTime = 0.0;
 
@@ -323,6 +358,10 @@ int main(int, char**)
   auto zero = VectorFunction{ Zero(), Zero() };
 
   std::cout << std::scientific << std::setprecision(6);
+  std::cout << "Time steps: " << nSteps;
+  if (nSteps != fullSteps)
+    std::cout << " (truncated from " << fullSteps << ")";
+  std::cout << std::endl;
 
   for (size_t step = 1; step <= nSteps; ++step)
   {
