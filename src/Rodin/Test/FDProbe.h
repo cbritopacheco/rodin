@@ -26,11 +26,16 @@ namespace Rodin::Test
    */
   struct FDProbeReport
   {
-    Real epsilon = 0.0;
-    Real absoluteError = 0.0;
-    Real relativeError = 0.0;
-    Real tangentNorm = 0.0;
-    Real finiteDifferenceNorm = 0.0;
+    /// @brief Central-difference step used by the probe.
+      Real epsilon = 0.0;
+    /// @brief Norm of the tangent-minus-finite-difference error.
+      Real absoluteError = 0.0;
+    /// @brief Absolute error scaled by the larger of the compared norms.
+      Real relativeError = 0.0;
+    /// @brief Norm of the tangent action @f$ A(u)w @f$.
+      Real tangentNorm = 0.0;
+    /// @brief Norm of the central finite difference.
+      Real finiteDifferenceNorm = 0.0;
   };
 
   /**
@@ -54,12 +59,19 @@ namespace Rodin::Test
   class FDProbe
   {
     public:
+      /// @brief Probed problem type.
       using Problem = ProblemType;
+      /// @brief Linear system type of the probed problem.
       using LinearSystemType =
         typename Problem::LinearSystemType;
+      /// @brief Vector type of the linear system.
       using VectorType =
         typename LinearSystemType::VectorType;
 
+      /**
+       * @brief Constructs the probe over a problem.
+       * @param problem Problem whose tangent is probed.
+       */
       explicit FDProbe(Problem& problem)
         : m_problem(problem)
       {}
@@ -153,18 +165,35 @@ namespace Rodin::Test
   class FDProbe<Math::LinearSystem<Operator, Vector>>
   {
     public:
+      /// @brief Probed linear system type.
       using LinearSystemType = Math::LinearSystem<Operator, Vector>;
+      /// @brief Vector type of the linear system.
       using VectorType = Vector;
 
+      /**
+       * @brief Constructs the probe over an assembled linear system.
+       * @param system Linear system whose operator is probed.
+       */
       explicit FDProbe(LinearSystemType& system)
         : m_system(system)
       {}
 
+      /**
+       * @brief Tests the system with a deterministic unit perturbation.
+       * @param epsilon Central-difference step.
+       * @return Error report.
+       */
       FDProbeReport test(Real epsilon = 1e-6)
       {
         return test(makeDeterministicDirection(), epsilon);
       }
 
+      /**
+       * @brief Tests the system in a caller-supplied perturbation direction.
+       * @param direction Direction @f$w@f$ used in the finite difference.
+       * @param epsilon Central-difference step.
+       * @return Error report.
+       */
       FDProbeReport test(const VectorType& direction, Real epsilon = 1e-6)
       {
         auto& solution = m_system.getSolution();

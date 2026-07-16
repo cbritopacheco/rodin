@@ -28,7 +28,7 @@ namespace Rodin::Tests::Unit::InitialGuess
   TEST(Rodin_Solver_InitialGuess, AssembleSeedsGuessFromTrialFunction)
   {
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     P1 vh(mesh);
@@ -38,12 +38,9 @@ namespace Rodin::Tests::Unit::InitialGuess
     RealFunction f = 1.0;
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, Zero());
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
 
-    u.getSolution() = [](const Geometry::Point& p)
-    { return p.x() + 2.0 * p.y(); };
+    u.getSolution() = [](const Geometry::Point& p) { return p.x() + 2.0 * p.y(); };
 
     poisson.assemble();
 
@@ -61,7 +58,7 @@ namespace Rodin::Tests::Unit::InitialGuess
   TEST(Rodin_Solver_InitialGuess, IterativeSolverHonorsGuess)
   {
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {16, 16});
     mesh.getConnectivity().compute(1, 2);
 
     P1 vh(mesh);
@@ -70,11 +67,8 @@ namespace Rodin::Tests::Unit::InitialGuess
 
     RealFunction f = 1.0;
 
-    auto define = [&](auto& pb)
-    {
-      pb = Integral(Grad(u), Grad(v))
-         - Integral(f, v)
-         + DirichletBC(u, Zero());
+    auto define = [&](auto& pb) {
+      pb = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, Zero());
     };
 
     // Reference solution with a direct solver.
@@ -113,13 +107,12 @@ namespace Rodin::Tests::Unit::InitialGuess
   TEST(Rodin_Solver_InitialGuess, NewtonIncrementStartsFromZero)
   {
     Mesh mesh;
-    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 8, 8 });
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, {8, 8});
     mesh.getConnectivity().compute(1, 2);
 
     P1 vh(mesh);
 
-    auto solveWith = [&](auto makeSolver) -> Math::Vector<Real>
-    {
+    auto solveWith = [&](auto makeSolver) -> Math::Vector<Real> {
       TrialFunction du(vh);
       TestFunction v(vh);
 
@@ -130,31 +123,24 @@ namespace Rodin::Tests::Unit::InitialGuess
 
       // Newton form of the linear Poisson problem: J du = -F(u).
       Problem newton(du, v);
-      newton = Integral(Grad(du), Grad(v))
-             + Integral(Grad(u), Grad(v))
-             - Integral(f, v)
-             + DirichletBC(du, Zero());
+      newton = Integral(Grad(du), Grad(v)) + Integral(Grad(u), Grad(v)) - Integral(f, v) +
+        DirichletBC(du, Zero());
 
       auto linearSolver = makeSolver(newton);
       Solver::NewtonSolver solver(linearSolver);
-      solver.setMaxIterations(10)
-            .setAbsoluteTolerance(1e-12)
-            .setRelativeTolerance(1e-10);
+      solver.setMaxIterations(10).setAbsoluteTolerance(1e-12).setRelativeTolerance(1e-10);
       solver.solve(u);
       EXPECT_TRUE(solver.getReport().converged);
       return u.getData();
     };
 
-    const auto direct =
-      solveWith([](auto& pb) { return SparseLU(pb); });
+    const auto direct = solveWith([](auto& pb) { return SparseLU(pb); });
 
-    const auto iterative =
-      solveWith([](auto& pb)
-      {
-        CG cg(pb);
-        cg.setTolerance(1e-12).setMaxIterations(2000);
-        return cg;
-      });
+    const auto iterative = solveWith([](auto& pb) {
+      CG cg(pb);
+      cg.setTolerance(1e-12).setMaxIterations(2000);
+      return cg;
+    });
 
     EXPECT_GT(direct.norm(), 0.0);
     EXPECT_NEAR((direct - iterative).norm(), 0.0, 1e-8);

@@ -246,7 +246,7 @@ namespace Rodin::Variational
         u.flush();
         PetscErrorCode ierr = VecCopy(u.getData(), m_axb.getSolution());
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         m_assembled = true;
         return *this;
@@ -633,30 +633,26 @@ namespace Rodin::Variational
 
         // Gather the trial function data into the solution vector.
         PetscErrorCode ierr;
-        m_us.iapply(
-            [&](size_t i, const auto& uref)
-            {
-              const auto& u = uref.get().getSolution();
-              u.flush();
+        m_us.iapply([&](size_t i, const auto& uref) {
+          const auto& u = uref.get().getSolution();
+          u.flush();
 
-              PetscInt n = 0;
-              ierr = VecGetSize(u.getData(), &n);
-              assert(ierr == PETSC_SUCCESS);
+          PetscInt n = 0;
+          ierr = VecGetSize(u.getData(), &n);
+          assert(ierr == PETSC_SUCCESS);
 
-              ::IS is = PETSC_NULLPTR;
-              ierr = ISCreateStride(
-                m_axb.getCommunicator(), n,
-                static_cast<PetscInt>(m_trialOffsets[i]), 1, &is);
-              assert(ierr == PETSC_SUCCESS);
+          ::IS is = PETSC_NULLPTR;
+          ierr = ISCreateStride(
+            m_axb.getCommunicator(), n, static_cast<PetscInt>(m_trialOffsets[i]), 1, &is);
+          assert(ierr == PETSC_SUCCESS);
 
-              ierr = VecISCopy(
-                m_axb.getSolution(), is, SCATTER_FORWARD, u.getData());
-              assert(ierr == PETSC_SUCCESS);
+          ierr = VecISCopy(m_axb.getSolution(), is, SCATTER_FORWARD, u.getData());
+          assert(ierr == PETSC_SUCCESS);
 
-              ierr = ISDestroy(&is);
-              assert(ierr == PETSC_SUCCESS);
-            });
-        (void) ierr;
+          ierr = ISDestroy(&is);
+          assert(ierr == PETSC_SUCCESS);
+        });
+        (void)ierr;
 
         m_assembled = true;
         return *this;

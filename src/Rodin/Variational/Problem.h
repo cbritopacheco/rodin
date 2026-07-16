@@ -891,13 +891,10 @@ namespace Rodin::Variational
         // the solution vector at the trial offsets.
         auto& guess = axb.getSolution();
         guess.resize(static_cast<Eigen::Index>(cols));
-        m_us.iapply(
-            [&](size_t i, auto& u)
-            {
-              const auto& data = u.get().getSolution().getData();
-              guess.segment(
-                  static_cast<Eigen::Index>(m_trialOffsets[i]), data.size()) = data;
-            });
+        m_us.iapply([&](size_t i, auto& u) {
+          const auto& data = u.get().getSolution().getData();
+          guess.segment(static_cast<Eigen::Index>(m_trialOffsets[i]), data.size()) = data;
+        });
 
         m_assembled = true;
 

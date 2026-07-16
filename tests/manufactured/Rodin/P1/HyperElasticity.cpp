@@ -237,6 +237,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     EXPECT_GT(result.l2ErrorSquared, 1e-6);
   }
 
+  /// @brief Verifies the NeoHookean internal virtual work tangent against a central finite difference of the residual in 2D.
   TEST(Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency2D)
   {
     Mesh mesh = makeUnitSquareMesh();
@@ -256,6 +257,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
   }
 
+  /// @brief Verifies the NeoHookean internal virtual work tangent against a central finite difference of the residual in 3D.
   TEST(Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency3D)
   {
     Mesh mesh = makeUnitCubeMesh();
@@ -276,6 +278,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
   }
 
+  /// @brief Verifies the ActiveContraction internal virtual work tangent against a central finite difference of the residual in 2D.
   TEST(Rodin_Manufactured_P1, HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency2D)
   {
     Mesh mesh = makeUnitSquareMesh();
@@ -296,6 +299,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
   }
 
+  /// @brief Verifies the ActiveContraction internal virtual work tangent against a central finite difference of the residual in 3D.
   TEST(Rodin_Manufactured_P1, HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency3D)
   {
     Mesh mesh = makeUnitCubeMesh();
