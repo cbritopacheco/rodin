@@ -106,11 +106,11 @@ namespace Rodin::Tests::Unit::InitialGuess
   }
 
   /**
-   * The NewtonSolver increment guess policies must all converge to the same
-   * solution, and a custom guess callback must receive a correctly sized
-   * increment vector.
+   * The Newton increment solve always starts from a zero guess, regardless
+   * of what the assembly seeded: a direct and an iterative solver must
+   * converge to the same Newton solution.
    */
-  TEST(Rodin_Solver_InitialGuess, NewtonIncrementGuessPolicies)
+  TEST(Rodin_Solver_InitialGuess, NewtonIncrementStartsFromZero)
   {
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 8, 8 });
@@ -118,12 +118,7 @@ namespace Rodin::Tests::Unit::InitialGuess
 
     P1 vh(mesh);
 
-    using NewtonSolverType =
-      Solver::NewtonSolver<Solver::SparseLU<Math::LinearSystem<
-        Math::SparseMatrix<Real>, Math::Vector<Real>>>>;
-    using IncrementGuess = NewtonSolverType::IncrementGuess;
-
-    auto solveWith = [&](auto configure) -> Math::Vector<Real>
+    auto solveWith = [&](auto makeSolver) -> Math::Vector<Real>
     {
       TrialFunction du(vh);
       TestFunction v(vh);
@@ -133,49 +128,35 @@ namespace Rodin::Tests::Unit::InitialGuess
 
       RealFunction f = 1.0;
 
-      // Newton form of the linear Poisson problem: J du = -F(u). Linear, so
-      // Newton converges for any increment guess policy.
+      // Newton form of the linear Poisson problem: J du = -F(u).
       Problem newton(du, v);
       newton = Integral(Grad(du), Grad(v))
              + Integral(Grad(u), Grad(v))
              - Integral(f, v)
              + DirichletBC(du, Zero());
 
-      SparseLU lu(newton);
-      Solver::NewtonSolver solver(lu);
+      auto linearSolver = makeSolver(newton);
+      Solver::NewtonSolver solver(linearSolver);
       solver.setMaxIterations(10)
             .setAbsoluteTolerance(1e-12)
             .setRelativeTolerance(1e-10);
-      configure(solver);
       solver.solve(u);
       EXPECT_TRUE(solver.getReport().converged);
       return u.getData();
     };
 
-    const auto zeroPolicy =
-      solveWith([](auto& s) { s.setIncrementGuess(IncrementGuess::Zero); });
+    const auto direct =
+      solveWith([](auto& pb) { return SparseLU(pb); });
 
-    const auto previousPolicy =
-      solveWith([](auto& s) { s.setIncrementGuess(IncrementGuess::Previous); });
-
-    size_t callbackCalls = 0;
-    Eigen::Index callbackSize = 0;
-    const auto customPolicy =
-      solveWith([&](auto& s)
+    const auto iterative =
+      solveWith([](auto& pb)
       {
-        s.setIncrementGuess(
-            [&](Math::Vector<Real>& guess)
-            {
-              ++callbackCalls;
-              callbackSize = guess.size();
-              guess.setZero();
-            });
+        CG cg(pb);
+        cg.setTolerance(1e-12).setMaxIterations(2000);
+        return cg;
       });
 
-    EXPECT_GT(callbackCalls, 0u);
-    EXPECT_EQ(callbackSize, static_cast<Eigen::Index>(vh.getSize()));
-    EXPECT_NEAR((zeroPolicy - previousPolicy).norm(), 0.0, 1e-9);
-    EXPECT_NEAR((zeroPolicy - customPolicy).norm(), 0.0, 1e-9);
-    EXPECT_GT(zeroPolicy.norm(), 0.0);
+    EXPECT_GT(direct.norm(), 0.0);
+    EXPECT_NEAR((direct - iterative).norm(), 0.0, 1e-8);
   }
 }

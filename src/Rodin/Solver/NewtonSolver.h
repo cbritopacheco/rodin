@@ -397,40 +397,6 @@ namespace Rodin::Solver
       using StepPolicy =
         std::function<StepResult(SolutionType&, LinearSystemType&, Report&)>;
 
-      /**
-       * @brief Initial guess policy for each tangential (increment) solve.
-       *
-       * The linear system's solution vector is the initial guess on entry to
-       * the linear solver and the Newton increment on exit.
-       */
-      enum class IncrementGuess
-      {
-        /**
-         * @brief Start each tangential solve from zero (default).
-         *
-         * Zero is the exact limit of the increment as Newton converges, so
-         * this is the natural guess.
-         */
-        Zero,
-
-        /**
-         * @brief Start each tangential solve from the previous increment.
-         *
-         * The first solve starts from zero.
-         */
-        Previous
-      };
-
-      /**
-       * @brief Callback type for a custom increment guess.
-       *
-       * Called once per Newton iteration with the sized solution vector of
-       * the tangential system; the callback fills it with the initial guess.
-       * On entry the vector holds the previous increment (zero on the first
-       * iteration).
-       */
-      using IncrementGuessFunction = std::function<void(SolutionType&)>;
-
       using Parent::solve;
 
       /**
@@ -457,9 +423,7 @@ namespace Rodin::Solver
           m_stol(0.0),
           m_alpha(1.0),
           m_monitor(std::nullopt),
-          m_stepPolicy(std::nullopt),
-          m_incrementGuess(IncrementGuess::Zero),
-          m_incrementGuessFunction(std::nullopt)
+          m_stepPolicy(std::nullopt)
       {}
 
       ~NewtonSolver() override = default;
@@ -679,44 +643,6 @@ namespace Rodin::Solver
       }
 
       /**
-       * @brief Sets the initial guess policy for the tangential solves.
-       *
-       * Default value: IncrementGuess::Zero.
-       *
-       * @param guess Increment guess policy.
-       * @returns Reference to this solver.
-       */
-      NewtonSolver& setIncrementGuess(IncrementGuess guess)
-      {
-        m_incrementGuess = guess;
-        m_incrementGuessFunction.reset();
-        return *this;
-      }
-
-      /**
-       * @brief Sets a custom initial guess for the tangential solves.
-       *
-       * The callback overrides the IncrementGuess policy.
-       *
-       * @param fn Callback filling the increment guess each Newton iteration.
-       * @returns Reference to this solver.
-       */
-      NewtonSolver& setIncrementGuess(IncrementGuessFunction fn)
-      {
-        m_incrementGuessFunction = std::move(fn);
-        return *this;
-      }
-
-      /**
-       * @brief Gets the increment guess policy.
-       * @returns Current increment guess policy.
-       */
-      IncrementGuess getIncrementGuess() const noexcept
-      {
-        return m_incrementGuess;
-      }
-
-      /**
        * @brief Gets the report of the most recent solve.
        *
        * @returns Diagnostic report for the last call to @c solve().
@@ -811,19 +737,13 @@ namespace Rodin::Solver
             return;
           }
 
-          // Establish the initial guess of the tangential solve: the linear
-          // system's solution vector is the guess on entry to the linear
-          // solver and the increment on exit.
+          // The tangential solve always starts from a zero initial guess:
+          // the increment vanishes as Newton converges, so zero is its
+          // natural limit. This overrides the assembly-seeded guess, which
+          // holds the previous increment.
           auto& increment = linearSystem.getSolution();
-          if (increment.size() != linearSystem.getVector().size())
-          {
-            increment.resize(linearSystem.getVector().size());
-            increment.setZero();
-          }
-          if (m_incrementGuessFunction)
-            (*m_incrementGuessFunction)(increment);
-          else if (m_incrementGuess == IncrementGuess::Zero)
-            increment.setZero();
+          increment.resize(linearSystem.getVector().size());
+          increment.setZero();
 
           this->getLinearSolver().solve();
 
@@ -943,12 +863,6 @@ namespace Rodin::Solver
 
       /// @brief Optional custom step policy.
       Optional<StepPolicy> m_stepPolicy;
-
-      /// @brief Initial guess policy for the tangential solves.
-      IncrementGuess m_incrementGuess;
-
-      /// @brief Optional custom increment guess callback.
-      Optional<IncrementGuessFunction> m_incrementGuessFunction;
 
       /**
        * @brief Diagnostic report of the most recent solve.
