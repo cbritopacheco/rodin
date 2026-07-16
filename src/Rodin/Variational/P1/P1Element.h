@@ -306,6 +306,20 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(i);
       }
 
+      template <class Coefficient>
+      constexpr
+      void interpolate(
+          ScalarType& out,
+          Coefficient&& coefficient,
+          const Math::SpatialPoint& rc) const
+      {
+        const size_t count = getCount();
+        assert(count > 0);
+        out = coefficient(size_t(0)) * getBasis(0)(rc);
+        for (size_t local = 1; local < count; ++local)
+          out += coefficient(local) * getBasis(local)(rc);
+      }
+
       const LinearForm& getLinearForm(size_t i) const
       {
         const Geometry::Polytope::Type g = this->getGeometry();
@@ -1145,6 +1159,30 @@ namespace Rodin::Variational
       const Math::SpatialPoint& getNode(size_t local) const
       {
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(local / m_vdim);
+      }
+
+      template <class Coefficient>
+      constexpr
+      void interpolate(
+          RangeType& out,
+          Coefficient&& coefficient,
+          const Math::SpatialPoint& rc) const
+      {
+        assert(m_vdim > 0);
+        out.resize(m_vdim);
+        out.setZero();
+
+        const P1Element<ScalarType> scalarfe(this->getGeometry());
+        const size_t nv = scalarfe.getCount();
+        for (size_t vertex = 0; vertex < nv; ++vertex)
+        {
+          const ScalarType phi = scalarfe.getBasis(vertex)(rc);
+          for (size_t component = 0; component < m_vdim; ++component)
+          {
+            const size_t local = vertex * m_vdim + component;
+            out(component) += coefficient(local) * phi;
+          }
+        }
       }
 
       constexpr
