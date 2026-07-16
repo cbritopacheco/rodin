@@ -6,7 +6,6 @@
  */
 #include "Rodin/Alert/MemberFunctionException.h"
 
-#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -796,10 +795,20 @@ namespace Rodin::Geometry
 
     if (dimensions.size() != dim)
     {
-      Alert::NamespacedException("Rodin::Geometry::Mesh<Context::Local>::UniformGrid")
-        << "Expected " << dim << " dimensions for geometry type " << g
-        << ", but got " << dimensions.size() << "."
-        << Alert::Raise;
+      Alert::MemberFunctionException(Mesh(), __func__)
+        << "Expected " << dim << " dimensions for geometry type " << g << ", but got "
+        << dimensions.size() << "." << Alert::Raise;
+    }
+
+    for (size_t axis = 0; axis < dimensions.size(); ++axis)
+    {
+      if (dimensions.coeff(axis) < 2)
+      {
+        Alert::MemberFunctionException(Mesh(), __func__)
+          << "Expected at least 2 grid points along axis " << axis
+          << " for geometry type " << g << ", but got " << dimensions.coeff(axis) << "."
+          << Alert::Raise;
+      }
     }
 
     switch (g)
@@ -810,9 +819,7 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Segment:
       {
-        assert(dimensions.size() == 1);
         const size_t n = dimensions.coeff(0);
-        assert(n >= 2);
 
         build.initialize(dim).nodes(n);
 
@@ -829,11 +836,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Triangle:
       {
-        assert(dimensions.size() == 2);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         build.initialize(dim).nodes(w * h);
-        assert(w * h >= 4);
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
@@ -853,11 +858,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Quadrilateral:
       {
-        assert(dimensions.size() == 2);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         build.initialize(dim).nodes(w * h);
-        assert(w * h >= 4);
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
@@ -880,11 +883,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Tetrahedron:
       {
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
 
         build.initialize(dim)
              .nodes(w * h * d)
@@ -936,11 +937,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Wedge:
       {
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
         build.initialize(dim).nodes(w * h * d);
         for (size_t k = 0; k < d; k++)
         {
@@ -979,11 +978,9 @@ namespace Rodin::Geometry
 
       case Polytope::Type::Pyramid:
       {
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
 
         const size_t gridVertices = w * h * d;
         const size_t cellCount = (w - 1) * (h - 1) * (d - 1);
@@ -1063,11 +1060,9 @@ namespace Rodin::Geometry
       {
         // Structured brick mesh with MFEM-compatible vertex ordering
         // dimensions = {w, h, d}
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
 
         // Total vertices
         build.initialize(dim).nodes(w * h * d);
@@ -1120,7 +1115,8 @@ namespace Rodin::Geometry
       }
       default:
       {
-        assert(false);
+        Alert::MemberFunctionException(Mesh(), __func__)
+          << "Unsupported uniform-grid geometry type " << g << "." << Alert::Raise;
         return build.nodes(0).finalize();
       }
     };

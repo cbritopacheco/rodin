@@ -14,13 +14,17 @@
  * checks the whole header surface. Used by dev/style_lint and the Style CI
  * workflow; not part of the library build.
  *
- * Optional-dependency headers (PETSc, MMG, MPI) are excluded so the TU
- * analyzes without those packages installed.
+ * Optional modules are included under the same feature definitions as the
+ * library. The RodinTidyTU CMake target supplies their dependency include
+ * paths whenever they are enabled.
  */
+#include <Rodin/Configure.h>
+
 #include <Rodin/Types.h>
 #include <Rodin/Alert.h>
 #include <Rodin/Math.h>
 #include <Rodin/Geometry.h>
+#include <Rodin/Location.h>
 #include <Rodin/QF.h>
 #include <Rodin/FormLanguage.h>
 #include <Rodin/Variational.h>
@@ -29,8 +33,28 @@
 #include <Rodin/Solid.h>
 #include <Rodin/Heart.h>
 #include <Rodin/IO.h>
+#include <Rodin/Utility.h>
 #include <Rodin/Serialization/Export.h>
+#include <Rodin/Advection/Lagrangian.h>
+#include <Rodin/Eikonal/FMM.h>
 #include <Rodin/Adaptation/WNGIR.h>
+#include <Rodin/MMG.h>
+
+#ifdef RODIN_USE_MPI
+#include <Rodin/MPI.h>
+#endif
+
+#ifdef RODIN_USE_PETSC
+#include <Rodin/PETSc.h>
+#endif
+
+#ifdef RODIN_USE_SCOTCH
+#include <Rodin/Scotch/MeshPartitioner.h>
+#endif
+
+#ifdef RODIN_USE_APPLE_ACCELERATE
+#include <Rodin/Solver/AppleAccelerate.h>
+#endif
 
 int main()
 {

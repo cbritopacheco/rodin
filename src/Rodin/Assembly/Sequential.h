@@ -61,10 +61,26 @@ namespace Rodin::Assembly
       SequentialIteration(const MeshType& mesh, const Geometry::Region&);
 
       /**
-       * @brief Gets an iterator for traversing mesh elements.
-       * @return PolytopeIterator for sequential mesh traversal
+       * @brief Gets an iterator over the selected region.
+       * @return Polytope iterator
        */
       Geometry::PolytopeIterator getIterator() const;
+
+      /**
+       * @brief Gets a polytope value for an indexed assembly iteration.
+       * @param i Polytope index
+       * @return Non-owning polytope descriptor
+       */
+      Geometry::Polytope getPolytope(Index i) const;
+
+      /// @brief Gets the topological dimension of the iteration.
+      size_t getDimension() const;
+
+      /// @brief Gets the number of candidate polytopes.
+      size_t getCount() const;
+
+      /// @brief Tests whether a candidate belongs to the iteration region.
+      bool filter(Index i) const;
 
     private:
       std::reference_wrapper<const MeshType> m_mesh;  ///< Reference to the mesh
@@ -151,17 +167,20 @@ namespace Rodin::Assembly
         {
           const auto& attrs = lfi.getAttributes();
           SequentialIteration seq(mesh, lfi.getRegion());
-          for (auto it = seq.getIterator(); it; ++it)
+          const size_t d = seq.getDimension();
+          const Index count = seq.getCount();
+          for (Index i = 0; i < count; ++i)
           {
+            if (!seq.filter(i))
+              continue;
             if (!attrs.empty())
             {
-              const auto a = it->getAttribute();
+              const auto a = mesh.getAttribute(d, i);
               if (!a || !attrs.count(*a))
                 continue;
             }
-            lfi.setPolytope(*it);
-            const size_t d = it.getDimension();
-            const size_t i = it->getIndex();
+            const auto polytope = seq.getPolytope(i);
+            lfi.setPolytope(polytope);
             const auto& dofs = input.getFES().getDOFs(d, i);
             for (size_t l = 0; l < static_cast<size_t>(dofs.size()); l++)
               res(dofs(l)) += lfi.integrate(l);
@@ -258,17 +277,22 @@ namespace Rodin::Assembly
         {
           const auto& attrs = bfi.getAttributes();
           SequentialIteration seq(mesh, bfi.getRegion());
-          for (auto it = seq.getIterator(); it; ++it)
+          const size_t d = seq.getDimension();
+          const Index count = seq.getCount();
+          for (Index p = 0; p < count; ++p)
           {
+            if (!seq.filter(p))
+              continue;
             if (!attrs.empty())
             {
-              const auto a = it->getAttribute();
+              const auto a = mesh.getAttribute(d, p);
               if (!a || !attrs.count(*a))
                 continue;
             }
-            bfi.setPolytope(*it);
-            const auto& rows = input.getTestFES().getDOFs(it.getDimension(), it->getIndex());
-            const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
+            const auto polytope = seq.getPolytope(p);
+            bfi.setPolytope(polytope);
+            const auto& rows = input.getTestFES().getDOFs(d, p);
+            const auto& cols = input.getTrialFES().getDOFs(d, p);
             for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
               for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                 res(rows(l), cols(m)) += Math::conj(bfi.integrate(m, l));
@@ -280,25 +304,35 @@ namespace Rodin::Assembly
           const auto& testAttrs = bfi.getTestAttributes();
           SequentialIteration trialseq(mesh, bfi.getTrialRegion());
           SequentialIteration testseq(mesh, bfi.getTestRegion());
-          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          const size_t td = testseq.getDimension();
+          const size_t rd = trialseq.getDimension();
+          const Index tcount = testseq.getCount();
+          const Index rcount = trialseq.getCount();
+          for (Index te = 0; te < tcount; ++te)
           {
+            if (!testseq.filter(te))
+              continue;
             if (!testAttrs.empty())
             {
-              const auto a = teIt->getAttribute();
+              const auto a = mesh.getAttribute(td, te);
               if (!a || !testAttrs.count(*a))
                 continue;
             }
-            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            const auto testPolytope = testseq.getPolytope(te);
+            const auto& rows = input.getTestFES().getDOFs(td, te);
+            for (Index tr = 0; tr < rcount; ++tr)
             {
+              if (!trialseq.filter(tr))
+                continue;
               if (!trialAttrs.empty())
               {
-                const auto a = trIt->getAttribute();
+                const auto a = mesh.getAttribute(rd, tr);
                 if (!a || !trialAttrs.count(*a))
                   continue;
               }
-              bfi.setPolytope(*trIt, *teIt);
-              const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
-              const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+              const auto trialPolytope = trialseq.getPolytope(tr);
+              bfi.setPolytope(trialPolytope, testPolytope);
+              const auto& cols = input.getTrialFES().getDOFs(rd, tr);
               for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
                   res(rows(l), cols(m)) += Math::conj(bfi.integrate(m, l));
@@ -485,17 +519,22 @@ namespace Rodin::Assembly
         {
           const auto& attrs = bfi.getAttributes();
           SequentialIteration seq(mesh, bfi.getRegion());
-          for (auto it = seq.getIterator(); it; ++it)
+          const size_t d = seq.getDimension();
+          const Index count = seq.getCount();
+          for (Index p = 0; p < count; ++p)
           {
+            if (!seq.filter(p))
+              continue;
             if (!attrs.empty())
             {
-              const auto a = it->getAttribute();
+              const auto a = mesh.getAttribute(d, p);
               if (!a || !attrs.count(*a))
                 continue;
             }
-            bfi.setPolytope(*it);
-            const auto& rows = input.getTestFES().getDOFs(it.getDimension(), it->getIndex());
-            const auto& cols = input.getTrialFES().getDOFs(it.getDimension(), it->getIndex());
+            const auto polytope = seq.getPolytope(p);
+            bfi.setPolytope(polytope);
+            const auto& rows = input.getTestFES().getDOFs(d, p);
+            const auto& cols = input.getTrialFES().getDOFs(d, p);
             for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
             {
               for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
@@ -513,26 +552,36 @@ namespace Rodin::Assembly
           const auto& trialAttrs = bfi.getTrialAttributes();
           const auto& testAttrs = bfi.getTestAttributes();
           SequentialIteration testseq(mesh, bfi.getTestRegion());
-          for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+          SequentialIteration trialseq(mesh, bfi.getTrialRegion());
+          const size_t td = testseq.getDimension();
+          const size_t rd = trialseq.getDimension();
+          const Index tcount = testseq.getCount();
+          const Index rcount = trialseq.getCount();
+          for (Index te = 0; te < tcount; ++te)
           {
+            if (!testseq.filter(te))
+              continue;
             if (!testAttrs.empty())
             {
-              const auto a = teIt->getAttribute();
+              const auto a = mesh.getAttribute(td, te);
               if (!a || !testAttrs.count(*a))
                 continue;
             }
-            SequentialIteration trialseq(mesh, bfi.getTrialRegion());
-            for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+            const auto testPolytope = testseq.getPolytope(te);
+            const auto& rows = input.getTestFES().getDOFs(td, te);
+            for (Index tr = 0; tr < rcount; ++tr)
             {
+              if (!trialseq.filter(tr))
+                continue;
               if (!trialAttrs.empty())
               {
-                const auto a = trIt->getAttribute();
+                const auto a = mesh.getAttribute(rd, tr);
                 if (!a || !trialAttrs.count(*a))
                   continue;
               }
-              bfi.setPolytope(*trIt, *teIt);
-              const auto& rows = input.getTestFES().getDOFs(teIt.getDimension(), teIt->getIndex());
-              const auto& cols = input.getTrialFES().getDOFs(trIt.getDimension(), trIt->getIndex());
+              const auto trialPolytope = trialseq.getPolytope(tr);
+              bfi.setPolytope(trialPolytope, testPolytope);
+              const auto& cols = input.getTrialFES().getDOFs(rd, tr);
               for (size_t l = 0; l < static_cast<size_t>(rows.size()); l++)
               {
                 for (size_t m = 0; m < static_cast<size_t>(cols.size()); m++)
@@ -1020,19 +1069,21 @@ namespace Rodin::Assembly
                   return;
                 const auto& vFES = vref.get().getFiniteElementSpace();
 
-                for (auto it = seq.getIterator(); it; ++it)
+                const size_t d = seq.getDimension();
+                const Index count = seq.getCount();
+                for (Index p = 0; p < count; ++p)
                 {
+                  if (!seq.filter(p))
+                    continue;
                   if (!attrs.empty())
                   {
-                    const auto a = it->getAttribute();
+                    const auto a = mesh.getAttribute(d, p);
                     if (!a || !attrs.count(*a))
                       continue;
                   }
 
-                  const size_t d = it->getDimension();
-                  const Index p = it->getIndex();
-
-                  bfi.setPolytope(*it);
+                  const auto polytope = seq.getPolytope(p);
+                  bfi.setPolytope(polytope);
 
                   const auto& rows = vFES.getDOFs(d, p);
                   const auto& cols = uFES.getDOFs(d, p);
@@ -1084,30 +1135,39 @@ namespace Rodin::Assembly
                   return;
                 const auto& vFES = vref.get().getFiniteElementSpace();
 
-                for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+                const size_t td = testseq.getDimension();
+                const size_t rd = trialseq.getDimension();
+                const Index tcount = testseq.getCount();
+                const Index rcount = trialseq.getCount();
+                for (Index te = 0; te < tcount; ++te)
                 {
+                  if (!testseq.filter(te))
+                    continue;
                   if (!testAttrs.empty())
                   {
-                    const auto a = teIt->getAttribute();
+                    const auto a = mesh.getAttribute(td, te);
                     if (!a || !testAttrs.count(*a))
                       continue;
                   }
 
-                  const auto& rows = vFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+                  const auto testPolytope = testseq.getPolytope(te);
+                  const auto& rows = vFES.getDOFs(td, te);
 
-                  for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+                  for (Index tr = 0; tr < rcount; ++tr)
                   {
+                    if (!trialseq.filter(tr))
+                      continue;
                     if (!trialAttrs.empty())
                     {
-                      const auto a = trIt->getAttribute();
+                      const auto a = mesh.getAttribute(rd, tr);
                       if (!a || !trialAttrs.count(*a))
                         continue;
                     }
 
-                    const auto& cols =
-                      uFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+                    const auto& cols = uFES.getDOFs(rd, tr);
 
-                    bfi.setPolytope(*trIt, *teIt);
+                    const auto trialPolytope = trialseq.getPolytope(tr);
+                    bfi.setPolytope(trialPolytope, testPolytope);
 
                     for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                     {
@@ -1144,18 +1204,23 @@ namespace Rodin::Assembly
                 return;
               const auto& vFES = vref.get().getFiniteElementSpace();
 
-              for (auto it = seq.getIterator(); it; ++it)
+              const size_t d = seq.getDimension();
+              const Index count = seq.getCount();
+              for (Index p = 0; p < count; ++p)
               {
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
-                  const auto a = it->getAttribute();
+                  const auto a = mesh.getAttribute(d, p);
                   if (!a || !attrs.count(*a))
                     continue;
                 }
 
-                lfi.setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                lfi.setPolytope(polytope);
 
-                const auto& dofs = vFES.getDOFs(it->getDimension(), it->getIndex());
+                const auto& dofs = vFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                 {
                   const Index I = static_cast<Index>(vOff + static_cast<size_t>(dofs[l]));
@@ -1232,10 +1297,10 @@ namespace Rodin::Assembly
               b.coeffRef(gs) = constraints.getIdentificationValue(gs);
             }
 
-            std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
-            filteredTriplets.reserve(triplets.size() + nrows);
-            for (const auto& t : triplets)
+            size_t write = 0;
+            for (size_t read = 0; read < triplets.size(); ++read)
             {
+              const auto& t = triplets[read];
               const Index row = static_cast<Index>(t.row());
               const Index col = static_cast<Index>(t.col());
               const ScalarType val = t.value();
@@ -1246,20 +1311,23 @@ namespace Rodin::Assembly
                 b.coeffRef(row) -= val * constraints.getFixedValue(col);
                 continue;
               }
-              filteredTriplets.push_back(t);
+              if (write != read)
+                triplets[write] = t;
+              ++write;
             }
+            triplets.resize(write);
 
             for (Index i = 0; i < static_cast<Index>(nrows); ++i)
             {
               if (constraints.isFixed(i))
               {
-                filteredTriplets.emplace_back(i, i, ScalarType(1));
+                triplets.emplace_back(i, i, ScalarType(1));
                 b.coeffRef(i) = constraints.getFixedValue(i);
               }
             }
 
             A.resize(nrows, ncols);
-            A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+            A.setFromTriplets(triplets.begin(), triplets.end());
           }
           else
           {
@@ -1568,19 +1636,21 @@ namespace Rodin::Assembly
             {
               const auto& attrs = bfi.getAttributes();
               SequentialIteration seq(mesh, bfi.getRegion());
-              for (auto it = seq.getIterator(); it; ++it)
+              const size_t d = seq.getDimension();
+              const Index count = seq.getCount();
+              for (Index p = 0; p < count; ++p)
               {
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
-                  const auto a = it->getAttribute();
+                  const auto a = mesh.getAttribute(d, p);
                   if (!a || !attrs.count(*a))
                     continue;
                 }
 
-                const size_t d = it->getDimension();
-                const Index p = it->getIndex();
-
-                bfi.setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                bfi.setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1606,31 +1676,39 @@ namespace Rodin::Assembly
               SequentialIteration trialseq(mesh, bfi.getTrialRegion());
               SequentialIteration testseq(mesh, bfi.getTestRegion());
 
-              for (auto teIt = testseq.getIterator(); teIt; ++teIt)
+              const size_t td = testseq.getDimension();
+              const size_t rd = trialseq.getDimension();
+              const Index tcount = testseq.getCount();
+              const Index rcount = trialseq.getCount();
+              for (Index te = 0; te < tcount; ++te)
               {
+                if (!testseq.filter(te))
+                  continue;
                 if (!testAttrs.empty())
                 {
-                  const auto a = teIt->getAttribute();
+                  const auto a = mesh.getAttribute(td, te);
                   if (!a || !testAttrs.count(*a))
                     continue;
                 }
 
-                const auto& rowsDOF =
-                  testFES.getDOFs(teIt->getDimension(), teIt->getIndex());
+                const auto testPolytope = testseq.getPolytope(te);
+                const auto& rowsDOF = testFES.getDOFs(td, te);
 
-                for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+                for (Index tr = 0; tr < rcount; ++tr)
                 {
+                  if (!trialseq.filter(tr))
+                    continue;
                   if (!trialAttrs.empty())
                   {
-                    const auto a = trIt->getAttribute();
+                    const auto a = mesh.getAttribute(rd, tr);
                     if (!a || !trialAttrs.count(*a))
                       continue;
                   }
 
-                  const auto& colsDOF =
-                    trialFES.getDOFs(trIt->getDimension(), trIt->getIndex());
+                  const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  bfi.setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  bfi.setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1680,17 +1758,22 @@ namespace Rodin::Assembly
             {
               const auto& attrs = lfi.getAttributes();
               SequentialIteration seq(mesh, lfi.getRegion());
-              for (auto it = seq.getIterator(); it; ++it)
+              const size_t d = seq.getDimension();
+              const Index count = seq.getCount();
+              for (Index p = 0; p < count; ++p)
               {
+                if (!seq.filter(p))
+                  continue;
                 if (!attrs.empty())
                 {
-                  const auto a = it->getAttribute();
+                  const auto a = mesh.getAttribute(d, p);
                   if (!a || !attrs.count(*a))
                     continue;
                 }
 
-                lfi.setPolytope(*it);
-                const auto& dofs = testFES.getDOFs(it->getDimension(), it->getIndex());
+                const auto polytope = seq.getPolytope(p);
+                lfi.setPolytope(polytope);
+                const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
                   vectorEntry(dofs[l], -static_cast<ScalarType>(lfi.integrate(l)));
               }
@@ -1721,10 +1804,10 @@ namespace Rodin::Assembly
                 b.coeffRef(gs) = constraints.getIdentificationValue(gs);
               }
 
-              std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
-              filteredTriplets.reserve(triplets.size() + rows);
-              for (const auto& t : triplets)
+              size_t write = 0;
+              for (size_t read = 0; read < triplets.size(); ++read)
               {
+                const auto& t = triplets[read];
                 const Index row = static_cast<Index>(t.row());
                 const Index col = static_cast<Index>(t.col());
                 const ScalarType val = t.value();
@@ -1735,20 +1818,23 @@ namespace Rodin::Assembly
                   b.coeffRef(row) -= val * constraints.getFixedValue(col);
                   continue;
                 }
-                filteredTriplets.push_back(t);
+                if (write != read)
+                  triplets[write] = t;
+                ++write;
               }
+              triplets.resize(write);
 
               for (Index i = 0; i < static_cast<Index>(rows); ++i)
               {
                 if (constraints.isFixed(i))
                 {
-                  filteredTriplets.emplace_back(i, i, ScalarType(1));
+                  triplets.emplace_back(i, i, ScalarType(1));
                   b.coeffRef(i) = constraints.getFixedValue(i);
                 }
               }
 
               A.resize(rows, cols);
-              A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+              A.setFromTriplets(triplets.begin(), triplets.end());
             }
             else
             {
@@ -1797,19 +1883,22 @@ namespace Rodin::Assembly
             // columns kept), mirroring the PETSc MatZeroRows targeted path.
             if constexpr (IsSparse)
             {
-              std::vector<Eigen::Triplet<ScalarType>> filteredTriplets;
-              filteredTriplets.reserve(triplets.size() + rows);
-              for (const auto& t : triplets)
+              size_t write = 0;
+              for (size_t read = 0; read < triplets.size(); ++read)
               {
+                const auto& t = triplets[read];
                 if (constraints.isFixed(static_cast<Index>(t.row())))
                   continue;
-                filteredTriplets.push_back(t);
+                if (write != read)
+                  triplets[write] = t;
+                ++write;
               }
+              triplets.resize(write);
               for (Index i = 0; i < static_cast<Index>(rows); ++i)
                 if (constraints.isFixed(i))
-                  filteredTriplets.emplace_back(i, i, ScalarType(1));
+                  triplets.emplace_back(i, i, ScalarType(1));
               A.resize(rows, cols);
-              A.setFromTriplets(filteredTriplets.begin(), filteredTriplets.end());
+              A.setFromTriplets(triplets.begin(), triplets.end());
             }
             else
             {

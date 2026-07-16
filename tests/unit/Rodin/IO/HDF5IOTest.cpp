@@ -214,13 +214,13 @@ namespace Rodin::Tests::Unit
     const boost::filesystem::path stem = testDir / "vis";
 
     Mesh mesh = LocalMesh::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {0, 1, 2})
-      .finalize();
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                  .finalize();
 
     RealH1Element<2> fe(Polytope::Type::Triangle);
     PointCloud pm(2, fe.getCount());
@@ -231,8 +231,7 @@ namespace Rodin::Tests::Unit
       pm(1, i) = rc[1];
     }
     mesh.setPolytopeTransformation(
-        {2, 0},
-        new ParametricTransformation<RealH1Element<2>>(pm, fe));
+      {2, 0}, new ParametricTransformation<RealH1Element<2>>(pm, fe));
 
     {
       XDMF xdmf(stem);
@@ -265,13 +264,9 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(static_cast<size_t>(tdims[0]), 1u);
     ASSERT_EQ(static_cast<size_t>(tdims[1]), 6u);
     std::vector<unsigned long long> topology(6);
-    ASSERT_GE(H5Dread(
-          tdset,
-          H5T_NATIVE_ULLONG,
-          H5S_ALL,
-          H5S_ALL,
-          H5P_DEFAULT,
-          topology.data()), 0);
+    ASSERT_GE(
+      H5Dread(tdset, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, topology.data()),
+      0);
     for (size_t i = 0; i < topology.size(); ++i)
       EXPECT_EQ(topology[i], static_cast<unsigned long long>(i));
     H5Sclose(tspace);
@@ -298,22 +293,20 @@ namespace Rodin::Tests::Unit
     switch (type)
     {
       case Polytope::Type::Segment:
-        return LocalMesh::UniformGrid(type, { 3 });
+        return LocalMesh::UniformGrid(type, {3});
       case Polytope::Type::Triangle:
       case Polytope::Type::Quadrilateral:
-        return LocalMesh::UniformGrid(type, { 2, 2 });
+        return LocalMesh::UniformGrid(type, {2, 2});
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Pyramid:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Wedge:
-        return LocalMesh::UniformGrid(type, { 2, 2, 2 });
+        return LocalMesh::UniformGrid(type, {2, 2, 2});
       case Polytope::Type::Point:
         break;
     }
 
-    Alert::Exception()
-      << "Unsupported quadratic XDMF test polytope."
-      << Alert::Raise;
+    Alert::Exception() << "Unsupported quadratic XDMF test polytope." << Alert::Raise;
     return {};
   }
 
@@ -321,14 +314,22 @@ namespace Rodin::Tests::Unit
   {
     switch (type)
     {
-      case Polytope::Type::Segment:       return "Segment1D";
-      case Polytope::Type::Triangle:      return "Triangle2D";
-      case Polytope::Type::Quadrilateral: return "Quad2D";
-      case Polytope::Type::Tetrahedron:   return "Tet3D";
-      case Polytope::Type::Pyramid:       return "Pyramid3D";
-      case Polytope::Type::Wedge:         return "Wedge3D";
-      case Polytope::Type::Hexahedron:    return "Hex3D";
-      case Polytope::Type::Point:         return "Point0D";
+      case Polytope::Type::Segment:
+        return "Segment1D";
+      case Polytope::Type::Triangle:
+        return "Triangle2D";
+      case Polytope::Type::Quadrilateral:
+        return "Quad2D";
+      case Polytope::Type::Tetrahedron:
+        return "Tet3D";
+      case Polytope::Type::Pyramid:
+        return "Pyramid3D";
+      case Polytope::Type::Wedge:
+        return "Wedge3D";
+      case Polytope::Type::Hexahedron:
+        return "Hex3D";
+      case Polytope::Type::Point:
+        return "Point0D";
     }
     return "Unknown";
   }
@@ -350,20 +351,18 @@ namespace Rodin::Tests::Unit
           pm(d, j) = pc(static_cast<Eigen::Index>(d));
       }
       mesh.setPolytopeTransformation(
-          {D, i},
-          new ParametricTransformation<RealH1Element<2>>(pm, fe));
+        {D, i}, new ParametricTransformation<RealH1Element<2>>(pm, fe));
     }
   }
 
   struct QuadraticXDMFCase
   {
-    Polytope::Type type;
-    unsigned long long topologyId;
-    size_t nodesPerCell;
+      Polytope::Type type;
+      unsigned long long topologyId;
+      size_t nodesPerCell;
   };
 
-  class Rodin_IO_HDF5_QuadraticXDMF
-    : public testing::TestWithParam<QuadraticXDMFCase>
+  class Rodin_IO_HDF5_QuadraticXDMF : public testing::TestWithParam<QuadraticXDMFCase>
   {};
 
   /// @brief Verifies supported quadratic topology for IO HDF 5 quadratic XDMF by checking exact expected values, true predicates, false predicates.
@@ -371,7 +370,7 @@ namespace Rodin::Tests::Unit
   {
     const auto c = GetParam();
     const boost::filesystem::path testDir =
-        "/tmp/rodin_xdmf_p2_" + quadraticXDMFLabel(c.type);
+      "/tmp/rodin_xdmf_p2_" + quadraticXDMFLabel(c.type);
     boost::filesystem::create_directories(testDir);
     const boost::filesystem::path stem = testDir / "vis";
 
@@ -409,15 +408,10 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(static_cast<size_t>(tdims[0]), mesh.getCellCount());
     EXPECT_EQ(static_cast<size_t>(tdims[1]), c.nodesPerCell);
 
-    std::vector<unsigned long long> topology(
-        static_cast<size_t>(tdims[0] * tdims[1]));
-    ASSERT_GE(H5Dread(
-          tdset,
-          H5T_NATIVE_ULLONG,
-          H5S_ALL,
-          H5S_ALL,
-          H5P_DEFAULT,
-          topology.data()), 0);
+    std::vector<unsigned long long> topology(static_cast<size_t>(tdims[0] * tdims[1]));
+    ASSERT_GE(
+      H5Dread(tdset, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, topology.data()),
+      0);
     ASSERT_FALSE(topology.empty());
     for (size_t i = 0; i < topology.size(); ++i)
       EXPECT_EQ(topology[i], static_cast<unsigned long long>(i));
@@ -433,7 +427,7 @@ namespace Rodin::Tests::Unit
   {
     const auto c = GetParam();
     const boost::filesystem::path meshH5 =
-        "/tmp/rodin_xdmf_p2_mixed_" + quadraticXDMFLabel(c.type) + ".h5";
+      "/tmp/rodin_xdmf_p2_mixed_" + quadraticXDMFLabel(c.type) + ".h5";
 
     auto mesh = makeQuadraticXDMFBaseMesh(c.type);
     setQuadraticCellTransformations(mesh);
@@ -451,26 +445,19 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(H5Sget_simple_extent_dims(tspace, &count, nullptr), 1);
 
     std::vector<unsigned long long> topology(static_cast<size_t>(count));
-    ASSERT_GE(H5Dread(
-          tdset,
-          H5T_NATIVE_ULLONG,
-          H5S_ALL,
-          H5S_ALL,
-          H5P_DEFAULT,
-          topology.data()), 0);
+    ASSERT_GE(
+      H5Dread(tdset, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, topology.data()),
+      0);
 
-    ASSERT_EQ(
-        topology.size(),
-        mesh.getCellCount() * (1 + c.nodesPerCell));
+    ASSERT_EQ(topology.size(), mesh.getCellCount() * (1 + c.nodesPerCell));
     for (size_t cell = 0; cell < mesh.getCellCount(); ++cell)
     {
       const size_t offset = cell * (1 + c.nodesPerCell);
       EXPECT_EQ(topology[offset], c.topologyId);
       for (size_t i = 0; i < c.nodesPerCell; ++i)
       {
-        EXPECT_EQ(
-            topology[offset + 1 + i],
-            static_cast<unsigned long long>(cell * c.nodesPerCell + i));
+        EXPECT_EQ(topology[offset + 1 + i],
+          static_cast<unsigned long long>(cell * c.nodesPerCell + i));
       }
     }
 
@@ -483,19 +470,18 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies XDMF mixed linear and curved cells uses mixed topology for IO HDF 5 by checking exact expected values.
   TEST(Rodin_IO_HDF5, XDMFMixedLinearAndCurvedCellsUsesMixedTopology)
   {
-    const boost::filesystem::path meshH5 =
-        "/tmp/rodin_xdmf_mixed_linear_curved.h5";
+    const boost::filesystem::path meshH5 = "/tmp/rodin_xdmf_mixed_linear_curved.h5";
 
     auto mesh = LocalMesh::Builder()
-      .initialize(2)
-      .nodes(4)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .vertex({1, 1})
-      .polytope(Polytope::Type::Triangle, {0, 1, 2})
-      .polytope(Polytope::Type::Triangle, {1, 3, 2})
-      .finalize();
+                  .initialize(2)
+                  .nodes(4)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .vertex({1, 1})
+                  .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                  .polytope(Polytope::Type::Triangle, {1, 3, 2})
+                  .finalize();
 
     RealH1Element<2> fe(Polytope::Type::Triangle);
     PointCloud pm(2, fe.getCount());
@@ -508,8 +494,7 @@ namespace Rodin::Tests::Unit
       pm(1, i) = pc(1);
     }
     mesh.setPolytopeTransformation(
-        {2, 0},
-        new ParametricTransformation<RealH1Element<2>>(pm, fe));
+      {2, 0}, new ParametricTransformation<RealH1Element<2>>(pm, fe));
 
     HDF5::writeXDMFMesh(meshH5, mesh, true);
 
@@ -524,15 +509,12 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(static_cast<size_t>(count), HDF5::getXDMFMixedTopologySize(mesh));
 
     std::vector<unsigned long long> topology(static_cast<size_t>(count));
-    ASSERT_GE(H5Dread(
-          tdset,
-          H5T_NATIVE_ULLONG,
-          H5S_ALL,
-          H5S_ALL,
-          H5P_DEFAULT,
-          topology.data()), 0);
+    ASSERT_GE(
+      H5Dread(tdset, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, topology.data()),
+      0);
     ASSERT_GE(topology.size(), 11u);
-    EXPECT_EQ(topology[0], HDF5::getXDMFQuadraticMixedTopologyId(Polytope::Type::Triangle));
+    EXPECT_EQ(
+      topology[0], HDF5::getXDMFQuadraticMixedTopologyId(Polytope::Type::Triangle));
     EXPECT_EQ(topology[7], HDF5::getXDMFMixedTopologyId(Polytope::Type::Triangle));
 
     H5Sclose(tspace);
@@ -544,19 +526,17 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies XDMF curved attributes evaluate on visualization points for IO HDF 5 by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_HDF5, XDMFCurvedAttributesEvaluateOnVisualizationPoints)
   {
-    const boost::filesystem::path nodeH5 =
-        "/tmp/rodin_xdmf_p2_attr_node.h5";
-    const boost::filesystem::path cellH5 =
-        "/tmp/rodin_xdmf_p2_attr_cell.h5";
+    const boost::filesystem::path nodeH5 = "/tmp/rodin_xdmf_p2_attr_node.h5";
+    const boost::filesystem::path cellH5 = "/tmp/rodin_xdmf_p2_attr_cell.h5";
 
     Mesh mesh = LocalMesh::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({2, 0})
-      .vertex({0, 3})
-      .polytope(Polytope::Type::Triangle, {0, 1, 2})
-      .finalize();
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({2, 0})
+                  .vertex({0, 3})
+                  .polytope(Polytope::Type::Triangle, {0, 1, 2})
+                  .finalize();
     setQuadraticCellTransformations(mesh);
 
     P1 fes(mesh);
@@ -575,13 +555,9 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(H5Sget_simple_extent_dims(dspace, &count, nullptr), 1);
     ASSERT_EQ(static_cast<size_t>(count), 6u);
     std::vector<double> nodeValues(static_cast<size_t>(count));
-    ASSERT_GE(H5Dread(
-          dset,
-          H5T_NATIVE_DOUBLE,
-          H5S_ALL,
-          H5S_ALL,
-          H5P_DEFAULT,
-          nodeValues.data()), 0);
+    ASSERT_GE(
+      H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, nodeValues.data()),
+      0);
     const auto nodes = HDF5::getXDMFReferenceNodes(Polytope::Type::Triangle, 2);
     const auto& trans = mesh.getPolytopeTransformation(2, 0);
     for (size_t i = 0; i < nodes.size(); ++i)
@@ -603,13 +579,8 @@ namespace Rodin::Tests::Unit
     ASSERT_EQ(H5Sget_simple_extent_dims(dspace, &count, nullptr), 1);
     ASSERT_EQ(static_cast<size_t>(count), 1u);
     double cellValue = 0.0;
-    ASSERT_GE(H5Dread(
-          dset,
-          H5T_NATIVE_DOUBLE,
-          H5S_ALL,
-          H5S_ALL,
-          H5P_DEFAULT,
-          &cellValue), 0);
+    ASSERT_GE(
+      H5Dread(dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &cellValue), 0);
     EXPECT_NEAR(cellValue, 13.0 / 3.0, 1e-14);
     H5Sclose(dspace);
     H5Dclose(dset);
@@ -633,8 +604,7 @@ namespace Rodin::Tests::Unit
     sharder.shard(partitioner);
     const auto& shard = sharder.getShards().front();
 
-    const boost::filesystem::path meshH5 =
-        "/tmp/rodin_xdmf_shard_owned_curved.h5";
+    const boost::filesystem::path meshH5 = "/tmp/rodin_xdmf_shard_owned_curved.h5";
     HDF5::writeXDMFMesh(meshH5, shard, false);
 
     hid_t h5 = H5Fopen(meshH5.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -646,8 +616,7 @@ namespace Rodin::Tests::Unit
     hsize_t vdims[2] = {0, 0};
     ASSERT_EQ(H5Sget_simple_extent_dims(vspace, vdims, nullptr), 2);
     EXPECT_EQ(
-        static_cast<size_t>(vdims[0]),
-        HDF5::getXDMFVisualizationVertexCount(shard));
+      static_cast<size_t>(vdims[0]), HDF5::getXDMFVisualizationVertexCount(shard));
     EXPECT_EQ(static_cast<size_t>(vdims[1]), shard.getSpaceDimension());
     H5Sclose(vspace);
     H5Dclose(vdset);
@@ -657,20 +626,17 @@ namespace Rodin::Tests::Unit
     hid_t tspace = H5Dget_space(tdset);
     hsize_t tcount = 0;
     ASSERT_EQ(H5Sget_simple_extent_dims(tspace, &tcount, nullptr), 1);
-    EXPECT_EQ(
-        static_cast<size_t>(tcount),
-        HDF5::getXDMFMixedTopologySize(shard));
+    EXPECT_EQ(static_cast<size_t>(tcount), HDF5::getXDMFMixedTopologySize(shard));
     H5Sclose(tspace);
     H5Dclose(tdset);
 
-    hid_t adset = H5Dopen2(h5, HDF5::attributePath(shard.getDimension()).c_str(), H5P_DEFAULT);
+    hid_t adset =
+      H5Dopen2(h5, HDF5::attributePath(shard.getDimension()).c_str(), H5P_DEFAULT);
     ASSERT_GE(adset, 0);
     hid_t aspace = H5Dget_space(adset);
     hsize_t acount = 0;
     ASSERT_EQ(H5Sget_simple_extent_dims(aspace, &acount, nullptr), 1);
-    EXPECT_EQ(
-        static_cast<size_t>(acount),
-        HDF5::getXDMFRenderedCellCount(shard));
+    EXPECT_EQ(static_cast<size_t>(acount), HDF5::getXDMFRenderedCellCount(shard));
     H5Sclose(aspace);
     H5Dclose(adset);
 
@@ -679,17 +645,14 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates IO HDF 5 Quadratic XDMF over the IO HDF 5 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      Rodin_IO_HDF5,
-      Rodin_IO_HDF5_QuadraticXDMF,
-      testing::Values(
-        QuadraticXDMFCase{Polytope::Type::Segment,       34u, 3u},
-        QuadraticXDMFCase{Polytope::Type::Triangle,      36u, 6u},
-        QuadraticXDMFCase{Polytope::Type::Quadrilateral, 35u, 9u},
-        QuadraticXDMFCase{Polytope::Type::Tetrahedron,   38u, 10u},
-        QuadraticXDMFCase{Polytope::Type::Pyramid,       39u, 13u},
-        QuadraticXDMFCase{Polytope::Type::Wedge,         41u, 18u},
-        QuadraticXDMFCase{Polytope::Type::Hexahedron,    50u, 27u}));
+  INSTANTIATE_TEST_SUITE_P(Rodin_IO_HDF5, Rodin_IO_HDF5_QuadraticXDMF,
+    testing::Values(QuadraticXDMFCase{Polytope::Type::Segment, 34u, 3u},
+      QuadraticXDMFCase{Polytope::Type::Triangle, 36u, 6u},
+      QuadraticXDMFCase{Polytope::Type::Quadrilateral, 35u, 9u},
+      QuadraticXDMFCase{Polytope::Type::Tetrahedron, 38u, 10u},
+      QuadraticXDMFCase{Polytope::Type::Pyramid, 39u, 13u},
+      QuadraticXDMFCase{Polytope::Type::Wedge, 41u, 18u},
+      QuadraticXDMFCase{Polytope::Type::Hexahedron, 50u, 27u}));
 
   /// @brief The XDMF visualization path must write evaluated vertex data,.
   TEST(Rodin_IO_HDF5, XDMFVisualizationEvaluatedAttributes)
@@ -886,48 +849,45 @@ namespace
     {
       case 1:
       {
-        builder
-          .nodes(3)
-          .vertex({ 0.0 })
-          .vertex({ 1.0 })
-          .vertex({ 2.0 })
-          .polytope(Polytope::Type::Segment, { 0, 1 })
-          .attribute({ 1, 0 }, 11)
-          .polytope(Polytope::Type::Segment, { 1, 2 })
-          .attribute({ 1, 1 }, 22);
+        builder.nodes(3)
+          .vertex({0.0})
+          .vertex({1.0})
+          .vertex({2.0})
+          .polytope(Polytope::Type::Segment, {0, 1})
+          .attribute({1, 0}, 11)
+          .polytope(Polytope::Type::Segment, {1, 2})
+          .attribute({1, 1}, 22);
         break;
       }
       case 2:
       {
-        builder
-          .nodes(5)
-          .vertex({ 0.0, 0.0 })
-          .vertex({ 1.0, 0.0 })
-          .vertex({ 0.0, 1.0 })
-          .vertex({ 2.0, 0.0 })
-          .vertex({ 2.0, 1.0 })
-          .polytope(Polytope::Type::Triangle, { 0, 1, 2 })
-          .attribute({ 2, 0 }, 11)
-          .polytope(Polytope::Type::Quadrilateral, { 1, 3, 4, 2 })
-          .attribute({ 2, 1 }, 22);
+        builder.nodes(5)
+          .vertex({0.0, 0.0})
+          .vertex({1.0, 0.0})
+          .vertex({0.0, 1.0})
+          .vertex({2.0, 0.0})
+          .vertex({2.0, 1.0})
+          .polytope(Polytope::Type::Triangle, {0, 1, 2})
+          .attribute({2, 0}, 11)
+          .polytope(Polytope::Type::Quadrilateral, {1, 3, 4, 2})
+          .attribute({2, 1}, 22);
         break;
       }
       case 3:
       {
-        builder
-          .nodes(8)
-          .vertex({ 0.0, 0.0, 0.0 })
-          .vertex({ 1.0, 0.0, 0.0 })
-          .vertex({ 1.0, 1.0, 0.0 })
-          .vertex({ 0.0, 1.0, 0.0 })
-          .vertex({ 0.0, 0.0, 1.0 })
-          .vertex({ 1.0, 0.0, 1.0 })
-          .vertex({ 1.0, 1.0, 1.0 })
-          .vertex({ 0.0, 1.0, 1.0 })
-          .polytope(Polytope::Type::Tetrahedron, { 0, 1, 2, 4 })
-          .attribute({ 3, 0 }, 11)
-          .polytope(Polytope::Type::Hexahedron, { 0, 1, 2, 3, 4, 5, 6, 7 })
-          .attribute({ 3, 1 }, 22);
+        builder.nodes(8)
+          .vertex({0.0, 0.0, 0.0})
+          .vertex({1.0, 0.0, 0.0})
+          .vertex({1.0, 1.0, 0.0})
+          .vertex({0.0, 1.0, 0.0})
+          .vertex({0.0, 0.0, 1.0})
+          .vertex({1.0, 0.0, 1.0})
+          .vertex({1.0, 1.0, 1.0})
+          .vertex({0.0, 1.0, 1.0})
+          .polytope(Polytope::Type::Tetrahedron, {0, 1, 2, 4})
+          .attribute({3, 0}, 11)
+          .polytope(Polytope::Type::Hexahedron, {0, 1, 2, 3, 4, 5, 6, 7})
+          .attribute({3, 1}, 22);
         break;
       }
       default:
@@ -937,8 +897,7 @@ namespace
   }
 
   void expectAttributeRegressionMesh(
-      const Geometry::Mesh<Context::Local>& mesh,
-      size_t dim)
+    const Geometry::Mesh<Context::Local>& mesh, size_t dim)
   {
     ASSERT_EQ(mesh.getSpaceDimension(), dim);
     ASSERT_EQ(mesh.getDimension(), dim);
@@ -985,7 +944,8 @@ namespace
   }
   // Parameterized test fixture
   class HDF5MultiDim : public ::testing::TestWithParam<Polytope::Type> {};
-  class HDF5AttributeRegression : public ::testing::TestWithParam<size_t> {};
+  class HDF5AttributeRegression : public ::testing::TestWithParam<size_t>
+  {};
 
   // --- Mesh round-trip persistence across dimensions -------------------------
 
@@ -1037,7 +997,7 @@ namespace
   {
     const size_t dim = GetParam();
     const std::string meshFile =
-        "/tmp/rodin_hdf5_attr_regression_" + std::to_string(dim) + "d.h5";
+      "/tmp/rodin_hdf5_attr_regression_" + std::to_string(dim) + "d.h5";
 
     Mesh mesh = makeAttributeRegressionMesh(dim);
     mesh.save(meshFile, FileFormat::HDF5);
@@ -1475,12 +1435,8 @@ namespace
       ),
       PolytopeNameGenerator());
 
-  INSTANTIATE_TEST_SUITE_P(
-      Dimensions,
-      HDF5AttributeRegression,
-      ::testing::Values(1, 2, 3),
-      [](const ::testing::TestParamInfo<size_t>& info)
-      {
-        return "Dim" + std::to_string(info.param) + "D";
-      });
+  INSTANTIATE_TEST_SUITE_P(Dimensions, HDF5AttributeRegression,
+    ::testing::Values(1, 2, 3), [](const ::testing::TestParamInfo<size_t>& info) {
+      return "Dim" + std::to_string(info.param) + "D";
+    });
 }

@@ -287,8 +287,8 @@ namespace Rodin::MMG
       if (newna > 0)
       {
         MMG5_SAFE_CALLOC(edges, newna + 1, MMG5_Edge,
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to reallocate edge memory." << Alert::Raise);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to reallocate edge memory." << Alert::Raise);
         for (size_t i = 1; i <= newna; i++)
           edges[i] = mesh->edge[ids[i - 1]];
         mesh->namax = newna;
@@ -315,8 +315,8 @@ namespace Rodin::MMG
       if (newnt > 0)
       {
         MMG5_SAFE_CALLOC(triangles, newnt + 1, MMG5_Tria,
-            Alert::MemberFunctionException(*this, __func__)
-              << "Failed to reallocate triangles." << Alert::Raise);
+          Alert::MemberFunctionException(*this, __func__)
+            << "Failed to reallocate triangles." << Alert::Raise);
         for (size_t i = 1; i <= newnt; i++)
           triangles[i] = mesh->tria[ids[i - 1]];
         mesh->ntmax = newnt;

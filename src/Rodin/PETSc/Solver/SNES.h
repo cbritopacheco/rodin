@@ -228,18 +228,18 @@ namespace Rodin::Solver
     private:
       static PetscErrorCode Update(::Vec x, void* ctx);
       static PetscErrorCode Assemble(
-          ::Vec x, void* ctx, Variational::AssemblyTarget target);
+        ::Vec x, void* ctx, Variational::AssemblyTarget target);
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
-      ::PetscReal m_abstol,  ///< Absolute convergence tolerance.
-                  m_rtol,    ///< Relative convergence tolerance.
-                  m_stol;    ///< Step norm convergence tolerance.
-      ::PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
-                 m_maxF;     ///< Maximum function evaluations.
+      ::PetscReal m_abstol, ///< Absolute convergence tolerance.
+        m_rtol, ///< Relative convergence tolerance.
+        m_stol; ///< Step norm convergence tolerance.
+      ::PetscInt m_maxIt, ///< Maximum nonlinear iterations.
+        m_maxF; ///< Maximum function evaluations.
       StateUpdate m_update; ///< Optional state synchronization callback.
       Optional<::PetscObjectState> m_lhsAssembled;
       Optional<::PetscObjectState> m_rhsAssembled;

@@ -86,8 +86,8 @@ namespace Rodin::Advection
    *   relying on a pre-defined orientation convention of face normals.
    *
    * @par Parameters
-   * - @p eps_in_phys: desired inward physical offset when the boundary is hit. The effective
-   *   offset is @c max(eps_in_phys, 50*sqrt(machine_epsilon)).
+   * - @p epsInPhys: desired inward physical offset when the boundary is hit. The effective
+   *   offset is @c max(epsInPhys, 50*sqrt(machine_epsilon)).
    *
    * @par Complexity
    * Constant time per boundary hit: one projection to cell + face, a few transforms, and a clamp.
@@ -100,15 +100,13 @@ namespace Rodin::Advection
        *
        * @param[in] dt          Signed time step used by the tracer (kept for API symmetry).
        * @param[in] mesh        Mesh on which tracing occurs.
-       * @param[in] eps_in_phys Inward physical offset used to place the footpoint strictly inside.
+       * @param[in] epsInPhys Inward physical offset used to place the footpoint strictly inside.
        */
       StopInsideBoundaryPolicy(
-          Real dt,
-          const Geometry::Mesh<Context::Local>& mesh,
-          Real eps_in_phys = Real(1e-12))
+        Real dt, const Geometry::Mesh<Context::Local>& mesh, Real epsInPhys = Real(1e-12))
         : m_dt(dt),
           m_mesh(mesh),
-          m_eps_in_phys(eps_in_phys)
+          m_epsInPhys(epsInPhys)
       {}
 
       /**
@@ -166,7 +164,6 @@ namespace Rodin::Advection
         Geometry::Point qface(cell, r, x);
         const auto JinvT = qface.getJacobianInverse().transpose();
 
-        Math::SpatialMatrix<Real> JinvT_nref = (JinvT * nref);
         Math::SpatialVector<Real> nu = (JinvT * nref).col(0); // unnormalized physical normal
         Real nn = nu.dot(nu);
         if (!(nn > Real(0)) || !std::isfinite(nn))
@@ -185,17 +182,17 @@ namespace Rodin::Advection
         mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
 
         const Real cplane = nhat.dot(x);
-        const Real sd_in  = cplane - nhat.dot(xc);
-        if (sd_in < Real(0))
+        const Real sdIn = cplane - nhat.dot(xc);
+        if (sdIn < Real(0))
           nhat = -nhat;
 
         // -------- (4) nudge inside in physical space (inside = -nhat) --------
-        const Real eps_machine = std::numeric_limits<Real>::epsilon();
-        const Real eps_floor   = Real(10) * eps_machine;
-        const Real eps_dt      = Real(0.1) * std::abs(m_dt);
-        const Real eps_in      = std::max(eps_floor, std::min(m_eps_in_phys, eps_dt));
+        const Real epsMachine = std::numeric_limits<Real>::epsilon();
+        const Real epsFloor = Real(10) * epsMachine;
+        const Real epsDt = Real(0.1) * std::abs(m_dt);
+        const Real epsIn = std::max(epsFloor, std::min(m_epsInPhys, epsDt));
 
-        x -= eps_in * nhat;
+        x -= epsIn * nhat;
 
         // -------- (5) map back + clamp --------
         mesh.getPolytopeTransformation(cd, c).inverse(rtmp, x);
@@ -209,7 +206,7 @@ namespace Rodin::Advection
     private:
       Real m_dt;
       std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
-      const Real m_eps_in_phys;
+      const Real m_epsInPhys;
   };
 
   /**
@@ -269,8 +266,8 @@ namespace Rodin::Advection
    * - `dt`: Signed step size of the tracer (kept for API symmetry; not used directly here).
    * - `mesh`: Mesh on which tracing occurs.
    * - `phi`: Scalar field/function to correct (typically the advected field itself in level-set use).
-   * - `eps_in_phys`: Desired inward physical offset. The effective shift is
-   *   `max(eps_in_phys, 50*sqrt(machine_epsilon))`.
+   * - `epsInPhys`: Desired inward physical offset. The effective shift is
+   *   `max(epsInPhys, 50*sqrt(machine_epsilon))`.
    */
   template <class Field>
   class TaylorBoundaryShiftPolicy
@@ -281,17 +278,14 @@ namespace Rodin::Advection
        * @param dt Signed time step used by the tracer.
        * @param mesh Mesh on which tracing occurs.
        * @param phi Scalar field used for the Taylor correction.
-       * @param eps_in_phys Inward physical offset used after a boundary hit.
+       * @param epsInPhys Inward physical offset used after a boundary hit.
        */
-      TaylorBoundaryShiftPolicy(
-          Real dt,
-          const Geometry::Mesh<Context::Local>& mesh,
-          const Field& phi,
-          Real eps_in_phys = Real(1e-12))
+      TaylorBoundaryShiftPolicy(Real dt, const Geometry::Mesh<Context::Local>& mesh,
+        const Field& phi, Real epsInPhys = Real(1e-12))
         : m_dt(dt),
           m_mesh(mesh),
           m_phi(phi),
-          m_eps_in_phys(eps_in_phys)
+          m_epsInPhys(epsInPhys)
       {}
 
       /**
@@ -325,9 +319,9 @@ namespace Rodin::Advection
         Geometry::Polytope::Project(g).cell(rtmp, r);
         Geometry::Polytope::Project(g).face(j, r, rtmp);
 
-        // ---- (2) physical boundary point x_hit
-        Math::SpatialPoint x_hit;
-        mesh.getPolytopeTransformation(cd, c).transform(x_hit, r);
+        // ---- (2) physical boundary point xHit
+        Math::SpatialPoint xHit;
+        mesh.getPolytopeTransformation(cd, c).transform(xHit, r);
 
         // ---- (3) outward unit normal on \partialD in physical space
         const auto nref = hs.matrix.row(j).transpose();
@@ -335,8 +329,8 @@ namespace Rodin::Advection
         const auto itc   = mesh.getPolytope(cd, c);
         const auto& cell = *itc;
 
-        Geometry::Point q_hit(cell, r, x_hit);
-        const auto JinvT = q_hit.getJacobianInverse().transpose();
+        Geometry::Point qHit(cell, r, xHit);
+        const auto JinvT = qHit.getJacobianInverse().transpose();
 
         Math::SpatialVector<Real> nu = (JinvT * nref).col(0); // unnormalized physical normal
         const Real nn = nu.dot(nu);
@@ -354,39 +348,39 @@ namespace Rodin::Advection
         Math::SpatialPoint xc;
         mesh.getPolytopeTransformation(cd, c).transform(xc, rcent);
 
-        const Real cplane = nD.dot(x_hit);
-        const Real sd_in  = cplane - nD.dot(xc);
-        if (sd_in < Real(0))
+        const Real cplane = nD.dot(xHit);
+        const Real sdIn = cplane - nD.dot(xc);
+        if (sdIn < Real(0))
           nD = -nD;
 
-        // ---- (4) inward nudge: x_new = x_hit - eps_in * nD
-        const Real eps_machine = std::numeric_limits<Real>::epsilon();
-        const Real eps_floor   = Real(10) * eps_machine;
-        const Real eps_dt      = Real(0.1) * std::abs(m_dt);
-        const Real eps_in      = std::max(eps_floor, std::min(m_eps_in_phys, eps_dt));
+        // ---- (4) inward nudge: xNew = xHit - epsIn * nD
+        const Real epsMachine = std::numeric_limits<Real>::epsilon();
+        const Real epsFloor = Real(10) * epsMachine;
+        const Real epsDt = Real(0.1) * std::abs(m_dt);
+        const Real epsIn = std::max(epsFloor, std::min(m_epsInPhys, epsDt));
 
-        Math::SpatialPoint x_new = x_hit;
-        x_new -= eps_in * nD;
+        Math::SpatialPoint xNew = xHit;
+        xNew -= epsIn * nD;
 
-        // ---- (5) value correction via first-order Taylor to recover phi(x_hit) from phi(x_new)
+        // ---- (5) value correction via first-order Taylor to recover phi(xHit) from phi(xNew)
         //
-        // We will evaluate phi at the nudged point x_new (since we set hit.rref to it).
+        // We will evaluate phi at the nudged point xNew (since we set hit.rref to it).
         // To approximate the *unshifted* hit value, use:
-        //   phi(x_hit) ≈ phi(x_new) + gradphi \cdot (x_hit - x_new)
-        const auto gphi = Variational::Grad(m_phi.get()).getValue(q_hit);
+        //   phi(xHit) ≈ phi(xNew) + gradphi \cdot (xHit - xNew)
+        const auto gphi = Variational::Grad(m_phi.get()).getValue(qHit);
 
-        // dx = x_hit - x_new  (NOTE THE SIGN)
+        // dx = xHit - xNew  (NOTE THE SIGN)
         Math::SpatialVector<Real> dx;
         dx.resize(gphi.size());
         for (int k = 0; k < dx.size(); ++k)
-          dx[k] = x_hit[k] - x_new[k];
+          dx[k] = xHit[k] - xNew[k];
 
         const Real dphi = dx.dot(gphi);
         if (std::isfinite(dphi))
           hit.correction += dphi;
 
         // ---- (6) map back + clamp
-        mesh.getPolytopeTransformation(cd, c).inverse(rtmp, x_new);
+        mesh.getPolytopeTransformation(cd, c).inverse(rtmp, xNew);
         Geometry::Polytope::Project(g).cell(r, rtmp);
 
         hit.rref = r;
@@ -398,7 +392,7 @@ namespace Rodin::Advection
       const Real m_dt;
       std::reference_wrapper<const Geometry::Mesh<Context::Local>> m_mesh;
       std::reference_wrapper<const Field> m_phi;
-      const Real m_eps_in_phys;
+      const Real m_epsInPhys;
   };
 
   /**

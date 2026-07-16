@@ -741,8 +741,7 @@ namespace Rodin::Solver
 
           if (m_stepPolicy)
           {
-            const StepResult step =
-              (*m_stepPolicy)(x, linearSystem, m_report);
+            const StepResult step = (*m_stepPolicy)(x, linearSystem, m_report);
             if (!std::isfinite(step.stepNorm))
             {
               m_report.reason = ConvergedReason::StepNormIsNotFinite;

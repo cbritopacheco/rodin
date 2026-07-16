@@ -280,7 +280,7 @@ namespace Rodin::Variational
 
         // For P0, the local DOF index for cell i equals i (the cell index).
         // Pre-allocate the left map with an invalid sentinel.
-        m_local_to_global.left.assign(localCellCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localCellCount, std::numeric_limits<Index>::max());
 
         // send[r]: messages to rank r — pairs (globalCellID, globalDOF).
         // Keyed by rank so every neighbor gets an entry (possibly empty).
@@ -313,8 +313,8 @@ namespace Rodin::Variational
           const Index gid    = mesh.getGlobalIndex(D, i);
           const Index global = m_offset + dofIdx++;
 
-          m_local_to_global.left[i] = global;
-          m_local_to_global.right.emplace(global, static_cast<Index>(i));
+          m_localToGlobal.left[i] = global;
+          m_localToGlobal.right.emplace(global, static_cast<Index>(i));
 
           // Notify all neighbors that have this cell as a ghost.
           auto hit = halo.find(i);
@@ -364,14 +364,14 @@ namespace Rodin::Variational
             const Index li = *liOpt;
             assert(!shard.isOwned(D, li));
 
-            m_local_to_global.left[li] = global;
-            m_local_to_global.right.emplace(global, li);
+            m_localToGlobal.left[li] = global;
+            m_localToGlobal.right.emplace(global, li);
           }
         }
 
 #ifndef NDEBUG
         for (size_t i = 0; i < localCellCount; ++i)
-          assert(m_local_to_global.left[i] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[i] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -425,7 +425,7 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(localIdx);
+        return m_localToGlobal.left.at(localIdx);
       }
 
       /**
@@ -439,8 +439,8 @@ namespace Rodin::Variational
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto it = m_local_to_global.right.find(globalIdx);
-        if (it == m_local_to_global.right.end())
+        auto it = m_localToGlobal.right.find(globalIdx);
+        if (it == m_localToGlobal.right.end())
           return std::nullopt;
         return it->second;
       }
@@ -585,7 +585,7 @@ namespace Rodin::Variational
 
       size_t m_offset;
       size_t m_owned;
-      IndexBimap m_local_to_global;
+      IndexBimap m_localToGlobal;
   };
 }
 

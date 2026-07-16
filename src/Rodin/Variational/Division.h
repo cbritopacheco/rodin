@@ -313,7 +313,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& ip = getIntegrationPoint();
-        const auto lhs = getLHS().getBasis(local);
+        decltype(auto) lhs = getLHS().getBasis(local);
         const auto rhs = getRHS().getValue(ip);
         return lhs / rhs;
       }

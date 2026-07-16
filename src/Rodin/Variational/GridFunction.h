@@ -718,18 +718,11 @@ namespace Rodin::Variational
         const size_t d = polytope.getDimension();
         const Index  i = polytope.getIndex();
 
-        const auto& fe = fes.getFiniteElement(d, i);
-        const size_t count = fe.getCount();
         const auto& dofs = getCachedDOFs(d, i);
-        for (Index local = 0; local < count; ++local)
-        {
-          const auto mapping = fes.getPushforward({ d, i }, fe.getBasis(local));
-          const auto k = this->operator[](dofs[local]) * mapping(p);
-          if (local == 0)
-            res = k;
-          else
-            res += k;
-        }
+        const auto coefficient = [&](size_t local) -> decltype(auto) {
+          return this->operator[](dofs[local]);
+        };
+        fes.evaluate(res, {d, i}, coefficient, p);
       }
 
       /**

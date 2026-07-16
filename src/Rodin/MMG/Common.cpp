@@ -10,16 +10,16 @@ namespace Rodin::MMG
 {
   const char* getISCDMshdistExecutable()
   {
-   return ISCD_MSHDIST_EXECUTABLE;
+    return iscdMshdistExecutable;
   }
 
   const char* getISCDAdvectExecutable()
   {
-   return ISCD_ADVECTION_EXECUTABLE;
+    return iscdAdvectionExecutable;
   }
 
   int getMMGVerbosityLevel()
   {
-   return VERBOSITY_LEVEL;
+    return verbosityLevel;
   }
 }

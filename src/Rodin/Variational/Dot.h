@@ -438,7 +438,7 @@ namespace Rodin::Variational
       {
         const auto& ip = this->getRHS().getIntegrationPoint();
         const auto lhs = getLHS().getValue(ip);
-        const auto rhs = getRHS().getBasis(local);
+        decltype(auto) rhs = getRHS().getBasis(local);
         return Math::dot(lhs, rhs);
       }
 
@@ -585,7 +585,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = getLHS().getIntegrationPoint();
-        const auto lhs = getLHS().getBasis(local);
+        decltype(auto) lhs = getLHS().getBasis(local);
         const auto rhs = getRHS().getValue(p);
         return Math::dot(lhs, rhs);
       }
@@ -714,8 +714,8 @@ namespace Rodin::Variational
       constexpr
       auto operator()(size_t tr, size_t te)
       {
-        const auto lhs = getLHS().getBasis(tr);
-        const auto rhs = getRHS().getBasis(te);
+        decltype(auto) lhs = getLHS().getBasis(tr);
+        decltype(auto) rhs = getRHS().getBasis(te);
         return Math::dot(lhs, rhs);
       }
 

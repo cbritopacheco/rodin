@@ -307,8 +307,7 @@ namespace Rodin::IO
       snapshot.cellCount = HDF5::getXDMFRenderedCellCount(*gr.mesh);
       snapshot.meshDimension = gr.mesh->getDimension();
       snapshot.spaceDimension = gr.mesh->getSpaceDimension();
-      const auto topologyLayout =
-        HDF5::getXDMFTopologyLayout(*gr.mesh, !m_distributed);
+      const auto topologyLayout = HDF5::getXDMFTopologyLayout(*gr.mesh, !m_distributed);
       snapshot.topologySize = topologyLayout.entryCount;
       snapshot.topologyIsUniform = topologyLayout.isUniform;
       snapshot.topologyType = topologyLayout.topologyType;
@@ -432,9 +431,8 @@ namespace Rodin::IO
     os << indent(bi) << "<Grid Name=\"" << gridName << "\" GridType=\"Uniform\">\n";
     os << indent(bi + 1) << "<Time Value=\"" << snap.time << "\" />\n";
 
-    os << indent(bi + 1) << "<Topology TopologyType=\""
-       << snap.topologyType << "\" NumberOfElements=\""
-       << snap.cellCount << "\">\n";
+    os << indent(bi + 1) << "<Topology TopologyType=\"" << snap.topologyType
+       << "\" NumberOfElements=\"" << snap.cellCount << "\">\n";
     // Precision="8" is required here because the HDF5 topology dataset is U64.
     // Without Precision, some XDMF readers may assume 32-bit UInt and misread
     // the dataset.
@@ -444,8 +442,7 @@ namespace Rodin::IO
       os << snap.topologyRows << " " << snap.topologyColumns;
     else
       os << snap.topologySize;
-    os << "\">" << meshH5 << ":" << HDF5::Path::MeshXDMFTopology
-       << "</DataItem>\n";
+    os << "\">" << meshH5 << ":" << HDF5::Path::MeshXDMFTopology << "</DataItem>\n";
     os << indent(bi + 1) << "</Topology>\n";
 
     os << indent(bi + 1) << "<Geometry GeometryType=\""

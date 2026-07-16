@@ -261,7 +261,7 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(localIdx);
+        return m_localToGlobal.left.at(localIdx);
       }
 
       /**
@@ -269,8 +269,8 @@ namespace Rodin::Variational
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto it = m_local_to_global.right.find(globalIdx);
-        if (it == m_local_to_global.right.end())
+        auto it = m_localToGlobal.right.find(globalIdx);
+        if (it == m_localToGlobal.right.end())
           return std::nullopt;
         return it->second;
       }
@@ -348,8 +348,7 @@ namespace Rodin::Variational
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        */
       template <class CallableType>
-      auto getPushforward(
-          const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -361,6 +360,18 @@ namespace Rodin::Variational
       auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
+      }
+
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:
@@ -424,22 +435,21 @@ namespace Rodin::Variational
             // Fekete tet ordering.
             // tetraTotal = (K+1)(K+2)(K+3)/6
             // For (i,j,k) with i+j+k <= K, i,j,k >= 0:
-            //   offset_k = tetraTotal - (K-k+1)(K-k+2)(K-k+3)/6
-            //   offset_j = j*(K-k+1) - j*(j-1)/2
-            //   idx      = offset_k + offset_j + i
+            //   offsetK = tetraTotal - (K-k+1)(K-k+2)(K-k+3)/6
+            //   offsetJ = j*(K-k+1) - j*(j-1)/2
+            //   idx      = offsetK + offsetJ + i
             // Interior: i > 0, j > 0, k > 0, i+j+k < K
             const size_t tetraTotal = (K + 1) * (K + 2) * (K + 3) / 6;
             for (size_t k = 1; k + 2 < K; ++k)          // k <= K-3
             {
-              const size_t m_tail   = K - k;
-              const size_t tetraTail =
-                  (m_tail + 1) * (m_tail + 2) * (m_tail + 3) / 6;
-              const size_t offset_k = tetraTotal - tetraTail;
+              const size_t tail = K - k;
+              const size_t tetraTail = (tail + 1) * (tail + 2) * (tail + 3) / 6;
+              const size_t offsetK = tetraTotal - tetraTail;
               for (size_t j = 1; j + k + 1 < K; ++j)    // j <= K-k-2
               {
-                const size_t offset_j = j * (K - k + 1) - j * (j - 1) / 2;
+                const size_t offsetJ = j * (K - k + 1) - j * (j - 1) / 2;
                 for (size_t i = 1; i + j + k < K; ++i)  // i <= K-j-k-1
-                  res.push_back(offset_k + offset_j + i);
+                  res.push_back(offsetK + offsetJ + i);
               }
             }
             break;
@@ -682,7 +692,7 @@ namespace Rodin::Variational
       }
 
       /**
-       * @brief Core DOF-numbering algorithm: builds m_local_to_global.
+       * @brief Core DOF-numbering algorithm: builds m_localToGlobal.
        *
        * For each entity dimension d = 0..D, owned entities receive contiguous
        * global DOF indices.  Non-owned entities obtain their global DOF
@@ -743,8 +753,7 @@ namespace Rodin::Variational
         // Step 3: pre-allocate local_to_global.left.
         // ------------------------------------------------------------------
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(
-            localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
         // ------------------------------------------------------------------
         // Step 4: for each dimension, assign owned global indices and
@@ -802,7 +811,7 @@ namespace Rodin::Variational
 
             const auto& entityDOFs = m_fes.getDOFs(d, i);
             for (const size_t p : pos)
-              m_local_to_global.left[entityDOFs(p)] = dofIdx++;
+              m_localToGlobal.left[entityDOFs(p)] = dofIdx++;
           }
 
           // ----------------------------------------------------------------
@@ -811,9 +820,9 @@ namespace Rodin::Variational
           //     owner rank.  The halo is complete after reconcile() runs
           //     the holder-set propagation, so no all_to_all is required.
           // ----------------------------------------------------------------
-          const auto& halo_d = shard.getHalo(d);
+          const auto& dimensionHalo = shard.getHalo(d);
 
-          std::vector<std::vector<EntityMsg>> push_send(static_cast<size_t>(P));
+          std::vector<std::vector<EntityMsg>> pushSend(static_cast<size_t>(P));
 
           for (Index i = 0; i < static_cast<Index>(count); ++i)
           {
@@ -825,12 +834,12 @@ namespace Rodin::Variational
             if (pos.empty())
               continue;
 
-            auto hit = halo_d.find(i);
-            if (hit == halo_d.end())
+            auto hit = dimensionHalo.find(i);
+            if (hit == dimensionHalo.end())
               continue;
 
             const auto& entityDOFs = m_fes.getDOFs(d, i);
-            const Index  firstGDOF = m_local_to_global.left[entityDOFs(pos[0])];
+            const Index firstGDOF = m_localToGlobal.left[entityDOFs(pos[0])];
             const Index  gid       = mesh.getGlobalIndex(d, i);
             const auto   orderedVertexIDs = getOrderedVertexIDs(i);
 
@@ -839,40 +848,39 @@ namespace Rodin::Variational
               const int rh = static_cast<int>(h);
               if (rh == rank)
                 continue;
-              push_send[static_cast<size_t>(rh)].push_back(
-                  { gid, { firstGDOF, orderedVertexIDs } });
+              pushSend[static_cast<size_t>(rh)].push_back(
+                {gid, {firstGDOF, orderedVertexIDs}});
             }
           }
 
           // Build the symmetric neighbor set for dimension d from halo(d) ∪ owner(d).
           // Using all neighbors ensures every isend has a matching irecv and
           // no messages are orphaned between sequential FES constructions.
-          std::vector<int> neighbors_d;
+          std::vector<int> dimensionNeighbors;
           {
             UnorderedSet<int> nbrs;
-            const auto& halo_d_nbrs = shard.getHalo(d);
-            for (const auto& [i, peers] : halo_d_nbrs)
+            const auto& dimensionHaloNeighbors = shard.getHalo(d);
+            for (const auto& [i, peers] : dimensionHaloNeighbors)
               for (const Index r : peers)
                 if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
             for (const auto& [i, r] : owner)
               if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
-            neighbors_d.assign(nbrs.begin(), nbrs.end());
+            dimensionNeighbors.assign(nbrs.begin(), nbrs.end());
           }
 
           // Tag 100+d is reserved for H1 entity-push DOF exchange at dimension d
           // and does not overlap with SubMesh (10,11) or other FES (50,51,52) tags.
-          const int tag_push = 100 + static_cast<int>(d);
+          const int pushTag = 100 + static_cast<int>(d);
 
-          UnorderedMap<int, std::vector<EntityMsg>> push_recv;
+          UnorderedMap<int, std::vector<EntityMsg>> pushReceive;
           std::vector<boost::mpi::request> reqs;
-          reqs.reserve(2 * neighbors_d.size());
+          reqs.reserve(2 * dimensionNeighbors.size());
 
-          for (int r : neighbors_d)
+          for (int r : dimensionNeighbors)
           {
-            push_recv[r]; // default-construct
-            reqs.push_back(comm.irecv(r, tag_push, push_recv[r]));
-            reqs.push_back(comm.isend(r, tag_push,
-                push_send[static_cast<size_t>(r)]));
+            pushReceive[r]; // default-construct
+            reqs.push_back(comm.irecv(r, pushTag, pushReceive[r]));
+            reqs.push_back(comm.isend(r, pushTag, pushSend[static_cast<size_t>(r)]));
           }
 
           boost::mpi::wait_all(reqs.begin(), reqs.end());
@@ -880,7 +888,7 @@ namespace Rodin::Variational
           // ----------------------------------------------------------------
           // 4c. Install received global DOF numbering for non-owned entities.
           // ----------------------------------------------------------------
-          for (auto& [r, msgs] : push_recv)
+          for (auto& [r, msgs] : pushReceive)
           {
             for (const auto& [gid, payload] : msgs)
             {
@@ -899,8 +907,8 @@ namespace Rodin::Variational
               {
                 const auto ownerK = orientedOwnerOrdinal(
                     g, pos, k, localVertexIDs, ownerVertexIDs);
-                m_local_to_global.left[entityDOFs(pos[k])] =
-                    firstGDOF + static_cast<Index>(ownerK.value_or(k));
+                m_localToGlobal.left[entityDOFs(pos[k])] =
+                  firstGDOF + static_cast<Index>(ownerK.value_or(k));
               }
             }
           }
@@ -913,13 +921,13 @@ namespace Rodin::Variational
         // ------------------------------------------------------------------
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
 
         for (size_t local = 0; local < localDofCount; ++local)
         {
-          const Index global = m_local_to_global.left[local];
-          m_local_to_global.right.emplace(global, static_cast<Index>(local));
+          const Index global = m_localToGlobal.left[local];
+          m_localToGlobal.right.emplace(global, static_cast<Index>(local));
         }
       }
 
@@ -929,7 +937,7 @@ namespace Rodin::Variational
       size_t m_offset;
       size_t m_owned;
       size_t m_globalSize;
-      IndexBimap m_local_to_global;
+      IndexBimap m_localToGlobal;
   };
 
 
@@ -1157,8 +1165,7 @@ namespace Rodin::Variational
         //   [scalarBegin * vdim, scalarEnd * vdim)
         // ------------------------------------------------------------------
         const size_t localVecSize = m_fes.getSize();
-        m_local_to_global.left.assign(
-            localVecSize, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localVecSize, std::numeric_limits<Index>::max());
 
         for (size_t localScalar = 0; localScalar < scalarLocalSize; ++localScalar)
         {
@@ -1172,19 +1179,19 @@ namespace Rodin::Variational
             const Index globalVec =
                 static_cast<Index>(globalScalar * vdim + c);
 
-            m_local_to_global.left[localVec] = globalVec;
+            m_localToGlobal.left[localVec] = globalVec;
           }
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localVecSize; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
 
         for (size_t local = 0; local < localVecSize; ++local)
         {
-          const Index global = m_local_to_global.left[local];
-          m_local_to_global.right.emplace(global, static_cast<Index>(local));
+          const Index global = m_localToGlobal.left[local];
+          m_localToGlobal.right.emplace(global, static_cast<Index>(local));
         }
       }
 
@@ -1217,7 +1224,7 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(localIdx);
+        return m_localToGlobal.left.at(localIdx);
       }
 
       /**
@@ -1225,8 +1232,8 @@ namespace Rodin::Variational
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto it = m_local_to_global.right.find(globalIdx);
-        if (it == m_local_to_global.right.end())
+        auto it = m_localToGlobal.right.find(globalIdx);
+        if (it == m_localToGlobal.right.end())
           return std::nullopt;
         return it->second;
       }
@@ -1304,8 +1311,7 @@ namespace Rodin::Variational
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        */
       template <class CallableType>
-      auto getPushforward(
-          const std::pair<size_t, Index>&, CallableType&& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
@@ -1319,6 +1325,18 @@ namespace Rodin::Variational
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
+      }
+
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
@@ -1327,7 +1345,7 @@ namespace Rodin::Variational
       size_t m_offset;
       size_t m_owned;
       size_t m_globalSize;
-      IndexBimap m_local_to_global;
+      IndexBimap m_localToGlobal;
   };
 }
 

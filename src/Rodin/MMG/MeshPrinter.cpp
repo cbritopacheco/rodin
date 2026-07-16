@@ -75,10 +75,8 @@ namespace Rodin::MMG
   void MeshPrinter::printRequiredTriangles(std::ostream& os)
   {
     const auto& mesh = getObject();
-    os << IO::MEDIT::Keyword::RequiredTriangles
-       << '\n'
-       << mesh.getRequiredTriangles().size()
-       << '\n';
+    os << IO::MEDIT::Keyword::RequiredTriangles << '\n'
+       << mesh.getRequiredTriangles().size() << '\n';
     for (const auto& r : mesh.getRequiredTriangles())
       os << r + 1 << '\n';
     os << '\n';
@@ -87,10 +85,8 @@ namespace Rodin::MMG
   void MeshPrinter::printRequiredTetrahedra(std::ostream& os)
   {
     const auto& mesh = getObject();
-    os << IO::MEDIT::Keyword::RequiredTetrahedra
-       << '\n'
-       << mesh.getRequiredTetrahedra().size()
-       << '\n';
+    os << IO::MEDIT::Keyword::RequiredTetrahedra << '\n'
+       << mesh.getRequiredTetrahedra().size() << '\n';
     for (const auto& r : mesh.getRequiredTetrahedra())
       os << r + 1 << '\n';
     os << '\n';

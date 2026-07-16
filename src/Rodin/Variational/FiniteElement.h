@@ -241,6 +241,36 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Evaluates a local finite element expansion on the reference element.
+       *
+       * Given local coefficients @f$ c_i @f$ and basis functions
+       * @f$ \varphi_i @f$, this method evaluates
+       * @f[
+       *   u_h(\widehat{x}) = \sum_i c_i \varphi_i(\widehat{x}).
+       * @f]
+       *
+       * Derived finite elements may hide this method with an equivalent
+       * structured contraction when their basis has a known component layout.
+       *
+       * @tparam Range Range type of the finite element expansion.
+       * @tparam Coefficient Callable returning the local coefficient of a basis.
+       * @param[out] out Value of the expansion.
+       * @param[in] coefficient Local coefficient accessor.
+       * @param[in] rc Reference coordinates.
+       */
+      template <class Range, class Coefficient>
+      constexpr void evaluate(
+        Range& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
+      {
+        const auto& derived = static_cast<const Derived&>(*this);
+        const size_t count = derived.getCount();
+        assert(count > 0);
+        out = coefficient(size_t(0)) * derived.getBasis(0)(rc);
+        for (size_t local = 1; local < count; ++local)
+          out += coefficient(local) * derived.getBasis(local)(rc);
+      }
+
+      /**
        * @brief Gets the i-th linear functional (degree of freedom) on the element.
        *
        * A linear form represents one element of the DOF set @f$ \Sigma @f$, such

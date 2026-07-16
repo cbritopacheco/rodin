@@ -242,7 +242,8 @@ namespace Rodin::Variational
       /// @returns Reference to this problem.
       Problem& assemble(AssemblyTarget target) override
       {
-        m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() }, target);
+        m_assembly.execute(
+          m_axb, {m_pb, this->getTrialFunction(), this->getTestFunction()}, target);
         m_assembled = true;
         return *this;
       }
@@ -618,12 +619,8 @@ namespace Rodin::Variational
       {
         computeOffsets();
 
-        AssemblyInput in{
-          m_pb, m_us, m_vs,
-          m_trialOffsets, m_testOffsets,
-          m_trialUUIDMap, m_testUUIDMap,
-          m_totalTrial, m_totalTest
-        };
+        AssemblyInput in{m_pb, m_us, m_vs, m_trialOffsets, m_testOffsets, m_trialUUIDMap,
+          m_testUUIDMap, m_totalTrial, m_totalTest};
 
         m_assembly.execute(m_axb, in, target);
 

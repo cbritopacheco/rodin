@@ -93,6 +93,27 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs[1], 1);
   }
 
+  /// @brief Verifies scalar and vector P0g grid-function evaluation.
+  TEST(Rodin_Variational_P0g, GridFunctionEvaluation)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    P0g scalarFES(mesh);
+    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> vectorFES(mesh, 2);
+    GridFunction scalar(scalarFES);
+    GridFunction vector(vectorFES);
+    scalar = RealFunction(3.5);
+    vector.getData()(0) = -1.25;
+    vector.getData()(1) = 2.75;
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
+    const auto value = vector(p);
+
+    EXPECT_NEAR(scalar(p), 3.5, 1e-14);
+    EXPECT_NEAR(value(0), -1.25, 1e-14);
+    EXPECT_NEAR(value(1), 2.75, 1e-14);
+  }
+
   // ---- P0g element properties ----
 
   /// @brief Verifies scalar element properties for variational P0 g by checking tolerance-based numerical results, exact expected values.

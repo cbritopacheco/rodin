@@ -357,7 +357,7 @@ namespace Rodin::Eikonal
       }
 
       static Real computeEdgeGeodesicDistance(
-          Index a, Index b, Index edge_idx, const Mesh& mesh)
+        Index a, Index b, Index edgeIdx, const Mesh& mesh)
       {
         // For now, use geometric distance as approximation
         // In the future, this could integrate along curved edges using PolytopeTransformation

@@ -527,7 +527,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      auto getBasis(size_t local) const
+      const SpatialMatrixType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.jac.size());
