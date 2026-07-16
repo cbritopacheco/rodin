@@ -1118,6 +1118,8 @@ namespace Rodin::Geometry
        * @param[in] g Geometry type of the cells (e.g., Triangle,
        * Quadrilateral)
        * @param[in] l Number of nodes in each coordinate direction
+       * @throws Alert::MemberFunctionException If the shape dimension does
+       * not match the geometry or an axis contains fewer than two grid points.
        */
       static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
       {
@@ -1154,6 +1156,8 @@ namespace Rodin::Geometry
        * @param[in] g Geometry type of the cells (e.g., Triangle,
        * Quadrilateral)
        * @param[in] shape Number of nodes in each coordinate direction
+       * @throws Alert::MemberFunctionException If the shape dimension does
+       * not match the geometry or an axis contains fewer than two grid points.
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
