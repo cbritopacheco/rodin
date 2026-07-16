@@ -1,0 +1,181 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2025.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#include <gtest/gtest.h>
+
+#include "Rodin/Assembly.h"
+#include "Rodin/Geometry/Mesh.h"
+#include "Rodin/Solver/CG.h"
+#include "Rodin/Solver/NewtonSolver.h"
+#include "Rodin/Solver/SparseLU.h"
+#include "Rodin/Variational.h"
+
+using namespace Rodin;
+using namespace Rodin::Geometry;
+using namespace Rodin::Variational;
+using Rodin::Solver::CG;
+using Rodin::Solver::SparseLU;
+
+namespace Rodin::Tests::Unit::InitialGuess
+{
+  /**
+   * A full assemble() must seed the linear system's solution vector (the
+   * initial guess) from the trial function data.
+   */
+  TEST(Rodin_Solver_InitialGuess, AssembleSeedsGuessFromTrialFunction)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+
+    RealFunction f = 1.0;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v))
+            - Integral(f, v)
+            + DirichletBC(u, Zero());
+
+    u.getSolution() = [](const Geometry::Point& p)
+    { return p.x() + 2.0 * p.y(); };
+
+    poisson.assemble();
+
+    const auto& guess = poisson.getLinearSystem().getSolution();
+    const auto& data = u.getSolution().getData();
+    ASSERT_EQ(guess.size(), data.size());
+    EXPECT_EQ((guess - data).norm(), 0.0);
+  }
+
+  /**
+   * An iterative solver must use the seeded guess: with the exact solution
+   * as the guess, CG must succeed within an iteration budget that is
+   * insufficient from a zero guess.
+   */
+  TEST(Rodin_Solver_InitialGuess, IterativeSolverHonorsGuess)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 16, 16 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 vh(mesh);
+    TrialFunction u(vh);
+    TestFunction v(vh);
+
+    RealFunction f = 1.0;
+
+    auto define = [&](auto& pb)
+    {
+      pb = Integral(Grad(u), Grad(v))
+         - Integral(f, v)
+         + DirichletBC(u, Zero());
+    };
+
+    // Reference solution with a direct solver.
+    Problem direct(u, v);
+    define(direct);
+    SparseLU lu(direct);
+    direct.solve(lu);
+    const Math::Vector<Real> exact = u.getSolution().getData();
+    ASSERT_GT(exact.norm(), 0.0);
+
+    // u's solution holds the exact data; assemble seeds it as the guess and
+    // a single CG iteration suffices.
+    Problem warm(u, v);
+    define(warm);
+    CG cg(warm);
+    cg.setTolerance(1e-10).setMaxIterations(1);
+    warm.solve(cg);
+    EXPECT_TRUE(cg.success());
+    EXPECT_NEAR((u.getSolution().getData() - exact).norm(), 0.0, 1e-10);
+
+    // From a zero guess, the same iteration budget must fail.
+    Problem cold(u, v);
+    define(cold);
+    u.getSolution() = Zero();
+    CG coldCG(cold);
+    coldCG.setTolerance(1e-10).setMaxIterations(1);
+    cold.solve(coldCG);
+    EXPECT_FALSE(coldCG.success());
+  }
+
+  /**
+   * The NewtonSolver increment guess policies must all converge to the same
+   * solution, and a custom guess callback must receive a correctly sized
+   * increment vector.
+   */
+  TEST(Rodin_Solver_InitialGuess, NewtonIncrementGuessPolicies)
+  {
+    Mesh mesh;
+    mesh = mesh.UniformGrid(Polytope::Type::Triangle, { 8, 8 });
+    mesh.getConnectivity().compute(1, 2);
+
+    P1 vh(mesh);
+
+    using NewtonSolverType =
+      Solver::NewtonSolver<Solver::SparseLU<Math::LinearSystem<
+        Math::SparseMatrix<Real>, Math::Vector<Real>>>>;
+    using IncrementGuess = NewtonSolverType::IncrementGuess;
+
+    auto solveWith = [&](auto configure) -> Math::Vector<Real>
+    {
+      TrialFunction du(vh);
+      TestFunction v(vh);
+
+      GridFunction u(vh);
+      u = Zero();
+
+      RealFunction f = 1.0;
+
+      // Newton form of the linear Poisson problem: J du = -F(u). Linear, so
+      // Newton converges for any increment guess policy.
+      Problem newton(du, v);
+      newton = Integral(Grad(du), Grad(v))
+             + Integral(Grad(u), Grad(v))
+             - Integral(f, v)
+             + DirichletBC(du, Zero());
+
+      SparseLU lu(newton);
+      Solver::NewtonSolver solver(lu);
+      solver.setMaxIterations(10)
+            .setAbsoluteTolerance(1e-12)
+            .setRelativeTolerance(1e-10);
+      configure(solver);
+      solver.solve(u);
+      EXPECT_TRUE(solver.getReport().converged);
+      return u.getData();
+    };
+
+    const auto zeroPolicy =
+      solveWith([](auto& s) { s.setIncrementGuess(IncrementGuess::Zero); });
+
+    const auto previousPolicy =
+      solveWith([](auto& s) { s.setIncrementGuess(IncrementGuess::Previous); });
+
+    size_t callbackCalls = 0;
+    Eigen::Index callbackSize = 0;
+    const auto customPolicy =
+      solveWith([&](auto& s)
+      {
+        s.setIncrementGuess(
+            [&](Math::Vector<Real>& guess)
+            {
+              ++callbackCalls;
+              callbackSize = guess.size();
+              guess.setZero();
+            });
+      });
+
+    EXPECT_GT(callbackCalls, 0u);
+    EXPECT_EQ(callbackSize, static_cast<Eigen::Index>(vh.getSize()));
+    EXPECT_NEAR((zeroPolicy - previousPolicy).norm(), 0.0, 1e-9);
+    EXPECT_NEAR((zeroPolicy - customPolicy).norm(), 0.0, 1e-9);
+    EXPECT_GT(zeroPolicy.norm(), 0.0);
+  }
+}

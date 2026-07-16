@@ -146,7 +146,11 @@ namespace Rodin::Solver
       /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
-        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
+        m_solver.compute(axb.getOperator());
+        if (axb.getSolution().size() == axb.getVector().size())
+          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
+        else
+          axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       /// @brief Returns whether the most recent solve converged successfully.
@@ -228,7 +232,11 @@ namespace Rodin::Solver
       /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
-        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
+        m_solver.compute(axb.getOperator());
+        if (axb.getSolution().size() == axb.getVector().size())
+          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
+        else
+          axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       /// @brief Returns whether the most recent solve converged successfully.

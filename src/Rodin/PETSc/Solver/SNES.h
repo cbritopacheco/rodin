@@ -181,9 +181,12 @@ namespace Rodin::Solver
        *
        * The solution vector is obtained directly from
        * @c ksp.getProblem().getLinearSystem().getSolution(), so no manual
-       * initial-guess packing is needed.  After the first solve the solution
-       * vector retains its value, providing a natural warm-start for subsequent
-       * time steps.
+       * initial-guess packing is needed. A full @c Problem::assemble() seeds
+       * this vector from the trial function data, so the initial iterate is
+       * the trial functions' state — consistent with
+       * @c NewtonSolverBase::solve(GridFunction&). After the first solve the
+       * solution vector retains its value, providing a natural warm start for
+       * subsequent time steps.
        */
       void solve();
 
