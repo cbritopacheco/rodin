@@ -320,6 +320,25 @@ namespace Rodin::Variational
           out += coefficient(local) * getBasis(local)(rc);
       }
 
+      template <class Coefficient>
+      constexpr
+      void interpolateGradient(
+          Math::SpatialVector<ScalarType>& out,
+          Coefficient&& coefficient,
+          const Math::SpatialPoint& rc) const
+      {
+        const size_t d = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        out.resize(d);
+        out.setZero();
+        for (size_t local = 0; local < getCount(); ++local)
+        {
+          const ScalarType value = coefficient(local);
+          const auto& basis = getBasis(local);
+          for (size_t k = 0; k < d; ++k)
+            out(k) += value * basis.template getDerivative<1>(k)(rc);
+        }
+      }
+
       const LinearForm& getLinearForm(size_t i) const
       {
         const Geometry::Polytope::Type g = this->getGeometry();
@@ -1181,6 +1200,36 @@ namespace Rodin::Variational
           {
             const size_t local = vertex * m_vdim + component;
             out(component) += coefficient(local) * phi;
+          }
+        }
+      }
+
+      template <class Coefficient>
+      constexpr
+      void interpolateJacobian(
+          Math::SpatialMatrix<ScalarType>& out,
+          Coefficient&& coefficient,
+          const Math::SpatialPoint& rc) const
+      {
+        assert(m_vdim > 0);
+        const size_t d = Geometry::Polytope::Traits(this->getGeometry()).getDimension();
+        out.resize(m_vdim, d);
+        out.setZero();
+
+        const P1Element<ScalarType> scalarfe(this->getGeometry());
+        const size_t nv = scalarfe.getCount();
+        for (size_t vertex = 0; vertex < nv; ++vertex)
+        {
+          const auto& basis = scalarfe.getBasis(vertex);
+          for (size_t k = 0; k < d; ++k)
+          {
+            const ScalarType derivative =
+              basis.template getDerivative<1>(k)(rc);
+            for (size_t component = 0; component < m_vdim; ++component)
+            {
+              const size_t local = vertex * m_vdim + component;
+              out(component, k) += coefficient(local) * derivative;
+            }
           }
         }
       }
