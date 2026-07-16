@@ -515,6 +515,22 @@ namespace Rodin::Variational
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 
+      /**
+       * @brief Evaluates the scalar expansion directly at reference coordinates.
+       *
+       * The scalar Lagrange pushforward is composition with the element map;
+       * therefore a point already carrying reference coordinates requires no
+       * range transformation.
+       */
+      template <class Coefficient>
+      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
+      }
+
     private:
       std::reference_wrapper<const MeshType> m_mesh;
 
@@ -802,6 +818,21 @@ namespace Rodin::Variational
       {
         (void) idx;
         return Pushforward<Callable>(std::forward<Callable>(v));
+      }
+
+      /**
+       * @brief Evaluates the vector expansion directly at reference coordinates.
+       *
+       * Vector H1 uses a componentwise Lagrange map and therefore requires no
+       * range transformation after the structured local contraction.
+       */
+      template <class Coefficient>
+      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:

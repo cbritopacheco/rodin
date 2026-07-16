@@ -2,6 +2,7 @@
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
+#include "Rodin/Variational/H1.h"
 
 using namespace Rodin;
 using namespace Rodin::IO;
@@ -21,31 +22,39 @@ namespace Rodin::Tests::Unit
       {
         public:
           template <class Function>
-          explicit Pushforward(Function&& function)
-            : m_function(std::forward<Function>(function))
+          Pushforward(Function&& function, size_t& evaluations)
+            : m_function(std::forward<Function>(function)),
+              m_evaluations(evaluations)
           {}
 
-          Real operator()(const Point& p) const
+          Math::SpatialVector<Real> operator()(const Point& p) const
           {
-            return 2.0 * m_function(p.getReferenceCoordinates());
+            ++m_evaluations.get();
+            const auto value = m_function(p.getReferenceCoordinates());
+            Math::SpatialVector<Real> out(2);
+            out(0) = 2.0 * value(0) + value(1);
+            out(1) = -value(0) + 3.0 * value(1);
+            return out;
           }
 
         private:
           Callable m_function;
+          std::reference_wrapper<size_t> m_evaluations;
       };
 
       explicit RangeTransformingSpace(const LocalMesh& mesh)
-        : m_mesh(mesh), m_element(Polytope::Type::Triangle)
+        : m_mesh(mesh),
+          m_element(Polytope::Type::Triangle, 2)
       {}
 
       size_t getSize() const override
       {
-        return 3;
+        return 6;
       }
 
       size_t getVectorDimension() const override
       {
-        return 1;
+        return 2;
       }
 
       const LocalMesh& getMesh() const override
@@ -53,26 +62,33 @@ namespace Rodin::Tests::Unit
         return m_mesh.get();
       }
 
-      const P1Element<Real>& getFiniteElement(size_t, Index) const
+      const P1Element<Math::SpatialVector<Real>>& getFiniteElement(size_t, Index) const
       {
         return m_element;
       }
 
       const IndexArray& getDOFs(size_t, Index) const override
       {
-        static const IndexArray s_dofs{{ 0, 1, 2 }};
+        static const IndexArray s_dofs{{0, 1, 2, 3, 4, 5}};
         return s_dofs;
       }
 
       template <class Callable>
       auto getPushforward(const std::pair<size_t, Index>&, Callable&& function) const
       {
-        return Pushforward<Callable>(std::forward<Callable>(function));
+        return Pushforward<Callable>(
+          std::forward<Callable>(function), m_pushforwardEvaluations);
+      }
+
+      size_t getPushforwardEvaluationCount() const
+      {
+        return m_pushforwardEvaluations;
       }
 
     private:
       std::reference_wrapper<const LocalMesh> m_mesh;
-      P1Element<Real> m_element;
+      P1Element<Math::SpatialVector<Real>> m_element;
+      mutable size_t m_pushforwardEvaluations = 0;
   };
 
   TEST(Rodin_Variational_FiniteElementSpace, RangeTransformingPushforwardIsApplied)
@@ -82,8 +98,8 @@ namespace Rodin::Tests::Unit
     RangeTransformingSpace fes(mesh);
     const auto cell = mesh.getCell(0);
     const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
-    const std::array<Real, 3> coefficients{ 1.0, 2.0, 4.0 };
-    Real value = 0;
+    const std::array<Real, 6> coefficients{1.0, 2.0, 4.0, -1.0, 3.0, 5.0};
+    Math::SpatialVector<Real> value;
 
     fes.evaluate(
         value,
@@ -92,12 +108,16 @@ namespace Rodin::Tests::Unit
         p);
 
     const auto& fe = fes.getFiniteElement(mesh.getDimension(), 0);
-    Real referenceValue = 0;
+    Math::SpatialVector<Real> referenceValue;
     fe.evaluate(
         referenceValue,
         [&](size_t local) { return coefficients[local]; },
         p.getReferenceCoordinates());
-    EXPECT_NEAR(value, 2.0 * referenceValue, 1e-14);
+    Math::SpatialVector<Real> expected(2);
+    expected(0) = 2.0 * referenceValue(0) + referenceValue(1);
+    expected(1) = -referenceValue(0) + 3.0 * referenceValue(1);
+    EXPECT_NEAR((value - expected).norm(), 0, 1e-14);
+    EXPECT_EQ(fes.getPushforwardEvaluationCount(), 1);
   }
 
   /// @brief Verifies sanity test build for variational real P1 grid function by checking exact expected values.
@@ -282,6 +302,119 @@ namespace Rodin::Tests::Unit
 
     EXPECT_NEAR(value(0), 1.0 + 2.0 * p.x() - p.y(), 1e-12);
     EXPECT_NEAR(value(1), -2.0 + p.x() + 3.0 * p.y(), 1e-12);
+  }
+
+  TEST(Rodin_Variational_P1_GridFunction, EvaluationMatchesMappedBasisExpansion)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(3, 0);
+    P1 scalarFES(mesh);
+    P1 vectorFES(mesh, 3);
+    GridFunction scalar(scalarFES);
+    GridFunction vector(vectorFES);
+
+    for (Index i = 0; i < scalar.getSize(); ++i)
+      scalar[i] = Real(0.25) + Real(0.5) * i;
+    for (Index i = 0; i < vector.getSize(); ++i)
+      vector[i] = Real(-0.75) + Real(0.125) * i;
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.17, 0.23, 0.19});
+
+    Real expectedScalar = 0;
+    const auto& scalarFE = scalarFES.getFiniteElement(3, cell->getIndex());
+    const auto& scalarDOFs = scalarFES.getDOFs(3, cell->getIndex());
+    for (size_t local = 0; local < scalarFE.getCount(); ++local)
+    {
+      const auto basis =
+        scalarFES.getPushforward({3, cell->getIndex()}, scalarFE.getBasis(local));
+      expectedScalar += scalar[scalarDOFs[local]] * basis(p);
+    }
+
+    Math::SpatialVector<Real> expectedVector;
+    const auto& vectorFE = vectorFES.getFiniteElement(3, cell->getIndex());
+    const auto& vectorDOFs = vectorFES.getDOFs(3, cell->getIndex());
+    for (size_t local = 0; local < vectorFE.getCount(); ++local)
+    {
+      const auto basis =
+        vectorFES.getPushforward({3, cell->getIndex()}, vectorFE.getBasis(local));
+      const auto term = vector[vectorDOFs[local]] * basis(p);
+      if (local == 0)
+        expectedVector = term;
+      else
+        expectedVector += term;
+    }
+
+    EXPECT_NEAR(scalar(p), expectedScalar, 1e-14);
+    EXPECT_NEAR((vector(p) - expectedVector).norm(), 0, 1e-14);
+  }
+
+  TEST(Rodin_Variational_H1_GridFunction, CurvedP2EvaluationMatchesMappedBasisExpansion)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    const auto cell = mesh.getCell(0);
+    RealH1Element<2> geometryFE(Polytope::Type::Triangle);
+    PointCloud nodes(2, geometryFE.getCount());
+    for (size_t local = 0; local < geometryFE.getCount(); ++local)
+    {
+      const auto& rc = geometryFE.getNode(local);
+      Math::SpatialPoint x;
+      cell->getTransformation().transform(x, rc);
+      bool isVertex = false;
+      const Polytope::Traits traits(Polytope::Type::Triangle);
+      for (size_t vertex = 0; vertex < traits.getVertexCount(); ++vertex)
+        isVertex = isVertex || (rc - traits.getVertex(vertex)).norm() < 1e-14;
+      if (!isVertex)
+        x(1) += 0.08;
+      nodes(0, local) = x(0);
+      nodes(1, local) = x(1);
+    }
+    mesh.setPolytopeTransformation({2, cell->getIndex()},
+      new ParametricTransformation<RealH1Element<2>>(std::move(nodes), geometryFE));
+
+    H1 scalarFES(std::integral_constant<size_t, 2>{}, mesh);
+    H1 vectorFES(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
+    GridFunction scalar(scalarFES);
+    GridFunction vector(vectorFES);
+    for (Index i = 0; i < scalar.getSize(); ++i)
+      scalar[i] = Real(0.31) - Real(0.12) * i;
+    for (Index i = 0; i < vector.getSize(); ++i)
+      vector[i] = Real(-0.47) + Real(0.08) * i;
+
+    const Point p(*mesh.getCell(0), Math::SpatialPoint{0.23, 0.29});
+    const auto& scalarFE = scalarFES.getFiniteElement(2, cell->getIndex());
+    const auto& scalarDOFs = scalarFES.getDOFs(2, cell->getIndex());
+    Real expectedScalar = 0;
+    for (size_t local = 0; local < scalarFE.getCount(); ++local)
+    {
+      const auto basis =
+        scalarFES.getPushforward({2, cell->getIndex()}, scalarFE.getBasis(local));
+      expectedScalar += scalar[scalarDOFs[local]] * basis(p);
+    }
+
+    const auto& vectorFE = vectorFES.getFiniteElement(2, cell->getIndex());
+    const auto& vectorDOFs = vectorFES.getDOFs(2, cell->getIndex());
+    Math::SpatialVector<Real> expectedVector;
+    for (size_t local = 0; local < vectorFE.getCount(); ++local)
+    {
+      const auto basis =
+        vectorFES.getPushforward({2, cell->getIndex()}, vectorFE.getBasis(local));
+      const auto term = vector[vectorDOFs[local]] * basis(p);
+      if (local == 0)
+        expectedVector = term;
+      else
+        expectedVector += term;
+    }
+
+    EXPECT_NEAR(scalar(p), expectedScalar, 1e-13);
+    EXPECT_NEAR((vector(p) - expectedVector).norm(), 0, 1e-13);
   }
 
   /// @brief Verifies get value for variational real P1 grid function by checking tolerance-based numerical results.

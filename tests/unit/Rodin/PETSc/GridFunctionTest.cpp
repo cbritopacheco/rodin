@@ -54,6 +54,42 @@ namespace
     cgf.flush();
   }
 
+  TEST(PETSc_GridFunction, SequentialPointEvaluationMatchesMappedBasisExpansion)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+    mesh.getConnectivity().compute(2, 0);
+    mesh.getConnectivity().compute(3, 0);
+    P1 fes(mesh, 3);
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+
+    for (Index i = 0; i < gf.getSize(); ++i)
+      gf[i] = static_cast<PetscScalar>(Real(-0.4) + Real(0.07) * i);
+    gf.flush();
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.17, 0.23, 0.19});
+    const auto& fe = fes.getFiniteElement(3, cell->getIndex());
+    const auto& dofs = fes.getDOFs(3, cell->getIndex());
+    const auto& cgf = gf;
+    Math::SpatialVector<PetscScalar> expected;
+    for (size_t local = 0; local < fe.getCount(); ++local)
+    {
+      const auto basis = fes.getPushforward({3, cell->getIndex()}, fe.getBasis(local));
+      const auto term = cgf[dofs[local]] * basis(p);
+      if (local == 0)
+        expected = term;
+      else
+        expected += term;
+    }
+
+    const auto value = cgf(p);
+    EXPECT_NEAR((value - expected).norm(), 0, 1e-14);
+    cgf.flush();
+  }
+
   /// @brief Verifies sequential min returns value and index for PET sc grid function by checking tolerance-based numerical results, exact expected values.
   TEST(PETSc_GridFunction, SequentialMinReturnsValueAndIndex)
   {

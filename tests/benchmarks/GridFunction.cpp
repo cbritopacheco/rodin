@@ -75,6 +75,47 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
+  BENCHMARK_F(GridFunctionEvaluationBenchmark, P1ScalarReferenceExpansion)
+  (benchmark::State& state)
+  {
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
+    const auto& fe = fes.getFiniteElement(2, 0);
+    const auto& dofs = fes.getDOFs(2, 0);
+
+    for (auto _ : state)
+    {
+      Real value;
+      fe.evaluate(
+        value, [&](size_t local) -> decltype(auto) { return gf[dofs[local]]; },
+        p.getReferenceCoordinates());
+      benchmark::DoNotOptimize(value);
+    }
+  }
+
+  BENCHMARK_F(GridFunctionEvaluationBenchmark, P1ScalarSpaceExpansion)
+  (benchmark::State& state)
+  {
+    P1 fes(mesh);
+    GridFunction gf(fes);
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
+    const auto& dofs = fes.getDOFs(2, 0);
+
+    for (auto _ : state)
+    {
+      Real value;
+      fes.evaluate(
+        value, {2, 0}, [&](size_t local) -> decltype(auto) { return gf[dofs[local]]; },
+        p);
+      benchmark::DoNotOptimize(value);
+    }
+  }
+
   BENCHMARK_F(GridFunctionEvaluationBenchmark, P1ScalarMappedBasis)
   (benchmark::State& state)
   {

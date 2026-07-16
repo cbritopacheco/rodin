@@ -362,6 +362,18 @@ namespace Rodin::Variational
         return Pushforward<CallableType>(std::forward<CallableType>(v));
       }
 
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
+      }
+
     private:
       /**
        * @brief Returns the positions in getDOFs(d, i) that correspond to interior
@@ -1311,6 +1323,18 @@ namespace Rodin::Variational
       auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
         return Pushforward<CallableType>(std::forward<CallableType>(v));
+      }
+
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:

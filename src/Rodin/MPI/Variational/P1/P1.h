@@ -833,6 +833,18 @@ namespace Rodin::Variational
           std::forward<CallableType>(v));
       }
 
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
+      }
+
     private:
       std::reference_wrapper<const MeshType> m_mesh;
       FESType m_fes;
