@@ -195,20 +195,42 @@ namespace Rodin::Variational
 
         const auto& gf = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
-        const auto& fe = fes.getFiniteElement(d, i);
-        const auto& dofs = fes.getDOFs(d, i);
+        const size_t vdim = fes.getVectorDimension();
+
+        const auto geom = polytope.getGeometry();
+        const P1Element<ScalarType> feScalar(geom);
+        const size_t nv = feScalar.getCount();
 
         // Reference coordinates
         const auto& rc = p.getReferenceCoordinates();
 
         // Build the reference jacobian accumulator:
         // G = Σ_v u(v) ⊗ \nabla_hat φ_v   (vdim x d)
-        SpatialMatrixType G;
-        const auto coefficient = [&](size_t local) -> decltype(auto)
+        SpatialMatrixType G(vdim, d);
+        G.setZero();
+
+        // For each vertex basis (scalar), accumulate:
+        // for each component c: G(c, :) += u_c(v) * \nabla_hat φ_v^T
+        for (size_t v = 0; v < nv; ++v)
         {
-          return gf[dofs[local]];
-        };
-        fe.interpolateJacobian(G, coefficient, rc);
+          // \nabla_hat φ_v (size d)
+          // Avoid GradientFunction() to prevent extra vector construction.
+          Math::SpatialVector<ScalarType> ghat(d);
+          for (size_t k = 0; k < d; ++k)
+            ghat(k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
+
+          // vertex value u(v) is stored in gf as vdim dofs at that vertex
+          // local index = v*vdim + c
+          for (size_t c = 0; c < vdim; ++c)
+          {
+            const size_t local = v * vdim + c;
+            const ScalarType uc = gf[fes.getGlobalIndex({d, i}, local)];
+
+            // Row update: G(c, col) += uc * ghat(col)
+            for (size_t col = 0; col < d; ++col)
+              G(c, col) += uc * ghat(col);
+          }
+        }
 
         // Physical jacobian: Jx = G * J^{-1}
         out = G * p.getJacobianInverse();

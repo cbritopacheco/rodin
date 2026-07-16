@@ -167,13 +167,13 @@ namespace Rodin::Variational
           const auto& gf = this->getOperand();
           const auto& fes = gf.getFiniteElementSpace();
           const auto& fe = fes.getFiniteElement(d, i);
-          const auto& dofs = fes.getDOFs(d, i);
           const auto& rc = p.getReferenceCoordinates();
-          const auto coefficient = [&](size_t local) -> decltype(auto)
+          for (size_t local = 0; local < fe.getCount(); local++)
           {
-            return gf[dofs[local]];
-          };
-          fe.interpolateGradient(res, coefficient, rc);
+            const auto& basis = fe.getBasis(local);
+            basis.getGradient()(rc);
+            res += gf[fes.getGlobalIndex({d, i}, local)] * basis.getGradient()(rc);
+          }
           out = p.getJacobianInverse().transpose() * res;
         }
       }
