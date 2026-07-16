@@ -1,4 +1,8 @@
 #include <gtest/gtest.h>
+
+#include <type_traits>
+#include <utility>
+
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -12,6 +16,37 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies that basis forwarding preserves cached references and values.
+  TEST(Rodin_Variational_Grad, ShapeFunctionBasisValueCategories)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+
+    P1 scalarP1(mesh);
+    TrialFunction scalarTrial(scalarP1);
+    using P1GradType = decltype(Grad(scalarTrial));
+    using P1GradBasisType =
+      decltype(std::declval<const P1GradType&>().getBasis(0));
+    static_assert(std::is_lvalue_reference_v<P1GradBasisType>);
+    static_assert(
+      std::is_const_v<std::remove_reference_t<P1GradBasisType>>);
+
+    P1 vectorP1(mesh, 2);
+    TrialFunction vectorTrial(vectorP1);
+    using P1JacobianType = decltype(Jacobian(vectorTrial));
+    using P1JacobianBasisType =
+      decltype(std::declval<const P1JacobianType&>().getBasis(0));
+    static_assert(std::is_lvalue_reference_v<P1JacobianBasisType>);
+    static_assert(
+      std::is_const_v<std::remove_reference_t<P1JacobianBasisType>>);
+
+    P0 scalarP0(mesh);
+    TrialFunction p0Trial(scalarP0);
+    using P0GradType = decltype(Grad(p0Trial));
+    using P0GradBasisType =
+      decltype(std::declval<const P0GradType&>().getBasis(0));
+    static_assert(!std::is_reference_v<P0GradBasisType>);
+  }
+
   /// @brief Verifies shape function construction for variational grad.
   TEST(Rodin_Variational_Grad, ShapeFunction_Construction)
   {

@@ -243,7 +243,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto v = getOperand().getBasis(local);
+        decltype(auto) v = getOperand().getBasis(local);
         return -v;
       }
 

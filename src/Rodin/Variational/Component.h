@@ -499,7 +499,7 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto basis = this->getOperand().getBasis(local);
+        decltype(auto) basis = this->getOperand().getBasis(local);
         return basis(m_idx);
       }
 

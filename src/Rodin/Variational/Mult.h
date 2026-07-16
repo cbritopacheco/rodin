@@ -447,7 +447,7 @@ namespace Rodin::Variational
       {
         const auto& p = this->getIntegrationPoint();
         const auto lhs = getLHS().getValue(p);
-        const auto rhs = getRHS().getBasis(local);
+        decltype(auto) rhs = getRHS().getBasis(local);
         const auto product = lhs * rhs;
         return Internal::materializeProduct(product);
       }
@@ -608,7 +608,7 @@ namespace Rodin::Variational
       auto getBasis(size_t local) const
       {
         const auto& p = this->getIntegrationPoint();
-        const auto lhs = this->getLHS().getBasis(local);
+        decltype(auto) lhs = this->getLHS().getBasis(local);
         const auto rhs = this->getRHS().getValue(p);
         const auto product = lhs * rhs;
         return Internal::materializeProduct(product);
