@@ -11,6 +11,95 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  class RangeTransformingSpace final
+    : public FiniteElementSpace<LocalMesh, RangeTransformingSpace>
+  {
+    public:
+      template <class Callable>
+      class Pushforward
+        : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      {
+        public:
+          template <class Function>
+          explicit Pushforward(Function&& function)
+            : m_function(std::forward<Function>(function))
+          {}
+
+          Real operator()(const Point& p) const
+          {
+            return 2.0 * m_function(p.getReferenceCoordinates());
+          }
+
+        private:
+          Callable m_function;
+      };
+
+      explicit RangeTransformingSpace(const LocalMesh& mesh)
+        : m_mesh(mesh), m_element(Polytope::Type::Triangle)
+      {}
+
+      size_t getSize() const override
+      {
+        return 3;
+      }
+
+      size_t getVectorDimension() const override
+      {
+        return 1;
+      }
+
+      const LocalMesh& getMesh() const override
+      {
+        return m_mesh.get();
+      }
+
+      const P1Element<Real>& getFiniteElement(size_t, Index) const
+      {
+        return m_element;
+      }
+
+      const IndexArray& getDOFs(size_t, Index) const override
+      {
+        static const IndexArray s_dofs{{ 0, 1, 2 }};
+        return s_dofs;
+      }
+
+      template <class Callable>
+      auto getPushforward(const std::pair<size_t, Index>&, Callable&& function) const
+      {
+        return Pushforward<Callable>(std::forward<Callable>(function));
+      }
+
+    private:
+      std::reference_wrapper<const LocalMesh> m_mesh;
+      P1Element<Real> m_element;
+  };
+
+  TEST(Rodin_Variational_FiniteElementSpace, RangeTransformingPushforwardIsApplied)
+  {
+    LocalMesh mesh =
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 1, 1 });
+    RangeTransformingSpace fes(mesh);
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const std::array<Real, 3> coefficients{ 1.0, 2.0, 4.0 };
+    Real value = 0;
+
+    fes.evaluate(
+        value,
+        { mesh.getDimension(), 0 },
+        [&](size_t local) { return coefficients[local]; },
+        p);
+
+    const auto& fe = fes.getFiniteElement(mesh.getDimension(), 0);
+    Real referenceValue = 0;
+    fe.evaluate(
+        referenceValue,
+        [&](size_t local) { return coefficients[local]; },
+        p.getReferenceCoordinates());
+    EXPECT_NEAR(value, 2.0 * referenceValue, 1e-14);
+  }
+
   /// @brief Verifies sanity test build for variational real P1 grid function by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_GridFunction, SanityTest_Build)
   {
@@ -50,9 +139,9 @@ namespace Rodin::Tests::Unit
     RealFunction linear_func([](const Geometry::Point& p) { return p.x() + p.y(); });
     gf.project(linear_func);
 
-    // For P1 elements, a linear function should be represented exactly
-    // Check a few known values based on mesh structure
-    EXPECT_GT(gf.getSize(), 0);
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    EXPECT_NEAR(gf(p), p.x() + p.y(), 1e-12);
   }
 
   /// @brief Verifies arithmetic operations for variational real P1 grid function by checking tolerance-based numerical results.
@@ -175,6 +264,24 @@ namespace Rodin::Tests::Unit
     gf.project(vf);
 
     EXPECT_GT(gf.getSize(), 0);
+  }
+
+  TEST(Rodin_Variational_Vector_P1_GridFunction, EvaluateAtCellInterior)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    P1 fes(mesh, 2);
+    GridFunction gf(fes);
+    gf = VectorFunction{
+      [](const Point& p) { return 1.0 + 2.0 * p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + p.x() + 3.0 * p.y(); }
+    };
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const auto value = gf(p);
+
+    EXPECT_NEAR(value(0), 1.0 + 2.0 * p.x() - p.y(), 1e-12);
+    EXPECT_NEAR(value(1), -2.0 + p.x() + 3.0 * p.y(), 1e-12);
   }
 
   /// @brief Verifies get value for variational real P1 grid function by checking tolerance-based numerical results.

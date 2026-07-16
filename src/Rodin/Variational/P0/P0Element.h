@@ -542,6 +542,18 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
+      template <class Coefficient>
+      constexpr
+      void evaluate(
+          RangeType& out,
+          Coefficient&& coefficient,
+          const Math::SpatialPoint&) const
+      {
+        out.resize(m_vdim);
+        for (size_t component = 0; component < m_vdim; ++component)
+          out(component) = coefficient(component);
+      }
+
       constexpr
       size_t getOrder() const
       {

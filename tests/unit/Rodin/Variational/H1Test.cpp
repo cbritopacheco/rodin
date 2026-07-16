@@ -1909,6 +1909,32 @@ namespace Rodin::Tests::Unit
     testVectorGridFunction(H1(std::integral_constant<size_t, 6>{}, mesh, vdim));
   }
 
+  TEST(Rodin_Variational_H1_Space, VectorGridFunctionEvaluationAtCellInterior)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    H1 fes(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
+    H1 scalarFES(std::integral_constant<size_t, 2>{}, mesh);
+    GridFunction gf(fes);
+    GridFunction scalar(scalarFES);
+    gf = VectorFunction{
+      [](const Point& p) { return 1.0 + 2.0 * p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + p.x() + 3.0 * p.y(); }
+    };
+    scalar = RealFunction(
+        [](const Point& p) { return 3.0 - p.x() + 2.0 * p.y(); });
+
+    const auto cell = mesh.getCell(0);
+    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const auto value = gf(p);
+
+    EXPECT_NEAR(scalar(p), 3.0 - p.x() + 2.0 * p.y(), 1e-11);
+    EXPECT_NEAR(value(0), 1.0 + 2.0 * p.x() - p.y(), 1e-11);
+    EXPECT_NEAR(value(1), -2.0 + p.x() + 3.0 * p.y(), 1e-11);
+  }
+
   // Vector H1 16x16 mesh test
   /// @brief Verifies vector H1 16 x 16 mesh K 1 to K 6 for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, VectorH1_16x16_Mesh_K1_to_K6)

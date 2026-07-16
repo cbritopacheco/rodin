@@ -1127,6 +1127,30 @@ namespace Rodin::Variational
         return H1Element<K, ScalarType>::getNodes(this->getGeometry())[local / m_vdim];
       }
 
+      template <class Coefficient>
+      constexpr
+      void evaluate(
+          RangeType& out,
+          Coefficient&& coefficient,
+          const Math::SpatialPoint& rc) const
+      {
+        assert(m_vdim > 0);
+        out.resize(m_vdim);
+        out.setZero();
+
+        const H1Element<K, ScalarType> scalarfe(this->getGeometry());
+        const size_t count = scalarfe.getCount();
+        for (size_t node = 0; node < count; ++node)
+        {
+          const ScalarType phi = scalarfe.getBasis(node)(rc);
+          for (size_t component = 0; component < m_vdim; ++component)
+          {
+            const size_t local = node * m_vdim + component;
+            out(component) += coefficient(local) * phi;
+          }
+        }
+      }
+
       constexpr
       size_t getOrder() const
       {

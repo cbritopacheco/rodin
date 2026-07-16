@@ -306,20 +306,6 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(i);
       }
 
-      template <class Coefficient>
-      constexpr
-      void interpolate(
-          ScalarType& out,
-          Coefficient&& coefficient,
-          const Math::SpatialPoint& rc) const
-      {
-        const size_t count = getCount();
-        assert(count > 0);
-        out = coefficient(size_t(0)) * getBasis(0)(rc);
-        for (size_t local = 1; local < count; ++local)
-          out += coefficient(local) * getBasis(local)(rc);
-      }
-
       const LinearForm& getLinearForm(size_t i) const
       {
         const Geometry::Polytope::Type g = this->getGeometry();
@@ -1163,7 +1149,7 @@ namespace Rodin::Variational
 
       template <class Coefficient>
       constexpr
-      void interpolate(
+      void evaluate(
           RangeType& out,
           Coefficient&& coefficient,
           const Math::SpatialPoint& rc) const
