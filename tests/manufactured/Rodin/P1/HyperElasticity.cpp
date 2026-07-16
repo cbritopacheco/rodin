@@ -58,17 +58,15 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     {
       constexpr Real meshElementSize = 1.0 / 4.0;
       Mesh mesh;
-      mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { 5, 5, 5 });
+      mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {5, 5, 5});
       mesh.scale(meshElementSize);
       mesh.getConnectivity().compute(2, 3);
       return mesh;
     }
 
     template <class FES, class State>
-    Rodin::Test::FDProbeReport
-    checkNeoHookeanInternalVirtualWorkFD(
-        FES& Vh,
-        State& uCurrent)
+    Rodin::Test::FDProbeReport checkNeoHookeanInternalVirtualWorkFD(
+      FES& Vh, State& uCurrent)
     {
       const Real lambda = 2.0;
       const Real mu = 1.0;
@@ -87,26 +85,23 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     }
 
     template <class FES, class State>
-    Rodin::Test::FDProbeReport
-    checkActiveContractionInternalVirtualWorkFD(
-        FES& Vh,
-        State& uCurrent)
+    Rodin::Test::FDProbeReport checkActiveContractionInternalVirtualWorkFD(
+      FES& Vh, State& uCurrent)
     {
       const size_t dim = Vh.getMesh().getSpaceDimension();
 
       Solid::NeoHookean passive(0.0, 0.0);
       Solid::ActiveFiberLaw::Parameters activeInput;
-      activeInput.stiffness            = 80.0;
-      activeInput.damping              = 0.4;
-      activeInput.destructionRate      = 0.5;
+      activeInput.stiffness = 80.0;
+      activeInput.damping = 0.4;
+      activeInput.destructionRate = 0.5;
       activeInput.crossBridgeStiffness = 60.0;
-      activeInput.contractility        = 40.0;
+      activeInput.contractility = 40.0;
       Solid::ActiveFiberLaw active(activeInput);
       Solid::ActiveContraction law(passive, active);
       law.setLocalTolerance(1e-13).setLocalMaxIterations(80);
 
-      auto setActiveInput = [dim](Solid::ConstitutivePoint& cp)
-      {
+      auto setActiveInput = [dim](Solid::ConstitutivePoint& cp) {
         Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(dim));
         fiber.setZero();
         fiber[0] = 0.8;
@@ -128,8 +123,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       du.getSolution() = uCurrent;
 
       auto ivw =
-        Solid::InternalVirtualWork(law, du.getSolution())
-          .setInput(setActiveInput);
+        Solid::InternalVirtualWork(law, du.getSolution()).setInput(setActiveInput);
       Problem problem(du, v);
       problem = ivw(du, v);
 
@@ -238,17 +232,16 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   }
 
   /// @brief Verifies the NeoHookean internal virtual work tangent against a central finite difference of the residual in 2D.
-  TEST(Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency2D)
+  TEST(
+    Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency2D)
   {
     Mesh mesh = makeUnitSquareMesh();
     P1 Vh(mesh, mesh.getSpaceDimension());
 
     GridFunction uCurrent(Vh);
     const Real pi = Math::Constants::pi();
-    uCurrent = VectorFunction{
-      0.07 * F::x + 0.02 * sin(pi * F::x) * sin(pi * F::y),
-      -0.05 * F::y + 0.01 * cos(pi * F::x) * sin(pi * F::y)
-    };
+    uCurrent = VectorFunction{0.07 * F::x + 0.02 * sin(pi * F::x) * sin(pi * F::y),
+      -0.05 * F::y + 0.01 * cos(pi * F::x) * sin(pi * F::y)};
 
     const auto result = checkNeoHookeanInternalVirtualWorkFD(Vh, uCurrent);
     EXPECT_LT(result.relativeError, 1e-6)
@@ -258,18 +251,17 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   }
 
   /// @brief Verifies the NeoHookean internal virtual work tangent against a central finite difference of the residual in 3D.
-  TEST(Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency3D)
+  TEST(
+    Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency3D)
   {
     Mesh mesh = makeUnitCubeMesh();
     P1 Vh(mesh, mesh.getSpaceDimension());
 
     GridFunction uCurrent(Vh);
     const Real pi = Math::Constants::pi();
-    uCurrent = VectorFunction{
-      0.04 * F::x + 0.01 * sin(pi * F::x) * sin(pi * F::y),
+    uCurrent = VectorFunction{0.04 * F::x + 0.01 * sin(pi * F::x) * sin(pi * F::y),
       -0.03 * F::y + 0.01 * sin(pi * F::y) * sin(pi * F::z),
-      0.02 * F::z + 0.01 * sin(pi * F::x) * sin(pi * F::z)
-    };
+      0.02 * F::z + 0.01 * sin(pi * F::x) * sin(pi * F::z)};
 
     const auto result = checkNeoHookeanInternalVirtualWorkFD(Vh, uCurrent);
     EXPECT_LT(result.relativeError, 1e-6)
@@ -279,17 +271,16 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   }
 
   /// @brief Verifies the ActiveContraction internal virtual work tangent against a central finite difference of the residual in 2D.
-  TEST(Rodin_Manufactured_P1, HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency2D)
+  TEST(Rodin_Manufactured_P1,
+    HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency2D)
   {
     Mesh mesh = makeUnitSquareMesh();
     P1 Vh(mesh, mesh.getSpaceDimension());
 
     GridFunction uCurrent(Vh);
     const Real pi = Math::Constants::pi();
-    uCurrent = VectorFunction{
-      0.05 * F::x + 0.015 * sin(pi * F::x) * sin(pi * F::y),
-      -0.04 * F::y + 0.012 * cos(pi * F::x) * sin(pi * F::y)
-    };
+    uCurrent = VectorFunction{0.05 * F::x + 0.015 * sin(pi * F::x) * sin(pi * F::y),
+      -0.04 * F::y + 0.012 * cos(pi * F::x) * sin(pi * F::y)};
 
     const auto result = checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent);
     EXPECT_GT(result.finiteDifferenceNorm, 1e-10);
@@ -300,18 +291,17 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
   }
 
   /// @brief Verifies the ActiveContraction internal virtual work tangent against a central finite difference of the residual in 3D.
-  TEST(Rodin_Manufactured_P1, HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency3D)
+  TEST(Rodin_Manufactured_P1,
+    HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency3D)
   {
     Mesh mesh = makeUnitCubeMesh();
     P1 Vh(mesh, mesh.getSpaceDimension());
 
     GridFunction uCurrent(Vh);
     const Real pi = Math::Constants::pi();
-    uCurrent = VectorFunction{
-      0.035 * F::x + 0.008 * sin(pi * F::x) * sin(pi * F::y),
+    uCurrent = VectorFunction{0.035 * F::x + 0.008 * sin(pi * F::x) * sin(pi * F::y),
       -0.025 * F::y + 0.007 * sin(pi * F::y) * sin(pi * F::z),
-      0.020 * F::z + 0.006 * sin(pi * F::x) * sin(pi * F::z)
-    };
+      0.020 * F::z + 0.006 * sin(pi * F::x) * sin(pi * F::z)};
 
     const auto result = checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent);
     EXPECT_GT(result.finiteDifferenceNorm, 1e-10);

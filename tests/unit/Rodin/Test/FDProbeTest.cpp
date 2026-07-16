@@ -47,13 +47,13 @@ namespace
     switch (type)
     {
       case Polytope::Type::Segment:
-        mesh = LocalMesh::UniformGrid(type, { 5 });
+        mesh = LocalMesh::UniformGrid(type, {5});
         mesh.scale(1.0 / 4.0);
         mesh.getConnectivity().compute(0, 1);
         break;
       case Polytope::Type::Triangle:
       case Polytope::Type::Quadrilateral:
-        mesh = LocalMesh::UniformGrid(type, { 4, 4 });
+        mesh = LocalMesh::UniformGrid(type, {4, 4});
         mesh.scale(1.0 / 3.0);
         mesh.getConnectivity().compute(1, 2);
         break;
@@ -61,17 +61,17 @@ namespace
       case Polytope::Type::Pyramid:
       case Polytope::Type::Hexahedron:
       case Polytope::Type::Wedge:
-        mesh = LocalMesh::UniformGrid(type, { 3, 3, 3 });
+        mesh = LocalMesh::UniformGrid(type, {3, 3, 3});
         mesh.scale(1.0 / 2.0);
         mesh.getConnectivity().compute(2, 3);
         break;
       case Polytope::Type::Point:
         mesh = LocalMesh::Builder()
-          .initialize(1)
-          .nodes(1)
-          .vertex({ 0.0 })
-          .polytope(Polytope::Type::Point, { 0 })
-          .finalize();
+                 .initialize(1)
+                 .nodes(1)
+                 .vertex({0.0})
+                 .polytope(Polytope::Type::Point, {0})
+                 .finalize();
         break;
     }
     return mesh;
@@ -85,8 +85,7 @@ namespace
   template <class State>
   void setSmoothState(State& state)
   {
-    state = [](const Geometry::Point& p)
-    {
+    state = [](const Geometry::Point& p) {
       const auto& x = p.getPhysicalCoordinates();
       Real value = 0.3;
       for (Index d = 0; d < x.size(); ++d)
@@ -112,8 +111,7 @@ namespace
     auto direction = problem.getTrialFunction().getSolution().getData();
     direction.setZero();
 
-    const auto& fes =
-      problem.getTrialFunction().getFiniteElementSpace();
+    const auto& fes = problem.getTrialFunction().getFiniteElementSpace();
     for (auto it = mesh.getVertex(); it; ++it)
     {
       const auto& x = it->getCoordinates();
@@ -143,9 +141,7 @@ TEST(Rodin_Test_FDProbe, NonlinearScalarProblemPasses)
 
   const auto& u = du.getSolution();
   Problem problem(du, v);
-  problem =
-      2.0 * Integral(u * du, v)
-    + Integral(u * u, v);
+  problem = 2.0 * Integral(u * du, v) + Integral(u * u, v);
 
   Rodin::Test::FDProbe probe(problem);
   const auto report = probe.test(1e-6);
@@ -158,14 +154,9 @@ TEST(Rodin_Test_FDProbe, NonlinearScalarProblemPasses)
 
 TEST(Rodin_Test_FDProbe, NonlinearScalarProblemPassesAcrossGeometries)
 {
-  for (const Polytope::Type type : {
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge })
+  for (const Polytope::Type type : {Polytope::Type::Segment, Polytope::Type::Triangle,
+         Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+         Polytope::Type::Pyramid, Polytope::Type::Hexahedron, Polytope::Type::Wedge})
   {
     SCOPED_TRACE(getName(type));
 
@@ -178,9 +169,7 @@ TEST(Rodin_Test_FDProbe, NonlinearScalarProblemPassesAcrossGeometries)
 
     const auto& u = du.getSolution();
     Problem problem(du, v);
-    problem =
-        2.0 * Integral(u * du, v)
-      + Integral(u * u, v);
+    problem = 2.0 * Integral(u * du, v) + Integral(u * u, v);
 
     const auto report = runNonlinearScalarProbe(problem);
     EXPECT_LT(report.relativeError, 1e-6)
@@ -231,9 +220,7 @@ TEST(Rodin_Test_FDProbe, WrongTangentFails)
 
   const auto& u = du.getSolution();
   Problem problem(du, v);
-  problem =
-      Integral(u * du, v)
-    + Integral(u * u, v);
+  problem = Integral(u * du, v) + Integral(u * u, v);
 
   Rodin::Test::FDProbe probe(problem);
   const auto report = probe.test(1e-6);
@@ -252,10 +239,7 @@ TEST(Rodin_Test_FDProbe, DirichletProblemPassesWithAdmissibleDirection)
 
   const auto& u = du.getSolution();
   Problem problem(du, v);
-  problem =
-      2.0 * Integral(u * du, v)
-    + Integral(u * u, v)
-    + DirichletBC(du, Zero());
+  problem = 2.0 * Integral(u * du, v) + Integral(u * u, v) + DirichletBC(du, Zero());
 
   Rodin::Test::FDProbe probe(problem);
   const auto direction = makeInteriorVertexDirection(mesh, problem);

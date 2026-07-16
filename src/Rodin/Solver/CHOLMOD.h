@@ -96,8 +96,10 @@ namespace Rodin::Solver::CHOLMOD
    * @tparam Scalar The scalar type (e.g., Real, Complex)
    */
   template <class Scalar>
-  class SupernodalLLT<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
-    : public LinearSolverBase<Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+  class SupernodalLLT<
+    Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
+    : public LinearSolverBase<
+        Math::LinearSystem<Math::SparseMatrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
       /// Type of scalar values in the system
@@ -186,5 +188,3 @@ namespace Rodin::Solver::CHOLMOD
 
 #endif // #ifdef RODIN_USE_CHOLMOD
 #endif
-
-

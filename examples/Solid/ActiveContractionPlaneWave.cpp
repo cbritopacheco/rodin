@@ -123,8 +123,7 @@ int main(int argc, char** argv)
     activeScale = parseReal(argv[4], "active scale");
   if (argc > 5)
   {
-    std::cerr << "Usage: " << argv[0]
-              << " [nc=64] [nSteps=full]"
+    std::cerr << "Usage: " << argv[0] << " [nc=64] [nSteps=full]"
               << " [targetMaxDisplacement=0] [activeScale=1]" << std::endl;
     return 2;
   }
@@ -184,11 +183,11 @@ int main(int argc, char** argv)
   Solid::NeoHookean passive(lambda, mu);
 
   Solid::ActiveFiberLaw::Parameters activeParams;
-  activeParams.stiffness            = activeScale * 20.0;
+  activeParams.stiffness = activeScale * 20.0;
   activeParams.damping              = 300;
   activeParams.destructionRate      = 0.4;
   activeParams.crossBridgeStiffness = activeScale * 100.0;
-  activeParams.contractility        = activeScale * 20.0;
+  activeParams.contractility = activeScale * 20.0;
   activeParams.initial.extension    = 0.0;
   activeParams.initial.stiffness    = 0.0;
   activeParams.initial.stress       = 0.0;
@@ -214,7 +213,7 @@ int main(int argc, char** argv)
   const size_t nWaves = 2;
 
   PlaneWaveParams wave;
-  wave.amplitude      = activeScale * 20.0;
+  wave.amplitude = activeScale * 20.0;
   wave.speed          = 0.5;
   wave.width          = 0.05;
   wave.start          = 0;
@@ -301,8 +300,7 @@ int main(int argc, char** argv)
   fiberField.setName("FiberDirection");
   fiberField = VectorFunction{ RealFunction(1.0), Zero() };
 
-  auto computeMaxNodalDisplacement = [&]() -> Real
-  {
+  auto computeMaxNodalDisplacement = [&]() -> Real {
     Real maxDisplacement = 0.0;
     const auto& uData = u.getData();
     for (auto it = mesh.getVertex(); it; ++it)
@@ -497,8 +495,7 @@ int main(int argc, char** argv)
     const auto diagnostics = commitState();
     const auto& report = solver.getReport();
     const Real maxNodalDisplacement = computeMaxNodalDisplacement();
-    peakMaxNodalDisplacement =
-      std::max(peakMaxNodalDisplacement, maxNodalDisplacement);
+    peakMaxNodalDisplacement = std::max(peakMaxNodalDisplacement, maxNodalDisplacement);
 
     const auto bdfData =
       bdfA0 * u.getData()
@@ -512,9 +509,9 @@ int main(int argc, char** argv)
               << " |u| = " << u.getData().norm()
               << " max_node|u| = " << maxNodalDisplacement
               << " peak_max_node|u| = " << peakMaxNodalDisplacement
-              << " |BDF(u)| = " << bdfData.norm()
-              << " ec = [" << diagnostics.minActiveExtension << ", "
-              << diagnostics.maxActiveExtension << "]"
+              << " |BDF(u)| = " << bdfData.norm() << " ec = ["
+              << diagnostics.minActiveExtension << ", " << diagnostics.maxActiveExtension
+              << "]"
               << " max|gamma| = " << diagnostics.maxGamma
               << " max|beta| = " << diagnostics.maxBeta
               << " max_local_newton = " << diagnostics.maxLocalIterations;
@@ -546,8 +543,7 @@ int main(int argc, char** argv)
               << " target_max_node|u| = " << targetMaxDisplacement
               << " observed_peak_max_node|u| = " << peakMaxNodalDisplacement
               << " active_scale = " << activeScale
-              << " suggested_active_scale = " << suggestedScale
-              << std::endl;
+              << " suggested_active_scale = " << suggestedScale << std::endl;
   }
 
   xdmf.close();

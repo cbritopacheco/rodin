@@ -62,11 +62,9 @@ namespace Rodin::Test
       /// @brief Probed problem type.
       using Problem = ProblemType;
       /// @brief Linear system type of the probed problem.
-      using LinearSystemType =
-        typename Problem::LinearSystemType;
+      using LinearSystemType = typename Problem::LinearSystemType;
       /// @brief Vector type of the linear system.
-      using VectorType =
-        typename LinearSystemType::VectorType;
+      using VectorType = typename LinearSystemType::VectorType;
 
       /**
        * @brief Constructs the probe over a problem.
@@ -109,8 +107,7 @@ namespace Rodin::Test
         m_problem.assemble();
         const auto tangent = m_problem.getLinearSystem().getOperator();
 
-        const auto finiteDifference =
-          -(1.0 / (2.0 * epsilon)) * (rhsPlus - rhsMinus);
+        const auto finiteDifference = -(1.0 / (2.0 * epsilon)) * (rhsPlus - rhsMinus);
         const auto tangentAction = tangent * direction;
         const auto error = tangentAction - finiteDifference;
 
@@ -119,11 +116,8 @@ namespace Rodin::Test
         report.absoluteError = error.norm();
         report.tangentNorm = tangentAction.norm();
         report.finiteDifferenceNorm = finiteDifference.norm();
-        report.relativeError =
-          report.absoluteError
-          / std::max<Real>(
-              1.0,
-              std::max(report.tangentNorm, report.finiteDifferenceNorm));
+        report.relativeError = report.absoluteError /
+          std::max<Real>(1.0, std::max(report.tangentNorm, report.finiteDifferenceNorm));
         return report;
       }
 
@@ -135,9 +129,7 @@ namespace Rodin::Test
         for (decltype(direction.size()) i = 0; i < direction.size(); ++i)
         {
           const Real x = static_cast<Real>(i + 1);
-          direction[i] =
-            0.5 * std::sin(0.37 * x)
-            + 0.25 * std::cos(0.19 * x);
+          direction[i] = 0.5 * std::sin(0.37 * x) + 0.25 * std::cos(0.19 * x);
         }
 
         const Real norm = direction.norm();
@@ -225,11 +217,8 @@ namespace Rodin::Test
         report.absoluteError = error.norm();
         report.tangentNorm = tangentAction.norm();
         report.finiteDifferenceNorm = finiteDifference.norm();
-        report.relativeError =
-          report.absoluteError
-          / std::max<Real>(
-              1.0,
-              std::max(report.tangentNorm, report.finiteDifferenceNorm));
+        report.relativeError = report.absoluteError /
+          std::max<Real>(1.0, std::max(report.tangentNorm, report.finiteDifferenceNorm));
         return report;
       }
 
@@ -240,9 +229,7 @@ namespace Rodin::Test
         for (decltype(direction.size()) i = 0; i < direction.size(); ++i)
         {
           const Real x = static_cast<Real>(i + 1);
-          direction[i] =
-            0.5 * std::sin(0.37 * x)
-            + 0.25 * std::cos(0.19 * x);
+          direction[i] = 0.5 * std::sin(0.37 * x) + 0.25 * std::cos(0.19 * x);
         }
 
         const Real norm = direction.norm();
