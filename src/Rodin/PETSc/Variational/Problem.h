@@ -631,22 +631,41 @@ namespace Rodin::Variational
 
         m_assembly.execute(m_axb, in);
 
-        // Gather the trial function data into the solution vector.
+        // Gather each trial field's data into the block solution vector, so
+        // it holds the initial guess. This is the reverse of the scatter-back
+        // in solve() and mirrors GridFunction::setData: the IS local size must
+        // match the field vector's owned range, not the global field size, or
+        // the copy is invalid in the distributed case.
         PetscErrorCode ierr;
         m_us.iapply([&](size_t i, const auto& uref) {
           const auto& u = uref.get().getSolution();
           u.flush();
 
-          PetscInt n = 0;
-          ierr = VecGetSize(u.getData(), &n);
+          const PetscInt off = static_cast<PetscInt>(m_trialOffsets[i]);
+
+          PetscInt rb = 0, re = 0;
+          ierr = VecGetOwnershipRange(u.getData(), &rb, &re);
+          assert(ierr == PETSC_SUCCESS);
+          const PetscInt nLocal = re - rb;
+
+          MPI_Comm comm;
+          ierr = PetscObjectGetComm((PetscObject)m_axb.getSolution(), &comm);
           assert(ierr == PETSC_SUCCESS);
 
           ::IS is = PETSC_NULLPTR;
-          ierr = ISCreateStride(
-            m_axb.getCommunicator(), n, static_cast<PetscInt>(m_trialOffsets[i]), 1, &is);
+          ierr = ISCreateStride(comm, nLocal, off + rb, 1, &is);
           assert(ierr == PETSC_SUCCESS);
 
-          ierr = VecISCopy(m_axb.getSolution(), is, SCATTER_FORWARD, u.getData());
+          ::Vec sub = PETSC_NULLPTR;
+          ierr = VecGetSubVector(m_axb.getSolution(), is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          // sub and u.getData() now share a local layout, so copy the owned
+          // field values into the block sub-vector.
+          ierr = VecCopy(u.getData(), sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecRestoreSubVector(m_axb.getSolution(), is, &sub);
           assert(ierr == PETSC_SUCCESS);
 
           ierr = ISDestroy(&is);
