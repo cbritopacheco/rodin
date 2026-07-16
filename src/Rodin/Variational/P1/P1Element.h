@@ -1148,11 +1148,8 @@ namespace Rodin::Variational
       }
 
       template <class Coefficient>
-      constexpr
-      void evaluate(
-          RangeType& out,
-          Coefficient&& coefficient,
-          const Math::SpatialPoint& rc) const
+      constexpr void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
       {
         assert(m_vdim > 0);
         out.resize(m_vdim);

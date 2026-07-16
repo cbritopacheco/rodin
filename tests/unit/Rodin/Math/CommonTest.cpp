@@ -93,8 +93,8 @@ TEST_F(CommonTest, ConjFunction)
 TEST_F(CommonTest, ConjMatrixFunction)
 {
   using MatrixType = Eigen::Matrix<Real, 2, 2>;
-  static_assert(std::is_same_v<
-    decltype(conj(std::declval<const MatrixType&>())), MatrixType>);
+  static_assert(
+    std::is_same_v<decltype(conj(std::declval<const MatrixType&>())), MatrixType>);
 
   // Test conjugate of real matrix (should be unchanged)
   MatrixType realMat;

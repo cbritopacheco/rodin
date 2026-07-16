@@ -1429,8 +1429,7 @@ namespace Rodin::Geometry
 
             std::sort(component.begin(), component.end());
             res.emplace_back(
-              boost::container::ordered_unique_range,
-              component.begin(), component.end());
+              boost::container::ordered_unique_range, component.begin(), component.end());
           }
         }
         return res;

@@ -592,7 +592,7 @@ namespace Rodin::Assembly
               }
 
               const auto testPolytope = testseq.getPolytope(i);
-              OpenMPIteration trialseq{ mesh, gbfi->getTrialRegion() };
+              OpenMPIteration trialseq{mesh, gbfi->getTrialRegion()};
               const Index rd = trialseq.getDimension();
               const Index rcount = trialseq.getCount();
 

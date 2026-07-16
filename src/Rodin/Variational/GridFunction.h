@@ -719,11 +719,10 @@ namespace Rodin::Variational
         const Index  i = polytope.getIndex();
 
         const auto& dofs = getCachedDOFs(d, i);
-        const auto coefficient = [&](size_t local) -> decltype(auto)
-        {
+        const auto coefficient = [&](size_t local) -> decltype(auto) {
           return this->operator[](dofs[local]);
         };
-        fes.evaluate(res, { d, i }, coefficient, p);
+        fes.evaluate(res, {d, i}, coefficient, p);
       }
 
       /**

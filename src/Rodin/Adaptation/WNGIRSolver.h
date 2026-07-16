@@ -584,10 +584,15 @@ namespace Rodin::Adaptation
                       << "  accepted=" << (accepted ? 1 : 0) << "  alpha=" << alpha
                       << "  actRMS=" << std::scientific << surf.activeRMS
                       << "  actRMS/h=" << (h > Real(0) ? surf.activeRMS / h : Real(0))
-                      << "  min_j=" << (p.admissibilityChecks && accepted
-                          ? adm.minJ : std::numeric_limits<Real>::quiet_NaN())
-                      << "  max_Q=" << (p.admissibilityChecks && accepted
-                          ? adm.maxQ : std::numeric_limits<Real>::quiet_NaN()) << '\n';
+                      << "  min_j="
+                      << (p.admissibilityChecks && accepted
+                             ? adm.minJ
+                             : std::numeric_limits<Real>::quiet_NaN())
+                      << "  max_Q="
+                      << (p.admissibilityChecks && accepted
+                             ? adm.maxQ
+                             : std::numeric_limits<Real>::quiet_NaN())
+                      << '\n';
           }
         }
 
@@ -749,10 +754,10 @@ namespace Rodin::Adaptation
           }
           else
             rep.acceptedStep = maxStep;
-          rep.minJ = p.admissibilityChecks
-            ? acceptedAdm.minJ : std::numeric_limits<Real>::quiet_NaN();
-          rep.maxQRel = p.admissibilityChecks
-            ? acceptedAdm.maxQ : std::numeric_limits<Real>::quiet_NaN();
+          rep.minJ = p.admissibilityChecks ? acceptedAdm.minJ
+                                           : std::numeric_limits<Real>::quiet_NaN();
+          rep.maxQRel = p.admissibilityChecks ? acceptedAdm.maxQ
+                                              : std::numeric_limits<Real>::quiet_NaN();
 
           const auto surf = acceptedSurf;
           const Real eNow = acceptedEnergy;

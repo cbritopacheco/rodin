@@ -535,15 +535,13 @@ namespace Rodin::Variational
           m_integrand(integrand.copy())
       {}
 
-      constexpr
-      QuadratureRule(const QuadratureRule& other)
+      constexpr QuadratureRule(const QuadratureRule& other)
         : Parent(other),
           m_integrand(other.m_integrand->copy()),
           m_basis(other.m_basis)
       {}
 
-      constexpr
-      QuadratureRule(QuadratureRule&& other)
+      constexpr QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_polytope(std::move(other.m_polytope)),
@@ -601,8 +599,7 @@ namespace Rodin::Variational
           const P1Element<ScalarType> scalarfe(geometry);
           const size_t nv = scalarfe.getCount();
           m_basis.resize(
-            static_cast<Eigen::Index>(m_qf->getSize()),
-            static_cast<Eigen::Index>(nv));
+            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
           for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
           {
             const auto& rc = m_qf->getPoint(qp);
@@ -622,8 +619,7 @@ namespace Rodin::Variational
 
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
-        const size_t vdim = [&]()
-        {
+        const size_t vdim = [&]() {
           if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
           {
             const size_t trialVdim = trialfes.getVectorDimension();
@@ -953,8 +949,7 @@ namespace Rodin::Variational
           const P1Element<ScalarType> scalarfe(geometry);
           const size_t nv = scalarfe.getCount();
           m_basis.resize(
-            static_cast<Eigen::Index>(m_qf->getSize()),
-            static_cast<Eigen::Index>(nv));
+            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
           for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
           {
             const auto& rc = m_qf->getPoint(qp);
@@ -972,8 +967,7 @@ namespace Rodin::Variational
         assert(ntr == trialfe.getCount());
         assert(nte == testfe.getCount());
 
-        const size_t vdim = [&]()
-        {
+        const size_t vdim = [&]() {
           if constexpr (FormLanguage::IsVectorRange<MultiplicandRangeType>::Value)
           {
             const size_t trialVdim = trialfes.getVectorDimension();
@@ -1014,8 +1008,7 @@ namespace Rodin::Variational
                 const ScalarType phi_te = m_basis(qp, ib);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * csv * phi_te * m_basis(qp, ia);
+                  const ScalarType kij = wdet * csv * phi_te * m_basis(qp, ia);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -1032,8 +1025,7 @@ namespace Rodin::Variational
                   if (ia % vdim == cb)
                   {
                     const ScalarType phi_tr = m_basis(qp, ia / vdim);
-                    m_matrix(ib, ia) +=
-                      wdet * csv * phi_te * phi_tr;
+                    m_matrix(ib, ia) += wdet * csv * phi_te * phi_tr;
                   }
                 }
               }
@@ -1056,8 +1048,7 @@ namespace Rodin::Variational
               {
                 const size_t ca = ia % vdim;
                 const ScalarType phi_tr = m_basis(qp, ia / vdim);
-                m_matrix(ib, ia) +=
-                  wdet * phi_te * cmv(cb, ca) * phi_tr;
+                m_matrix(ib, ia) += wdet * phi_te * cmv(cb, ca) * phi_tr;
               }
             }
           }

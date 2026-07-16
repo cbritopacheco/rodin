@@ -1692,10 +1692,8 @@ namespace Rodin::Assembly
               }
 
               const auto polytope = seq.getPolytope(k);
-              withTrialFES(uUUID, [&](const auto& uFES)
-              {
-                withTestFES(vUUID, [&](const auto& vFES)
-                {
+              withTrialFES(uUUID, [&](const auto& uFES) {
+                withTestFES(vUUID, [&](const auto& vFES) {
                   integrator->setPolytope(polytope);
                   const auto& rows = vFES.getDOFs(dim, k);
                   const auto& cols = uFES.getDOFs(dim, k);
@@ -1918,8 +1916,7 @@ namespace Rodin::Assembly
               }
 
               const auto polytope = seq.getPolytope(k);
-              withTestFES(vUUID, [&](const auto& vFES)
-              {
+              withTestFES(vUUID, [&](const auto& vFES) {
                 integrator->setPolytope(polytope);
                 const auto& dofs = vFES.getDOFs(dim, k);
                 for (PetscInt l = 0; l < static_cast<PetscInt>(dofs.size()); ++l)

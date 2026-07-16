@@ -259,11 +259,8 @@ namespace Rodin::Variational
        * @param[in] rc Reference coordinates.
        */
       template <class Range, class Coefficient>
-      constexpr
-      void evaluate(
-          Range& out,
-          Coefficient&& coefficient,
-          const Math::SpatialPoint& rc) const
+      constexpr void evaluate(
+        Range& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
       {
         const auto& derived = static_cast<const Derived&>(*this);
         const size_t count = derived.getCount();

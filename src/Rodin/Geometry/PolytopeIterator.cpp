@@ -46,7 +46,8 @@ namespace Rodin::Geometry
 
   Polytope* PolytopeIterator::generate() const
   {
-    if (this->end()) return nullptr;
+    if (this->end())
+      return nullptr;
     return new Polytope(make());
   }
 
@@ -65,7 +66,8 @@ namespace Rodin::Geometry
 
   Cell* CellIterator::generate() const
   {
-    if (this->end()) return nullptr;
+    if (this->end())
+      return nullptr;
     return new Cell(make());
   }
 
@@ -84,7 +86,8 @@ namespace Rodin::Geometry
 
   Face* FaceIterator::generate() const
   {
-    if (this->end()) return nullptr;
+    if (this->end())
+      return nullptr;
     return new Face(make());
   }
 
@@ -103,7 +106,8 @@ namespace Rodin::Geometry
 
   Vertex* VertexIterator::generate() const
   {
-    if (this->end()) return nullptr;
+    if (this->end())
+      return nullptr;
     return new Vertex(make());
   }
 }

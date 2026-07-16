@@ -21,8 +21,8 @@ namespace Rodin::Assembly
     return m_mesh.get().getPolytope(getDimension(), i);
   }
 
-  Geometry::Polytope
-  OpenMPIteration<Geometry::Mesh<Context::Local>>::getPolytope(Index i) const
+  Geometry::Polytope OpenMPIteration<Geometry::Mesh<Context::Local>>::getPolytope(
+    Index i) const
   {
     return Geometry::Polytope(getDimension(), i, m_mesh.get());
   }

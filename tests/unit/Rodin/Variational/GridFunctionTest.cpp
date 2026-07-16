@@ -17,8 +17,7 @@ namespace Rodin::Tests::Unit
   {
     public:
       template <class Callable>
-      class Pushforward
-        : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
+      class Pushforward : public FiniteElementSpacePushforwardBase<Pushforward<Callable>>
       {
         public:
           template <class Function>
@@ -93,26 +92,22 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_FiniteElementSpace, RangeTransformingPushforwardIsApplied)
   {
-    LocalMesh mesh =
-      LocalMesh::UniformGrid(Polytope::Type::Triangle, { 1, 1 });
+    LocalMesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {1, 1});
     RangeTransformingSpace fes(mesh);
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const std::array<Real, 6> coefficients{1.0, 2.0, 4.0, -1.0, 3.0, 5.0};
     Math::SpatialVector<Real> value;
 
     fes.evaluate(
-        value,
-        { mesh.getDimension(), 0 },
-        [&](size_t local) { return coefficients[local]; },
-        p);
+      value, {mesh.getDimension(), 0}, [&](size_t local) { return coefficients[local]; },
+      p);
 
     const auto& fe = fes.getFiniteElement(mesh.getDimension(), 0);
     Math::SpatialVector<Real> referenceValue;
     fe.evaluate(
-        referenceValue,
-        [&](size_t local) { return coefficients[local]; },
-        p.getReferenceCoordinates());
+      referenceValue, [&](size_t local) { return coefficients[local]; },
+      p.getReferenceCoordinates());
     Math::SpatialVector<Real> expected(2);
     expected(0) = 2.0 * referenceValue(0) + referenceValue(1);
     expected(1) = -referenceValue(0) + 3.0 * referenceValue(1);
@@ -160,7 +155,7 @@ namespace Rodin::Tests::Unit
     gf.project(linear_func);
 
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     EXPECT_NEAR(gf(p), p.x() + p.y(), 1e-12);
   }
 
@@ -288,16 +283,14 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_Vector_P1_GridFunction, EvaluateAtCellInterior)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P1 fes(mesh, 2);
     GridFunction gf(fes);
-    gf = VectorFunction{
-      [](const Point& p) { return 1.0 + 2.0 * p.x() - p.y(); },
-      [](const Point& p) { return -2.0 + p.x() + 3.0 * p.y(); }
-    };
+    gf = VectorFunction{[](const Point& p) { return 1.0 + 2.0 * p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + p.x() + 3.0 * p.y(); }};
 
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const auto value = gf(p);
 
     EXPECT_NEAR(value(0), 1.0 + 2.0 * p.x() - p.y(), 1e-12);

@@ -279,22 +279,16 @@ namespace Rodin::Variational
        * @param[in] p Point on the physical element.
        */
       template <class Range, class Coefficient>
-      constexpr
-      void evaluate(
-          Range& out,
-          const std::pair<size_t, Index>& idx,
-          Coefficient&& coefficient,
-          const Geometry::Point& p) const
+      constexpr void evaluate(Range& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
       {
         const auto& derived = static_cast<const Derived&>(*this);
         const auto& fe = derived.getFiniteElement(idx.first, idx.second);
-        const auto expansion =
-          [&](const Math::SpatialPoint& rc)
-          {
-            Range value;
-            fe.evaluate(value, coefficient, rc);
-            return value;
-          };
+        const auto expansion = [&](const Math::SpatialPoint& rc) {
+          Range value;
+          fe.evaluate(value, coefficient, rc);
+          return value;
+        };
         const auto mapping = derived.getPushforward(idx, expansion);
         out = mapping(p);
       }

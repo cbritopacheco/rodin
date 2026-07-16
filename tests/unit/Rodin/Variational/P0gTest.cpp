@@ -95,10 +95,9 @@ namespace Rodin::Tests::Unit
 
   TEST(Rodin_Variational_P0g, GridFunctionEvaluation)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
     P0g scalarFES(mesh);
-    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>>
-      vectorFES(mesh, 2);
+    P0g<Math::SpatialVector<Real>, Geometry::Mesh<Context::Local>> vectorFES(mesh, 2);
     GridFunction scalar(scalarFES);
     GridFunction vector(vectorFES);
     scalar = RealFunction(3.5);
@@ -106,7 +105,7 @@ namespace Rodin::Tests::Unit
     vector.getData()(1) = 2.75;
 
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const auto value = vector(p);
 
     EXPECT_NEAR(scalar(p), 3.5, 1e-14);

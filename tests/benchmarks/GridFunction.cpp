@@ -27,14 +27,14 @@ namespace Rodin::Tests::Benchmarks
 {
   struct GridFunctionEvaluationBenchmark : public benchmark::Fixture
   {
-    void SetUp(const benchmark::State&)
-    {
-      mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
-      mesh.getConnectivity().compute(2, 1);
-      mesh.getConnectivity().compute(1, 0);
-    }
+      void SetUp(const benchmark::State&)
+      {
+        mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
+        mesh.getConnectivity().compute(2, 1);
+        mesh.getConnectivity().compute(1, 0);
+      }
 
-    LocalMesh mesh;
+      LocalMesh mesh;
   };
 
   BENCHMARK_F(GridFunctionEvaluationBenchmark, P1VectorExpansion)
@@ -42,12 +42,10 @@ namespace Rodin::Tests::Benchmarks
   {
     P1 fes(mesh, 2);
     GridFunction gf(fes);
-    gf = VectorFunction{
-      [](const Point& p) { return 1.0 + p.x() - p.y(); },
-      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }
-    };
+    gf = VectorFunction{[](const Point& p) { return 1.0 + p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }};
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
 
     for (auto _ : state)
     {
@@ -62,10 +60,9 @@ namespace Rodin::Tests::Benchmarks
   {
     P1 fes(mesh);
     GridFunction gf(fes);
-    gf = RealFunction(
-        [](const Point& p) { return 1.0 + p.x() - p.y(); });
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
 
     for (auto _ : state)
     {
@@ -121,10 +118,9 @@ namespace Rodin::Tests::Benchmarks
   {
     P1 fes(mesh);
     GridFunction gf(fes);
-    gf = RealFunction(
-        [](const Point& p) { return 1.0 + p.x() - p.y(); });
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const auto& fe = fes.getFiniteElement(2, 0);
     const auto& dofs = fes.getDOFs(2, 0);
 
@@ -133,7 +129,7 @@ namespace Rodin::Tests::Benchmarks
       Real value = 0;
       for (size_t local = 0; local < fe.getCount(); ++local)
       {
-        const auto mapping = fes.getPushforward({ 2, 0 }, fe.getBasis(local));
+        const auto mapping = fes.getPushforward({2, 0}, fe.getBasis(local));
         value += gf[dofs[local]] * mapping(p);
       }
       benchmark::DoNotOptimize(value);
@@ -145,12 +141,10 @@ namespace Rodin::Tests::Benchmarks
   {
     P1 fes(mesh, 2);
     GridFunction gf(fes);
-    gf = VectorFunction{
-      [](const Point& p) { return 1.0 + p.x() - p.y(); },
-      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }
-    };
+    gf = VectorFunction{[](const Point& p) { return 1.0 + p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }};
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const auto& fe = fes.getFiniteElement(2, 0);
     const auto& dofs = fes.getDOFs(2, 0);
 
@@ -159,7 +153,7 @@ namespace Rodin::Tests::Benchmarks
       Math::SpatialVector<Real> value;
       for (size_t local = 0; local < fe.getCount(); ++local)
       {
-        const auto mapping = fes.getPushforward({ 2, 0 }, fe.getBasis(local));
+        const auto mapping = fes.getPushforward({2, 0}, fe.getBasis(local));
         const auto term = gf[dofs[local]] * mapping(p);
         if (local == 0)
           value = term;
@@ -175,12 +169,10 @@ namespace Rodin::Tests::Benchmarks
   {
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
     GridFunction gf(fes);
-    gf = VectorFunction{
-      [](const Point& p) { return 1.0 + p.x() - p.y(); },
-      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }
-    };
+    gf = VectorFunction{[](const Point& p) { return 1.0 + p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }};
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
 
     for (auto _ : state)
     {
@@ -195,10 +187,9 @@ namespace Rodin::Tests::Benchmarks
   {
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
-    gf = RealFunction(
-        [](const Point& p) { return 1.0 + p.x() - p.y(); });
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
 
     for (auto _ : state)
     {
@@ -213,10 +204,9 @@ namespace Rodin::Tests::Benchmarks
   {
     H1 fes(std::integral_constant<size_t, 2>{}, mesh);
     GridFunction gf(fes);
-    gf = RealFunction(
-        [](const Point& p) { return 1.0 + p.x() - p.y(); });
+    gf = RealFunction([](const Point& p) { return 1.0 + p.x() - p.y(); });
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const auto& fe = fes.getFiniteElement(2, 0);
     const auto& dofs = fes.getDOFs(2, 0);
 
@@ -225,7 +215,7 @@ namespace Rodin::Tests::Benchmarks
       Real value = 0;
       for (size_t local = 0; local < fe.getCount(); ++local)
       {
-        const auto mapping = fes.getPushforward({ 2, 0 }, fe.getBasis(local));
+        const auto mapping = fes.getPushforward({2, 0}, fe.getBasis(local));
         value += gf[dofs[local]] * mapping(p);
       }
       benchmark::DoNotOptimize(value);
@@ -237,12 +227,10 @@ namespace Rodin::Tests::Benchmarks
   {
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, size_t(2));
     GridFunction gf(fes);
-    gf = VectorFunction{
-      [](const Point& p) { return 1.0 + p.x() - p.y(); },
-      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }
-    };
+    gf = VectorFunction{[](const Point& p) { return 1.0 + p.x() - p.y(); },
+      [](const Point& p) { return -2.0 + 2.0 * p.x() + p.y(); }};
     const auto cell = mesh.getCell(0);
-    const Point p(*cell, Math::SpatialPoint{ 0.2, 0.3 });
+    const Point p(*cell, Math::SpatialPoint{0.2, 0.3});
     const auto& fe = fes.getFiniteElement(2, 0);
     const auto& dofs = fes.getDOFs(2, 0);
 
@@ -251,7 +239,7 @@ namespace Rodin::Tests::Benchmarks
       Math::SpatialVector<Real> value;
       for (size_t local = 0; local < fe.getCount(); ++local)
       {
-        const auto mapping = fes.getPushforward({ 2, 0 }, fe.getBasis(local));
+        const auto mapping = fes.getPushforward({2, 0}, fe.getBasis(local));
         const auto term = gf[dofs[local]] * mapping(p);
         if (local == 0)
           value = term;

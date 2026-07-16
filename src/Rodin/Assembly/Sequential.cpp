@@ -37,8 +37,8 @@ namespace Rodin::Assembly
     return it;
   }
 
-  Geometry::Polytope
-  SequentialIteration<Geometry::Mesh<Context::Local>>::getPolytope(Index i) const
+  Geometry::Polytope SequentialIteration<Geometry::Mesh<Context::Local>>::getPolytope(
+    Index i) const
   {
     return Geometry::Polytope(getDimension(), i, m_mesh.get());
   }
@@ -60,9 +60,8 @@ namespace Rodin::Assembly
 
   size_t SequentialIteration<Geometry::Mesh<Context::Local>>::getCount() const
   {
-    return m_region == Geometry::Region::Cells
-      ? m_mesh.get().getCellCount()
-      : m_mesh.get().getFaceCount();
+    return m_region == Geometry::Region::Cells ? m_mesh.get().getCellCount()
+                                               : m_mesh.get().getFaceCount();
   }
 
   bool SequentialIteration<Geometry::Mesh<Context::Local>>::filter(Index i) const
