@@ -27,15 +27,34 @@ it. "It passes the happy path" is not coverage; a test that cannot fail
 proves nothing. If a category does not apply, that is a judgement to state,
 not one to skip silently.
 
-| Term | Meaning |
+| Category | What it checks |
 | --- | --- |
-| Success-path test / happy-path test | Normal valid use succeeds |
-| Failure-path test / error-path test | Invalid use produces the correct error |
-| Expected-success test | Operation is expected to succeed |
-| Expected-failure test | Operation is expected to report failure |
-| Boundary test | Tests values at or near valid limits |
-| Exception test | Checks that a particular exception is raised |
-| Regression test | Ensures a previously found bug does not return |
+| Happy-path / positive (success-path, expected-success) | Valid input gives the expected result |
+| Negative / error-path (failure-path, expected-failure) | Invalid input is rejected correctly |
+| Boundary / edge-case | Values at or near limits |
+| Exceptional behavior | Correct exception, error code, or failure state |
+| State-transition | Object moves between valid states correctly |
+| Invariant / property | A rule remains true across many inputs |
+| Regression | A previously fixed bug stays fixed |
+| Interaction / collaboration | Calls to dependencies occur correctly |
+| Side-effect | Files, logs, events, database writes, etc. are correct |
+| Idempotency | Repeating an operation has the intended effect |
+| Determinism | Same input gives the same result when required |
+| Numerical | Accuracy, tolerance, stability, convergence |
+| Resource / lifecycle | Allocation, cleanup, ownership, leaks |
+| Concurrency | Races, ordering, deadlocks, thread safety |
+| Timeout / cancellation | Operations stop or cancel correctly |
+| Serialization / round-trip | Encode–decode preserves information |
+| Compatibility | Behavior remains valid across versions or formats |
+
+Several of these have a house form, given under *House test patterns*
+below: FD-consistency gates and manufactured solutions are the numerical
+category; identity checks (R = M·u, symmetry, R·u = 2E) are the invariant
+category; rebuild-safe set comparisons are how determinism is stated for
+re-indexing code. Others map onto standing hazards rather than patterns:
+PETSc handle ownership is resource/lifecycle, the OpenMP and MPI assembly
+backends are concurrency, and CI building against PETSc 3.19 while local
+builds are newer is compatibility.
 
 Two rules that make the difference between coverage and theatre:
 
