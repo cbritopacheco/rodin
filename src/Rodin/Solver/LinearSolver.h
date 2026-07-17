@@ -131,11 +131,19 @@ namespace Rodin::Solver
        * @brief Solves the linear system.
        *
        * Solves the linear system @f$ Ax = b @f$ where @f$ A @f$ is the matrix
-       * operator, @f$ x @f$ is the solution vector, and @f$ b @f$ is the 
+       * operator, @f$ x @f$ is the solution vector, and @f$ b @f$ is the
        * right-hand side vector.
        *
-       * @param[in,out] system The linear system to solve. The solution is 
-       *                       stored in the system's solution vector.
+       * @par Initial guess contract
+       * On entry, the system's solution vector holds the initial guess; on
+       * exit it holds the solution. Iterative solvers use the guess whenever
+       * it is correctly sized; direct solvers ignore it. Assembly seeds the
+       * guess from the trial function data, which is zero by construction
+       * unless set.
+       *
+       * @param[in,out] system The linear system to solve. On entry the
+       *                       solution vector is the initial guess; on exit
+       *                       it stores the solution.
        */
       virtual void solve(LinearSystem& system) = 0;
 

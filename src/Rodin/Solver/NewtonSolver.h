@@ -737,6 +737,14 @@ namespace Rodin::Solver
             return;
           }
 
+          // The tangential solve always starts from a zero initial guess:
+          // the increment vanishes as Newton converges, so zero is its
+          // natural limit. This overrides the assembly-seeded guess, which
+          // holds the previous increment.
+          auto& increment = linearSystem.getSolution();
+          increment.resize(linearSystem.getVector().size());
+          increment.setZero();
+
           this->getLinearSolver().solve();
 
           if (m_stepPolicy)

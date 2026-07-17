@@ -229,10 +229,25 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Assembles the variational formulation into the linear system.
+      /**
+       * @brief Assembles the variational formulation and establishes the
+       *        initial guess.
+       *
+       * After assembly, the linear system's solution vector holds the trial
+       * function data as the initial guess: on entry to a linear solver the
+       * solution vector is the guess, on exit it is the solution. Trial
+       * functions are zero-initialized, so the guess is zero unless set.
+       */
       Problem& assemble() override
       {
         m_assembly.execute(m_axb, { m_pb, this->getTrialFunction(), this->getTestFunction() });
+
+        const auto& u = this->getTrialFunction().getSolution();
+        u.flush();
+        PetscErrorCode ierr = VecCopy(u.getData(), m_axb.getSolution());
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         m_assembled = true;
         return *this;
       }
@@ -594,7 +609,15 @@ namespace Rodin::Variational
       // --------------------------
       // Assembly / solve
       // --------------------------
-      /// @brief Assembles the block-structured variational formulation.
+      /**
+       * @brief Assembles the block-structured variational formulation and
+       *        establishes the initial guess.
+       *
+       * After assembly, the linear system's solution vector holds the trial
+       * function data, gathered at the trial offsets, as the initial guess:
+       * on entry to a linear solver the solution vector is the guess, on
+       * exit it is the solution.
+       */
       Problem& assemble() override
       {
         computeOffsets();
@@ -607,6 +630,48 @@ namespace Rodin::Variational
         };
 
         m_assembly.execute(m_axb, in);
+
+        // Gather each trial field's data into the block solution vector, so
+        // it holds the initial guess. This is the reverse of the scatter-back
+        // in solve() and mirrors GridFunction::setData: the IS local size must
+        // match the field vector's owned range, not the global field size, or
+        // the copy is invalid in the distributed case.
+        PetscErrorCode ierr;
+        m_us.iapply([&](size_t i, const auto& uref) {
+          const auto& u = uref.get().getSolution();
+          u.flush();
+
+          const PetscInt off = static_cast<PetscInt>(m_trialOffsets[i]);
+
+          PetscInt rb = 0, re = 0;
+          ierr = VecGetOwnershipRange(u.getData(), &rb, &re);
+          assert(ierr == PETSC_SUCCESS);
+          const PetscInt nLocal = re - rb;
+
+          MPI_Comm comm;
+          ierr = PetscObjectGetComm((PetscObject)m_axb.getSolution(), &comm);
+          assert(ierr == PETSC_SUCCESS);
+
+          ::IS is = PETSC_NULLPTR;
+          ierr = ISCreateStride(comm, nLocal, off + rb, 1, &is);
+          assert(ierr == PETSC_SUCCESS);
+
+          ::Vec sub = PETSC_NULLPTR;
+          ierr = VecGetSubVector(m_axb.getSolution(), is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          // sub and u.getData() now share a local layout, so copy the owned
+          // field values into the block sub-vector.
+          ierr = VecCopy(u.getData(), sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = VecRestoreSubVector(m_axb.getSolution(), is, &sub);
+          assert(ierr == PETSC_SUCCESS);
+
+          ierr = ISDestroy(&is);
+          assert(ierr == PETSC_SUCCESS);
+        });
+        (void)ierr;
 
         m_assembled = true;
         return *this;

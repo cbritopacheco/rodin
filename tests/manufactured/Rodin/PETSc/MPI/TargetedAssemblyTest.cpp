@@ -313,8 +313,11 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
     p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(1.0), v);
     p.assemble();
 
-    Vec x = p.getLinearSystem().getSolution();
-    ASSERT_EQ(VecSet(x, 3.0), PETSC_SUCCESS);
+    // The solution vector is the initial guess, seeded from the trial
+    // function on assembly. Set the guess through the trial function (its
+    // carrier under the initial-guess contract) and confirm reassembly reuses
+    // the solution vector to reflect it rather than reallocating or zeroing.
+    u.getSolution() = 3.0;
 
     p = Integral(gamma * Grad(u), Grad(v)) - Integral(RealFunction(2.0), v);
     p.assemble();

@@ -6,6 +6,7 @@ Distributed under the Boost Software License, Version 1.0.
 ]]
 
 set(RodinTest_HEADERS
+  FDProbe.h
   Random.h
   Utility.h
   Random/RandomInteger.h
