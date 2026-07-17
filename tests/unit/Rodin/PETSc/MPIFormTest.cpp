@@ -255,6 +255,63 @@ namespace
     }
   }
 
+  /// @brief Regression: block (multi-trial) assemble() must seed the block
+  ///        solution vector with each trial function's data as the initial
+  ///        guess. In the distributed case this needs per-field owned-range
+  ///        index sets; an earlier version used a globally-sized index set and
+  ///        the wrong scatter direction, aborting with an IS/Vec local-length
+  ///        mismatch under MPI. Verifies each field's guess round-trips through
+  ///        the documented offset scatter used by solve().
+  TEST(PETSc_MPI_Form, DistributedBlockAssembleSeedsPerFieldInitialGuess)
+  {
+    const auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    PETSc::Variational::TrialFunction u(fes);
+    PETSc::Variational::TestFunction v(fes);
+    PETSc::Variational::TrialFunction eta(fes);
+    PETSc::Variational::TestFunction zeta(fes);
+
+    // Distinct, nonzero per-field guesses carried by the trial functions.
+    constexpr PetscScalar guessU = 3.0;
+    constexpr PetscScalar guessEta = -5.0;
+    u.getSolution() = guessU;
+    eta.getSolution() = guessEta;
+
+    Problem problem(u, v, eta, zeta);
+    problem = Integral(Grad(u), Grad(v)) + Integral(Grad(eta), Grad(zeta)) -
+      Integral(RealFunction(1.0), v) - Integral(RealFunction(1.0), zeta);
+    problem.assemble(); // regression: this aborted under MPI
+
+    // Recover each field from the seeded block solution vector using the same
+    // offset scatter that solve() uses, and confirm the guesses survived.
+    Vec x = problem.getLinearSystem().getSolution();
+    const auto& offsets = problem.getTrialOffsets();
+
+    PETSc::Variational::GridFunction uRecovered(fes);
+    PETSc::Variational::GridFunction etaRecovered(fes);
+    uRecovered = PetscScalar(0);
+    etaRecovered = PetscScalar(0);
+    uRecovered.setData(x, offsets[0]);
+    etaRecovered.setData(x, offsets[1]);
+
+    auto expectOwnedConstant = [](const Vec& data, PetscScalar expected) {
+      PetscInt begin = 0;
+      PetscInt end = 0;
+      EXPECT_EQ(VecGetOwnershipRange(data, &begin, &end), PETSC_SUCCESS);
+      for (PetscInt i = begin; i < end; ++i)
+      {
+        PetscScalar value = 0;
+        EXPECT_EQ(VecGetValues(data, 1, &i, &value), PETSC_SUCCESS);
+        EXPECT_NEAR(PetscRealPart(value), PetscRealPart(expected), 1e-14) << "row " << i;
+      }
+    };
+
+    expectOwnedConstant(uRecovered.getData(), guessU);
+    expectOwnedConstant(etaRecovered.getData(), guessEta);
+  }
+
   /// @brief Verifies distributed self identification matches zero value constraint for PET sc MPI form by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(PETSc_MPI_Form, DistributedSelfIdentificationMatchesZeroValueConstraint)
   {

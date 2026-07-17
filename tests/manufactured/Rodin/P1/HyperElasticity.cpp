@@ -18,6 +18,7 @@
 #include "Rodin/Solid.h"
 #include "Rodin/Solver/NewtonSolver.h"
 #include "Rodin/Solver/SparseLU.h"
+#include "Rodin/Test/FDProbe.h"
 #include "Rodin/Variational.h"
 
 using namespace Rodin;
@@ -51,6 +52,83 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       mesh.scale(meshElementSize);
       mesh.getConnectivity().compute(1, 2);
       return mesh;
+    }
+
+    auto makeUnitCubeMesh()
+    {
+      constexpr Real meshElementSize = 1.0 / 4.0;
+      Mesh mesh;
+      mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {5, 5, 5});
+      mesh.scale(meshElementSize);
+      mesh.getConnectivity().compute(2, 3);
+      return mesh;
+    }
+
+    template <class FES, class State>
+    Rodin::Test::FDProbeReport checkNeoHookeanInternalVirtualWorkFD(
+      FES& Vh, State& uCurrent)
+    {
+      const Real lambda = 2.0;
+      const Real mu = 1.0;
+      Solid::NeoHookean law(lambda, mu);
+
+      TrialFunction du(Vh);
+      TestFunction v(Vh);
+      du.getSolution() = uCurrent;
+
+      auto ivw = Solid::InternalVirtualWork(law, du.getSolution());
+      Problem problem(du, v);
+      problem = ivw(du, v);
+
+      Rodin::Test::FDProbe probe(problem);
+      return probe.test(1e-6);
+    }
+
+    template <class FES, class State>
+    Rodin::Test::FDProbeReport checkActiveContractionInternalVirtualWorkFD(
+      FES& Vh, State& uCurrent)
+    {
+      const size_t dim = Vh.getMesh().getSpaceDimension();
+
+      Solid::NeoHookean passive(0.0, 0.0);
+      Solid::ActiveFiberLaw::Parameters activeInput;
+      activeInput.stiffness = 80.0;
+      activeInput.damping = 0.4;
+      activeInput.destructionRate = 0.5;
+      activeInput.crossBridgeStiffness = 60.0;
+      activeInput.contractility = 40.0;
+      Solid::ActiveFiberLaw active(activeInput);
+      Solid::ActiveContraction law(passive, active);
+      law.setLocalTolerance(1e-13).setLocalMaxIterations(80);
+
+      auto setActiveInput = [dim](Solid::ConstitutivePoint& cp) {
+        Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(dim));
+        fiber.setZero();
+        fiber[0] = 0.8;
+        fiber[1] = 0.6;
+        if (dim == 3)
+          fiber[2] = 0.3;
+        fiber *= 1.0 / fiber.norm();
+
+        cp.set<Solid::Tags::FiberDirection>(fiber);
+        cp.set<Solid::Tags::TimeStep>(0.01);
+        cp.set<Solid::Tags::PreviousActiveExtension>(-0.035);
+        cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
+        cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
+        cp.set<Solid::Tags::ElectricalActivation>(1.1);
+      };
+
+      TrialFunction du(Vh);
+      TestFunction v(Vh);
+      du.getSolution() = uCurrent;
+
+      auto ivw =
+        Solid::InternalVirtualWork(law, du.getSolution()).setInput(setActiveInput);
+      Problem problem(du, v);
+      problem = ivw(du, v);
+
+      Rodin::Test::FDProbe probe(problem);
+      return probe.test(1e-7);
     }
 
     SolveResult solveAffineHyperElasticity(ResidualSign residualSign)
@@ -151,5 +229,85 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
     // The wrong sign makes the residual grow rather than decay.
     EXPECT_GT(result.finalResidual, result.initialResidual);
     EXPECT_GT(result.l2ErrorSquared, 1e-6);
+  }
+
+  /// @brief Verifies the NeoHookean internal virtual work tangent against a central finite difference of the residual in 2D.
+  TEST(
+    Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency2D)
+  {
+    Mesh mesh = makeUnitSquareMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    const Real pi = Math::Constants::pi();
+    uCurrent = VectorFunction{0.07 * F::x + 0.02 * sin(pi * F::x) * sin(pi * F::y),
+      -0.05 * F::y + 0.01 * cos(pi * F::x) * sin(pi * F::y)};
+
+    const auto result = checkNeoHookeanInternalVirtualWorkFD(Vh, uCurrent);
+    EXPECT_LT(result.relativeError, 1e-6)
+      << "absoluteError = " << result.absoluteError
+      << ", tangentNorm = " << result.tangentNorm
+      << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
+  }
+
+  /// @brief Verifies the NeoHookean internal virtual work tangent against a central finite difference of the residual in 3D.
+  TEST(
+    Rodin_Manufactured_P1, HyperElasticity_NeoHookean_InternalVirtualWork_FDConsistency3D)
+  {
+    Mesh mesh = makeUnitCubeMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    const Real pi = Math::Constants::pi();
+    uCurrent = VectorFunction{0.04 * F::x + 0.01 * sin(pi * F::x) * sin(pi * F::y),
+      -0.03 * F::y + 0.01 * sin(pi * F::y) * sin(pi * F::z),
+      0.02 * F::z + 0.01 * sin(pi * F::x) * sin(pi * F::z)};
+
+    const auto result = checkNeoHookeanInternalVirtualWorkFD(Vh, uCurrent);
+    EXPECT_LT(result.relativeError, 1e-6)
+      << "absoluteError = " << result.absoluteError
+      << ", tangentNorm = " << result.tangentNorm
+      << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
+  }
+
+  /// @brief Verifies the ActiveContraction internal virtual work tangent against a central finite difference of the residual in 2D.
+  TEST(Rodin_Manufactured_P1,
+    HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency2D)
+  {
+    Mesh mesh = makeUnitSquareMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    const Real pi = Math::Constants::pi();
+    uCurrent = VectorFunction{0.05 * F::x + 0.015 * sin(pi * F::x) * sin(pi * F::y),
+      -0.04 * F::y + 0.012 * cos(pi * F::x) * sin(pi * F::y)};
+
+    const auto result = checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent);
+    EXPECT_GT(result.finiteDifferenceNorm, 1e-10);
+    EXPECT_LT(result.relativeError, 2e-5)
+      << "absoluteError = " << result.absoluteError
+      << ", tangentNorm = " << result.tangentNorm
+      << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
+  }
+
+  /// @brief Verifies the ActiveContraction internal virtual work tangent against a central finite difference of the residual in 3D.
+  TEST(Rodin_Manufactured_P1,
+    HyperElasticity_ActiveContraction_InternalVirtualWork_FDConsistency3D)
+  {
+    Mesh mesh = makeUnitCubeMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    const Real pi = Math::Constants::pi();
+    uCurrent = VectorFunction{0.035 * F::x + 0.008 * sin(pi * F::x) * sin(pi * F::y),
+      -0.025 * F::y + 0.007 * sin(pi * F::y) * sin(pi * F::z),
+      0.020 * F::z + 0.006 * sin(pi * F::x) * sin(pi * F::z)};
+
+    const auto result = checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent);
+    EXPECT_GT(result.finiteDifferenceNorm, 1e-10);
+    EXPECT_LT(result.relativeError, 2e-5)
+      << "absoluteError = " << result.absoluteError
+      << ", tangentNorm = " << result.tangentNorm
+      << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
   }
 }

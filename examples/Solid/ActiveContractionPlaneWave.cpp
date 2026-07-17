@@ -33,10 +33,16 @@
  *   - Displacement (transient vector) - warp by vector in ParaView
  *   - Activation   (transient scalar) - Gaussian travelling plane wave
  *   - FiberDirection (static vector)  - constant (1,0) fiber field
+ *
+ * Optional command-line arguments:
+ *   ActiveContractionPlaneWave [nc=64] [nSteps=full]
+ *                                [targetMaxDisplacement=0]
+ *                                [activeScale=1]
  */
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <iomanip>
 #include <limits>
 #include <vector>
@@ -47,7 +53,7 @@
 #include <Rodin/Solid.h>
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
-#include <Rodin/Solver/SparseLU.h>
+#include <Rodin/Solver/CG.h>
 #include <Rodin/QF/PolytopeQuadratureFormula.h>
 
 using namespace Rodin;
@@ -74,12 +80,70 @@ namespace
     Real maxBeta = 0.0;
     size_t maxLocalIterations = 0;
   };
+
+  size_t parseSize(const char* value, const char* name)
+  {
+    char* end = nullptr;
+    const auto parsed = std::strtoull(value, &end, 10);
+    if (end == value || *end != '\0')
+    {
+      std::cerr << "Invalid " << name << ": " << value << std::endl;
+      std::exit(2);
+    }
+    return static_cast<size_t>(parsed);
+  }
+
+  Real parseReal(const char* value, const char* name)
+  {
+    char* end = nullptr;
+    const Real parsed = std::strtod(value, &end);
+    if (end == value || *end != '\0')
+    {
+      std::cerr << "Invalid " << name << ": " << value << std::endl;
+      std::exit(2);
+    }
+    return parsed;
+  }
 }
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+  size_t nc = 64;
+  size_t requestedSteps = 0;
+  Real targetMaxDisplacement = 0.0;
+  Real activeScale = 1.0;
+
+  if (argc > 1)
+    nc = parseSize(argv[1], "mesh resolution");
+  if (argc > 2)
+    requestedSteps = parseSize(argv[2], "step count");
+  if (argc > 3)
+    targetMaxDisplacement = parseReal(argv[3], "target max displacement");
+  if (argc > 4)
+    activeScale = parseReal(argv[4], "active scale");
+  if (argc > 5)
+  {
+    std::cerr << "Usage: " << argv[0] << " [nc=64] [nSteps=full]"
+              << " [targetMaxDisplacement=0] [activeScale=1]" << std::endl;
+    return 2;
+  }
+  if (nc < 2)
+  {
+    std::cerr << "Mesh resolution must be at least 2." << std::endl;
+    return 2;
+  }
+  if (targetMaxDisplacement < 0.0)
+  {
+    std::cerr << "Target max displacement must be nonnegative." << std::endl;
+    return 2;
+  }
+  if (activeScale <= 0.0)
+  {
+    std::cerr << "Active scale must be positive." << std::endl;
+    return 2;
+  }
+
   // ---- geometry -----------------------------------------------------------
-  constexpr size_t nc = 16;
   Mesh mesh;
   mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { nc, nc, nc });
   mesh.scale(1.0 / static_cast<Real>(nc - 1));
@@ -119,11 +183,11 @@ int main(int, char**)
   Solid::NeoHookean passive(lambda, mu);
 
   Solid::ActiveFiberLaw::Parameters activeParams;
-  activeParams.stiffness            = 200.0;
+  activeParams.stiffness = activeScale * 20.0;
   activeParams.damping              = 300;
   activeParams.destructionRate      = 0.4;
-  activeParams.crossBridgeStiffness = 100.0;
-  activeParams.contractility        = 20.0;
+  activeParams.crossBridgeStiffness = activeScale * 100.0;
+  activeParams.contractility = activeScale * 20.0;
   activeParams.initial.extension    = 0.0;
   activeParams.initial.stiffness    = 0.0;
   activeParams.initial.stress       = 0.0;
@@ -149,7 +213,7 @@ int main(int, char**)
   const size_t nWaves = 2;
 
   PlaneWaveParams wave;
-  wave.amplitude      = 20;
+  wave.amplitude = activeScale * 20.0;
   wave.speed          = 0.5;
   wave.width          = 0.05;
   wave.start          = 0;
@@ -178,7 +242,9 @@ int main(int, char**)
     static_cast<Real>(nWaves - 1) * wave.gap
     + traversalTime
     + 0.4 / wave.speed;
-  const size_t nSteps = static_cast<size_t>(tEnd / dtStep) + 1;
+  const size_t fullSteps = static_cast<size_t>(tEnd / dtStep) + 1;
+  const size_t nSteps =
+    requestedSteps == 0 ? fullSteps : std::min(requestedSteps, fullSteps);
 
   Real currentTime = 0.0;
 
@@ -233,6 +299,23 @@ int main(int, char**)
   GridFunction fiberField(Vh);
   fiberField.setName("FiberDirection");
   fiberField = VectorFunction{ RealFunction(1.0), Zero() };
+
+  auto computeMaxNodalDisplacement = [&]() -> Real {
+    Real maxDisplacement = 0.0;
+    const auto& uData = u.getData();
+    for (auto it = mesh.getVertex(); it; ++it)
+    {
+      const auto& dofs = Vh.getDOFs(0, it->getIndex());
+      Real squaredNorm = 0.0;
+      for (size_t c = 0; c < dim && c < static_cast<size_t>(dofs.size()); ++c)
+      {
+        const Real component = uData(dofs(static_cast<Index>(c)));
+        squaredNorm += component * component;
+      }
+      maxDisplacement = std::max(maxDisplacement, std::sqrt(squaredNorm));
+    }
+    return maxDisplacement;
+  };
 
   // ---- XDMF output --------------------------------------------------------
   IO::XDMF xdmf("ActiveContractionPlaneWave");
@@ -323,6 +406,16 @@ int main(int, char**)
   auto zero = VectorFunction{ Zero(), Zero() };
 
   std::cout << std::scientific << std::setprecision(6);
+  std::cout << "Time steps: " << nSteps;
+  if (nSteps != fullSteps)
+    std::cout << " (truncated from " << fullSteps << ")";
+  std::cout << std::endl;
+  std::cout << "Active scale: " << activeScale;
+  if (targetMaxDisplacement > 0.0)
+    std::cout << ", target max displacement: " << targetMaxDisplacement;
+  std::cout << std::endl;
+
+  Real peakMaxNodalDisplacement = 0.0;
 
   for (size_t step = 1; step <= nSteps; ++step)
   {
@@ -367,7 +460,8 @@ int main(int, char**)
                         + bdfA2 * uPreviousPrevious, v)
            + DirichletBC(du, zero).on(topBC);
 
-    SparseLU linearSolver(newton);
+    CG linearSolver(newton);
+    linearSolver.setTolerance(1e-8).setMaxIterations(2000);
     NewtonSolver solver(linearSolver);
     solver.setMaxIterations(50)
           .setAbsoluteTolerance(1e-9)
@@ -400,6 +494,8 @@ int main(int, char**)
 
     const auto diagnostics = commitState();
     const auto& report = solver.getReport();
+    const Real maxNodalDisplacement = computeMaxNodalDisplacement();
+    peakMaxNodalDisplacement = std::max(peakMaxNodalDisplacement, maxNodalDisplacement);
 
     const auto bdfData =
       bdfA0 * u.getData()
@@ -410,12 +506,22 @@ int main(int, char**)
               << " converged = " << (report.converged ? "yes" : "no")
               << " iterations = " << report.iterations
               << " finalResidual = " << report.finalResidual
-              << " |u| = " << u.getData().norm() << " |BDF(u)| = " << bdfData.norm()
-              << " ec = [" << diagnostics.minActiveExtension << ", "
-              << diagnostics.maxActiveExtension << "]"
+              << " |u| = " << u.getData().norm()
+              << " max_node|u| = " << maxNodalDisplacement
+              << " peak_max_node|u| = " << peakMaxNodalDisplacement
+              << " |BDF(u)| = " << bdfData.norm() << " ec = ["
+              << diagnostics.minActiveExtension << ", " << diagnostics.maxActiveExtension
+              << "]"
               << " max|gamma| = " << diagnostics.maxGamma
               << " max|beta| = " << diagnostics.maxBeta
-              << " max_local_newton = " << diagnostics.maxLocalIterations << std::endl;
+              << " max_local_newton = " << diagnostics.maxLocalIterations;
+    if (targetMaxDisplacement > 0.0 && peakMaxNodalDisplacement > 0.0)
+    {
+      const Real suggestedScale =
+        activeScale * targetMaxDisplacement / peakMaxNodalDisplacement;
+      std::cout << " suggested_active_scale = " << suggestedScale;
+    }
+    std::cout << std::endl;
 
     uPreviousPrevious = uPrevious;
     uPrevious = u;
@@ -427,6 +533,17 @@ int main(int, char**)
     };
 
     xdmf.write(currentTime).flush();
+  }
+
+  if (targetMaxDisplacement > 0.0 && peakMaxNodalDisplacement > 0.0)
+  {
+    const Real suggestedScale =
+      activeScale * targetMaxDisplacement / peakMaxNodalDisplacement;
+    std::cout << "\nCalibration:"
+              << " target_max_node|u| = " << targetMaxDisplacement
+              << " observed_peak_max_node|u| = " << peakMaxNodalDisplacement
+              << " active_scale = " << activeScale
+              << " suggested_active_scale = " << suggestedScale << std::endl;
   }
 
   xdmf.close();

@@ -62,6 +62,7 @@ option(RODIN_BUILD_UNIT_TESTS         "Build Rodin unit tests"                  
 option(RODIN_BUILD_MANUFACTURED_TESTS "Build Rodin manufactured solution tests"   OFF)
 option(RODIN_BUILD_BENCHMARKS         "Build Rodin benchmarks"                    OFF)
 option(RODIN_BUILD_DOC                "Build the Rodin documentation"             OFF)
+option(RODIN_BUILD_TIDY               "Configure the clang-tidy aggregate target" OFF)
 option(RODIN_WITH_PY                  "Build Python bindings"                     OFF)
 option(RODIN_USE_MCSS                 "Build documentation with m.css"            OFF)
 option(RODIN_USE_MPI                  "Use Rodin with MPI support"                OFF)
@@ -263,18 +264,26 @@ if (RODIN_BUILD_SRC)
     find_package(Scotch REQUIRED)
   endif()
 
-  # ---- UMFPACK, SPQR, CHOLMOD ----
+  # ---- SuiteSparse ---------------------------------------------------------
+  set(_RODIN_SUITESPARSE_COMPONENTS)
+
   if (RODIN_USE_UMFPACK)
-    find_package(SuiteSparse REQUIRED COMPONENTS UMFPACK)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS UMFPACK)
   endif()
 
   if (RODIN_USE_SPQR)
-    find_package(SuiteSparse REQUIRED COMPONENTS SPQR)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS SPQR)
   endif()
 
   if (RODIN_USE_CHOLMOD)
-    find_package(SuiteSparse REQUIRED COMPONENTS CHOLMOD)
+    list(APPEND _RODIN_SUITESPARSE_COMPONENTS CHOLMOD)
   endif()
+
+  if (_RODIN_SUITESPARSE_COMPONENTS)
+    find_package(SuiteSparse REQUIRED
+      COMPONENTS ${_RODIN_SUITESPARSE_COMPONENTS})
+  endif()
+  unset(_RODIN_SUITESPARSE_COMPONENTS)
 
   # ---- OpenMP ----
   if (RODIN_USE_OPENMP)
@@ -282,6 +291,23 @@ if (RODIN_BUILD_SRC)
   endif()
 
   add_subdirectory(src)
+
+  if (RODIN_BUILD_TIDY)
+    add_library(RodinTidyTU OBJECT EXCLUDE_FROM_ALL dev/TidyTU.cpp)
+    target_link_libraries(RodinTidyTU PRIVATE Rodin::MMG Rodin::Solver)
+
+    if (RODIN_USE_MPI)
+      target_link_libraries(RodinTidyTU PRIVATE Rodin::MPI)
+    endif()
+
+    if (RODIN_USE_PETSC)
+      target_link_libraries(RodinTidyTU PRIVATE Rodin::PETSc)
+    endif()
+
+    if (RODIN_USE_SCOTCH)
+      target_link_libraries(RodinTidyTU PRIVATE Rodin::Scotch)
+    endif()
+  endif()
 
   if (RODIN_BUILD_EXAMPLES)
     add_subdirectory(examples)

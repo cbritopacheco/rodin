@@ -62,12 +62,18 @@ namespace Rodin::Assembly
       OpenMPIteration(const MeshType& mesh, const Geometry::Region& region);
 
       /**
-       * @brief Gets an iterator for a specific thread.
-       *
-       * @param i Thread index
-       * @return PolytopeIterator for the specified thread's element subset
+       * @brief Gets an iterator positioned at a specific polytope.
+       * @param i Polytope index
+       * @return Iterator positioned at @p i
        */
       Geometry::PolytopeIterator getIterator(Index i) const;
+
+      /**
+       * @brief Gets a polytope value for an indexed assembly iteration.
+       * @param i Polytope index
+       * @return Non-owning polytope descriptor
+       */
+      Geometry::Polytope getPolytope(Index i) const;
 
       /**
        * @brief Gets the topological dimension of elements.
@@ -235,8 +241,8 @@ namespace Rodin::Assembly
                   continue;
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
@@ -536,8 +542,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
               }
 
-              auto it = seq.getIterator(i);
-              lbfi->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              lbfi->setPolytope(polytope);
 
               const auto& rows = input.getTestFES().getDOFs(d, i);
               const auto& cols = input.getTrialFES().getDOFs(d, i);
@@ -585,21 +591,26 @@ namespace Rodin::Assembly
                 if (!a || !testAttrs.contains(*a)) continue;
               }
 
-              auto teIt = testseq.getIterator(i);
-              SequentialIteration trialseq{ mesh, gbfi->getTrialRegion() };
+              const auto testPolytope = testseq.getPolytope(i);
+              OpenMPIteration trialseq{mesh, gbfi->getTrialRegion()};
+              const Index rd = trialseq.getDimension();
+              const Index rcount = trialseq.getCount();
 
-              for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
+              for (Index tr = 0; tr < rcount; ++tr)
               {
+                if (!trialseq.filter(tr))
+                  continue;
                 if (!trialAttrs.empty())
                 {
-                  const auto a = trIt->getAttribute(); // Optional<Attribute>
+                  const auto a = mesh.getAttribute(rd, tr);
                   if (!a || !trialAttrs.contains(*a)) continue; // or trialAttrs.count(*a)==0
                 }
 
-                gbfi->setPolytope(*trIt, *teIt);
+                const auto trialPolytope = trialseq.getPolytope(tr);
+                gbfi->setPolytope(trialPolytope, testPolytope);
 
-                const auto& rows = input.getTestFES().getDOFs(d, teIt->getIndex());
-                const auto& cols = input.getTrialFES().getDOFs(d, trIt->getIndex());
+                const auto& rows = input.getTestFES().getDOFs(d, i);
+                const auto& cols = input.getTrialFES().getDOFs(rd, tr);
                 for (size_t r = 0; r < rows.size(); ++r)
                   for (size_t c = 0; c < cols.size(); ++c)
                     local(rows(r), cols(c)) += Math::conj(gbfi->integrate(c, r));
@@ -729,8 +740,8 @@ namespace Rodin::Assembly
                 if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
               }
 
-              auto it = seq.getIterator(i);
-              integrator->setPolytope(*it);
+              const auto polytope = seq.getPolytope(i);
+              integrator->setPolytope(polytope);
 
               const auto& dofs = input.getFES().getDOFs(d, i);
               assert(dofs.size() >= 0);
@@ -1083,7 +1094,8 @@ namespace Rodin::Assembly
         {
           // ---- Sparse path: eliminate during assembly (thread-local triplets + RHS) ----
           std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
+          std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
+            static_cast<size_t>(tc));
 
           auto sparseEntry = [&](std::vector<Eigen::Triplet<ScalarType>>& localT,
                                std::vector<std::pair<Index, ScalarType>>& localRhs,
@@ -1099,9 +1111,7 @@ namespace Rodin::Assembly
             for (const auto& r : constraints.expand(row))
             {
               if (colValue != ScalarType(0))
-                localRhs.emplace_back(
-                    r.index,
-                    -r.coefficient * val * colValue);
+                localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
                 localT.emplace_back(
                     r.index, c.index, r.coefficient * val * c.coefficient);
@@ -1143,8 +1153,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1194,6 +1204,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
                 const Index rcount = trialseq.getCount();
@@ -1209,10 +1220,8 @@ namespace Rodin::Assembly
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  auto teIt = testseq.getIterator(te);
-                  auto trIt = trialseq.getIterator(tr);
-
-                  integrator->setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1263,8 +1272,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -1306,7 +1315,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            v0.clear();
+            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -1319,10 +1328,10 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(all.size() + rows);
-          for (const auto& t : all)
+          size_t write = 0;
+          for (size_t read = 0; read < all.size(); ++read)
           {
+            const auto& t = all[read];
             const Index row = static_cast<Index>(t.row());
             const Index col = static_cast<Index>(t.col());
             const ScalarType val = t.value();
@@ -1334,21 +1343,24 @@ namespace Rodin::Assembly
                 val * constraints.getFixedValue(col);
               continue;
             }
-            filtered.push_back(t);
+            if (write != read)
+              all[write] = t;
+            ++write;
           }
+          all.resize(write);
 
           for (Index i = 0; i < static_cast<Index>(rows); ++i)
           {
             if (constraints.isFixed(i))
             {
-              filtered.emplace_back(i, i, ScalarType(1));
+              all.emplace_back(i, i, ScalarType(1));
               b.coeffRef(static_cast<size_t>(i)) =
                 constraints.getFixedValue(i);
             }
           }
 
           A.resize(rows, cols);
-          A.setFromTriplets(filtered.begin(), filtered.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
@@ -1394,8 +1406,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue; // or attrs.count(*a)==0
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& rowsDOF = testFES.getDOFs(d, p);
                 const auto& colsDOF = trialFES.getDOFs(d, p);
@@ -1460,6 +1472,7 @@ namespace Rodin::Assembly
                 }
 
                 const auto& rowsDOF = testFES.getDOFs(td, te);
+                const auto testPolytope = testseq.getPolytope(te);
 
                 const Index rd = trialseq.getDimension();
                 const Index rcount = trialseq.getCount();
@@ -1475,10 +1488,8 @@ namespace Rodin::Assembly
 
                   const auto& colsDOF = trialFES.getDOFs(rd, tr);
 
-                  auto teIt = testseq.getIterator(te);
-                  auto trIt = trialseq.getIterator(tr);
-
-                  integrator->setPolytope(*trIt, *teIt);
+                  const auto trialPolytope = trialseq.getPolytope(tr);
+                  integrator->setPolytope(trialPolytope, testPolytope);
 
                   for (size_t i = 0; i < static_cast<size_t>(rowsDOF.size()); ++i)
                   {
@@ -1567,8 +1578,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue;
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = testFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -1653,10 +1664,8 @@ namespace Rodin::Assembly
        * @param input Problem assembly input.
        * @param target Side of the system to assemble.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         LinearSystemType scratch;
         execute(scratch, input);
@@ -1868,7 +1877,8 @@ namespace Rodin::Assembly
         // Thread-local accumulators
         // ------------------------------------------------------------------
         std::vector<std::vector<Eigen::Triplet<ScalarType>>> tchunks(static_cast<size_t>(tc));
-        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(static_cast<size_t>(tc));
+        std::vector<std::vector<std::pair<Index, ScalarType>>> rhsChunks(
+          static_cast<size_t>(tc));
 
         std::vector<OperatorType> Achunks;
         if constexpr (!IsSparse)
@@ -1899,8 +1909,7 @@ namespace Rodin::Assembly
           {
             if (colValue != ScalarType(0))
               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                  r.index,
-                  -r.coefficient * val * colValue);
+                r.index, -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
               tchunks[static_cast<size_t>(tid)].emplace_back(
                   r.index, c.index, r.coefficient * val * c.coefficient);
@@ -1955,8 +1964,8 @@ namespace Rodin::Assembly
                     if (!a || !attrs.contains(*a)) continue;
                   }
 
-                  auto it = seq.getIterator(p);
-                  integrator->setPolytope(*it);
+                  const auto polytope = seq.getPolytope(p);
+                  integrator->setPolytope(polytope);
 
                   const auto& rows = vFES.getDOFs(d, p);
                   const auto& cols = uFES.getDOFs(d, p);
@@ -1983,8 +1992,7 @@ namespace Rodin::Assembly
                         {
                           if (colValue != ScalarType(0))
                             rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                r.index,
-                                -r.coefficient * val * colValue);
+                              r.index, -r.coefficient * val * colValue);
                           for (const auto& c : constraints.expand(J))
                             (*Alocal)(r.index, c.index) +=
                               r.coefficient * val * c.coefficient;
@@ -2051,6 +2059,7 @@ namespace Rodin::Assembly
                   }
 
                   const auto& rows = vFES.getDOFs(td, te);
+                  const auto testPolytope = testseq.getPolytope(te);
 
                   const Index rd = trialseq.getDimension();
                   const Index rcount = trialseq.getCount();
@@ -2066,10 +2075,8 @@ namespace Rodin::Assembly
 
                     const auto& cols = uFES.getDOFs(rd, tr);
 
-                    auto teIt = testseq.getIterator(te);
-                    auto trIt = trialseq.getIterator(tr);
-
-                    integrator->setPolytope(*trIt, *teIt);
+                    const auto trialPolytope = trialseq.getPolytope(tr);
+                    integrator->setPolytope(trialPolytope, testPolytope);
 
                     for (size_t i = 0; i < static_cast<size_t>(rows.size()); ++i)
                     {
@@ -2093,8 +2100,7 @@ namespace Rodin::Assembly
                           {
                             if (colValue != ScalarType(0))
                               rhsChunks[static_cast<size_t>(tid)].emplace_back(
-                                  r.index,
-                                  -r.coefficient * val * colValue);
+                                r.index, -r.coefficient * val * colValue);
                             for (const auto& c : constraints.expand(J))
                               (*Alocal)(r.index, c.index) +=
                                 r.coefficient * val * c.coefficient;
@@ -2145,8 +2151,8 @@ namespace Rodin::Assembly
                   if (!a || !attrs.contains(*a)) continue;
                 }
 
-                auto it = seq.getIterator(p);
-                integrator->setPolytope(*it);
+                const auto polytope = seq.getPolytope(p);
+                integrator->setPolytope(polytope);
 
                 const auto& dofs = vFES.getDOFs(d, p);
                 for (size_t l = 0; l < static_cast<size_t>(dofs.size()); ++l)
@@ -2237,7 +2243,7 @@ namespace Rodin::Assembly
             all.insert(all.end(),
                        std::make_move_iterator(v0.begin()),
                        std::make_move_iterator(v0.end()));
-            v0.clear();
+            std::vector<Eigen::Triplet<ScalarType>>().swap(v0);
           }
 
           for (const Index gs : constraints.getIdentifiedRows())
@@ -2250,10 +2256,10 @@ namespace Rodin::Assembly
             b.coeffRef(static_cast<size_t>(gs)) = constraints.getIdentificationValue(gs);
           }
 
-          std::vector<Eigen::Triplet<ScalarType>> filtered;
-          filtered.reserve(all.size() + nrows);
-          for (const auto& t : all)
+          size_t write = 0;
+          for (size_t read = 0; read < all.size(); ++read)
           {
+            const auto& t = all[read];
             const Index row = static_cast<Index>(t.row());
             const Index col = static_cast<Index>(t.col());
             const ScalarType val = t.value();
@@ -2265,21 +2271,24 @@ namespace Rodin::Assembly
                 val * constraints.getFixedValue(col);
               continue;
             }
-            filtered.push_back(t);
+            if (write != read)
+              all[write] = t;
+            ++write;
           }
+          all.resize(write);
 
           for (Index I = 0; I < static_cast<Index>(nrows); ++I)
           {
             if (constraints.isFixed(I))
             {
-              filtered.emplace_back(I, I, ScalarType(1));
+              all.emplace_back(I, I, ScalarType(1));
               b.coeffRef(static_cast<size_t>(I)) =
                 constraints.getFixedValue(I);
             }
           }
 
           A.resize(nrows, ncols);
-          A.setFromTriplets(filtered.begin(), filtered.end());
+          A.setFromTriplets(all.begin(), all.end());
         }
         else
         {
@@ -2376,10 +2385,8 @@ namespace Rodin::Assembly
        * @param input Mixed problem input.
        * @param target Side of the system to assemble.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         LinearSystemType scratch;
         execute(scratch, input);

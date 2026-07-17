@@ -29,8 +29,7 @@ namespace Rodin::Geometry
       /// @brief Label value for cells outside the level set.
       static constexpr int Outside = 1;
       /// @brief Sentinel index denoting an absent edge/index.
-      static constexpr Index InvalidIndex =
-        std::numeric_limits<Index>::max();
+      static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
 
       /// @brief A weighted graph edge between two cells.
       struct Edge
@@ -105,25 +104,18 @@ namespace Rodin::Geometry
 
       /// @brief Classifies cells into Inside/Outside via a Potts min s-t cut
       /// built from per-cell volumes and moments.
-      Result classify(
-          const std::vector<Real>& volumes,
-          const std::vector<Real>& moments,
-          const std::vector<Edge>& edges) const;
+      Result classify(const std::vector<Real>& volumes, const std::vector<Real>& moments,
+        const std::vector<Edge>& edges) const;
 
       /// @brief Classifies cells with additional @ref Options (narrow-band
       /// restriction, far-field pinning, per-edge weighting).
-      Result classify(
-          const std::vector<Real>& volumes,
-          const std::vector<Real>& moments,
-          const std::vector<Edge>& edges,
-          const Options& options) const;
+      Result classify(const std::vector<Real>& volumes, const std::vector<Real>& moments,
+        const std::vector<Edge>& edges, const Options& options) const;
 
       /// @brief Solves the s-t min cut directly from precomputed unary costs
       /// and edges.
-      Result solve(
-          const std::vector<Real>& insideCosts,
-          const std::vector<Real>& outsideCosts,
-          const std::vector<Edge>& edges) const;
+      Result solve(const std::vector<Real>& insideCosts,
+        const std::vector<Real>& outsideCosts, const std::vector<Edge>& edges) const;
   };
 }
 

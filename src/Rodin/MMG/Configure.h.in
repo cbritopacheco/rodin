@@ -19,25 +19,25 @@ namespace Rodin::MMG
   /**
    * @brief Path to the ISCD Mshdist executable.
    */
-  inline constexpr const char* ISCD_MSHDIST_EXECUTABLE =
+  inline constexpr const char* iscdMshdistExecutable =
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
   /**
    * @brief Path to the Mshdist executable used by MMG helpers.
    */
-  inline constexpr const char* MSHDIST_EXECUTABLE =
+  inline constexpr const char* mshdistExecutable =
     "@RODIN_ISCD_MSHDIST_EXECUTABLE@";
 
   /**
    * @brief Path to the ISCD Mshdist executable.
    */
-  inline constexpr const char* ISCD_ADVECTION_EXECUTABLE =
+  inline constexpr const char* iscdAdvectionExecutable =
     "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 
   /**
    * @brief Path to the ISCD advection executable used by MMG helpers.
    */
-  inline constexpr const char* ADVECTION_EXECUTABLE =
+  inline constexpr const char* advectionExecutable =
     "@RODIN_ISCD_ADVECTION_EXECUTABLE@";
 
   /**
@@ -45,7 +45,9 @@ namespace Rodin::MMG
    *
    * Ranges from -1 to INT_MAX. A higher number means more verbose output.
    */
-  inline constexpr const int VERBOSITY_LEVEL = @RODIN_MMG_VERBOSITY_LEVEL@;
+  // clang-format off
+  inline constexpr const int verbosityLevel = @RODIN_MMG_VERBOSITY_LEVEL@;
+  // clang-format on
 }
 
 #endif

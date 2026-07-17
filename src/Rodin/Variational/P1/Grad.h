@@ -419,8 +419,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr const SpatialVectorType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.grad.size());

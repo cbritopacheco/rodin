@@ -104,9 +104,7 @@ namespace Rodin::Solid
        * @param displacement Current displacement grid function
        */
       InternalVirtualWorkResidual(
-          const LawDerived& law,
-          const TestType& v,
-          const StateType& displacement)
+        const LawDerived& law, const TestType& v, const StateType& displacement)
         : Parent(v),
           m_law(law),
           m_test(v),
@@ -127,7 +125,8 @@ namespace Rodin::Solid
           m_testfes(other.m_testfes),
           m_statefes(other.m_statefes),
           m_quadOrder(other.m_quadOrder),
-          m_input(other.m_input)      {}
+          m_input(other.m_input)
+      {}
 
       /**
        * @brief Rebinds the current displacement state.
@@ -176,7 +175,8 @@ namespace Rodin::Solid
       }
 
       /// @brief Sets the current polytope and assembles the element residual.
-      InternalVirtualWorkResidual& setPolytope(const Geometry::Polytope& polytope) final override
+      InternalVirtualWorkResidual& setPolytope(
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
@@ -194,7 +194,8 @@ namespace Rodin::Solid
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
           : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
-        const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -276,7 +277,10 @@ namespace Rodin::Solid
       }
 
       /// @brief Gets the constitutive law.
-      const LawType& getLaw() const { return m_law; }
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       void checkCompatibility(const StateType& displacement) const
@@ -286,8 +290,8 @@ namespace Rodin::Solid
 
         assert(&stateFES.getMesh() == &testFES.getMesh());
         assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
-        (void) testFES;
-        (void) stateFES;
+        (void)testFES;
+        (void)stateFES;
       }
 
       LawType m_law;
@@ -304,13 +308,10 @@ namespace Rodin::Solid
 
   /// CTAD deduction guide for InternalVirtualWorkResidual
   template <class LawDerived, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkResidual(const LawDerived&,
-                               const TestFunctionType&,
-                               const DisplacementType&)
-    -> InternalVirtualWorkResidual<
-         LawDerived,
-         std::decay_t<TestFunctionType>,
-         std::decay_t<DisplacementType>>;
+  InternalVirtualWorkResidual(
+    const LawDerived&, const TestFunctionType&, const DisplacementType&)
+    -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
+      std::decay_t<DisplacementType>>;
 }
 
 #endif

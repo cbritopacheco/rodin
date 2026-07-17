@@ -1270,8 +1270,7 @@ namespace Rodin::Math
       }
 
       /// @brief Returns the componentwise additive inverse of this matrix.
-      constexpr
-      SpatialMatrix operator-() const noexcept
+      constexpr SpatialMatrix operator-() const noexcept
       {
         SpatialMatrix result(*this);
         result *= Scalar(-1);

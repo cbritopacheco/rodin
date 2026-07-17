@@ -644,27 +644,32 @@ namespace Rodin::IO
      * exported node count/order is independent of Rodin's internal geometry
      * basis and node layout.
      */
-    inline
-    U64 getXDMFQuadraticMixedTopologyId(Geometry::Polytope::Type t)
+    inline U64 getXDMFQuadraticMixedTopologyId(Geometry::Polytope::Type t)
     {
       using PT = Geometry::Polytope::Type;
       switch (t)
       {
-        case PT::Segment:       return 34; // Edge_3
-        case PT::Triangle:      return 36; // Triangle_6
-        case PT::Quadrilateral: return 35; // Quadrilateral_9
-        case PT::Tetrahedron:   return 38; // Tetrahedron_10
-        case PT::Pyramid:       return 39; // Pyramid_13
-        case PT::Wedge:         return 41; // Wedge_18
-        case PT::Hexahedron:    return 50; // Hexahedron_27
+        case PT::Segment:
+          return 34; // Edge_3
+        case PT::Triangle:
+          return 36; // Triangle_6
+        case PT::Quadrilateral:
+          return 35; // Quadrilateral_9
+        case PT::Tetrahedron:
+          return 38; // Tetrahedron_10
+        case PT::Pyramid:
+          return 39; // Pyramid_13
+        case PT::Wedge:
+          return 41; // Wedge_18
+        case PT::Hexahedron:
+          return 50; // Hexahedron_27
         case PT::Point:
           return getXDMFMixedTopologyId(t);
       }
 
-      Alert::Exception()
-        << "XDMF curved visualization does not support quadratic Rodin "
-        << "polytope type " << static_cast<int>(t) << "."
-        << Alert::Raise;
+      Alert::Exception() << "XDMF curved visualization does not support quadratic Rodin "
+                         << "polytope type " << static_cast<int>(t) << "."
+                         << Alert::Raise;
       return std::numeric_limits<U64>::max();
     }
 
@@ -673,27 +678,32 @@ namespace Rodin::IO
      * @param[in] t Polytope geometry type.
      * @returns XDMF topology name string.
      */
-    inline
-    const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
+    inline const char* getXDMFQuadraticTopologyName(Geometry::Polytope::Type t)
     {
       using PT = Geometry::Polytope::Type;
       switch (t)
       {
-        case PT::Segment:       return "Edge_3";
-        case PT::Triangle:      return "Triangle_6";
-        case PT::Quadrilateral: return "Quadrilateral_9";
-        case PT::Tetrahedron:   return "Tetrahedron_10";
-        case PT::Pyramid:       return "Pyramid_13";
-        case PT::Wedge:         return "Wedge_18";
-        case PT::Hexahedron:    return "Hexahedron_27";
+        case PT::Segment:
+          return "Edge_3";
+        case PT::Triangle:
+          return "Triangle_6";
+        case PT::Quadrilateral:
+          return "Quadrilateral_9";
+        case PT::Tetrahedron:
+          return "Tetrahedron_10";
+        case PT::Pyramid:
+          return "Pyramid_13";
+        case PT::Wedge:
+          return "Wedge_18";
+        case PT::Hexahedron:
+          return "Hexahedron_27";
         case PT::Point:
           return "Polyvertex";
       }
 
-      Alert::Exception()
-        << "XDMF curved visualization does not support quadratic Rodin "
-        << "polytope type " << static_cast<int>(t) << "."
-        << Alert::Raise;
+      Alert::Exception() << "XDMF curved visualization does not support quadratic Rodin "
+                         << "polytope type " << static_cast<int>(t) << "."
+                         << Alert::Raise;
       return nullptr;
     }
 
@@ -722,8 +732,7 @@ namespace Rodin::IO
      * @param[in] values Coordinate values in reference-cell coordinates.
      * @returns Spatial point with the same dimension as @p values.
      */
-    inline
-    Math::SpatialPoint xdmfReferencePoint(std::initializer_list<Real> values)
+    inline Math::SpatialPoint xdmfReferencePoint(std::initializer_list<Real> values)
     {
       Math::SpatialPoint p;
       p.resize(static_cast<Eigen::Index>(values.size()));
@@ -741,10 +750,8 @@ namespace Rodin::IO
      * visualization independent of Rodin's internal finite-element node layout
      * while intentionally approximating higher-order geometry by quadratic XDMF.
      */
-    inline
-    std::vector<Math::SpatialPoint> getXDMFReferenceNodes(
-        Geometry::Polytope::Type t,
-        size_t order)
+    inline std::vector<Math::SpatialPoint> getXDMFReferenceNodes(
+      Geometry::Polytope::Type t, size_t order)
     {
       using PT = Geometry::Polytope::Type;
       if (order <= 1)
@@ -752,164 +759,94 @@ namespace Rodin::IO
         switch (t)
         {
           case PT::Point:
-            return { xdmfReferencePoint({}) };
+            return {xdmfReferencePoint({})};
           case PT::Segment:
-            return { xdmfReferencePoint({0}), xdmfReferencePoint({1}) };
+            return {xdmfReferencePoint({0}), xdmfReferencePoint({1})};
           case PT::Triangle:
-            return {
-              xdmfReferencePoint({0, 0}),
-              xdmfReferencePoint({1, 0}),
-              xdmfReferencePoint({0, 1}) };
+            return {xdmfReferencePoint({0, 0}), xdmfReferencePoint({1, 0}),
+              xdmfReferencePoint({0, 1})};
           case PT::Quadrilateral:
-            return {
-              xdmfReferencePoint({0, 0}),
-              xdmfReferencePoint({1, 0}),
-              xdmfReferencePoint({1, 1}),
-              xdmfReferencePoint({0, 1}) };
+            return {xdmfReferencePoint({0, 0}), xdmfReferencePoint({1, 0}),
+              xdmfReferencePoint({1, 1}), xdmfReferencePoint({0, 1})};
           case PT::Tetrahedron:
-            return {
-              xdmfReferencePoint({0, 0, 0}),
-              xdmfReferencePoint({1, 0, 0}),
-              xdmfReferencePoint({0, 1, 0}),
-              xdmfReferencePoint({0, 0, 1}) };
+            return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({0, 1, 0}), xdmfReferencePoint({0, 0, 1})};
           case PT::Pyramid:
-            return {
-              xdmfReferencePoint({0, 0, 0}),
-              xdmfReferencePoint({1, 0, 0}),
-              xdmfReferencePoint({1, 1, 0}),
-              xdmfReferencePoint({0, 1, 0}),
-              xdmfReferencePoint({0, 0, 1}) };
+            return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({0, 0, 1})};
           case PT::Wedge:
-            return {
-              xdmfReferencePoint({0, 0, 0}),
-              xdmfReferencePoint({1, 0, 0}),
-              xdmfReferencePoint({0, 1, 0}),
-              xdmfReferencePoint({0, 0, 1}),
-              xdmfReferencePoint({1, 0, 1}),
-              xdmfReferencePoint({0, 1, 1}) };
+            return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({0, 1, 0}), xdmfReferencePoint({0, 0, 1}),
+              xdmfReferencePoint({1, 0, 1}), xdmfReferencePoint({0, 1, 1})};
           case PT::Hexahedron:
-            return {
-              xdmfReferencePoint({0, 0, 0}),
-              xdmfReferencePoint({1, 0, 0}),
-              xdmfReferencePoint({1, 1, 0}),
-              xdmfReferencePoint({0, 1, 0}),
-              xdmfReferencePoint({0, 0, 1}),
-              xdmfReferencePoint({1, 0, 1}),
-              xdmfReferencePoint({1, 1, 1}),
-              xdmfReferencePoint({0, 1, 1}) };
+            return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+              xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
+              xdmfReferencePoint({0, 0, 1}), xdmfReferencePoint({1, 0, 1}),
+              xdmfReferencePoint({1, 1, 1}), xdmfReferencePoint({0, 1, 1})};
         }
       }
 
       switch (t)
       {
         case PT::Point:
-          return { xdmfReferencePoint({}) };
+          return {xdmfReferencePoint({})};
         case PT::Segment:
           return {
-            xdmfReferencePoint({0}),
-            xdmfReferencePoint({1}),
-            xdmfReferencePoint({0.5}) };
+            xdmfReferencePoint({0}), xdmfReferencePoint({1}), xdmfReferencePoint({0.5})};
         case PT::Triangle:
-          return {
-            xdmfReferencePoint({0, 0}),
-            xdmfReferencePoint({1, 0}),
-            xdmfReferencePoint({0, 1}),
-            xdmfReferencePoint({0.5, 0}),
-            xdmfReferencePoint({0.5, 0.5}),
-            xdmfReferencePoint({0, 0.5}) };
+          return {xdmfReferencePoint({0, 0}), xdmfReferencePoint({1, 0}),
+            xdmfReferencePoint({0, 1}), xdmfReferencePoint({0.5, 0}),
+            xdmfReferencePoint({0.5, 0.5}), xdmfReferencePoint({0, 0.5})};
         case PT::Quadrilateral:
-          return {
-            xdmfReferencePoint({0, 0}),
-            xdmfReferencePoint({1, 0}),
-            xdmfReferencePoint({1, 1}),
-            xdmfReferencePoint({0, 1}),
-            xdmfReferencePoint({0.5, 0}),
-            xdmfReferencePoint({1, 0.5}),
-            xdmfReferencePoint({0.5, 1}),
-            xdmfReferencePoint({0, 0.5}),
-            xdmfReferencePoint({0.5, 0.5}) };
+          return {xdmfReferencePoint({0, 0}), xdmfReferencePoint({1, 0}),
+            xdmfReferencePoint({1, 1}), xdmfReferencePoint({0, 1}),
+            xdmfReferencePoint({0.5, 0}), xdmfReferencePoint({1, 0.5}),
+            xdmfReferencePoint({0.5, 1}), xdmfReferencePoint({0, 0.5}),
+            xdmfReferencePoint({0.5, 0.5})};
         case PT::Tetrahedron:
-          return {
-            xdmfReferencePoint({0, 0, 0}),
-            xdmfReferencePoint({1, 0, 0}),
-            xdmfReferencePoint({0, 1, 0}),
-            xdmfReferencePoint({0, 0, 1}),
-            xdmfReferencePoint({0.5, 0, 0}),
-            xdmfReferencePoint({0.5, 0.5, 0}),
-            xdmfReferencePoint({0, 0.5, 0}),
-            xdmfReferencePoint({0, 0, 0.5}),
-            xdmfReferencePoint({0.5, 0, 0.5}),
-            xdmfReferencePoint({0, 0.5, 0.5}) };
+          return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({0, 1, 0}), xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({0.5, 0, 0}), xdmfReferencePoint({0.5, 0.5, 0}),
+            xdmfReferencePoint({0, 0.5, 0}), xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0, 0.5}), xdmfReferencePoint({0, 0.5, 0.5})};
         case PT::Wedge:
-          return {
-            xdmfReferencePoint({0, 0, 0}),
-            xdmfReferencePoint({1, 0, 0}),
-            xdmfReferencePoint({0, 1, 0}),
-            xdmfReferencePoint({0, 0, 1}),
-            xdmfReferencePoint({1, 0, 1}),
-            xdmfReferencePoint({0, 1, 1}),
-            xdmfReferencePoint({0.5, 0, 0}),
-            xdmfReferencePoint({0.5, 0.5, 0}),
-            xdmfReferencePoint({0, 0.5, 0}),
-            xdmfReferencePoint({0, 0, 0.5}),
-            xdmfReferencePoint({1, 0, 0.5}),
-            xdmfReferencePoint({0, 1, 0.5}),
-            xdmfReferencePoint({0.5, 0, 1}),
-            xdmfReferencePoint({0.5, 0.5, 1}),
-            xdmfReferencePoint({0, 0.5, 1}),
-            xdmfReferencePoint({0.5, 0, 0.5}),
-            xdmfReferencePoint({0.5, 0.5, 0.5}),
-            xdmfReferencePoint({0, 0.5, 0.5}) };
+          return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({0, 1, 0}), xdmfReferencePoint({0, 0, 1}),
+            xdmfReferencePoint({1, 0, 1}), xdmfReferencePoint({0, 1, 1}),
+            xdmfReferencePoint({0.5, 0, 0}), xdmfReferencePoint({0.5, 0.5, 0}),
+            xdmfReferencePoint({0, 0.5, 0}), xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({1, 0, 0.5}), xdmfReferencePoint({0, 1, 0.5}),
+            xdmfReferencePoint({0.5, 0, 1}), xdmfReferencePoint({0.5, 0.5, 1}),
+            xdmfReferencePoint({0, 0.5, 1}), xdmfReferencePoint({0.5, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0.5, 0.5}), xdmfReferencePoint({0, 0.5, 0.5})};
         case PT::Pyramid:
-          return {
-            xdmfReferencePoint({0, 0, 0}),
-            xdmfReferencePoint({1, 0, 0}),
-            xdmfReferencePoint({1, 1, 0}),
-            xdmfReferencePoint({0, 1, 0}),
-            xdmfReferencePoint({0, 0, 1}),
-            xdmfReferencePoint({0.5, 0, 0}),
-            xdmfReferencePoint({1, 0.5, 0}),
-            xdmfReferencePoint({0.5, 1, 0}),
-            xdmfReferencePoint({0, 0.5, 0}),
-            xdmfReferencePoint({0, 0, 0.5}),
-            xdmfReferencePoint({0.5, 0, 0.5}),
-            xdmfReferencePoint({0.5, 0.5, 0.5}),
-            xdmfReferencePoint({0, 0.5, 0.5}) };
+          return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({0, 0, 1}), xdmfReferencePoint({0.5, 0, 0}),
+            xdmfReferencePoint({1, 0.5, 0}), xdmfReferencePoint({0.5, 1, 0}),
+            xdmfReferencePoint({0, 0.5, 0}), xdmfReferencePoint({0, 0, 0.5}),
+            xdmfReferencePoint({0.5, 0, 0.5}), xdmfReferencePoint({0.5, 0.5, 0.5}),
+            xdmfReferencePoint({0, 0.5, 0.5})};
         case PT::Hexahedron:
-          return {
-            xdmfReferencePoint({0, 0, 0}),
-            xdmfReferencePoint({1, 0, 0}),
-            xdmfReferencePoint({1, 1, 0}),
-            xdmfReferencePoint({0, 1, 0}),
-            xdmfReferencePoint({0, 0, 1}),
-            xdmfReferencePoint({1, 0, 1}),
-            xdmfReferencePoint({1, 1, 1}),
-            xdmfReferencePoint({0, 1, 1}),
-            xdmfReferencePoint({0.5, 0, 0}),
-            xdmfReferencePoint({1, 0.5, 0}),
-            xdmfReferencePoint({0.5, 1, 0}),
-            xdmfReferencePoint({0, 0.5, 0}),
-            xdmfReferencePoint({0, 0, 0.5}),
-            xdmfReferencePoint({1, 0, 0.5}),
-            xdmfReferencePoint({1, 1, 0.5}),
-            xdmfReferencePoint({0, 1, 0.5}),
-            xdmfReferencePoint({0.5, 0, 1}),
-            xdmfReferencePoint({1, 0.5, 1}),
-            xdmfReferencePoint({0.5, 1, 1}),
-            xdmfReferencePoint({0, 0.5, 1}),
-            xdmfReferencePoint({0.5, 0.5, 0}),
-            xdmfReferencePoint({0.5, 0, 0.5}),
-            xdmfReferencePoint({1, 0.5, 0.5}),
-            xdmfReferencePoint({0.5, 1, 0.5}),
-            xdmfReferencePoint({0, 0.5, 0.5}),
-            xdmfReferencePoint({0.5, 0.5, 1}),
-            xdmfReferencePoint({0.5, 0.5, 0.5}) };
+          return {xdmfReferencePoint({0, 0, 0}), xdmfReferencePoint({1, 0, 0}),
+            xdmfReferencePoint({1, 1, 0}), xdmfReferencePoint({0, 1, 0}),
+            xdmfReferencePoint({0, 0, 1}), xdmfReferencePoint({1, 0, 1}),
+            xdmfReferencePoint({1, 1, 1}), xdmfReferencePoint({0, 1, 1}),
+            xdmfReferencePoint({0.5, 0, 0}), xdmfReferencePoint({1, 0.5, 0}),
+            xdmfReferencePoint({0.5, 1, 0}), xdmfReferencePoint({0, 0.5, 0}),
+            xdmfReferencePoint({0, 0, 0.5}), xdmfReferencePoint({1, 0, 0.5}),
+            xdmfReferencePoint({1, 1, 0.5}), xdmfReferencePoint({0, 1, 0.5}),
+            xdmfReferencePoint({0.5, 0, 1}), xdmfReferencePoint({1, 0.5, 1}),
+            xdmfReferencePoint({0.5, 1, 1}), xdmfReferencePoint({0, 0.5, 1}),
+            xdmfReferencePoint({0.5, 0.5, 0}), xdmfReferencePoint({0.5, 0, 0.5}),
+            xdmfReferencePoint({1, 0.5, 0.5}), xdmfReferencePoint({0.5, 1, 0.5}),
+            xdmfReferencePoint({0, 0.5, 0.5}), xdmfReferencePoint({0.5, 0.5, 1}),
+            xdmfReferencePoint({0.5, 0.5, 0.5})};
       }
 
-      Alert::Exception()
-        << "Unsupported order-2 XDMF reference nodes for polytope type "
-        << static_cast<int>(t) << "."
-        << Alert::Raise;
+      Alert::Exception() << "Unsupported order-2 XDMF reference nodes for polytope type "
+                         << static_cast<int>(t) << "." << Alert::Raise;
       return {};
     }
 
@@ -918,8 +855,7 @@ namespace Rodin::IO
      * @param[in] mesh Mesh to inspect.
      * @returns True when at least one exported cell has order greater than one.
      */
-    inline
-    bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
+    inline bool hasCurvedXDMFGeometry(const Geometry::MeshBase& mesh)
     {
       for (auto it = mesh.getCell(); !it.end(); ++it)
       {
@@ -939,8 +875,7 @@ namespace Rodin::IO
      * as a ghost). For a plain `Mesh<Context::Local>` this returns
      * nullptr and the writers iterate every cell.
      */
-    inline
-    const Geometry::Shard* asShard(const Geometry::MeshBase& mesh)
+    inline const Geometry::Shard* asShard(const Geometry::MeshBase& mesh)
     {
       return dynamic_cast<const Geometry::Shard*>(&mesh);
     }
@@ -951,9 +886,7 @@ namespace Rodin::IO
      * On a `Shard` this means `isOwned(D, i)`. On a non-shard local mesh
      * the predicate is identically true.
      */
-    inline
-    bool isXDMFOwnedCell(
-        const Geometry::Shard* shard, std::size_t D, Index i)
+    inline bool isXDMFOwnedCell(const Geometry::Shard* shard, std::size_t D, Index i)
     {
       return !shard || shard->isOwned(D, i);
     }
@@ -964,8 +897,7 @@ namespace Rodin::IO
      * Equals the shard's owned-cell count when `mesh` is a `Shard`,
      * otherwise `mesh.getCellCount()`.
      */
-    inline
-    std::size_t getXDMFRenderedCellCount(const Geometry::MeshBase& mesh)
+    inline std::size_t getXDMFRenderedCellCount(const Geometry::MeshBase& mesh)
     {
       const auto* shard = asShard(mesh);
       if (!shard)
@@ -984,8 +916,7 @@ namespace Rodin::IO
      * @param[in] mesh Mesh to inspect.
      * @returns Vertex count for the XDMF geometry dataset.
      */
-    inline
-    size_t getXDMFVisualizationVertexCount(const Geometry::MeshBase& mesh)
+    inline size_t getXDMFVisualizationVertexCount(const Geometry::MeshBase& mesh)
     {
       // Linear meshes share vertices across cells; vertex emission is
       // by vertex index, not per-cell. We deliberately do NOT filter the
@@ -1063,10 +994,8 @@ namespace Rodin::IO
      * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      * @returns Topology layout metadata.
      */
-    inline
-    XDMFTopologyLayout getXDMFTopologyLayout(
-        const Geometry::MeshBase& mesh,
-        bool allowUniformCurvedTopology = true)
+    inline XDMFTopologyLayout getXDMFTopologyLayout(
+      const Geometry::MeshBase& mesh, bool allowUniformCurvedTopology = true)
     {
       XDMFTopologyLayout layout;
       layout.entryCount = getXDMFMixedTopologySize(mesh);
@@ -1074,8 +1003,7 @@ namespace Rodin::IO
       if (!allowUniformCurvedTopology || !hasCurvedXDMFGeometry(mesh))
         return layout;
 
-      const auto& localMesh =
-          static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
+      const auto& localMesh = static_cast<const Geometry::Mesh<Context::Local>&>(mesh);
       const auto& connectivity = localMesh.getConnectivity();
       const size_t D = connectivity.getDimension();
       const auto* shard = asShard(mesh);
@@ -1417,11 +1345,8 @@ namespace Rodin::IO
      * @param[in] mesh  Local mesh whose cells provide the topology data.
      * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
-    inline
-    void writeXDMFTopology(
-        hid_t file,
-        const Geometry::MeshBase& mesh,
-        bool allowUniformCurvedTopology = true)
+    inline void writeXDMFTopology(
+      hid_t file, const Geometry::MeshBase& mesh, bool allowUniformCurvedTopology = true)
     {
       {
         const auto g =
@@ -1437,8 +1362,7 @@ namespace Rodin::IO
       const auto& connectivity =
           static_cast<const Geometry::Mesh<Context::Local>&>(mesh).getConnectivity();
       const size_t D = connectivity.getDimension();
-      const auto layout =
-        getXDMFTopologyLayout(mesh, allowUniformCurvedTopology);
+      const auto layout = getXDMFTopologyLayout(mesh, allowUniformCurvedTopology);
       const auto* shard = asShard(mesh);
 
       if (layout.isUniform)
@@ -1449,16 +1373,11 @@ namespace Rodin::IO
           for (size_t k = 0; k < layout.columnCount; ++k)
             topology[i * layout.columnCount + k] = nextNode++;
 
-        writeMatrixDataset(
-            file,
-            Path::MeshXDMFTopology,
-            topology,
-            static_cast<hsize_t>(layout.rowCount),
-            static_cast<hsize_t>(layout.columnCount));
+        writeMatrixDataset(file, Path::MeshXDMFTopology, topology,
+          static_cast<hsize_t>(layout.rowCount),
+          static_cast<hsize_t>(layout.columnCount));
         writeScalarDataset(
-            file,
-            Path::MeshXDMFTopologySize,
-            static_cast<U64>(layout.entryCount));
+          file, Path::MeshXDMFTopologySize, static_cast<U64>(layout.entryCount));
         return;
       }
 
@@ -1478,9 +1397,8 @@ namespace Rodin::IO
           const size_t order = trans.getOrder();
           const auto nodes = getXDMFReferenceNodes(geometry, order);
 
-          topology.push_back(order > 1
-              ? getXDMFQuadraticMixedTopologyId(geometry)
-              : getXDMFMixedTopologyId(geometry));
+          topology.push_back(order > 1 ? getXDMFQuadraticMixedTopologyId(geometry)
+                                       : getXDMFMixedTopologyId(geometry));
 
           if (geometry == Geometry::Polytope::Type::Segment && order <= 1)
             topology.push_back(static_cast<U64>(nodes.size()));
@@ -1490,7 +1408,8 @@ namespace Rodin::IO
         }
 
         writeVectorDataset(file, Path::MeshXDMFTopology, topology);
-        writeScalarDataset(file, Path::MeshXDMFTopologySize, static_cast<U64>(topology.size()));
+        writeScalarDataset(
+          file, Path::MeshXDMFTopologySize, static_cast<U64>(topology.size()));
         return;
       }
 
@@ -1529,11 +1448,8 @@ namespace Rodin::IO
      * @param[in] mesh      Local mesh whose cells provide the topology data.
      * @param[in] allowUniformCurvedTopology Whether uniform curved topology is allowed.
      */
-    inline
-    void writeXDMFTopology(
-        const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh,
-        bool allowUniformCurvedTopology = true)
+    inline void writeXDMFTopology(const boost::filesystem::path& filename,
+      const Geometry::MeshBase& mesh, bool allowUniformCurvedTopology = true)
     {
       const auto file = File(H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT));
       if (!file)
@@ -1601,12 +1517,8 @@ namespace Rodin::IO
           }
         }
 
-        writeMatrixDataset(
-            file,
-            Path::MeshGeometryVertices,
-            packed,
-            static_cast<hsize_t>(nv),
-            static_cast<hsize_t>(sdim));
+        writeMatrixDataset(file, Path::MeshGeometryVertices, packed,
+          static_cast<hsize_t>(nv), static_cast<hsize_t>(sdim));
         return;
       }
 
@@ -1711,11 +1623,8 @@ namespace Rodin::IO
      * @see writeXDMFTopology, writeXDMFVertices, writeXDMFRegionAttribute,
      *      MeshPrinter<FileFormat::HDF5, Context::Local>
      */
-    inline
-    void writeXDMFMesh(
-        const boost::filesystem::path& filename,
-        const Geometry::MeshBase& mesh,
-        bool allowUniformCurvedTopology = true)
+    inline void writeXDMFMesh(const boost::filesystem::path& filename,
+      const Geometry::MeshBase& mesh, bool allowUniformCurvedTopology = true)
     {
       const auto file =
         File(H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT));
@@ -1745,10 +1654,8 @@ namespace Rodin::IO
     /// @cond
     // Forward declaration of the explicit-mesh overload, defined below.
     template <class GridFunctionType>
-    void writeXDMFNodeAttribute(
-        const GridFunctionType& gf,
-        const Geometry::MeshBase& visMesh,
-        const boost::filesystem::path& filename);
+    void writeXDMFNodeAttribute(const GridFunctionType& gf,
+      const Geometry::MeshBase& visMesh, const boost::filesystem::path& filename);
     /// @endcond
 
     /**
@@ -1790,16 +1697,15 @@ namespace Rodin::IO
     {
       const auto& fesMesh = gf.getFiniteElementSpace().getMesh();
       const auto* localMesh =
-          dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
+        dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
       if (!localMesh)
       {
-        Alert::Exception()
-          << "writeXDMFNodeAttribute(gf, path): the grid function's FES "
-             "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
-             "shard explicitly via writeXDMFNodeAttribute(gf, "
-             "mpiMesh.getShard(), path), or use IO::XDMF with "
-             "setMesh(mpiMesh) which forwards the shard automatically."
-          << Alert::Raise;
+        Alert::Exception() << "writeXDMFNodeAttribute(gf, path): the grid function's FES "
+                              "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
+                              "shard explicitly via writeXDMFNodeAttribute(gf, "
+                              "mpiMesh.getShard(), path), or use IO::XDMF with "
+                              "setMesh(mpiMesh) which forwards the shard automatically."
+                           << Alert::Raise;
       }
       writeXDMFNodeAttribute(gf, *localMesh, filename);
     }
@@ -1830,10 +1736,8 @@ namespace Rodin::IO
      */
     // Forward declaration of the explicit-mesh overload, defined below.
     template <class GridFunctionType>
-    void writeXDMFCellAttribute(
-        const GridFunctionType& gf,
-        const Geometry::MeshBase& visMesh,
-        const boost::filesystem::path& filename);
+    void writeXDMFCellAttribute(const GridFunctionType& gf,
+      const Geometry::MeshBase& visMesh, const boost::filesystem::path& filename);
     /// @endcond
 
     /**
@@ -1858,16 +1762,15 @@ namespace Rodin::IO
       // silently emit a malformed dataset. Fail loudly instead.
       const auto& fesMesh = gf.getFiniteElementSpace().getMesh();
       const auto* localMesh =
-          dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
+        dynamic_cast<const Geometry::Mesh<Context::Local>*>(&fesMesh);
       if (!localMesh)
       {
-        Alert::Exception()
-          << "writeXDMFCellAttribute(gf, path): the grid function's FES "
-             "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
-             "shard explicitly via writeXDMFCellAttribute(gf, "
-             "mpiMesh.getShard(), path), or use IO::XDMF with "
-             "setMesh(mpiMesh) which forwards the shard automatically."
-          << Alert::Raise;
+        Alert::Exception() << "writeXDMFCellAttribute(gf, path): the grid function's FES "
+                              "mesh is not a Mesh<Context::Local>. In MPI mode, pass the "
+                              "shard explicitly via writeXDMFCellAttribute(gf, "
+                              "mpiMesh.getShard(), path), or use IO::XDMF with "
+                              "setMesh(mpiMesh) which forwards the shard automatically."
+                           << Alert::Raise;
       }
       writeXDMFCellAttribute(gf, *localMesh, filename);
     }
@@ -1971,8 +1874,7 @@ namespace Rodin::IO
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
             const auto nodes = getXDMFReferenceNodes(
-                visCell->getGeometry(),
-                visCell->getTransformation().getOrder());
+              visCell->getGeometry(), visCell->getTransformation().getOrder());
             for (const auto& rc : nodes)
             {
               Math::SpatialPoint pc;
@@ -1983,11 +1885,10 @@ namespace Rodin::IO
           }
           if (out != nv)
           {
-            Alert::Exception()
-              << "writeXDMFNodeAttribute (curved): emitted " << out
-              << " values but expected " << nv
-              << " — visMesh and gfMesh cardinalities disagree."
-              << Alert::Raise;
+            Alert::Exception() << "writeXDMFNodeAttribute (curved): emitted " << out
+                               << " values but expected " << nv
+                               << " — visMesh and gfMesh cardinalities disagree."
+                               << Alert::Raise;
           }
           HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
         }
@@ -2002,8 +1903,7 @@ namespace Rodin::IO
             const auto visCell = visMesh.getPolytope(D, i);
             const auto gfCell = gfMesh.getPolytope(D, i);
             const auto nodes = getXDMFReferenceNodes(
-                visCell->getGeometry(),
-                visCell->getTransformation().getOrder());
+              visCell->getGeometry(), visCell->getTransformation().getOrder());
             for (const auto& rc : nodes)
             {
               Math::SpatialPoint pc;
@@ -2017,18 +1917,13 @@ namespace Rodin::IO
           }
           if (out != nv)
           {
-            Alert::Exception()
-              << "writeXDMFNodeAttribute (curved): emitted " << out
-              << " values but expected " << nv
-              << " — visMesh and gfMesh cardinalities disagree."
-              << Alert::Raise;
+            Alert::Exception() << "writeXDMFNodeAttribute (curved): emitted " << out
+                               << " values but expected " << nv
+                               << " — visMesh and gfMesh cardinalities disagree."
+                               << Alert::Raise;
           }
-          HDF5::writeMatrixDataset(
-              file.get(),
-              Path::GridFunctionValuesData,
-              values,
-              static_cast<hsize_t>(nv),
-              static_cast<hsize_t>(vdim));
+          HDF5::writeMatrixDataset(file.get(), Path::GridFunctionValuesData, values,
+            static_cast<hsize_t>(nv), static_cast<hsize_t>(vdim));
         }
         return;
       }
@@ -2102,9 +1997,8 @@ namespace Rodin::IO
       // shard-aware) so that XDMF associates each value with the right
       // cell.
       const auto* shard = asShard(visMesh);
-      const size_t nc = shard
-        ? getXDMFRenderedCellCount(visMesh)
-        : visMesh.getCellCount();
+      const size_t nc =
+        shard ? getXDMFRenderedCellCount(visMesh) : visMesh.getCellCount();
       const size_t vdim = gf.getDimension();
       const size_t D = visMesh.getDimension();
 
@@ -2174,11 +2068,10 @@ namespace Rodin::IO
         // Defensive: invariant on (visMesh, gfMesh) cardinality (T2).
         if (values.size() != nc)
         {
-          Alert::Exception()
-            << "writeXDMFCellAttribute: emitted " << values.size()
-            << " values but expected " << nc
-            << " — visMesh and gfMesh cell cardinalities disagree."
-            << Alert::Raise;
+          Alert::Exception() << "writeXDMFCellAttribute: emitted " << values.size()
+                             << " values but expected " << nc
+                             << " — visMesh and gfMesh cell cardinalities disagree."
+                             << Alert::Raise;
         }
         HDF5::writeVectorDataset(file.get(), Path::GridFunctionValuesData, values);
       }
@@ -2199,11 +2092,10 @@ namespace Rodin::IO
         }
         if (values.size() != nc * vdim)
         {
-          Alert::Exception()
-            << "writeXDMFCellAttribute: emitted " << values.size()
-            << " values but expected " << (nc * vdim)
-            << " — visMesh and gfMesh cell cardinalities disagree."
-            << Alert::Raise;
+          Alert::Exception() << "writeXDMFCellAttribute: emitted " << values.size()
+                             << " values but expected " << (nc * vdim)
+                             << " — visMesh and gfMesh cell cardinalities disagree."
+                             << Alert::Raise;
         }
         HDF5::writeMatrixDataset(
             file.get(),
