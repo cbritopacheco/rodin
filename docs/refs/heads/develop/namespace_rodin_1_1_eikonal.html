@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md451">Fast Marching Method (FMM)</a></li>
-            <li><a href="#autotoc_md452">Typical Usage</a></li>
+            <li><a href="#autotoc_md450">Fast Marching Method (FMM)</a></li>
+            <li><a href="#autotoc_md451">Typical Usage</a></li>
             <li>
               Reference
               <ul>
@@ -148,7 +148,7 @@ $ F = 1 $
 <use x='12.524444' y='0' xlink:href='#eq3-g1-61'/>
 <use x='24.949925' y='0' xlink:href='#eq3-g1-49'/>
 </g>
-</svg>, the solution represents the distance function.</p><section id="autotoc_md451"><h3><a href="#autotoc_md451">Fast Marching Method (FMM)</a></h3><p>The primary solver is <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>, which implements the Fast Marching Method on unstructured simplicial meshes. The algorithm propagates a wavefront from seed vertices, updating arrival times in causal order using a priority queue. Vertex states during propagation:</p><table class="m-table"><thead><tr><th>State</th><th>Description</th></tr></thead><tbody><tr><td><strong>Far</strong></td><td>Not yet visited</td></tr><tr><td><strong>Considered</strong></td><td>In the priority queue, tentative value computed</td></tr><tr><td><strong>Accepted</strong></td><td>Finalized — arrival time is correct</td></tr></tbody></table><p>The FMM specialization for P1 finite elements on local meshes supports:</p><ul><li>Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)</li><li>User-defined speed functions <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
+</svg>, the solution represents the distance function.</p><section id="autotoc_md450"><h3><a href="#autotoc_md450">Fast Marching Method (FMM)</a></h3><p>The primary solver is <a href="class_rodin_1_1_eikonal_1_1_f_m_m.html" class="m-doc">FMM</a>, which implements the Fast Marching Method on unstructured simplicial meshes. The algorithm propagates a wavefront from seed vertices, updating arrival times in causal order using a priority queue. Vertex states during propagation:</p><table class="m-table"><thead><tr><th>State</th><th>Description</th></tr></thead><tbody><tr><td><strong>Far</strong></td><td>Not yet visited</td></tr><tr><td><strong>Considered</strong></td><td>In the priority queue, tentative value computed</td></tr><tr><td><strong>Accepted</strong></td><td>Finalized — arrival time is correct</td></tr></tbody></table><p>The FMM specialization for P1 finite elements on local meshes supports:</p><ul><li>Arbitrary spatial dimension (2D triangular, 3D tetrahedral, surface meshes)</li><li>User-defined speed functions <svg class="m-math" style="width: 2.600em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.960354 11.955168">
 <title>
 $ F(x) $
 </title>
@@ -164,7 +164,7 @@ $ F(x) $
 <use x='13.755941' y='0' xlink:href='#eq4-g0-120'/>
 <use x='20.408028' y='0' xlink:href='#eq4-g1-41'/>
 </g>
-</svg></li><li>Seed interface specification (initial zero-distance vertices)</li></ul></section><section id="autotoc_md452"><h3><a href="#autotoc_md452">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li><li>Seed interface specification (initial zero-distance vertices)</li></ul></section><section id="autotoc_md451"><h3><a href="#autotoc_md451">Typical Usage</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 
 <span class="c1">// Speed function F(x) = 1 (distance computation)</span>

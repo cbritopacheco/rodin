@@ -81,9 +81,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md113">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md114">Implementations</a></li>
-            <li><a href="#autotoc_md115">Thread Safety</a></li>
+            <li><a href="#autotoc_md112">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md113">Implementations</a></li>
+            <li><a href="#autotoc_md114">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>This class represents the transformation function that maps reference coordinates to physical coordinates for a polytope in a mesh.</p><section id="autotoc_md113"><h2><a href="#autotoc_md113">Mathematical Foundation</a></h2><p>Let <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
+<p>This class represents the transformation function that maps reference coordinates to physical coordinates for a polytope in a mesh.</p><section id="autotoc_md112"><h2><a href="#autotoc_md112">Mathematical Foundation</a></h2><p>Let <svg class="m-math" style="width: 0.669em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.418941 5.147373">
 <title>
 $ \tau $
 </title>
@@ -267,7 +267,7 @@ $ \tau $
 <g id='eq13-page1'>
 <use x='0' y='0' xlink:href='#eq13-g0-28'/>
 </g>
-</svg> is the physical element</li></ul></section><section id="autotoc_md114"><h2><a href="#autotoc_md114">Implementations</a></h2><p>Concrete implementations include:</p><ul><li>IdentityTransformation: <svg class="m-math" style="width: 4.448em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.703996 11.955168">
+</svg> is the physical element</li></ul></section><section id="autotoc_md113"><h2><a href="#autotoc_md113">Implementations</a></h2><p>Concrete implementations include:</p><ul><li>IdentityTransformation: <svg class="m-math" style="width: 4.448em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 42.703996 11.955168">
 <title>
 $ x(r) = r $
 </title>
@@ -286,7 +286,7 @@ $ x(r) = r $
 <use x='24.678041' y='0' xlink:href='#eq14-g1-61'/>
 <use x='37.103522' y='0' xlink:href='#eq14-g0-114'/>
 </g>
-</svg> (identity map)</li><li>ParametricTransformation: Uses finite element basis functions</li></ul></section><section id="autotoc_md115"><h2><a href="#autotoc_md115">Thread Safety</a></h2><p>Transformation objects are immutable after construction and are thread-safe for concurrent read access. The transform(), jacobian(), and inverse() methods can be called concurrently from multiple threads.</p><aside class="m-note m-default"><h4>See also</h4><p>IdentityTransformation, ParametricTransformation, Point</p></aside></section>
+</svg> (identity map)</li><li>ParametricTransformation: Uses finite element basis functions</li></ul></section><section id="autotoc_md114"><h2><a href="#autotoc_md114">Thread Safety</a></h2><p>Transformation objects are immutable after construction and are thread-safe for concurrent read access. The transform(), jacobian(), and inverse() methods can be called concurrently from multiple threads.</p><aside class="m-note m-default"><h4>See also</h4><p>IdentityTransformation, ParametricTransformation, Point</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

@@ -83,9 +83,9 @@
           <h3>Contents</h3>
           <ul>
             <li>
-              <a href="#autotoc_md175">Usage</a>
+              <a href="#autotoc_md174">Usage</a>
               <ul>
-                <li><a href="#autotoc_md176">Creating a distributed boundary submesh:</a></li>
+                <li><a href="#autotoc_md175">Creating a distributed boundary submesh:</a></li>
               </ul>
             </li>
             <li>
@@ -99,7 +99,7 @@
             </li>
           </ul>
         </nav>
-<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md175"><h2><a href="#autotoc_md175">Usage</a></h2><section id="autotoc_md176"><h3><a href="#autotoc_md176">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+<p>A <code>SubMesh&lt;Context::MPI&gt;</code> is an MPI mesh that represents a subset of polytopes from a parent <code>Mesh&lt;Context::MPI&gt;</code>, maintaining bidirectional index mappings between submesh-local shard indices and parent-local shard indices.</p><p>Each rank independently builds its portion of the submesh by including entities from its parent shard. The submesh keeps a collective logical dimension, so ranks that select no local top-dimensional entities still agree on the dimension of the distributed submesh.</p><p>The submesh initially inherits ownership metadata from the parent shard. Finalization reconciles selected shared entities because the parent owner of an entity need not participate in a strict submesh such as a boundary skin.</p><section id="autotoc_md174"><h2><a href="#autotoc_md174">Usage</a></h2><section id="autotoc_md175"><h3><a href="#autotoc_md175">Creating a distributed boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">MPI</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mpiMesh</span><span class="p">);</span>
 
 <span class="c1">// Include all owned boundary faces on this rank</span>

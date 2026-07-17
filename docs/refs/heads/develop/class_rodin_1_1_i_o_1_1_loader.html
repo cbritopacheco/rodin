@@ -92,7 +92,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md139">Usage Example</a></li>
+            <li><a href="#autotoc_md138">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>Abstract base class template for loading objects from streams or files.</p><aside class="m-note m-default"><h4>See also</h4><p>Loader</p></aside><p>The Loader class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>load(std::istream&amp;) - Load object from an input stream</li><li>getObject() - Access the object being loaded</li></ul><section id="autotoc_md139"><h3><a href="#autotoc_md139">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
+<p>Abstract base class template for loading objects from streams or files.</p><aside class="m-note m-default"><h4>See also</h4><p>Loader</p></aside><p>The Loader class provides a common interface for reading objects of type <code>T</code> from input streams or files. This class serves as the foundation for specialized loaders that handle different file formats and object types.</p><p>Derived classes must implement:</p><ul><li>load(std::istream&amp;) - Load object from an input stream</li><li>getObject() - Access the object being loaded</li></ul><section id="autotoc_md138"><h3><a href="#autotoc_md138">Usage Example</a></h3><pre class="m-code"><span class="k">class</span><span class="w"> </span><span class="nc">MyObjectLoader</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Loader</span><span class="o">&lt;</span><span class="n">MyObject</span><span class="o">&gt;</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
 <span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">istream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">is</span><span class="p">)</span><span class="w"> </span><span class="k">override</span>

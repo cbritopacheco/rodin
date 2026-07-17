@@ -466,7 +466,7 @@ $ F(x) = 0 $
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solver::<wbr />SNES::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7d39f0eac0af0ed5785935ac72a1e7d" class="m-doc-self">solve</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Solves the nonlinear system using the linear system&#x27;s solution vector as both the initial guess and the solution storage.</p>
-<p>The solution vector is obtained directly from <code>ksp.getProblem()</code>.getLinearSystem().getSolution(), so no manual initial-guess packing is needed. After the first solve the solution vector retains its value, providing a natural warm-start for subsequent time steps.</p>
+<p>The solution vector is obtained directly from <code>ksp.getProblem()</code>.getLinearSystem().getSolution(), so no manual initial-guess packing is needed. A full <code>Problem::assemble()</code> seeds this vector from the trial function data, so the initial iterate is the trial functions&#x27; state — consistent with <code>NewtonSolverBase::solve(GridFunction&amp;)</code>. After the first solve the solution vector retains its value, providing a natural warm start for subsequent time steps.</p>
           </div></section>
           <section class="m-doc-details" id="aadcb750c27693e889490c65577fa55cf"><div>
             <h3>

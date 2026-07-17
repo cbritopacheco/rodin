@@ -82,7 +82,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md135">Usage Example</a></li>
+            <li><a href="#autotoc_md134">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>Serializes a complete Geometry::Mesh to an HDF5 file including:</p><ul><li>Vertex geometry (<code>/Mesh/Geometry/Vertices</code>)</li><li>Full connectivity (entity CSR per dimension, incidence CSR, state)</li><li>Polytope attributes and transformations</li></ul><p>This printer is strictly for canonical Rodin mesh persistence. It does not write any XDMF-specific datasets. The XDMF visualization path (IO::XDMF) handles its own derived topology generation separately.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md135"><h3><a href="#autotoc_md135">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<p>Serializes a complete Geometry::Mesh to an HDF5 file including:</p><ul><li>Vertex geometry (<code>/Mesh/Geometry/Vertices</code>)</li><li>Full connectivity (entity CSR per dimension, incidence CSR, state)</li><li>Polytope attributes and transformations</li></ul><p>This printer is strictly for canonical Rodin mesh persistence. It does not write any XDMF-specific datasets. The XDMF visualization path (IO::XDMF) handles its own derived topology generation separately.</p><p>Stream-based printing is not supported; only file-path printing is available.</p><section id="autotoc_md134"><h3><a href="#autotoc_md134">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Geometry</span><span class="o">::</span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="n">IO</span><span class="o">::</span><span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">IO</span><span class="o">::</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">HDF5</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">&quot;output.h5&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>MeshLoader&lt;FileFormat::HDF5, Context::Local&gt;, IO::XDMF</p></aside></section>
         <section id="base-classes">

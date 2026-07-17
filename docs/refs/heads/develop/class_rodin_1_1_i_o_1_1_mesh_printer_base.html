@@ -92,7 +92,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md141">Usage Example</a></li>
+            <li><a href="#autotoc_md140">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>MeshPrinterBase provides the foundation for writing mesh data in different file formats. It extends the generic Printer class to handle mesh-specific operations and manages the mesh object being output.</p><p>Specialized printers for specific file formats should derive from this class and implement the print(std::ostream&amp;) method to generate their respective formats.</p><section id="autotoc_md141"><h3><a href="#autotoc_md141">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getMesh</span><span class="p">();</span>
+<p>MeshPrinterBase provides the foundation for writing mesh data in different file formats. It extends the generic Printer class to handle mesh-specific operations and manages the mesh object being output.</p><p>Specialized printers for specific file formats should derive from this class and implement the print(std::ostream&amp;) method to generate their respective formats.</p><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getMesh</span><span class="p">();</span>
 <span class="n">MeshPrinter</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MEDIT</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">printer</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">std</span><span class="o">::</span><span class="n">ofstream</span><span class="w"> </span><span class="n">file</span><span class="p">(</span><span class="s">&quot;output.mesh&quot;</span><span class="p">);</span>
 <span class="n">printer</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="n">file</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>Printer, MeshLoader</p></aside></section>

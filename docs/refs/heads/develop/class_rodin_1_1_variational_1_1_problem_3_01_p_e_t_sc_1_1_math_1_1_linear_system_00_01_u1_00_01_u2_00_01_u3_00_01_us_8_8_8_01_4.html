@@ -82,8 +82,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md200">Block Structure</a></li>
-            <li><a href="#autotoc_md201">Field-Split Preconditioning</a></li>
+            <li><a href="#autotoc_md199">Block Structure</a></li>
+            <li><a href="#autotoc_md200">Field-Split Preconditioning</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>Supports coupled multi-physics systems (e.g. Stokes, fluid-structure interaction) by accepting an arbitrary number of PETSc trial and test function arguments. Assembles a block-structured <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> whose global matrix and vectors are partitioned by field DOF offsets.</p><p>After calling <code>solve()</code>, the global solution vector is sliced and scattered back into each trial function&#x27;s grid function using the precomputed offset arrays.</p><section id="autotoc_md200"><h3><a href="#autotoc_md200">Block Structure</a></h3><p>For <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+<p>Supports coupled multi-physics systems (e.g. Stokes, fluid-structure interaction) by accepting an arbitrary number of PETSc trial and test function arguments. Assembles a block-structured <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> whose global matrix and vectors are partitioned by field DOF offsets.</p><p>After calling <code>solve()</code>, the global solution vector is sliced and scattered back into each trial function&#x27;s grid function using the precomputed offset arrays.</p><section id="autotoc_md199"><h3><a href="#autotoc_md199">Block Structure</a></h3><p>For <svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -205,7 +205,7 @@ $ O_1 = 0 $
 <use x='16.999226' y='0' xlink:href='#eq6-g2-61'/>
 <use x='29.424707' y='0' xlink:href='#eq6-g2-48'/>
 </g>
-</svg>).</p></section><section id="autotoc_md201"><h3><a href="#autotoc_md201">Field-Split Preconditioning</a></h3><p>Call <code>setFieldSplits()</code> after <code>assemble()</code> to create PETSc <code>IS</code> objects for each trial field. These are passed to <code>PCFIELDSPLIT</code> so that the preconditioner can be configured per-block from the command line or programmatically.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::Problem (convenience alias), Rodin::PETSc::Math::LinearSystem::FieldSplits</p></aside></section>
+</svg>).</p></section><section id="autotoc_md200"><h3><a href="#autotoc_md200">Field-Split Preconditioning</a></h3><p>Call <code>setFieldSplits()</code> after <code>assemble()</code> to create PETSc <code>IS</code> objects for each trial field. These are passed to <code>PCFIELDSPLIT</code> so that the preconditioner can be configured per-block from the command line or programmatically.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::Problem (convenience alias), Rodin::PETSc::Math::LinearSystem::FieldSplits</p></aside></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -282,10 +282,10 @@ $ O_1 = 0 $
               <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#a8459167869c8f59ee2695e0852f0b72d" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body (bilinear and linear forms).</dd>
-            <dt id="ade273f2556fd4951a4e7b8dad8006d5f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Assembles the block-structured variational formulation.</dd>
+            <dd>Assembles the block-structured variational formulation and establishes the initial guess.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a52c9cb6ad3a86b473eb82a1be6dcae6f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">AssemblyTarget target) -&gt; <a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -450,6 +450,16 @@ $ O_1 = 0 $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ade273f2556fd4951a4e7b8dad8006d5f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U1, class U2, class U3, class... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a4cd269bcb12bd569b6fd6ecd6dde4c1b" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles the block-structured variational formulation and establishes the initial guess.</p>
+<p>After assembly, the linear system&#x27;s solution vector holds the trial function data, gathered at the trial offsets, as the initial guess: on entry to a linear solver the solution vector is the guess, on exit it is the solution.</p>
           </div></section>
           <section class="m-doc-details" id="a52c9cb6ad3a86b473eb82a1be6dcae6f"><div>
             <h3>

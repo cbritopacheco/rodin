@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md179">Zeroing</a></li>
+            <li><a href="#autotoc_md178">Zeroing</a></li>
             <li>
               Reference
               <ul>
@@ -111,7 +111,7 @@ $ \mathbf{x} $
 <g id='eq2-page1'>
 <use x='0' y='0' xlink:href='#eq2-g0-120'/>
 </g>
-</svg> keep their sizes for the whole lifetime. The first call lays the vector out (sizes, type, options); subsequent calls reuse it. PETSc has no in-place resize for a vector whose layout is set, so if <code>prepare</code> ever observes a typed vector whose size differs from the requested one, which is only possible if a <code>LinearSystem</code> is illegally reused across different spaces, it fails the debug assertion.</p><section id="autotoc_md179"><h3><a href="#autotoc_md179">Zeroing</a></h3><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse: it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section>
+</svg> keep their sizes for the whole lifetime. The first call lays the vector out (sizes, type, options); subsequent calls reuse it. PETSc has no in-place resize for a vector whose layout is set, so if <code>prepare</code> ever observes a typed vector whose size differs from the requested one, which is only possible if a <code>LinearSystem</code> is illegally reused across different spaces, it fails the debug assertion.</p><section id="autotoc_md178"><h3><a href="#autotoc_md178">Zeroing</a></h3><p>The right-hand side and residual vectors are rebuilt from scratch on every assembly and must therefore be zeroed each time (<code>zeroOnReuse</code> = true, the default). The solution vector must <em>not</em> be zeroed on reuse: it carries the previous iterate, which iterative/Newton solvers consume as the initial guess. It is still zeroed once, when first laid out, to provide a defined starting point.</p></section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">

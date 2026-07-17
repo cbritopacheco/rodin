@@ -310,14 +310,14 @@
                 </tr>
               </tfoot>
             </table>
-<p>Uses a two-phase locking strategy: first tries a fast shared-lock read, then upgrades to exclusive lock only if the transformation needs to be created. The factory is called at most once per polytope.</p><aside class="m-note m-info"><h4>Note</h4><p>The Factory must be callable with signature: <code>std::unique_ptr&lt;PolytopeTransformation&gt;(size_t d, Index idx)</code></p></aside>
+<p>Uses an atomic pointer on repeated accesses. Storage growth is serialized per dimension, while first construction is serialized per polytope. The factory is called at most once per polytope.</p><aside class="m-note m-info"><h4>Note</h4><p>Cache mutation, including clear() and set(), must not overlap use of a reference returned by this function. Mesh evaluation already requires geometry to remain unchanged for the duration of assembly.</p><p>The Factory must be callable with signature: <code>std::unique_ptr&lt;PolytopeTransformation&gt;(size_t d, Index idx)</code></p></aside>
           </div></section>
           <section class="m-doc-details" id="ac8bb3912a3ce86b15842e79d0b421204"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Geometry::<wbr />PolytopeTransformationIndex::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8bb3912a3ce86b15842e79d0b421204" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
             <p>Clears all stored transformations.</p>
-<p>Releases all transformation objects and resets internal storage. Thread-safe with respect to concurrent operations.</p>
+<p>Releases all transformation objects and resets internal storage. This operation must not overlap transformation evaluation.</p>
           </div></section>
           <section class="m-doc-details" id="a38d1df78f2175f8f38f74d4357ad6a35"><div>
             <h3>

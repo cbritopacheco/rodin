@@ -541,6 +541,15 @@ $ u $
                   <td>Number of nodes in each coordinate direction</td>
                 </tr>
               </tbody>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::MemberFunctionException</td>
+                  <td>If the shape dimension does not match the geometry or an axis contains fewer than two grid points.</td>
+                </tr>
+              </tbody>
             </table>
           </div></section>
           <section class="m-doc-details" id="ae48b0eb06ac78320310c37c2a103f165"><div>
@@ -676,6 +685,15 @@ $ [0, N_1] \times [0, N_2] \times \cdots $
                 <tr>
                   <td>shape&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Number of nodes in each coordinate direction</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Exceptions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Alert::MemberFunctionException</td>
+                  <td>If the shape dimension does not match the geometry or an axis contains fewer than two grid points.</td>
                 </tr>
               </tbody>
             </table>
@@ -1437,7 +1455,7 @@ $ \vec{u} $
                 </tr>
               </tfoot>
             </table>
-<p>Uses a breadth-first search algorithm to discover connected components among polytopes of the specified dimension. Requires that the adjacency connectivity <svg class="m-math" style="width: 3.204em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 30.762247 8.302191">
+<p>Uses a graph traversal to discover connected components among polytopes of the specified dimension. Requires that the adjacency connectivity <svg class="m-math" style="width: 3.204em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 30.762247 8.302191">
 <title>
 $ d \rightarrow d $
 </title>

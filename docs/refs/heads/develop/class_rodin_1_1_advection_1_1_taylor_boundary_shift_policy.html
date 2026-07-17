@@ -297,15 +297,15 @@ $ \varepsilon $
 <g id='eq9-page1'>
 <use x='0' y='0' xlink:href='#eq9-g0-34'/>
 </g>
-</svg> is too large relative to local mesh size or curvature of <code>phi</code>, the correction will be poor.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>dt</code>: Signed step size of the tracer (kept for API symmetry; not used directly here).</li><li><code>mesh</code>: Mesh on which tracing occurs.</li><li><code>phi</code>: Scalar field/function to correct (typically the advected field itself in level-set use).</li><li><code>eps_in_phys</code>: Desired inward physical offset. The effective shift is <code>max(eps_in_phys, 50*sqrt(machine_epsilon))</code>.</li></ul></aside>
+</svg> is too large relative to local mesh size or curvature of <code>phi</code>, the correction will be poor.</li></ul></aside><aside class="m-note m-default"><h4>Parameters</h4><ul><li><code>dt</code>: Signed step size of the tracer (kept for API symmetry; not used directly here).</li><li><code>mesh</code>: Mesh on which tracing occurs.</li><li><code>phi</code>: Scalar field/function to correct (typically the advected field itself in level-set use).</li><li><code>epsInPhys</code>: Desired inward physical offset. The effective shift is <code>max(epsInPhys, 50*sqrt(machine_epsilon))</code>.</li></ul></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1f9096a28c1bfdf2a43321070f6d270d" class="m-doc">TaylorBoundaryShiftPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              <span class="m-doc-wrap-bumper"><a href="#aed1c626edcd1e4d3d8f573ca9954f968" class="m-doc">TaylorBoundaryShiftPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
               const Field&amp; phi,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps_in_phys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> epsInPhys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span>
             </dt>
             <dd>Constructs the boundary policy.</dd>
           </dl>
@@ -321,15 +321,15 @@ $ \varepsilon $
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a1f9096a28c1bfdf2a43321070f6d270d"><div>
+          <section class="m-doc-details" id="aed1c626edcd1e4d3d8f573ca9954f968"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class Field&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />TaylorBoundaryShiftPolicy&lt;Field&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1f9096a28c1bfdf2a43321070f6d270d" class="m-doc-self">TaylorBoundaryShiftPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Advection::<wbr />TaylorBoundaryShiftPolicy&lt;Field&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed1c626edcd1e4d3d8f573ca9954f968" class="m-doc-self">TaylorBoundaryShiftPolicy</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> dt,
               const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh,
               const Field&amp; phi,
-              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> eps_in_phys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span></span>
+              <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a> epsInPhys = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>(1e-12))</span></span>
             </h3>
             <p>Constructs the boundary policy.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -350,7 +350,7 @@ $ \varepsilon $
                   <td>Scalar field used for the Taylor correction.</td>
                 </tr>
                 <tr>
-                  <td>eps_in_phys</td>
+                  <td>epsInPhys</td>
                   <td>Inward physical offset used after a boundary hit.</td>
                 </tr>
               </tbody>

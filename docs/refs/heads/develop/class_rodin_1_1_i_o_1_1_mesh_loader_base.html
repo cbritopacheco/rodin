@@ -92,7 +92,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md140">Usage Example</a></li>
+            <li><a href="#autotoc_md139">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -104,7 +104,7 @@
             </li>
           </ul>
         </nav>
-<p>MeshLoaderBase provides the foundation for loading mesh data in different file formats. It extends the generic Loader class to handle mesh-specific operations and manages the mesh object being populated.</p><p>Specialized loaders for specific file formats should derive from this class and implement the load(std::istream&amp;) method to parse their respective formats.</p><section id="autotoc_md140"><h3><a href="#autotoc_md140">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
+<p>MeshLoaderBase provides the foundation for loading mesh data in different file formats. It extends the generic Loader class to handle mesh-specific operations and manages the mesh object being populated.</p><p>Specialized loaders for specific file formats should derive from this class and implement the load(std::istream&amp;) method to parse their respective formats.</p><section id="autotoc_md139"><h3><a href="#autotoc_md139">Usage Example</a></h3><pre class="m-code"><span class="n">Mesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">MeshLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;mesh.mfem&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>Loader, MeshPrinter</p></aside></section>
         <section id="base-classes">

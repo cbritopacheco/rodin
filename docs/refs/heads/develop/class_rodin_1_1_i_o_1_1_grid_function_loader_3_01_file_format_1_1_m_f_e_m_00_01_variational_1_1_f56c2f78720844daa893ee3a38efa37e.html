@@ -92,8 +92,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md145">MFEM Grid Function Format</a></li>
-            <li><a href="#autotoc_md146">Usage Example</a></li>
+            <li><a href="#autotoc_md144">MFEM Grid Function Format</a></li>
+            <li><a href="#autotoc_md145">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -105,7 +105,7 @@
             </li>
           </ul>
         </nav>
-<p>Loads finite element solution data for continuous Lagrange (P1) elements from MFEM grid function files.</p><section id="autotoc_md145"><h3><a href="#autotoc_md145">MFEM Grid Function Format</a></h3><p>The format includes:</p><ul><li>FiniteElementSpace header</li><li>FiniteElementCollection name (e.g., &quot;H1_2D_P1&quot;)</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values</li></ul></section><section id="autotoc_md146"><h3><a href="#autotoc_md146">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+<p>Loads finite element solution data for continuous Lagrange (P1) elements from MFEM grid function files.</p><section id="autotoc_md144"><h3><a href="#autotoc_md144">MFEM Grid Function Format</a></h3><p>The format includes:</p><ul><li>FiniteElementSpace header</li><li>FiniteElementCollection name (e.g., &quot;H1_2D_P1&quot;)</li><li>VDim: vector dimension</li><li>Ordering: data layout (Nodes=0 or VectorDimension=1)</li><li>Coefficient data values</li></ul></section><section id="autotoc_md145"><h3><a href="#autotoc_md145">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="n">GridFunction</span><span class="o">&lt;</span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
 <span class="n">GridFunctionLoader</span><span class="o">&lt;</span><span class="n">FileFormat</span><span class="o">::</span><span class="n">MFEM</span><span class="p">,</span><span class="w"> </span><span class="n">P1</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">loader</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
 <span class="n">loader</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;solution.gf&quot;</span><span class="p">);</span></pre><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionPrinter</p></aside></section>

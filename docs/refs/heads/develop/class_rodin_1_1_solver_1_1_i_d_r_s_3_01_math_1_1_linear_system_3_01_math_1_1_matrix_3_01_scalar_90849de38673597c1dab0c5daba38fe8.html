@@ -228,7 +228,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">system&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
-                  <td>The linear system to solve. The solution is stored in the system&#x27;s solution vector.</td>
+                  <td>The linear system to solve. On entry the solution vector is the initial guess; on exit it stores the solution.</td>
                 </tr>
               </tbody>
             </table>
@@ -278,7 +278,7 @@ $ b $
 <g id='eq4-page1'>
 <use x='0' y='0' xlink:href='#eq4-g0-98'/>
 </g>
-</svg> is the right-hand side vector.</p>
+</svg> is the right-hand side vector.</p><aside class="m-note m-default"><h4>Initial guess contract</h4><p>On entry, the system&#x27;s solution vector holds the initial guess; on exit it holds the solution. Iterative solvers use the guess whenever it is correctly sized; direct solvers ignore it. Assembly seeds the guess from the trial function data, which is zero by construction unless set.</p></aside>
           </div></section>
         </section>
       </div>

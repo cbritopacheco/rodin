@@ -81,7 +81,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md138">Usage Example</a></li>
+            <li><a href="#autotoc_md137">Usage Example</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>Manages the lifetime of an HDF5 <code>hid_t</code> identifier by calling the appropriate close function (e.g. <code>H5Fclose</code>, <code>H5Gclose</code>, <code>H5Dclose</code>, <code>H5Sclose</code>) on destruction or reset. Move-only; copying is disabled.</p><p>Use the factory functions File(), Group(), DataSet(), and Space() to construct handles with the correct close function.</p><section id="autotoc_md138"><h3><a href="#autotoc_md138">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">File</span><span class="p">(</span><span class="n">H5Fcreate</span><span class="p">(</span><span class="s">&quot;out.h5&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">H5F_ACC_TRUNC</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">));</span>
+<p>Manages the lifetime of an HDF5 <code>hid_t</code> identifier by calling the appropriate close function (e.g. <code>H5Fclose</code>, <code>H5Gclose</code>, <code>H5Dclose</code>, <code>H5Sclose</code>) on destruction or reset. Move-only; copying is disabled.</p><p>Use the factory functions File(), Group(), DataSet(), and Space() to construct handles with the correct close function.</p><section id="autotoc_md137"><h3><a href="#autotoc_md137">Usage Example</a></h3><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HDF5</span><span class="o">::</span><span class="n">File</span><span class="p">(</span><span class="n">H5Fcreate</span><span class="p">(</span><span class="s">&quot;out.h5&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">H5F_ACC_TRUNC</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">H5P_DEFAULT</span><span class="p">));</span>
 <span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">file</span><span class="p">)</span>
 <span class="w">  </span><span class="c1">// handle error ...</span>
 

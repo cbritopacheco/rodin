@@ -232,10 +232,10 @@ $ \mathbf{x} $
               <span class="m-doc-wrap-bumper">auto <a href="#a7f4dd7112c20d7855433d59d50032694" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="#af723523eed8a866c8fa646cb4d08f428" class="m-doc">ProblemBodyType</a>&amp; rhs) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Assigns a problem body (bilinear and linear forms).</dd>
-            <dt id="ade273f2556fd4951a4e7b8dad8006d5f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Assembles the variational formulation into the linear system.</dd>
+            <dd>Assembles the variational formulation and establishes the initial guess.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a52c9cb6ad3a86b473eb82a1be6dcae6f" class="m-doc">assemble</a>(</span><span class="m-doc-wrap">AssemblyTarget target) -&gt; <a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -362,6 +362,16 @@ $ \mathbf{x} $
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="ade273f2556fd4951a4e7b8dad8006d5f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U, class V&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a92a04f56194441a169e751a0ef01f52e" class="m-doc">Problem</a>&amp; Rodin::<wbr />Variational::<wbr />Problem&lt;PETSc::<wbr />Math::<wbr />LinearSystem, U, V&gt;&lt;U, V&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade273f2556fd4951a4e7b8dad8006d5f" class="m-doc-self">assemble</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles the variational formulation and establishes the initial guess.</p>
+<p>After assembly, the linear system&#x27;s solution vector holds the trial function data as the initial guess: on entry to a linear solver the solution vector is the guess, on exit it is the solution. Trial functions are zero-initialized, so the guess is zero unless set.</p>
           </div></section>
           <section class="m-doc-details" id="a52c9cb6ad3a86b473eb82a1be6dcae6f"><div>
             <h3>

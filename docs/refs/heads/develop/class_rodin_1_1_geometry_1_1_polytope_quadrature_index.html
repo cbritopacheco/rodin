@@ -81,10 +81,9 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md109">Slot design</a></li>
-            <li><a href="#autotoc_md110">Eviction policy</a></li>
-            <li><a href="#autotoc_md111">Thread safety</a></li>
-            <li><a href="#autotoc_md112">Lifecycle</a></li>
+            <li><a href="#autotoc_md109">Cache design</a></li>
+            <li><a href="#autotoc_md110">Thread safety</a></li>
+            <li><a href="#autotoc_md111">Lifecycle</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +93,7 @@
             </li>
           </ul>
         </nav>
-<p>This class maintains a mesh-owned cache of <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> objects, indexed by:</p><ul><li>polytope dimension,</li><li>polytope index,</li><li>quadrature formula identity.</li></ul><section id="autotoc_md109"><h2><a href="#autotoc_md109">Slot design</a></h2><p>Each polytope slot contains:</p><ul><li>a hot entry storing a non-owning mirror of the most recently promoted cached quadrature,</li><li>a fixed-capacity array of owned entries used as a bounded ring buffer.</li></ul><p>The hot entry exists only to accelerate repeated hits. Ownership remains solely in the bounded cache entries.</p></section><section id="autotoc_md110"><h2><a href="#autotoc_md110">Eviction policy</a></h2><p>The bounded cache uses round-robin replacement once full. This is appropriate because:</p><ul><li>the per-polytope cache is intentionally small,</li><li>the lookup cost is linear in a tiny fixed capacity,</li><li>the hot entry captures the most common repeated access pattern.</li></ul></section><section id="autotoc_md111"><h2><a href="#autotoc_md111">Thread safety</a></h2><ul><li>Each dimension bucket owns a shared mutex.</li><li>Each polytope slot owns its own shared mutex.</li><li>Reads first take shared locks.</li><li>Misses upgrade to exclusive slot access only where insertion is required.</li></ul></section><section id="autotoc_md112"><h2><a href="#autotoc_md112">Lifecycle</a></h2><p>This cache is derived state. It should be cleared whenever the mesh geometry changes.</p><aside class="m-note m-info"><h4>Note</h4><p>This cache is intentionally transient and is not serializable.</p></aside></section>
+<p>This class maintains a mesh-owned cache of <a href="class_rodin_1_1_geometry_1_1_polytope_quadrature.html" class="m-doc">PolytopeQuadrature</a> objects. Within each dimension, it first resolves a quadrature formula and then indexes a dense array by polytope index.</p><section id="autotoc_md109"><h2><a href="#autotoc_md109">Cache design</a></h2><p>A formula cache owns one stable slot per polytope. Repeated assembly with a fixed formula therefore resolves one atomically published formula pointer and one atomically published quadrature pointer. Cached objects remain valid until the mesh geometry is flushed.</p></section><section id="autotoc_md110"><h2><a href="#autotoc_md110">Thread safety</a></h2><ul><li>Repeated cache hits are lock-free.</li><li>Formula creation and storage growth are serialized per dimension.</li><li>First quadrature construction is serialized through striped locks.</li></ul></section><section id="autotoc_md111"><h2><a href="#autotoc_md111">Lifecycle</a></h2><p>This cache is derived state. It should be cleared whenever the mesh geometry changes.</p><aside class="m-note m-info"><h4>Note</h4><p>This cache is intentionally transient and is not serializable.</p></aside></section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -292,7 +291,7 @@ $ 0, \dots, \texttt{meshDim} $
                 </tr>
               </tbody>
             </table>
-<p>Lookup proceeds in three stages:</p><ul><li>check the hot entry,</li><li>scan the bounded owned cache,</li><li>lazily construct and insert on miss.</li></ul><p>On hits in the bounded cache, the entry is promoted to the hot slot. On misses, a new owned entry is inserted into the bounded cache, using round-robin replacement once the slot is full, and is then promoted to the hot slot.</p>
+<p>Formula and quadrature pointers are resolved atomically on repeated accesses. A miss creates stable owned storage under a narrow lock.</p><aside class="m-note m-info"><h4>Note</h4><p>Cache mutation, including clear(), must not overlap use of a returned reference. Mesh geometry must remain unchanged during variational evaluation.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a38d1df78f2175f8f38f74d4357ad6a35"><div>
             <h3>

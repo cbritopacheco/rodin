@@ -703,6 +703,11 @@
               VertexAttributes)</span>
             </dt>
             <dd>Verifies vertex attributes for geometry attribute index by checking exact expected values, true predicates.</dd>
+            <dt id="a3ccd335d52b9f3b449e1cf0b223b8ee3">
+              <span class="m-doc-wrap-bumper"><a href="#a3ccd335d52b9f3b449e1cf0b223b8ee3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_AttributeIndex,
+              ConcurrentReadersAndWriter)</span>
+            </dt>
+            <dd>Verifies coherent attribute snapshots during concurrent reads and writes.</dd>
             <dt id="a8b311195a7d993c05abdab5737bcde34">
               <span class="m-doc-wrap-bumper"><a href="#a8b311195a7d993c05abdab5737bcde34" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_ConnectivityExt,
               Chain_2D_Edges_Then_Vertices)</span>
@@ -1983,16 +1988,21 @@
               ExceedingCapacityDoesNotThrow)</span>
             </dt>
             <dd>Verifies exceeding capacity does not throw for geometry polytope quadrature index by checking no-throw behavior.</dd>
-            <dt id="a6e42cded2c6d03e99ea60765c429d2d0">
-              <span class="m-doc-wrap-bumper"><a href="#a6e42cded2c6d03e99ea60765c429d2d0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeQuadratureIndex,
-              RebuildsEvictedFormulaAfterCapacityExceeded)</span>
+            <dt id="a35695504903c853e774d26c08aa3f0c2">
+              <span class="m-doc-wrap-bumper"><a href="#a35695504903c853e774d26c08aa3f0c2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeQuadratureIndex,
+              RetainsFormulaBeyondFormerCapacity)</span>
             </dt>
-            <dd>Verifies rebuilds evicted formula after capacity exceeded for geometry polytope quadrature index by checking exact expected values.</dd>
-            <dt id="af6d7d7bcf819b05976507d823e3b2f80">
-              <span class="m-doc-wrap-bumper"><a href="#af6d7d7bcf819b05976507d823e3b2f80" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeQuadratureIndex,
-              HotEntryPreservesImmediateRepeatAfterOverflow)</span>
+            <dd>Verifies formula entries remain stable beyond the former bounded-cache capacity.</dd>
+            <dt id="adc3c6130908b959d0a4983d4ae05d20d">
+              <span class="m-doc-wrap-bumper"><a href="#adc3c6130908b959d0a4983d4ae05d20d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeQuadratureIndex,
+              PreservesImmediateRepeatAcrossFormulas)</span>
             </dt>
-            <dd>Verifies hot entry preserves immediate repeat after overflow for geometry polytope quadrature index by checking exact expected values.</dd>
+            <dd>Verifies immediate repeated access after registering several formulas.</dd>
+            <dt id="a55c6594ae5e5352c2bfb66704558b895">
+              <span class="m-doc-wrap-bumper"><a href="#a55c6594ae5e5352c2bfb66704558b895" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeQuadratureIndex,
+              ConstructsDistinctFormulasConcurrently)</span>
+            </dt>
+            <dd>Verifies that concurrent formula lookup constructs each cached entry once.</dd>
             <dt id="aa15b864ee5e01ca20f52acb188767d3d">
               <span class="m-doc-wrap-bumper"><a href="#aa15b864ee5e01ca20f52acb188767d3d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_Polytope,
               BasicPolytopeAccess)</span>
@@ -2538,6 +2548,16 @@
               IterableArray)</span>
             </dt>
             <dd>Verifies iterable array for geometry polytope types by checking exact expected values.</dd>
+            <dt id="ab3fce4a88db77601bab70e0106de5d95">
+              <span class="m-doc-wrap-bumper"><a href="#ab3fce4a88db77601bab70e0106de5d95" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeTransformationIndex,
+              ConstructsEachSlotOnceConcurrently)</span>
+            </dt>
+            <dd>Verifies that concurrent lookup constructs each transformation once.</dd>
+            <dt id="a9845fcbcaa5172aaeb9542db394720b3">
+              <span class="m-doc-wrap-bumper"><a href="#a9845fcbcaa5172aaeb9542db394720b3" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_PolytopeTransformationIndex,
+              ClearRebuildsTransformation)</span>
+            </dt>
+            <dd>Verifies that clearing the index invalidates cached transformations.</dd>
             <dt id="a6c81b9a8058ff09df3be58bdc9e6f23f">
               <span class="m-doc-wrap-bumper"><a href="#a6c81b9a8058ff09df3be58bdc9e6f23f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Geometry_Region,
               EnumValues)</span>
@@ -2945,6 +2965,11 @@
               AsSubMesh)</span>
             </dt>
             <dd>Verifies as sub mesh for geometry sub mesh by checking exact expected values, true predicates.</dd>
+            <dt id="ade2a3e327856968e5fba0adb568fe0b2">
+              <span class="m-doc-wrap-bumper"><a href="#ade2a3e327856968e5fba0adb568fe0b2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Mesh_UniformGrid,
+              InvalidDimensions)</span>
+            </dt>
+            <dd>Verifies that invalid grid dimensions raise a member-function exception.</dd>
             <dt id="ae1fded5a3d242b0e193addfa4e3eb27f">
               <span class="m-doc-wrap-bumper"><a href="#ae1fded5a3d242b0e193addfa4e3eb27f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Geometry_Mesh_UniformGrid,
               SanityTest)</span>
@@ -5042,6 +5067,11 @@
               to_stringstream)</span>
             </dt>
             <dd>Verifies to stringstream for serialization mesh by checking exact expected values, serialization round trips.</dd>
+            <dt id="af486cd2647bd0fa23298f7851b1a8dbc">
+              <span class="m-doc-wrap-bumper"><a href="#af486cd2647bd0fa23298f7851b1a8dbc" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Serialization_Mesh,
+              ParametricTransformationRoundTrip)</span>
+            </dt>
+            <dd>Verifies polymorphic serialization of a parametric transformation.</dd>
             <dt id="a751da4adc14ef06ff7628fbaf36aaf80">
               <span class="m-doc-wrap-bumper"><a href="#a751da4adc14ef06ff7628fbaf36aaf80" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Tuple,
               VariantConstructor)</span>
@@ -6188,6 +6218,11 @@ $ u_s - u_s = 0 $
               ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle))</span>
             </dt>
             <dd>Instantiates Flow Test over the Flow Mesh Params parameter coverage.</dd>
+            <dt id="aeee59971b213f088bf03effd47ca1506">
+              <span class="m-doc-wrap-bumper"><a href="#aeee59971b213f088bf03effd47ca1506" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Grad,
+              ShapeFunctionBasisValueCategories)</span>
+            </dt>
+            <dd>Verifies that basis forwarding preserves cached references and values.</dd>
             <dt id="a55ae60af4d2278ddd3bc9c4fe5761b65">
               <span class="m-doc-wrap-bumper"><a href="#a55ae60af4d2278ddd3bc9c4fe5761b65" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Grad,
               ShapeFunction_Construction)</span>
@@ -6258,6 +6293,11 @@ $ u_s - u_s = 0 $
               RandomCoordinates_Tetrahedron_LinearFunction)</span>
             </dt>
             <dd>Verifies random coordinates tetrahedron linear function for variational grad by checking tolerance-based numerical results, grid-function projection.</dd>
+            <dt id="a0f83676f4ca57bf79719c4586177a022">
+              <span class="m-doc-wrap-bumper"><a href="#a0f83676f4ca57bf79719c4586177a022" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_FiniteElementSpace,
+              RangeTransformingPushforwardIsApplied)</span>
+            </dt>
+            <dd>Verifies that a nontrivial range pushforward is applied once to an expansion.</dd>
             <dt id="aa98c90638eda645ba5558647c466f978">
               <span class="m-doc-wrap-bumper"><a href="#aa98c90638eda645ba5558647c466f978" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1_GridFunction,
               SanityTest_Build)</span>
@@ -6303,6 +6343,21 @@ $ u_s - u_s = 0 $
               ProjectVectorFunction)</span>
             </dt>
             <dd>Verifies project vector function for variational vector P1 grid function by checking grid-function projection.</dd>
+            <dt id="a9856c80c5b26e13ce930f3f5910edaa6">
+              <span class="m-doc-wrap-bumper"><a href="#a9856c80c5b26e13ce930f3f5910edaa6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Vector_P1_GridFunction,
+              EvaluateAtCellInterior)</span>
+            </dt>
+            <dd>Verifies vector P1 grid-function evaluation at an interior cell point.</dd>
+            <dt id="aeee7b9e4d1746572d9431481cc3998d6">
+              <span class="m-doc-wrap-bumper"><a href="#aeee7b9e4d1746572d9431481cc3998d6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P1_GridFunction,
+              EvaluationMatchesMappedBasisExpansion)</span>
+            </dt>
+            <dd>Verifies scalar and vector P1 evaluation against mapped-basis expansion.</dd>
+            <dt id="add76941f64d673e3352b776b812678f5">
+              <span class="m-doc-wrap-bumper"><a href="#add76941f64d673e3352b776b812678f5" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_H1_GridFunction,
+              CurvedP2EvaluationMatchesMappedBasisExpansion)</span>
+            </dt>
+            <dd>Verifies scalar and vector P2 evaluation on a curved cell.</dd>
             <dt id="a7ffe30fa6a6b7574e135156bfd8ae9bd">
               <span class="m-doc-wrap-bumper"><a href="#a7ffe30fa6a6b7574e135156bfd8ae9bd" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_Real_P1_GridFunction,
               GetValue)</span>
@@ -10077,6 +10132,16 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               VectorH1_GridFunction_K1_to_K6)</span>
             </dt>
             <dd>Verifies vector H1 grid function K 1 to K 6 for variational H1 space by checking tolerance-based numerical results, exact expected values.</dd>
+            <dt id="ade0f85bcf6469cbf63c366a2c6197acc">
+              <span class="m-doc-wrap-bumper"><a href="#ade0f85bcf6469cbf63c366a2c6197acc" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_H1_Space,
+              VectorGridFunctionEvaluationAtCellInterior)</span>
+            </dt>
+            <dd>Verifies scalar and vector H1 evaluation at an interior cell point.</dd>
+            <dt id="adf839fb410010f63052a3b52d1cffaf9">
+              <span class="m-doc-wrap-bumper"><a href="#adf839fb410010f63052a3b52d1cffaf9" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_H1_Space,
+              P2EvaluationMatchesMappedBasisExpansion)</span>
+            </dt>
+            <dd>Verifies scalar and vector P2 evaluation against mapped-basis expansion.</dd>
             <dt id="aea14d970f289bd15b19a5246f1413153">
               <span class="m-doc-wrap-bumper"><a href="#aea14d970f289bd15b19a5246f1413153" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_H1_Space,
               VectorH1_16x16_Mesh_K1_to_K6)</span>
@@ -11251,6 +11316,11 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               VectorDOFsMapping)</span>
             </dt>
             <dd>Verifies vector DO fs mapping for variational P0 g by checking exact expected values.</dd>
+            <dt id="a00551b83015533940e5d7066291017f2">
+              <span class="m-doc-wrap-bumper"><a href="#a00551b83015533940e5d7066291017f2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P0g,
+              GridFunctionEvaluation)</span>
+            </dt>
+            <dd>Verifies scalar and vector P0g grid-function evaluation.</dd>
             <dt id="a611929a3dcfedb327a0cf6318a75b9bf">
               <span class="m-doc-wrap-bumper"><a href="#a611929a3dcfedb327a0cf6318a75b9bf" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_P0g,
               ScalarElementProperties)</span>

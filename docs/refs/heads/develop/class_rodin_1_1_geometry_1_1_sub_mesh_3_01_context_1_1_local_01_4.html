@@ -82,15 +82,15 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md124">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md123">Mathematical Foundation</a></li>
             <li>
-              <a href="#autotoc_md125">Usage Examples</a>
+              <a href="#autotoc_md124">Usage Examples</a>
               <ul>
-                <li><a href="#autotoc_md126">Creating a boundary submesh:</a></li>
-                <li><a href="#autotoc_md127">Accessing as submesh:</a></li>
+                <li><a href="#autotoc_md125">Creating a boundary submesh:</a></li>
+                <li><a href="#autotoc_md126">Accessing as submesh:</a></li>
               </ul>
             </li>
-            <li><a href="#autotoc_md128">Thread Safety</a></li>
+            <li><a href="#autotoc_md127">Thread Safety</a></li>
             <li>
               Reference
               <ul>
@@ -102,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>A SubMesh is a mesh that represents a subset of polytopes from a parent mesh, maintaining bidirectional index mappings between child and parent. This is useful for:</p><ul><li>Extracting boundary meshes</li><li>Defining material regions</li><li>Mesh refinement</li><li>Domain decomposition</li></ul><section id="autotoc_md124"><h2><a href="#autotoc_md124">Mathematical Foundation</a></h2><p>For a parent mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
+<p>A SubMesh is a mesh that represents a subset of polytopes from a parent mesh, maintaining bidirectional index mappings between child and parent. This is useful for:</p><ul><li>Extracting boundary meshes</li><li>Defining material regions</li><li>Mesh refinement</li><li>Domain decomposition</li></ul><section id="autotoc_md123"><h2><a href="#autotoc_md123">Mathematical Foundation</a></h2><p>For a parent mesh <svg class="m-math" style="width: 1.187em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169354 11.391224 9.962617">
 <title>
 $ \mathcal{T}_h $
 </title>
@@ -191,7 +191,7 @@ $ I_{\mathcal{T}_h} $
 <use x='5.162902' y='1.793263' xlink:href='#eq6-g0-84'/>
 <use x='9.835929' y='3.199109' xlink:href='#eq6-g1-104'/>
 </g>
-</svg> are index sets.</p></section><section id="autotoc_md125"><h2><a href="#autotoc_md125">Usage Examples</a></h2><section id="autotoc_md126"><h3><a href="#autotoc_md126">Creating a boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
+</svg> are index sets.</p></section><section id="autotoc_md124"><h2><a href="#autotoc_md124">Usage Examples</a></h2><section id="autotoc_md125"><h3><a href="#autotoc_md125">Creating a boundary submesh:</a></h3><pre class="m-code"><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;::</span><span class="n">Builder</span><span class="w"> </span><span class="n">builder</span><span class="p">;</span>
 <span class="n">builder</span><span class="p">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 
 <span class="c1">// Include all boundary faces</span>
@@ -199,7 +199,7 @@ $ I_{\mathcal{T}_h} $
 <span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">it</span><span class="o">-&gt;</span><span class="n">isBoundary</span><span class="p">())</span>
 <span class="w">    </span><span class="n">builder</span><span class="p">.</span><span class="n">include</span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">getDimension</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="o">-&gt;</span><span class="n">getIndex</span><span class="p">());</span>
 
-<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre></section><section id="autotoc_md127"><h3><a href="#autotoc_md127">Accessing as submesh:</a></h3><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
+<span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">finalize</span><span class="p">();</span></pre></section><section id="autotoc_md126"><h3><a href="#autotoc_md126">Accessing as submesh:</a></h3><pre class="m-code"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mesh</span><span class="p">.</span><span class="n">isSubMesh</span><span class="p">())</span>
 <span class="p">{</span>
 <span class="w">  </span><span class="c1">// Downcast to submesh</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">SubMesh</span><span class="o">&lt;</span><span class="n">Context</span><span class="o">::</span><span class="n">Local</span><span class="o">&gt;&amp;&gt;</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
@@ -211,7 +211,7 @@ $ I_{\mathcal{T}_h} $
 <span class="p">{</span>
 <span class="w">  </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">submesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">asSubMesh</span><span class="p">();</span>
 <span class="w">  </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">submesh</span><span class="p">.</span><span class="n">getParent</span><span class="p">();</span>
-<span class="p">}</span></pre></section></section><section id="autotoc_md128"><h2><a href="#autotoc_md128">Thread Safety</a></h2><p>SubMesh objects are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, Mesh, Shard</p></aside></section>
+<span class="p">}</span></pre></section></section><section id="autotoc_md127"><h2><a href="#autotoc_md127">Thread Safety</a></h2><p>SubMesh objects are not thread-safe during construction. Once finalized, read-only operations are thread-safe.</p><aside class="m-note m-default"><h4>See also</h4><p>SubMeshBase, Mesh, Shard</p></aside></section>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">

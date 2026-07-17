@@ -117,7 +117,23 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a73f2054afa215eb5caa7437062ad2803" class="m-doc">getIterator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">Geometry::<wbr />PolytopeIterator</a></span>
             </dt>
-            <dd>Gets an iterator for traversing mesh elements.</dd>
+            <dd>Gets an iterator over the selected region.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a450448797e541d4a25c88ea69c3540e7" class="m-doc">getPolytope</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a></span>
+            </dt>
+            <dd>Gets a polytope value for an indexed assembly iteration.</dd>
+            <dt id="acfab02634131e313692a9c39c73b8976">
+              <span class="m-doc-wrap-bumper">auto <a href="#acfab02634131e313692a9c39c73b8976" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the topological dimension of the iteration.</dd>
+            <dt id="a636b1ea8f7b2b1920d81e6046be03eda">
+              <span class="m-doc-wrap-bumper">auto <a href="#a636b1ea8f7b2b1920d81e6046be03eda" class="m-doc-self">getCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t</span>
+            </dt>
+            <dd>Gets the number of candidate polytopes.</dd>
+            <dt id="a20dce3e37ebd07a2de80556d605f3cc4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a20dce3e37ebd07a2de80556d605f3cc4" class="m-doc-self">filter</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; bool</span>
+            </dt>
+            <dd>Tests whether a candidate belongs to the iteration region.</dd>
           </dl>
         </section>
         <section>
@@ -150,12 +166,38 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">Geometry::<wbr />PolytopeIterator</a> Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73f2054afa215eb5caa7437062ad2803" class="m-doc-self">getIterator</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-            <p>Gets an iterator for traversing mesh elements.</p>
+            <p>Gets an iterator over the selected region.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>PolytopeIterator for sequential mesh traversal</td>
+                  <td>Polytope iterator</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a450448797e541d4a25c88ea69c3540e7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a> Rodin::<wbr />Assembly::<wbr />SequentialIteration&lt;Geometry::<wbr />Mesh&lt;Context::<wbr />Local&gt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a450448797e541d4a25c88ea69c3540e7" class="m-doc-self">getPolytope</a>(</span><span class="m-doc-wrap"><a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const</span></span>
+            </h3>
+            <p>Gets a polytope value for an indexed assembly iteration.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">i</td>
+                  <td>Polytope index</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Non-owning polytope descriptor</td>
                 </tr>
               </tfoot>
             </table>

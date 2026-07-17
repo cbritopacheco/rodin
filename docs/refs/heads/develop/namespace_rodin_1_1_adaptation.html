@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md485">Design</a></li>
-            <li><a href="#autotoc_md486">Key classes</a></li>
+            <li><a href="#autotoc_md484">Design</a></li>
+            <li><a href="#autotoc_md485">Key classes</a></li>
             <li>
               Reference
               <ul>
@@ -101,7 +101,7 @@ $ \phi $
 <g id='eq1-page1'>
 <use x='0' y='0' xlink:href='#eq1-g0-30'/>
 </g>
-</svg>, while preserving element quality.</p><section id="autotoc_md485"><h3><a href="#autotoc_md485">Design</a></h3><p>The module follows a strict separation of concerns:</p><ul><li>The <strong>level set</strong> <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
+</svg>, while preserving element quality.</p><section id="autotoc_md484"><h3><a href="#autotoc_md484">Design</a></h3><p>The module follows a strict separation of concerns:</p><ul><li>The <strong>level set</strong> <svg class="m-math" style="width: 0.722em; height: 1.107em; vertical-align: -0.243em;" viewBox="0 -8.302191 6.928102 10.626798">
 <title>
 $ \phi $
 </title>
@@ -149,7 +149,7 @@ $ \phi $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-30'/>
 </g>
-</svg> into discrete cell attributes (see <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> utilities such as the min s-t cut classifier).</li><li><strong>Geometry fitting</strong> (WNGIR) moves and curves the mesh. It never decides topology.</li></ul><p>The WNGIR step solves a metric-preconditioned (natural-gradient) problem built entirely in the variational form language: a surface force (the Welsch first variation, assembled on interface facets) balanced against bulk, observation, and admissibility metrics. Hard admissibility (element validity) is enforced by a nonlinear line search.</p></section><section id="autotoc_md486"><h3><a href="#autotoc_md486">Key classes</a></h3><ul><li>WNGIRParameters — solve configuration (budgets, tolerances, weights)</li><li>WNGIRReport — per-solve diagnostics</li><li>WNGIRSolver — backend-independent solver driver</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Interface-fitting constraints are formulated as smooth penalties; the module deliberately avoids hard geometric projections inside the solve, which break line-search continuity.</p></aside></section>
+</svg> into discrete cell attributes (see <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> utilities such as the min s-t cut classifier).</li><li><strong>Geometry fitting</strong> (WNGIR) moves and curves the mesh. It never decides topology.</li></ul><p>The WNGIR step solves a metric-preconditioned (natural-gradient) problem built entirely in the variational form language: a surface force (the Welsch first variation, assembled on interface facets) balanced against bulk, observation, and admissibility metrics. Hard admissibility (element validity) is enforced by a nonlinear line search.</p></section><section id="autotoc_md485"><h3><a href="#autotoc_md485">Key classes</a></h3><ul><li>WNGIRParameters — solve configuration (budgets, tolerances, weights)</li><li>WNGIRReport — per-solve diagnostics</li><li>WNGIRSolver — backend-independent solver driver</li></ul><aside class="m-note m-info"><h4>Note</h4><p>Interface-fitting constraints are formulated as smooth penalties; the module deliberately avoids hard geometric projections inside the solve, which break line-search continuity.</p></aside></section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">

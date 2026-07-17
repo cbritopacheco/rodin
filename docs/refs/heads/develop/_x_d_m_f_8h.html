@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md153">Typical Workflow</a></li>
+            <li><a href="#autotoc_md152">Typical Workflow</a></li>
             <li>
               Reference
               <ul>
@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>This file defines the IO::XDMF class, which produces XDMF 3 XML documents that reference HDF5 heavy-data files for mesh topology, geometry, and grid function attribute datasets.</p><p>The XDMF writer follows a split-file design:</p><ul><li>One HDF5 file per mesh snapshot</li><li>One HDF5 file per grid function attribute per snapshot</li><li>One XDMF XML file referencing all HDF5 files</li></ul><p>In distributed (MPI) mode, each rank writes its own rank-specific HDF5 visualization files using <code>{rank}</code> in the file patterns. Only the root rank (configurable, default 0) writes the master <code>.xdmf</code> XML file that references all rank-local piece files as a Spatial collection. For transient output, the master XDMF uses a Temporal collection of Spatial collections.</p><section id="autotoc_md153"><h3><a href="#autotoc_md153">Typical Workflow</a></h3><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;output/simulation&quot;</span><span class="p">);</span>
+<p>This file defines the IO::XDMF class, which produces XDMF 3 XML documents that reference HDF5 heavy-data files for mesh topology, geometry, and grid function attribute datasets.</p><p>The XDMF writer follows a split-file design:</p><ul><li>One HDF5 file per mesh snapshot</li><li>One HDF5 file per grid function attribute per snapshot</li><li>One XDMF XML file referencing all HDF5 files</li></ul><p>In distributed (MPI) mode, each rank writes its own rank-specific HDF5 visualization files using <code>{rank}</code> in the file patterns. Only the root rank (configurable, default 0) writes the master <code>.xdmf</code> XML file that references all rank-local piece files as a Spatial collection. For transient output, the master XDMF uses a Temporal collection of Spatial collections.</p><section id="autotoc_md152"><h3><a href="#autotoc_md152">Typical Workflow</a></h3><pre class="m-code"><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="w"> </span><span class="n">xdmf</span><span class="p">(</span><span class="s">&quot;output/simulation&quot;</span><span class="p">);</span>
 
 <span class="n">xdmf</span><span class="p">.</span><span class="n">setMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
 <span class="w">     </span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;velocity&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">IO</span><span class="o">::</span><span class="n">XDMF</span><span class="o">::</span><span class="n">Center</span><span class="o">::</span><span class="n">Node</span><span class="p">)</span>
