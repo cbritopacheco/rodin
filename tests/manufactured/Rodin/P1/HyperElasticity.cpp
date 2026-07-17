@@ -14,6 +14,9 @@
 
 #include <gtest/gtest.h>
 
+#include <set>
+#include <utility>
+
 #include "Rodin/Assembly.h"
 #include "Rodin/Solid.h"
 #include "Rodin/Solver/NewtonSolver.h"
@@ -369,5 +372,121 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       << "absoluteError = " << result.absoluteError
       << ", tangentNorm = " << result.tangentNorm
       << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
+  }
+
+  // ========================================================================
+  // InternalVirtualWork output / commit tests
+  //
+  // commit() evaluates the law at every quadrature point and hands each cache
+  // to the output, without assembling. The point of the hook is that the input
+  // and the output are driven by the same sweep, so their (cell, quadrature
+  // point) indexing agrees by construction rather than by a matching guess.
+  // ========================================================================
+
+  /// @brief Verifies commit() invokes the output exactly once per quadrature
+  ///        point, over the same points the input sees.
+  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitVisitsEachQuadraturePointOnce)
+  {
+    Mesh mesh = makeUnitSquareMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    uCurrent = VectorFunction{0.01 * F::x, -0.01 * F::y};
+
+    Solid::NeoHookean law(2.0, 1.0);
+    auto ivw = Solid::InternalVirtualWork(law, uCurrent);
+
+    using Key = std::pair<Index, std::size_t>;
+    std::set<Key> inputSeen;
+    std::set<Key> outputSeen;
+    std::size_t outputCalls = 0;
+
+    ivw.setInput([&](Solid::ConstitutivePoint& cp) {
+      inputSeen.insert(
+        {cp.get<Solid::Tags::CellIndex>(), cp.get<Solid::Tags::QuadraturePointIndex>()});
+    });
+    ivw.setOutput([&](const Solid::ConstitutivePoint& cp, const auto&) {
+      ++outputCalls;
+      outputSeen.insert(
+        {cp.get<Solid::Tags::CellIndex>(), cp.get<Solid::Tags::QuadraturePointIndex>()});
+    });
+
+    ivw.commit();
+
+    EXPECT_GT(outputSeen.size(), 0u);
+    // Exactly once per point: no duplicates.
+    EXPECT_EQ(outputCalls, outputSeen.size());
+    // The input and the output address the same quadrature points.
+    EXPECT_EQ(inputSeen, outputSeen);
+  }
+
+  /// @brief Verifies commit() runs the input before the law, so the output
+  ///        observes a cache built from the injected data. With the dynamic
+  ///        tags supplied, the active contraction cache must be dynamic.
+  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitOutputSeesInputDrivenCache)
+  {
+    Mesh mesh = makeUnitSquareMesh();
+    const size_t dim = mesh.getSpaceDimension();
+    P1 Vh(mesh, dim);
+
+    GridFunction uCurrent(Vh);
+    uCurrent = VectorFunction{0.01 * F::x, -0.01 * F::y};
+
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters p;
+    p.stiffness = 80.0;
+    p.damping = 0.4;
+    p.destructionRate = 0.5;
+    p.crossBridgeStiffness = 60.0;
+    p.contractility = 40.0;
+    Solid::ActiveContraction law(passive, Solid::ActiveFiberLaw(p));
+
+    auto ivw = Solid::InternalVirtualWork(law, uCurrent);
+    ivw.setInput([dim](Solid::ConstitutivePoint& cp) {
+      Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(dim));
+      fiber.setZero();
+      fiber[0] = 1.0;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.01);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.035);
+      cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
+      cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
+      cp.set<Solid::Tags::ElectricalActivation>(1.1);
+    });
+
+    std::size_t calls = 0;
+    bool allDynamic = true;
+    ivw.setOutput([&](const Solid::ConstitutivePoint&, const auto& cache) {
+      ++calls;
+      // The dynamic branch is only taken when the input's tags are present,
+      // so this proves input ran before the law and the output sees the
+      // resulting cache.
+      allDynamic = allDynamic && cache.dynamic;
+    });
+
+    ivw.commit();
+
+    EXPECT_GT(calls, 0u);
+    EXPECT_TRUE(allDynamic);
+  }
+
+  /// @brief Verifies commit() is a no-op when no output has been set, rather
+  ///        than evaluating the law or faulting.
+  TEST(Rodin_Manufactured_P1, InternalVirtualWork_CommitWithoutOutputIsANoOp)
+  {
+    Mesh mesh = makeUnitSquareMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    uCurrent = VectorFunction{0.01 * F::x, -0.01 * F::y};
+
+    Solid::NeoHookean law(2.0, 1.0);
+    auto ivw = Solid::InternalVirtualWork(law, uCurrent);
+
+    std::size_t inputCalls = 0;
+    ivw.setInput([&](Solid::ConstitutivePoint&) { ++inputCalls; });
+
+    EXPECT_NO_THROW(ivw.commit());
+    EXPECT_EQ(inputCalls, 0u);
   }
 }

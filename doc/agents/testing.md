@@ -20,6 +20,32 @@ src/Rodin/Test/                    Library-side helpers (Random functions, Utili
   (e.g. `PETSc/TargetedAssemblyTest.cpp` pins sparsity-pattern reuse:
   0 mallocs on reuse, structural zeros preserved).
 
+## Required coverage
+
+Whenever applicable, a change ships every one of these that makes sense for
+it. "It passes the happy path" is not coverage; a test that cannot fail
+proves nothing. If a category does not apply, that is a judgement to state,
+not one to skip silently.
+
+| Term | Meaning |
+| --- | --- |
+| Success-path test / happy-path test | Normal valid use succeeds |
+| Failure-path test / error-path test | Invalid use produces the correct error |
+| Expected-success test | Operation is expected to succeed |
+| Expected-failure test | Operation is expected to report failure |
+| Boundary test | Tests values at or near valid limits |
+| Exception test | Checks that a particular exception is raised |
+| Regression test | Ensures a previously found bug does not return |
+
+Two rules that make the difference between coverage and theatre:
+
+- **A regression test must be shown to catch the bug.** Revert the fix,
+  watch the test fail, restore the fix. A regression test never observed
+  red is an assumption.
+- **A tolerance-based test must fail when the quantity is wrong.**
+  Perturb the code (drop a term, change a factor) and confirm the test
+  rejects it. Otherwise the tolerance, not the code, is what passed.
+
 ## House test patterns
 
 - **FD-consistency gates** for every residual/tangent pair: assemble R and
