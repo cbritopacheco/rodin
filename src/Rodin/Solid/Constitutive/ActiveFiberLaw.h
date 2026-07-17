@@ -207,9 +207,15 @@ namespace Rodin::Solid
 
       /// @brief Evaluates the dynamic active response and condensed tangent.
       ///
+      /// @param dt Time step @f$\Delta t@f$.
+      /// @param oldState Previous internal state @f$(\gamma^n, \beta^n)@f$.
+      /// @param newState Updated internal state @f$(\gamma^{n+1}, \beta^{n+1})@f$.
       /// @param e Fiber strain at which the series law is evaluated. For the
       ///   compatible discretization this is the midpoint strain
       ///   @f$e_{1D}^{n+\frac{1}{2}}@f$.
+      /// @param previousActiveExtension Previous active extension @f$e_c^n@f$.
+      /// @param activeExtension Current active extension @f$e_c^{n+1}@f$.
+      /// @param activation Electrical activation @f$u_1@f$.
       /// @param strainFactor Derivative @f$\partial e/\partial e_{1D}^{n+1}@f$
       ///   of the evaluation strain with respect to the current fiber strain.
       ///   It is @f$\frac{1}{2}@f$ for the midpoint strain and @f$1@f$ when
