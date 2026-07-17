@@ -8,7 +8,7 @@
  * @file Output.h
  * @brief Extensible extraction mechanism for constitutive evaluation.
  *
- * An Output is the dual of @ref Input: where an Input populates a
+ * An Output is the dual of Input: where an Input populates a
  * ConstitutivePoint with auxiliary data before the constitutive law is
  * evaluated, an Output reads the resulting cache at each quadrature point
  * afterwards. This is the extraction site for quantities derived from the
@@ -17,8 +17,8 @@
  * constitutive law, and without recomputing the kinematics at the call site.
  *
  * The cache type is the law's, so an Output is written against a specific
- * law. The ConstitutivePoint carries @ref Tags::CellIndex and
- * @ref Tags::QuadraturePointIndex, so an Output and an Input driven by the
+ * law. The ConstitutivePoint carries @c Tags::CellIndex and
+ * @c Tags::QuadraturePointIndex, so an Output and an Input driven by the
  * same pass address the same quadrature point.
  *
  * ## Usage with CRTP
