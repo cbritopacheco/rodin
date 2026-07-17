@@ -206,14 +206,19 @@ namespace Rodin::Solid
       }
 
       /// @brief Evaluates the dynamic active response and condensed tangent.
-      Response evaluateDynamic(
-          Real dt,
-          const State& oldState,
-          const State& newState,
-          Real e,
-          Real previousActiveExtension,
-          Real activeExtension,
-          Real activation) const
+      ///
+      /// @param e Fiber strain at which the series law is evaluated. For the
+      ///   compatible discretization this is the midpoint strain
+      ///   @f$e_{1D}^{n+\frac{1}{2}}@f$.
+      /// @param strainFactor Derivative @f$\partial e/\partial e_{1D}^{n+1}@f$
+      ///   of the evaluation strain with respect to the current fiber strain.
+      ///   It is @f$\frac{1}{2}@f$ for the midpoint strain and @f$1@f$ when
+      ///   @p e is the current strain. Only the condensed tangent depends on
+      ///   it, since the global tangent differentiates with respect to
+      ///   @f$e_{1D}^{n+1}@f$.
+      Response evaluateDynamic(Real dt, const State& oldState, const State& newState,
+        Real e, Real previousActiveExtension, Real activeExtension, Real activation,
+        Real strainFactor = 1.0) const
       {
         const Real midpointExtension =
           0.5 * (activeExtension + previousActiveExtension);
@@ -246,9 +251,11 @@ namespace Rodin::Solid
            - m_parameters.stiffness
              * (e - midpointExtension) * (1.0 + 2.0 * e))
           / response.kcc;
-        response.tangent =
-          response.dStressDe
-          - 0.5 * response.dStressDc * response.kce / response.kcc;
+        // Chain rule to the current fiber strain: sigma and the local residual
+        // are functions of the evaluation strain e, whose derivative with
+        // respect to e_1D^{n+1} is strainFactor.
+        response.tangent = strainFactor *
+          (response.dStressDe - 0.5 * response.dStressDc * response.kce / response.kcc);
         return response;
       }
 

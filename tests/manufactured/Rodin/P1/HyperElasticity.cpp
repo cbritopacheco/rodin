@@ -84,9 +84,12 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       return probe.test(1e-6);
     }
 
+    /// @brief Finite-difference probe of the active contraction tangent.
+    /// @param previousFiberStrain When set, supplies Tags::PreviousFiberStrain
+    ///   so the series law is evaluated at the midpoint fiber strain.
     template <class FES, class State>
     Rodin::Test::FDProbeReport checkActiveContractionInternalVirtualWorkFD(
-      FES& Vh, State& uCurrent)
+      FES& Vh, State& uCurrent, std::optional<Real> previousFiberStrain)
     {
       const size_t dim = Vh.getMesh().getSpaceDimension();
 
@@ -101,7 +104,7 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       Solid::ActiveContraction law(passive, active);
       law.setLocalTolerance(1e-13).setLocalMaxIterations(80);
 
-      auto setActiveInput = [dim](Solid::ConstitutivePoint& cp) {
+      auto setActiveInput = [dim, previousFiberStrain](Solid::ConstitutivePoint& cp) {
         Math::SpatialVector<Real> fiber(static_cast<std::uint8_t>(dim));
         fiber.setZero();
         fiber[0] = 0.8;
@@ -116,6 +119,8 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
         cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
         cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
         cp.set<Solid::Tags::ElectricalActivation>(1.1);
+        if (previousFiberStrain)
+          cp.set<Solid::Tags::PreviousFiberStrain>(*previousFiberStrain);
       };
 
       TrialFunction du(Vh);
@@ -129,6 +134,13 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
 
       Rodin::Test::FDProbe probe(problem);
       return probe.test(1e-7);
+    }
+
+    template <class FES, class State>
+    Rodin::Test::FDProbeReport checkActiveContractionInternalVirtualWorkFD(
+      FES& Vh, State& uCurrent)
+    {
+      return checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent, std::nullopt);
     }
 
     SolveResult solveAffineHyperElasticity(ResidualSign residualSign)
@@ -304,6 +316,54 @@ namespace Rodin::Tests::Manufactured::HyperElasticity
       0.020 * F::z + 0.006 * sin(pi * F::x) * sin(pi * F::z)};
 
     const auto result = checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent);
+    EXPECT_GT(result.finiteDifferenceNorm, 1e-10);
+    EXPECT_LT(result.relativeError, 2e-5)
+      << "absoluteError = " << result.absoluteError
+      << ", tangentNorm = " << result.tangentNorm
+      << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
+  }
+
+  /// @brief Verifies the ActiveContraction tangent stays consistent with a central
+  ///        finite difference of the residual when the series law is evaluated at
+  ///        the midpoint fiber strain (Tags::PreviousFiberStrain supplied).
+  TEST(Rodin_Manufactured_P1,
+    HyperElasticity_ActiveContraction_MidpointStrain_FDConsistency2D)
+  {
+    Mesh mesh = makeUnitSquareMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    const Real pi = Math::Constants::pi();
+    uCurrent = VectorFunction{0.05 * F::x + 0.015 * sin(pi * F::x) * sin(pi * F::y),
+      -0.04 * F::y + 0.012 * cos(pi * F::x) * sin(pi * F::y)};
+
+    // A previous fiber strain distinct from the current one, so the midpoint
+    // is a genuine average and the 1/2 chain-rule factor is exercised.
+    const auto result =
+      checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent, Real(-0.02));
+    EXPECT_GT(result.finiteDifferenceNorm, 1e-10);
+    EXPECT_LT(result.relativeError, 2e-5)
+      << "absoluteError = " << result.absoluteError
+      << ", tangentNorm = " << result.tangentNorm
+      << ", finiteDifferenceNorm = " << result.finiteDifferenceNorm;
+  }
+
+  /// @brief Verifies the midpoint-strain ActiveContraction tangent against a central
+  ///        finite difference of the residual in 3D.
+  TEST(Rodin_Manufactured_P1,
+    HyperElasticity_ActiveContraction_MidpointStrain_FDConsistency3D)
+  {
+    Mesh mesh = makeUnitCubeMesh();
+    P1 Vh(mesh, mesh.getSpaceDimension());
+
+    GridFunction uCurrent(Vh);
+    const Real pi = Math::Constants::pi();
+    uCurrent = VectorFunction{0.035 * F::x + 0.008 * sin(pi * F::x) * sin(pi * F::y),
+      -0.025 * F::y + 0.007 * sin(pi * F::y) * sin(pi * F::z),
+      0.020 * F::z + 0.006 * sin(pi * F::x) * sin(pi * F::z)};
+
+    const auto result =
+      checkActiveContractionInternalVirtualWorkFD(Vh, uCurrent, Real(-0.02));
     EXPECT_GT(result.finiteDifferenceNorm, 1e-10);
     EXPECT_LT(result.relativeError, 2e-5)
       << "absoluteError = " << result.absoluteError

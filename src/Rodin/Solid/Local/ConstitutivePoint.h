@@ -102,6 +102,18 @@ namespace Rodin::Solid
         using Type = Real;
     };
 
+    /// @brief Tag for the previous fiber strain @f$e_{1D}^n@f$.
+    ///
+    /// When present, the series law is evaluated at the midpoint fiber strain
+    /// @f$e_{1D}^{n+\frac{1}{2}}@f$, as in the compatible discretization of
+    /// Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent,
+    /// the series law falls back to the current fiber strain.
+    struct PreviousFiberStrain
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
     /// @brief Tag for the active-law time step.
     struct TimeStep
     {
