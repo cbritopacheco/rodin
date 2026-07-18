@@ -1690,4 +1690,317 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getLameFirstParameter(), 4.0, 1e-14);
     EXPECT_NEAR(law.getShearModulus(), 2.0, 1e-14);
   }
+
+  // ========================================================================
+  // ConstitutivePoint tag storage tests
+  //
+  // The tag storage is a reserved FlatMap keyed by type_index. These cover
+  // the round-trip, the open tag set (tags declared outside the library),
+  // and the ReservedTags boundary, since ReservedTags is a capacity hint
+  // and must not behave as a limit.
+  // ========================================================================
+
+  namespace
+  {
+    /// @brief A tag declared outside the library, of a declared value type.
+    struct UserScalarTag
+    {
+        using Type = Real;
+    };
+
+    /// @brief A tag declared outside the library, of a type no library tag uses.
+    struct UserMatrixTag
+    {
+        using Type = Math::SpatialMatrix<Real>;
+    };
+
+    /// @brief A family of distinct tag types, used to exceed ReservedTags.
+    template <std::size_t I>
+    struct OverflowTag
+    {
+        using Type = Real;
+    };
+
+    Solid::KinematicState makeIdentityState()
+    {
+      Solid::KinematicState state(3);
+      Math::SpatialMatrix<Real> H(3, 3);
+      H.setZero();
+      state.setDisplacementGradient(H);
+      return state;
+    }
+  }
+
+  /// @brief Verifies a declared tag round-trips through the constitutive point.
+  TEST(Rodin_Solid_ConstitutivePoint, DeclaredTagRoundTrips)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    EXPECT_FALSE(cp.has<Solid::Tags::TimeStep>());
+
+    cp.set<Solid::Tags::TimeStep>(0.25);
+
+    EXPECT_TRUE(cp.has<Solid::Tags::TimeStep>());
+    EXPECT_NEAR(cp.get<Solid::Tags::TimeStep>(), 0.25, 1e-14);
+  }
+
+  /// @brief Verifies setting a tag twice overwrites rather than duplicates.
+  TEST(Rodin_Solid_ConstitutivePoint, SetOverwrites)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    cp.set<Solid::Tags::TimeStep>(0.25);
+    cp.set<Solid::Tags::TimeStep>(0.5);
+
+    EXPECT_NEAR(cp.get<Solid::Tags::TimeStep>(), 0.5, 1e-14);
+  }
+
+  /// @brief Verifies distinct tags of the same value type do not alias.
+  TEST(Rodin_Solid_ConstitutivePoint, DistinctTagsOfSameTypeDoNotAlias)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    cp.set<Solid::Tags::PreviousActiveGamma>(1.5);
+    cp.set<Solid::Tags::PreviousActiveBeta>(2.5);
+
+    EXPECT_NEAR(cp.get<Solid::Tags::PreviousActiveGamma>(), 1.5, 1e-14);
+    EXPECT_NEAR(cp.get<Solid::Tags::PreviousActiveBeta>(), 2.5, 1e-14);
+  }
+
+  /// @brief Verifies an unset tag reports absent, and a set tag does not make
+  ///        an unrelated tag appear present.
+  TEST(Rodin_Solid_ConstitutivePoint, UnsetTagIsAbsent)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    cp.set<Solid::Tags::TimeStep>(0.25);
+
+    EXPECT_TRUE(cp.has<Solid::Tags::TimeStep>());
+    EXPECT_FALSE(cp.has<Solid::Tags::ElectricalActivation>());
+    EXPECT_FALSE(cp.has<Solid::Tags::FiberDirection>());
+  }
+
+  /// @brief Verifies the tag set is open: tags declared outside the library,
+  ///        including one whose value type no library tag uses, round-trip.
+  TEST(Rodin_Solid_ConstitutivePoint, UserDefinedTagRoundTrips)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    Math::SpatialMatrix<Real> m(3, 3);
+    m.setIdentity();
+
+    cp.set<UserScalarTag>(0.42);
+    cp.set<UserMatrixTag>(m);
+
+    ASSERT_TRUE(cp.has<UserScalarTag>());
+    ASSERT_TRUE(cp.has<UserMatrixTag>());
+    EXPECT_NEAR(cp.get<UserScalarTag>(), 0.42, 1e-14);
+    EXPECT_NEAR(cp.get<UserMatrixTag>()(0, 0), 1.0, 1e-14);
+    EXPECT_NEAR(cp.get<UserMatrixTag>()(0, 1), 0.0, 1e-14);
+  }
+
+  /// @brief Boundary: ReservedTags is a capacity hint, not a limit. Setting
+  ///        more tags than are reserved must still round-trip; the storage
+  ///        reallocates.
+  TEST(Rodin_Solid_ConstitutivePoint, ExceedingReservedTagsStillRoundTrips)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    // One distinct tag type per index, more than ReservedTags of them.
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+      (cp.set<OverflowTag<I>>(static_cast<Real>(I)), ...);
+    }(std::make_index_sequence<Solid::ConstitutivePoint::ReservedTags + 8>{});
+
+    // gtest macros expand to statements, so check inside a function body.
+    auto check = [&]<std::size_t I>() {
+      EXPECT_TRUE(cp.has<OverflowTag<I>>());
+      EXPECT_NEAR(cp.get<OverflowTag<I>>(), static_cast<Real>(I), 1e-14);
+    };
+
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+      (check.template operator()<I>(), ...);
+    }(std::make_index_sequence<Solid::ConstitutivePoint::ReservedTags + 8>{});
+  }
+
+  /// @brief Verifies a copied constitutive point carries its tags.
+  TEST(Rodin_Solid_ConstitutivePoint, CopyCarriesTags)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    fiber[2] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::TimeStep>(0.25);
+
+    Solid::ConstitutivePoint copy(cp);
+
+    ASSERT_TRUE(copy.has<Solid::Tags::FiberDirection>());
+    EXPECT_NEAR(copy.get<Solid::Tags::FiberDirection>()[0], 1.0, 1e-14);
+    EXPECT_NEAR(copy.get<Solid::Tags::TimeStep>(), 0.25, 1e-14);
+  }
+
+  // ========================================================================
+  // ActiveContraction midpoint fiber strain tests
+  //
+  // The series law is evaluated at e_1D^{n+1/2} when Tags::PreviousFiberStrain
+  // is supplied (Chapelle, Le Tallec, Moireau, Sorine 2012, eq. 26). These
+  // pin that directly rather than through finite differences: the local solve
+  // depends on the evaluation strain alone, so supplying a previous strain
+  // must give the same active extension as evaluating at the midpoint with no
+  // tag at all.
+  // ========================================================================
+
+  namespace
+  {
+    /// @brief Builds a kinematic state with a prescribed fiber strain along x.
+    ///
+    /// For F = diag(1+a,1,1) and fiber (1,0,0): I4 = (1+a)^2, so the
+    /// Green-Lagrange fiber strain is ((1+a)^2 - 1)/2. Invert for a.
+    Solid::KinematicState makeUniaxialStateWithFiberStrain(Real strain)
+    {
+      const Real a = std::sqrt(1.0 + 2.0 * strain) - 1.0;
+      Solid::KinematicState state(3);
+      Math::SpatialMatrix<Real> H(3, 3);
+      H.setZero();
+      H(0, 0) = a;
+      state.setDisplacementGradient(H);
+      return state;
+    }
+
+    Solid::ActiveContraction<Solid::NeoHookean, Solid::ActiveFiberLaw>
+    makeActiveContractionLaw()
+    {
+      Solid::NeoHookean passive(0.0, 0.0);
+      Solid::ActiveFiberLaw::Parameters p;
+      p.stiffness = 80.0;
+      p.damping = 0.4;
+      p.destructionRate = 0.5;
+      p.crossBridgeStiffness = 60.0;
+      p.contractility = 40.0;
+      Solid::ActiveContraction law(passive, Solid::ActiveFiberLaw(p));
+      law.setLocalTolerance(1e-14).setLocalMaxIterations(80);
+      return law;
+    }
+
+    void setDynamicTags(Solid::ConstitutivePoint& cp)
+    {
+      Math::SpatialVector<Real> fiber(3);
+      fiber[0] = 1.0;
+      fiber[1] = 0.0;
+      fiber[2] = 0.0;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.01);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.035);
+      cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
+      cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
+      cp.set<Solid::Tags::ElectricalActivation>(1.1);
+    }
+  }
+
+  /// @brief Verifies the series law is evaluated at the midpoint fiber strain:
+  ///        supplying a previous strain must reproduce the active extension
+  ///        obtained by evaluating at the midpoint directly.
+  TEST(Rodin_Solid_ActiveContraction, MidpointStrainIsUsedForTheSeriesLaw)
+  {
+    auto law = makeActiveContractionLaw();
+
+    const Real ePrev = -0.02;
+    const Real eCurr = 0.06;
+    const Real eMid = 0.5 * (eCurr + ePrev);
+
+    // Midpoint via the tag: current strain eCurr, previous strain ePrev.
+    auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpA(stateA);
+    setDynamicTags(cpA);
+    cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
+    decltype(law)::Cache cacheA;
+    law.setCache(cacheA, cpA);
+
+    // The same evaluation strain, reached directly with no tag.
+    auto stateB = makeUniaxialStateWithFiberStrain(eMid);
+    Solid::ConstitutivePoint cpB(stateB);
+    setDynamicTags(cpB);
+    decltype(law)::Cache cacheB;
+    law.setCache(cacheB, cpB);
+
+    ASSERT_TRUE(cacheA.dynamic);
+    ASSERT_TRUE(cacheB.dynamic);
+
+    // cache.strain is the *current* fiber strain, so these differ ...
+    EXPECT_NEAR(cacheA.strain, eCurr, 1e-12);
+    EXPECT_NEAR(cacheB.strain, eMid, 1e-12);
+
+    // ... but the local solve sees the same evaluation strain, so the
+    // converged active extension must agree.
+    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+  }
+
+  /// @brief Verifies the condensed tangent carries the 1/2 chain-rule factor
+  ///        when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.
+  TEST(Rodin_Solid_ActiveContraction, MidpointStrainHalvesTheCondensedTangent)
+  {
+    auto law = makeActiveContractionLaw();
+
+    const Real ePrev = -0.02;
+    const Real eCurr = 0.06;
+    const Real eMid = 0.5 * (eCurr + ePrev);
+
+    auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpA(stateA);
+    setDynamicTags(cpA);
+    cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
+    decltype(law)::Cache cacheA;
+    law.setCache(cacheA, cpA);
+
+    auto stateB = makeUniaxialStateWithFiberStrain(eMid);
+    Solid::ConstitutivePoint cpB(stateB);
+    setDynamicTags(cpB);
+    decltype(law)::Cache cacheB;
+    law.setCache(cacheB, cpB);
+
+    EXPECT_GT(std::abs(cacheB.active.tangent), 1e-8);
+    EXPECT_NEAR(cacheA.active.tangent, 0.5 * cacheB.active.tangent, 1e-9);
+  }
+
+  /// @brief Regression: omitting Tags::PreviousFiberStrain must reproduce the
+  ///        pre-midpoint behaviour exactly -- the series law falls back to the
+  ///        current strain and the tangent carries no 1/2 factor. Existing
+  ///        callers that never set the tag must be unaffected.
+  TEST(Rodin_Solid_ActiveContraction, OmittingPreviousFiberStrainFallsBackToCurrentStrain)
+  {
+    auto law = makeActiveContractionLaw();
+
+    const Real eCurr = 0.06;
+
+    // No tag: the evaluation strain is the current strain.
+    auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpA(stateA);
+    setDynamicTags(cpA);
+    decltype(law)::Cache cacheA;
+    law.setCache(cacheA, cpA);
+
+    // Tag equal to the current strain: the midpoint *is* the current strain,
+    // so the local solve must agree, while the tangent picks up the 1/2.
+    auto stateB = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpB(stateB);
+    setDynamicTags(cpB);
+    cpB.set<Solid::Tags::PreviousFiberStrain>(eCurr);
+    decltype(law)::Cache cacheB;
+    law.setCache(cacheB, cpB);
+
+    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+    // Guard: without this the tangent comparison would pass trivially if the
+    // tangent were near zero.
+    EXPECT_GT(std::abs(cacheA.active.tangent), 1e-8);
+    EXPECT_NEAR(cacheB.active.tangent, 0.5 * cacheA.active.tangent, 1e-9);
+  }
 }
