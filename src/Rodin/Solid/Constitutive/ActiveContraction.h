@@ -118,6 +118,17 @@ namespace Rodin::Solid
           const Real ecN = cp.get<Tags::PreviousActiveExtension>();
           const Real activation = cp.get<Tags::ElectricalActivation>();
 
+          // The series law is evaluated at the midpoint fiber strain when the
+          // previous strain is supplied, matching the compatible
+          // discretization; otherwise it falls back to the current strain.
+          // e^n is a constant of the step, so the derivative of the evaluation
+          // strain with respect to e^{n+1} is 1/2 in the midpoint case.
+          const bool midpoint = cp.has<Tags::PreviousFiberStrain>();
+          const Real strainFactor = midpoint ? 0.5 : 1.0;
+          const Real seriesStrain = midpoint
+            ? 0.5 * (cache.strain + cp.get<Tags::PreviousFiberStrain>())
+            : cache.strain;
+
           // Initial guess: previous extension, optionally overridden by the
           // input via Tags::ActiveExtension (warm start).
           Real c =
@@ -126,7 +137,7 @@ namespace Rodin::Solid
           typename ActiveLaw::State newState =
             m_activeLaw.update(dt, oldState, ecN, c, activation);
           typename ActiveLaw::Response resp = m_activeLaw.evaluateDynamic(
-            dt, oldState, newState, cache.strain, ecN, c, activation);
+            dt, oldState, newState, seriesStrain, ecN, c, activation, strainFactor);
 
           size_t it = 0;
           for (; it < m_localMaxIterations; ++it)
@@ -137,7 +148,7 @@ namespace Rodin::Solid
             c += dc;
             newState = m_activeLaw.update(dt, oldState, ecN, c, activation);
             resp = m_activeLaw.evaluateDynamic(
-              dt, oldState, newState, cache.strain, ecN, c, activation);
+              dt, oldState, newState, seriesStrain, ecN, c, activation, strainFactor);
             if (std::abs(dc) < m_localTolerance)
               break;
           }

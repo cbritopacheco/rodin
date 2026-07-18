@@ -54,7 +54,6 @@
 #include <Rodin/IO/XDMF.h>
 #include <Rodin/Solver/NewtonSolver.h>
 #include <Rodin/Solver/CG.h>
-#include <Rodin/QF/PolytopeQuadratureFormula.h>
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -68,6 +67,7 @@ namespace
     Real ec    = 0.0;
     Real gamma = 0.0;
     Real beta  = 0.0;
+    Real e1D = 0.0;   // committed fiber strain e_1D^n
   };
 
   using StateBuffer = std::vector<std::vector<LocalState>>;
@@ -275,6 +275,8 @@ int main(int argc, char** argv)
     cp.set<Solid::Tags::PreviousActiveExtension>(s.ec);
     cp.set<Solid::Tags::PreviousActiveGamma>(s.gamma);
     cp.set<Solid::Tags::PreviousActiveBeta>(s.beta);
+    // Evaluate the series law at the midpoint fiber strain.
+    cp.set<Solid::Tags::PreviousFiberStrain>(s.e1D);
     cp.set<Solid::Tags::ElectricalActivation>(activationAt(y, currentTime));
   };
 
@@ -329,75 +331,28 @@ int main(int argc, char** argv)
   xdmf.write(0.0);
 
   // ---- commit sweep -------------------------------------------------------
-  auto commitState = [&]()
-  {
-    StepDiagnostics diagnostics;
+  // activeInput reads the state buffer as the previous step's values; this
+  // output writes it back from the converged evaluation. Both are driven by
+  // InternalVirtualWork over the same kinematics and the same quadrature
+  // rule, so the (cell, quadrature point) indexing agrees by construction.
+  StepDiagnostics diagnostics;
 
-    const auto& uData = u.getData();
-    for (auto it = mesh.getCell(); it; ++it)
-    {
-      const auto& polytope = *it;
-      const Index idx = polytope.getIndex();
-      const auto& fe = Vh.getFiniteElement(dim, idx);
-      const size_t ndof = fe.getCount();
-      const size_t order = 2 * fe.getOrder();
-      const auto& qf = QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
-      const auto& quadrature = polytope.getQuadrature(qf);
-      const size_t nqp = quadrature.getSize();
+  auto commitOutput = [&](const Solid::ConstitutivePoint& cp, const auto& cache) {
+    auto& s = state[cp.get<Solid::Tags::CellIndex>()]
+                   [cp.get<Solid::Tags::QuadraturePointIndex>()];
+    s.ec = cache.activeExtension;
+    s.gamma = cache.newState.gamma;
+    s.beta = cache.newState.beta;
+    s.e1D = cache.strain;
 
-      if (idx >= state.size())
-        state.resize(idx + 1);
-      if (state[idx].size() != nqp)
-        state[idx].assign(nqp, LocalState{});
-
-      for (size_t q = 0; q < nqp; ++q)
-      {
-        const auto& pt = quadrature.getPoint(q);
-        const auto& rc = qf.getPoint(q);
-        const auto& JacInv = pt.getJacobianInverse();
-
-        Math::SpatialMatrix<Real> H(static_cast<std::uint8_t>(dim),
-                                    static_cast<std::uint8_t>(dim));
-        H.setZero();
-        for (size_t dof = 0; dof < ndof; ++dof)
-        {
-          Math::SpatialMatrix<Real> refJac =
-            fe.getBasis(dof).getJacobian()(rc);
-          Math::SpatialMatrix<Real> physJac = refJac * JacInv;
-          const Real u_dof = uData(Vh.getGlobalIndex({dim, idx}, dof));
-          for (size_t c = 0; c < dim; ++c)
-            for (size_t k = 0; k < dim; ++k)
-              H(c, k) += u_dof * physJac(c, k);
-        }
-
-        Solid::KinematicState ks(dim);
-        ks.setDisplacementGradient(H);
-        Solid::ConstitutivePoint cp(pt, ks);
-        cp.set<Solid::Tags::CellIndex>(idx);
-        cp.set<Solid::Tags::QuadraturePointIndex>(q);
-        activeInput(cp);
-
-        typename decltype(law)::Cache cache;
-        law.setCache(cache, cp);
-
-        state[idx][q].ec    = cache.activeExtension;
-        state[idx][q].gamma = cache.newState.gamma;
-        state[idx][q].beta  = cache.newState.beta;
-
-        diagnostics.minActiveExtension =
-          std::min(diagnostics.minActiveExtension, cache.activeExtension);
-        diagnostics.maxActiveExtension =
-          std::max(diagnostics.maxActiveExtension, cache.activeExtension);
-        diagnostics.maxGamma =
-          std::max(diagnostics.maxGamma, std::abs(cache.newState.gamma));
-        diagnostics.maxBeta =
-          std::max(diagnostics.maxBeta, std::abs(cache.newState.beta));
-        diagnostics.maxLocalIterations =
-          std::max(diagnostics.maxLocalIterations, cache.localIterations);
-      }
-    }
-
-    return diagnostics;
+    diagnostics.minActiveExtension =
+      std::min(diagnostics.minActiveExtension, cache.activeExtension);
+    diagnostics.maxActiveExtension =
+      std::max(diagnostics.maxActiveExtension, cache.activeExtension);
+    diagnostics.maxGamma = std::max(diagnostics.maxGamma, std::abs(cache.newState.gamma));
+    diagnostics.maxBeta = std::max(diagnostics.maxBeta, std::abs(cache.newState.beta));
+    diagnostics.maxLocalIterations =
+      std::max(diagnostics.maxLocalIterations, cache.localIterations);
   };
 
   // ---- time loop ----------------------------------------------------------
@@ -449,7 +404,8 @@ int main(int argc, char** argv)
       << " |u_guess| = " << u.getData().norm()
       << std::endl;
 
-    auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
+    auto ivw =
+      Solid::InternalVirtualWork(law, u).setInput(activeInput).setOutput(commitOutput);
 
     Problem newton(du, v);
     newton =
@@ -492,7 +448,8 @@ int main(int argc, char** argv)
       return 1;
     }
 
-    const auto diagnostics = commitState();
+    diagnostics = StepDiagnostics{};
+    ivw.commit();
     const auto& report = solver.getReport();
     const Real maxNodalDisplacement = computeMaxNodalDisplacement();
     peakMaxNodalDisplacement = std::max(peakMaxNodalDisplacement, maxNodalDisplacement);
