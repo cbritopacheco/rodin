@@ -80,7 +80,7 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md425">Workflow</a></li>
+            <li><a href="#autotoc_md427">Workflow</a></li>
             <li>
               Reference
               <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code>PETSc::Solver::CG</code> (and <code>PETSc::Solver::GMRES</code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed through the PETSc-backed <code>Integral</code> path. For MPI grid functions this evaluates a distributed <code>LinearForm</code>, so PETSc performs the communicator-wide reduction internally.</p><section id="autotoc_md425"><h4><a href="#autotoc_md425">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;PETSc::Math::LinearSystem, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The PETSc-backed <code>Integral</code> path returns the communicator-wide L² error, which is checked against the manufactured tolerance.</li></ol></section>
+<p>These tests distribute a mesh across MPI ranks, assemble the Poisson variational problem with the PETSc backend, solve with <code>PETSc::Solver::CG</code> (and <code>PETSc::Solver::GMRES</code>), and verify the solution against a known manufactured solution.</p><p>The L² error is computed through the PETSc-backed <code>Integral</code> path. For MPI grid functions this evaluates a distributed <code>LinearForm</code>, so PETSc performs the communicator-wide reduction internally.</p><section id="autotoc_md427"><h4><a href="#autotoc_md427">Workflow</a></h4><ol><li>Rank 0 builds a uniform-grid mesh, partitions it with <code>BalancedCompactPartitioner</code>, and calls <code>sharder.scatter()</code>.</li><li>Each rank saves its shard to HDF5.</li><li>Each rank rereads its shard from HDF5 through the MPI mesh loader.</li><li>Incidence data required for assembly and Dirichlet-BC enforcement is computed and the mesh is reconciled.</li><li><code>PETSc::Variational::TrialFunction / TestFunction</code> wrap the distributed <code>P1</code> space.</li><li><code>Problem&lt;PETSc::Math::LinearSystem, U, V&gt;</code> is assembled with the MPI assembly backend and solved with a PETSc KSP solver.</li><li>The PETSc-backed <code>Integral</code> path returns the communicator-wide L² error, which is checked against the manufactured tolerance.</li></ol></section>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

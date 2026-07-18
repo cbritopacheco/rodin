@@ -4407,6 +4407,56 @@
               ParameterAccessors)</span>
             </dt>
             <dd>Verifies parameter accessors for solid saint venant kirchhoff by checking tolerance-based numerical results.</dd>
+            <dt id="a745d84c6c9756123dcb384baf1414462">
+              <span class="m-doc-wrap-bumper"><a href="#a745d84c6c9756123dcb384baf1414462" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              DeclaredTagRoundTrips)</span>
+            </dt>
+            <dd>Verifies a declared tag round-trips through the constitutive point.</dd>
+            <dt id="a59e1ccf8779ab49f8ffb6b4120a467a0">
+              <span class="m-doc-wrap-bumper"><a href="#a59e1ccf8779ab49f8ffb6b4120a467a0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              SetOverwrites)</span>
+            </dt>
+            <dd>Verifies setting a tag twice overwrites rather than duplicates.</dd>
+            <dt id="a2550ec9e7ab094e5ee2444a638388bb4">
+              <span class="m-doc-wrap-bumper"><a href="#a2550ec9e7ab094e5ee2444a638388bb4" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              DistinctTagsOfSameTypeDoNotAlias)</span>
+            </dt>
+            <dd>Verifies distinct tags of the same value type do not alias.</dd>
+            <dt id="a9c8364c617ea27f2195b42cc0460d6a2">
+              <span class="m-doc-wrap-bumper"><a href="#a9c8364c617ea27f2195b42cc0460d6a2" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              UnsetTagIsAbsent)</span>
+            </dt>
+            <dd>Verifies an unset tag reports absent, and a set tag does not make an unrelated tag appear present.</dd>
+            <dt id="aa0283733dfea0ee58d9a956318fee39e">
+              <span class="m-doc-wrap-bumper"><a href="#aa0283733dfea0ee58d9a956318fee39e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              UserDefinedTagRoundTrips)</span>
+            </dt>
+            <dd>Verifies the tag set is open: tags declared outside the library, including one whose value type no library tag uses, round-trip.</dd>
+            <dt id="aa4da4c2d104bbcb56f4695e439d20d98">
+              <span class="m-doc-wrap-bumper"><a href="#aa4da4c2d104bbcb56f4695e439d20d98" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              ExceedingReservedTagsStillRoundTrips)</span>
+            </dt>
+            <dd>Boundary: ReservedTags is a capacity hint, not a limit. Setting more tags than are reserved must still round-trip; the storage reallocates.</dd>
+            <dt id="adcb11917c2a68564267a464caf6f0a01">
+              <span class="m-doc-wrap-bumper"><a href="#adcb11917c2a68564267a464caf6f0a01" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ConstitutivePoint,
+              CopyCarriesTags)</span>
+            </dt>
+            <dd>Verifies a copied constitutive point carries its tags.</dd>
+            <dt id="a4437a50ac4686e8e8b7377ba62e2225f">
+              <span class="m-doc-wrap-bumper"><a href="#a4437a50ac4686e8e8b7377ba62e2225f" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ActiveContraction,
+              MidpointStrainIsUsedForTheSeriesLaw)</span>
+            </dt>
+            <dd>Verifies the series law is evaluated at the midpoint fiber strain: supplying a previous strain must reproduce the active extension obtained by evaluating at the midpoint directly.</dd>
+            <dt id="a4d61f5e64d9eb9a98cc62f37ae21c94b">
+              <span class="m-doc-wrap-bumper"><a href="#a4d61f5e64d9eb9a98cc62f37ae21c94b" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ActiveContraction,
+              MidpointStrainHalvesTheCondensedTangent)</span>
+            </dt>
+            <dd>Verifies the condensed tangent carries the 1/2 chain-rule factor when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.</dd>
+            <dt id="acda87d08210b292b020764a9bf6d4289">
+              <span class="m-doc-wrap-bumper"><a href="#acda87d08210b292b020764a9bf6d4289" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Solid_ActiveContraction,
+              OmittingPreviousFiberStrainFallsBackToCurrentStrain)</span>
+            </dt>
+            <dd>Regression: omitting Tags::PreviousFiberStrain must reproduce the pre-midpoint behaviour exactly &ndash; the series law falls back to the current strain and the tangent carries no 1/2 factor. Existing callers that never set the tag must be unaffected.</dd>
             <dt id="a226b8d9dbfdfeb0dcb1345269eb4ec35">
               <span class="m-doc-wrap-bumper"><a href="#a226b8d9dbfdfeb0dcb1345269eb4ec35" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Moveable,
               BasicMove)</span>

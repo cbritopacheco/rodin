@@ -80,13 +80,13 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md384">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md385">Features</a></li>
-            <li><a href="#autotoc_md386">Usage Example</a></li>
-            <li><a href="#autotoc_md387">Supported Operations</a></li>
+            <li><a href="#autotoc_md386">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md387">Features</a></li>
+            <li><a href="#autotoc_md388">Usage Example</a></li>
+            <li><a href="#autotoc_md389">Supported Operations</a></li>
           </ul>
         </nav>
-<p>This header aggregates all functionality related to the P1 finite element space, which consists of continuous piecewise linear functions over mesh elements. P1 is the most commonly used conforming finite element space.</p><section id="autotoc_md384"><h3><a href="#autotoc_md384">Mathematical Foundation</a></h3><p>The P1 space is defined as:</p><div class="m-math"><svg style="width: 24.414em; height: 1.361em;" viewBox="77.082994 -13.06128 234.377075 13.06128">
+<p>This header aggregates all functionality related to the P1 finite element space, which consists of continuous piecewise linear functions over mesh elements. P1 is the most commonly used conforming finite element space.</p><section id="autotoc_md386"><h3><a href="#autotoc_md386">Mathematical Foundation</a></h3><p>The P1 space is defined as:</p><div class="m-math"><svg style="width: 24.414em; height: 1.361em;" viewBox="77.082994 -13.06128 234.377075 13.06128">
 <title>
 \[
   P_1(\mathcal{T}_h) = \{u \in C^0(\Omega) : u|_K \in \mathbb{P}_1(K) \, \forall K \in \mathcal{T}_h\}
@@ -175,7 +175,7 @@ $ K $
 <g id='eq3-page1'>
 <use x='0' y='0' xlink:href='#eq3-g0-75'/>
 </g>
-</svg>.</p></section><section id="autotoc_md385"><h3><a href="#autotoc_md385">Features</a></h3><ul><li>One degree of freedom per mesh vertex (nodal values)</li><li>Continuous across element boundaries ( <svg class="m-math" style="width: 1.403em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 13.467795 9.474739">
+</svg>.</p></section><section id="autotoc_md387"><h3><a href="#autotoc_md387">Features</a></h3><ul><li>One degree of freedom per mesh vertex (nodal values)</li><li>Continuous across element boundaries ( <svg class="m-math" style="width: 1.403em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 13.467795 9.474739">
 <title>
 $ C^0 $
 </title>
@@ -243,13 +243,13 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='51.379235' y='1.793263' xlink:href='#eq7-g0-105'/>
 <use x='54.262375' y='1.793263' xlink:href='#eq7-g0-106'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md386"><h3><a href="#autotoc_md386">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Define P1 space</span>
+</svg></li></ul></section><section id="autotoc_md388"><h3><a href="#autotoc_md388">Usage Example</a></h3><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span><span class="w">           </span><span class="c1">// Define P1 space</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">   </span><span class="c1">// P1 trial function</span>
 <span class="n">TestFunction</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span><span class="w">    </span><span class="c1">// P1 test function</span>
 
 <span class="c1">// Poisson problem: -Δu = f</span>
 <span class="n">Problem</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span>
-<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre></section><section id="autotoc_md387"><h3><a href="#autotoc_md387">Supported Operations</a></h3><ul><li>Gradient (Grad)</li><li>Divergence (Div) for vector-valued functions</li><li>Jacobian transformations</li><li>Potential recovery</li><li>Linear elasticity specializations</li></ul></section>
+<span class="n">problem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">Grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="w"> </span><span class="n">Grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Integral</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">);</span></pre></section><section id="autotoc_md389"><h3><a href="#autotoc_md389">Supported Operations</a></h3><ul><li>Gradient (Grad)</li><li>Divergence (Div) for vector-valued functions</li><li>Jacobian transformations</li><li>Potential recovery</li><li>Linear elasticity specializations</li></ul></section>
       </div>
     </div>
   </div>

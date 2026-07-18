@@ -82,8 +82,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md343">Mathematical Foundation</a></li>
-            <li><a href="#autotoc_md344">Key Features</a></li>
+            <li><a href="#autotoc_md345">Mathematical Foundation</a></li>
+            <li><a href="#autotoc_md346">Key Features</a></li>
             <li>
               Reference
               <ul>
@@ -94,7 +94,7 @@
             </li>
           </ul>
         </nav>
-<p>GridFunctionBase represents discrete functions defined on finite element spaces, where the function is represented as a linear combination of basis functions with scalar coefficients stored in a data vector.</p><section id="autotoc_md343"><h3><a href="#autotoc_md343">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
+<p>GridFunctionBase represents discrete functions defined on finite element spaces, where the function is represented as a linear combination of basis functions with scalar coefficients stored in a data vector.</p><section id="autotoc_md345"><h3><a href="#autotoc_md345">Mathematical Foundation</a></h3><p>A grid function represents a discrete finite element approximation:</p><div class="m-math"><svg style="width: 10.304em; height: 3.565em;" viewBox="144.814262 -35.422661 98.914467 34.227147">
 <title>
 \[
   u_h(x) = \sum_{i=1}^N u_i \phi_i(x)
@@ -180,7 +180,7 @@ $ N $
 <g id='eq5-page1'>
 <use x='0' y='0' xlink:href='#eq5-g0-78'/>
 </g>
-</svg> is the number of degrees of freedom</li></ul></section><section id="autotoc_md344"><h3><a href="#autotoc_md344">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Automatic handling of degrees of freedom storage</li><li><strong>Function Evaluation</strong>: Point-wise evaluation via finite element interpolation</li><li><strong>I/O Support</strong>: Export to various visualization formats (MEDIT, MFEM)</li><li><strong>Space Association</strong>: Strong association with underlying finite element space</li></ul><p>Abstract base class for GridFunction objects.</p><p>This class contains the common routines for the behaviour of a GridFunction object. It provides a common interface for the manipulation of its data and weights, as well as projection utilities and convenience functions.</p><aside class="m-note m-default"><h4>Projection semantics</h4><p>Assigning an expression to a grid function computes the <em>interpolant:</em> the space&#x27;s degree-of-freedom functionals are applied to the expression, <svg class="m-math" style="width: 8.726em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 83.769494 12.453452">
+</svg> is the number of degrees of freedom</li></ul></section><section id="autotoc_md346"><h3><a href="#autotoc_md346">Key Features</a></h3><ul><li><strong>DOF Management</strong>: Automatic handling of degrees of freedom storage</li><li><strong>Function Evaluation</strong>: Point-wise evaluation via finite element interpolation</li><li><strong>I/O Support</strong>: Export to various visualization formats (MEDIT, MFEM)</li><li><strong>Space Association</strong>: Strong association with underlying finite element space</li></ul><p>Abstract base class for GridFunction objects.</p><p>This class contains the common routines for the behaviour of a GridFunction object. It provides a common interface for the manipulation of its data and weights, as well as projection utilities and convenience functions.</p><aside class="m-note m-default"><h4>Projection semantics</h4><p>Assigning an expression to a grid function computes the <em>interpolant:</em> the space&#x27;s degree-of-freedom functionals are applied to the expression, <svg class="m-math" style="width: 8.726em; height: 1.297em; vertical-align: -0.365em;" viewBox="0 -8.966452 83.769494 12.453452">
 <title>
 $ u_h = \sum_i \sigma_i(f)\, \phi_i $
 </title>

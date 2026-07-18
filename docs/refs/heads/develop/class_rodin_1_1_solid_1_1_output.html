@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Context namespace | Rodin</title>
+  <title>Rodin::Solid::Output class | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,38 +74,106 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Context <span class="m-thin">namespace</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="_output_8h.html">&lt;Rodin/Solid/Local/Output.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;class Derived&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span>Output <span class="m-thin">class</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::<wbr />Context</a>.</p>
+        <p>CRTP base class for outputs.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Derived</td>
+              <td>The concrete output type (CRTP)</td>
+            </tr>
+          </tbody>
+        </table>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md428">Supported Contexts</a></li>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pro-methods">Protected functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Context</p><p>Module for serial, multi-threaded, distributed, and/or parallel computation.</p><p>The Context module provides abstractions for different execution environments and computing contexts. It enables Rodin to operate efficiently across various platforms, from single-machine local execution to distributed computing environments.</p><section id="autotoc_md428"><h3><a href="#autotoc_md428">Supported Contexts</a></h3><ul><li><strong>Local Context</strong>: Single-machine execution with shared memory</li><li><strong>Distributed Context</strong>: Multi-node execution with message passing (MPI)</li></ul></section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+<p>Derived classes implement an <code>extract(const ConstitutivePoint&amp;, const Cache&amp;)</code> method that reads quantities out of a constitutive evaluation at each quadrature point.</p>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="ab22499e074e28a2edab14265d6c24b05">
+              <span class="m-doc-wrap-bumper"><a href="#ab22499e074e28a2edab14265d6c24b05" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor for derived CRTP outputs.</dd>
+            <dt id="ae0b80512dbb6a7567eb0172aca439403">
+              <span class="m-doc-wrap-bumper"><a href="#ae0b80512dbb6a7567eb0172aca439403" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a826f825692d915cb92c322480d2cbcbb">
+              <span class="m-doc-wrap-bumper"><a href="#a826f825692d915cb92c322480d2cbcbb" class="m-doc-self">Output</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;&amp;) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Base</a>
+              <div class="m-doc-template">template&lt;class Cache&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a0d5cb3b631b40a3e0c1502eabc21c5a8" class="m-doc">extract</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const Cache&amp; cache) const</span>
             </dt>
-            <dd>Abstract base class for all execution contexts.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a>
-            </dt>
-            <dd>Represents a single machine context.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>
-            </dt>
-            <dd>MPI context for parallel computing with Message Passing Interface.</dd>
+            <dd>Extracts data from a constitutive evaluation.</dd>
           </dl>
+        </section>
+        <section id="pro-methods">
+          <h2><a href="#pro-methods">Protected functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a90a01a85ea4df09f2fb147a1e3912b0b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a90a01a85ea4df09f2fb147a1e3912b0b" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy assignment operator.</dd>
+            <dt id="a20f3ac16aaa65432f2a8d6eb8b9c2228">
+              <span class="m-doc-wrap-bumper">auto <a href="#a20f3ac16aaa65432f2a8d6eb8b9c2228" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp;&amp;) -&gt; <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Output</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a0d5cb3b631b40a3e0c1502eabc21c5a8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Derived&gt;
+                template&lt;class Cache&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Solid::<wbr />Output&lt;Derived&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d5cb3b631b40a3e0c1502eabc21c5a8" class="m-doc-self">extract</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solid_1_1_constitutive_point.html" class="m-doc">ConstitutivePoint</a>&amp; cp,
+              const Cache&amp; cache) const</span></span>
+            </h3>
+            <p>Extracts data from a constitutive evaluation.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cp&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The evaluated constitutive point</td>
+                </tr>
+                <tr>
+                  <td>cache&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>The law&#x27;s cache at <code>cp</code></td>
+                </tr>
+              </tbody>
+            </table>
+<p>Called at each quadrature point after the constitutive law has populated its cache.</p>
+          </div></section>
         </section>
       </div>
     </div>

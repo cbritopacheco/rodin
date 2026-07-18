@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md427">Alert Types</a></li>
-            <li><a href="#autotoc_md428">Usage Pattern</a></li>
+            <li><a href="#autotoc_md429">Alert Types</a></li>
+            <li><a href="#autotoc_md430">Usage Pattern</a></li>
             <li>
               Reference
               <ul>
@@ -95,7 +95,7 @@
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Alert</p><p>Module to handle alerts, exceptions, and diagnostic messages.</p><p>The Alert module provides a stream-based system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output. Rodin uses this system <strong>instead of raw <code>throw</code> statements</strong>.</p><section id="autotoc_md427"><h3><a href="#autotoc_md427">Alert Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Color</th><th>Behavior</th></tr></thead><tbody><tr><td><code>Alert::Info</code></td><td>Blue</td><td>Informational message (non-fatal)</td></tr><tr><td><code>Alert::Warning</code></td><td>Yellow</td><td>Warning message (non-fatal)</td></tr><tr><td><code>Alert::Success</code></td><td>Green</td><td>Success notification (non-fatal)</td></tr><tr><td><code>Alert::Exception</code></td><td>Red</td><td>Throws an exception (fatal)</td></tr><tr><td><code>Alert::MemberFunctionException</code></td><td>Red</td><td>Exception with class/method context</td></tr><tr><td><code>Alert::MemberFunctionWarning</code></td><td>Yellow</td><td>Warning with class/method context</td></tr></tbody></table></section><section id="autotoc_md428"><h3><a href="#autotoc_md428">Usage Pattern</a></h3><p>All alerts use the stream insertion operator <code>&lt;&lt;</code> and terminate with <code>Alert::Raise</code>:</p><pre class="m-code"><span class="c1">// Informational message</span>
+<p>Directory src/Rodin/Alert</p><p>Module to handle alerts, exceptions, and diagnostic messages.</p><p>The Alert module provides a stream-based system for handling exceptions, warnings, informational messages, and success notifications with colored terminal output. Rodin uses this system <strong>instead of raw <code>throw</code> statements</strong>.</p><section id="autotoc_md429"><h3><a href="#autotoc_md429">Alert Types</a></h3><table class="m-table"><thead><tr><th>Type</th><th>Color</th><th>Behavior</th></tr></thead><tbody><tr><td><code>Alert::Info</code></td><td>Blue</td><td>Informational message (non-fatal)</td></tr><tr><td><code>Alert::Warning</code></td><td>Yellow</td><td>Warning message (non-fatal)</td></tr><tr><td><code>Alert::Success</code></td><td>Green</td><td>Success notification (non-fatal)</td></tr><tr><td><code>Alert::Exception</code></td><td>Red</td><td>Throws an exception (fatal)</td></tr><tr><td><code>Alert::MemberFunctionException</code></td><td>Red</td><td>Exception with class/method context</td></tr><tr><td><code>Alert::MemberFunctionWarning</code></td><td>Yellow</td><td>Warning with class/method context</td></tr></tbody></table></section><section id="autotoc_md430"><h3><a href="#autotoc_md430">Usage Pattern</a></h3><p>All alerts use the stream insertion operator <code>&lt;&lt;</code> and terminate with <code>Alert::Raise</code>:</p><pre class="m-code"><span class="c1">// Informational message</span>
 <span class="n">Alert</span><span class="o">::</span><span class="n">Info</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Assembling the system...&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Alert</span><span class="o">::</span><span class="n">Raise</span><span class="p">;</span>
 
 <span class="c1">// Warning</span>

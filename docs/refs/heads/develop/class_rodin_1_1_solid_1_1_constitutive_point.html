@@ -86,6 +86,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
@@ -103,6 +104,15 @@
 <span class="n">law</span><span class="p">.</span><span class="n">getFirstPiolaKirchhoffStress</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="w"> </span><span class="n">cache</span><span class="p">,</span><span class="w"> </span><span class="n">cp</span><span class="p">);</span></pre></section><section id="autotoc_md227"><h3><a href="#autotoc_md227">Usage (without geometry, for unit testing)</a></h3><pre class="m-code"><span class="n">KinematicState</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
 <span class="n">state</span><span class="p">.</span><span class="n">setDisplacementGradient</span><span class="p">(</span><span class="n">H</span><span class="p">);</span>
 <span class="n">ConstitutivePoint</span><span class="w"> </span><span class="nf">cp</span><span class="p">(</span><span class="n">state</span><span class="p">);</span></pre></section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              static size_t <a href="#a002d9d730adf5bd992f196cc4deffd84" class="m-doc">ReservedTags</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Auxiliary tag capacity reserved on construction.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -308,6 +318,16 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="a002d9d730adf5bd992f196cc4deffd84"><div>
+            <h3>
+              static size_t Rodin::<wbr />Solid::<wbr />ConstitutivePoint::<wbr /><a href="#a002d9d730adf5bd992f196cc4deffd84" class="m-doc-self">ReservedTags</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p>Auxiliary tag capacity reserved on construction.</p>
+<p>A ConstitutivePoint is built at every quadrature point, so the tag storage is reserved once up front rather than grown one <code>set()</code> at a time.</p><p>This is a capacity hint, not a limit: the tag set is open, and setting more tags than this simply reallocates. It is sized well above the tags declared in <a href="namespace_rodin_1_1_solid_1_1_tags.html" class="m-doc">Tags</a> so that user-defined tags also fit without reallocating.</p><p>The cost is <code>ReservedTags</code> * 40 bytes per point, but a point is a stack-local built and destroyed per quadrature point, so at most one is live per thread, and reserved-but-unset slots are never constructed or touched. Raising this from 13 to 64 was measured to cost nothing, serial or threaded.</p>
           </div></section>
         </section>
       </div>

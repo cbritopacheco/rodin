@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Rodin::Context namespace | Rodin</title>
+  <title>Rodin/Solid/Local/Output.h file | Rodin</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
@@ -74,37 +74,54 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Context <span class="m-thin">namespace</span>
+          <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_add7d0d1e3fa2c5fc6de951654f0f623.html">Solid</a>/</span><span class="m-breadcrumb"><a href="dir_cc914b0b7e3f237609749fafe17f6ede.html">Local</a>/</span>Output.h <span class="m-thin">file</span>
         </h1>
-        <p>Namespace <a href="namespace_rodin_1_1_context.html" class="m-doc">Rodin::<wbr />Context</a>.</p>
+        <p>Extensible extraction mechanism for constitutive evaluation.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md428">Supported Contexts</a></li>
+            <li><a href="#autotoc_md230">Usage with CRTP</a></li>
+            <li><a href="#autotoc_md231">Usage with lambda / std::function</a></li>
             <li>
               Reference
               <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Directory src/Rodin/Context</p><p>Module for serial, multi-threaded, distributed, and/or parallel computation.</p><p>The Context module provides abstractions for different execution environments and computing contexts. It enables Rodin to operate efficiently across various platforms, from single-machine local execution to distributed computing environments.</p><section id="autotoc_md428"><h3><a href="#autotoc_md428">Supported Contexts</a></h3><ul><li><strong>Local Context</strong>: Single-machine execution with shared memory</li><li><strong>Distributed Context</strong>: Multi-node execution with message passing (MPI)</li></ul></section>
+<p>An Output is the dual of Input: where an Input populates a ConstitutivePoint with auxiliary data before the constitutive law is evaluated, an Output reads the resulting cache at each quadrature point afterwards. This is the extraction site for quantities derived from the evaluation &ndash; committed internal variables, recovered stresses, strain energy, diagnostics &ndash; without hard-coding them into the integrator or the constitutive law, and without recomputing the kinematics at the call site.</p><p>The cache type is the law&#x27;s, so an Output is written against a specific law. The ConstitutivePoint carries <code>Tags::CellIndex</code> and <code>Tags::QuadraturePointIndex</code>, so an Output and an Input driven by the same pass address the same quadrature point.</p><section id="autotoc_md230"><h3><a href="#autotoc_md230">Usage with CRTP</a></h3><pre class="m-code"><span class="k">struct</span><span class="w"> </span><span class="nc">MyOutput</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">Output</span><span class="o">&lt;</span><span class="n">MyOutput</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="nf">extract</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Cache</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// e.g., commit an internal variable</span>
+<span class="w">    </span><span class="n">state</span><span class="p">[</span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">CellIndex</span><span class="o">&gt;</span><span class="p">()]</span>
+<span class="w">         </span><span class="p">[</span><span class="n">cp</span><span class="p">.</span><span class="n">get</span><span class="o">&lt;</span><span class="n">Solid</span><span class="o">::</span><span class="n">Tags</span><span class="o">::</span><span class="n">QuadraturePointIndex</span><span class="o">&gt;</span><span class="p">()]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cache</span><span class="p">.</span><span class="n">activeExtension</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="n">ivw</span><span class="p">.</span><span class="n">setOutput</span><span class="p">(</span><span class="n">MyOutput</span><span class="p">{});</span></pre></section><section id="autotoc_md231"><h3><a href="#autotoc_md231">Usage with lambda / std::function</a></h3><pre class="m-code"><span class="n">ivw</span><span class="p">.</span><span class="n">setOutput</span><span class="p">([</span><span class="o">&amp;</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Solid</span><span class="o">::</span><span class="n">ConstitutivePoint</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">energy</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">cache</span><span class="p">.</span><span class="n">strain</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="n">ivw</span><span class="p">.</span><span class="n">commit</span><span class="p">();</span></pre></section>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_solid.html" class="m-doc">Rodin::Solid</a></dt>
+            <dd>Hyperelastic solid mechanics module for large-deformation problems.</dd>
+          </dl>
+        </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
-              class <a href="class_rodin_1_1_context_1_1_base.html" class="m-doc">Base</a>
+              <div class="m-doc-template">template&lt;class Derived&gt;</div>
+              class <a href="class_rodin_1_1_solid_1_1_output.html" class="m-doc">Rodin::Solid::Output</a>
             </dt>
-            <dd>Abstract base class for all execution contexts.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a>
-            </dt>
-            <dd>Represents a single machine context.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">MPI</a>
-            </dt>
-            <dd>MPI context for parallel computing with Message Passing Interface.</dd>
+            <dd>CRTP base class for outputs.</dd>
           </dl>
         </section>
       </div>

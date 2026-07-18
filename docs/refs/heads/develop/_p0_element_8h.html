@@ -80,8 +80,8 @@
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
-            <li><a href="#autotoc_md382">Supported Specializations</a></li>
-            <li><a href="#autotoc_md383">Usage Example</a></li>
+            <li><a href="#autotoc_md384">Supported Specializations</a></li>
+            <li><a href="#autotoc_md385">Usage Example</a></li>
           </ul>
         </nav>
 <p>This file provides the P0Element class template for piecewise constant finite elements. P0 elements have:</p><ul><li>One degree of freedom per element (at the barycenter)</li><li>Constant basis function: <svg class="m-math" style="width: 4.613em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 44.284141 11.955168">
@@ -120,7 +120,7 @@ $ \nabla \phi = 0 $
 <use x='20.211602' y='0' xlink:href='#eq2-g2-61'/>
 <use x='32.637083' y='0' xlink:href='#eq2-g2-48'/>
 </g>
-</svg></li></ul><section id="autotoc_md382"><h3><a href="#autotoc_md382">Supported Specializations</a></h3><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
+</svg></li></ul><section id="autotoc_md384"><h3><a href="#autotoc_md384">Supported Specializations</a></h3><p><strong>Scalar P0Element&lt;Scalar&gt;:</strong></p><ul><li>Works with Real and Complex scalar types</li><li>Single DOF at element barycenter</li><li>Constant value throughout element</li></ul><p><strong>Vector P0Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;:</strong></p><ul><li>Component-wise constant vector fields</li><li><svg class="m-math" style="width: 0.634em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.082693 8.302191">
 <title>
 $ d $
 </title>
@@ -170,7 +170,7 @@ $ j = i \mod d $
 <use x='49.158369' y='0' xlink:href='#eq5-g1-100'/>
 <use x='59.646686' y='0' xlink:href='#eq5-g0-100'/>
 </g>
-</svg></li></ul></section><section id="autotoc_md383"><h3><a href="#autotoc_md383">Usage Example</a></h3><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
+</svg></li></ul></section><section id="autotoc_md385"><h3><a href="#autotoc_md385">Usage Example</a></h3><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">Rodin</span><span class="o">::</span><span class="nn">Variational</span><span class="p">;</span>
 
 <span class="c1">// Scalar P0 element (real or complex)</span>
 <span class="n">RealP0Element</span><span class="w"> </span><span class="nf">p0_real</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">);</span>
