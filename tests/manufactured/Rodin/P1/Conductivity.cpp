@@ -246,7 +246,6 @@ namespace Rodin::Tests::Manufactured::Conductivity
    */
   TEST(Rodin_Manufactured_P1, Conductivity_Exponential)
   {
-
     Mesh mesh;
     mesh = mesh.UniformGrid(Polytope::Type::Quadrilateral, {16,16});
     mesh.scale(1.0/15);

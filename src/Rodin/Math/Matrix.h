@@ -93,9 +93,14 @@ namespace Rodin::Math
   template <class MatrixType>
   struct ThinSVD : public Eigen::BDCSVD<MatrixType>
   {
-    ThinSVD(const MatrixType& matrix)
-      : Eigen::BDCSVD<MatrixType>(matrix, Eigen::ComputeThinU | Eigen::ComputeThinV)
-    {}
+      /**
+       * @brief Decomposes the given matrix with thin unitaries.
+       *
+       * @param[in] matrix Matrix to decompose
+       */
+      ThinSVD(const MatrixType& matrix)
+        : Eigen::BDCSVD<MatrixType>(matrix, Eigen::ComputeThinU | Eigen::ComputeThinV)
+      {}
   };
 #endif
 }
