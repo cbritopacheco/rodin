@@ -176,7 +176,6 @@ namespace
       Mesh<Context::MPI>&& mesh)
   {
     const auto& comm = ctx.getCommunicator();
-    const size_t D = mesh.getDimension();
 
     const boost::filesystem::path rankFile =
         boost::filesystem::temp_directory_path()

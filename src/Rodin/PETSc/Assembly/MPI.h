@@ -81,7 +81,6 @@ namespace Rodin::Assembly
         const auto& fes = input.getFES();
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx = mesh.getContext();
         const size_t globalSize = fes.getSize();
 
         size_t begin, end;
@@ -193,7 +192,6 @@ namespace Rodin::Assembly
         assert(trialFES.getMesh() == testFES.getMesh());
         const auto& mesh = trialFES.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx = mesh.getContext();
 
         size_t rbegin, rend;
         testFES.getOwnershipRange(rbegin, rend);
@@ -238,10 +236,10 @@ namespace Rodin::Assembly
             const auto& rows = testFES.getDOFs(d, idx);
             const auto& cols = trialFES.getDOFs(d, idx);
 
-            for (Index i = 0; i < rows.size(); ++i)
+            for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
             {
               const PetscInt r = static_cast<PetscInt>(rows[i]);
-              for (Index j = 0; j < cols.size(); ++j)
+              for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
               {
                 const PetscInt c = static_cast<PetscInt>(cols[j]);
                 const PetscScalar v = bfi.integrate(j, i);
@@ -373,7 +371,6 @@ namespace Rodin::Assembly
 
         const auto& mesh  = trialFES.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx   = mesh.getContext();
 
         const size_t globalCols = trialFES.getSize();
         const size_t globalRows = testFES.getSize();
@@ -454,7 +451,7 @@ namespace Rodin::Assembly
                 const auto& coeffs = pair.second;
                 std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
                 entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
                 {
                   entries.push_back({
                       static_cast<Index>(masters[k]),
@@ -557,10 +554,10 @@ namespace Rodin::Assembly
               const auto& rowsDOF = testFES.getDOFs(d, idx);
               const auto& colsDOF = trialFES.getDOFs(d, idx);
 
-              for (Index i = 0; i < rowsDOF.size(); ++i)
+              for (Index i = 0; i < static_cast<Index>(rowsDOF.size()); ++i)
               {
                 const PetscInt I = rowsDOF[i];
-                for (Index j = 0; j < colsDOF.size(); ++j)
+                for (Index j = 0; j < static_cast<Index>(colsDOF.size()); ++j)
                 {
                   const PetscInt J = colsDOF[j];
                   const PetscScalar val = bfi.integrate(j, i);
@@ -618,10 +615,10 @@ namespace Rodin::Assembly
 
                 bfi.setPolytope(*trIt, *teIt);
 
-                for (Index i = 0; i < rowsDOF.size(); ++i)
+                for (Index i = 0; i < static_cast<Index>(rowsDOF.size()); ++i)
                 {
                   const PetscInt I = rowsDOF[i];
-                  for (Index j = 0; j < colsDOF.size(); ++j)
+                  for (Index j = 0; j < static_cast<Index>(colsDOF.size()); ++j)
                   {
                     const PetscInt J = colsDOF[j];
                     const PetscScalar val = bfi.integrate(j, i);
@@ -697,7 +694,7 @@ namespace Rodin::Assembly
               lfi.setPolytope(*it);
 
               const auto& dofs = testFES.getDOFs(d, idx);
-              for (Index l = 0; l < dofs.size(); ++l)
+              for (Index l = 0; l < static_cast<Index>(dofs.size()); ++l)
               {
                 const PetscInt I = dofs[l];
                 const PetscScalar val = lfi.integrate(l);
@@ -1131,7 +1128,7 @@ namespace Rodin::Assembly
                 const auto& coeffs = pair.second;
                 std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
                 entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
                 {
                   entries.push_back({
                       static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
@@ -1262,10 +1259,10 @@ namespace Rodin::Assembly
               const auto& rows = vFES.getDOFs(d, idx);
               const auto& cols = uFES.getDOFs(d, idx);
 
-              for (Index i = 0; i < rows.size(); ++i)
+              for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
               {
                 const PetscInt I = vOff + rows[i];
-                for (Index j = 0; j < cols.size(); ++j)
+                for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
                 {
                   const PetscInt J = uOff + cols[j];
                   const PetscScalar val = bfi.integrate(j, i);
@@ -1329,10 +1326,10 @@ namespace Rodin::Assembly
 
                 bfi.setPolytope(*trIt, *teIt);
 
-                for (Index i = 0; i < rows.size(); ++i)
+                for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
                 {
                   const PetscInt I = vOff + rows[i];
-                  for (Index j = 0; j < cols.size(); ++j)
+                  for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
                   {
                     const PetscInt J = uOff + cols[j];
                     const PetscScalar val = bfi.integrate(j, i);
@@ -1424,7 +1421,7 @@ namespace Rodin::Assembly
               lfi.setPolytope(*it);
 
               const auto& dofs = vFES.getDOFs(d, idx);
-              for (Index l = 0; l < dofs.size(); ++l)
+              for (Index l = 0; l < static_cast<Index>(dofs.size()); ++l)
               {
                 const PetscInt I = vOff + dofs[l];
                 const PetscScalar val = lfi.integrate(l);

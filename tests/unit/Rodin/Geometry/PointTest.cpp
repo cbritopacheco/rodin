@@ -530,7 +530,6 @@ TEST(Geometry_Point, SetPolytope)
   rc[1] = 0.5;
 
   Point p(tri, rc);
-  Real x_orig = p.x();
 
   // Set to same polytope
   p.setPolytope(tri);
