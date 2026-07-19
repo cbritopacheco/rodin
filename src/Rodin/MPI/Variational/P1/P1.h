@@ -575,7 +575,7 @@ namespace Rodin::Variational
               continue;
 
             const auto& dofs = m_fes.getDOFs(0, *i);
-            assert(dofs.size() == global.size());
+            assert(static_cast<size_t>(dofs.size()) == global.size());
 
             for (size_t k = 0; k < static_cast<size_t>(global.size()); ++k)
             {
