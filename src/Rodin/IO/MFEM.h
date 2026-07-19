@@ -1192,7 +1192,7 @@ namespace Rodin::IO::MFEM
         if (s_inv.size() == 0)
         {
           const auto& V = VandermondeTriangle<K>::getMatrix();
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Math::ThinSVD<Math::Matrix<Real>> svd(V);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           s_inv = svd.solve(I);
         }
@@ -1431,7 +1431,7 @@ namespace Rodin::IO::MFEM
         if (s_inv.size() == 0)
         {
           const auto& V = VandermondeTetrahedron<K>::getMatrix();
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Math::ThinSVD<Math::Matrix<Real>> svd(V);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           s_inv = svd.solve(I);
         }
@@ -1615,7 +1615,7 @@ namespace Rodin::IO::MFEM
         if (s_inv.size() == 0)
         {
           const auto& C = WedgeChange<K>::getMatrix();
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(C, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Math::ThinSVD<Math::Matrix<Real>> svd(C);
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(C.rows(), C.cols());
           s_inv = svd.solve(I);
         }

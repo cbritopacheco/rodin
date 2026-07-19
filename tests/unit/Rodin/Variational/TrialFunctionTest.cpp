@@ -60,8 +60,8 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
 
-    const auto& solution = u.getSolution();
-    auto& mutable_solution = u.getSolution();
+    [[maybe_unused]] const auto& solution = u.getSolution();
+    [[maybe_unused]] auto& mutable_solution = u.getSolution();
     
   }
 
@@ -124,6 +124,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
 
-    const auto& solution = u.getSolution();
+    [[maybe_unused]] const auto& solution = u.getSolution();
   }
 }

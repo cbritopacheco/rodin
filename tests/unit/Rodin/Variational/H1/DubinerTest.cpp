@@ -180,9 +180,9 @@ namespace Rodin::Tests::Unit
 
     auto I = V * Vinv;
 
-    for (size_t i = 0; i < V.rows(); ++i)
+    for (size_t i = 0; i < static_cast<size_t>(V.rows()); ++i)
     {
-      for (size_t j = 0; j < V.cols(); ++j)
+      for (size_t j = 0; j < static_cast<size_t>(V.cols()); ++j)
       {
         Real expected = (i == j) ? 1.0 : 0.0;
         EXPECT_NEAR(I(i, j), expected, 1e-10);
@@ -198,9 +198,9 @@ namespace Rodin::Tests::Unit
 
     auto I = V * Vinv;
 
-    for (size_t i = 0; i < V.rows(); ++i)
+    for (size_t i = 0; i < static_cast<size_t>(V.rows()); ++i)
     {
-      for (size_t j = 0; j < V.cols(); ++j)
+      for (size_t j = 0; j < static_cast<size_t>(V.cols()); ++j)
       {
         Real expected = (i == j) ? 1.0 : 0.0;
         EXPECT_NEAR(I(i, j), expected, 1e-9);
@@ -348,9 +348,9 @@ namespace Rodin::Tests::Unit
 
     auto I = V * Vinv;
 
-    for (size_t i = 0; i < V.rows(); ++i)
+    for (size_t i = 0; i < static_cast<size_t>(V.rows()); ++i)
     {
-      for (size_t j = 0; j < V.cols(); ++j)
+      for (size_t j = 0; j < static_cast<size_t>(V.cols()); ++j)
       {
         Real expected = (i == j) ? 1.0 : 0.0;
         EXPECT_NEAR(I(i, j), expected, 1e-10);
@@ -403,9 +403,9 @@ namespace Rodin::Tests::Unit
 
     auto I = V * Vinv;
 
-    for (size_t i = 0; i < V.rows(); ++i)
+    for (size_t i = 0; i < static_cast<size_t>(V.rows()); ++i)
     {
-      for (size_t j = 0; j < V.cols(); ++j)
+      for (size_t j = 0; j < static_cast<size_t>(V.cols()); ++j)
       {
         Real expected = (i == j) ? 1.0 : 0.0;
         EXPECT_NEAR(I(i, j), expected, 1e-8);
@@ -457,9 +457,9 @@ namespace Rodin::Tests::Unit
 
     auto I = V * Vinv;
 
-    for (size_t i = 0; i < V.rows(); ++i)
+    for (size_t i = 0; i < static_cast<size_t>(V.rows()); ++i)
     {
-      for (size_t j = 0; j < V.cols(); ++j)
+      for (size_t j = 0; j < static_cast<size_t>(V.cols()); ++j)
       {
         Real expected = (i == j) ? 1.0 : 0.0;
         EXPECT_NEAR(I(i, j), expected, 1e-8);

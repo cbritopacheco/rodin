@@ -76,6 +76,28 @@ namespace Rodin::Math
    */
   template <class ScalarType, size_t Rows, size_t Cols>
   using FixedSizeMatrix = Eigen::Matrix<ScalarType, Rows, Cols>;
+
+  /**
+   * @brief Bidiagonal divide-and-conquer SVD with thin unitaries.
+   *
+   * Wraps Eigen::BDCSVD with Eigen::ComputeThinU | Eigen::ComputeThinV,
+   * papering over the Eigen 3.4.90 move of the computation options from a
+   * constructor argument to a class template parameter.
+   *
+   * @tparam MatrixType The decomposed matrix type
+   */
+#if EIGEN_VERSION_AT_LEAST(3, 4, 90)
+  template <class MatrixType>
+  using ThinSVD = Eigen::BDCSVD<MatrixType, Eigen::ComputeThinU | Eigen::ComputeThinV>;
+#else
+  template <class MatrixType>
+  struct ThinSVD : public Eigen::BDCSVD<MatrixType>
+  {
+    ThinSVD(const MatrixType& matrix)
+      : Eigen::BDCSVD<MatrixType>(matrix, Eigen::ComputeThinU | Eigen::ComputeThinV)
+    {}
+  };
+#endif
 }
 
 namespace Rodin::FormLanguage

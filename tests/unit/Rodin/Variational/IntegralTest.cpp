@@ -136,7 +136,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(op.rows(), op.cols());
 
     // Mass matrix should be positive definite (diagonal entries positive)
-    for (Index i = 0; i < op.rows(); i++)
+    for (Index i = 0; i < static_cast<Index>(op.rows()); i++)
     {
       EXPECT_GT(op.coeff(i, i), 0.0);
     }
@@ -261,7 +261,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.cols(), 0);
 
     // All diagonal entries should be positive
-    for (Index i = 0; i < op.rows(); i++)
+    for (Index i = 0; i < static_cast<Index>(op.rows()); i++)
     {
       EXPECT_GT(op.coeff(i, i), 0.0);
     }

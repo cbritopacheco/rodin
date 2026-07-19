@@ -146,7 +146,7 @@ namespace Rodin::Assembly
               integrator->setPolytope(polytope);
 
               const auto& dofs = input.getFES().getDOFs(dim, i);
-              for (size_t k = 0; k < dofs.size(); ++k)
+              for (size_t k = 0; k < static_cast<size_t>(dofs.size()); ++k)
               {
                 const PetscScalar value = PetscScalar(integrator->integrate(k));
                 if (value != PetscScalar(0))
@@ -365,8 +365,8 @@ namespace Rodin::Assembly
 
               const auto& rows = input.getTestFES().getDOFs(dim, i);
               const auto& cols = input.getTrialFES().getDOFs(dim, i);
-              for (size_t r = 0; r < rows.size(); ++r)
-                for (size_t c = 0; c < cols.size(); ++c)
+              for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+                for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                 {
                   const PetscScalar v = Math::conj(integrator->integrate(c, r));
                   local.emplace_back(
@@ -439,8 +439,8 @@ namespace Rodin::Assembly
                 integrator->setPolytope(trialPolytope, testPolytope);
 
                 const auto& cols = input.getTrialFES().getDOFs(rdim, tr);
-                for (size_t r = 0; r < rows.size(); ++r)
-                  for (size_t c = 0; c < cols.size(); ++c)
+                for (size_t r = 0; r < static_cast<size_t>(rows.size()); ++r)
+                  for (size_t c = 0; c < static_cast<size_t>(cols.size()); ++c)
                   {
                     const PetscScalar v = Math::conj(integrator->integrate(c, r));
                     local.emplace_back(
@@ -686,7 +686,7 @@ namespace Rodin::Assembly
                 const auto& coeffs = pair.second;
                 std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
                 entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
                 {
                   entries.push_back({
                       static_cast<Index>(masters[k]),
@@ -1523,7 +1523,7 @@ namespace Rodin::Assembly
                 const auto& coeffs = pair.second;
                 std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
                 entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
                 {
                   entries.push_back({
                       static_cast<Index>(vOff + static_cast<size_t>(masters[k])),

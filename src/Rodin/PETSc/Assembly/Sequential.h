@@ -430,7 +430,7 @@ namespace Rodin::Assembly
                 const auto& coeffs = pair.second;
                 std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
                 entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
                 {
                   entries.push_back({
                       static_cast<Index>(masters[k]),
@@ -1051,7 +1051,7 @@ namespace Rodin::Assembly
                 const auto& coeffs = pair.second;
                 std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
                 entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
                 {
                   entries.push_back({
                       static_cast<Index>(vOff + static_cast<size_t>(masters[k])),

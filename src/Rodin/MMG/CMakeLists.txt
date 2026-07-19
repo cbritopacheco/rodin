@@ -67,6 +67,15 @@ add_subdirectory(
 # - Mmg::libmmg3d_a
 # - Mmg::libmmgs_a
 
+# GCC enables -Wstringop-overflow by default; mmg trips it (e.g.
+# common/inout.c) and we do not patch vendored sources.
+foreach(_mmg_target libmmg_a libmmg2d_a libmmg3d_a libmmgs_a)
+  if(TARGET ${_mmg_target})
+    target_compile_options(${_mmg_target} PRIVATE
+      $<$<C_COMPILER_ID:GNU>:-Wno-stringop-overflow>)
+  endif()
+endforeach()
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(RODIN_MMG_VERBOSITY_LEVEL 1)
 else()

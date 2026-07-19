@@ -228,7 +228,6 @@ namespace Rodin::Tests::Unit
     // Create a boundary point for testing
     auto it = mesh.getPolytope(D - 1, 0);
     const auto& polytope = *it;
-    const auto& trans = mesh.getPolytopeTransformation(D - 1, 0);
     const Math::Vector<Real> rc{{0.5}};
     Point p(polytope, rc);
     auto value = vf.getValue(p);

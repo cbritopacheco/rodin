@@ -172,7 +172,6 @@ namespace Rodin::Tests::Unit
   {
     // 1 element mesh, triangle with vertices (0,0), (1,0), (0,1)
     constexpr size_t sdim = 2;
-    constexpr size_t mdim = 2;
 
     Mesh mesh =
       Mesh<Rodin::Context::Local>::Builder()
@@ -1361,7 +1360,7 @@ namespace Rodin::Tests::Unit
 
         // Count interior DOFs on the edge = edge DOFs minus vertex DOFs
         size_t interiorCount = 0;
-        for (Index k = 0; k < dofs_e.size(); ++k)
+        for (Index k = 0; k < static_cast<Index>(dofs_e.size()); ++k)
         {
           if (vertexDOFs.count(dofs_e(k)) == 0)
             ++interiorCount;

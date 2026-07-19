@@ -345,7 +345,7 @@ namespace Rodin::Variational
           for (const auto& [global, offset] : m_ghosts.right)
           {
             assert(offset >= 0);
-            assert(offset < m_ghosts.left.size());
+            assert(static_cast<size_t>(offset) < m_ghosts.left.size());
             m_ghosts.left[offset] = global;
           }
 
