@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784395785913,
+  "lastUpdate": 1784489535720,
   "repoUrl": "https://github.com/cbritopacheco/rodin",
   "entries": {
     "C++ Rodin Benchmarks": [
@@ -124870,6 +124870,840 @@ window.BENCHMARK_DATA = {
             "value": 491745.0369856105,
             "unit": "ns/iter",
             "extra": "iterations: 1433\ncpu: 492247.82414504274 ns\nthreads: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "carlos.brito524@gmail.com",
+            "name": "Carlos Brito-Pacheco",
+            "username": "cbritopacheco"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "14a66499df598f3a36263eb8ad31007cca80458a",
+          "message": "Eliminate compile warnings across local and CI matrix builds (#316)\n\n* Start develop-wide compile warning cleanup\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Eliminate compile warnings across local and CI matrix builds\n\n- Add version-portable Math::ThinSVD alias; replaces deprecated\n  Eigen::BDCSVD constructor-options form at 6 call sites (AppleClang).\n- Fix -Wsign-compare between Eigen signed size() and Index/size_t loop\n  counters in PETSc assembly backends, GridFunction, MPI P1, and tests.\n- Drop dead locals; mark assert-only reads [[maybe_unused]], keeping the\n  assert(ierr == PETSC_SUCCESS) idiom.\n- Silence vendored googletest -Wmaybe-uninitialized and mmg\n  -Wstringop-overflow per-target (GCC only).\n- Suppress Xcode 15 ld duplicate-libraries warning behind\n  check_linker_flag.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Style: clang-format touched lines, document ThinSVD constructor\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Use explicit version-guarded Eigen::BDCSVD instead of ThinSVD alias\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Fix AppleClang -Wall warnings surfaced by local test build\n\nRelease builds strip asserts, leaving assert-only reads unused: mark\nfound/ierr/vdim and the ghost-map structured binding [[maybe_unused]];\ndrop the dead D local in PETSc/IO/MFEM.h.\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Mark assert-only ierr [[maybe_unused]] in PETSc/Object.h\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n* Fix remaining gcc-14 warnings: P1 assert sign-compare, boost array-bounds\n\n- Cast Eigen size() in the dofs/global assert in MPI P1.h.\n- Suppress GCC's false-positive -Warray-bounds around the Boost.Container\n  includes in Types.h (diagnostic is attributed to the Boost headers).\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Fable 5 <noreply@anthropic.com>",
+          "timestamp": "2026-07-19T21:24:03+02:00",
+          "tree_id": "a09298ebc15496a795ed056d6e95bc3013a104cc",
+          "url": "https://github.com/cbritopacheco/rodin/commit/14a66499df598f3a36263eb8ad31007cca80458a"
+        },
+        "date": 1784489523212,
+        "tool": "googlecpp",
+        "benches": [
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorExpansion",
+            "value": 31.161970524774496,
+            "unit": "ns/iter",
+            "extra": "iterations: 22595179\ncpu: 31.15888889395388 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarExpansion",
+            "value": 18.681395401023416,
+            "unit": "ns/iter",
+            "extra": "iterations: 37521916\ncpu: 18.680402727835116 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarReferenceExpansion",
+            "value": 12.696034071703153,
+            "unit": "ns/iter",
+            "extra": "iterations: 54387418\ncpu: 12.694325128653844 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarSpaceExpansion",
+            "value": 13.718433203381462,
+            "unit": "ns/iter",
+            "extra": "iterations: 51055331\ncpu: 13.717267272246259 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1ScalarMappedBasis",
+            "value": 23.556193104910975,
+            "unit": "ns/iter",
+            "extra": "iterations: 29720052\ncpu: 23.554702091369165 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/P1VectorMappedBasis",
+            "value": 84.44343458277059,
+            "unit": "ns/iter",
+            "extra": "iterations: 8462105\ncpu: 84.43427598688503 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorExpansion",
+            "value": 77.7592347886191,
+            "unit": "ns/iter",
+            "extra": "iterations: 9015339\ncpu: 77.75364731154306 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarExpansion",
+            "value": 68.3975396068153,
+            "unit": "ns/iter",
+            "extra": "iterations: 10254865\ncpu: 68.38937070356367 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2ScalarMappedBasis",
+            "value": 67.64666058884725,
+            "unit": "ns/iter",
+            "extra": "iterations: 10368849\ncpu: 67.64196913273591 ns\nthreads: 1"
+          },
+          {
+            "name": "GridFunctionEvaluationBenchmark/H1P2VectorMappedBasis",
+            "value": 204.7138221601189,
+            "unit": "ns/iter",
+            "extra": "iterations: 3433718\ncpu: 204.69607696380422 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_Build",
+            "value": 0.3518097855232764,
+            "unit": "ns/iter",
+            "extra": "iterations: 1980843091\ncpu: 0.3517821669803326 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_Build",
+            "value": 0.35236536641660443,
+            "unit": "ns/iter",
+            "extra": "iterations: 1991862938\ncpu: 0.352279049232453 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular64_Build",
+            "value": 0.35158272069466423,
+            "unit": "ns/iter",
+            "extra": "iterations: 1988821850\ncpu: 0.3515704124026998 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular128_Build",
+            "value": 0.3515202408006344,
+            "unit": "ns/iter",
+            "extra": "iterations: 1992627154\ncpu: 0.35147775618438637 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Real_SumOfComponents",
+            "value": 478.7736815576806,
+            "unit": "ns/iter",
+            "extra": "iterations: 1460208\ncpu: 478.73326950680985 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Real_SumOfComponents",
+            "value": 96573.94060088588,
+            "unit": "ns/iter",
+            "extra": "iterations: 7256\ncpu: 96568.03266262404 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Real_SumOfComponents",
+            "value": 417264.34564957867,
+            "unit": "ns/iter",
+            "extra": "iterations: 1678\ncpu: 417211.1603098918 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/2D_Square_GridFunction_Projection_Vector_Components",
+            "value": 814.5058502108049,
+            "unit": "ns/iter",
+            "extra": "iterations: 858687\ncpu: 814.4561312794998 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular16_GridFunction_Projection_Vector_Components",
+            "value": 173271.80489010565,
+            "unit": "ns/iter",
+            "extra": "iterations: 4049\ncpu: 173243.9202272167 ns\nthreads: 1"
+          },
+          {
+            "name": "P1Benchmark/UniformTriangular32_GridFunction_Projection_Vector_Components",
+            "value": 740093.2926828888,
+            "unit": "ns/iter",
+            "extra": "iterations: 943\ncpu: 740002.9024390273 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_NoCoefficient_ConstantSource",
+            "value": 178999.2080777118,
+            "unit": "ns/iter",
+            "extra": "iterations: 3912\ncpu: 178971.79038854755 ns\nthreads: 1"
+          },
+          {
+            "name": "Poisson_UniformGrid_16x16/Assembly_ConstantCoefficient_ConstantSource",
+            "value": 179143.62720984028,
+            "unit": "ns/iter",
+            "extra": "iterations: 3903\ncpu: 179115.46656418152 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_Square",
+            "value": 15667.33257387938,
+            "unit": "ns/iter",
+            "extra": "iterations: 44769\ncpu: 15665.951506622865 ns\nthreads: 1"
+          },
+          {
+            "name": "MeshIO/Load_MEDIT_2D_UniformTriangular64",
+            "value": 6357168.623853252,
+            "unit": "ns/iter",
+            "extra": "iterations: 109\ncpu: 6356463.577981668 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_16x16",
+            "value": 109140.75324675301,
+            "unit": "ns/iter",
+            "extra": "iterations: 6391\ncpu: 109128.80316069465 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_64x64",
+            "value": 2080143.4835821462,
+            "unit": "ns/iter",
+            "extra": "iterations: 335\ncpu: 2079861.638805964 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_128x128",
+            "value": 9201041.763158234,
+            "unit": "ns/iter",
+            "extra": "iterations: 76\ncpu: 9199855.197368423 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_256x256",
+            "value": 69372614.63636188,
+            "unit": "ns/iter",
+            "extra": "iterations: 11\ncpu: 69362991.36363612 ns\nthreads: 1"
+          },
+          {
+            "name": "UniformGrid/Triangular_512x512",
+            "value": 365738999.0000013,
+            "unit": "ns/iter",
+            "extra": "iterations: 2\ncpu: 365654906.49999964 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_AllPairs",
+            "value": 1106401.6561018468,
+            "unit": "ns/iter",
+            "extra": "iterations: 631\ncpu: 1106305.4706814422 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_AllPairs",
+            "value": 17.903235410645568,
+            "unit": "ns/iter",
+            "extra": "iterations: 38857355\ncpu: 17.901257278062296 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_0",
+            "value": 1091977.3374998164,
+            "unit": "ns/iter",
+            "extra": "iterations: 640\ncpu: 1091817.585937488 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_0_1",
+            "value": 808501.2973291754,
+            "unit": "ns/iter",
+            "extra": "iterations: 861\ncpu: 808438.8141696169 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_0",
+            "value": 294624.9299042783,
+            "unit": "ns/iter",
+            "extra": "iterations: 2411\ncpu: 294417.82165073755 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Cold_Compute_1_1",
+            "value": 812372.0275533999,
+            "unit": "ns/iter",
+            "extra": "iterations: 871\ncpu: 812230.582089591 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_0",
+            "value": 4.2250873839966046,
+            "unit": "ns/iter",
+            "extra": "iterations: 165876769\ncpu: 4.224112383090864 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_0_1",
+            "value": 4.2223583316107,
+            "unit": "ns/iter",
+            "extra": "iterations: 165907406\ncpu: 4.22138697051294 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_0",
+            "value": 2.4611494161778933,
+            "unit": "ns/iter",
+            "extra": "iterations: 284505879\ncpu: 2.4608306143297485 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Edge_Warm_Compute_1_1",
+            "value": 4.220316059901959,
+            "unit": "ns/iter",
+            "extra": "iterations: 165982017\ncpu: 4.219794196138694 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_AllPairs",
+            "value": 8854254.708864309,
+            "unit": "ns/iter",
+            "extra": "iterations: 79\ncpu: 8853858.582278306 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_AllPairs",
+            "value": 42.570580256933795,
+            "unit": "ns/iter",
+            "extra": "iterations: 16587514\ncpu: 42.567393703481166 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_1",
+            "value": 5469792.573639847,
+            "unit": "ns/iter",
+            "extra": "iterations: 129\ncpu: 5469900.527131975 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_2",
+            "value": 6130033.371683884,
+            "unit": "ns/iter",
+            "extra": "iterations: 113\ncpu: 6129207.460176707 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_2_2",
+            "value": 2051483.301169035,
+            "unit": "ns/iter",
+            "extra": "iterations: 342\ncpu: 2051307.7368420546 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Compute_1_1",
+            "value": 7607409.597823008,
+            "unit": "ns/iter",
+            "extra": "iterations: 92\ncpu: 7607369.749999417 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_1",
+            "value": 4.922794591035667,
+            "unit": "ns/iter",
+            "extra": "iterations: 141532752\ncpu: 4.922524907874326 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_2",
+            "value": 4.924918248868558,
+            "unit": "ns/iter",
+            "extra": "iterations: 142083660\ncpu: 4.924659021311816 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_2_2",
+            "value": 4.220495095411846,
+            "unit": "ns/iter",
+            "extra": "iterations: 165856637\ncpu: 4.220191652625848 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Compute_1_1",
+            "value": 5.629087502832281,
+            "unit": "ns/iter",
+            "extra": "iterations: 124584562\ncpu: 5.62839991362652 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Build_1",
+            "value": 3909220.105556225,
+            "unit": "ns/iter",
+            "extra": "iterations: 180\ncpu: 3909174.2833332117 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Build_1",
+            "value": 1442684.8845348628,
+            "unit": "ns/iter",
+            "extra": "iterations: 485\ncpu: 1442713.8144330578 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Transpose_1_2",
+            "value": 2229929.583069767,
+            "unit": "ns/iter",
+            "extra": "iterations: 319\ncpu: 2229658.940438368 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Transpose_1_2",
+            "value": 571855.7495904961,
+            "unit": "ns/iter",
+            "extra": "iterations: 1222\ncpu: 572099.1481179255 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_2_2_via_0",
+            "value": 1847303.5026319525,
+            "unit": "ns/iter",
+            "extra": "iterations: 380\ncpu: 1846922.7526317223 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_2_2_via_0",
+            "value": 1090127.9687974337,
+            "unit": "ns/iter",
+            "extra": "iterations: 641\ncpu: 1090083.5647425025 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Cold_Intersection_1_1_via_0",
+            "value": 3436989.21674981,
+            "unit": "ns/iter",
+            "extra": "iterations: 203\ncpu: 3436615.9802951454 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Triangle_Warm_Intersection_1_1_via_0",
+            "value": 1618822.4585271212,
+            "unit": "ns/iter",
+            "extra": "iterations: 434\ncpu: 1618818.912442544 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_AllPairs",
+            "value": 5565764.769836993,
+            "unit": "ns/iter",
+            "extra": "iterations: 126\ncpu: 5565422.317460723 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_AllPairs",
+            "value": 42.127739560648465,
+            "unit": "ns/iter",
+            "extra": "iterations: 16628670\ncpu: 42.12106807098768 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_1",
+            "value": 3154463.677129629,
+            "unit": "ns/iter",
+            "extra": "iterations: 223\ncpu: 3154387.219731433 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_2",
+            "value": 3640349.701031096,
+            "unit": "ns/iter",
+            "extra": "iterations: 194\ncpu: 3639967.7371132993 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_2_2",
+            "value": 1136779.123778165,
+            "unit": "ns/iter",
+            "extra": "iterations: 614\ncpu: 1136757.2508143035 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Compute_1_1",
+            "value": 4593029.621796282,
+            "unit": "ns/iter",
+            "extra": "iterations: 156\ncpu: 4592918.012820818 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_1",
+            "value": 4.923933608264105,
+            "unit": "ns/iter",
+            "extra": "iterations: 142180045\ncpu: 4.923652309998975 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_2",
+            "value": 4.925891087047093,
+            "unit": "ns/iter",
+            "extra": "iterations: 142103906\ncpu: 4.925586127097744 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_2_2",
+            "value": 4.232447926861738,
+            "unit": "ns/iter",
+            "extra": "iterations: 164586441\ncpu: 4.232149372498998 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Compute_1_1",
+            "value": 5.632182536902223,
+            "unit": "ns/iter",
+            "extra": "iterations: 124378094\ncpu: 5.631930297951123 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Build_1",
+            "value": 2310401.4125411976,
+            "unit": "ns/iter",
+            "extra": "iterations: 303\ncpu: 2310268.026402897 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Build_1",
+            "value": 816816.0059323522,
+            "unit": "ns/iter",
+            "extra": "iterations: 843\ncpu: 817031.9691578998 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Transpose_1_2",
+            "value": 1377093.0554456564,
+            "unit": "ns/iter",
+            "extra": "iterations: 505\ncpu: 1376949.0732674922 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Transpose_1_2",
+            "value": 365330.51175018534,
+            "unit": "ns/iter",
+            "extra": "iterations: 1915\ncpu: 365525.3033942137 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_2_2_via_0",
+            "value": 966371.3337930199,
+            "unit": "ns/iter",
+            "extra": "iterations: 725\ncpu: 966229.4303444108 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_2_2_via_0",
+            "value": 482385.2423216255,
+            "unit": "ns/iter",
+            "extra": "iterations: 1465\ncpu: 482607.25119462225 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Cold_Intersection_1_1_via_0",
+            "value": 2063711.4794132737,
+            "unit": "ns/iter",
+            "extra": "iterations: 340\ncpu: 2063453.7441179564 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Quadrilateral_Warm_Intersection_1_1_via_0",
+            "value": 866840.3605948954,
+            "unit": "ns/iter",
+            "extra": "iterations: 807\ncpu: 867000.7348200704 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_AllPairs",
+            "value": 80528711.66667172,
+            "unit": "ns/iter",
+            "extra": "iterations: 9\ncpu: 80522048.55555879 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_AllPairs",
+            "value": 78.47803966229348,
+            "unit": "ns/iter",
+            "extra": "iterations: 8918647\ncpu: 78.46810026229315 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_1",
+            "value": 21137813.705878977,
+            "unit": "ns/iter",
+            "extra": "iterations: 34\ncpu: 21136986.05882273 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_2",
+            "value": 24513386.35714657,
+            "unit": "ns/iter",
+            "extra": "iterations: 28\ncpu: 24512131.964285236 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_2_3",
+            "value": 27669205.879994936,
+            "unit": "ns/iter",
+            "extra": "iterations: 25\ncpu: 27666775.920000643 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Compute_3_3",
+            "value": 10174583.788729647,
+            "unit": "ns/iter",
+            "extra": "iterations: 71\ncpu: 10174506.577464962 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_1",
+            "value": 4.926053595653675,
+            "unit": "ns/iter",
+            "extra": "iterations: 142096970\ncpu: 4.92551700433861 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_2",
+            "value": 4.923151433486606,
+            "unit": "ns/iter",
+            "extra": "iterations: 141625023\ncpu: 4.922752033727832 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_2_3",
+            "value": 4.923957968161064,
+            "unit": "ns/iter",
+            "extra": "iterations: 142235889\ncpu: 4.923450733309628 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Compute_3_3",
+            "value": 4.2197571679566215,
+            "unit": "ns/iter",
+            "extra": "iterations: 165873743\ncpu: 4.21976745891601 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_1",
+            "value": 11510872.999999681,
+            "unit": "ns/iter",
+            "extra": "iterations: 61\ncpu: 11510178.983606884 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_1",
+            "value": 7175081.175254603,
+            "unit": "ns/iter",
+            "extra": "iterations: 97\ncpu: 7175501.484536745 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Build_2",
+            "value": 14769290.404258491,
+            "unit": "ns/iter",
+            "extra": "iterations: 47\ncpu: 14769269.893619103 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Build_2",
+            "value": 5942093.008403073,
+            "unit": "ns/iter",
+            "extra": "iterations: 119\ncpu: 5942439.016806493 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Transpose_2_3",
+            "value": 7498954.757894999,
+            "unit": "ns/iter",
+            "extra": "iterations: 95\ncpu: 7497799.673684301 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Transpose_2_3",
+            "value": 1949878.9497190209,
+            "unit": "ns/iter",
+            "extra": "iterations: 358\ncpu: 1949960.1145254127 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_0",
+            "value": 9232092.133334694,
+            "unit": "ns/iter",
+            "extra": "iterations: 75\ncpu: 9232017.746666657 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_0",
+            "value": 7273698.195648569,
+            "unit": "ns/iter",
+            "extra": "iterations: 92\ncpu: 7273286.9673919445 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Cold_Intersection_3_3_via_2",
+            "value": 7554521.406593646,
+            "unit": "ns/iter",
+            "extra": "iterations: 91\ncpu: 7552480.747252331 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Tetrahedron_Warm_Intersection_3_3_via_2",
+            "value": 1760741.6481035827,
+            "unit": "ns/iter",
+            "extra": "iterations: 395\ncpu: 1760930.820253532 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_AllPairs",
+            "value": 17755085.62499226,
+            "unit": "ns/iter",
+            "extra": "iterations: 40\ncpu: 17753667.29999952 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_AllPairs",
+            "value": 78.42820960938946,
+            "unit": "ns/iter",
+            "extra": "iterations: 8934218\ncpu: 78.42656234714613 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_1",
+            "value": 5080076.343069179,
+            "unit": "ns/iter",
+            "extra": "iterations: 137\ncpu: 5079739.759124619 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_2",
+            "value": 4409378.320753958,
+            "unit": "ns/iter",
+            "extra": "iterations: 159\ncpu: 4409539.4716986 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_2_3",
+            "value": 4961688.553190544,
+            "unit": "ns/iter",
+            "extra": "iterations: 141\ncpu: 4961583.418440352 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Compute_3_3",
+            "value": 1344731.3538474778,
+            "unit": "ns/iter",
+            "extra": "iterations: 520\ncpu: 1344589.7019232907 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_1",
+            "value": 4.923719259008743,
+            "unit": "ns/iter",
+            "extra": "iterations: 142225244\ncpu: 4.923017618447686 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_2",
+            "value": 4.92366019607011,
+            "unit": "ns/iter",
+            "extra": "iterations: 142214447\ncpu: 4.923657931883591 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_2_3",
+            "value": 4.923718250024262,
+            "unit": "ns/iter",
+            "extra": "iterations: 141612037\ncpu: 4.922966576633747 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Compute_3_3",
+            "value": 4.220067316276249,
+            "unit": "ns/iter",
+            "extra": "iterations: 165872514\ncpu: 4.219851077918654 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_1",
+            "value": 4025171.9827582533,
+            "unit": "ns/iter",
+            "extra": "iterations: 174\ncpu: 4025171.804596931 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_1",
+            "value": 2188465.0500014755,
+            "unit": "ns/iter",
+            "extra": "iterations: 320\ncpu: 2188588.181249518 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Build_2",
+            "value": 3341342.3666661945,
+            "unit": "ns/iter",
+            "extra": "iterations: 210\ncpu: 3341397.647617955 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Build_2",
+            "value": 1340674.6878615539,
+            "unit": "ns/iter",
+            "extra": "iterations: 519\ncpu: 1340884.1907515102 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Transpose_2_3",
+            "value": 1669845.5595235915,
+            "unit": "ns/iter",
+            "extra": "iterations: 420\ncpu: 1669676.1095238072 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Transpose_2_3",
+            "value": 483165.95947795646,
+            "unit": "ns/iter",
+            "extra": "iterations: 1456\ncpu: 483411.9120884397 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_0",
+            "value": 1139696.329545451,
+            "unit": "ns/iter",
+            "extra": "iterations: 616\ncpu: 1139526.7337671297 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_0",
+            "value": 705286.7618090799,
+            "unit": "ns/iter",
+            "extra": "iterations: 995\ncpu: 705485.5005026697 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Cold_Intersection_3_3_via_2",
+            "value": 1755831.612499321,
+            "unit": "ns/iter",
+            "extra": "iterations: 400\ncpu: 1755529.8025001776 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Hexahedron_Warm_Intersection_3_3_via_2",
+            "value": 407189.6916324151,
+            "unit": "ns/iter",
+            "extra": "iterations: 1709\ncpu: 407446.49912189523 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_AllPairs",
+            "value": 29774346.04166973,
+            "unit": "ns/iter",
+            "extra": "iterations: 24\ncpu: 29771305.08333422 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_AllPairs",
+            "value": 79.44454485618188,
+            "unit": "ns/iter",
+            "extra": "iterations: 8810391\ncpu: 79.4385189034163 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_1",
+            "value": 7857096.168539796,
+            "unit": "ns/iter",
+            "extra": "iterations: 89\ncpu: 7856516.494381675 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_2",
+            "value": 8343710.654759748,
+            "unit": "ns/iter",
+            "extra": "iterations: 84\ncpu: 8343280.047619876 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_2_3",
+            "value": 9337613.626670798,
+            "unit": "ns/iter",
+            "extra": "iterations: 75\ncpu: 9337091.493333295 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Compute_3_3",
+            "value": 2628700.2271067235,
+            "unit": "ns/iter",
+            "extra": "iterations: 273\ncpu: 2628246.6923083114 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_1",
+            "value": 4.92547164980013,
+            "unit": "ns/iter",
+            "extra": "iterations: 142154200\ncpu: 4.9251206999161585 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_2",
+            "value": 4.942870178307109,
+            "unit": "ns/iter",
+            "extra": "iterations: 142205625\ncpu: 4.942513392138927 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_2_3",
+            "value": 4.936917263505958,
+            "unit": "ns/iter",
+            "extra": "iterations: 142071611\ncpu: 4.936641613784443 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Compute_3_3",
+            "value": 4.221026311962624,
+            "unit": "ns/iter",
+            "extra": "iterations: 165731499\ncpu: 4.220708629444016 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_1",
+            "value": 5807318.333336297,
+            "unit": "ns/iter",
+            "extra": "iterations: 120\ncpu: 5806962.541666867 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_1",
+            "value": 3616891.870464435,
+            "unit": "ns/iter",
+            "extra": "iterations: 193\ncpu: 3616910.1347149634 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Build_2",
+            "value": 6221386.857140386,
+            "unit": "ns/iter",
+            "extra": "iterations: 112\ncpu: 6220982.848213501 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Build_2",
+            "value": 2304955.63576238,
+            "unit": "ns/iter",
+            "extra": "iterations: 302\ncpu: 2305162.854305585 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Transpose_2_3",
+            "value": 2937963.1171524017,
+            "unit": "ns/iter",
+            "extra": "iterations: 239\ncpu: 2937429.7907951022 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Transpose_2_3",
+            "value": 810065.290508072,
+            "unit": "ns/iter",
+            "extra": "iterations: 864\ncpu: 810241.2083332351 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_0",
+            "value": 2318847.3509944007,
+            "unit": "ns/iter",
+            "extra": "iterations: 302\ncpu: 2317353.983443409 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_0",
+            "value": 1624739.677422225,
+            "unit": "ns/iter",
+            "extra": "iterations: 434\ncpu: 1624985.3755757671 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Cold_Intersection_3_3_via_2",
+            "value": 3101356.628317151,
+            "unit": "ns/iter",
+            "extra": "iterations: 226\ncpu: 3100970.3053093962 ns\nthreads: 1"
+          },
+          {
+            "name": "ConnectivityBenchmark/Wedge_Warm_Intersection_3_3_via_2",
+            "value": 717461.6840498509,
+            "unit": "ns/iter",
+            "extra": "iterations: 978\ncpu: 717547.478528063 ns\nthreads: 1"
           }
         ]
       }
