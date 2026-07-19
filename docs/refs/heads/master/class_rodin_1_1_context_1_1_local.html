@@ -77,7 +77,19 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_context.html">Context</a>::<wbr/></span>Local <span class="m-thin">class</span>
         </h1>
         <p>Represents a single machine context.</p>
-<p>The <a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Local</a> context refers to an execution model where operations are confined to a single machine or node, utilizing shared memory without the need for distributed computing. While operating within a local scope, this context can leverage multithreading or parallelism, but it does not involve communication across multiple machines.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>The Local context refers to an execution model where operations are confined to a single machine or node, utilizing shared memory without the need for distributed computing. While operating within a local scope, this context can leverage multithreading or parallelism, but it does not involve communication across multiple machines.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -86,6 +98,54 @@
             </dt>
             <dd>Abstract base class for all execution contexts.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
+            </dt>
+            <dd>Serializes the local context.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a68e832cb064e3b7ca978d8e5911cf700"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Context::<wbr />Local::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span></span>
+            </h3>
+            <p>Serializes the local context.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Serialization archive type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ar</td>
+                  <td>Archive used for serialization.</td>
+                </tr>
+                <tr>
+                  <td>version</td>
+                  <td>Serialization version.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

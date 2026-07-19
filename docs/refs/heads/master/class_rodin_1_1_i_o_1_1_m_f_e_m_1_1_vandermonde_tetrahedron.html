@@ -78,7 +78,31 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o_1_1_m_f_e_m.html">MFEM</a>::<wbr/></span>VandermondeTetrahedron <span class="m-thin">class</span>
         </h1>
         <p>Vandermonde matrix on the tetrahedron using MFEM&#x27;s nodal set.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>V_MFEM(i,j) = ψ_j(x_i), where ψ_j are Dubiner tetrahedral modes and x_i are MfemTetrahedronNodes&lt;K&gt;.</p>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a2fa11f4ad8b15e85104f781b0cacc725">
+              <span class="m-doc-wrap-bumper">static auto <a href="#a2fa11f4ad8b15e85104f781b0cacc725" class="m-doc-self">getMatrix</a>(</span><span class="m-doc-wrap">) -&gt; const <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;</span>
+            </dt>
+            <dd>Returns the Dubiner Vandermonde matrix evaluated at MFEM tetrahedron nodes.</dd>
+            <dt id="a3dceed2d2880a3a2e32f579bfab433fe">
+              <span class="m-doc-wrap-bumper">static auto <a href="#a3dceed2d2880a3a2e32f579bfab433fe" class="m-doc-self">getInverse</a>(</span><span class="m-doc-wrap">) -&gt; const <a href="namespace_rodin_1_1_math.html#a3f1ae8ed25197a7603a7a4af0a0d9f9f" class="m-doc">Math::<wbr />Matrix</a>&lt;<a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>&gt;&amp;</span>
+            </dt>
+            <dd>Returns the inverse of <a href="#a2fa11f4ad8b15e85104f781b0cacc725" class="m-doc">getMatrix()</a>.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

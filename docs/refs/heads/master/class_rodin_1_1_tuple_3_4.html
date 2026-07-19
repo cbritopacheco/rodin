@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span>Tuple&lt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Specialization of <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> for an empty parameter pack.</p>
+        <p>Specialization of Tuple for an empty parameter pack.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -159,6 +159,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aae4c3867dcd57153f1148c9f097bbc9b" class="m-doc">size</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the size of the tuple.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#aa5b3dd8336182f751ebec27167c22415" class="m-doc">serialize</a>(</span><span class="m-doc-wrap">Archive&amp;,
+              const unsigned int)</span>
+            </dt>
+            <dd>Serializes the empty tuple.</dd>
           </dl>
         </section>
         <section>
@@ -199,10 +205,11 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>An empty <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+                  <td>An empty Tuple.</td>
                 </tr>
               </tfoot>
             </table>
+<p>The ignored argument is the other empty tuple.</p>
           </div></section>
           <section class="m-doc-details" id="af5114747c31a1ec3ff5f77b19c221a92"><div>
             <h3>
@@ -262,7 +269,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>An empty <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+                  <td>An empty Tuple.</td>
                 </tr>
               </tfoot>
             </table>
@@ -313,6 +320,29 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="aa5b3dd8336182f751ebec27167c22415"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+                template&lt;class Archive&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Tuple&lt;&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa5b3dd8336182f751ebec27167c22415" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp;,
+              const unsigned int)</span></span>
+            </h3>
+            <p>Serializes the empty tuple.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Archive</td>
+                  <td>Serialization archive type.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The archive and version arguments are ignored because an empty tuple has no state.</p>
           </div></section>
         </section>
       </div>

@@ -78,7 +78,27 @@
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_polytope_8h.html">&lt;Rodin/Geometry/Polytope.h&gt;</a></div>
         </h1>
         <p>Hash functor that produces the same hash for any permutation of the vertex indices.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <p>Uses the SplitMix64 hash function per vertex index, combined with XOR to ensure order-independence.</p>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a30e4cd450703d6f73a6a80bfd9a2883d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a30e4cd450703d6f73a6a80bfd9a2883d" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope_1_1_key.html" class="m-doc">Key</a>&amp; poly) const -&gt; std::size_t</span>
+            </dt>
+            <dd>Returns an order-independent hash of the key&#x27;s vertices.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

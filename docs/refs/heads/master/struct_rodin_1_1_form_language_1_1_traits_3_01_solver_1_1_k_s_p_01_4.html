@@ -78,8 +78,28 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_form_language.html">FormLanguage</a>::<wbr/></span>Traits&lt;Solver::KSP&gt; <span class="m-thin">struct</span>
         </h1>
-        <p><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Solver::<wbr />KSP</a> (<a href="namespace_rodin.html" class="m-doc">Rodin</a> wrapper for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> KSP).</p>
-<p>Maps <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Solver::<wbr />KSP</a> to the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> linear system type so that NewtonSolverBase&lt;Solver::KSP&gt; can deduce its LinearSystemType.</p>
+        <p>Traits specialization for Solver::KSP (Rodin wrapper for PETSc KSP).</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Maps Solver::KSP to the PETSc linear system type so that NewtonSolverBase&lt;Solver::KSP&gt; can deduce its LinearSystemType.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a0e2ed914b272429dbc177e1882a866f1">
+              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
+            </dt>
+            <dd>Linear system type.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

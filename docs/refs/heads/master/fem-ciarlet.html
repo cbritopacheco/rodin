@@ -100,7 +100,7 @@
             <li><a href="#fem-ciarlet-see-also">See Also</a></li>
           </ul>
         </nav>
-<section id="fem-ciarlet-intro"><h2><a href="#fem-ciarlet-intro">Introduction</a></h2><p>The finite element method (FEM) is a powerful technique for numerically solving partial differential equations. At its heart lies the concept of a finite element**, which provides a systematic way to construct piecewise-polynomial approximations on a mesh.</p><p>The most widely used formal definition of a finite element was introduced by Philippe G. Ciarlet. This definition provides a clean mathematical framework that separates three concerns:</p><ol><li><strong>Geometry</strong>: on which shape is the element defined?</li><li><strong>Approximation</strong>: which polynomial space is used?</li><li><strong>Degrees of freedom</strong>: how are functions in the space uniquely determined?</li></ol><p>This separation is precisely mirrored in <a href="namespace_rodin.html" class="m-doc">Rodin</a>&#x27;s architecture: the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module handles shapes, the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module defines polynomial spaces and DOFs, and the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module puts them together.</p></section><section id="fem-ciarlet-definition"><h2><a href="#fem-ciarlet-definition">The Ciarlet Triple</a></h2><p>A <strong>finite element</strong> in the sense of Ciarlet is defined as a triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
+<section id="fem-ciarlet-intro"><h2><a href="#fem-ciarlet-intro">Introduction</a></h2><p>The finite element method (FEM) is a powerful technique for numerically solving partial differential equations. At its heart lies the concept of a finite element**, which provides a systematic way to construct piecewise-polynomial approximations on a mesh.</p><p>The most widely used formal definition of a finite element was introduced by Philippe G. Ciarlet. This definition provides a clean mathematical framework that separates three concerns:</p><ol><li><strong>Geometry</strong>: on which shape is the element defined?</li><li><strong>Approximation</strong>: which polynomial space is used?</li><li><strong>Degrees of freedom</strong>: how are functions in the space uniquely determined?</li></ol><p>This separation is precisely mirrored in Rodin&#x27;s architecture: the <a href="namespace_rodin_1_1_geometry.html" class="m-doc">Geometry</a> module handles shapes, the <a href="namespace_rodin_1_1_variational.html" class="m-doc">Variational</a> module defines polynomial spaces and DOFs, and the <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module puts them together.</p></section><section id="fem-ciarlet-definition"><h2><a href="#fem-ciarlet-definition">The Ciarlet Triple</a></h2><p>A <strong>finite element</strong> in the sense of Ciarlet is defined as a triple <svg class="m-math" style="width: 4.801em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 46.08507 11.955168">
 <title>
 $ (K, P, \Sigma) $
 </title>
@@ -143,7 +143,7 @@ $ \mathbb{R}^d $
 <use x='0' y='0' xlink:href='#eq3-g0-82'/>
 <use x='8.634312' y='-4.338437' xlink:href='#eq3-g1-100'/>
 </g>
-</svg> with nonempty interior (e.g. a triangle, tetrahedron, quadrilateral). This is also called the <strong>reference element</strong>. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, reference element geometry is defined by the <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> enumeration (Triangle, Tetrahedron, Quadrilateral, etc.).</li><li><p><svg class="m-math" style="width: 0.955em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.171098 8.169366">
+</svg> with nonempty interior (e.g. a triangle, tetrahedron, quadrilateral). This is also called the <strong>reference element</strong>. In Rodin, reference element geometry is defined by the <a href="class_rodin_1_1_geometry_1_1_polytope.html#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Polytope::<wbr />Type</a> enumeration (Triangle, Tetrahedron, Quadrilateral, etc.).</li><li><p><svg class="m-math" style="width: 0.955em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 9.171098 8.169366">
 <title>
 $ P $
 </title>
@@ -767,7 +767,7 @@ $ p $
 <g id='eq34-page1'>
 <use x='0' y='0' xlink:href='#eq34-g0-112'/>
 </g>
-</svg>. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, these DOF values are stored as the coefficient vector of a <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a>.</p></section><section id="fem-ciarlet-examples"><h2><a href="#fem-ciarlet-examples">Common Finite Elements</a></h2><section id="fem-ciarlet-p1"><h3><a href="#fem-ciarlet-p1">P1 (Piecewise Linear) Elements</a></h3><p>The simplest and most widely used finite element is the <strong>P1 element</strong> on a triangle:</p><ul><li><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg>. In Rodin, these DOF values are stored as the coefficient vector of a <code>GridFunction</code>.</p></section><section id="fem-ciarlet-examples"><h2><a href="#fem-ciarlet-examples">Common Finite Elements</a></h2><section id="fem-ciarlet-p1"><h3><a href="#fem-ciarlet-p1">P1 (Piecewise Linear) Elements</a></h3><p>The simplest and most widely used finite element is the <strong>P1 element</strong> on a triangle:</p><ul><li><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -967,9 +967,9 @@ $ \lambda_i(a_j) = \delta_{ij} $
 <use x='50.772479' y='1.793263' xlink:href='#eq43-g0-105'/>
 <use x='53.655618' y='1.793263' xlink:href='#eq43-g0-106'/>
 </g>
-</svg>. Each basis function is 1 at one vertex and 0 at the other two, varying linearly between them.</p><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, a P1 finite element space is created with:</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg>. Each basis function is 1 at one vertex and 0 at the other two, varying linearly between them.</p><p>In Rodin, a P1 finite element space is created with:</p><pre class="m-code"><span class="n">P1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="c1">// Number of DOFs = number of vertices</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">.</span><span class="n">getSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre><p>The <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> class constructs one DOF per mesh vertex, producing a space of continuous piecewise linear functions that is <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Vh</span><span class="p">.</span><span class="n">getSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre><p>The <code>P1</code> class constructs one DOF per mesh vertex, producing a space of continuous piecewise linear functions that is <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -1061,9 +1061,9 @@ $ K $
 <g id='eq49-page1'>
 <use x='0' y='0' xlink:href='#eq49-g0-75'/>
 </g>
-</svg></li></ul><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>:</p><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">Wh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
+</svg></li></ul><p>In Rodin:</p><pre class="m-code"><span class="n">P0</span><span class="w"> </span><span class="nf">Wh</span><span class="p">(</span><span class="n">mesh</span><span class="p">);</span>
 <span class="c1">// Number of DOFs = number of cells</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Wh</span><span class="p">.</span><span class="n">getSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre><p>The <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a> class constructs one DOF per mesh cell. Functions in P0 are discontinuous across cell boundaries, making this space a subspace of <svg class="m-math" style="width: 3.152em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 30.255792 12.463531">
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Wh</span><span class="p">.</span><span class="n">getSize</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre><p>The <code>P0</code> class constructs one DOF per mesh cell. Functions in P0 are discontinuous across cell boundaries, making this space a subspace of <svg class="m-math" style="width: 3.152em; height: 1.298em; vertical-align: -0.312em;" viewBox="0 -9.474739 30.255792 12.463531">
 <title>
 $ L^2(\Omega) $
 </title>
@@ -1163,7 +1163,7 @@ $ \Sigma $
 <g id='eq56-page1'>
 <use x='0' y='0' xlink:href='#eq56-g0-6'/>
 </g>
-</svg> = point evaluations at the 3 vertices and 3 edge midpoints</li></ul><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, higher-order elements are provided by the <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1&lt;k&gt;</a> class:</p><pre class="m-code"><span class="c1">// Quadratic (P2) finite element space</span>
+</svg> = point evaluations at the 3 vertices and 3 edge midpoints</li></ul><p>In Rodin, higher-order elements are provided by the <code>H1&lt;k&gt;</code> class:</p><pre class="m-code"><span class="c1">// Quadratic (P2) finite element space</span>
 <span class="n">H1</span><span class="w"> </span><span class="nf">Vh</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;</span><span class="p">{},</span><span class="w"> </span><span class="n">mesh</span><span class="p">);</span></pre><p>The polynomial order <svg class="m-math" style="width: 0.676em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 6.489504 8.302191">
 <title>
 $ k $
@@ -1260,7 +1260,7 @@ $ F_K : \hat{K} \to K $
 <use x='39.812282' y='0' xlink:href='#eq62-g0-33'/>
 <use x='55.088314' y='0' xlink:href='#eq62-g2-75'/>
 </g>
-</svg>. In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, the Jacobian of this transformation is accessible through <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point::<wbr />getJacobian()</a>.</li><li><strong>Assemble</strong> local DOFs into global DOFs, enforcing inter-element continuity conditions at shared entities (vertices, edges, faces)</li></ol><p>The result is a finite-dimensional subspace <svg class="m-math" style="width: 1.219em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 11.704259 9.962629">
+</svg>. In Rodin, the Jacobian of this transformation is accessible through <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Point::<wbr />getJacobian()</a>.</li><li><strong>Assemble</strong> local DOFs into global DOFs, enforcing inter-element continuity conditions at shared entities (vertices, edges, faces)</li></ol><p>The result is a finite-dimensional subspace <svg class="m-math" style="width: 1.219em; height: 1.038em; vertical-align: -0.187em;" viewBox="0 -8.169366 11.704259 9.962629">
 <title>
 $ V_h $
 </title>
@@ -1272,7 +1272,7 @@ $ V_h $
 <use x='0' y='0' xlink:href='#eq63-g1-86'/>
 <use x='6.82435' y='1.793263' xlink:href='#eq63-g0-104'/>
 </g>
-</svg> of the function space in which we seek our approximate solution.</p><p>The assembly of local DOFs into global DOFs is handled automatically when you create a finite element space. For example, <code>P1 Vh(mesh)</code> constructs the global DOF numbering by identifying vertex-based DOFs on shared mesh vertices.</p></section><section id="fem-ciarlet-conformity"><h2><a href="#fem-ciarlet-conformity">Conformity</a></h2><p>Different types of inter-element continuity give rise to different types of conforming finite element spaces:</p><table class="m-table"><thead><tr><th>Conformity</th><th>Continuity requirement</th><th>Typical use</th><th><a href="namespace_rodin.html" class="m-doc">Rodin</a> class</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+</svg> of the function space in which we seek our approximate solution.</p><p>The assembly of local DOFs into global DOFs is handled automatically when you create a finite element space. For example, <code>P1 Vh(mesh)</code> constructs the global DOF numbering by identifying vertex-based DOFs on shared mesh vertices.</p></section><section id="fem-ciarlet-conformity"><h2><a href="#fem-ciarlet-conformity">Conformity</a></h2><p>Different types of inter-element continuity give rise to different types of conforming finite element spaces:</p><table class="m-table"><thead><tr><th>Conformity</th><th>Continuity requirement</th><th>Typical use</th><th>Rodin class</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -1284,7 +1284,7 @@ $ H^1 $
 <use x='0' y='0' xlink:href='#eq64-g0-72'/>
 <use x='10.62261' y='-4.338437' xlink:href='#eq64-g1-49'/>
 </g>
-</svg>-conforming</td><td>Continuous across element boundaries</td><td>Scalar PDEs (Poisson, heat)</td><td><a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a></td></tr><tr><td><svg class="m-math" style="width: 3.732em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 35.822985 11.955168">
+</svg>-conforming</td><td>Continuous across element boundaries</td><td>Scalar PDEs (Poisson, heat)</td><td><code>P1</code>, <code>H1</code></td></tr><tr><td><svg class="m-math" style="width: 3.732em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 35.822985 11.955168">
 <title>
 $ H(\mathrm{div}) $
 </title>
@@ -1338,7 +1338,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq67-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq67-g1-50'/>
 </g>
-</svg> (no conformity)</td><td>No continuity required</td><td>Discontinuous Galerkin, indicators</td><td><a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a></td></tr></tbody></table><p><a href="namespace_rodin.html" class="m-doc">Rodin</a> currently provides <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
+</svg> (no conformity)</td><td>No continuity required</td><td>Discontinuous Galerkin, indicators</td><td><code>P0</code></td></tr></tbody></table><p>Rodin currently provides <svg class="m-math" style="width: 1.548em; height: 0.987em; vertical-align: -0.000em;" viewBox="0 -9.474739 14.856793 9.474739">
 <title>
 $ H^1 $
 </title>
@@ -1362,7 +1362,7 @@ $ L^2 $
 <use x='0' y='0' xlink:href='#eq69-g0-76'/>
 <use x='7.964506' y='-4.338437' xlink:href='#eq69-g1-50'/>
 </g>
-</svg> elements (P0). The P1 and H1 spaces produce global functions that are continuous across element boundaries: values at shared vertices (and shared edge/face DOFs for higher order) are identified.</p></section><section id="fem-ciarlet-rodin"><h2><a href="#fem-ciarlet-rodin">Connection to Rodin</a></h2><p>In <a href="namespace_rodin.html" class="m-doc">Rodin</a>, the Ciarlet definition is realized through the interaction of several classes:</p><table class="m-table"><thead><tr><th>Ciarlet component</th><th>Mathematical object</th><th><a href="namespace_rodin.html" class="m-doc">Rodin</a> class</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
+</svg> elements (P0). The P1 and H1 spaces produce global functions that are continuous across element boundaries: values at shared vertices (and shared edge/face DOFs for higher order) are identified.</p></section><section id="fem-ciarlet-rodin"><h2><a href="#fem-ciarlet-rodin">Connection to Rodin</a></h2><p>In Rodin, the Ciarlet definition is realized through the interaction of several classes:</p><table class="m-table"><thead><tr><th>Ciarlet component</th><th>Mathematical object</th><th>Rodin class</th></tr></thead><tbody><tr><td><svg class="m-math" style="width: 1.127em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 10.817691 8.169366">
 <title>
 $ K $
 </title>
@@ -1382,7 +1382,7 @@ $ P $
 <g id='eq71-page1'>
 <use x='0' y='0' xlink:href='#eq71-g0-80'/>
 </g>
-</svg></td><td>Local polynomial space</td><td>Defined internally by <a href="class_rodin_1_1_variational_1_1_p0.html" class="m-doc">P0</a>, <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a>, <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a></td></tr><tr><td><svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
+</svg></td><td>Local polynomial space</td><td>Defined internally by <code>P0</code>, <code>P1</code>, <code>H1</code></td></tr><tr><td><svg class="m-math" style="width: 0.881em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.454319 8.169366">
 <title>
 $ \Sigma $
 </title>
@@ -1421,7 +1421,7 @@ $ u_h \in V_h $
 <use x='26.652278' y='0' xlink:href='#eq74-g2-86'/>
 <use x='33.476628' y='1.793263' xlink:href='#eq74-g1-104'/>
 </g>
-</svg></td><td>Discrete function</td><td><a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">GridFunction</a></td></tr><tr><td><svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
+</svg></td><td>Discrete function</td><td><code>GridFunction</code></td></tr><tr><td><svg class="m-math" style="width: 0.694em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.66244 5.147373">
 <title>
 $ u $
 </title>
@@ -1431,7 +1431,7 @@ $ u $
 <g id='eq75-page1'>
 <use x='0' y='0' xlink:href='#eq75-g0-117'/>
 </g>
-</svg> (unknown)</td><td>Trial function</td><td><a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">TrialFunction</a></td></tr><tr><td><svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
+</svg> (unknown)</td><td>Trial function</td><td><code>TrialFunction</code></td></tr><tr><td><svg class="m-math" style="width: 0.634em; height: 0.536em; vertical-align: -0.000em;" viewBox="0 -5.147373 6.088223 5.147373">
 <title>
 $ v $
 </title>
@@ -1441,7 +1441,7 @@ $ v $
 <g id='eq76-page1'>
 <use x='0' y='0' xlink:href='#eq76-g0-118'/>
 </g>
-</svg> (weight)</td><td>Test function</td><td><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a></td></tr></tbody></table><pre class="m-code"><span class="c1">// The mesh provides the cells K and the geometric transformations F_K</span>
+</svg> (weight)</td><td>Test function</td><td><code>TestFunction</code></td></tr></tbody></table><pre class="m-code"><span class="c1">// The mesh provides the cells K and the geometric transformations F_K</span>
 <span class="n">Mesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">;</span>
 <span class="n">mesh</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mesh</span><span class="p">.</span><span class="n">UniformGrid</span><span class="p">(</span><span class="n">Polytope</span><span class="o">::</span><span class="n">Type</span><span class="o">::</span><span class="n">Triangle</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">});</span>
 
@@ -1451,7 +1451,7 @@ $ v $
 
 <span class="c1">// Trial and test functions live in this global space</span>
 <span class="n">TrialFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span>
-<span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section><section id="fem-ciarlet-see-also"><h2><a href="#fem-ciarlet-see-also">See Also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces in <a href="namespace_rodin.html" class="m-doc">Rodin</a></li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core Concepts</a> — Practical guide to using finite elements in <a href="namespace_rodin.html" class="m-doc">Rodin</a></li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> — Geometric shapes used as reference elements</li><li><a href="notation-index.html" class="m-doc">Notation</a> — Mathematical notation reference</li></ul></section>
+<span class="n">TestFunction</span><span class="w">  </span><span class="nf">v</span><span class="p">(</span><span class="n">Vh</span><span class="p">);</span></pre></section><section id="fem-ciarlet-see-also"><h2><a href="#fem-ciarlet-see-also">See Also</a></h2><ul><li><a href="fem-spaces.html" class="m-doc">Finite element spaces</a> — Available spaces in Rodin</li><li><a href="guides-getting-started-core-concepts.html" class="m-doc">Core Concepts</a> — Practical guide to using finite elements in Rodin</li><li><a href="guides-polytopes.html" class="m-doc">Polytopes</a> — Geometric shapes used as reference elements</li><li><a href="notation-index.html" class="m-doc">Notation</a> — Mathematical notation reference</li></ul></section>
         <div class="m-note m-dim m-thin m-text-center"><a href="guides-connectivity.html" class="m-doc">&laquo; Connectivity</a> | <a href="guides-index.html" class="m-doc">General concepts</a> | <a href="fem-spaces.html" class="m-doc">Finite element spaces &raquo;</a></div>
       </div>
     </div>

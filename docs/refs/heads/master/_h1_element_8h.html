@@ -77,18 +77,6 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_4bca0b286e0f4e2445f6f25378ef63e0.html">H1</a>/</span>H1Element.h <span class="m-thin">file</span>
         </h1>
         <p>Defines the H1Element class for H1-conforming Lagrange finite elements.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
 <p>This file provides the implementation of high-order H1-conforming Lagrange finite elements. These elements are characterized by:</p><ul><li>Continuous basis functions (H¹-conforming)</li><li>Lagrange nodal property: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
@@ -116,54 +104,6 @@ $ \phi_i(x_j) = \delta_{ij} $
 <use x='54.262375' y='1.793263' xlink:href='#eq1-g0-106'/>
 </g>
 </svg></li><li>Arbitrary polynomial degree K</li><li>Support for scalar and vector-valued fields</li></ul><aside class="m-note m-default"><h4>See also</h4><p>H1Element</p><p>RealH1Element</p><p>VectorH1Element</p></aside>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">Rodin::Variational::H1Element</a>
-            </dt>
-            <dd>Degree k H1-conforming Lagrange element.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_linear_form.html" class="m-doc">Rodin::Variational::H1Element::LinearForm</a>
-            </dt>
-            <dd>Evaluates linear form at a given function/vector field.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function.html" class="m-doc">Rodin::Variational::H1Element::BasisFunction</a>
-            </dt>
-            <dd>Represents a Lagrange basis function of degree K.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::H1Element::BasisFunction::DerivativeFunction</a>
-            </dt>
-            <dd>Represents a partial derivative of a basis function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">Rodin::Variational::H1Element::BasisFunction::GradientFunction</a>
-            </dt>
-            <dd>Represents the gradient of a basis function.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::H1Element&lt;K, Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Continuous H1-conforming piecewise polynomial (degree k) vector Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_h1_element_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_42d934b7daffec7ba220fb785105ab17e.html" class="m-doc">Rodin::Variational::H1Element&lt;K, Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
-            </dt>
-            <dd>Represents a derivative function of a Pk vector element.</dd>
-          </dl>
-        </section>
       </div>
     </div>
   </div>

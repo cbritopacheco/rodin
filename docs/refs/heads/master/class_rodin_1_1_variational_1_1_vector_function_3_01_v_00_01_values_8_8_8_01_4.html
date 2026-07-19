@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class V, class ... Values&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>VectorFunction&lt;V, Values...&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Represents a vector function which may be constructed from values which can be converted to objects of type <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>.</p>
+        <p>Represents a vector function which may be constructed from values which can be converted to objects of type RealFunction.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -101,13 +101,15 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>In general one may construct any <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> by specifying its values in a uniform initialization manner. For example, to construct a <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> with constant entries (1, 2, 3) : <code class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorFunction</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span></code> Alternatively, we may construct instances of <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a> from any type which is convertible to specializations of <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RealFunction</span><span class="p">(</span><span class="mf">3.1416</span><span class="p">);</span>
+<p>In general one may construct any VectorFunction by specifying its values in a uniform initialization manner. For example, to construct a VectorFunction with constant entries (1, 2, 3) : <code class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorFunction</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span></code> Alternatively, we may construct instances of VectorFunction from any type which is convertible to specializations of RealFunction:</p><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RealFunction</span><span class="p">(</span><span class="mf">3.1416</span><span class="p">);</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VectorFunction</span><span class="p">{</span><span class="n">Dx</span><span class="p">(</span><span class="n">s</span><span class="p">),</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">};</span></pre>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
@@ -119,6 +121,44 @@
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a515179486a633cd3bd8acc6d313ed50d">
+              using <a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc-self">ScalarType</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a3c3e9c2215647cbae22cfcae7e75427d">
+              using <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc-self">VectorType</a> = <a href="namespace_rodin_1_1_math.html#a27cd225c75d47a2bd0cc5850164c2a6b" class="m-doc">Math::<wbr />Vector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="ae0445970d2d5087741c6518a1a7238d2">
+              using <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc-self">SpatialVectorType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Small spatial vector value type.</dd>
+            <dt id="a401b157b229584d55bf5257dcb1352f7">
+              using <a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc-self">RangeType</a> = std::conditional_t&lt;<a href="#ad3ebab2934e8453b1f426b0fa21e6517" class="m-doc">Dimension</a>&lt;=<a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>&gt;::MaxSize, <a href="#ae0445970d2d5087741c6518a1a7238d2" class="m-doc">SpatialVectorType</a>, <a href="#a3c3e9c2215647cbae22cfcae7e75427d" class="m-doc">VectorType</a>&gt;
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="a0d9d2c25a633ac292fe01d5c75b8ff57">
+              using <a href="#a0d9d2c25a633ac292fe01d5c75b8ff57" class="m-doc-self">FixedSizeVectorType</a> = <a href="namespace_rodin_1_1_math.html#a2b1553b74430bb0e4efbe35ce1cd9566" class="m-doc">Math::<wbr />FixedSizeVector</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#ad3ebab2934e8453b1f426b0fa21e6517" class="m-doc">Dimension</a>&gt;
+            </dt>
+            <dd>Fixed-size vector type used for storage decisions.</dd>
+            <dt id="aa07b23fa600877c8f33d704c7befa453">
+              using <a href="#aa07b23fa600877c8f33d704c7befa453" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">VectorFunctionBase</a>&lt;<a href="#a515179486a633cd3bd8acc6d313ed50d" class="m-doc">ScalarType</a>, <a href="#a40e7867ec2d66d82301c1b0fb71bbe6c" class="m-doc">VectorFunction</a>&lt;V, Values...&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="ad3ebab2934e8453b1f426b0fa21e6517">
+              static size_t <a href="#ad3ebab2934e8453b1f426b0fa21e6517" class="m-doc-self">Dimension</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Number of vector components.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -127,15 +167,44 @@
               const Values&amp;... values)</span>
             </dt>
             <dd>Constructs a vector with the given values.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#ad776889a2d950d6274164343d87b0605" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap">const VectorFunction&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a066abd27177bd3745581646fc61e7043" class="m-doc">VectorFunction</a>(</span><span class="m-doc-wrap">VectorFunction&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; <a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a></span>
             </dt>
-            <dd>Creates a polymorphic copy of this object.</dd>
+            <dd>Evaluates all component functions at a point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a03a97cd8c47198116ac3c86617f4f00b" class="m-doc">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const -&gt; <a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a></span>
+            </dt>
+            <dd>Evaluates all component functions at an integration point.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aad8f738241426a32d95c3696395698d3" class="m-doc">getDimension</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Gets the vector dimension.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class ... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4683f213bfed21b32405e96858ab4732" class="m-doc">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... attrs) -&gt; <a href="#a40e7867ec2d66d82301c1b0fb71bbe6c" class="m-doc">VectorFunction</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Applies a trace domain to each component function.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the maximum known component order on a mesh entity.</dd>
+            <dt id="ae03b33b8e074615727fb7838f0262314">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a40e7867ec2d66d82301c1b0fb71bbe6c" class="m-doc">VectorFunction</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Polymorphically copies the derived function.</dd>
           </dl>
         </section>
         <section>
@@ -155,8 +224,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">v</td>
-                  <td></td>
+                  <td style="width: 1%">v&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>First component source</td>
                 </tr>
                 <tr>
                   <td>values&nbsp;<span class="m-label m-flat m-info">in</span></td>
@@ -164,25 +233,169 @@
                 </tr>
               </tbody>
             </table>
-<p>Each value passed must be convertible to any specialization of <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>.</p>
+<p>Each value passed must be convertible to any specialization of RealFunction.</p>
           </div></section>
-          <section class="m-doc-details" id="ae03b33b8e074615727fb7838f0262314"><div>
+          <section class="m-doc-details" id="ad776889a2d950d6274164343d87b0605"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class V, class ... Values&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_vector_function.html" class="m-doc">VectorFunction</a>* Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae03b33b8e074615727fb7838f0262314" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad776889a2d950d6274164343d87b0605" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap">const VectorFunction&amp; other)</span></span>
             </h3>
-            <p>Creates a polymorphic copy of this object.</p>
+            <p>Copy constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Function to copy</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a066abd27177bd3745581646fc61e7043"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a066abd27177bd3745581646fc61e7043" class="m-doc-self">VectorFunction</a>(</span><span class="m-doc-wrap">VectorFunction&amp;&amp; other)</span></span>
+            </h3>
+            <p>Move constructor.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Function to move from</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af0e2923caa24f35613d3cc8427bdc6bb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af0e2923caa24f35613d3cc8427bdc6bb" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Evaluates all component functions at a point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Point at which to evaluate</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Vector value assembled from component functions</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a03a97cd8c47198116ac3c86617f4f00b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a401b157b229584d55bf5257dcb1352f7" class="m-doc">RangeType</a> Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03a97cd8c47198116ac3c86617f4f00b" class="m-doc-self">getValue</a>(</span><span class="m-doc-wrap">const IntegrationPoint&amp; ip) const</span></span>
+            </h3>
+            <p>Evaluates all component functions at an integration point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ip&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integration point at which to evaluate</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Vector value assembled from component functions</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aad8f738241426a32d95c3696395698d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">size_t Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aad8f738241426a32d95c3696395698d3" class="m-doc-self">getDimension</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Gets the vector dimension.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Non-owning pointer to the copied object</td>
+                  <td>Number of component functions</td>
                 </tr>
               </tfoot>
             </table>
-<p>Pure virtual function that must be implemented by derived classes to support polymorphic copying. The returned pointer is non-owning; the caller is responsible for managing its lifetime.</p><aside class="m-note m-info"><h4>Note</h4><p>This is a CRTP function to be overridden in derived classes.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a4683f213bfed21b32405e96858ab4732"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+                template&lt;class ... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a40e7867ec2d66d82301c1b0fb71bbe6c" class="m-doc">VectorFunction</a>&amp; Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4683f213bfed21b32405e96858ab4732" class="m-doc-self">traceOf</a>(</span><span class="m-doc-wrap">const Args&amp;... attrs) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Applies a trace domain to each component function.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">attrs&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Trace-domain specification passed to components</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to this function</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a2db2949e727b5e6fecadb8cc5645b4d3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class V, class ... Values&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />VectorFunction&lt;V, Values...&gt;&lt;V, Values&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2db2949e727b5e6fecadb8cc5645b4d3" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; geom) const <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the maximum known component order on a mesh entity.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">geom&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Entity whose local polynomial order is requested</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Polynomial order when at least one component reports it</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

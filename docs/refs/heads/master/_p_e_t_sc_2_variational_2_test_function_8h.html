@@ -89,18 +89,20 @@
             </li>
           </ul>
         </nav>
-<p>Provides the <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a> class, a thin wrapper around <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TestFunction</a> that lives in the PETSc namespace and triggers PETSc-specific template argument deduction for linear forms, bilinear forms, and problems.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TrialFunction</a>, Rodin::PETSc::Variational::LinearForm, Rodin::PETSc::Variational::BilinearForm</p></aside>
+<p>Provides the PETSc-aware test-function wrapper class, a thin wrapper around the core variational test function that lives in the PETSc namespace and triggers PETSc-specific template argument deduction for linear forms, bilinear forms, and problems.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::TrialFunction, Rodin::PETSc::Variational::LinearForm, Rodin::PETSc::Variational::BilinearForm</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> integration module for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>PETSc integration module for Rodin.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html" class="m-doc">Rodin::PETSc::Variational</a></dt>
+            <dd>PETSc-backed variational form adapters.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -115,12 +117,12 @@
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               struct <a href="struct_rodin_1_1_variational_1_1_is_test_function_3_01_p_e_t_sc_1_1_variational_1_1_test_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">Rodin::Variational::IsTestFunction&lt;PETSc::Variational::TestFunction&lt;FES&gt;&gt;</a>
             </dt>
-            <dd>Marks <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> test functions as valid test functions.</dd>
+            <dd>Marks PETSc test functions as valid test functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class FES&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_p_e_t_sc_1_1_variational_1_1_test_function_3_01_f_e_s_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;PETSc::Variational::TestFunction&lt;FES&gt;&gt;</a>
             </dt>
-            <dd>Form-language traits specialization for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> test functions.</dd>
+            <dd>Form-language traits specialization for PETSc test functions.</dd>
           </dl>
         </section>
       </div>

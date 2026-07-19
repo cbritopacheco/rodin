@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class U1, class U2, class U3, class ... Us&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;Rodin::PETSc::Math::LinearSystem, Rodin::Variational::Problem&lt;Rodin::PETSc::Math::LinearSystem, U1, U2, U3, Us...&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>OpenMP-parallel assembly of a multi-variable <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> problem.</p>
+        <p>OpenMP-parallel assembly of a multi-variable PETSc problem.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -102,7 +102,21 @@
             </tr>
           </tbody>
         </table>
-<p>Assembles a block-structured <a href="class_rodin_1_1_variational_1_1_problem.html" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> backed by <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> objects using OpenMP threads.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>Assembles a block-structured <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a> backed by PETSc objects using OpenMP threads.</p>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -112,6 +126,176 @@
             </dt>
             <dd>Base class template for assembly operations.</dd>
           </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="ad1af0a42aef10edbe00f03d0ad396b9d">
+              using <a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc-self">LinearSystemType</a> = <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a>
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="a0d025582f547fb56891deb2d6387b224">
+              using <a href="#a0d025582f547fb56891deb2d6387b224" class="m-doc-self">ProblemType</a> = <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Rodin::<wbr />Variational::<wbr />Problem</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>, U1, U2, U3, Us...&gt;
+            </dt>
+            <dd>Multi-field problem type being assembled.</dd>
+            <dt id="a2f7b6029bea6dbc14676c5f525d90b1c">
+              using <a href="#a2f7b6029bea6dbc14676c5f525d90b1c" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>, <a href="#a0d025582f547fb56891deb2d6387b224" class="m-doc">ProblemType</a>&gt;
+            </dt>
+            <dd>Parent assembly base class.</dd>
+            <dt id="a0619bd014adbfe7e508b058eefb69dab">
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
+            </dt>
+            <dd>Input data type for the assembly pipeline.</dd>
+            <dt id="a53d5f889ed2244180136220dee3550e2">
+              using <a href="#a53d5f889ed2244180136220dee3550e2" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+            </dt>
+            <dd>Assembled operator type.</dd>
+            <dt id="ad8c2ec8c3a8a389d4ee4d68d23752d71">
+              using <a href="#ad8c2ec8c3a8a389d4ee4d68d23752d71" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Rodin::<wbr />FormLanguage::<wbr />Traits</a>&lt;<a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            </dt>
+            <dd>PETSc vector type for the block RHS and solution.</dd>
+            <dt id="ac3859a7e3ef0eddad69d23927f6446f6">
+              using <a href="#ac3859a7e3ef0eddad69d23927f6446f6" class="m-doc-self">LocalBilinearIntegratorBase</a> = Variational::LocalBilinearFormIntegratorBase&lt;PetscScalar&gt;
+            </dt>
+            <dd>Base type for local bilinear form integrators.</dd>
+            <dt id="ab2d1c9420188243bdd4388b093222836">
+              using <a href="#ab2d1c9420188243bdd4388b093222836" class="m-doc-self">GlobalBilinearIntegratorBase</a> = Variational::GlobalBilinearFormIntegratorBase&lt;PetscScalar&gt;
+            </dt>
+            <dd>Base type for global bilinear form integrators.</dd>
+            <dt id="a7bb4a4d9c26ce732fbbf88aba362d27d">
+              using <a href="#a7bb4a4d9c26ce732fbbf88aba362d27d" class="m-doc-self">LinearIntegratorBase</a> = Variational::LinearFormIntegratorBase&lt;PetscScalar&gt;
+            </dt>
+            <dd>Base type for linear form integrators.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a14b2249366e25fb8b04d56fdde20690d">
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ab629819992d852fd6c2647d00eee90e6">
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b291780b6be85ddb1aa9eb6f525ed17" class="m-doc">setThreadCount</a>(</span><span class="m-doc-wrap">size_t tc) -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Sets the number of OpenMP threads used by this backend.</dd>
+            <dt id="a2c80d9cf01a06038bc42cf79d1af63df">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2c80d9cf01a06038bc42cf79d1af63df" class="m-doc-self">getThreadCount</a>(</span><span class="m-doc-wrap">) const -&gt; size_t <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the configured thread count, or OpenMP&#x27;s maximum.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Assembles the full multi-field PETSc linear system.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
+              Rodin::Variational::AssemblyTarget target) const</span>
+            </dt>
+            <dd>Assembles only the requested multi-field system target.</dd>
+            <dt id="a1d27227915eb0acdf4017085fbc61244">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a heap-allocated copy of this assembly backend.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a8b291780b6be85ddb1aa9eb6f525ed17"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>&amp; Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b291780b6be85ddb1aa9eb6f525ed17" class="m-doc-self">setThreadCount</a>(</span><span class="m-doc-wrap">size_t tc) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Sets the number of OpenMP threads used by this backend.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">tc&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Thread count.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Reference to <code>*this</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7201bb98fc8affa5f0c97246acce8d68"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Assembles the full multi-field PETSc linear system.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">axb&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Linear system receiving operator, RHS, and solution layout.</td>
+                </tr>
+                <tr>
+                  <td>input&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Multi-field problem assembly input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7f571f4884a37874cd3c65f25656934e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, Rodin::<wbr />Variational::<wbr />Problem&lt;Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#ad1af0a42aef10edbe00f03d0ad396b9d" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
+              Rodin::Variational::AssemblyTarget target) const</span></span>
+            </h3>
+            <p>Assembles only the requested multi-field system target.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">axb&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Linear system receiving the requested target.</td>
+                </tr>
+                <tr>
+                  <td>input&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Multi-field problem assembly input.</td>
+                </tr>
+                <tr>
+                  <td>target&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Assembly target to update.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

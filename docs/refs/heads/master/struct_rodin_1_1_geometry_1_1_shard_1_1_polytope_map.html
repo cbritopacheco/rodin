@@ -84,6 +84,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
@@ -100,6 +101,17 @@ $ d $
 <use x='0' y='0' xlink:href='#eq1-g0-100'/>
 </g>
 </svg>:</p><ul><li><code>left[local]</code> is the distributed index of the local shard entity,</li><li><code>right[distributed]</code> is the local shard index of that distributed entity, if present in the shard.</li></ul><p>This map does not encode ownership; it only encodes index correspondence.</p>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a68e832cb064e3b7ca978d8e5911cf700">
+              <div class="m-doc-template">template&lt;class Archive&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a68e832cb064e3b7ca978d8e5911cf700" class="m-doc-self">serialize</a>(</span><span class="m-doc-wrap">Archive&amp; ar,
+              const unsigned int version)</span>
+            </dt>
+            <dd>Serializes the local/distributed index maps.</dd>
+          </dl>
+        </section>
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">

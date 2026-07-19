@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class H1, class H2, class ... Hs, class ... Gs&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>Product&lt;Tuple&lt;H1, H2, Hs...&gt;, Tuple&lt;Gs...&gt;&gt; <span class="m-thin">struct</span>
         </h1>
-        <p>Specialization for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> with at least two elements (H1, H2, Hs…).</p>
+        <p>Specialization for Tuple with at least two elements (H1, H2, Hs…).</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -86,19 +86,19 @@
           <tbody>
             <tr>
               <td style="width: 1%">H1</td>
-              <td>First head type of the first <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+              <td>First head type of the first Tuple.</td>
             </tr>
             <tr>
               <td>H2</td>
-              <td>Second head type of the first <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+              <td>Second head type of the first Tuple.</td>
             </tr>
             <tr>
               <td>Hs</td>
-              <td>Remaining types of the first <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+              <td>Remaining types of the first Tuple.</td>
             </tr>
             <tr>
               <td>Gs</td>
-              <td>All types of the second <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>.</td>
+              <td>All types of the second Tuple.</td>
             </tr>
           </tbody>
         </table>
@@ -113,7 +113,7 @@
             </li>
           </ul>
         </nav>
-<p>For each G in the second tuple, creates Pair&lt;H1,G&gt; and Pair&lt;H2,G&gt;, then concatenates that with the product of the remainder Hs… with Gs….</p><aside class="m-note m-info"><h4>Note</h4><p>This relies on <code><a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;...&gt;::concatenate(<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;...&gt;)</code> to stitch the pieces together.</p></aside>
+<p>For each G in the second tuple, creates Pair&lt;H1,G&gt; and Pair&lt;H2,G&gt;, then concatenates that with the product of the remainder Hs… with Gs….</p><aside class="m-note m-info"><h4>Note</h4><p>This relies on tuple concatenation to stitch the pieces together.</p></aside>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -121,7 +121,7 @@
               <div class="m-doc-template">template&lt;template&lt;class, class&gt; class Pair&gt;</div>
               using <a href="#aa6b1ace4e5f96e54a1317a05a40cf9f3" class="m-doc">Type</a> = decltype(std::declval&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;H1, Gs&gt;...&gt;&gt;().concatenate(std::declval&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;H2, Gs&gt;...&gt;&gt;()).concatenate(std::declval&lt;typename <a href="struct_rodin_1_1_utility_1_1_product.html" class="m-doc">Product</a>&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Hs...&gt;, <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&gt;::template <a href="#aa6b1ace4e5f96e54a1317a05a40cf9f3" class="m-doc">Type</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&gt;&gt;()))
             </dt>
-            <dd>Resulting Cartesian product as a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> of Pair&lt;..., ...&gt;.</dd>
+            <dd>Resulting Cartesian product as a Tuple of Pair&lt;..., ...&gt;.</dd>
           </dl>
         </section>
         <section>
@@ -134,7 +134,18 @@
               </div>
               using Rodin::<wbr />Utility::<wbr />Product&lt;Tuple&lt;H1, H2, Hs...&gt;, Tuple&lt;Gs...&gt;&gt;&lt;H1, H2, Hs, Gs&gt;::<wbr /><a href="#aa6b1ace4e5f96e54a1317a05a40cf9f3" class="m-doc-self">Type</a> = decltype(std::declval&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;H1, Gs&gt;...&gt;&gt;().concatenate(std::declval&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&lt;H2, Gs&gt;...&gt;&gt;()).concatenate(std::declval&lt;typename <a href="struct_rodin_1_1_utility_1_1_product.html" class="m-doc">Product</a>&lt;<a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Hs...&gt;, <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a>&lt;Gs...&gt;&gt;::template <a href="#aa6b1ace4e5f96e54a1317a05a40cf9f3" class="m-doc">Type</a>&lt;<a href="class_rodin_1_1_pair.html" class="m-doc">Pair</a>&gt;&gt;()))
             </h3>
-            <p>Resulting Cartesian product as a <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> of Pair&lt;..., ...&gt;.</p>
+            <p>Resulting Cartesian product as a Tuple of Pair&lt;..., ...&gt;.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Pair</td>
+                  <td>Binary template taking one type from each input Tuple.</td>
+                </tr>
+              </tbody>
+            </table>
 <p>Example:</p><pre class="m-code"><span class="k">using</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tuple</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="k">using</span><span class="w"> </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Product</span><span class="o">&lt;</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="o">&gt;::</span><span class="n">Type</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&gt;</span><span class="p">;</span>

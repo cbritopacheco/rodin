@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4.html">GridFunction&lt;FES, ::Vec&gt;</a>::<wbr/></span>GhostBimap <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_p_e_t_sc_2_variational_2_grid_function_8h.html">&lt;Rodin/PETSc/Variational/GridFunction.h&gt;</a></div>
         </h1>
-        <p>Bidirectional mapping between global ghost DOF indices and local ghost offsets within the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> ghosted vector.</p>
+        <p>Bidirectional mapping between global ghost DOF indices and local ghost offsets within the PETSc ghosted vector.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>In <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mode, the finite element space may require DOF values that are owned by remote ranks. These <em>ghost</em> DOFs are appended after the locally-owned entries in the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> ghosted vector. The <code><a href="struct_rodin_1_1_variational_1_1_grid_function_3_01_f_e_s_00_01_1_1_vec_01_4_1_1_ghost_bimap.html" class="m-doc">GhostBimap</a></code> maintains both directions of the mapping:</p><ul><li><code>left[offset] → global</code> : given a local ghost offset, retrieve the corresponding global DOF index.</li><li><code>right[global] → offset</code> : given a global DOF index, find its position among the local ghost entries.</li></ul><p>This is used by <code>operator[]</code> to convert an arbitrary global DOF index to the correct position in the local (ghosted) array.</p>
+<p>In MPI mode, the finite element space may require DOF values that are owned by remote ranks. These <em>ghost</em> DOFs are appended after the locally-owned entries in the PETSc ghosted vector. The <code>GhostBimap</code> maintains both directions of the mapping:</p><ul><li><code>left[offset] → global</code> : given a local ghost offset, retrieve the corresponding global DOF index.</li><li><code>right[global] → offset</code> : given a global DOF index, find its position among the local ghost entries.</li></ul><p>This is used by <code>operator[]</code> to convert an arbitrary global DOF index to the correct position in the local (ghosted) array.</p>
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">

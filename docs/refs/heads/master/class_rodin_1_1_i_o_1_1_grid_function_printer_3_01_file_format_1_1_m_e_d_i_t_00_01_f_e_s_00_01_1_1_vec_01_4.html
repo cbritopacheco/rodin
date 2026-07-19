@@ -96,12 +96,24 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
 <p>Writes scalar or vector-valued nodal data in MEDIT-compatible format, one value (or component tuple) per mesh vertex.</p>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::MEDIT, FES, ::Vec&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function printers.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -112,7 +124,7 @@
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
               using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector data type (<code>::Vec</code>).</dd>
+            <dd>PETSc vector data type (<code>Vec</code>).</dd>
             <dt id="a2839800c87bf3d6b2c3845d48bf9bb40">
               using <a href="#a2839800c87bf3d6b2c3845d48bf9bb40" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase</a>&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfeae902e98da70b5998f60fb4cd62826def" class="m-doc">FileFormat::<wbr />MEDIT</a>, FES, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
             </dt>
@@ -132,8 +144,40 @@
             <dt id="ac2191d2e396891cd7fe4bfbc88ce1b45">
               using <a href="#ac2191d2e396891cd7fe4bfbc88ce1b45" class="m-doc-self">MeshContextType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa7cd28871381dd21a7b37b499ceaab39" class="m-doc">MeshType</a>&gt;::ContextType
             </dt>
-            <dd><a href="namespace_rodin_1_1_context.html" class="m-doc">Context</a> type (Local or <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a>) of the mesh.</dd>
+            <dd>Context type (Local or MPI) of the mesh.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Writes PETSc-backed grid function coefficients in MEDIT order.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a19f24c6c7621a42c693c4c0b616ab387"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class FES&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />MEDIT, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19f24c6c7621a42c693c4c0b616ab387" class="m-doc-self">printData</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Writes PETSc-backed grid function coefficients in MEDIT order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">os&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Output stream receiving one vertex value per line.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

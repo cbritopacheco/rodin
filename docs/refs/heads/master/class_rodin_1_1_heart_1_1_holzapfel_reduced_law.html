@@ -97,6 +97,7 @@
               Reference
               <ul>
                 <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -108,7 +109,16 @@
             <dt>
               struct <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a> of the reduced passive-energy law.</dd>
+            <dd>Parameters of the reduced passive-energy law.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a1b9e3c526e0ca575ef9eb1ca5000eabe" class="m-doc">HolzapfelReducedLaw</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; params = <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>()) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Constructs the law with a parameter set.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -118,10 +128,34 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab72ec545a90a59b4b3def131c73b53ea" class="m-doc">evaluate</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_heart_1_1_reduced_invariants.html" class="m-doc">ReducedInvariants</a>&lt;Scalar&gt;&amp; I) const -&gt; <a href="struct_rodin_1_1_heart_1_1_passive_energy_derivatives.html" class="m-doc">PassiveEnergyDerivatives</a>&lt;Scalar&gt;</span>
             </dt>
             <dd>Evaluate first- and second-order derivatives at reduced invariants.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3dbdf1ac1116cb98944410ef7edc0aeb" class="m-doc">getParameters</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the parameter set used by this law.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a1b9e3c526e0ca575ef9eb1ca5000eabe"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Heart::<wbr />HolzapfelReducedLaw&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b9e3c526e0ca575ef9eb1ca5000eabe" class="m-doc-self">HolzapfelReducedLaw</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; params = <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>()) <span class="m-label m-info">explicit</span> </span></span>
+            </h3>
+            <p>Constructs the law with a parameter set.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">params</td>
+                  <td>Reduced passive-energy parameters.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ab72ec545a90a59b4b3def131c73b53ea"><div>
             <h3>
               <div class="m-doc-template">
@@ -144,6 +178,23 @@
                 <tr>
                   <th>Returns</th>
                   <td>Gradient and Hessian of passive energy.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3dbdf1ac1116cb98944410ef7edc0aeb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="struct_rodin_1_1_heart_1_1_holzapfel_reduced_law_1_1_parameters.html" class="m-doc">Parameters</a>&amp; Rodin::<wbr />Heart::<wbr />HolzapfelReducedLaw&lt;Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3dbdf1ac1116cb98944410ef7edc0aeb" class="m-doc-self">getParameters</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the parameter set used by this law.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Const parameter reference.</td>
                 </tr>
               </tfoot>
             </table>

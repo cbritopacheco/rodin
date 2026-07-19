@@ -90,7 +90,7 @@
             </li>
           </ul>
         </nav>
-<p>The <a href="struct_rodin_1_1_form_language_1_1_debug.html" class="m-doc">Debug</a> template provides a mechanism for introspecting and debugging form language types during compilation and runtime. Specialize this template for specific types to provide custom debugging information.</p><section id="autotoc_md36"><h3><a href="#autotoc_md36">Usage</a></h3><p>This template is primarily used during development to understand type transformations and check template instantiations. When instantiated, compiler errors will reveal the actual type of T.</p><p>Example usage:</p><pre class="m-code"><span class="c1">// This will trigger a compile error showing the actual type</span>
+<p>The Debug template provides a mechanism for introspecting and debugging form language types during compilation and runtime. Specialize this template for specific types to provide custom debugging information.</p><section id="autotoc_md36"><h3><a href="#autotoc_md36">Usage</a></h3><p>This template is primarily used during development to understand type transformations and check template instantiations. When instantiated, compiler errors will reveal the actual type of T.</p><p>Example usage:</p><pre class="m-code"><span class="c1">// This will trigger a compile error showing the actual type</span>
 <span class="n">Debug</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">myExpression</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">debug</span><span class="p">;</span></pre></section>
       </div>
     </div>

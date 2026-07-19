@@ -78,16 +78,167 @@
           <div class="m-doc-template">template&lt;class CallableType&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span><span class="m-breadcrumb"><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g81bac0b4db4b0ddd8bd3c1859864d005.html">H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;</a>::<wbr/></span>Pushforward <span class="m-thin">class</span>
         </h1>
-        <p><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_ge7638f650fa348ea64a34c8ca101e4e3.html" class="m-doc">Pushforward</a> of a function from the reference polytope.</p>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
+        <p>Pushforward of a function from the reference polytope.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a0c691f7d3c833f3d02a06b064cea355e">
+              using <a href="#a0c691f7d3c833f3d02a06b064cea355e" class="m-doc-self">FunctionType</a> = CallableType
+            </dt>
+            <dd>Callable type evaluated on reference coordinates.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space_pushforward_base.html" class="m-doc">FiniteElementSpacePushforwardBase&lt;Pushforward&lt;CallableType&gt;&gt;</a>
+              <span class="m-doc-wrap-bumper"><a href="#acb7574c25740cf09df666859cab76492" class="m-doc">Pushforward</a>(</span><span class="m-doc-wrap">const <a href="#a0c691f7d3c833f3d02a06b064cea355e" class="m-doc">FunctionType</a>&amp; v)</span>
             </dt>
-            <dd>Base class for inverse mappings taking functions defined on reference elements to physical elements.</dd>
+            <dd>Constructs a pushforward from a reference-space callable.</dd>
+            <dt id="ad90b7f59c65494321fa117429d2b7d4a">
+              <span class="m-doc-wrap-bumper"><a href="#ad90b7f59c65494321fa117429d2b7d4a" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap">const Pushforward&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
           </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Evaluates the pushed-forward callable.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4242d040e7e21024362aef487e1df48f" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const -&gt; auto</span>
+            </dt>
+            <dd>Evaluates the pushed-forward callable into storage.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aea1c5e2d0d543eba9bd667cbe83645fb" class="m-doc">getFunction</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a0c691f7d3c833f3d02a06b064cea355e" class="m-doc">FunctionType</a>&amp; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the wrapped reference-space callable.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="acb7574c25740cf09df666859cab76492"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pushforward&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acb7574c25740cf09df666859cab76492" class="m-doc-self">Pushforward</a>(</span><span class="m-doc-wrap">const <a href="#a0c691f7d3c833f3d02a06b064cea355e" class="m-doc">FunctionType</a>&amp; v)</span></span>
+            </h3>
+            <p>Constructs a pushforward from a reference-space callable.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">v</td>
+                  <td>Callable evaluated on reference coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c866cf8be951c464aceeb788579b29a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pushforward&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c866cf8be951c464aceeb788579b29a" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Evaluates the pushed-forward callable.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">p</td>
+                  <td>Physical point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Callable value at the point reference coordinates.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4242d040e7e21024362aef487e1df48f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+                template&lt;class T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pushforward&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4242d040e7e21024362aef487e1df48f" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">T&amp; res,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span></span>
+            </h3>
+            <p>Evaluates the pushed-forward callable into storage.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Result storage type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>res</td>
+                  <td>Result storage.</td>
+                </tr>
+                <tr>
+                  <td>p</td>
+                  <td>Physical point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Value returned by the wrapped callable.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="aea1c5e2d0d543eba9bd667cbe83645fb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class CallableType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="#a0c691f7d3c833f3d02a06b064cea355e" class="m-doc">FunctionType</a>&amp; Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;::<wbr />Pushforward&lt;CallableType&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aea1c5e2d0d543eba9bd667cbe83645fb" class="m-doc-self">getFunction</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the wrapped reference-space callable.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Callable reference.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

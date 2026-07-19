@@ -92,6 +92,10 @@
               <td>Range type for the finite element space</td>
             </tr>
             <tr>
+              <td>Context</td>
+              <td>Context type (e.g., Context::Local)</td>
+            </tr>
+            <tr>
               <td>Data</td>
               <td>Data storage type</td>
             </tr>
@@ -104,13 +108,15 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Handles output of continuous finite element solutions on nodes for arbitrary degree H1 spaces.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_printer.html" class="m-doc">GridFunctionPrinter</a></p></aside>
+<p>Handles output of continuous finite element solutions on nodes for arbitrary degree H1 spaces.</p><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionPrinter</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -121,11 +127,53 @@
             <dd>Base template for printing objects to streams.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aa02baea147b29ab8b662b66f60802c8c">
+              using <a href="#aa02baea147b29ab8b662b66f60802c8c" class="m-doc-self">RangeType</a> = Range
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="ade2110a8617286e223033b2ec69b555f">
+              using <a href="#ade2110a8617286e223033b2ec69b555f" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa02baea147b29ab8b662b66f60802c8c" class="m-doc">RangeType</a>&gt;::ScalarType
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="aee60825459fdaf14377eb17bc437a934">
+              using <a href="#aee60825459fdaf14377eb17bc437a934" class="m-doc-self">DataType</a> = Data
+            </dt>
+            <dd>Coefficient data storage type.</dd>
+            <dt id="aa9e41e31d0b062199ad25656463b8913">
+              using <a href="#aa9e41e31d0b062199ad25656463b8913" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;Context&gt;
+            </dt>
+            <dd>Mesh type.</dd>
+            <dt id="aa7251cce08f49bc34cb1d9491c35ce17">
+              using <a href="#aa7251cce08f49bc34cb1d9491c35ce17" class="m-doc-self">FESType</a> = Variational::H1&lt;K, Range, <a href="#aa9e41e31d0b062199ad25656463b8913" class="m-doc">MeshType</a>&gt;
+            </dt>
+            <dd>Finite element space type.</dd>
+            <dt id="ae90cfd8753b1d4f2541968ee8541b04b">
+              using <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;<a href="#aa7251cce08f49bc34cb1d9491c35ce17" class="m-doc">FESType</a>, <a href="#aee60825459fdaf14377eb17bc437a934" class="m-doc">DataType</a>&gt;
+            </dt>
+            <dd>Grid function type being printed.</dd>
+            <dt id="a5841666a3ba94f8f7112b2b48cc0f168">
+              using <a href="#a5841666a3ba94f8f7112b2b48cc0f168" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_printer.html" class="m-doc">Printer</a>&lt;<a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="a4f4e3c513a000863d92c9bec174bd627">
+              static <a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> <a href="#a4f4e3c513a000863d92c9bec174bd627" class="m-doc-self">Format</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>File format handled by this printer base.</dd>
+          </dl>
+        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; gf)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span>
             </dt>
             <dd>Constructs a grid function printer.</dd>
           </dl>
@@ -138,7 +186,7 @@
             </dt>
             <dd>Prints grid function to an output stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc">getObject</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Gets a const reference to the object being printed.</dd>
             <dt>
@@ -154,7 +202,7 @@
               <div class="m-doc-template">
                 template&lt;size_t K, class Range, class Context, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Context&gt;&gt;, Data&gt;&lt;K, Range, Context, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc-self">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Context&gt;&gt;, Data&gt;&lt;K, Range, Context, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26001d196a781e52461e2679b1c20fd1" class="m-doc-self">GridFunctionPrinterBase</a>(</span><span class="m-doc-wrap">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; gf)</span></span>
             </h3>
             <p>Constructs a grid function printer.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -195,7 +243,7 @@
               <div class="m-doc-template">
                 template&lt;size_t K, class Range, class Context, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Context&gt;&gt;, Data&gt;&lt;K, Range, Context, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a href="#ae90cfd8753b1d4f2541968ee8541b04b" class="m-doc">ObjectType</a>&amp; Rodin::<wbr />IO::<wbr />GridFunctionPrinterBase&lt;FileFormat::<wbr />MFEM, Variational::<wbr />H1&lt;K, Range, Geometry::<wbr />Mesh&lt;Context&gt;&gt;, Data&gt;&lt;K, Range, Context, Data&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11c4ca84d818b4c96f829e779509de85" class="m-doc-self">getObject</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span></span></span>
             </h3>
             <p>Gets a const reference to the object being printed.</p>
             <table class="m-table m-fullwidth m-flat">

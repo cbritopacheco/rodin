@@ -89,18 +89,20 @@
             </li>
           </ul>
         </nav>
-<p>Provides the <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TrialFunction</a> class, a thin wrapper around <a href="class_rodin_1_1_variational_1_1_trial_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TrialFunction</a> that lives in the PETSc namespace. Its CTAD deduction guide automatically associates the trial function with a PETSc-backed <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a> as its solution type.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />TestFunction</a>, <a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_grid_function.html" class="m-doc">Rodin::<wbr />PETSc::<wbr />Variational::<wbr />GridFunction</a>, Rodin::PETSc::Variational::BilinearForm</p></aside>
+<p>Provides the PETSc-aware trial-function wrapper class, a thin wrapper around the core variational trial function that lives in the PETSc namespace. Its CTAD deduction guide automatically associates the trial function with a PETSc-backed PETSc-backed grid function as its solution type.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Variational::TestFunction, Rodin::PETSc::Variational::GridFunction, Rodin::PETSc::Variational::BilinearForm</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> integration module for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>PETSc integration module for Rodin.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_variational.html" class="m-doc">Rodin::PETSc::Variational</a></dt>
+            <dd>PETSc-backed variational form adapters.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -115,12 +117,12 @@
               <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
               struct <a href="struct_rodin_1_1_variational_1_1_is_trial_function_3_01_p_e_t_sc_1_1_variational_1_1_trial_funct583dd38e50be924fc1e0b868daad632b.html" class="m-doc">Rodin::Variational::IsTrialFunction&lt;PETSc::Variational::TrialFunction&lt;Solution, FES&gt;&gt;</a>
             </dt>
-            <dd>Marks <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> trial functions as valid trial functions.</dd>
+            <dd>Marks PETSc trial functions as valid trial functions.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class Solution, class FES&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_p_e_t_sc_1_1_variational_1_1_trial_function_3_01_solution_00_01_f_e_s_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;PETSc::Variational::TrialFunction&lt;Solution, FES&gt;&gt;</a>
             </dt>
-            <dd>Form-language traits specialization for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> trial functions.</dd>
+            <dd>Form-language traits specialization for PETSc trial functions.</dd>
           </dl>
         </section>
       </div>

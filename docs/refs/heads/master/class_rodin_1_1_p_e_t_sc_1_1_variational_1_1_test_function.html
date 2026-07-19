@@ -86,7 +86,7 @@
           <tbody>
             <tr>
               <td style="width: 1%">FES</td>
-              <td>Finite element space type (e.g. <code>P1&lt;Real, Mesh&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;</code>).</td>
+              <td>Finite element space type (e.g. <code>P1&lt;Real, Mesh&lt;Context::Local&gt;&gt;</code>).</td>
             </tr>
           </tbody>
         </table>
@@ -96,38 +96,23 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>Inherits all functionality from <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TestFunction</a> and triggers PETSc-specific CTAD so that constructing a <code><a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">PETSc::<wbr />Variational::<wbr />TestFunction</a></code> from a finite element space automatically selects the PETSc-backed linear form, bilinear form, and problem specializations.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TestFunction</a></p></aside>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class FES&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::Variational::TestFunction&lt;FES&gt;</a>
-            </dt>
-            <dd>Represents a function which belongs to a test space.</dd>
-          </dl>
-        </section>
+<p>Inherits all functionality from <code>Rodin::Variational::TestFunction</code> and triggers PETSc-specific CTAD so that constructing a <code>PETSc::Variational::TestFunction</code> from a finite element space automatically selects the PETSc-backed linear form, bilinear form, and problem specializations.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Variational::TestFunction</p></aside>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="aeb764ef99b9fe43949b7e3d34f279e53">
               using <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc-self">FESType</a> = FES
             </dt>
-            <dd>Finite element space type (e.g. <code>P1&lt;Real, Mesh&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;</code>).</dd>
+            <dd>Finite element space type (e.g. <code>P1&lt;Real, Mesh&lt;Context::Local&gt;&gt;</code>).</dd>
             <dt id="a030d463eaeb37b499fd00988fc67aaf2">
-              using <a href="#a030d463eaeb37b499fd00988fc67aaf2" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TestFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;
+              using <a href="#a030d463eaeb37b499fd00988fc67aaf2" class="m-doc-self">Parent</a> = Rodin::Variational::TestFunction&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;
             </dt>
-            <dd>Parent class type (<a href="class_rodin_1_1_variational_1_1_test_function.html" class="m-doc">Rodin::<wbr />Variational::<wbr />TestFunction</a>).</dd>
-            <dt id="ad69591311394dbd92b75665e375d7ac9">
-              using <a href="#ad69591311394dbd92b75665e375d7ac9" class="m-doc-self">Parent</a> = ShapeFunction&lt;<a href="class_rodin_1_1_p_e_t_sc_1_1_variational_1_1_test_function.html" class="m-doc">TestFunction</a>&lt;<a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>&gt;, <a href="#aeb764ef99b9fe43949b7e3d34f279e53" class="m-doc">FESType</a>, TestSpace&gt;
-            </dt>
-            <dd>Parent class type.</dd>
+            <dd>Parent class type (<code>Rodin::Variational::TestFunction</code>).</dd>
           </dl>
         </section>
       </div>

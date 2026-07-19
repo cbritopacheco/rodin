@@ -114,11 +114,11 @@ $ \mathbf{f}: \Omega \to \mathbb{R}^d $
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::<wbr />Variational</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -126,14 +126,29 @@ $ \mathbf{f}: \Omega \to \mathbb{R}^d $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_variational_1_1_vector_function_base_3_01_scalar_00_01_derived_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Variational::VectorFunctionBase&lt;Scalar, Derived&gt;&gt;</a>
+            </dt>
+            <dd>Traits for vector-valued function bases.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar, class Derived&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_base.html" class="m-doc">Rodin::Variational::VectorFunctionBase</a>
             </dt>
             <dd>Base class for vector-valued functions defined on a mesh.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_3_01_math_1_1_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::VectorFunction&lt;Math::Vector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Vector function backed by an existing dense vector.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;class V, class ... Values&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_vector_function_3_01_v_00_01_values_8_8_8_01_4.html" class="m-doc">Rodin::Variational::VectorFunction&lt;V, Values...&gt;</a>
             </dt>
-            <dd>Represents a vector function which may be constructed from values which can be converted to objects of type <a href="class_rodin_1_1_variational_1_1_real_function.html" class="m-doc">RealFunction</a>.</dd>
+            <dd>Represents a vector function which may be constructed from values which can be converted to objects of type RealFunction.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class F&gt;</div>
+              class <a href="class_rodin_1_1_variational_1_1_vector_function_3_01_f_01_4.html" class="m-doc">Rodin::Variational::VectorFunction&lt;F&gt;</a>
+            </dt>
+            <dd>Vector function backed by a callable.</dd>
           </dl>
         </section>
       </div>

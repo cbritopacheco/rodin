@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General concepts &raquo; Thread safety and parallelism | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <link rel="prev" href="guides-petsc.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="guides-index.html">General concepts</a> &raquo;</span>
+          Thread safety and parallelism
+        </h1>
+        <p>The thread-safety model of Rodin: what is safe, what is not, and how parallel assembly works.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#guides-threads-model">The thread-safety model</a></li>
+            <li><a href="#guides-threads-module">The Threads utilities</a></li>
+            <li><a href="#guides-threads-assembly">Parallel assembly</a></li>
+            <li><a href="#guides-threads-petsc">External libraries</a></li>
+            <li><a href="#guides-threads-writing">Writing parallel-friendly code</a></li>
+            <li><a href="#guides-threads-seealso">See also</a></li>
+          </ul>
+        </nav>
+<section id="guides-threads-model"><h2><a href="#guides-threads-model">The thread-safety model</a></h2><p>Rodin&#x27;s model is <em>coarse-grained</em>: parallelism happens at the level of mesh iteration inside the assembly backends, not at the level of individual objects. The rules:</p><ul><li><strong>Form-language objects are NOT thread-safe.</strong> Every node in the variational language derives from <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>, which is explicitly documented as single-threaded: only one thread may call methods of a given object at a time. Integrators, functions, shape functions, and problems all inherit this contract.</li><li><strong>Sharing is by cloning, not by locking.</strong> Expression trees deep-copy their operands on construction (<code>copy()</code>); when parallel code needs per-thread access to an integrator or function, it clones one per thread rather than synchronizing a shared instance. This is the idiomatic pattern — prefer it to adding mutexes.</li><li><strong>Reads of immutable data are safe.</strong> Meshes, connectivity, and finite element spaces are safe to <em>read</em> concurrently once fully constructed and computed. Lazily-computed caches inside logically const objects are the exception — they are guarded through the <a href="namespace_rodin_1_1_threads.html" class="m-doc">Threads</a> utilities (below) when <code>RODIN_THREAD_SAFE</code> is enabled.</li><li><strong>Mutation is exclusive.</strong> Any operation that mutates a mesh (<code>setVertexCoordinates</code>, transformation attachment, connectivity <code>compute</code>, builders) or a grid function&#x27;s data must be externally synchronized. Compute all needed connectivity <em>before</em> entering parallel regions.</li></ul></section><section id="guides-threads-module"><h2><a href="#guides-threads-module">The Threads utilities</a></h2><p>The <a href="namespace_rodin_1_1_threads.html" class="m-doc">Threads</a> module provides the primitives the library itself uses:</p><ul><li><code>Threads::Mutex</code> — mutual exclusion wrapper;</li><li><code>Threads::Mutable</code> — guarded mutable state inside logically const objects (lazy caches);</li><li><code>Threads::Unsafe</code> — an explicit marker wrapping state that is deliberately* not synchronized, documenting the single-thread assumption at the type level.</li></ul><p>The <code>RODIN_THREAD_SAFE</code> CMake option controls whether guarded paths compile to real synchronization.</p></section><section id="guides-threads-assembly"><h2><a href="#guides-threads-assembly">Parallel assembly</a></h2><p>The <a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> module provides sequential and OpenMP backends (selected by <code>Assembly/Default.h</code> according to the build configuration). The OpenMP backend parallelizes the <em>evaluation</em> phase — each thread iterates a share of the polytopes, evaluating local integrators into thread-local storage — followed by a merge into the global matrix/vector. Two practical consequences:</p><ul><li><strong>Determinism.</strong> Floating-point sums may be reordered between runs with different thread counts; bit-identical reproducibility across thread counts is not guaranteed (equality of results to solver tolerance is).</li><li><strong>Scaling is memory-bound.</strong> Integrand evaluation is bandwidth-limited on typical meshes: speedups plateau at a modest thread count (measurements on laptop-class hardware plateau around 4–5 threads and can regress beyond). If assembly is slow, the high-value fix is reducing per-quadrature-point work — hoisting (cell, quadrature)-only quantities into the integrator&#x27;s bind step — not adding threads.</li></ul><p>MPI-distributed assembly lives in the mirrored <code>MPI/</code> module tree and composes with the above (see <a href="guides-mpi.html" class="m-doc">MPI: Distributed Computing</a>).</p></section><section id="guides-threads-petsc"><h2><a href="#guides-threads-petsc">External libraries</a></h2><ul><li><strong>PETSc</strong> objects follow PETSc&#x27;s own threading rules (PETSc is not thread-safe per object); Rodin&#x27;s PETSc backend drives it from a single thread per rank. Be conservative when combining OpenMP-enabled Rodin assembly with PETSc-backed solves in the same process — when in doubt, pin <code>OMP_NUM_THREADS=1</code> for PETSc-dominated runs and let MPI provide the parallelism.</li><li><strong>Eigen</strong> is thread-safe for const operations; its internal OpenMP-parallel products can <em>nest</em> with Rodin&#x27;s OpenMP regions — control nesting with the usual OpenMP environment variables if you observe oversubscription.</li></ul></section><section id="guides-threads-writing"><h2><a href="#guides-threads-writing">Writing parallel-friendly code</a></h2><p>When designing a new mesh-sweeping algorithm, follow the house pattern: a read-only <strong>evaluate</strong> phase over polytopes producing independent proposals (parallelizable), then a deterministic <strong>commit</strong> phase applying a non-conflicting subset. This yields order-independent results and makes the parallelism optional rather than structural.</p></section><section id="guides-threads-seealso"><h2><a href="#guides-threads-seealso">See also</a></h2><ul><li><a href="guides-mpi.html" class="m-doc">MPI: Distributed Computing</a> — distributed meshes and assembly</li><li><a href="guides-petsc.html" class="m-doc">PETSc: Parallel Solvers and Distributed Linear Algebra</a> — PETSc-backed solves</li><li><a href="namespace_rodin_1_1_assembly.html" class="m-doc">Assembly</a> — backend selection</li></ul></section>
+        <div class="m-note m-dim m-thin m-text-center"><a href="guides-petsc.html" class="m-doc">&laquo; PETSc: Parallel Solvers and Distributed Linear Algebra</a> | <a href="guides-index.html" class="m-doc">General concepts</a></div>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

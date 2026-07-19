@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class T, class ... Ts&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_utility.html">Utility</a>::<wbr/></span>Extract&lt;Tuple&lt;T, Ts...&gt;&gt; <span class="m-thin">struct</span>
         </h1>
-        <p>Specialization of <a href="struct_rodin_1_1_utility_1_1_extract.html" class="m-doc">Extract</a> for <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> types.</p>
+        <p>Specialization of Extract for Tuple types.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -105,7 +105,7 @@
             </li>
           </ul>
         </nav>
-<p>This specialization enables the extraction and transformation of types from a <a href="class_rodin_1_1_tuple.html" class="m-doc">Rodin::<wbr />Tuple</a> by applying an Extractor metafunction to each element type.</p><p>Example usage:</p><pre class="m-code"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<p>This specialization enables the extraction and transformation of types from a Rodin::Tuple by applying an Extractor metafunction to each element type.</p><p>Example usage:</p><pre class="m-code"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
 <span class="k">struct</span><span class="w"> </span><span class="nc">AddConst</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
 
 <span class="k">using</span><span class="w"> </span><span class="n">OriginalTuple</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">;</span>
@@ -143,7 +143,7 @@
                 </tr>
               </tbody>
             </table>
-<p>This type alias creates a new <a href="class_rodin_1_1_tuple.html" class="m-doc">Tuple</a> where each element type has been transformed by the provided Extractor metafunction.</p>
+<p>This type alias creates a new Tuple where each element type has been transformed by the provided Extractor metafunction.</p>
           </div></section>
         </section>
       </div>

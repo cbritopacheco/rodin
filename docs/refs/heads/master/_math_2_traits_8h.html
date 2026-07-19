@@ -94,9 +94,9 @@
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::<wbr />FormLanguage</a>.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -108,25 +108,75 @@
             </dt>
             <dd>Type trait to check if a type is an Eigen object.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;class T, class = void&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_cols_at_compile_time.html" class="m-doc">Rodin::FormLanguage::ColsAtCompileTime</a>
+            </dt>
+            <dd>Compile-time column count of a type; -1 when unavailable.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_cols_at_compile_time_3_01_t_00_01std_1_1void__t_3_01decltype_3ea37140a2b5f387cb8b523bebc41389.html" class="m-doc">Rodin::FormLanguage::ColsAtCompileTime&lt;T, std::void_t&lt;decltype(std::decay_t&lt;T&gt;::ColsAtCompileTime)&gt;&gt;</a>
+            </dt>
+            <dd>Compile-time column count for Eigen-like types exposing ColsAtCompileTime.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_boolean_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Boolean&gt;</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Boolean type.</dd>
+            <dd>Traits specialization for Boolean type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_integer_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Integer&gt;</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Integer type.</dd>
+            <dd>Traits specialization for Integer type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_real_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Real&gt;</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Real type.</dd>
+            <dd>Traits specialization for Real type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_traits_3_01_complex_01_4.html" class="m-doc">Rodin::FormLanguage::Traits&lt;Complex&gt;</a>
             </dt>
-            <dd><a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">Traits</a> specialization for Complex type.</dd>
+            <dd>Traits specialization for Complex type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_spatial_vector.html" class="m-doc">Rodin::FormLanguage::IsSpatialVector</a>
+            </dt>
+            <dd>Type trait: whether <code>T</code> is a Math::SpatialVector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_spatial_vector_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::IsSpatialVector&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Type trait specialization for Math::SpatialVector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_spatial_matrix.html" class="m-doc">Rodin::FormLanguage::IsSpatialMatrix</a>
+            </dt>
+            <dd>Type trait: whether <code>T</code> is a Math::SpatialMatrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_spatial_matrix_3_01_math_1_1_spatial_matrix_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::FormLanguage::IsSpatialMatrix&lt;Math::SpatialMatrix&lt;Scalar&gt;&gt;</a>
+            </dt>
+            <dd>Type trait specialization for Math::SpatialMatrix.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_vector_range.html" class="m-doc">Rodin::FormLanguage::IsVectorRange</a>
+            </dt>
+            <dd>Type trait: whether <code>T</code> has vector range (a spatial vector or a single-column Eigen object).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_is_matrix_range.html" class="m-doc">Rodin::FormLanguage::IsMatrixRange</a>
+            </dt>
+            <dd>Type trait: whether <code>T</code> has matrix range (a spatial matrix or a multi-column Eigen object).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class T&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_range_kind_of.html" class="m-doc">Rodin::FormLanguage::RangeKindOf</a>
+            </dt>
+            <dd>Deduces the RangeKind of a type <code>T</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
+              struct <a href="struct_rodin_1_1_form_language_1_1_sum.html" class="m-doc">Rodin::FormLanguage::Sum</a>
+            </dt>
+            <dd>Type trait for deducing the result type of addition.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class LHS, class RHS&gt;</div>
               struct <a href="struct_rodin_1_1_form_language_1_1_minus.html" class="m-doc">Rodin::FormLanguage::Minus</a>

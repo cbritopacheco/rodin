@@ -76,7 +76,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_ab40ac20c32b770619b2042a8223271e.html">PETSc</a>/</span><span class="m-breadcrumb"><a href="dir_87c9c30d1d2ce6d6e5b8e4bc2a2b2f31.html">Solver</a>/</span>KSP.h <span class="m-thin">file</span>
         </h1>
-        <p>PETSc KSP (Krylov subspace) linear solver wrapper for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</p>
+        <p>PETSc KSP (Krylov subspace) linear solver wrapper for Rodin.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -89,7 +89,7 @@
             </li>
           </ul>
         </nav>
-<p>Wraps the PETSc <code>KSP</code> context and implements the <a href="namespace_rodin.html" class="m-doc">Rodin</a> <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">Rodin::<wbr />Solver::<wbr />LinearSolverBase</a> interface so that any PETSc Krylov solver (CG, GMRES, BiCGStab, …) can be used to solve the linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
+<p>Wraps the PETSc <code>KSP</code> context and implements the Rodin <a href="class_rodin_1_1_solver_1_1_linear_solver_base.html" class="m-doc">Rodin::<wbr />Solver::<wbr />LinearSolverBase</a> interface so that any PETSc Krylov solver (CG, GMRES, BiCGStab, …) can be used to solve the linear system <svg class="m-math" style="width: 4.072em; height: 0.865em; vertical-align: -0.000em;" viewBox="0 -8.302191 39.092018 8.302191">
 <title>
 $ A\mathbf{x} = \mathbf{b} $
 </title>
@@ -105,16 +105,18 @@ $ A\mathbf{x} = \mathbf{b} $
 <use x='19.194557' y='0' xlink:href='#eq1-g2-61'/>
 <use x='31.620038' y='0' xlink:href='#eq1-g0-98'/>
 </g>
-</svg> assembled by a <a href="namespace_rodin.html" class="m-doc">Rodin</a> variational problem.</p><p>The class supports:</p><ul><li>Programmatic configuration via <code>setType()</code>, <code>setTolerances()</code>, <code>setPreconditioner()</code>.</li><li>Command-line overrides via <code>KSPSetFromOptions</code> (called inside <code>solve</code>).</li><li>Automatic solution vector allocation when <code>x == PETSC_NULL</code>.</li></ul><aside class="m-note m-default"><h4>See also</h4><p><a href="_p_e_t_sc_2_solver_2_c_g_8h.html#acd85a42a8ce2254ae97d31ea641e9266" class="m-doc">Rodin::<wbr />PETSc::<wbr />Solver::<wbr />CG</a>, <a href="_p_e_t_sc_2_solver_2_g_m_r_e_s_8h.html#ac5dce6c655af6ba8fd9d554d3cef1257" class="m-doc">Rodin::<wbr />PETSc::<wbr />Solver::<wbr />GMRES</a>, Rodin::PETSc::Solver::SNES</p></aside>
+</svg> assembled by a Rodin variational problem.</p><p>The class supports:</p><ul><li>Programmatic configuration via <code>setType()</code>, <code>setTolerances()</code>, <code>setPreconditioner()</code>.</li><li>Command-line overrides via <code>KSPSetFromOptions</code> (called inside <code>solve</code>).</li><li>Automatic solution vector allocation when <code>x == PETSC_NULL</code>.</li></ul><aside class="m-note m-default"><h4>See also</h4><p>Rodin::PETSc::Solver::CG, Rodin::PETSc::Solver::GMRES, Rodin::PETSc::Solver::SNES</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
             <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
+            <dd>The Rodin library for finite element methods and shape optimization.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::Solver</a></dt>
-            <dd>Module for solving linear and nonlinear systems arising from finite element discretizations.</dd>
+            <dd>Namespace <a href="namespace_rodin_1_1_solver.html" class="m-doc">Rodin::<wbr />Solver</a>.</dd>
             <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">Rodin::PETSc</a></dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> integration module for <a href="namespace_rodin.html" class="m-doc">Rodin</a>.</dd>
+            <dd>PETSc integration module for Rodin.</dd>
+            <dt>namespace <a href="namespace_rodin_1_1_p_e_t_sc_1_1_solver.html" class="m-doc">Rodin::PETSc::Solver</a></dt>
+            <dd>PETSc-backed linear and nonlinear solver adapters.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -123,7 +125,7 @@ $ A\mathbf{x} = \mathbf{b} $
             <dt>
               class <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::Solver::KSP</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> (Krylov subspace) linear solver wrapper.</dd>
+            <dd>PETSc KSP (Krylov subspace) linear solver wrapper.</dd>
           </dl>
         </section>
       </div>

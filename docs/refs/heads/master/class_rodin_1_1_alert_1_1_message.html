@@ -77,7 +77,7 @@
           <div class="m-doc-template">template&lt;class Prefix&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_alert.html">Alert</a>::<wbr/></span>Message <span class="m-thin">class</span>
         </h1>
-        <p>Forward declaration of the <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> template class.</p>
+        <p>Forward declaration of the Message template class.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -102,7 +102,7 @@
             </li>
           </ul>
         </nav>
-<p>Base template class for formatted message output.</p><p>Base template class for formatted message output with customizable prefixes.</p><p>Base class for creating formatted messages with customizable prefixes, colors, and styles. Messages support stream-like insertion operators for building content incrementally. This class is used as the base for <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a>, <a href="class_rodin_1_1_alert_1_1_warning.html" class="m-doc">Warning</a>, <a href="class_rodin_1_1_alert_1_1_info.html" class="m-doc">Info</a>, and <a href="class_rodin_1_1_alert_1_1_success.html" class="m-doc">Success</a> message types.</p><p>The <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> class handles:</p><ul><li>Formatted output with colored prefixes</li><li>Automatic indentation for multi-line messages</li><li>Stream-like insertion operators for content</li><li>Integration with the <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> tag types (NewLine, Raise, etc.)</li></ul><p>Example usage (through derived classes):</p><pre class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Error in function: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">funcName</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">NewLine</span>
+<p>Base template class for formatted message output.</p><p>Base template class for formatted message output with customizable prefixes.</p><p>Base class for creating formatted messages with customizable prefixes, colors, and styles. Messages support stream-like insertion operators for building content incrementally. This class is used as the base for Exception, Warning, Info, and Success message types.</p><p>The Message class handles:</p><ul><li>Formatted output with colored prefixes</li><li>Automatic indentation for multi-line messages</li><li>Stream-like insertion operators for content</li><li>Integration with the Alert tag types (NewLine, Raise, etc.)</li></ul><p>Example usage (through derived classes):</p><pre class="m-code"><span class="n">Exception</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Error in function: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">funcName</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">NewLine</span>
 <span class="w">            </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Invalid parameter value: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Raise</span><span class="p">;</span></pre>
         <section id="derived-classes">
           <h2><a href="#derived-classes">Derived classes</a></h2>
@@ -111,7 +111,7 @@
               <div class="m-doc-template">template&lt;class Prefix&gt;</div>
               class <a href="class_rodin_1_1_alert_1_1_prefixed_message.html" class="m-doc">PrefixedMessage</a>
             </dt>
-            <dd>Convenience message for custom <a href="namespace_rodin_1_1_alert.html" class="m-doc">Alert</a> prefixes.</dd>
+            <dd>Convenience message for custom Alert prefixes.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -283,7 +283,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>Reference to this <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> object for method chaining.</td>
+                  <td>Reference to this Message object for method chaining.</td>
                 </tr>
               </tfoot>
             </table>
@@ -301,7 +301,7 @@
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Reference to this <a href="class_rodin_1_1_alert_1_1_message.html" class="m-doc">Message</a> object for method chaining.</td>
+                  <td>Reference to this Message object for method chaining.</td>
                 </tr>
               </tfoot>
             </table>
@@ -315,7 +315,7 @@
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac220a450cbcc48b9e15099e811453c1e" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">const <a href="struct_rodin_1_1_alert_1_1_raise_t.html" class="m-doc">RaiseT</a>&amp;)</span></span>
             </h3>
             <p>Stream insertion operator for Raise tag.</p>
-<p>Triggers the <a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc">raise()</a> method to output the message and perform any associated actions (such as program termination for exceptions).</p>
+<p>Triggers the raise() method to output the message and perform any associated actions (such as program termination for exceptions).</p>
           </div></section>
           <section class="m-doc-details" id="a05fa0dbb9670de92ab00a301d3e676b5"><div>
             <h3>
@@ -325,7 +325,7 @@
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />Alert::<wbr />Message&lt;Prefix&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a05fa0dbb9670de92ab00a301d3e676b5" class="m-doc-self">raise</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">virtual</span></span></span>
             </h3>
             <p>Raises (outputs) the message to the user.</p>
-<p>Default behavior outputs the formatted message to the configured output stream. Derived classes may override this to add additional behavior (e.g., <a href="class_rodin_1_1_alert_1_1_exception.html" class="m-doc">Exception</a> terminates the program).</p>
+<p>Default behavior outputs the formatted message to the configured output stream. Derived classes may override this to add additional behavior (e.g., Exception terminates the program).</p>
           </div></section>
           <section class="m-doc-details" id="a313a6aa220cc1d01a1ebf1d598043186"><div>
             <h3>

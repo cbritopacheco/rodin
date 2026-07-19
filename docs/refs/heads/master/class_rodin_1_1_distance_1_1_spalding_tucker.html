@@ -234,7 +234,7 @@ $ \text{sign}(d) = \text{sign}(u) $
 <use x='75.344507' y='0' xlink:href='#eq5-g0-117'/>
 <use x='82.006946' y='0' xlink:href='#eq5-g4-41'/>
 </g>
-</svg></li><li>Better gradient normalization than simple <a href="class_rodin_1_1_distance_1_1_rvachev.html" class="m-doc">Rvachev</a> method</li><li>More accurate near the interface</li></ul></section><section id="autotoc_md32"><h3><a href="#autotoc_md32">References</a></h3><p><a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[10]</a></p></section><section id="autotoc_md33"><h3><a href="#autotoc_md33">Usage Example</a></h3><pre class="m-code"><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
+</svg></li><li>Better gradient normalization than simple Rvachev method</li><li>More accurate near the interface</li></ul></section><section id="autotoc_md32"><h3><a href="#autotoc_md32">References</a></h3><p><a href="citelist.html#CITEREF_belyaev2015variational" class="m-doc">[2]</a> <a href="citelist.html#CITEREF_spalding1994calculation" class="m-doc">[9]</a> <a href="citelist.html#CITEREF_tucker1998assessment" class="m-doc">[10]</a></p></section><section id="autotoc_md33"><h3><a href="#autotoc_md33">Usage Example</a></h3><pre class="m-code"><span class="n">GridFunction</span><span class="w"> </span><span class="nf">u</span><span class="p">(</span><span class="n">fes</span><span class="p">);</span><span class="w">  </span><span class="c1">// Some level set function</span>
 <span class="n">SpaldingTucker</span><span class="w"> </span><span class="n">st</span><span class="p">;</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">st</span><span class="p">(</span><span class="n">u</span><span class="p">);</span><span class="w">  </span><span class="c1">// Normalized distance approximation</span></pre></section>
         <section id="pub-methods">
@@ -242,7 +242,7 @@ $ \text{sign}(d) = \text{sign}(u) $
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;class FES, class Data&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3323ef100e2184b7f8aefe411fcbfabe" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;&amp; gf) -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3323ef100e2184b7f8aefe411fcbfabe" class="m-doc">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;&amp; gf) -&gt; auto</span>
             </dt>
             <dd>Applies Spalding-Tucker normalization to a grid function.</dd>
           </dl>
@@ -254,7 +254,7 @@ $ \text{sign}(d) = \text{sign}(u) $
               <div class="m-doc-template">
                 template&lt;class FES, class Data&gt;
               </div>
-              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Distance::<wbr />SpaldingTucker::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3323ef100e2184b7f8aefe411fcbfabe" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;&amp; gf)</span></span>
+              <span class="m-doc-wrap-bumper">auto Rodin::<wbr />Distance::<wbr />SpaldingTucker::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3323ef100e2184b7f8aefe411fcbfabe" class="m-doc-self">operator()</a>(</span><span class="m-doc-wrap">const <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, Data&gt;&amp; gf)</span></span>
             </h3>
             <p>Applies Spalding-Tucker normalization to a grid function.</p>
             <table class="m-table m-fullwidth m-flat">

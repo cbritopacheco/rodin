@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Assembly::OpenMP&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt; class | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;</div>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>OpenMP&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>OpenMP mixed problem assembly.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class LinearSystem, class U1, class U2, class U3, class... Us&gt;</div>
+              class <a href="class_rodin_1_1_assembly_1_1_assembly_base_3_01_linear_system_00_01_variational_1_1_problem_3_01ddc30094b379ba2fed63aa4a0dd21ebf.html" class="m-doc">AssemblyBase&lt;LinearSystem, Variational::Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;</a>
+            </dt>
+            <dd>Base class for complete mixed problem assembly.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="aa3ecd362e0c7ed70bca40b2b444218d5">
+              using <a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc-self">LinearSystemType</a> = LinearSystem
+            </dt>
+            <dd>Linear system type.</dd>
+            <dt id="aab48d65375b2f39b41e91666feda0193">
+              using <a href="#aab48d65375b2f39b41e91666feda0193" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_assembly_1_1_assembly_base.html" class="m-doc">AssemblyBase</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>, <a href="group___rodin_c_t_a_d.html#ga4cc83b3477511b5e20c51118fc1ed187" class="m-doc">Variational::<wbr />Problem</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>, U1, U2, U3, Us...&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+            <dt id="a0619bd014adbfe7e508b058eefb69dab">
+              using <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc-self">InputType</a> = typename Parent::InputType
+            </dt>
+            <dd>Assembly input data type.</dd>
+            <dt id="a3f02c76806f998a41174a54479486d51">
+              using <a href="#a3f02c76806f998a41174a54479486d51" class="m-doc-self">OperatorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::OperatorType
+            </dt>
+            <dd>Assembled operator type.</dd>
+            <dt id="a8d4666f2edbd3de42a6bfbdbec15e536">
+              using <a href="#a8d4666f2edbd3de42a6bfbdbec15e536" class="m-doc-self">VectorType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::VectorType
+            </dt>
+            <dd>Vector type of the linear system.</dd>
+            <dt id="a5584bb04cdb3914f8da2f4904a179ef0">
+              using <a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc-self">ScalarType</a> = typename <a href="struct_rodin_1_1_form_language_1_1_traits.html" class="m-doc">FormLanguage::<wbr />Traits</a>&lt;<a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&gt;::ScalarType
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a41367851d8caefe154f8d74e18cce12a">
+              using <a href="#a41367851d8caefe154f8d74e18cce12a" class="m-doc-self">LocalBilinearFormIntegratorBaseType</a> = Variational::LocalBilinearFormIntegratorBase&lt;<a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Local bilinear form integrator base type.</dd>
+            <dt id="a47ee43e37dc1bfd025361456958ff949">
+              using <a href="#a47ee43e37dc1bfd025361456958ff949" class="m-doc-self">GlobalBilinearFormIntegratorBaseType</a> = Variational::GlobalBilinearFormIntegratorBase&lt;<a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Global bilinear form integrator base type.</dd>
+            <dt id="a3e9e221e07126303f6953d28efe8a1fb">
+              using <a href="#a3e9e221e07126303f6953d28efe8a1fb" class="m-doc-self">LinearFormIntegratorBaseType</a> = Variational::LinearFormIntegratorBase&lt;<a href="#a5584bb04cdb3914f8da2f4904a179ef0" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Linear form integrator base type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a14b2249366e25fb8b04d56fdde20690d">
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="ae9ff110dd307a2e8d181728439fc88b0">
+              <span class="m-doc-wrap-bumper"><a href="#ae9ff110dd307a2e8d181728439fc88b0" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">const OpenMP&amp; other)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="ab629819992d852fd6c2647d00eee90e6">
+              <span class="m-doc-wrap-bumper"><a href="#ab629819992d852fd6c2647d00eee90e6" class="m-doc-self">OpenMP</a>(</span><span class="m-doc-wrap">OpenMP&amp;&amp; other)</span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-flat m-warning">override</span></span>
+            </dt>
+            <dd>Executes full mixed problem assembly.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
+              Rodin::Variational::AssemblyTarget target) const</span>
+            </dt>
+            <dd>Executes targeted mixed problem assembly.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Creates a polymorphic copy.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a7201bb98fc8affa5f0c97246acce8d68"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7201bb98fc8affa5f0c97246acce8d68" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input) const <span class="m-label m-warning">override</span></span></span>
+            </h3>
+            <p>Executes full mixed problem assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">axb</td>
+                  <td>Output linear system.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Mixed problem input.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7f571f4884a37874cd3c65f25656934e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7f571f4884a37874cd3c65f25656934e" class="m-doc-self">execute</a>(</span><span class="m-doc-wrap"><a href="#aa3ecd362e0c7ed70bca40b2b444218d5" class="m-doc">LinearSystemType</a>&amp; axb,
+              const <a href="#a0619bd014adbfe7e508b058eefb69dab" class="m-doc">InputType</a>&amp; input,
+              Rodin::Variational::AssemblyTarget target) const</span></span>
+            </h3>
+            <p>Executes targeted mixed problem assembly.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">axb</td>
+                  <td>Output linear system.</td>
+                </tr>
+                <tr>
+                  <td>input</td>
+                  <td>Mixed problem input.</td>
+                </tr>
+                <tr>
+                  <td>target</td>
+                  <td>Side of the system to assemble.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1d27227915eb0acdf4017085fbc61244"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;class LinearSystem, class U1, class U2, class U3, class ... Us&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="#a14b2249366e25fb8b04d56fdde20690d" class="m-doc">OpenMP</a>* Rodin::<wbr />Assembly::<wbr />OpenMP&lt;LinearSystem, Variational::<wbr />Problem&lt;LinearSystem, U1, U2, U3, Us...&gt;&gt;&lt;LinearSystem, U1, U2, U3, Us&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d27227915eb0acdf4017085fbc61244" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Creates a polymorphic copy.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>Pointer to a new copy.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

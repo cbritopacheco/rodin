@@ -77,7 +77,7 @@
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_assembly.html">Assembly</a>::<wbr/></span>MPIIteration <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_m_p_i_2_assembly_2_m_p_i_8h.html">&lt;Rodin/MPI/Assembly/MPI.h&gt;</a></div>
         </h1>
-        <p>Iteration helper over a region of an <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> mesh shard.</p>
+        <p>Iteration helper over a region of an MPI mesh shard.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -91,7 +91,7 @@
             </li>
           </ul>
         </nav>
-<p>This type wraps a distributed mesh and a region descriptor and provides a <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeIterator</a> suitable for local integration loops.</p><p><a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> assembly uses shard-local topological indices throughout. A polytope returned by this iterator belongs to the distributed mesh object, but its <code>(d, i)</code> pair addresses the rank-local shard. The same local pair is passed to finite element spaces (<code>getFiniteElement()</code>, <code>getDOFs()</code>) and to mesh geometry/quadrature routines. Owned-entity filters decide which rank contributes a row/entity; ghost entities can still appear where off-process trial columns are needed.</p>
+<p>This type wraps a distributed mesh and a region descriptor and provides a <a href="class_rodin_1_1_geometry_1_1_polytope_iterator.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />PolytopeIterator</a> suitable for local integration loops.</p><p>MPI assembly uses shard-local topological indices throughout. A polytope returned by this iterator belongs to the distributed mesh object, but its <code>(d, i)</code> pair addresses the rank-local shard. The same local pair is passed to finite element spaces (<code>getFiniteElement()</code>, <code>getDOFs()</code>) and to mesh geometry/quadrature routines. Owned-entity filters decide which rank contributes a row/entity; ghost entities can still appear where off-process trial columns are needed.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -105,8 +105,8 @@
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a1a98800aea44287e38c26a503cceab0f" class="m-doc">MPIIteration</a>(</span><span class="m-doc-wrap">const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; mesh,
-              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>)</span>
+              <span class="m-doc-wrap-bumper"><a href="#a377137a5e17d7d8b9337a3b594f47280" class="m-doc">MPIIteration</a>(</span><span class="m-doc-wrap">const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; mesh,
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> region)</span>
             </dt>
             <dd>Constructs an iteration helper on a mesh region.</dd>
           </dl>
@@ -122,10 +122,10 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a1a98800aea44287e38c26a503cceab0f"><div>
+          <section class="m-doc-details" id="a377137a5e17d7d8b9337a3b594f47280"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />MPIIteration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a98800aea44287e38c26a503cceab0f" class="m-doc-self">MPIIteration</a>(</span><span class="m-doc-wrap">const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; mesh,
-              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a>)</span></span>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Assembly::<wbr />MPIIteration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a377137a5e17d7d8b9337a3b594f47280" class="m-doc-self">MPIIteration</a>(</span><span class="m-doc-wrap">const <a href="#a52597898083a89a8664becf85b25ce65" class="m-doc">MeshType</a>&amp; mesh,
+              <a href="namespace_rodin_1_1_geometry.html#a81a01a86de31071a92e6cce0bab9bc4b" class="m-doc">Geometry::<wbr />Region</a> region)</span></span>
             </h3>
             <p>Constructs an iteration helper on a mesh region.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -136,6 +136,10 @@
                 <tr>
                   <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-info">in</span></td>
                   <td>Distributed mesh.</td>
+                </tr>
+                <tr>
+                  <td>region&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Region descriptor to iterate.</td>
                 </tr>
               </tbody>
             </table>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rodin::Solid::Tags::PreviousFiberStrain struct | Rodin</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Varela+Round:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="stylesheet" href="rodin.css" />
+  <link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">Rodin</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="guides-index.html">General concepts</a></li>
+                <li><a href="examples-index.html">Examples and tutorials</a></li>
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="guides-io.html">I/O in Rodin</a></li>
+                <li><a href="notation-index.html">Notation</a></li>
+                <li><a href="credits-index.html">Credits</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="modules.html">Modules</a>
+              <ol>
+                <li><a href="group___rodin_directives.html">Preprocessor directives</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="namespaces.html">Namespaces</a>
+              <ol>
+                <li><a href="namespace_rodin_1_1_assembly.html">Rodin::Assembly</a></li>
+                <li><a href="namespace_rodin_1_1_geometry.html">Rodin::Geometry</a></li>
+                <li><a href="namespace_rodin_1_1_i_o.html">Rodin::IO</a></li>
+                <li><a href="namespace_rodin_1_1_math.html">Rodin::Math</a></li>
+                <li><a href="namespace_rodin_1_1_q_f.html">Rodin::QF</a></li>
+                <li><a href="namespace_rodin_1_1_solver.html">Rodin::Solver</a></li>
+                <li><a href="namespace_rodin_1_1_variational.html">Rodin::Variational</a></li>
+              </ol>
+            </li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li><a href="https://github.com/cbritopacheco/rodin">GitHub</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid.html">Solid</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solid_1_1_tags.html">Tags</a>::<wbr/></span>PreviousFiberStrain <span class="m-thin">struct</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="_constitutive_point_8h.html">&lt;Rodin/Solid/Local/ConstitutivePoint.h&gt;</a></div>
+        </h1>
+        <p>Tag for the previous fiber strain <svg class="m-math" style="width: 1.754em; height: 1.124em; vertical-align: -0.316em;" viewBox="0 -7.770011 16.842222 10.79056">
+<title>
+$e_{1D}^n$
+</title>
+<defs>
+<path id='eq1-g2-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq1-g0-68' d='M1.331009-.629639C1.259278-.326775 1.243337-.263014 .653549-.263014C.502117-.263014 .406476-.263014 .406476-.111582C.406476 0 .510087 0 .645579 0H3.387298C5.068991 0 6.742715-1.609963 6.742715-3.387298C6.742715-4.606725 5.929763-5.443587 4.742217-5.443587H1.952677C1.809215-5.443587 1.705604-5.443587 1.705604-5.292154C1.705604-5.180573 1.801245-5.180573 1.936737-5.180573C2.199751-5.180573 2.430884-5.180573 2.430884-5.053051C2.430884-5.021171 2.422914-5.0132 2.399004-4.909589L1.331009-.629639ZM3.092403-4.885679C3.164134-5.156663 3.172105-5.180573 3.498879-5.180573H4.463263C5.395766-5.180573 6.025405-4.646575 6.025405-3.674222C6.025405-3.411208 5.913823-2.11208 5.220423-1.219427C4.869738-.773101 4.184309-.263014 3.243836-.263014H2.056289C1.984558-.278954 1.960648-.278954 1.960648-.334745C1.960648-.398506 1.976588-.462267 1.992528-.510087L3.092403-4.885679Z'/>
+<path id='eq1-g0-110' d='M1.594022-1.307098C1.617933-1.42665 1.697634-1.729514 1.721544-1.849066C1.833126-2.279452 1.833126-2.287422 2.016438-2.550436C2.279452-2.940971 2.654047-3.291656 3.188045-3.291656C3.474969-3.291656 3.642341-3.124284 3.642341-2.749689C3.642341-2.311333 3.307597-1.40274 3.156164-1.012204C3.052553-.749191 3.052553-.70137 3.052553-.597758C3.052553-.143462 3.427148 .079701 3.769863 .079701C4.550934 .079701 4.877709-1.036115 4.877709-1.139726C4.877709-1.219427 4.813948-1.243337 4.758157-1.243337C4.662516-1.243337 4.646575-1.187547 4.622665-1.107846C4.431382-.454296 4.096638-.143462 3.793773-.143462C3.666252-.143462 3.602491-.223163 3.602491-.406476S3.666252-.765131 3.745953-.964384C3.865504-1.267248 4.216189-2.183811 4.216189-2.630137C4.216189-3.227895 3.801743-3.514819 3.227895-3.514819C2.582316-3.514819 2.16787-3.124284 1.936737-2.82142C1.880946-3.259776 1.530262-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.318804-2.709838 .239103-2.311333 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.107846 .079701 1.227397-.01594 1.283188-.111582C1.307098-.159402 1.370859-.430386 1.41071-.597758L1.594022-1.307098Z'/>
+<path id='eq1-g1-101' d='M2.139975-2.773599C2.462765-2.773599 3.275716-2.797509 3.849564-3.012702C4.758157-3.359402 4.841843-4.052802 4.841843-4.267995C4.841843-4.794022 4.387547-5.272229 3.598506-5.272229C2.343213-5.272229 .537983-4.136488 .537983-2.008468C.537983-.753176 1.255293 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.685679-.119552 1.327024-.657534 1.327024-1.542217C1.327024-1.709589 1.327024-2.008468 1.506351-2.773599H2.139975ZM1.566127-3.012702C2.080199-4.853798 3.21594-5.033126 3.598506-5.033126C4.124533-5.033126 4.483188-4.722291 4.483188-4.267995C4.483188-3.012702 2.570361-3.012702 2.068244-3.012702H1.566127Z'/>
+</defs>
+<g id='eq1-page1'>
+<use x='0' y='0' xlink:href='#eq1-g1-101'/>
+<use x='5.42544' y='-4.338437' xlink:href='#eq1-g0-110'/>
+<use x='5.42544' y='3.020549' xlink:href='#eq1-g2-49'/>
+<use x='9.659623' y='3.020549' xlink:href='#eq1-g0-68'/>
+</g>
+</svg>.</p>
+        <nav class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+<p>When present, the series law is evaluated at the midpoint fiber strain <svg class="m-math" style="width: 2.292em; height: 1.833em; vertical-align: -0.339em;" viewBox="0 -14.354144 21.998589 17.595256">
+<title>
+$e_{1D}^{n+\frac{1}{2}}$
+</title>
+<defs>
+<path id='eq2-g2-49' d='M2.145953-3.795766C2.145953-3.975093 2.122042-3.975093 1.942715-3.975093C1.548194-3.592528 .938481-3.592528 .723288-3.592528V-3.359402C.878705-3.359402 1.273225-3.359402 1.63188-3.526775V-.508095C1.63188-.310834 1.63188-.233126 1.016189-.233126H.759153V0C1.08792-.02391 1.554172-.02391 1.888917-.02391S2.689913-.02391 3.01868 0V-.233126H2.761644C2.145953-.233126 2.145953-.310834 2.145953-.508095V-3.795766Z'/>
+<path id='eq2-g2-50' d='M3.21594-1.117808H2.99477C2.982814-1.034122 2.923039-.639601 2.833375-.573848C2.791532-.537983 2.307347-.537983 2.223661-.537983H1.105853L1.870984-1.159651C2.074222-1.321046 2.606227-1.703611 2.791532-1.882939C2.970859-2.062267 3.21594-2.367123 3.21594-2.791532C3.21594-3.53873 2.540473-3.975093 1.739477-3.975093C.968369-3.975093 .430386-3.466999 .430386-2.905106C.430386-2.600249 .687422-2.564384 .753176-2.564384C.902615-2.564384 1.075965-2.67198 1.075965-2.887173C1.075965-3.01868 .998257-3.209963 .735243-3.209963C.872727-3.514819 1.23736-3.741968 1.649813-3.741968C2.27746-3.741968 2.612204-3.275716 2.612204-2.791532C2.612204-2.367123 2.331258-1.93076 1.912827-1.548194L.496139-.251059C.436364-.191283 .430386-.185305 .430386 0H3.030635L3.21594-1.117808Z'/>
+<path id='eq2-g3-43' d='M3.474969-1.809215H5.818182C5.929763-1.809215 6.105106-1.809215 6.105106-1.992528S5.929763-2.175841 5.818182-2.175841H3.474969V-4.527024C3.474969-4.638605 3.474969-4.813948 3.291656-4.813948S3.108344-4.638605 3.108344-4.527024V-2.175841H.757161C.645579-2.175841 .470237-2.175841 .470237-1.992528S.645579-1.809215 .757161-1.809215H3.108344V.541968C3.108344 .653549 3.108344 .828892 3.291656 .828892S3.474969 .653549 3.474969 .541968V-1.809215Z'/>
+<path id='eq2-g3-49' d='M2.502615-5.076961C2.502615-5.292154 2.486675-5.300125 2.271482-5.300125C1.944707-4.98132 1.522291-4.790037 .765131-4.790037V-4.527024C.980324-4.527024 1.41071-4.527024 1.872976-4.742217V-.653549C1.872976-.358655 1.849066-.263014 1.091905-.263014H.812951V0C1.139726-.02391 1.825156-.02391 2.183811-.02391S3.235866-.02391 3.56264 0V-.263014H3.283686C2.526526-.263014 2.502615-.358655 2.502615-.653549V-5.076961Z'/>
+<path id='eq2-g0-68' d='M1.331009-.629639C1.259278-.326775 1.243337-.263014 .653549-.263014C.502117-.263014 .406476-.263014 .406476-.111582C.406476 0 .510087 0 .645579 0H3.387298C5.068991 0 6.742715-1.609963 6.742715-3.387298C6.742715-4.606725 5.929763-5.443587 4.742217-5.443587H1.952677C1.809215-5.443587 1.705604-5.443587 1.705604-5.292154C1.705604-5.180573 1.801245-5.180573 1.936737-5.180573C2.199751-5.180573 2.430884-5.180573 2.430884-5.053051C2.430884-5.021171 2.422914-5.0132 2.399004-4.909589L1.331009-.629639ZM3.092403-4.885679C3.164134-5.156663 3.172105-5.180573 3.498879-5.180573H4.463263C5.395766-5.180573 6.025405-4.646575 6.025405-3.674222C6.025405-3.411208 5.913823-2.11208 5.220423-1.219427C4.869738-.773101 4.184309-.263014 3.243836-.263014H2.056289C1.984558-.278954 1.960648-.278954 1.960648-.334745C1.960648-.398506 1.976588-.462267 1.992528-.510087L3.092403-4.885679Z'/>
+<path id='eq2-g0-110' d='M1.594022-1.307098C1.617933-1.42665 1.697634-1.729514 1.721544-1.849066C1.833126-2.279452 1.833126-2.287422 2.016438-2.550436C2.279452-2.940971 2.654047-3.291656 3.188045-3.291656C3.474969-3.291656 3.642341-3.124284 3.642341-2.749689C3.642341-2.311333 3.307597-1.40274 3.156164-1.012204C3.052553-.749191 3.052553-.70137 3.052553-.597758C3.052553-.143462 3.427148 .079701 3.769863 .079701C4.550934 .079701 4.877709-1.036115 4.877709-1.139726C4.877709-1.219427 4.813948-1.243337 4.758157-1.243337C4.662516-1.243337 4.646575-1.187547 4.622665-1.107846C4.431382-.454296 4.096638-.143462 3.793773-.143462C3.666252-.143462 3.602491-.223163 3.602491-.406476S3.666252-.765131 3.745953-.964384C3.865504-1.267248 4.216189-2.183811 4.216189-2.630137C4.216189-3.227895 3.801743-3.514819 3.227895-3.514819C2.582316-3.514819 2.16787-3.124284 1.936737-2.82142C1.880946-3.259776 1.530262-3.514819 1.123786-3.514819C.836862-3.514819 .637609-3.331507 .510087-3.084433C.318804-2.709838 .239103-2.311333 .239103-2.295392C.239103-2.223661 .294894-2.191781 .358655-2.191781C.462267-2.191781 .470237-2.223661 .526027-2.430884C.621669-2.82142 .765131-3.291656 1.099875-3.291656C1.307098-3.291656 1.354919-3.092403 1.354919-2.917061C1.354919-2.773599 1.315068-2.622167 1.251308-2.359153C1.235367-2.295392 1.115816-1.825156 1.083935-1.713574L.789041-.518057C.757161-.398506 .70934-.199253 .70934-.167372C.70934 .01594 .860772 .079701 .964384 .079701C1.107846 .079701 1.227397-.01594 1.283188-.111582C1.307098-.159402 1.370859-.430386 1.41071-.597758L1.594022-1.307098Z'/>
+<path id='eq2-g1-101' d='M2.139975-2.773599C2.462765-2.773599 3.275716-2.797509 3.849564-3.012702C4.758157-3.359402 4.841843-4.052802 4.841843-4.267995C4.841843-4.794022 4.387547-5.272229 3.598506-5.272229C2.343213-5.272229 .537983-4.136488 .537983-2.008468C.537983-.753176 1.255293 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.685679-.119552 1.327024-.657534 1.327024-1.542217C1.327024-1.709589 1.327024-2.008468 1.506351-2.773599H2.139975ZM1.566127-3.012702C2.080199-4.853798 3.21594-5.033126 3.598506-5.033126C4.124533-5.033126 4.483188-4.722291 4.483188-4.267995C4.483188-3.012702 2.570361-3.012702 2.068244-3.012702H1.566127Z'/>
+</defs>
+<g id='eq2-page1'>
+<use x='0' y='0' xlink:href='#eq2-g1-101'/>
+<use x='5.42544' y='-7.243482' xlink:href='#eq2-g0-110'/>
+<use x='10.563643' y='-7.243482' xlink:href='#eq2-g3-43'/>
+<use x='18.345663' y='-10.501923' xlink:href='#eq2-g2-49'/>
+<rect x='18.345663' y='-9.415346' height='.358656' width='3.652912'/>
+<use x='18.345663' y='-4.117889' xlink:href='#eq2-g2-50'/>
+<use x='5.42544' y='3.241111' xlink:href='#eq2-g3-49'/>
+<use x='9.659623' y='3.241111' xlink:href='#eq2-g0-68'/>
+</g>
+</svg>, as in the compatible discretization of Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent, the series law falls back to the current fiber strain.</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a005cb95f8facab183f186725af7ee009">
+              using <a href="#a005cb95f8facab183f186725af7ee009" class="m-doc-self">Type</a> = <a href="namespace_rodin.html#a36afbd9801a3c5cba968cdec29036daf" class="m-doc">Real</a>
+            </dt>
+            <dd>Stored value type for this tag.</dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script src="searchdata-v2.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>Rodin. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.8 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

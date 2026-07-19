@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;class FES&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_i_o.html">IO</a>::<wbr/></span>GridFunctionPrinter&lt;FileFormat::HDF5, FES, ::Vec&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p><a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> printer for PETSc-backed grid functions.</p>
+        <p>HDF5 printer for PETSc-backed grid functions.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -96,6 +96,7 @@
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -103,16 +104,26 @@
             </li>
           </ul>
         </nav>
-<p>Writes the local portion of a distributed <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file using the same layout expected by <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a>.</p><aside class="m-note m-info"><h4>Note</h4><p>Stream-based printing is not supported; use the path-based overload.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a></p></aside>
+<p>Writes the local portion of a distributed PETSc vector to an HDF5 file using the same layout expected by <a href="class_rodin_1_1_i_o_1_1_grid_function_loader.html" class="m-doc">GridFunctionLoader</a>.</p><aside class="m-note m-info"><h4>Note</h4><p>Stream-based printing is not supported; use the path-based overload.</p></aside><aside class="m-note m-default"><h4>See also</h4><p>GridFunctionLoader</p></aside>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;<a href="namespace_rodin_1_1_i_o.html#a610845e6f56e545283af144cbbb99cfe" class="m-doc">FileFormat</a> Fmt, class FES, class Data&gt;</div>
+              class <a href="class_rodin_1_1_i_o_1_1_grid_function_printer_base.html" class="m-doc">GridFunctionPrinterBase&lt;FileFormat::HDF5, FES, ::Vec&gt;</a>
+            </dt>
+            <dd>Base class for concrete grid function printers.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a688b92a0c3e16ec579786a89a3580d88">
               using <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc-self">DataType</a> = ::Vec
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector data type (<code>::Vec</code>).</dd>
+            <dd>PETSc vector data type (<code>Vec</code>).</dd>
             <dt id="a87ab5050b41f14d97440bab3534e33ae">
-              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_variational_1_1_grid_function.html" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
+              using <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc-self">ObjectType</a> = <a href="namespace_rodin_1_1_variational.html#a4c6767f4c0bfde8cbd504ccc434343f1" class="m-doc">Variational::<wbr />GridFunction</a>&lt;FES, <a href="#a688b92a0c3e16ec579786a89a3580d88" class="m-doc">DataType</a>&gt;
             </dt>
             <dd>Grid function type being printed.</dd>
             <dt id="aea26ce1ae1c8e16f264f0e3d8dc7827b">
@@ -127,39 +138,39 @@
             <dt id="a0a8311d43e66ddc5a8e681495d56aa56">
               <span class="m-doc-wrap-bumper"><a href="#a0a8311d43e66ddc5a8e681495d56aa56" class="m-doc-self">GridFunctionPrinter</a>(</span><span class="m-doc-wrap">const <a href="#a87ab5050b41f14d97440bab3534e33ae" class="m-doc">ObjectType</a>&amp; gf)</span>
             </dt>
-            <dd>Constructs an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> printer bound to a PETSc-backed grid function.</dd>
+            <dd>Constructs an HDF5 printer bound to a PETSc-backed grid function.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">void <a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Stream-based overload — not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</dd>
+            <dd>Stream-based overload — not supported for HDF5.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Writes grid function data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</dd>
+            <dd>Writes grid function data to an HDF5 file.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a7c84cfa9805fac76a8f3f3600270724b"><div>
+          <section class="m-doc-details" id="a2504fad917ab72c2e27e762f99fa6583"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;class FES&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c84cfa9805fac76a8f3f3600270724b" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp;) <span class="m-label m-warning">override</span></span></span>
+              <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2504fad917ab72c2e27e762f99fa6583" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">std::ostream&amp; os) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Stream-based overload — not supported for <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a>.</p>
+            <p>Stream-based overload — not supported for HDF5.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Exceptions</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%"><a href="class_rodin_1_1_alert_1_1_member_function_exception.html" class="m-doc">Alert::<wbr />MemberFunctionException</a></td>
+                  <td style="width: 1%">Alert::MemberFunctionException</td>
                   <td>Always; use print(path) instead.</td>
                 </tr>
               </tbody>
@@ -172,7 +183,7 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />GridFunctionPrinter&lt;FileFormat::<wbr />HDF5, FES, ::<wbr />Vec&gt;&lt;FES&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad71af491000e3f2eccd987fe9ad1a999" class="m-doc-self">print</a>(</span><span class="m-doc-wrap">const boost::filesystem::path&amp; filename) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Writes grid function data to an <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</p>
+            <p>Writes grid function data to an HDF5 file.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -180,7 +191,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">filename</td>
-                  <td>Path for the output <a href="namespace_rodin_1_1_i_o_1_1_h_d_f5.html" class="m-doc">HDF5</a> file.</td>
+                  <td>Path for the output HDF5 file.</td>
                 </tr>
               </tbody>
             </table>

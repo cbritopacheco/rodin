@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_solver.html">Solver</a>::<wbr/></span>CG&lt;PETSc::Math::LinearSystem&gt; <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>Conjugate gradient solver for <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> linear systems.</p>
+        <p>Conjugate gradient solver for PETSc linear systems.</p>
         <nav class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,14 +93,14 @@
             </li>
           </ul>
         </nav>
-<p>Specialization of <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a> that targets <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> and sets the underlying <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> algorithm to <code>KSPCG</code>. Applicable only to symmetric positive definite (SPD) systems.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">Rodin::<wbr />Solver::<wbr />KSP</a>, <a href="_p_e_t_sc_2_solver_2_c_g_8h.html#acd85a42a8ce2254ae97d31ea641e9266" class="m-doc">Rodin::<wbr />PETSc::<wbr />Solver::<wbr />CG</a></p></aside>
+<p>Specialization of <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">Rodin::<wbr />Solver::<wbr />CG</a> that targets <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">Rodin::<wbr />PETSc::<wbr />Math::<wbr />LinearSystem</a> and sets the underlying KSP algorithm to <code>KSPCG</code>. Applicable only to symmetric positive definite (SPD) systems.</p><aside class="m-note m-default"><h4>See also</h4><p>Rodin::Solver::KSP, Rodin::PETSc::Solver::CG</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
             <dt>
               class <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a>
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> <a href="class_rodin_1_1_solver_1_1_k_s_p.html" class="m-doc">KSP</a> (Krylov subspace) linear solver wrapper.</dd>
+            <dd>PETSc KSP (Krylov subspace) linear solver wrapper.</dd>
           </dl>
         </section>
         <section id="pub-types">
@@ -109,17 +109,17 @@
             <dt id="a032f029f468e1154761b88b10b9baaf4">
               using <a href="#a032f029f468e1154761b88b10b9baaf4" class="m-doc-self">OperatorType</a> = ::Mat
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> matrix type (<code>::Mat</code>) for the system operator.</dd>
+            <dd>PETSc matrix type (<code>Mat</code>) for the system operator.</dd>
             <dt id="a1c2b8e781aa99081ace8d8ce8d3790de">
               using <a href="#a1c2b8e781aa99081ace8d8ce8d3790de" class="m-doc-self">VectorType</a> = ::Vec
             </dt>
-            <dd><a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> vector type (<code>::Vec</code>) for the RHS and solution.</dd>
+            <dd>PETSc vector type (<code>Vec</code>) for the RHS and solution.</dd>
             <dt id="a11ddd836b07135509382a92fbcc504bb">
               using <a href="#a11ddd836b07135509382a92fbcc504bb" class="m-doc-self">ScalarType</a> = PetscScalar
             </dt>
             <dd>Scalar type (<code>PetscScalar</code>).</dd>
             <dt id="a0e2ed914b272429dbc177e1882a866f1">
-              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="_p_e_t_sc_2_math_2_linear_system_8h.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
+              using <a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc-self">LinearSystemType</a> = <a href="namespace_rodin_1_1_p_e_t_sc_1_1_math.html#afa0435f07e69ca0a0806164a5b7e897f" class="m-doc">PETSc::<wbr />Math::<wbr />LinearSystem</a>
             </dt>
             <dd>Linear system type coupling <svg class="m-math" style="width: 0.914em; height: 0.851em; vertical-align: -0.000em;" viewBox="0 -8.169366 8.775347 8.169366">
 <title>
@@ -153,7 +153,7 @@ $ \mathbf{x} $
 </g>
 </svg>.</dd>
             <dt id="ab6098d508adace773204c1e42ece893a">
-              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = <a href="class_rodin_1_1_variational_1_1_problem_base.html" class="m-doc">Variational::<wbr />ProblemBase</a>&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
+              using <a href="#ab6098d508adace773204c1e42ece893a" class="m-doc-self">ProblemBaseType</a> = Variational::ProblemBase&lt;<a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&gt;
             </dt>
             <dd>Base problem type that provides the linear system.</dd>
             <dt id="aaa1f19b66d8e7cb44bf307207b1035e7">
@@ -168,7 +168,7 @@ $ \mathbf{x} $
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#acce1a9ae04988820f26b122de9ee8fc9" class="m-doc">CG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
-            <dd>Construct a <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> solver and set the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> type to KSPCG.</dd>
+            <dd>Construct a CG solver and set the PETSc type to KSPCG.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#ae00a62b09d5d5a690c5796008775ffd6" class="m-doc">CG</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>&amp; other)</span>
             </dt>
@@ -185,7 +185,7 @@ $ \mathbf{x} $
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#afc6bebc168854f735ee03d14f1230da9" class="m-doc">copy</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a heap-allocated copy of this <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> solver.</dd>
+            <dd>Creates a heap-allocated copy of this CG solver.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a15e7896618ae50e8f86a2bdb8ca2e2e7" class="m-doc">solve</a>(</span><span class="m-doc-wrap"><a href="#a0e2ed914b272429dbc177e1882a866f1" class="m-doc">LinearSystemType</a>&amp; b) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
@@ -227,7 +227,7 @@ $ x $
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Solver::<wbr />CG&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acce1a9ae04988820f26b122de9ee8fc9" class="m-doc-self">CG</a>(</span><span class="m-doc-wrap"><a href="#ab6098d508adace773204c1e42ece893a" class="m-doc">ProblemBaseType</a>&amp; pb) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
-            <p>Construct a <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> solver and set the <a href="namespace_rodin_1_1_p_e_t_sc.html" class="m-doc">PETSc</a> type to KSPCG.</p>
+            <p>Construct a CG solver and set the PETSc type to KSPCG.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -255,7 +255,7 @@ $ x $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td>Another <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> instance.</td>
+                  <td>Another CG instance.</td>
                 </tr>
               </tbody>
             </table>
@@ -275,7 +275,7 @@ $ x $
               <tbody>
                 <tr>
                   <td style="width: 1%">other</td>
-                  <td>Moved-from <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> instance.</td>
+                  <td>Moved-from CG instance.</td>
                 </tr>
               </tbody>
             </table>
@@ -287,12 +287,12 @@ $ x $
               </div>
               <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a>* Rodin::<wbr />Solver::<wbr />CG&lt;PETSc::<wbr />Math::<wbr />LinearSystem&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afc6bebc168854f735ee03d14f1230da9" class="m-doc-self">copy</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a heap-allocated copy of this <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> solver.</p>
+            <p>Creates a heap-allocated copy of this CG solver.</p>
             <table class="m-table m-fullwidth m-flat">
               <tfoot>
                 <tr>
                   <th style="width: 1%">Returns</th>
-                  <td>Pointer to the cloned <a href="class_rodin_1_1_solver_1_1_c_g.html" class="m-doc">CG</a> instance.</td>
+                  <td>Pointer to the cloned CG instance.</td>
                 </tr>
               </tfoot>
             </table>

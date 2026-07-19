@@ -77,18 +77,6 @@
           <span class="m-breadcrumb"><a href="dir_a76ff2fd046c37f043d49e701a9434a5.html">Rodin</a>/</span><span class="m-breadcrumb"><a href="dir_8abf735db4842a0d37da7c8b4f1d6568.html">Variational</a>/</span><span class="m-breadcrumb"><a href="dir_80838750593a9f1caedce9bf7d761a53.html">P1</a>/</span>P1Element.h <span class="m-thin">file</span>
         </h1>
         <p>P1 (piecewise linear) finite element implementation.</p>
-        <nav class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-              </ul>
-            </li>
-          </ul>
-        </nav>
 <p>This file provides the P1Element class template for continuous piecewise linear finite elements. P1 elements have:</p><ul><li>One DOF per vertex</li><li>Linear basis functions: <svg class="m-math" style="width: 6.057em; height: 1.282em; vertical-align: -0.350em;" viewBox="0 -8.966376 58.1464 12.309385">
 <title>
 $ \phi_i(x_j) = \delta_{ij} $
@@ -180,54 +168,6 @@ $ O(h^2) $
 <use x='25.294443' y='0' xlink:href='#eq4-g2-41'/>
 </g>
 </svg> for energy norm) and forming the foundation for many FEM applications.</p>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
-          <dl class="m-doc">
-            <dt>namespace <a href="namespace_rodin.html" class="m-doc">Rodin</a></dt>
-            <dd>The <a href="namespace_rodin.html" class="m-doc">Rodin</a> library for finite element methods and shape optimization.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_form_language.html" class="m-doc">Rodin::FormLanguage</a></dt>
-            <dd>Module for writing high level abstract expressions.</dd>
-            <dt>namespace <a href="namespace_rodin_1_1_variational.html" class="m-doc">Rodin::Variational</a></dt>
-            <dd>Module which provides the necessary tools for constructing and solving variational problems.</dd>
-          </dl>
-        </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element.html" class="m-doc">Rodin::Variational::P1Element</a>
-            </dt>
-            <dd>Degree 1 Lagrange element.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_linear_form.html" class="m-doc">Rodin::Variational::P1Element::LinearForm</a>
-            </dt>
-            <dd>Represents a linear form of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> scalar element.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function.html" class="m-doc">Rodin::Variational::P1Element::BasisFunction</a>
-            </dt>
-            <dd>Represents a piecewise linear basis function of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> scalar element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_derivative_function.html" class="m-doc">Rodin::Variational::P1Element::BasisFunction::DerivativeFunction</a>
-            </dt>
-            <dd>Represents a partial derivative of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> basis function.</dd>
-            <dt>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_1_1_basis_function_1_1_gradient_function.html" class="m-doc">Rodin::Variational::P1Element::BasisFunction::GradientFunction</a>
-            </dt>
-            <dd>Represents the gradient of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> basis function.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;class Scalar&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4.html" class="m-doc">Rodin::Variational::P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;</a>
-            </dt>
-            <dd>Continuous piecewise linear (degree 1) vector Lagrange element.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;size_t Order&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_p1_element_3_01_math_1_1_spatial_vector_3_01_scalar_01_4_01_4_1_b29f29bd8cb065166079f8d6b69076b6.html" class="m-doc">Rodin::Variational::P1Element&lt;Math::SpatialVector&lt;Scalar&gt;&gt;::BasisFunction::DerivativeFunction</a>
-            </dt>
-            <dd>Represents a derivative function of a <a href="class_rodin_1_1_variational_1_1_p1.html" class="m-doc">P1</a> vector element.</dd>
-          </dl>
-        </section>
       </div>
     </div>
   </div>

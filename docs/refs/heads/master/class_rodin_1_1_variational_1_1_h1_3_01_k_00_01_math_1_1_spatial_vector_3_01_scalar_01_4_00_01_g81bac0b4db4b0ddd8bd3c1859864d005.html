@@ -78,7 +78,7 @@
           <div class="m-doc-template">template&lt;size_t K, class Scalar&gt;</div>
           <span class="m-breadcrumb"><a href="namespace_rodin.html">Rodin</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespace_rodin_1_1_variational.html">Variational</a>::<wbr/></span>H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt; <span class="m-thin">class</span>
         </h1>
-        <p>Distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> finite element space for <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> meshes.</p>
+        <p>Distributed vector-valued H1 finite element space for MPI meshes.</p>
         <table class="m-table m-fullwidth m-flat">
           <thead>
             <tr><th colspan="2">Template parameters</th></tr>
@@ -100,7 +100,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -108,7 +107,7 @@
             </li>
           </ul>
         </nav>
-<p>Each scalar interior DOF node is replicated <code>vdim</code> times (once per component). Internally this builds a scalar <a href="namespace_rodin_1_1_m_p_i.html" class="m-doc">MPI</a> <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space and derives the vector DOF mappings as:</p><div class="m-math"><svg style="width: 27.484em; height: 1.245em;" viewBox="62.346401 -11.955168 263.8502 11.955168">
+<p>Each scalar interior DOF node is replicated <code>vdim</code> times (once per component). Internally this builds a scalar MPI H1 space and derives the vector DOF mappings as:</p><div class="m-math"><svg style="width: 27.484em; height: 1.245em;" viewBox="62.346401 -11.955168 263.8502 11.955168">
 <title>
 \[
   \text{globalVecDOF}(q, c) =
@@ -119,11 +118,11 @@
 <path id='eq1-g1-59' d='M2.331258 .047821C2.331258-.645579 2.10411-1.159651 1.613948-1.159651C1.231382-1.159651 1.0401-.848817 1.0401-.585803S1.219427 0 1.625903 0C1.78132 0 1.912827-.047821 2.020423-.155417C2.044334-.179328 2.056289-.179328 2.068244-.179328C2.092154-.179328 2.092154-.011955 2.092154 .047821C2.092154 .442341 2.020423 1.219427 1.327024 1.996513C1.195517 2.139975 1.195517 2.163885 1.195517 2.187796C1.195517 2.247572 1.255293 2.307347 1.315068 2.307347C1.41071 2.307347 2.331258 1.422665 2.331258 .047821Z'/>
 <path id='eq1-g1-99' d='M4.674471-4.495143C4.447323-4.495143 4.339726-4.495143 4.172354-4.351681C4.100623-4.291905 3.969116-4.112578 3.969116-3.921295C3.969116-3.682192 4.148443-3.53873 4.375592-3.53873C4.662516-3.53873 4.985305-3.777833 4.985305-4.25604C4.985305-4.829888 4.435367-5.272229 3.610461-5.272229C2.044334-5.272229 .478207-3.56264 .478207-1.865006C.478207-.824907 1.123786 .119552 2.343213 .119552C3.969116 .119552 4.99726-1.147696 4.99726-1.303113C4.99726-1.374844 4.925529-1.43462 4.877709-1.43462C4.841843-1.43462 4.829888-1.422665 4.722291-1.315068C3.957161-.298879 2.82142-.119552 2.367123-.119552C1.542217-.119552 1.279203-.836862 1.279203-1.43462C1.279203-1.853051 1.482441-3.012702 1.912827-3.825654C2.223661-4.387547 2.86924-5.033126 3.622416-5.033126C3.777833-5.033126 4.435367-5.009215 4.674471-4.495143Z'/>
 <path id='eq1-g1-113' d='M5.272229-5.152677C5.272229-5.212453 5.224408-5.260274 5.164633-5.260274C5.068991-5.260274 4.60274-4.829888 4.375592-4.411457C4.160399-4.94944 3.789788-5.272229 3.275716-5.272229C1.924782-5.272229 .466252-3.526775 .466252-1.75741C.466252-.573848 1.159651 .119552 1.972603 .119552C2.606227 .119552 3.132254-.358655 3.383313-.633624L3.395268-.621669L2.940971 1.171606L2.833375 1.601993C2.725778 1.960648 2.546451 1.960648 1.984558 1.972603C1.853051 1.972603 1.733499 1.972603 1.733499 2.199751C1.733499 2.283437 1.80523 2.319303 1.888917 2.319303C2.056289 2.319303 2.271482 2.295392 2.438854 2.295392H3.658281C3.837609 2.295392 4.040847 2.319303 4.220174 2.319303C4.291905 2.319303 4.435367 2.319303 4.435367 2.092154C4.435367 1.972603 4.339726 1.972603 4.160399 1.972603C3.598506 1.972603 3.56264 1.888917 3.56264 1.793275C3.56264 1.733499 3.574595 1.721544 3.610461 1.566127L5.272229-5.152677ZM3.58655-1.422665C3.526775-1.219427 3.526775-1.195517 3.359402-.968369C3.096389-.633624 2.570361-.119552 2.008468-.119552C1.518306-.119552 1.243337-.561893 1.243337-1.267248C1.243337-1.924782 1.613948-3.263761 1.841096-3.765878C2.247572-4.60274 2.809465-5.033126 3.275716-5.033126C4.064757-5.033126 4.220174-4.052802 4.220174-3.957161C4.220174-3.945205 4.184309-3.789788 4.172354-3.765878L3.58655-1.422665Z'/>
-<path id='eq1-g0-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
 <path id='eq1-g5-40' d='M3.88543 2.905106C3.88543 2.86924 3.88543 2.84533 3.682192 2.642092C2.486675 1.43462 1.817186-.537983 1.817186-2.976837C1.817186-5.296139 2.379078-7.292653 3.765878-8.703362C3.88543-8.810959 3.88543-8.834869 3.88543-8.870735C3.88543-8.942466 3.825654-8.966376 3.777833-8.966376C3.622416-8.966376 2.642092-8.105604 2.056289-6.933998C1.446575-5.726526 1.171606-4.447323 1.171606-2.976837C1.171606-1.912827 1.338979-.490162 1.960648 .789041C2.666002 2.223661 3.646326 3.000747 3.777833 3.000747C3.825654 3.000747 3.88543 2.976837 3.88543 2.905106Z'/>
 <path id='eq1-g5-41' d='M3.371357-2.976837C3.371357-3.88543 3.251806-5.36787 2.582316-6.75467C1.876961-8.18929 .896638-8.966376 .765131-8.966376C.71731-8.966376 .657534-8.942466 .657534-8.870735C.657534-8.834869 .657534-8.810959 .860772-8.607721C2.056289-7.400249 2.725778-5.427646 2.725778-2.988792C2.725778-.669489 2.163885 1.327024 .777086 2.737733C.657534 2.84533 .657534 2.86924 .657534 2.905106C.657534 2.976837 .71731 3.000747 .765131 3.000747C.920548 3.000747 1.900872 2.139975 2.486675 .968369C3.096389-.251059 3.371357-1.542217 3.371357-2.976837Z'/>
 <path id='eq1-g5-43' d='M4.770112-2.761644H8.069738C8.237111-2.761644 8.452304-2.761644 8.452304-2.976837C8.452304-3.203985 8.249066-3.203985 8.069738-3.203985H4.770112V-6.503611C4.770112-6.670984 4.770112-6.886177 4.554919-6.886177C4.327771-6.886177 4.327771-6.682939 4.327771-6.503611V-3.203985H1.028144C.860772-3.203985 .645579-3.203985 .645579-2.988792C.645579-2.761644 .848817-2.761644 1.028144-2.761644H4.327771V.537983C4.327771 .705355 4.327771 .920548 4.542964 .920548C4.770112 .920548 4.770112 .71731 4.770112 .537983V-2.761644Z'/>
 <path id='eq1-g5-61' d='M8.069738-3.873474C8.237111-3.873474 8.452304-3.873474 8.452304-4.088667C8.452304-4.315816 8.249066-4.315816 8.069738-4.315816H1.028144C.860772-4.315816 .645579-4.315816 .645579-4.100623C.645579-3.873474 .848817-3.873474 1.028144-3.873474H8.069738ZM8.069738-1.649813C8.237111-1.649813 8.452304-1.649813 8.452304-1.865006C8.452304-2.092154 8.249066-2.092154 8.069738-2.092154H1.028144C.860772-2.092154 .645579-2.092154 .645579-1.876961C.645579-1.649813 .848817-1.649813 1.028144-1.649813H8.069738Z'/>
+<path id='eq1-g0-1' d='M2.295392-2.988792C2.295392-3.335492 2.008468-3.622416 1.661768-3.622416S1.028144-3.335492 1.028144-2.988792S1.315068-2.355168 1.661768-2.355168S2.295392-2.642092 2.295392-2.988792Z'/>
 <path id='eq1-g4-68' d='M8.158695-3.978108C8.158695-5.050054 7.80138-5.979073 7.146302-6.634151C6.336388-7.455975 5.038143-7.884753 3.406404-7.884753H.190568V-7.658454C1.131498-7.57508 1.238692-7.467886 1.238692-6.586509V-1.298245C1.238692-.440689 1.095766-.285852 .190568-.2263V0H3.573151C4.95477 0 6.205372-.393047 6.943824-1.060035C7.718006-1.762755 8.158695-2.822789 8.158695-3.978108ZM6.86045-3.894735C6.86045-2.489295 6.372119-1.488813 5.407369-.929019C4.799933-.583615 4.109124-.440689 3.07291-.440689C2.59649-.440689 2.453564-.547883 2.453564-.929019V-6.979555C2.453564-7.348781 2.584579-7.444065 3.07291-7.444065C4.097213-7.444065 4.871396-7.253497 5.4431-6.84854C6.372119-6.205372 6.86045-5.181069 6.86045-3.894735Z'/>
 <path id='eq1-g4-70' d='M6.503135-6.181551L6.467404-7.884753H.142926V-7.658454C1.024303-7.586991 1.17914-7.420244 1.17914-6.586509V-1.42926C1.17914-.440689 1.048124-.285852 .142926-.2263V0H3.477867V-.2263C2.560758-.273942 2.394011-.440689 2.394011-1.298245V-3.894735H4.121034C5.085785-3.894735 5.288264-3.716077 5.43119-2.751326H5.705131V-5.514563H5.43119C5.288264-4.561723 5.073875-4.383065 4.121034-4.383065H2.394011V-7.027197C2.394011-7.360691 2.453564-7.432154 2.775147-7.432154H4.394976C5.740863-7.432154 6.002894-7.253497 6.205372-6.181551H6.503135Z'/>
 <path id='eq1-g4-79' d='M8.194427-3.894735C8.194427-5.073875 7.849022-6.086267 7.193944-6.800898C6.443583-7.622722 5.4431-8.051501 4.299692-8.051501C2.024786-8.051501 .404957-6.336388 .404957-3.942377C.404957-2.822789 .786093-1.738934 1.42926-1.048124C2.12007-.297763 3.180104 .166747 4.228229 .166747C6.574598 .166747 8.194427-1.500723 8.194427-3.894735ZM6.836629-3.906645C6.836629-3.203926 6.681793-2.382101 6.443583-1.762755C6.336388-1.464992 6.133909-1.167229 5.859968-.893288C5.4431-.47642 4.907128-.262031 4.275871-.262031C3.727988-.262031 3.192015-.47642 2.775147-.845646C2.155801-1.393529 1.762755-2.59649 1.762755-3.918556C1.762755-5.133427 2.096249-6.288746 2.59649-6.84854C3.060999-7.360691 3.644614-7.622722 4.299692-7.622722C4.847575-7.622722 5.395458-7.408333 5.824236-7.027197C6.467404-6.443583 6.836629-5.323995 6.836629-3.906645Z'/>
@@ -188,16 +187,6 @@
 <use x='321.158612' y='-2.988792' xlink:href='#eq1-g1-99'/>
 </g>
 </svg></div>
-        <section id="base-classes">
-          <h2><a href="#base-classes">Base classes</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;class Mesh, class Derived&gt;</div>
-              class <a href="class_rodin_1_1_variational_1_1_finite_element_space.html" class="m-doc">FiniteElementSpace&lt;Geometry::Mesh&lt;Context::MPI&gt;, H1&lt;K, Math::SpatialVector&lt;Scalar&gt;, Geometry::Mesh&lt;Context::MPI&gt;&gt;&gt;</a>
-            </dt>
-            <dd>Represernts a finite element space.</dd>
-          </dl>
-        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -209,12 +198,44 @@
               <div class="m-doc-template">template&lt;class Callable&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g6395c0805c539fe8dcbcf349a6e5143a.html" class="m-doc">Pullback</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g6395c0805c539fe8dcbcf349a6e5143a.html" class="m-doc">Pullback</a> of a callable (or <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>) to the reference polytope.</dd>
+            <dd>Pullback of a callable (or FunctionBase) to the reference polytope.</dd>
             <dt>
               <div class="m-doc-template">template&lt;class CallableType&gt;</div>
               class <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_ge7638f650fa348ea64a34c8ca101e4e3.html" class="m-doc">Pushforward</a>
             </dt>
-            <dd><a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_ge7638f650fa348ea64a34c8ca101e4e3.html" class="m-doc">Pushforward</a> of a function from the reference polytope.</dd>
+            <dd>Pushforward of a function from the reference polytope.</dd>
+            <dt id="abccaffe1f1d9f2b4e323c3f4721a26dd">
+              using <a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc-self">ContextType</a> = <a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>
+            </dt>
+            <dd>Execution context type.</dd>
+            <dt id="ab971c6ec4177c374836d376ba1d8c92f">
+              using <a href="#ab971c6ec4177c374836d376ba1d8c92f" class="m-doc-self">FESType</a> = <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&gt;
+            </dt>
+            <dd>Finite element space type.</dd>
+            <dt id="a34130e18c1deff7165fe2aa4d9429a35">
+              using <a href="#a34130e18c1deff7165fe2aa4d9429a35" class="m-doc-self">ScalarFESType</a> = <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, Scalar, <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_m_p_i.html" class="m-doc">Context::<wbr />MPI</a>&gt;&gt;
+            </dt>
+            <dd>Scalar distributed H1 space used for component-wise numbering.</dd>
+            <dt id="ad4b3ea5ea1f041cc44d8b1e41603b06b">
+              using <a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc-self">ScalarType</a> = Scalar
+            </dt>
+            <dd>Scalar value type.</dd>
+            <dt id="a883786ff5269f0c99e98741145efc8f6">
+              using <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc-self">RangeType</a> = <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;<a href="#ad4b3ea5ea1f041cc44d8b1e41603b06b" class="m-doc">ScalarType</a>&gt;
+            </dt>
+            <dd>Range (evaluation value) type.</dd>
+            <dt id="a4ded3263986a36723239faeabaa4a7ed">
+              using <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc-self">MeshType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="#abccaffe1f1d9f2b4e323c3f4721a26dd" class="m-doc">ContextType</a>&gt;
+            </dt>
+            <dd>Mesh type.</dd>
+            <dt id="a5606ef555735d542cf22d49f90326bc4">
+              using <a href="#a5606ef555735d542cf22d49f90326bc4" class="m-doc-self">ElementType</a> = H1Element&lt;K, <a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&gt;
+            </dt>
+            <dd>Finite element type.</dd>
+            <dt id="a16684b7e715b851b6b93828d94f2c44e">
+              using <a href="#a16684b7e715b851b6b93828d94f2c44e" class="m-doc-self">Parent</a> = FiniteElementSpace&lt;<a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>, <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&lt;K, <a href="class_rodin_1_1_math_1_1_spatial_vector.html" class="m-doc">Math::<wbr />SpatialVector</a>&lt;Scalar&gt;, <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&gt;&gt;
+            </dt>
+            <dd>Parent class type.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -222,17 +243,29 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt;,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh,
               size_t vdim)</span>
             </dt>
-            <dd>Constructs a distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space.</dd>
+            <dd>Constructs a distributed vector-valued H1 space.</dd>
+            <dt id="a54af72f4bbd1ce5498fa715041cea174">
+              <span class="m-doc-wrap-bumper"><a href="#a54af72f4bbd1ce5498fa715041cea174" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">const H1&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="abb322efe6b21425ee99dae0c835ea9a7">
+              <span class="m-doc-wrap-bumper"><a href="#abb322efe6b21425ee99dae0c835ea9a7" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">H1&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a19ff7be23fad19be92d41b13d6b58274">
+              <span class="m-doc-wrap-bumper">auto <a href="#a19ff7be23fad19be92d41b13d6b58274" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&amp;&amp;) -&gt; <a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc">H1</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Move assignment operator.</dd>
             <dt id="a88987bef7972e7ef2a6aa0c6b83138b0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_3_01_k_00_01_math_1_1_spatial_vector_3_01_scalar_01_4_00_01_g0a47e13b731fd39ea7df5f39f21365b1.html" class="m-doc">FESType</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a88987bef7972e7ef2a6aa0c6b83138b0" class="m-doc-self">getShard</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#ab971c6ec4177c374836d376ba1d8c92f" class="m-doc">FESType</a>&amp;</span>
             </dt>
             <dd>Returns the local shard finite element space.</dd>
             <dt id="a96abd8ba8f14deaed88496405eb96c1d">
@@ -250,7 +283,7 @@
             <dd>Returns the local DOF index for a global DOF, or nullopt if not present.</dd>
             <dt id="ae158db2d2017a069f2ede653e5110753">
               <span class="m-doc-wrap-bumper">auto <a href="#ae158db2d2017a069f2ede653e5110753" class="m-doc-self">getFiniteElement</a>(</span><span class="m-doc-wrap">size_t d,
-              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="class_rodin_1_1_variational_1_1_h1_element.html" class="m-doc">ElementType</a>&amp;</span>
+              <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a> i) const -&gt; const <a href="#a5606ef555735d542cf22d49f90326bc4" class="m-doc">ElementType</a>&amp;</span>
             </dt>
             <dd>Returns the finite element on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
 <title>
@@ -280,7 +313,7 @@ $(d, i)$
             </dt>
             <dd>Returns the vector dimension of the space.</dd>
             <dt id="a023a4642b6e40a2d6ea68a6bdbb096bb">
-              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a023a4642b6e40a2d6ea68a6bdbb096bb" class="m-doc-self">getMesh</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; <span class="m-label m-flat m-warning">override</span></span>
             </dt>
             <dd>Returns the distributed mesh.</dd>
             <dt id="adba1954ca59742b5304d71dcc0854c65">
@@ -316,7 +349,7 @@ $(d, i)$
               <span class="m-doc-wrap-bumper">auto <a href="#a2a363690c6d5bdf368b7b5182bc6f8b7" class="m-doc-self">getPullback</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; p,
               Callable&amp;&amp; v) const -&gt; auto</span>
             </dt>
-            <dd>Returns a pullback wrapper for a callable (or <a href="class_rodin_1_1_variational_1_1_function_base.html" class="m-doc">FunctionBase</a>) on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
+            <dd>Returns a pullback wrapper for a callable (or FunctionBase) on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
 <title>
 $(d, i)$
 </title>
@@ -335,10 +368,10 @@ $(d, i)$
 <use x='19.87261' y='0' xlink:href='#eq4-g1-41'/>
 </g>
 </svg>.</dd>
-            <dt id="ac80994529ff16c67dfc1224daa901b64">
+            <dt id="a9e3d24ffd51c6545b840e0e41af2631d">
               <div class="m-doc-template">template&lt;class CallableType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ac80994529ff16c67dfc1224daa901b64" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
-              const CallableType&amp; v) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9e3d24ffd51c6545b840e0e41af2631d" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp;,
+              CallableType&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Returns a pushforward wrapper on local polytope <svg class="m-math" style="width: 2.544em; height: 1.245em; vertical-align: -0.312em;" viewBox="0 -8.966376 24.424936 11.955168">
 <title>
@@ -359,12 +392,20 @@ $(d, i)$
 <use x='19.87261' y='0' xlink:href='#eq5-g1-41'/>
 </g>
 </svg>.</dd>
-            <dt id="ad69edc9efdace02783e2ebab801bd77a">
+            <dt id="a626a64e8c510e1c63a1033c59edfb031">
               <div class="m-doc-template">template&lt;class CallableType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad69edc9efdace02783e2ebab801bd77a" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;,
-              const CallableType&amp; v) const -&gt; auto</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a626a64e8c510e1c63a1033c59edfb031" class="m-doc-self">getPushforward</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;,
+              CallableType&amp;&amp; v) const -&gt; auto</span>
             </dt>
             <dd>Returns a pushforward wrapper for an explicit polytope object.</dd>
+            <dt id="a282c0fc18d1313b48b9d757fe05c1830">
+              <div class="m-doc-template">template&lt;class Coefficient&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a282c0fc18d1313b48b9d757fe05c1830" class="m-doc-self">evaluate</a>(</span><span class="m-doc-wrap"><a href="#a883786ff5269f0c99e98741145efc8f6" class="m-doc">RangeType</a>&amp; out,
+              const std::pair&lt;size_t, <a href="namespace_rodin.html#a68df7958495e405a2df133a40d640251" class="m-doc">Index</a>&gt;&amp; idx,
+              Coefficient&amp;&amp; coefficient,
+              const <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&amp; p) const</span>
+            </dt>
+            <dd>Evaluates the local shard expansion directly at reference coordinates.</dd>
           </dl>
         </section>
         <section>
@@ -375,10 +416,10 @@ $(d, i)$
                 template&lt;size_t K, class Scalar&gt;
               </div>
               <span class="m-doc-wrap-bumper"> Rodin::<wbr />Variational::<wbr />H1&lt;K, Math::<wbr />SpatialVector&lt;Scalar&gt;, Geometry::<wbr />Mesh&lt;Context::<wbr />MPI&gt;&gt;&lt;K, Scalar&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af7391f7326f12695dbf759cdf5b73e8d" class="m-doc-self">H1</a>(</span><span class="m-doc-wrap">std::integral_constant&lt;size_t, K&gt;,
-              const <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">MeshType</a>&amp; mesh,
+              const <a href="#a4ded3263986a36723239faeabaa4a7ed" class="m-doc">MeshType</a>&amp; mesh,
               size_t vdim)</span></span>
             </h3>
-            <p>Constructs a distributed vector-valued <a href="class_rodin_1_1_variational_1_1_h1.html" class="m-doc">H1</a> space.</p>
+            <p>Constructs a distributed vector-valued H1 space.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

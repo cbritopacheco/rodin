@@ -86,6 +86,8 @@
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#derived-classes">Derived classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
@@ -111,17 +113,96 @@
             <dd>Loads an <a href="class_rodin_1_1_m_m_g_1_1_mesh.html" class="m-doc">Rodin::<wbr />MMG::<wbr />Mesh</a> from the MEDIT format.</dd>
           </dl>
         </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a89d37ccaf707b2f375fa3b4e96fb0304">
+              using <a href="#a89d37ccaf707b2f375fa3b4e96fb0304" class="m-doc-self">ObjectType</a> = <a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Rodin::<wbr />Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+            </dt>
+            <dd>Mesh type loaded by this specialization.</dd>
+            <dt id="a8478c9857aedb5621245a798f762a9bd">
+              using <a href="#a8478c9857aedb5621245a798f762a9bd" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_i_o_1_1_mesh_loader_base.html" class="m-doc">MeshLoaderBase</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;
+            </dt>
+            <dd>Parent class type.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a89d37ccaf707b2f375fa3b4e96fb0304" class="m-doc">ObjectType</a>&amp; mesh)</span>
+            </dt>
+            <dd>Constructs a MEDIT loader bound to a local mesh.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-flat m-warning">override</span></span>
             </dt>
-            <dd>Loads object from an input stream.</dd>
+            <dd>Loads a local mesh from a MEDIT input stream.</dd>
+            <dt id="a765791207d61c8b95a052eeac98aea22">
+              <span class="m-doc-wrap-bumper">auto <a href="#a765791207d61c8b95a052eeac98aea22" class="m-doc-self">getline</a>(</span><span class="m-doc-wrap">std::istream&amp; is,
+              std::string&amp; line) -&gt; std::istream&amp;</span>
+            </dt>
+            <dd>Reads one logical line while tracking line numbers.</dd>
+            <dt id="ac9f80fc1cc4132bf482d0ca93efad6f5">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac9f80fc1cc4132bf482d0ca93efad6f5" class="m-doc-self">skipEmptyLines</a>(</span><span class="m-doc-wrap">std::istream&amp; is) -&gt; std::string</span>
+            </dt>
+            <dd>Skips blank lines and returns the next non-empty line.</dd>
+            <dt id="ac5a0239882d20a2848c28f9b5fc7f51e">
+              <span class="m-doc-wrap-bumper">void <a href="#ac5a0239882d20a2848c28f9b5fc7f51e" class="m-doc-self">readVersion</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
+            </dt>
+            <dd>Reads and validates the MEDIT version section.</dd>
+            <dt id="a650875bc7b3c274a32e1927cad78c194">
+              <span class="m-doc-wrap-bumper">void <a href="#a650875bc7b3c274a32e1927cad78c194" class="m-doc-self">readDimension</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
+            </dt>
+            <dd>Reads and validates the MEDIT dimension section.</dd>
+            <dt id="ab6d32101a701150c5a6ecfa0ac8af5f1">
+              <span class="m-doc-wrap-bumper">void <a href="#ab6d32101a701150c5a6ecfa0ac8af5f1" class="m-doc-self">readEntities</a>(</span><span class="m-doc-wrap">std::istream&amp; is)</span>
+            </dt>
+            <dd>Reads vertex and element entities from the MEDIT stream.</dd>
+            <dt id="a549feab362bfeac8228df6bebeb46c18">
+              <span class="m-doc-wrap-bumper">auto <a href="#a549feab362bfeac8228df6bebeb46c18" class="m-doc-self">getCountMap</a>(</span><span class="m-doc-wrap">) -&gt; std::unordered_map&lt;MEDIT::Keyword, size_t&gt;&amp;</span>
+            </dt>
+            <dd>Returns mutable counts collected for each MEDIT keyword.</dd>
+            <dt id="aa12ddee14d7b3ea68d5f2cf16feb883a">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa12ddee14d7b3ea68d5f2cf16feb883a" class="m-doc-self">getCountMap</a>(</span><span class="m-doc-wrap">) const -&gt; const std::unordered_map&lt;MEDIT::Keyword, size_t&gt;&amp;</span>
+            </dt>
+            <dd>Returns counts collected for each MEDIT keyword.</dd>
+            <dt id="af0d606b880f3a37af034184eef859901">
+              <span class="m-doc-wrap-bumper">auto <a href="#af0d606b880f3a37af034184eef859901" class="m-doc-self">getPositionMap</a>(</span><span class="m-doc-wrap">) -&gt; std::unordered_map&lt;MEDIT::Keyword, std::istream::pos_type&gt;&amp;</span>
+            </dt>
+            <dd>Returns mutable stream positions for parsed MEDIT sections.</dd>
+            <dt id="a582c4804a0467ce501f2bee765e0e94f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a582c4804a0467ce501f2bee765e0e94f" class="m-doc-self">getPositionMap</a>(</span><span class="m-doc-wrap">) const -&gt; const std::unordered_map&lt;MEDIT::Keyword, std::istream::pos_type&gt;&amp;</span>
+            </dt>
+            <dd>Returns stream positions for parsed MEDIT sections.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a3238d396f9f9e4a8512bae21b4c6aaab"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />IO::<wbr />MeshLoader&lt;IO::<wbr />FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3238d396f9f9e4a8512bae21b4c6aaab" class="m-doc-self">MeshLoader</a>(</span><span class="m-doc-wrap"><a href="#a89d37ccaf707b2f375fa3b4e96fb0304" class="m-doc">ObjectType</a>&amp; mesh)</span></span>
+            </h3>
+            <p>Constructs a MEDIT loader bound to a local mesh.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">mesh&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Mesh object populated by load().</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a69a36ae58eeb6d0819e38eea87d59767"><div>
             <h3>
               <div class="m-doc-template">
@@ -129,19 +210,18 @@
               </div>
               <span class="m-doc-wrap-bumper">void Rodin::<wbr />IO::<wbr />MeshLoader&lt;IO::<wbr />FileFormat::<wbr />MEDIT, Context::<wbr />Local&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69a36ae58eeb6d0819e38eea87d59767" class="m-doc-self">load</a>(</span><span class="m-doc-wrap">std::istream&amp; is) <span class="m-label m-warning">override</span></span></span>
             </h3>
-            <p>Loads object from an input stream.</p>
+            <p>Loads a local mesh from a MEDIT input stream.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">is&nbsp;<span class="m-label m-flat m-info">in</span></td>
-                  <td>Input stream to read from</td>
+                  <td style="width: 1%">is&nbsp;<span class="m-label m-flat m-danger">in/out</span></td>
+                  <td>Input stream containing MEDIT data.</td>
                 </tr>
               </tbody>
             </table>
-<p>This pure virtual method must be implemented by derived classes to read the object data from the provided stream.</p>
           </div></section>
         </section>
       </div>
