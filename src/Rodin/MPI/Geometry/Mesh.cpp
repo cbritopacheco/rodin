@@ -466,15 +466,11 @@ namespace Rodin::Geometry
   {
     const auto& shard = this->getShard();
     assert(localIdx < shard.getPolytopeCount(dimension));
-    return m_quadratures.get(
-        { dimension, localIdx },
-        shard.getPolytopeCount(dimension),
-        qf,
-        [&]() -> std::unique_ptr<PolytopeQuadrature>
-        {
-          return std::make_unique<PolytopeQuadrature>(
-              *this->getPolytope(dimension, localIdx), qf);
-        });
+    return m_quadratures.get({dimension, localIdx}, shard.getPolytopeCount(dimension), qf,
+      [&]() -> std::unique_ptr<PolytopeQuadrature> {
+        return std::make_unique<PolytopeQuadrature>(
+          *this->getPolytope(dimension, localIdx), qf);
+      });
   }
 
   Polytope::Type MPIMesh::getGeometry(size_t dimension, Index localIdx) const
@@ -2095,11 +2091,9 @@ namespace Rodin::Geometry
                 const Shard::State state =
                   (owner == rank ? Shard::State::Owned : Shard::State::Ghost);
 
-                const Index lv = sb.vertex(
-                  gvid,
-                  sp3(static_cast<Real>(i) + Real(0.5),
-                      static_cast<Real>(j) + Real(0.5),
-                      static_cast<Real>(k) + Real(0.5)),
+                const Index lv = sb.vertex(gvid,
+                  sp3(static_cast<Real>(i) + Real(0.5), static_cast<Real>(j) + Real(0.5),
+                    static_cast<Real>(k) + Real(0.5)),
                   state);
                 gv2lv.emplace(gvid, lv);
 
@@ -2199,34 +2193,28 @@ namespace Rodin::Geometry
               {
                 const Index centerOffset = static_cast<Index>(nx * ny * nz);
 
-                const Index v0 = gv2lv.at(vid3(i,     j,     k,     nx, ny));
-                const Index v1 = gv2lv.at(vid3(i + 1, j,     k,     nx, ny));
-                const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k,     nx, ny));
-                const Index v3 = gv2lv.at(vid3(i,     j + 1, k,     nx, ny));
-                const Index v4 = gv2lv.at(vid3(i,     j,     k + 1, nx, ny));
-                const Index v5 = gv2lv.at(vid3(i + 1, j,     k + 1, nx, ny));
+                const Index v0 = gv2lv.at(vid3(i, j, k, nx, ny));
+                const Index v1 = gv2lv.at(vid3(i + 1, j, k, nx, ny));
+                const Index v2 = gv2lv.at(vid3(i + 1, j + 1, k, nx, ny));
+                const Index v3 = gv2lv.at(vid3(i, j + 1, k, nx, ny));
+                const Index v4 = gv2lv.at(vid3(i, j, k + 1, nx, ny));
+                const Index v5 = gv2lv.at(vid3(i + 1, j, k + 1, nx, ny));
                 const Index v6 = gv2lv.at(vid3(i + 1, j + 1, k + 1, nx, ny));
-                const Index v7 = gv2lv.at(vid3(i,     j + 1, k + 1, nx, ny));
-                const Index c  = gv2lv.at(centerOffset + macroId3(i, j, k, cx, cy));
+                const Index v7 = gv2lv.at(vid3(i, j + 1, k + 1, nx, ny));
+                const Index c = gv2lv.at(centerOffset + macroId3(i, j, k, cx, cy));
 
-                const Index lc0 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 0), Polytope::Type::Pyramid,
-                  makeIndexArray(v0, v1, v2, v3, c), state);
-                const Index lc1 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 1), Polytope::Type::Pyramid,
-                  makeIndexArray(v4, v5, v6, v7, c), state);
-                const Index lc2 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 2), Polytope::Type::Pyramid,
-                  makeIndexArray(v0, v4, v5, v1, c), state);
-                const Index lc3 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 3), Polytope::Type::Pyramid,
-                  makeIndexArray(v1, v5, v6, v2, c), state);
-                const Index lc4 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 4), Polytope::Type::Pyramid,
-                  makeIndexArray(v2, v6, v7, v3, c), state);
-                const Index lc5 = sb.polytope(
-                  3, static_cast<Index>(6 * mid + 5), Polytope::Type::Pyramid,
-                  makeIndexArray(v3, v7, v4, v0, c), state);
+                const Index lc0 = sb.polytope(3, static_cast<Index>(6 * mid + 0),
+                  Polytope::Type::Pyramid, makeIndexArray(v0, v1, v2, v3, c), state);
+                const Index lc1 = sb.polytope(3, static_cast<Index>(6 * mid + 1),
+                  Polytope::Type::Pyramid, makeIndexArray(v4, v5, v6, v7, c), state);
+                const Index lc2 = sb.polytope(3, static_cast<Index>(6 * mid + 2),
+                  Polytope::Type::Pyramid, makeIndexArray(v0, v4, v5, v1, c), state);
+                const Index lc3 = sb.polytope(3, static_cast<Index>(6 * mid + 3),
+                  Polytope::Type::Pyramid, makeIndexArray(v1, v5, v6, v2, c), state);
+                const Index lc4 = sb.polytope(3, static_cast<Index>(6 * mid + 4),
+                  Polytope::Type::Pyramid, makeIndexArray(v2, v6, v7, v3, c), state);
+                const Index lc5 = sb.polytope(3, static_cast<Index>(6 * mid + 5),
+                  Polytope::Type::Pyramid, makeIndexArray(v3, v7, v4, v0, c), state);
 
                 if (state == Shard::State::Owned)
                 {

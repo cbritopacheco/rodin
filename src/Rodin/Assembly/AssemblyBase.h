@@ -262,15 +262,11 @@ namespace Rodin::Assembly
    * Output type encodes, for each slave DOF, the master DOF index array and
    * the matching scalar coefficient vector.
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
-  class AssemblyBase<
-    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Sol1, FES1>,
-      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
-    : public FormLanguage::Base
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
+  class AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> : public FormLanguage::Base
   {
     public:
       /// @brief Scalar value type.

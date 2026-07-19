@@ -419,7 +419,7 @@ namespace Rodin::Variational
         key.geom  = geom;
         key.dim   = d;
         key.cell  = cell;
-        key.qf    = qf;
+        key.qf = qf;
         key.qp    = qp;
         key.valid = true;
 
@@ -447,10 +447,8 @@ namespace Rodin::Variational
         for (size_t alpha = 0; alpha < nscalar; ++alpha)
         {
           for (size_t j = 0; j < d; ++j)
-            ref(j) =
-              qf
-                ? tab->getGradient(qp, alpha)[j]
-                : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
+            ref(j) = qf ? tab->getGradient(qp, alpha)[j]
+                        : feS.getBasis(alpha).template getDerivative<1>(j)(rc);
 
           m_cache.gradPhys[alpha] = JinvT * ref;
         }

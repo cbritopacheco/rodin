@@ -118,11 +118,16 @@ namespace
     const Real T = 0.85;
     const Real tau = t - T * std::floor(t / T);
 
-    if (tau < 0.13)  return 0.0;
-    if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
-    if (tau < 0.281) return 35.0;
-    if (tau < 0.361) return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
-    if (tau < 0.45)  return -20.0;
+    if (tau < 0.13)
+      return 0.0;
+    if (tau < 0.141)
+      return 35.0 * ((tau - 0.13) / 0.011);
+    if (tau < 0.281)
+      return 35.0;
+    if (tau < 0.361)
+      return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
+    if (tau < 0.45)
+      return -20.0;
     return 0.0;
   }
 
@@ -239,7 +244,7 @@ namespace
       Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
 
     cardiacInput.Kat = 9.0e-6;
-    cardiacInput.Kp  = 5.0e-10;
+    cardiacInput.Kp = 5.0e-10;
     cardiacInput.Kar = 1.3e-5;
 
     cardiacInput.cavityCapacity = 5.0e-12;
@@ -281,10 +286,8 @@ namespace
     initialState.par = 11000.0;
     initialState.pd = 10000.0;
     initialState.ec = cardiacInput.initFibDef;
-    initialState.gamma =
-      std::sqrt(std::max<Real>(cardiacInput.initActiveStiffness, 0.0));
-    initialState.beta =
-      (initialState.gamma > 0.0)
+    initialState.gamma = std::sqrt(std::max<Real>(cardiacInput.initActiveStiffness, 0.0));
+    initialState.beta = (initialState.gamma > 0.0)
       ? (cardiacInput.initActiveStress / initialState.gamma)
       : 0.0;
     initialState.kc = initialState.gamma * initialState.gamma;
@@ -463,10 +466,10 @@ TEST(CCMLC2014Test, ExampleSetupCompletesThreeCyclesWithPhysicalState)
   auto cardiacInput = makeExampleCardiacInput();
   Model model(cardiacInput);
   model.setMaxIterations(200)
-       .setAbsoluteTolerance(1e-8)
-       .setRelativeTolerance(1e-8)
-       .setStepTolerance(1e-10)
-       .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   model.initialize(makeExampleInitialState(cardiacInput));
 
@@ -479,8 +482,7 @@ TEST(CCMLC2014Test, ExampleSetupCompletesThreeCyclesWithPhysicalState)
   {
     const auto report = model.step(dt);
     ASSERT_TRUE(report.converged)
-      << "Example setup failed at step " << step
-      << ", t = " << model.getState().t
+      << "Example setup failed at step " << step << ", t = " << model.getState().t
       << ", residual = " << report.finalResidual;
     maxFinalResidual = std::max(maxFinalResidual, report.finalResidual);
     maxIterations = std::max(maxIterations, report.iterations);
@@ -509,10 +511,10 @@ TEST(CCMLC2014Test, ExampleSetupEvolvesWindkesselAndRelaxationStates)
   auto cardiacInput = makeExampleCardiacInput();
   Model model(cardiacInput);
   model.setMaxIterations(200)
-       .setAbsoluteTolerance(1e-8)
-       .setRelativeTolerance(1e-8)
-       .setStepTolerance(1e-10)
-       .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
 
   const auto initialState = makeExampleInitialState(cardiacInput);
   model.initialize(initialState);
@@ -559,18 +561,18 @@ TEST(CCMLC2014Test, NonNewtonianExampleTrajectoryDiffersFromNewtonian)
 
   Model nonNewtonianModel(nonNewtonianInput);
   nonNewtonianModel.setMaxIterations(200)
-                   .setAbsoluteTolerance(1e-8)
-                   .setRelativeTolerance(1e-8)
-                   .setStepTolerance(1e-10)
-                   .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
   nonNewtonianModel.initialize(makeExampleInitialState(nonNewtonianInput));
 
   Model newtonianModel(newtonianInput);
   newtonianModel.setMaxIterations(200)
-                .setAbsoluteTolerance(1e-8)
-                .setRelativeTolerance(1e-8)
-                .setStepTolerance(1e-10)
-                .setDampingFactor(1.0);
+    .setAbsoluteTolerance(1e-8)
+    .setRelativeTolerance(1e-8)
+    .setStepTolerance(1e-10)
+    .setDampingFactor(1.0);
   newtonianModel.initialize(makeExampleInitialState(newtonianInput));
 
   const Real dt = 1e-3;
@@ -579,18 +581,14 @@ TEST(CCMLC2014Test, NonNewtonianExampleTrajectoryDiffersFromNewtonian)
   {
     const auto nonNewtonianReport = nonNewtonianModel.step(dt);
     const auto newtonianReport = newtonianModel.step(dt);
-    ASSERT_TRUE(nonNewtonianReport.converged)
-      << "Non-Newtonian failed at step " << step;
-    ASSERT_TRUE(newtonianReport.converged)
-      << "Newtonian failed at step " << step;
+    ASSERT_TRUE(nonNewtonianReport.converged) << "Non-Newtonian failed at step " << step;
+    ASSERT_TRUE(newtonianReport.converged) << "Newtonian failed at step " << step;
   }
 
   EXPECT_GT(
-      std::abs(nonNewtonianModel.getState().par - newtonianModel.getState().par),
-      10.0);
+    std::abs(nonNewtonianModel.getState().par - newtonianModel.getState().par), 10.0);
   EXPECT_GT(
-      std::abs(nonNewtonianModel.getState().pd - newtonianModel.getState().pd),
-      10.0);
+    std::abs(nonNewtonianModel.getState().pd - newtonianModel.getState().pd), 10.0);
 }
 
 /// @brief Verifies load dependent relaxation accelerates negative activation decay for CCMLC 2014 test.
@@ -618,17 +616,16 @@ TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
   previousState.w = 1.0;
 
   using InputType = Model::Input;
-  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
-      baseSystem(baseInput);
-  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
-      relaxedSystem(relaxedInput);
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType> baseSystem(baseInput);
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType> relaxedSystem(
+    relaxedInput);
 
   Model::EvalData baseData;
   Model::EvalData relaxedData;
   baseSystem.buildEvalData(
-      baseCandidateState, currentState, previousState, currentState.t + dt, dt, baseData);
-  relaxedSystem.buildEvalData(
-      relaxedCandidateState, currentState, previousState, currentState.t + dt, dt, relaxedData);
+    baseCandidateState, currentState, previousState, currentState.t + dt, dt, baseData);
+  relaxedSystem.buildEvalData(relaxedCandidateState, currentState, previousState,
+    currentState.t + dt, dt, relaxedData);
 
   Model::DenseVector baseResidual;
   Model::DenseVector relaxedResidual;
@@ -637,9 +634,8 @@ TEST(CCMLC2014Test, LoadDependentRelaxationAcceleratesNegativeActivationDecay)
 
   EXPECT_GT(relaxedData.active.wCurrent, baseData.active.wCurrent);
   EXPECT_GT(relaxedData.active.relaxationDrive, baseData.active.relaxationDrive);
-  EXPECT_GT(
-      relaxedResidual[CCMLC2014Vars::ActiveStiffness],
-      baseResidual[CCMLC2014Vars::ActiveStiffness]);
+  EXPECT_GT(relaxedResidual[CCMLC2014Vars::ActiveStiffness],
+    baseResidual[CCMLC2014Vars::ActiveStiffness]);
 }
 
 /// @brief Verifies dynamic jacobian matches finite difference for CCMLC 2014 test.
@@ -676,15 +672,15 @@ TEST(CCMLC2014Test, WindkesselResidualAndJacobianUseBranchFlowsAndBDF2)
   previousState.pd = 7.8e3;
 
   using InputType = Model::Input;
-  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType>
-      dynamicSystem(cardiacInput);
+  Heart::CCMLC2014::Numerics::DynamicSystem<PassiveLaw, InputType> dynamicSystem(
+    cardiacInput);
 
   const Real dt = 1e-3;
   const Real nextTime = currentState.t + dt;
 
   Model::EvalData evaluationData;
   dynamicSystem.buildEvalData(
-      candidateState, currentState, previousState, nextTime, dt, evaluationData);
+    candidateState, currentState, previousState, nextTime, dt, evaluationData);
 
   Model::DenseVector residual;
   dynamicSystem.evaluateResidual(evaluationData, residual);
@@ -693,68 +689,40 @@ TEST(CCMLC2014Test, WindkesselResidualAndJacobianUseBranchFlowsAndBDF2)
   dynamicSystem.evaluateJacobian(evaluationData, jacobian, dt);
 
   const Real a0 = 1.5 / dt;
-  const Real parDot =
-      a0 * candidateState[CCMLC2014Vars::ArterialPressure]
-    - 2.0 / dt * currentState.par
-    + 0.5 / dt * previousState.par;
-  const Real pdDot =
-      a0 * candidateState[CCMLC2014Vars::DistalPressure]
-    - 2.0 / dt * currentState.pd
-    + 0.5 / dt * previousState.pd;
+  const Real parDot = a0 * candidateState[CCMLC2014Vars::ArterialPressure] -
+    2.0 / dt * currentState.par + 0.5 / dt * previousState.par;
+  const Real pdDot = a0 * candidateState[CCMLC2014Vars::DistalPressure] -
+    2.0 / dt * currentState.pd + 0.5 / dt * previousState.pd;
 
-  const Real expectedOutflow =
-    cardiacInput.Kar
-    * (candidateState[CCMLC2014Vars::VentricularPressure]
-       - candidateState[CCMLC2014Vars::ArterialPressure]);
-  const Real expectedProximalFlow =
-    (candidateState[CCMLC2014Vars::ArterialPressure]
-     - candidateState[CCMLC2014Vars::DistalPressure]) / cardiacInput.Rp
-    - expectedOutflow;
-  const Real expectedDistalFlow =
-    (candidateState[CCMLC2014Vars::DistalPressure]
-     - candidateState[CCMLC2014Vars::ArterialPressure]) / cardiacInput.Rp
-    - (cardiacInput.pSv(nextTime)
-       - candidateState[CCMLC2014Vars::DistalPressure]) / cardiacInput.Rd;
+  const Real expectedOutflow = cardiacInput.Kar *
+    (candidateState[CCMLC2014Vars::VentricularPressure] -
+      candidateState[CCMLC2014Vars::ArterialPressure]);
+  const Real expectedProximalFlow = (candidateState[CCMLC2014Vars::ArterialPressure] -
+                                      candidateState[CCMLC2014Vars::DistalPressure]) /
+      cardiacInput.Rp -
+    expectedOutflow;
+  const Real expectedDistalFlow = (candidateState[CCMLC2014Vars::DistalPressure] -
+                                    candidateState[CCMLC2014Vars::ArterialPressure]) /
+      cardiacInput.Rp -
+    (cardiacInput.pSv(nextTime) - candidateState[CCMLC2014Vars::DistalPressure]) /
+      cardiacInput.Rd;
 
-  EXPECT_NEAR(
-      residual[CCMLC2014Vars::ArterialPressure],
-      cardiacInput.Cp * parDot + expectedProximalFlow,
-      1e-13);
-  EXPECT_NEAR(
-      residual[CCMLC2014Vars::DistalPressure],
-      cardiacInput.Cd * pdDot + expectedDistalFlow,
-      1e-13);
+  EXPECT_NEAR(residual[CCMLC2014Vars::ArterialPressure],
+    cardiacInput.Cp * parDot + expectedProximalFlow, 1e-13);
+  EXPECT_NEAR(residual[CCMLC2014Vars::DistalPressure],
+    cardiacInput.Cd * pdDot + expectedDistalFlow, 1e-13);
 
   EXPECT_NEAR(
-      jacobian(
-        CCMLC2014Vars::ArterialPressure,
-        CCMLC2014Vars::VentricularPressure),
-      -cardiacInput.Kar,
-      1e-14);
-  EXPECT_NEAR(
-      jacobian(
-        CCMLC2014Vars::ArterialPressure,
-        CCMLC2014Vars::ArterialPressure),
-      cardiacInput.Cp * a0 + 1.0 / cardiacInput.Rp + cardiacInput.Kar,
-      1e-14);
-  EXPECT_NEAR(
-      jacobian(
-        CCMLC2014Vars::ArterialPressure,
-        CCMLC2014Vars::DistalPressure),
-      -1.0 / cardiacInput.Rp,
-      1e-14);
-  EXPECT_NEAR(
-      jacobian(
-        CCMLC2014Vars::DistalPressure,
-        CCMLC2014Vars::ArterialPressure),
-      -1.0 / cardiacInput.Rp,
-      1e-14);
-  EXPECT_NEAR(
-      jacobian(
-        CCMLC2014Vars::DistalPressure,
-        CCMLC2014Vars::DistalPressure),
-      cardiacInput.Cd * a0 + 1.0 / cardiacInput.Rp + 1.0 / cardiacInput.Rd,
-      1e-14);
+    jacobian(CCMLC2014Vars::ArterialPressure, CCMLC2014Vars::VentricularPressure),
+    -cardiacInput.Kar, 1e-14);
+  EXPECT_NEAR(jacobian(CCMLC2014Vars::ArterialPressure, CCMLC2014Vars::ArterialPressure),
+    cardiacInput.Cp * a0 + 1.0 / cardiacInput.Rp + cardiacInput.Kar, 1e-14);
+  EXPECT_NEAR(jacobian(CCMLC2014Vars::ArterialPressure, CCMLC2014Vars::DistalPressure),
+    -1.0 / cardiacInput.Rp, 1e-14);
+  EXPECT_NEAR(jacobian(CCMLC2014Vars::DistalPressure, CCMLC2014Vars::ArterialPressure),
+    -1.0 / cardiacInput.Rp, 1e-14);
+  EXPECT_NEAR(jacobian(CCMLC2014Vars::DistalPressure, CCMLC2014Vars::DistalPressure),
+    cardiacInput.Cd * a0 + 1.0 / cardiacInput.Rp + 1.0 / cardiacInput.Rd, 1e-14);
 }
 
 /// @brief Verifies non newtonian windkessel path produces finite consistent jacobian for CCMLC 2014 test by checking true predicates.
@@ -782,12 +750,7 @@ TEST(CCMLC2014Test, NonNewtonianWindkesselPathProducesFiniteConsistentJacobian)
   Model::State previousState = makePreviousState(currentState);
 
   const Real relativeError = computeDynamicJacobianRelativeError(
-      cardiacInput,
-      candidateState,
-      currentState,
-      previousState,
-      1e-3,
-      1e-7);
+    cardiacInput, candidateState, currentState, previousState, 1e-3, 1e-7);
   EXPECT_TRUE(std::isfinite(relativeError));
   EXPECT_LT(relativeError, 3e-3);
 }

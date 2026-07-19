@@ -143,15 +143,14 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Rodin_Variational_P1QuadratureRule, VectorMass_MatchesGridFunctionLinearForm)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     const size_t vdim = 2;
     P1<Math::SpatialVector<Real>> fes(mesh, vdim);
@@ -177,17 +176,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    ScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     const size_t vdim = 2;
     P1<Math::SpatialVector<Real>> fes(mesh, vdim);
@@ -200,7 +199,8 @@ namespace Rodin::Tests::Unit
     for (Eigen::Index i = 0; i < x.size(); ++i)
       x(i) = static_cast<Real>(i + 1);
 
-    RealFunction coeff([](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
+    RealFunction coeff(
+      [](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
 
     BilinearForm mass(u, v);
     mass = Integral(Dot(Mult(coeff, u), v));
@@ -215,17 +215,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies outer scalar weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, OuterScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    OuterScalarWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     const size_t vdim = 2;
     P1<Math::SpatialVector<Real>> fes(mesh, vdim);
@@ -238,7 +238,8 @@ namespace Rodin::Tests::Unit
     for (Eigen::Index i = 0; i < x.size(); ++i)
       x(i) = static_cast<Real>(i + 1);
 
-    RealFunction coeff([](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
+    RealFunction coeff(
+      [](const Geometry::Point& p) { return 1.0 + p.x() + 2.0 * p.y(); });
 
     BilinearForm mass(u, v);
     mass = Integral(coeff * Dot(u, v));
@@ -253,17 +254,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies matrix weighted vector mass matches grid function linear form for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, MatrixWeightedVectorMass_MatchesGridFunctionLinearForm)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    MatrixWeightedVectorMass_MatchesGridFunctionLinearForm)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     const size_t vdim = 2;
     P1<Math::SpatialVector<Real>> fes(mesh, vdim);
@@ -296,17 +297,17 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Verifies vector potential constant kernel uses separate trial and test basis values for variational P1 quadrature rule by checking tolerance-based numerical results, exact expected values, form assembly.
-  TEST(Rodin_Variational_P1QuadratureRule, VectorPotentialConstantKernel_UsesSeparateTrialAndTestBasisValues)
+  TEST(Rodin_Variational_P1QuadratureRule,
+    VectorPotentialConstantKernel_UsesSeparateTrialAndTestBasisValues)
   {
-    Mesh mesh =
-      Mesh<Rodin::Context::Local>::Builder()
-      .initialize(2)
-      .nodes(3)
-      .vertex({0, 0})
-      .vertex({1, 0})
-      .vertex({0, 1})
-      .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
-      .finalize();
+    Mesh mesh = Mesh<Rodin::Context::Local>::Builder()
+                  .initialize(2)
+                  .nodes(3)
+                  .vertex({0, 0})
+                  .vertex({1, 0})
+                  .vertex({0, 1})
+                  .polytope(Polytope::Type::Triangle, {{0, 1, 2}})
+                  .finalize();
 
     const size_t vdim = 2;
     P1<Math::SpatialVector<Real>> fes(mesh, vdim);
@@ -323,15 +324,13 @@ namespace Rodin::Tests::Unit
     scalarProblem.assemble();
     const auto& scalarA = scalarProblem.getLinearSystem().getOperator();
 
-    auto kernel =
-      [](Math::SpatialMatrix<Real>& out, const Point&, const Point&)
-      {
-        out.resize(2, 2);
-        out(0, 0) = 2.0;
-        out(0, 1) = -3.0;
-        out(1, 0) = 5.0;
-        out(1, 1) = 7.0;
-      };
+    auto kernel = [](Math::SpatialMatrix<Real>& out, const Point&, const Point&) {
+      out.resize(2, 2);
+      out(0, 0) = 2.0;
+      out(0, 1) = -3.0;
+      out(1, 0) = 5.0;
+      out(1, 1) = 7.0;
+    };
 
     DenseProblem problem(u, v);
     problem = Integral(Potential(kernel, u), v);
@@ -352,15 +351,13 @@ namespace Rodin::Tests::Unit
         {
           for (size_t trialComp = 0; trialComp < vdim; ++trialComp)
           {
-            const Eigen::Index row =
-              static_cast<Eigen::Index>(testVertex + testComp * 3);
+            const Eigen::Index row = static_cast<Eigen::Index>(testVertex + testComp * 3);
             const Eigen::Index col =
               static_cast<Eigen::Index>(trialVertex + trialComp * 3);
-            EXPECT_NEAR(
-              A(row, col),
-              scalarA(
-                static_cast<Eigen::Index>(testVertex),
-                static_cast<Eigen::Index>(trialVertex)) * k[testComp][trialComp],
+            EXPECT_NEAR(A(row, col),
+              scalarA(static_cast<Eigen::Index>(testVertex),
+                static_cast<Eigen::Index>(trialVertex)) *
+                k[testComp][trialComp],
               1e-12);
           }
         }

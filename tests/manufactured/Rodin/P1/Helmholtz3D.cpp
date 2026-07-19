@@ -69,7 +69,7 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   };
 
   /// @brief Helper used by the tests to Helmholtz 3 D Test 8.
-  using Helmholtz3DTest8  = Helmholtz3DFixture<8>;
+  using Helmholtz3DTest8 = Helmholtz3DFixture<8>;
   /// @brief Helper used by the tests to Helmholtz 3 D Test 16.
   using Helmholtz3DTest16 = Helmholtz3DFixture<16>;
   /// @brief Helper used by the tests to Helmholtz 3 D Test 32.
@@ -301,35 +301,17 @@ namespace Rodin::Tests::Manufactured::Helmholtz3D
   }
 
   /// @brief Instantiates Helmholtz 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Helmholtz3DTest8,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Helmholtz3DTest8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Helmholtz 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Helmholtz3DTest16,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Helmholtz3DTest16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Helmholtz 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Helmholtz3DTest32,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Helmholtz3DTest32,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

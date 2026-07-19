@@ -35,7 +35,8 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
     void SetUp() override
     {
       const auto geom = GetParam();
-      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron || geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
+      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron ||
+        geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
       {
         m_mesh = Mesh().UniformGrid(geom, { NX, NY, NZ });
         m_mesh.scale(1.0 / (NX - 1));
@@ -239,13 +240,7 @@ namespace Rodin::Tests::Manufactured::P0P1Mixed
   );
 
   /// @brief Instantiates Manufactured P0 P1 Mixed Test 6 x 6 x 6 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_P0P1_Mixed_Test_6x6x6,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_P0P1_Mixed_Test_6x6x6,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

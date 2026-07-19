@@ -396,9 +396,7 @@ namespace Rodin::Variational
           const size_t nv = fe.getCount();
 
           const auto& rc =
-            qf
-              ? qf->getPoint(ip.getIndex())
-              : pt.getReferenceCoordinates();
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           // J^{-T} at this integration point (constant for affine maps)
           const auto JinvT = pt.getJacobianInverse().transpose();

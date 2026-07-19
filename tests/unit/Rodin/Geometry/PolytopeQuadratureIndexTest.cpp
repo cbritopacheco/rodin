@@ -145,9 +145,7 @@ namespace Rodin::Tests::Unit
     const auto& quadrature = moved.getQuadrature(2, 0, qf);
     const auto& point = quadrature.getPoint(0);
 
-    EXPECT_EQ(
-      &point.getPolytope().getMesh(),
-      &static_cast<const MeshBase&>(moved));
+    EXPECT_EQ(&point.getPolytope().getMesh(), &static_cast<const MeshBase&>(moved));
   }
 
   /// @brief Verifies mesh move assignment drops stale entries for geometry polytope quadrature index by checking exact expected values, move semantics.
@@ -163,9 +161,7 @@ namespace Rodin::Tests::Unit
     const auto& quadrature = moved.getQuadrature(2, 0, qf);
     const auto& point = quadrature.getPoint(0);
 
-    EXPECT_EQ(
-      &point.getPolytope().getMesh(),
-      &static_cast<const MeshBase&>(moved));
+    EXPECT_EQ(&point.getPolytope().getMesh(), &static_cast<const MeshBase&>(moved));
   }
 
   /// @brief Verifies throws on invalid dimension for geometry polytope quadrature index by checking exception behavior.

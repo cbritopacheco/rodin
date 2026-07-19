@@ -37,12 +37,9 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     constexpr Attribute BottomAttribute = 3;
     constexpr Attribute TopAttribute = 4;
 
-    void labelBoundaryAttributes(
-      Geometry::Mesh<Context::Local>& mesh,
-      Attribute left = LeftAttribute,
-      Attribute right = RightAttribute,
-      Attribute bottom = BottomAttribute,
-      Attribute top = TopAttribute)
+    void labelBoundaryAttributes(Geometry::Mesh<Context::Local>& mesh,
+      Attribute left = LeftAttribute, Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute, Attribute top = TopAttribute)
     {
       for (auto it = mesh.getBoundary(); !it.end(); ++it)
       {
@@ -200,7 +197,8 @@ namespace Rodin::Tests::Manufactured::H1Poisson
   }
 
   /// @brief Verifies poisson nonhomogeneous dirichlet H1 2 labeled boundary for manufactured poisson H1 test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
-  TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_NonhomogeneousDirichlet_H1_2_LabeledBoundary)
+  TEST_P(Manufactured_Poisson_H1_Test_16x16,
+    Poisson_NonhomogeneousDirichlet_H1_2_LabeledBoundary)
   {
     auto pi = Rodin::Math::Constants::pi();
 
@@ -212,19 +210,15 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     H1 vh(order, mesh);
 
     TrialFunction u(vh);
-    TestFunction  v(vh);
+    TestFunction v(vh);
 
     const auto solution = cos(pi * F::x) * cos(pi * F::y);
     const auto f = 2 * pi * pi * solution;
 
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, solution).on(
-                LeftAttribute,
-                RightAttribute,
-                BottomAttribute,
-                TopAttribute);
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) +
+      DirichletBC(u, solution)
+        .on(LeftAttribute, RightAttribute, BottomAttribute, TopAttribute);
     CG(poisson).solve();
 
     GridFunction diff(vh);

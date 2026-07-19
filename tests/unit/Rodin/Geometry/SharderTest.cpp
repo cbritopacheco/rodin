@@ -1242,10 +1242,8 @@ namespace Rodin::Tests::Unit
   TEST(Rodin_Geometry_Sharder, AllUniformGrid3D_MultiplePartitions)
   {
     // Test all 3D uniform grid types with multiple partition counts
-    for (Polytope::Type type : { Polytope::Type::Tetrahedron,
-                                  Polytope::Type::Hexahedron,
-                                  Polytope::Type::Pyramid,
-                                  Polytope::Type::Wedge })
+    for (Polytope::Type type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       auto mesh = makeShardableMesh(type, {3, 3, 3});
       const size_t D = mesh.getDimension();

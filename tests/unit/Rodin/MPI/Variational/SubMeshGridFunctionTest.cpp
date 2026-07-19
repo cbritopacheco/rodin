@@ -51,14 +51,13 @@ using namespace Rodin::Variational;
 // ---------------------------------------------------------------------------
 // Global MPI handles (initialized in main())
 // ---------------------------------------------------------------------------
-static boost::mpi::environment*  g_env   = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
   static Mesh<Context::Local> makeShardableMesh(
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    Polytope::Type type, std::initializer_list<size_t> shape)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
     const size_t D = mesh.getDimension();
@@ -76,9 +75,7 @@ namespace
   }
 
   static Mesh<Context::MPI> distributeFromRoot(
-      const Context::MPI& ctx,
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    const Context::MPI& ctx, Polytope::Type type, std::initializer_list<size_t> shape)
   {
     const auto& comm = ctx.getCommunicator();
     Sharder<Context::MPI> sharder(ctx);
@@ -97,16 +94,20 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Tetrahedron: return "Tetrahedron";
-      case Polytope::Type::Hexahedron:  return "Hexahedron";
-      case Polytope::Type::Pyramid:     return "Pyramid";
-      case Polytope::Type::Wedge:       return "Wedge";
-      default:                          return "Other";
+      case Polytope::Type::Tetrahedron:
+        return "Tetrahedron";
+      case Polytope::Type::Hexahedron:
+        return "Hexahedron";
+      case Polytope::Type::Pyramid:
+        return "Pyramid";
+      case Polytope::Type::Wedge:
+        return "Wedge";
+      default:
+        return "Other";
     }
   }
 
-  static SubMesh<Context::MPI> makeBoundarySubMesh(
-      const Mesh<Context::MPI>& mesh)
+  static SubMesh<Context::MPI> makeBoundarySubMesh(const Mesh<Context::MPI>& mesh)
   {
     const size_t faceDim = mesh.getDimension() - 1;
     SubMesh<Context::MPI>::Builder builder;
@@ -116,8 +117,7 @@ namespace
     return builder.finalize();
   }
 
-  static SubMesh<Context::MPI> makeCellSubMesh(
-      const Mesh<Context::MPI>& mesh)
+  static SubMesh<Context::MPI> makeCellSubMesh(const Mesh<Context::MPI>& mesh)
   {
     const size_t cellDim = mesh.getDimension();
     const auto& shard = mesh.getShard();
@@ -132,8 +132,7 @@ namespace
   }
 
   static SubMesh<Context::MPI> makeSparseBoundarySubMesh(
-      const Mesh<Context::MPI>& mesh,
-      const boost::mpi::communicator& comm)
+    const Mesh<Context::MPI>& mesh, const boost::mpi::communicator& comm)
   {
     const size_t faceDim = mesh.getDimension() - 1;
     const auto& shard = mesh.getShard();
@@ -184,7 +183,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeSparseBoundarySubMesh(mesh, world);
+    auto sub = makeSparseBoundarySubMesh(mesh, world);
 
     const size_t faceDim = mesh.getDimension() - 1;
     ASSERT_EQ(sub.getDimension(), faceDim);
@@ -218,7 +217,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0g<Real, Mesh<Context::MPI>> fes(sub);
     EXPECT_EQ(fes.getSize(), 1u);
@@ -258,7 +257,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     const size_t vdim = 3;
     P0g<Math::SpatialVector<Real>, Mesh<Context::MPI>> fes(sub, vdim);
@@ -288,8 +287,8 @@ namespace Rodin::Tests::Unit
       for (size_t k = 0; k < vdim; ++k)
       {
         EXPECT_EQ(dofs[k], static_cast<Index>(k));
-        EXPECT_EQ(fes.getGlobalIndex({d, i}, static_cast<Index>(k)),
-                  static_cast<Index>(k));
+        EXPECT_EQ(
+          fes.getGlobalIndex({d, i}, static_cast<Index>(k)), static_cast<Index>(k));
       }
     }
   }
@@ -305,7 +304,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeSparseBoundarySubMesh(mesh, world);
+    auto sub = makeSparseBoundarySubMesh(mesh, world);
 
     const size_t d = sub.getDimension();
     ASSERT_EQ(sub.getPolytopeCount(d), 1u);
@@ -330,15 +329,12 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    for (auto type :
-         { Polytope::Type::Tetrahedron,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Wedge })
+    for (auto type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
       auto mesh = distributeFromRoot(ctx, type, {4, 3, 3});
-      auto sub  = makeBoundarySubMesh(mesh);
+      auto sub = makeBoundarySubMesh(mesh);
 
       ASSERT_EQ(sub.getDimension(), 2u);
 
@@ -374,7 +370,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -394,7 +390,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
     EXPECT_EQ(fes.getVectorDimension(), 1u);
@@ -412,12 +408,12 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard  = sub.getShard();
-    const size_t fDim  = sub.getDimension();
+    const auto& shard = sub.getShard();
+    const size_t fDim = sub.getDimension();
     const size_t nFace = shard.getCellCount();
 
     size_t ownedCount = 0;
@@ -446,22 +442,21 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard  = sub.getShard();
-    const size_t fDim  = sub.getDimension();
+    const auto& shard = sub.getShard();
+    const size_t fDim = sub.getDimension();
     const size_t nFace = shard.getCellCount();
 
     for (size_t i = 0; i < nFace; ++i)
     {
       const auto& dofs = fes.getDOFs(fDim, static_cast<Index>(i));
       ASSERT_EQ(dofs.size(), 1u);
-      const Index via_dofs   = dofs[0];
-      const Index via_global = fes.getGlobalIndex({ fDim, static_cast<Index>(i) }, 0);
-      EXPECT_EQ(via_dofs, via_global)
-          << "Mismatch for face " << i;
+      const Index via_dofs = dofs[0];
+      const Index via_global = fes.getGlobalIndex({fDim, static_cast<Index>(i)}, 0);
+      EXPECT_EQ(via_dofs, via_global) << "Mismatch for face " << i;
     }
   }
 
@@ -476,12 +471,12 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard  = sub.getShard();
-    const size_t fDim  = sub.getDimension();
+    const auto& shard = sub.getShard();
+    const size_t fDim = sub.getDimension();
     const size_t nFace = shard.getCellCount();
 
     // Cache getSize() once — it does all_reduce internally and must not be
@@ -494,7 +489,7 @@ namespace Rodin::Tests::Unit
       for (const Index d : dofs)
       {
         EXPECT_LT(d, globalSize)
-            << "Global P0 DOF " << d << " out of range for local face " << i;
+          << "Global P0 DOF " << d << " out of range for local face " << i;
       }
     }
   }
@@ -515,7 +510,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -538,13 +533,13 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     P0<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard     = sub.getShard();
-    const size_t cellDim  = sub.getDimension();
-    const size_t nCells   = shard.getCellCount();
+    const auto& shard = sub.getShard();
+    const size_t cellDim = sub.getDimension();
+    const size_t nCells = shard.getCellCount();
 
     std::vector<Index> ownedDofs;
     for (size_t i = 0; i < nCells; ++i)
@@ -571,10 +566,10 @@ namespace Rodin::Tests::Unit
 
       std::sort(combined.begin(), combined.end());
       const size_t uniqueCount = static_cast<size_t>(
-          std::unique(combined.begin(), combined.end()) - combined.begin());
+        std::unique(combined.begin(), combined.end()) - combined.begin());
 
       EXPECT_EQ(uniqueCount, combined.size())
-          << "Duplicate global P0 DOF indices on cell SubMesh.";
+        << "Duplicate global P0 DOF indices on cell SubMesh.";
       EXPECT_EQ(combined.size(), globalCells);
     }
   }
@@ -593,15 +588,12 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    for (auto type :
-         { Polytope::Type::Tetrahedron,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Wedge })
+    for (auto type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
       auto mesh = distributeFromRoot(ctx, type, {4, 3, 3});
-      auto sub  = makeBoundarySubMesh(mesh);
+      auto sub = makeBoundarySubMesh(mesh);
 
       P0<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -626,7 +618,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -646,7 +638,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -676,7 +668,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -691,7 +683,7 @@ namespace Rodin::Tests::Unit
       for (const Index d : dofs)
       {
         EXPECT_LT(d, globalSize)
-            << "Global P1 DOF " << d << " out of range for local vertex " << i;
+          << "Global P1 DOF " << d << " out of range for local vertex " << i;
       }
     }
   }
@@ -712,7 +704,7 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
@@ -733,12 +725,12 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeCellSubMesh(mesh);
+    auto sub = makeCellSubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard    = sub.getShard();
-    const size_t nVerts  = shard.getVertexCount();
+    const auto& shard = sub.getShard();
+    const size_t nVerts = shard.getVertexCount();
 
     std::vector<Index> ownedDofs;
     for (size_t i = 0; i < nVerts; ++i)
@@ -764,10 +756,10 @@ namespace Rodin::Tests::Unit
 
       std::sort(combined.begin(), combined.end());
       const size_t uniqueCount = static_cast<size_t>(
-          std::unique(combined.begin(), combined.end()) - combined.begin());
+        std::unique(combined.begin(), combined.end()) - combined.begin());
 
       EXPECT_EQ(uniqueCount, combined.size())
-          << "Duplicate global P1 DOF indices on cell SubMesh.";
+        << "Duplicate global P1 DOF indices on cell SubMesh.";
       EXPECT_EQ(combined.size(), globalVerts);
     }
   }
@@ -793,11 +785,11 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard   = sub.getShard();
+    const auto& shard = sub.getShard();
     const size_t nVerts = shard.getVertexCount();
 
     std::vector<Index> ownedDofs;
@@ -825,12 +817,12 @@ namespace Rodin::Tests::Unit
 
       std::sort(combined.begin(), combined.end());
       const size_t uniqueCount = static_cast<size_t>(
-          std::unique(combined.begin(), combined.end()) - combined.begin());
+        std::unique(combined.begin(), combined.end()) - combined.begin());
 
       EXPECT_EQ(uniqueCount, combined.size())
-          << "Duplicate global P1 DOF indices on boundary SubMesh.";
+        << "Duplicate global P1 DOF indices on boundary SubMesh.";
       EXPECT_EQ(combined.size(), globalBoundaryVerts)
-          << "Owned P1 DOF count does not match global boundary vertex count.";
+        << "Owned P1 DOF count does not match global boundary vertex count.";
     }
   }
 
@@ -850,8 +842,8 @@ namespace Rodin::Tests::Unit
    * must produce valid DOFs even when constructed after P0 cell and P0
    * boundary SubMesh spaces.
    */
-  TEST(MPIP1FESSubMesh,
-       Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF)
+  TEST(
+    MPIP1FESSubMesh, Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
@@ -861,22 +853,22 @@ namespace Rodin::Tests::Unit
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {4, 4});
 
     // Build both SubMeshes.
-    auto cellSub     = makeCellSubMesh(mesh);
+    auto cellSub = makeCellSubMesh(mesh);
     auto boundarySub = makeBoundarySubMesh(mesh);
 
     // Construct P0 on cell SubMesh first (this was the source of stale sends).
     P0<Real, Mesh<Context::MPI>> p0cell(cellSub);
-    (void) p0cell;
+    (void)p0cell;
 
     // Construct P0 on boundary SubMesh (additional potential source of stale sends).
     P0<Real, Mesh<Context::MPI>> p0bnd(boundarySub);
-    (void) p0bnd;
+    (void)p0bnd;
 
     // Now construct P1 on boundary SubMesh.  After the symmetric-drain fix,
     // this must not consume any stale P0 messages and must produce valid DOFs.
     P1<Real, Mesh<Context::MPI>> p1bnd(boundarySub);
 
-    const auto& shard   = boundarySub.getShard();
+    const auto& shard = boundarySub.getShard();
     const size_t nVerts = shard.getVertexCount();
     const size_t globalSize = p1bnd.getSize();
 
@@ -886,9 +878,8 @@ namespace Rodin::Tests::Unit
       for (const Index d : dofs)
       {
         EXPECT_LT(d, globalSize)
-            << "P1 boundary SubMesh DOF " << d
-            << " out of range for local vertex " << i
-            << " (constructed after P0 cell and boundary SubMesh spaces).";
+          << "P1 boundary SubMesh DOF " << d << " out of range for local vertex " << i
+          << " (constructed after P0 cell and boundary SubMesh spaces).";
       }
     }
   }
@@ -897,34 +888,31 @@ namespace Rodin::Tests::Unit
    * @brief Same regression test over all supported 3D cell meshes.
    */
   TEST(MPIP1FESSubMesh,
-       Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_All3D)
+    Regression_P0CellThenP1Boundary_AllLocalVertices_HaveValidGlobalDOF_All3D)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    for (auto type :
-         { Polytope::Type::Tetrahedron,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Wedge })
+    for (auto type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
       auto mesh = distributeFromRoot(ctx, type, {4, 3, 3});
 
-      auto cellSub     = makeCellSubMesh(mesh);
+      auto cellSub = makeCellSubMesh(mesh);
       auto boundarySub = makeBoundarySubMesh(mesh);
 
       P0<Real, Mesh<Context::MPI>> p0cell(cellSub);
-      (void) p0cell;
+      (void)p0cell;
 
       P0<Real, Mesh<Context::MPI>> p0bnd(boundarySub);
-      (void) p0bnd;
+      (void)p0bnd;
 
       P1<Real, Mesh<Context::MPI>> p1bnd(boundarySub);
 
-      const auto& shard   = boundarySub.getShard();
+      const auto& shard = boundarySub.getShard();
       const size_t nVerts = shard.getVertexCount();
       const size_t globalSize = p1bnd.getSize();
 
@@ -934,8 +922,7 @@ namespace Rodin::Tests::Unit
         for (const Index d : dofs)
         {
           EXPECT_LT(d, globalSize)
-              << "P1 boundary SubMesh DOF " << d
-              << " out of range for local vertex " << i;
+            << "P1 boundary SubMesh DOF " << d << " out of range for local vertex " << i;
         }
       }
     }
@@ -956,8 +943,8 @@ namespace Rodin::Tests::Unit
    *
    * Passing this test requires the 2-round ownership fix in SubMesh::finalize.
    */
-  TEST(MPIP1FESSubMesh,
-       Regression_OrphanVertex_AllLocalVertices_HaveValidGlobalDOF_Triangle)
+  TEST(
+    MPIP1FESSubMesh, Regression_OrphanVertex_AllLocalVertices_HaveValidGlobalDOF_Triangle)
   {
     const auto& world = *g_world;
     if (world.size() > 4)
@@ -968,11 +955,11 @@ namespace Rodin::Tests::Unit
     // A finer 8×8 mesh increases the probability of hitting corner vertices
     // where the volume-partition owner is not adjacent to any boundary face.
     auto mesh = distributeFromRoot(ctx, Polytope::Type::Triangle, {8, 8});
-    auto sub  = makeBoundarySubMesh(mesh);
+    auto sub = makeBoundarySubMesh(mesh);
 
     P1<Real, Mesh<Context::MPI>> fes(sub);
 
-    const auto& shard   = sub.getShard();
+    const auto& shard = sub.getShard();
     const size_t nVerts = shard.getVertexCount();
     const size_t globalSize = fes.getSize();
 
@@ -982,8 +969,8 @@ namespace Rodin::Tests::Unit
       for (const Index d : dofs)
       {
         EXPECT_LT(d, globalSize)
-            << "P1 DOF " << d << " out of range for local vertex " << i
-            << " (orphan-vertex regression, 8x8 triangle mesh).";
+          << "P1 DOF " << d << " out of range for local vertex " << i
+          << " (orphan-vertex regression, 8x8 triangle mesh).";
       }
     }
 
@@ -1012,12 +999,12 @@ namespace Rodin::Tests::Unit
 
       std::sort(combined.begin(), combined.end());
       const size_t uniqueCount = static_cast<size_t>(
-          std::unique(combined.begin(), combined.end()) - combined.begin());
+        std::unique(combined.begin(), combined.end()) - combined.begin());
 
       EXPECT_EQ(uniqueCount, combined.size())
-          << "Duplicate owned P1 DOFs on 8x8 boundary SubMesh (orphan-vertex regression).";
+        << "Duplicate owned P1 DOFs on 8x8 boundary SubMesh (orphan-vertex regression).";
       EXPECT_EQ(combined.size(), globalBoundaryVerts)
-          << "Owned P1 DOF count does not match global boundary vertex count.";
+        << "Owned P1 DOF count does not match global boundary vertex count.";
     }
   }
 }
@@ -1029,7 +1016,7 @@ int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
-  g_env   = &env;
+  g_env = &env;
   g_world = &world;
 
   ::testing::InitGoogleTest(&argc, argv);

@@ -439,7 +439,9 @@ namespace
         case Polytope::Type::Quadrilateral: g = "Quadrilateral"; break;
         case Polytope::Type::Tetrahedron:   g = "Tetrahedron";   break;
         case Polytope::Type::Hexahedron:    g = "Hexahedron";    break;
-        case Polytope::Type::Pyramid:       g = "Pyramid";       break;
+        case Polytope::Type::Pyramid:
+          g = "Pyramid";
+          break;
         case Polytope::Type::Wedge:         g = "Wedge";         break;
         default:                            g = "Unknown";        break;
       }
@@ -520,19 +522,12 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
   }
 
   /// @brief Instantiates H1 Poisson 3 D Workflow 1 over the All Geometries And Degrees parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1Poisson3D_Workflow1,
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1Poisson3D_Workflow1,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)),
+    ParamName{});
 
   // =========================================================================
   // Workflow 2 — Construct → Shard → Distribute → Reconcile → Assemble → Solve
@@ -598,19 +593,12 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
   }
 
   /// @brief Instantiates H1 Poisson 3 D Workflow 2 over the All Geometries And Degrees parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1Poisson3D_Workflow2,
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1Poisson3D_Workflow2,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)),
+    ParamName{});
 
   // =========================================================================
   // Workflow 3 — UniformGrid → Reconcile → Assemble → Solve
@@ -678,19 +666,12 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
   }
 
   /// @brief Instantiates H1 Poisson 3 D Workflow 3 over the All Geometries And Degrees parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1Poisson3D_Workflow3,
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1Poisson3D_Workflow3,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)),
+    ParamName{});
 } // namespace Rodin::Tests::Manufactured::MPI::H1Poisson
 
 // ---------------------------------------------------------------------------

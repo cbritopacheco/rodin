@@ -79,13 +79,12 @@ namespace Rodin::Variational
        * the trial function @f$ u @f$ and test function @f$ v @f$.
        */
       template <class TrialFunctionType, class TestFunctionType,
-                std::enable_if_t<
-                  IsTrialFunction<std::decay_t<TrialFunctionType>>::Value &&
-                  IsTestFunction<std::decay_t<TestFunctionType>>::Value,
-                  int> = 0>
-      BilinearFormIntegratorBase(
-          const TrialFunctionType& u, const TestFunctionType& v)
-        : m_u(u.copy()), m_v(v.copy())
+        std::enable_if_t<IsTrialFunction<std::decay_t<TrialFunctionType>>::Value &&
+            IsTestFunction<std::decay_t<TestFunctionType>>::Value,
+          int> = 0>
+      BilinearFormIntegratorBase(const TrialFunctionType& u, const TestFunctionType& v)
+        : m_u(u.copy()),
+          m_v(v.copy())
       {}
 
       /**

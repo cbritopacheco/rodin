@@ -2027,7 +2027,7 @@ namespace Rodin::Assembly
         }
     };
 
-  /**
+    /**
    * @brief Sequential assembler for the identification Dirichlet BC
    *        `u = A(v)`.
    *
@@ -2044,160 +2044,151 @@ namespace Rodin::Assembly
    * basis is evaluated through @f$ A(v) @f$ and then sampled by the slave
    * finite element's DOF functional.
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
-  class Sequential<
-    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Sol1, FES1>,
-      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
-    : public AssemblyBase<
-        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-        Variational::DirichletBC<
-          Variational::TrialFunction<Sol1, FES1>,
-          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
-  {
-    public:
-      /// @brief Output map type for slave-to-master identifications.
-      using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
+    template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+      Variational::ShapeFunctionSpaceType Sp>
+    class Sequential<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+      Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+        Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+      final : public AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+                Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+                  Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+    {
+      public:
+        /// @brief Output map type for slave-to-master identifications.
+        using OutputType = IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>;
 
-      /// @brief Slave trial function type.
-      using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
+        /// @brief Slave trial function type.
+        using TrialFunctionType = Variational::TrialFunction<Sol1, FES1>;
 
-      /// @brief Shape-function expression type on the right-hand side.
-      using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+        /// @brief Shape-function expression type on the right-hand side.
+        using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
 
-      /// @brief Dirichlet condition type.
-      using DirichletBCType =
-        Variational::DirichletBC<TrialFunctionType, ValueType>;
+        /// @brief Dirichlet condition type.
+        using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
 
-      /// @brief Parent class type.
-      using Parent = AssemblyBase<OutputType, DirichletBCType>;
+        /// @brief Parent class type.
+        using Parent = AssemblyBase<OutputType, DirichletBCType>;
 
-      /// @brief Assembly input data type.
-      using InputType = typename Parent::InputType;
+        /// @brief Assembly input data type.
+        using InputType = typename Parent::InputType;
 
-      /// @brief Default constructor.
-      Sequential() = default;
+        /// @brief Default constructor.
+        Sequential() = default;
 
-      /// @brief Copy constructor.
-      Sequential(const Sequential& other)
-        : Parent(other)
-      {}
+        /// @brief Copy constructor.
+        Sequential(const Sequential& other)
+          : Parent(other)
+        {}
 
-      /// @brief Move constructor.
-      Sequential(Sequential&& other)
-        : Parent(std::move(other))
-      {}
+        /// @brief Move constructor.
+        Sequential(Sequential&& other)
+          : Parent(std::move(other))
+        {}
 
-      /**
+        /**
        * @brief Executes identification Dirichlet boundary condition assembly.
        * @param res Output map from slave DOFs to master DOF coefficients.
        * @param input Boundary condition input.
        */
-      void execute(OutputType& res, const InputType& input) const override
-      {
-        const auto& u = input.getOperand();
-        // setIntegrationPoint mutates internal evaluation state; the input
-        // exposes Av as const, but we need to drive its IP cursor while
-        // probing each basis. The mutation is purely evaluation state, not
-        // semantic.
-        auto& Av = const_cast<ValueType&>(input.getShapeFunction());
-        const auto& essBdr = input.getEssentialBoundary();
-
-        const auto& fesU = u.getFiniteElementSpace();
-        const auto& fesV = Av.getLeaf().getFiniteElementSpace();
-        const auto& mesh = fesU.getMesh();
-        const size_t faceCount = mesh.getFaceCount();
-        const size_t faceDim   = mesh.getDimension() - 1;
-
-        res.clear();
-        for (Index fi = 0; fi < faceCount; fi++)
+        void execute(OutputType& res, const InputType& input) const override
         {
-          if (essBdr.empty() && !mesh.isBoundary(fi))
-            continue;
+          const auto& u = input.getOperand();
+          // setIntegrationPoint mutates internal evaluation state; the input
+          // exposes Av as const, but we need to drive its IP cursor while
+          // probing each basis. The mutation is purely evaluation state, not
+          // semantic.
+          auto& Av = const_cast<ValueType&>(input.getShapeFunction());
+          const auto& essBdr = input.getEssentialBoundary();
 
-          if (!essBdr.empty())
+          const auto& fesU = u.getFiniteElementSpace();
+          const auto& fesV = Av.getLeaf().getFiniteElementSpace();
+          const auto& mesh = fesU.getMesh();
+          const size_t faceCount = mesh.getFaceCount();
+          const size_t faceDim = mesh.getDimension() - 1;
+
+          res.clear();
+          for (Index fi = 0; fi < faceCount; fi++)
           {
-            const auto a = mesh.getAttribute(faceDim, fi);
-            if (!a || !essBdr.count(*a))
-              continue;
-          }
-
-          const auto& feU = fesU.getFiniteElement(faceDim, fi);
-          const auto& feV = fesV.getFiniteElement(faceDim, fi);
-          const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
-          const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
-
-          const Index nMasters = static_cast<Index>(feV.getCount());
-
-          for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
-          {
-            const Index slave = slaveDOFs[s];
-            if (res.find(slave) != res.end())
+            if (essBdr.empty() && !mesh.isBoundary(fi))
               continue;
 
-            // Compute the constraint row C_{sj} = ℓ_s^u(A(φ_j^v)) for each
-            // master j. We construct a callable that, given a Geometry::Point
-            // p, evaluates A(φ_j^v)(p) through a pointwise IntegrationPoint
-            // with no quadrature formula and pulls the j-th basis. The
-            // slave-FES pullback drives this
-            // through whatever evaluation pattern the slave DOF functional
-            // uses (point evaluation for Lagrange, integral for moment-based
-            // elements, etc.) — making this work for any FES whose
-            // FiniteElement::LinearForm operates on a (Geometry::Point ->
-            // value) callable through the FES pullback.
-            std::vector<Index>  mIdx;
-            std::vector<Scalar> mCoef;
-            mIdx.reserve(static_cast<size_t>(nMasters));
-            mCoef.reserve(static_cast<size_t>(nMasters));
-
-            for (Index j = 0; j < nMasters; j++)
+            if (!essBdr.empty())
             {
-              auto basisCallable = [&Av, j]
-                                   (const Geometry::Point& p)
+              const auto a = mesh.getAttribute(faceDim, fi);
+              if (!a || !essBdr.count(*a))
+                continue;
+            }
+
+            const auto& feU = fesU.getFiniteElement(faceDim, fi);
+            const auto& feV = fesV.getFiniteElement(faceDim, fi);
+            const auto& slaveDOFs = fesU.getDOFs(faceDim, fi);
+            const auto& masterDOFs = fesV.getDOFs(faceDim, fi);
+
+            const Index nMasters = static_cast<Index>(feV.getCount());
+
+            for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
+            {
+              const Index slave = slaveDOFs[s];
+              if (res.find(slave) != res.end())
+                continue;
+
+              // Compute the constraint row C_{sj} = ℓ_s^u(A(φ_j^v)) for each
+              // master j. We construct a callable that, given a Geometry::Point
+              // p, evaluates A(φ_j^v)(p) through a pointwise IntegrationPoint
+              // with no quadrature formula and pulls the j-th basis. The
+              // slave-FES pullback drives this
+              // through whatever evaluation pattern the slave DOF functional
+              // uses (point evaluation for Lagrange, integral for moment-based
+              // elements, etc.) — making this work for any FES whose
+              // FiniteElement::LinearForm operates on a (Geometry::Point ->
+              // value) callable through the FES pullback.
+              std::vector<Index> mIdx;
+              std::vector<Scalar> mCoef;
+              mIdx.reserve(static_cast<size_t>(nMasters));
+              mCoef.reserve(static_cast<size_t>(nMasters));
+
+              for (Index j = 0; j < nMasters; j++)
               {
-                const Variational::IntegrationPoint ip(p);
-                Av.setIntegrationPoint(ip);
-                return Av.getBasis(static_cast<size_t>(j));
-              };
-              const auto mapping =
-                fesU.getPullback({faceDim, fi}, std::move(basisCallable));
-              const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
-              if (c != Scalar(0))
-              {
-                mIdx.push_back(masterDOFs[j]);
-                mCoef.push_back(c);
+                auto basisCallable = [&Av, j](const Geometry::Point& p) {
+                  const Variational::IntegrationPoint ip(p);
+                  Av.setIntegrationPoint(ip);
+                  return Av.getBasis(static_cast<size_t>(j));
+                };
+                const auto mapping =
+                  fesU.getPullback({faceDim, fi}, std::move(basisCallable));
+                const Scalar c = static_cast<Scalar>(feU.getLinearForm(s)(mapping));
+                if (c != Scalar(0))
+                {
+                  mIdx.push_back(masterDOFs[j]);
+                  mCoef.push_back(c);
+                }
               }
-            }
 
-            if (mIdx.empty())
-              continue;
+              if (mIdx.empty())
+                continue;
 
-            const Index n = static_cast<Index>(mIdx.size());
-            IndexArray masters(n);
-            Math::Vector<Scalar> coeffs(n);
-            for (Index k = 0; k < n; k++)
-            {
-              masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
-              coeffs.coeffRef(k)  = mCoef[static_cast<size_t>(k)];
+              const Index n = static_cast<Index>(mIdx.size());
+              IndexArray masters(n);
+              Math::Vector<Scalar> coeffs(n);
+              for (Index k = 0; k < n; k++)
+              {
+                masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
+                coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];
+              }
+              res.emplace(slave, std::pair{std::move(masters), std::move(coeffs)});
             }
-            res.emplace(slave,
-                std::pair{ std::move(masters), std::move(coeffs) });
           }
         }
-      }
 
-      /**
+        /**
        * @brief Creates a polymorphic copy.
        * @return Pointer to a new copy.
        */
-      Sequential* copy() const noexcept override
-      {
-        return new Sequential(*this);
-      }
-  };
+        Sequential* copy() const noexcept override
+        {
+          return new Sequential(*this);
+        }
+    };
 }
 
 #endif

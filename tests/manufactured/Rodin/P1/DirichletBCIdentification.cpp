@@ -62,7 +62,7 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
       Mesh<Context::Local> getMesh()
       {
         Mesh<Context::Local> mesh;
-        mesh = mesh.UniformGrid(GetParam(), { M, M });
+        mesh = mesh.UniformGrid(GetParam(), {M, M});
         mesh.scale(1.0 / (M - 1));
         mesh.getConnectivity().compute(1, 2);
         return mesh;
@@ -70,11 +70,9 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
   };
 
   /// @brief Helper used by the tests to Test 16 x 16.
-  using Test_16x16 =
-    Manufactured_DirichletBCIdentification_Test<16>;
+  using Test_16x16 = Manufactured_DirichletBCIdentification_Test<16>;
   /// @brief Helper used by the tests to Test 32 x 32.
-  using Test_32x32 =
-    Manufactured_DirichletBCIdentification_Test<32>;
+  using Test_32x32 = Manufactured_DirichletBCIdentification_Test<32>;
 
   /**
    * @brief `DirichletBC(u, -u).on(\Gamma)` is algebraically equivalent to
@@ -98,11 +96,10 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     Mesh meshRef = this->getMesh();
     P1 vhRef(meshRef);
     TrialFunction uRef(vhRef);
-    TestFunction  vRef(vhRef);
+    TestFunction vRef(vhRef);
     Problem refProblem(uRef, vRef);
-    refProblem = Integral(Grad(uRef), Grad(vRef))
-               - Integral(f, vRef)
-               + DirichletBC(uRef, Zero());
+    refProblem =
+      Integral(Grad(uRef), Grad(vRef)) - Integral(f, vRef) + DirichletBC(uRef, Zero());
     SparseLU(refProblem).solve();
     const auto& uRefData = uRef.getSolution().getData();
 
@@ -110,11 +107,10 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     Mesh meshId = this->getMesh();
     P1 vhId(meshId);
     TrialFunction uId(vhId);
-    TestFunction  vId(vhId);
+    TestFunction vId(vhId);
     Problem idProblem(uId, vId);
-    idProblem = Integral(Grad(uId), Grad(vId))
-              - Integral(f, vId)
-              + DirichletBC(uId, -uId);
+    idProblem =
+      Integral(Grad(uId), Grad(vId)) - Integral(f, vId) + DirichletBC(uId, -uId);
     SparseLU(idProblem).solve();
     const auto& uIdData = uId.getSolution().getData();
 
@@ -148,24 +144,22 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     Mesh meshRef = this->getMesh();
     P1 vhRef(meshRef);
     TrialFunction uRef(vhRef);
-    TestFunction  vRef(vhRef);
+    TestFunction vRef(vhRef);
     Problem refProblem(uRef, vRef);
-    refProblem = Integral(Grad(uRef), Grad(vRef))
-               - Integral(f, vRef)
-               + DirichletBC(uRef, Zero());
+    refProblem =
+      Integral(Grad(uRef), Grad(vRef)) - Integral(f, vRef) + DirichletBC(uRef, Zero());
     SparseLU(refProblem).solve();
     const auto& uRefData = uRef.getSolution().getData();
 
-    for (const Real c : { Real(-1), Real(-2), Real(0.5), Real(3) })
+    for (const Real c : {Real(-1), Real(-2), Real(0.5), Real(3)})
     {
       Mesh meshId = this->getMesh();
       P1 vhId(meshId);
       TrialFunction uId(vhId);
-      TestFunction  vId(vhId);
+      TestFunction vId(vhId);
       Problem idProblem(uId, vId);
-      idProblem = Integral(Grad(uId), Grad(vId))
-                - Integral(f, vId)
-                + DirichletBC(uId, RealFunction(c) * uId);
+      idProblem = Integral(Grad(uId), Grad(vId)) - Integral(f, vId) +
+        DirichletBC(uId, RealFunction(c) * uId);
       SparseLU(idProblem).solve();
       const auto& uIdData = uId.getSolution().getData();
 
@@ -189,18 +183,16 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
   TEST_P(Test_16x16, NegativeSelfIdentificationFEError)
   {
     const Real pi = Rodin::Math::Constants::pi();
-    const auto f        = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
+    const auto f = 2 * pi * pi * sin(pi * F::x) * sin(pi * F::y);
     const auto solution = sin(pi * F::x) * sin(pi * F::y);
 
     // Identification path
     Mesh mesh = this->getMesh();
     P1 vh(mesh);
     TrialFunction u(vh);
-    TestFunction  v(vh);
+    TestFunction v(vh);
     Problem poisson(u, v);
-    poisson = Integral(Grad(u), Grad(v))
-            - Integral(f, v)
-            + DirichletBC(u, -u);
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) + DirichletBC(u, -u);
     SparseLU(poisson).solve();
 
     GridFunction diff(vh);
@@ -227,20 +219,19 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     Mesh meshRef = this->getMesh();
     P1 vhRef(meshRef);
     TrialFunction uRef(vhRef);
-    TestFunction  vRef(vhRef);
+    TestFunction vRef(vhRef);
     Problem refProblem(uRef, vRef);
-    refProblem = Integral(Grad(uRef), Grad(vRef))
-               + DirichletBC(uRef, Zero());
+    refProblem = Integral(Grad(uRef), Grad(vRef)) + DirichletBC(uRef, Zero());
     SparseLU(refProblem).solve();
     const auto& uRefData = uRef.getSolution().getData();
 
     Mesh meshId = this->getMesh();
     P1 vhId(meshId);
     TrialFunction uId(vhId);
-    TestFunction  vId(vhId);
+    TestFunction vId(vhId);
     Problem idProblem(uId, vId);
-    idProblem = Integral(Grad(uId), Grad(vId))
-              + DirichletBC(uId, RealFunction(2.0) * uId);
+    idProblem =
+      Integral(Grad(uId), Grad(vId)) + DirichletBC(uId, RealFunction(2.0) * uId);
     SparseLU(idProblem).solve();
     const auto& uIdData = uId.getSolution().getData();
 
@@ -284,58 +275,47 @@ namespace Rodin::Tests::Manufactured::DirichletBCIdentification
     P1 scalarRef(meshRef);
     P1 vectorRef(meshRef, meshRef.getSpaceDimension());
     TrialFunction uRef(scalarRef);
-    TestFunction  vRef(scalarRef);
+    TestFunction vRef(scalarRef);
     TrialFunction etaRef(vectorRef);
-    TestFunction  zetaRef(vectorRef);
+    TestFunction zetaRef(vectorRef);
 
     Problem refProblem(uRef, vRef, etaRef, zetaRef);
-    refProblem =
-      Integral(uRef, vRef)
-      + Integral(etaRef, zetaRef)
-      + DirichletBC(uRef, uBoundary)
-      + DirichletBC(etaRef, VectorFunction{ etaX, etaY });
+    refProblem = Integral(uRef, vRef) + Integral(etaRef, zetaRef) +
+      DirichletBC(uRef, uBoundary) + DirichletBC(etaRef, VectorFunction{etaX, etaY});
     SparseLU(refProblem).solve();
 
     Mesh meshId = this->getMesh();
     P1 scalarId(meshId);
     P1 vectorId(meshId, meshId.getSpaceDimension());
     TrialFunction uId(scalarId);
-    TestFunction  vId(scalarId);
+    TestFunction vId(scalarId);
     TrialFunction etaId(vectorId);
-    TestFunction  zetaId(vectorId);
+    TestFunction zetaId(vectorId);
 
     Problem idProblem(uId, vId, etaId, zetaId);
-    idProblem =
-      Integral(uId, vId)
-      + Integral(etaId, zetaId)
-      + DirichletBC(
-          uId,
-          RealFunction(2.0) * etaId.x() + RealFunction(-0.5) * etaId.y())
-      + DirichletBC(etaId, VectorFunction{ etaX, etaY });
+    idProblem = Integral(uId, vId) + Integral(etaId, zetaId) +
+      DirichletBC(uId, RealFunction(2.0) * etaId.x() + RealFunction(-0.5) * etaId.y()) +
+      DirichletBC(etaId, VectorFunction{etaX, etaY});
     SparseLU(idProblem).solve();
 
     const auto& uRefData = uRef.getSolution().getData();
-    const auto& uIdData  = uId.getSolution().getData();
+    const auto& uIdData = uId.getSolution().getData();
     ASSERT_EQ(uRefData.size(), uIdData.size());
     for (Eigen::Index i = 0; i < uRefData.size(); i++)
       EXPECT_NEAR(uRefData(i), uIdData(i), 1e-10) << "u dof " << i;
 
     const auto& etaRefData = etaRef.getSolution().getData();
-    const auto& etaIdData  = etaId.getSolution().getData();
+    const auto& etaIdData = etaId.getSolution().getData();
     ASSERT_EQ(etaRefData.size(), etaIdData.size());
     for (Eigen::Index i = 0; i < etaRefData.size(); i++)
       EXPECT_NEAR(etaRefData(i), etaIdData(i), 1e-10) << "eta dof " << i;
   }
 
   /// @brief Instantiates Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    MeshParams16x16,
-    Test_16x16,
+  INSTANTIATE_TEST_SUITE_P(MeshParams16x16, Test_16x16,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral));
 
   /// @brief Instantiates Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    MeshParams32x32,
-    Test_32x32,
+  INSTANTIATE_TEST_SUITE_P(MeshParams32x32, Test_32x32,
     ::testing::Values(Polytope::Type::Triangle, Polytope::Type::Quadrilateral));
 }

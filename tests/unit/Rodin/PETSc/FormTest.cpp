@@ -127,22 +127,21 @@ namespace
   template <template <class, class> class Assembler>
   void checkPETScAffineIdentificationDefect()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(1, 2);
 
     P1 fes(mesh);
     PETSc::Variational::TrialFunction u(fes);
-    PETSc::Variational::TestFunction  v(fes);
+    PETSc::Variational::TestFunction v(fes);
     PETSc::Variational::TrialFunction eta(fes);
-    PETSc::Variational::TestFunction  zeta(fes);
+    PETSc::Variational::TestFunction zeta(fes);
 
     constexpr PetscScalar gamma = 2.0;
     constexpr PetscScalar defect = 3.0;
     const PetscInt n = static_cast<PetscInt>(fes.getSize());
     const PetscInt nTotal = 2 * n;
 
-    auto bc =
-      DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
+    auto bc = DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
 
     BilinearForm uu(u, v);
     auto& op = uu.getOperator();
@@ -181,33 +180,24 @@ namespace
 
     using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemType =
-      Problem<LinearSystemType,
-              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+      Problem<LinearSystemType, decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
 
-    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
-    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+    auto trialFunctions = Tuple{std::ref(u), std::ref(eta)};
+    auto testFunctions = Tuple{std::ref(v), std::ref(zeta)};
 
-    std::array<size_t, 2> offsets{ 0, static_cast<size_t>(n) };
+    std::array<size_t, 2> offsets{0, static_cast<size_t>(n)};
 
     boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
     boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
-    trialUUIDMap.right.insert({ 0, u.getUUID() });
-    trialUUIDMap.right.insert({ 1, eta.getUUID() });
-    testUUIDMap.right.insert({ 0, v.getUUID() });
-    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+    trialUUIDMap.right.insert({0, u.getUUID()});
+    trialUUIDMap.right.insert({1, eta.getUUID()});
+    testUUIDMap.right.insert({0, v.getUUID()});
+    testUUIDMap.right.insert({1, zeta.getUUID()});
 
-    Assembly::ProblemAssemblyInput<
-      std::decay_t<decltype(body)>,
-      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
-          body,
-          trialFunctions,
-          testFunctions,
-          offsets,
-          offsets,
-          trialUUIDMap,
-          testUUIDMap,
-          static_cast<size_t>(nTotal),
-          static_cast<size_t>(nTotal));
+    Assembly::ProblemAssemblyInput<std::decay_t<decltype(body)>, decltype(u), decltype(v),
+      decltype(eta), decltype(zeta)>
+      input(body, trialFunctions, testFunctions, offsets, offsets, trialUUIDMap,
+        testUUIDMap, static_cast<size_t>(nTotal), static_cast<size_t>(nTotal));
 
     LinearSystemType ls(PETSC_COMM_SELF);
     Assembler<LinearSystemType, ProblemType> assembler;
@@ -249,21 +239,18 @@ namespace
   template <template <class, class> class Assembler>
   void checkPETScVectorMasterIdentification()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(1, 2);
 
     P1 slaveFES(mesh);
     P1 masterFES(mesh, mesh.getSpaceDimension());
 
     PETSc::Variational::TrialFunction u(slaveFES);
-    PETSc::Variational::TestFunction  v(slaveFES);
+    PETSc::Variational::TestFunction v(slaveFES);
     PETSc::Variational::TrialFunction eta(masterFES);
-    PETSc::Variational::TestFunction  zeta(masterFES);
+    PETSc::Variational::TestFunction zeta(masterFES);
 
-    auto bc =
-      DirichletBC(
-          u,
-          RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
+    auto bc = DirichletBC(u, RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
     bc.assemble();
 
     using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
@@ -274,32 +261,26 @@ namespace
     bool sawMultiMaster = false;
     for (const auto& [slave, row] : ident)
     {
-      (void) slave;
+      (void)slave;
       if (row.first.size() >= 2)
         sawMultiMaster = true;
     }
     ASSERT_TRUE(sawMultiMaster);
 
-    const PetscInt nSlave  = static_cast<PetscInt>(slaveFES.getSize());
+    const PetscInt nSlave = static_cast<PetscInt>(slaveFES.getSize());
     const PetscInt nMaster = static_cast<PetscInt>(masterFES.getSize());
-    const PetscInt nTotal  = nSlave + nMaster;
+    const PetscInt nTotal = nSlave + nMaster;
 
     struct MatrixEntry
     {
-      PetscInt row;
-      PetscInt col;
-      PetscScalar value;
+        PetscInt row;
+        PetscInt col;
+        PetscScalar value;
     };
     const std::vector<MatrixEntry> matrixEntries{
-      { 0, 0, 2.0 },
-      { 0, 1, 3.0 },
-      { 1, 0, 5.0 },
-      { 1, 1, 7.0 }
-    };
+      {0, 0, 2.0}, {0, 1, 3.0}, {1, 0, 5.0}, {1, 1, 7.0}};
     const std::vector<std::pair<PetscInt, PetscScalar>> vectorEntries{
-      { 0, 11.0 },
-      { 1, -13.0 }
-    };
+      {0, 11.0}, {1, -13.0}};
 
     BilinearForm uu(u, v);
     auto& op = uu.getOperator();
@@ -339,50 +320,34 @@ namespace
 
     using LinearSystemType = PETSc::Math::LinearSystem;
     using ProblemType =
-      Problem<LinearSystemType,
-              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+      Problem<LinearSystemType, decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
 
-    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
-    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+    auto trialFunctions = Tuple{std::ref(u), std::ref(eta)};
+    auto testFunctions = Tuple{std::ref(v), std::ref(zeta)};
 
-    std::array<size_t, 2> trialOffsets{
-      0, static_cast<size_t>(nSlave)
-    };
-    std::array<size_t, 2> testOffsets{
-      0, static_cast<size_t>(nSlave)
-    };
+    std::array<size_t, 2> trialOffsets{0, static_cast<size_t>(nSlave)};
+    std::array<size_t, 2> testOffsets{0, static_cast<size_t>(nSlave)};
 
     boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
     boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
-    trialUUIDMap.right.insert({ 0, u.getUUID() });
-    trialUUIDMap.right.insert({ 1, eta.getUUID() });
-    testUUIDMap.right.insert({ 0, v.getUUID() });
-    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+    trialUUIDMap.right.insert({0, u.getUUID()});
+    trialUUIDMap.right.insert({1, eta.getUUID()});
+    testUUIDMap.right.insert({0, v.getUUID()});
+    testUUIDMap.right.insert({1, zeta.getUUID()});
 
-    Assembly::ProblemAssemblyInput<
-      std::decay_t<decltype(body)>,
-      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
-          body,
-          trialFunctions,
-          testFunctions,
-          trialOffsets,
-          testOffsets,
-          trialUUIDMap,
-          testUUIDMap,
-          static_cast<size_t>(nTotal),
-          static_cast<size_t>(nTotal));
+    Assembly::ProblemAssemblyInput<std::decay_t<decltype(body)>, decltype(u), decltype(v),
+      decltype(eta), decltype(zeta)>
+      input(body, trialFunctions, testFunctions, trialOffsets, testOffsets, trialUUIDMap,
+        testUUIDMap, static_cast<size_t>(nTotal), static_cast<size_t>(nTotal));
 
     LinearSystemType ls(PETSC_COMM_SELF);
     Assembler<LinearSystemType, ProblemType> assembler;
     assembler.execute(ls, input);
 
-    Eigen::MatrixXd expectedA =
-      Eigen::MatrixXd::Zero(nTotal, nTotal);
-    Eigen::VectorXd expectedB =
-      Eigen::VectorXd::Zero(nTotal);
+    Eigen::MatrixXd expectedA = Eigen::MatrixXd::Zero(nTotal, nTotal);
+    Eigen::VectorXd expectedB = Eigen::VectorXd::Zero(nTotal);
 
-    auto expand = [&](PetscInt local)
-    {
+    auto expand = [&](PetscInt local) {
       std::vector<std::pair<PetscInt, PetscScalar>> res;
       const auto it = ident.find(static_cast<Index>(local));
       if (it == ident.end())
@@ -391,7 +356,7 @@ namespace
         return res;
       }
       const auto& masters = it->second.first;
-      const auto& coeffs  = it->second.second;
+      const auto& coeffs = it->second.second;
       for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
         res.emplace_back(nSlave + static_cast<PetscInt>(masters[k]), coeffs[k]);
       return res;
@@ -411,7 +376,7 @@ namespace
       expectedA.row(static_cast<Eigen::Index>(slave)).setZero();
       expectedA(slave, slave) = 1.0;
       const auto& masters = row.first;
-      const auto& coeffs  = row.second;
+      const auto& coeffs = row.second;
       for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
         expectedA(slave, nSlave + static_cast<PetscInt>(masters[k])) -= coeffs[k];
       expectedB(slave) = 0.0;
@@ -431,8 +396,7 @@ namespace
         PetscScalar aValue = 0;
         ierr = MatGetValues(A, 1, &i, 1, &j, &aValue);
         ASSERT_EQ(ierr, PETSC_SUCCESS);
-        EXPECT_NEAR(aValue, expectedA(i, j), 1e-14)
-          << "entry (" << i << ", " << j << ")";
+        EXPECT_NEAR(aValue, expectedA(i, j), 1e-14) << "entry (" << i << ", " << j << ")";
       }
     }
   }
@@ -440,17 +404,16 @@ namespace
   template <template <class, class> class Assembler>
   void checkPETScSelfIdentificationMatchesZeroValueConstraint()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(1, 2);
 
     P1 refFES(mesh);
     PETSc::Variational::TrialFunction uRef(refFES);
-    PETSc::Variational::TestFunction  vRef(refFES);
+    PETSc::Variational::TestFunction vRef(refFES);
 
     const PetscInt n = static_cast<PetscInt>(refFES.getSize());
 
-    auto setOperator = [&](auto& form)
-    {
+    auto setOperator = [&](auto& form) {
       auto& op = form.getOperator();
       PetscErrorCode ierr = MatSetSizes(op, n, n, n, n);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
@@ -458,9 +421,9 @@ namespace
       ASSERT_EQ(ierr, PETSC_SUCCESS);
       ierr = MatSetUp(op);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
-      const PetscInt rows[4] = { 0, 0, 1, 1 };
-      const PetscInt cols[4] = { 0, 1, 0, 1 };
-      const PetscScalar vals[4] = { 2.0, 3.0, 5.0, 7.0 };
+      const PetscInt rows[4] = {0, 0, 1, 1};
+      const PetscInt cols[4] = {0, 1, 0, 1};
+      const PetscScalar vals[4] = {2.0, 3.0, 5.0, 7.0};
       for (PetscInt k = 0; k < 4; k++)
       {
         ierr = MatSetValue(op, rows[k], cols[k], vals[k], INSERT_VALUES);
@@ -472,15 +435,14 @@ namespace
       ASSERT_EQ(ierr, PETSC_SUCCESS);
     };
 
-    auto setVector = [&](auto& form)
-    {
+    auto setVector = [&](auto& form) {
       auto& vec = form.getVector();
       PetscErrorCode ierr = VecSetSizes(vec, n, n);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
       ierr = VecSetFromOptions(vec);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
-      const PetscInt rows[2] = { 0, 1 };
-      const PetscScalar vals[2] = { 11.0, -13.0 };
+      const PetscInt rows[2] = {0, 1};
+      const PetscScalar vals[2] = {11.0, -13.0};
       ierr = VecSetValues(vec, 2, rows, vals, INSERT_VALUES);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
       ierr = VecAssemblyBegin(vec);
@@ -498,7 +460,7 @@ namespace
 
     P1 idFES(mesh);
     PETSc::Variational::TrialFunction uId(idFES);
-    PETSc::Variational::TestFunction  vId(idFES);
+    PETSc::Variational::TestFunction vId(idFES);
 
     BilinearForm uuId(uId, vId);
     setOperator(uuId);
@@ -508,32 +470,31 @@ namespace
     auto idBody = uuId + DirichletBC(uId, -uId) - loadId;
 
     using LinearSystemType = PETSc::Math::LinearSystem;
-    using ProblemType =
-      Problem<LinearSystemType, decltype(uRef), decltype(vRef)>;
+    using ProblemType = Problem<LinearSystemType, decltype(uRef), decltype(vRef)>;
 
     LinearSystemType refLS(PETSC_COMM_SELF);
     LinearSystemType idLS(PETSC_COMM_SELF);
-    Assembly::ProblemAssemblyInput<
-      std::decay_t<decltype(refBody)>,
-      decltype(uRef), decltype(vRef)> refInput(refBody, uRef, vRef);
-    Assembly::ProblemAssemblyInput<
-      std::decay_t<decltype(idBody)>,
-      decltype(uId), decltype(vId)> idInput(idBody, uId, vId);
+    Assembly::ProblemAssemblyInput<std::decay_t<decltype(refBody)>, decltype(uRef),
+      decltype(vRef)>
+      refInput(refBody, uRef, vRef);
+    Assembly::ProblemAssemblyInput<std::decay_t<decltype(idBody)>, decltype(uId),
+      decltype(vId)>
+      idInput(idBody, uId, vId);
 
     Assembler<LinearSystemType, ProblemType> assembler;
     assembler.execute(refLS, refInput);
     assembler.execute(idLS, idInput);
 
     auto& ARef = refLS.getOperator();
-    auto& AId  = idLS.getOperator();
+    auto& AId = idLS.getOperator();
     auto& bRef = refLS.getVector();
-    auto& bId  = idLS.getVector();
+    auto& bId = idLS.getVector();
 
     for (PetscInt i = 0; i < n; i++)
     {
       PetscErrorCode ierr;
       PetscScalar refValue = 0;
-      PetscScalar idValue  = 0;
+      PetscScalar idValue = 0;
 
       ierr = VecGetValues(bRef, 1, &i, &refValue);
       ASSERT_EQ(ierr, PETSC_SUCCESS);
@@ -547,8 +508,7 @@ namespace
         ASSERT_EQ(ierr, PETSC_SUCCESS);
         ierr = MatGetValues(AId, 1, &i, 1, &j, &idValue);
         ASSERT_EQ(ierr, PETSC_SUCCESS);
-        EXPECT_NEAR(refValue, idValue, 1e-12)
-          << "entry (" << i << ", " << j << ")";
+        EXPECT_NEAR(refValue, idValue, 1e-12) << "entry (" << i << ", " << j << ")";
       }
     }
   }

@@ -1224,8 +1224,7 @@ namespace Rodin::IO
           const Real psi3 = (q - x) * y / q;
           const Real psi4 = z;
 
-          return psi0 * u[0] + psi1 * u[1] + psi2 * u[2]
-               + psi3 * u[3] + psi4 * u[4];
+          return psi0 * u[0] + psi1 * u[1] + psi2 * u[2] + psi3 * u[3] + psi4 * u[4];
         };
 
         // Element loop

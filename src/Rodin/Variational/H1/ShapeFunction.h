@@ -124,7 +124,7 @@ namespace Rodin::Variational
 
         typename Cache::Key key;
         key.geom  = geom;
-        key.qf    = qf;
+        key.qf = qf;
         key.qp    = qp;
         key.valid = true;
 
@@ -297,7 +297,7 @@ namespace Rodin::Variational
 
         typename Cache::Key key;
         key.geom  = geom;
-        key.qf    = qf;
+        key.qf = qf;
         key.qp    = qp;
         key.vdim  = vdim;
         key.valid = true;

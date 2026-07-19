@@ -234,9 +234,7 @@ namespace Rodin::IO
             {
               Alert::MemberFunctionException(*this, __func__)
                 << "Failed to parse Pyramid on line "
-                << std::to_string(m_currentLineNumber)
-                << "."
-                << Alert::Raise;
+                << std::to_string(m_currentLineNumber) << "." << Alert::Raise;
             }
             data->vertices -= 1;
             Index index;

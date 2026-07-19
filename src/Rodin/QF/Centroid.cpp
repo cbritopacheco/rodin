@@ -46,7 +46,7 @@ namespace Rodin::QF
       }
       case Geometry::Polytope::Type::Pyramid:
       {
-        static const Math::SpatialPoint s_point{{ 0.375, 0.375, 0.25 }};
+        static const Math::SpatialPoint s_point{{0.375, 0.375, 0.25}};
         return s_point;
       }
       case Geometry::Polytope::Type::Wedge:

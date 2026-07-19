@@ -375,11 +375,11 @@ namespace Rodin::IO::MFEM
       }
       case Geometry::Polytope::Type::Pyramid:
       {
-        callback(std::array<int, 4>{ 0, 1, 2, 3 });
-        callback(std::array<int, 3>{ 0, 1, 4 });
-        callback(std::array<int, 3>{ 1, 2, 4 });
-        callback(std::array<int, 3>{ 2, 3, 4 });
-        callback(std::array<int, 3>{ 3, 0, 4 });
+        callback(std::array<int, 4>{0, 1, 2, 3});
+        callback(std::array<int, 3>{0, 1, 4});
+        callback(std::array<int, 3>{1, 2, 4});
+        callback(std::array<int, 3>{2, 3, 4});
+        callback(std::array<int, 3>{3, 0, 4});
         break;
       }
       case Geometry::Polytope::Type::Hexahedron:

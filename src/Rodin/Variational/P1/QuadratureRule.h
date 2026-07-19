@@ -3455,7 +3455,8 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      QuadratureRule& setPolytope(const Geometry::Polytope& trp, const Geometry::Polytope& tep) override
+      QuadratureRule& setPolytope(
+        const Geometry::Polytope& trp, const Geometry::Polytope& tep) override
       {
         m_trp = trp;
         m_tep = tep;

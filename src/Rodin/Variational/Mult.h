@@ -136,8 +136,7 @@ namespace Rodin::Variational
   namespace Internal
   {
     template <class Product>
-    constexpr
-    auto materializeProduct(const Product& product)
+    constexpr auto materializeProduct(const Product& product)
     {
       /// @brief Range (evaluation value) type.
       using RangeType =

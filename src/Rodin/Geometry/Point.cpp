@@ -336,7 +336,8 @@ namespace Rodin::Geometry
       m_rc(rc)
   {}
 
-  Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc)
+  Point::Point(
+    const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc)
     : PointBase(polytope, pc),
       m_rc(rc)
   {}
