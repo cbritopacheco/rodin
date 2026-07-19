@@ -335,7 +335,8 @@ namespace Rodin::Variational
             const Index global = fes.getGlobalIndex(i);
             if (global < m_begin || global >= m_end)
             {
-              auto [it, inserted] = m_ghosts.right.emplace(global, offset);
+              [[maybe_unused]] auto [it, inserted] =
+                m_ghosts.right.emplace(global, offset);
               assert(inserted);
               offset++;
             }
@@ -345,7 +346,7 @@ namespace Rodin::Variational
           for (const auto& [global, offset] : m_ghosts.right)
           {
             assert(offset >= 0);
-            assert(offset < m_ghosts.left.size());
+            assert(static_cast<size_t>(offset) < m_ghosts.left.size());
             m_ghosts.left[offset] = global;
           }
 

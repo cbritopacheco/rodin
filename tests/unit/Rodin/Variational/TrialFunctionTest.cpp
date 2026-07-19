@@ -60,9 +60,8 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh);
     TrialFunction u(fes);
 
-    const auto& solution = u.getSolution();
-    auto& mutable_solution = u.getSolution();
-    
+    [[maybe_unused]] const auto& solution = u.getSolution();
+    [[maybe_unused]] auto& mutable_solution = u.getSolution();
   }
 
   /// @brief Verifies sanity test build for variational vector P1 trial function by checking exact expected values.
@@ -124,6 +123,6 @@ namespace Rodin::Tests::Unit
     P1 fes(mesh, vdim);
     TrialFunction u(fes);
 
-    const auto& solution = u.getSolution();
+    [[maybe_unused]] const auto& solution = u.getSolution();
   }
 }

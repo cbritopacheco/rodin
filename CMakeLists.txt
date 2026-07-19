@@ -175,6 +175,15 @@ rodin_add_compile_options(LANG C CXX OPTIONS -Wno-old-style-cast -Wno-deprecated
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=array-bounds)
 rodin_add_compile_options(LANG C CXX OPTIONS -Wno-error=nontrivial-memcall)
 
+# Apple's ld (Xcode >= 15) warns whenever a static library appears more than
+# once on the link line, which CMake's transitive component dependencies
+# produce by design. Silence it where the linker understands the flag.
+include(CheckLinkerFlag)
+check_linker_flag(CXX "-Wl,-no_warn_duplicate_libraries" RODIN_LINKER_NO_WARN_DUPLICATE_LIBRARIES)
+if(RODIN_LINKER_NO_WARN_DUPLICATE_LIBRARIES)
+  add_link_options(-Wl,-no_warn_duplicate_libraries)
+endif()
+
 add_compile_definitions(_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
 add_compile_definitions(__MAC_OS_X_VERSION_MIN_REQUIRED=__MAC_10_8)
 
@@ -318,6 +327,14 @@ if (RODIN_BUILD_SRC)
     # ---- GoogleTest ----
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     add_subdirectory(third-party/googletest EXCLUDE_FROM_ALL)
+    # GoogleTest builds itself with -Wall; GCC then flags gtest-death-test.cc
+    # with -Wmaybe-uninitialized. Vendored code, so silence instead of patch.
+    foreach(_gtest_target gtest gtest_main gmock gmock_main)
+      if(TARGET ${_gtest_target})
+        target_compile_options(${_gtest_target} PRIVATE
+          $<$<CXX_COMPILER_ID:GNU>:-Wno-maybe-uninitialized>)
+      endif()
+    endforeach()
     if (RODIN_BUILD_BENCHMARKS)
       if (RODIN_LTO)
         set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
