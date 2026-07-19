@@ -1447,7 +1447,7 @@ namespace Rodin::Assembly
         const auto withTrialFES = [&](const auto& uuid, auto&& fn)
         {
           const size_t k = findTrialBlock(uuid);
-          bool found = false;
+          [[maybe_unused]] bool found = false;
           us.iapply([&](size_t i, const auto& uref)
           {
             if (i == k)
@@ -1462,7 +1462,7 @@ namespace Rodin::Assembly
         const auto withTestFES = [&](const auto& uuid, auto&& fn)
         {
           const size_t k = findTestBlock(uuid);
-          bool found = false;
+          [[maybe_unused]] bool found = false;
           vs.iapply([&](size_t i, const auto& vref)
           {
             if (i == k)
