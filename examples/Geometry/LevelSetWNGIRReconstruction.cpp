@@ -370,9 +370,18 @@ int main(int argc, char** argv)
   constexpr Attribute exteriorAttribute = 2;
   constexpr Attribute interfaceAttribute = 10;
   constexpr Attribute boundaryAttribute = 20;
+  constexpr Attribute supportAttribute = 21;
 
-  const auto wngirParams = Rodin::Examples::makeWNGIRParameters(
+  auto wngirParams = Rodin::Examples::makeWNGIRParameters(
     argc, argv, h, interfaceAttribute, wngirDefaults);
+  const auto wngirDirichlet =
+    Rodin::Examples::stringOption(argc, argv, "wngir-dirichlet", "none");
+  if (wngirDirichlet == "anchor" || wngirDirichlet == "support")
+    wngirParams.dirichletAttributes = {supportAttribute};
+  else if (wngirDirichlet == "boundary")
+    wngirParams.dirichletAttributes = {boundaryAttribute, supportAttribute};
+  else if (wngirDirichlet != "none")
+    throw std::invalid_argument("Unknown --wngir-dirichlet value: " + wngirDirichlet);
   const Real fitTol = parseRealOption(argc, argv, "fit-tol", wngirParams.activeRMSTol);
   const std::size_t qOrder = wngirParams.quadratureOrder;
   const bool trace = wngirParams.trace;
@@ -388,7 +397,19 @@ int main(int argc, char** argv)
 #endif
 
   for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
+  {
+    bool support = true;
+    Real ym = 0;
+    for (const Index vertex : faceIt->getVertices())
+    {
+      support = support && std::abs(mesh.getVertexCoordinates(vertex)(0)) < Real(1e-12);
+      ym += mesh.getVertexCoordinates(vertex)(1);
+    }
+    ym /= static_cast<Real>(faceIt->getVertices().size());
+    support = support && ym < h;
+    mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
+      support ? supportAttribute : boundaryAttribute);
+  }
 
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
   using ScalarFES = H1<2, Real, LocalMesh>;
@@ -494,7 +515,19 @@ int main(int argc, char** argv)
 
     clearXDMFRegionAttributes(mesh);
     for (auto faceIt = mesh.getBoundary(); faceIt; ++faceIt)
-      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()}, boundaryAttribute);
+    {
+      bool support = true;
+      Real ym = 0;
+      for (const Index vertex : faceIt->getVertices())
+      {
+        support = support && std::abs(mesh.getVertexCoordinates(vertex)(0)) < Real(1e-12);
+        ym += mesh.getVertexCoordinates(vertex)(1);
+      }
+      ym /= static_cast<Real>(faceIt->getVertices().size());
+      support = support && ym < h;
+      mesh.setAttribute({mesh.getDimension() - 1, faceIt->getIndex()},
+        support ? supportAttribute : boundaryAttribute);
+    }
 
     const auto cellMoments = collectCellMomentInfo(
       mesh, [&](const Vec2& p) { return levelSet.phi(p); }, epsilon);

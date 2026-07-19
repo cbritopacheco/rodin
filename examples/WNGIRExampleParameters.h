@@ -22,7 +22,7 @@ namespace Rodin::Examples
       std::size_t maxIterations = 60;
       std::size_t quadratureOrder = 4;
       Real betaMax = 50;
-      Real gammaMFactor = Real(0.0125);
+      Real gammaMFactor = 0;
       Real gammaHFactor = Real(0.0125);
       Real gammaDivFactor = -1;
       Real ellOverH = Real(0.75);
@@ -110,6 +110,21 @@ namespace Rodin::Examples
     throw std::invalid_argument("Unknown --wngir-metric-activation value: " + value);
   }
 
+  inline Adaptation::WNGIRObservationMetric parseObservationMetric(int argc, char** argv)
+  {
+    const auto value =
+      stringOption(argc, argv, "wngir-observation-metric", "hybrid-rank-one-irls");
+    if (value == "isotropic")
+      return Adaptation::WNGIRObservationMetric::Isotropic;
+    if (value == "rank-one-irls")
+      return Adaptation::WNGIRObservationMetric::RankOneIRLS;
+    if (value == "hybrid-rank-one-irls")
+      return Adaptation::WNGIRObservationMetric::HybridRankOneIRLS;
+    if (value == "rank-one-gn")
+      return Adaptation::WNGIRObservationMetric::RankOneGaussNewton;
+    throw std::invalid_argument("Unknown --wngir-observation-metric value: " + value);
+  }
+
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
@@ -128,6 +143,9 @@ namespace Rodin::Examples
     p.ellM = realOption(argc, argv, "wngir-ell", defaults.ellOverH) * h;
 
     p.gammaObs = realOption(argc, argv, "wngir-gamma-obs", Real(1));
+    p.observationMetric = parseObservationMetric(argc, argv);
+    p.observationTangentialFloor = realOption(
+      argc, argv, "wngir-observation-tangential-floor", p.observationTangentialFloor);
     p.residualStabilizedObservationMetric =
       boolOption(argc, argv, "wngir-residual-stabilized-obs", true);
     p.initialGuessGamma = Real(0);

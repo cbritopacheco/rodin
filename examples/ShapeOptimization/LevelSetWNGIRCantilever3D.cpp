@@ -581,7 +581,7 @@ int run(int argc, char** argv)
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
-  wngirDefaults.gammaMFactor = Real(0.0125);
+  wngirDefaults.gammaMFactor = 0;
   wngirDefaults.gammaHFactor = Real(0.0125);
   wngirDefaults.gammaDivFactor = Real(0.0125);
   wngirDefaults.ellOverH = Real(0.75);

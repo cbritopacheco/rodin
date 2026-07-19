@@ -490,9 +490,10 @@ namespace Rodin::Adaptation
             epsTrial - (Real(1) / d) * divTrial * Variational::IdentityMatrix(meshDim);
           const auto devTest =
             epsTest - (Real(1) / d) * divTest * Variational::IdentityMatrix(meshDim);
-          m_bulkForm = Variational::Integral(gammaM * m_duStep, m_vStep) +
-            Variational::Integral(gammaH * ellM * ellM * devTrial, devTest) +
+          m_bulkForm = Variational::Integral(gammaH * ellM * ellM * devTrial, devTest) +
             Variational::Integral(gammaDiv * ellM * ellM * divTrial, divTest);
+          if (gammaM > Real(0))
+            m_bulkForm += Variational::Integral(gammaM * m_duStep, m_vStep);
           m_bulkForm.assemble();
           rep.tBulk = secondsSince(bulkTic);
           m_bulkFormAssembled = true;
@@ -513,6 +514,12 @@ namespace Rodin::Adaptation
           initForce.over(p.interfaceAttribute);
           typename ProblemType::ProblemBodyType body(m_bulkForm);
           body = body + initMetric - initForce;
+          Math::Vector<Real> zero(meshDim);
+          zero.setZero();
+          if (!p.dirichletAttributes.empty())
+            body = body +
+              Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                .on(p.dirichletAttributes);
           m_stepProblem = body;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
@@ -610,12 +617,17 @@ namespace Rodin::Adaptation
           obsMetric.over(p.interfaceAttribute);
           Detail::WNGIRSurfaceForce surfaceForce(phi, grad, m_vStep, u, p, sigma2);
           surfaceForce.over(p.interfaceAttribute);
-
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
 
           typename ProblemType::ProblemBodyType body(m_bulkForm);
           body = body + obsMetric + admMetric - surfaceForce;
+          Math::Vector<Real> zero(meshDim);
+          zero.setZero();
+          if (!p.dirichletAttributes.empty())
+            body = body +
+              Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                .on(p.dirichletAttributes);
           m_stepProblem = body;
           m_stepProblem.assemble();
           rep.tAssembly += secondsSince(tic);
@@ -658,7 +670,20 @@ namespace Rodin::Adaptation
                 const Real obsWeight = g.dot(g) + epsG +
                   (p.residualStabilizedObservationMetric ? (r * r) / sigma2 : Real(0));
                 const Real omega = std::exp(-r * r / sigma2);
-                const SpatialVec dVec = (-omega * r / obsWeight) * g;
+                SpatialVec dVec;
+                switch (p.observationMetric)
+                {
+                  case WNGIRObservationMetric::Isotropic:
+                    dVec = (-omega * r / obsWeight) * g;
+                    break;
+                  case WNGIRObservationMetric::RankOneIRLS:
+                  case WNGIRObservationMetric::HybridRankOneIRLS:
+                    dVec = (-r / (g.dot(g) + epsG)) * g;
+                    break;
+                  case WNGIRObservationMetric::RankOneGaussNewton:
+                    dVec = (-omega * r / (g.dot(g) + epsG)) * g;
+                    break;
+                }
                 const SpatialVec v = fieldAtFacetQP(vK, ft, fq);
                 bNum += fq.w * dVec.dot(v);
                 bDen += fq.w * v.dot(v);

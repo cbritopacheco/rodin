@@ -11,6 +11,19 @@
 
 namespace Rodin::Adaptation
 {
+  /// @brief Surface observation metric used by the WNGIR natural gradient.
+  enum class WNGIRObservationMetric
+  {
+    /// @brief Isotropic demons metric acting on every displacement component.
+    Isotropic,
+    /// @brief Rank-one IRLS metric acting only in the observed level-set direction.
+    RankOneIRLS,
+    /// @brief Rank-one IRLS metric with a tangential coercivity floor.
+    HybridRankOneIRLS,
+    /// @brief Rank-one Gauss--Newton majorizer retaining Welsch force attenuation.
+    RankOneGaussNewton
+  };
+
   /// @brief Activation rule for quality and admissibility metric terms.
   enum class WNGIRMetricActivation
   {
@@ -24,11 +37,15 @@ namespace Rodin::Adaptation
   struct WNGIRParameters
   {
       Real h = 0;                 ///< reference mesh size (required).
-      Real gammaM = -1;           ///< L² weight; <0 ⇒ 1/h.
+      Real gammaM = 0;            ///< L² weight; zero disables the mass term.
       Real gammaH = -1;           ///< deviatoric-strain weight; <0 ⇒ 1/h.
       Real gammaDiv = -1;         ///< divergence weight; <0 ⇒ gammaH.
       Real ellM = -1;             ///< Sobolev length; <0 ⇒ 3h.
       Real gammaObs = 1;          ///< surface observation metric weight.
+      WNGIRObservationMetric observationMetric =
+        WNGIRObservationMetric::HybridRankOneIRLS; ///< Surface observation metric.
+      Real observationTangentialFloor =
+        Real(0.05); ///< Tangential weight of the hybrid rank-one metric.
       bool residualStabilizedObservationMetric =
         true; ///< Add residual damping to observation metric.
       Real initialGuessGamma = 1000; ///< Normal-offset initializer metric weight.
@@ -95,6 +112,7 @@ namespace Rodin::Adaptation
       bool hasInterfaceAttribute = false; ///< Whether an interface marker was configured.
       Geometry::Attribute interfaceAttribute =
         0; ///< Mesh attribute identifying interface facets.
+      FlatSet<Geometry::Attribute> dirichletAttributes; ///< Zero-displacement boundaries.
       bool trace = false; ///< Print per-iteration diagnostics when true.
       /// If true, also add the nonlinear Q-barrier first variation to the RHS.
       /// The j-barrier first variation is part of the quality energy when

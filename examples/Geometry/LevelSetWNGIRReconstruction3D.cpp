@@ -339,7 +339,7 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 120;
-  wngirDefaults.gammaMFactor = Real(0.0125);
+  wngirDefaults.gammaMFactor = 0;
   wngirDefaults.gammaHFactor = Real(0.0125);
   wngirDefaults.gammaDivFactor = Real(0.0125);
   wngirDefaults.ellOverH = Real(0.75);

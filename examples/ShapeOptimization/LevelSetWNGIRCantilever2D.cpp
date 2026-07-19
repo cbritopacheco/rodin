@@ -69,6 +69,7 @@ namespace
   constexpr Attribute GammaD = 2;               // clamped left     (bdr attr 2)
   constexpr Attribute GammaN = 3;               // loaded right-mid (bdr attr 3)
   constexpr Attribute Gamma = 4; // free interface   (bdr attr 4)
+  constexpr Attribute WNGIRAnchor = 30;
 
   // Lame coefficients (plane, matching LevelSetCantilever2D).
   constexpr Real muLame = 0.3846;
@@ -483,6 +484,24 @@ int main(int argc, char** argv)
   installP2Transformations(mesh);
 #endif
 
+  Index wngirAnchorFacet = Index(-1);
+  Real wngirAnchorY = std::numeric_limits<Real>::infinity();
+  for (auto it = mesh.getBoundary(); it; ++it)
+  {
+    if (mesh.getAttribute(D - 1, it->getIndex()) != Attribute{GammaD})
+      continue;
+    const auto& vertices = it->getVertices();
+    Real ym = 0;
+    for (const Index vertex : vertices)
+      ym += mesh.getVertexCoordinates(vertex)(1);
+    ym /= static_cast<Real>(vertices.size());
+    if (ym < wngirAnchorY)
+    {
+      wngirAnchorY = ym;
+      wngirAnchorFacet = it->getIndex();
+    }
+  }
+
 #ifdef RODIN_WNGIR_P2_DISPLACEMENT
   using ScalarFES = H1<2, Real, WNGIRMesh>;
   using VectorFES = H1<2, Math::SpatialVector<Real>, WNGIRMesh>;
@@ -558,6 +577,16 @@ int main(int argc, char** argv)
   wngirDefaults.activeSupOverHTol = Real(0.25);
   WNGIRParameters wp =
     Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
+  const auto wngirDirichlet =
+    Rodin::Examples::stringOption(argc, argv, "wngir-dirichlet", "none");
+  if (wngirDirichlet == "anchor")
+    wp.dirichletAttributes = {WNGIRAnchor};
+  else if (wngirDirichlet == "support")
+    wp.dirichletAttributes = {GammaD};
+  else if (wngirDirichlet == "boundary")
+    wp.dirichletAttributes = {Gamma0, GammaD, GammaN};
+  else if (wngirDirichlet != "none")
+    throw std::invalid_argument("Unknown --wngir-dirichlet value: " + wngirDirichlet);
   wp.trace = trace;
   WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
@@ -1008,7 +1037,15 @@ int main(int argc, char** argv)
     u.getData().setZero();
     WNGIRReport rep;
     {
+      if (wngirDirichlet == "anchor")
+      {
+        if (wngirAnchorFacet == Index(-1))
+          throw std::runtime_error("WNGIR anchor facet was not found.");
+        mesh.setAttribute({D - 1, wngirAnchorFacet}, WNGIRAnchor);
+      }
       rep = wngir.solve(mesh, interfaceFacets, phiFn, gradPhiFn);
+      if (wngirDirichlet == "anchor")
+        mesh.setAttribute({D - 1, wngirAnchorFacet}, GammaD);
       // Diagnostic: did WNGIR actually move the mesh, and did it converge?
       Real maxUoverH = 0;
       const auto& uFes = u.getFiniteElementSpace();

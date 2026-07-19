@@ -104,19 +104,50 @@ namespace Rodin::Adaptation::Detail
             pt.getPhysicalCoordinates() + displacement, params.pointLocationTolerance);
           const Real r = m_phi->getValue(moved);
           const auto g = m_grad->getValue(moved);
-          const Real g2 = g.dot(g);
-          const Real obsWeight = g2 + epsG +
-            (params.residualStabilizedObservationMetric ? (r * r) / m_sigma2 : Real(0));
 
           const auto& rc = pt.getReferenceCoordinates();
-          for (std::size_t te = 0; te < nte; ++te)
+          if (params.observationMetric == WNGIRObservationMetric::Isotropic)
           {
-            const auto testValue = testFE.getBasis(te)(rc);
-            for (std::size_t tr = 0; tr < ntr; ++tr)
+            const Real obsWeight = g.dot(g) + epsG +
+              (params.residualStabilizedObservationMetric ? (r * r) / m_sigma2 : Real(0));
+            for (std::size_t te = 0; te < nte; ++te)
             {
-              const auto trialValue = trialFE.getBasis(tr)(rc);
-              m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                w * params.gammaObs * obsWeight * trialValue.dot(testValue);
+              const auto testValue = testFE.getBasis(te)(rc);
+              for (std::size_t tr = 0; tr < ntr; ++tr)
+              {
+                const auto trialValue = trialFE.getBasis(tr)(rc);
+                m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
+                  w * params.gammaObs * obsWeight * trialValue.dot(testValue);
+              }
+            }
+          }
+          else
+          {
+            const Real obsWeight =
+              params.observationMetric == WNGIRObservationMetric::RankOneIRLS ||
+                params.observationMetric == WNGIRObservationMetric::HybridRankOneIRLS
+              ? std::exp(-r * r / m_sigma2)
+              : Real(1);
+            const Real gradientNorm2 = g.dot(g);
+            for (std::size_t te = 0; te < nte; ++te)
+            {
+              const auto testValue = testFE.getBasis(te)(rc);
+              const Real testNormal = g.dot(testValue);
+              for (std::size_t tr = 0; tr < ntr; ++tr)
+              {
+                const auto trialValue = trialFE.getBasis(tr)(rc);
+                const Real trialNormal = g.dot(trialValue);
+                Real metricValue = trialNormal * testNormal;
+                if (params.observationMetric == WNGIRObservationMetric::HybridRankOneIRLS)
+                {
+                  const Real tangentialProduct = trialValue.dot(testValue) -
+                    trialNormal * testNormal / (gradientNorm2 + epsG);
+                  metricValue +=
+                    params.observationTangentialFloor * gradientNorm2 * tangentialProduct;
+                }
+                m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
+                  w * params.gammaObs * obsWeight * metricValue;
+              }
             }
           }
         }
