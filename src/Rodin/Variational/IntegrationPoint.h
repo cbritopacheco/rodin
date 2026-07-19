@@ -36,7 +36,9 @@ namespace Rodin::Variational
   {
     public:
       IntegrationPoint(const Geometry::Point& p)
-        : m_p(p), m_qf(nullptr), m_qp(0)
+        : m_p(p),
+          m_qf(nullptr),
+          m_qp(0)
       {}
 
       /**
@@ -48,10 +50,10 @@ namespace Rodin::Variational
        * @param[in] qp Quadrature sample index in @p qf
        */
       IntegrationPoint(
-          const Geometry::Point& p,
-          const QF::QuadratureFormulaBase* qf,
-          size_t qp)
-        : m_p(p), m_qf(qf), m_qp(qp)
+        const Geometry::Point& p, const QF::QuadratureFormulaBase* qf, size_t qp)
+        : m_p(p),
+          m_qf(qf),
+          m_qp(qp)
       {}
 
       /**

@@ -806,8 +806,7 @@ namespace Rodin::Math
       }
 
     private:
-      constexpr
-      void zeroStorage() noexcept
+      constexpr void zeroStorage() noexcept
       {
         m_data[0] = ScalarType(0);
         m_data[1] = ScalarType(0);

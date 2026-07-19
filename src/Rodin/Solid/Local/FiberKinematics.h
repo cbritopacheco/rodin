@@ -36,8 +36,7 @@ namespace Rodin::Solid
 
       /// @brief Constructs fiber kinematics from a state and reference direction.
       FiberKinematics(
-          const KinematicState& state,
-          const Math::SpatialVector<Real>& direction)
+        const KinematicState& state, const Math::SpatialVector<Real>& direction)
         : m_direction(normalize(direction)),
           m_tensor(dyad(m_direction)),
           m_current(state.getDeformationGradient() * m_direction),
@@ -89,8 +88,7 @@ namespace Rodin::Solid
       /// @brief Reads and normalizes the fiber direction from a constitutive point.
       static Math::SpatialVector<Real> direction(const ConstitutivePoint& cp)
       {
-        const auto d =
-          static_cast<std::uint8_t>(cp.getKinematicState().getDimension());
+        const auto d = static_cast<std::uint8_t>(cp.getKinematicState().getDimension());
         Math::SpatialVector<Real> a(d);
         if (cp.has<Tags::FiberDirection>())
           a = cp.get<Tags::FiberDirection>();

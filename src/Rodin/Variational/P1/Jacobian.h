@@ -480,9 +480,7 @@ namespace Rodin::Variational
 
           // Reference coordinates at this sample.
           const auto& rc =
-            qf
-              ? qf->getPoint(ip.getIndex())
-              : pt.getReferenceCoordinates();
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           // J^{-1} at this integration point
           const auto Jinv = pt.getJacobianInverse();

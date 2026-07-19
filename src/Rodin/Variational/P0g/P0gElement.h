@@ -173,7 +173,7 @@ namespace Rodin::Variational
         }
         case G::Pyramid:
         {
-          static const Math::SpatialVector<Real> s_node{ { 0.375, 0.375, 0.25 } };
+          static const Math::SpatialVector<Real> s_node{{0.375, 0.375, 0.25}};
           return s_node;
         }
         case G::Wedge:

@@ -142,13 +142,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
   );
 
   /// @brief Instantiates Eikonal 3 D Test over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Eikonal3DTest,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Eikonal3DTest,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

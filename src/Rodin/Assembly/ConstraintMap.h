@@ -78,7 +78,7 @@ namespace Rodin::Assembly
         m_identifiedRows.clear();
 
         for (Index i = 0; i < static_cast<Index>(size); i++)
-          m_expansions[static_cast<size_t>(i)].push_back({ i, Scalar(1) });
+          m_expansions[static_cast<size_t>(i)].push_back({i, Scalar(1)});
       }
 
       /**
@@ -96,8 +96,8 @@ namespace Rodin::Assembly
        */
       bool isFixed(Index i) const
       {
-        return static_cast<size_t>(i) < m_fixed.size()
-            && m_fixed[static_cast<size_t>(i)].has_value();
+        return static_cast<size_t>(i) < m_fixed.size() &&
+          m_fixed[static_cast<size_t>(i)].has_value();
       }
 
       /**
@@ -106,8 +106,8 @@ namespace Rodin::Assembly
        */
       bool isIdentified(Index i) const
       {
-        return static_cast<size_t>(i) < m_expansions.size()
-            && m_isIdentified[static_cast<size_t>(i)];
+        return static_cast<size_t>(i) < m_expansions.size() &&
+          m_isIdentified[static_cast<size_t>(i)];
       }
 
       /**
@@ -246,14 +246,13 @@ namespace Rodin::Assembly
 
         std::vector<State> state(size(), State::Unvisited);
 
-        auto flatten = [&] (auto&& self, Index i) -> Expansion
-        {
+        auto flatten = [&](auto&& self, Index i) -> Expansion {
           check(i);
 
           const size_t idx = static_cast<size_t>(i);
 
           if (!m_isIdentified[idx])
-            return Expansion{ Entry{ i, Scalar(1) } };
+            return Expansion{Entry{i, Scalar(1)}};
 
           if (state[idx] == State::Visiting)
           {
@@ -281,10 +280,7 @@ namespace Rodin::Assembly
               if (me.coefficient == Scalar(0))
                 continue;
 
-              accumulate(
-                  flattened,
-                  me.index,
-                  e.coefficient * me.coefficient);
+              accumulate(flattened, me.index, e.coefficient * me.coefficient);
             }
           }
 
@@ -310,9 +306,8 @@ namespace Rodin::Assembly
         if (static_cast<size_t>(i) >= m_expansions.size())
         {
           Alert::MemberFunctionException(*this, __func__)
-            << "ConstraintMap index out of range: " << i
-            << " is not in [0, " << m_expansions.size() << ")."
-            << Alert::Raise;
+            << "ConstraintMap index out of range: " << i << " is not in [0, "
+            << m_expansions.size() << ")." << Alert::Raise;
         }
       }
 
@@ -321,17 +316,12 @@ namespace Rodin::Assembly
         if (coefficient == Scalar(0))
           return;
 
-        auto it = std::find_if(
-            expansion.begin(),
-            expansion.end(),
-            [&] (const Entry& entry)
-            {
-              return entry.index == index;
-            });
+        auto it = std::find_if(expansion.begin(), expansion.end(),
+          [&](const Entry& entry) { return entry.index == index; });
 
         if (it == expansion.end())
         {
-          expansion.push_back({ index, coefficient });
+          expansion.push_back({index, coefficient});
         }
         else
         {
@@ -341,15 +331,9 @@ namespace Rodin::Assembly
 
       static void prune(Expansion& expansion)
       {
-        expansion.erase(
-            std::remove_if(
-              expansion.begin(),
-              expansion.end(),
-              [] (const Entry& e)
-              {
-                return e.coefficient == Scalar(0);
-              }),
-            expansion.end());
+        expansion.erase(std::remove_if(expansion.begin(), expansion.end(),
+                          [](const Entry& e) { return e.coefficient == Scalar(0); }),
+          expansion.end());
       }
 
       template <class Entries>
@@ -429,8 +413,7 @@ namespace Rodin::Assembly
 
             Alert::MemberFunctionException(*this, __func__)
               << "Invalid affine identification: slave DOF " << slave
-              << " is constrained by x_s = x_s + d with nonzero d."
-              << Alert::Raise;
+              << " is constrained by x_s = x_s + d with nonzero d." << Alert::Raise;
           }
 
           Alert::MemberFunctionException(*this, __func__)
@@ -472,7 +455,7 @@ namespace Rodin::Assembly
         if (canonical.empty())
         {
           m_expansions[static_cast<size_t>(slave)].clear();
-          m_expansions[static_cast<size_t>(slave)].push_back({ slave, Scalar(1) });
+          m_expansions[static_cast<size_t>(slave)].push_back({slave, Scalar(1)});
           m_isIdentified[static_cast<size_t>(slave)] = false;
           m_identificationValues[static_cast<size_t>(slave)] = Scalar(0);
           return;

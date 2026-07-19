@@ -67,26 +67,22 @@ namespace Rodin::Tests::Unit
   /// @brief Helper used by the tests to Check Open MP Self Identification Matches Zero Value Constraint.
   void checkOpenMPSelfIdentificationMatchesZeroValueConstraint()
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {4, 4});
     mesh.getConnectivity().compute(1, 2);
 
     P1 refFES(mesh);
     TrialFunction uRef(refFES);
-    TestFunction  vRef(refFES);
+    TestFunction vRef(refFES);
 
-    auto refBody =
-      Integral(Grad(uRef), Grad(vRef))
-      - Integral(RealFunction(1.0), vRef)
-      + DirichletBC(uRef, Zero());
+    auto refBody = Integral(Grad(uRef), Grad(vRef)) - Integral(RealFunction(1.0), vRef) +
+      DirichletBC(uRef, Zero());
 
     P1 idFES(mesh);
     TrialFunction uId(idFES);
-    TestFunction  vId(idFES);
+    TestFunction vId(idFES);
 
-    auto idBody =
-      Integral(Grad(uId), Grad(vId))
-      - Integral(RealFunction(1.0), vId)
-      + DirichletBC(uId, -uId);
+    auto idBody = Integral(Grad(uId), Grad(vId)) - Integral(RealFunction(1.0), vId) +
+      DirichletBC(uId, -uId);
 
     Problem refProblem(uRef, vRef);
     refProblem = refBody;
@@ -96,12 +92,10 @@ namespace Rodin::Tests::Unit
     idProblem = idBody;
     idProblem.assemble();
 
-    const auto matrixDiff =
-      refProblem.getLinearSystem().getOperator()
-      - idProblem.getLinearSystem().getOperator();
+    const auto matrixDiff = refProblem.getLinearSystem().getOperator() -
+      idProblem.getLinearSystem().getOperator();
     const auto vectorDiff =
-      refProblem.getLinearSystem().getVector()
-      - idProblem.getLinearSystem().getVector();
+      refProblem.getLinearSystem().getVector() - idProblem.getLinearSystem().getVector();
 
     EXPECT_NEAR(matrixDiff.norm(), 0.0, 1e-12);
     EXPECT_NEAR(vectorDiff.norm(), 0.0, 1e-12);
@@ -168,19 +162,10 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates Assembly Open MP Linear Form over the All Geometries parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometries,
-    Assembly_OpenMP_LinearForm,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-    )
-  );
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, Assembly_OpenMP_LinearForm,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   // =========================================================================
   // BilinearForm — OpenMP matches Sequential across geometries
@@ -349,19 +334,10 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates Assembly Open MP Bilinear Form over the All Geometries parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometries,
-    Assembly_OpenMP_BilinearForm,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-    )
-  );
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, Assembly_OpenMP_BilinearForm,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   // =========================================================================
   // Problem (multi-variable) — OpenMP matches Sequential
@@ -422,14 +398,14 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies affine identification defect matches sequential for assembly open MP problem by checking tolerance-based numerical results, exact expected values, form assembly.
   TEST(Assembly_OpenMP_Problem, AffineIdentificationDefectMatchesSequential)
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(1, 2);
 
     P1 fes(mesh);
     TrialFunction u(fes);
-    TestFunction  v(fes);
+    TestFunction v(fes);
     TrialFunction eta(fes);
-    TestFunction  zeta(fes);
+    TestFunction zeta(fes);
 
     constexpr Real gamma = 2.0;
     constexpr Real defect = 3.0;
@@ -443,11 +419,7 @@ namespace Rodin::Tests::Unit
       triplets.emplace_back(i, i, 1.0);
     uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
 
-    auto bc =
-      DirichletBC(
-          u,
-          RealFunction(gamma) * eta,
-          RealFunction(defect));
+    auto bc = DirichletBC(u, RealFunction(gamma) * eta, RealFunction(defect));
     LinearForm zero(v);
     zero.getVector().resize(n);
     zero.getVector().setZero();
@@ -457,33 +429,24 @@ namespace Rodin::Tests::Unit
     using LinearSystemType =
       Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     using ProblemType =
-      Problem<LinearSystemType,
-              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+      Problem<LinearSystemType, decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
 
-    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
-    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+    auto trialFunctions = Tuple{std::ref(u), std::ref(eta)};
+    auto testFunctions = Tuple{std::ref(v), std::ref(zeta)};
 
-    std::array<size_t, 2> offsets{ 0, static_cast<size_t>(n) };
+    std::array<size_t, 2> offsets{0, static_cast<size_t>(n)};
 
     boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
     boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
-    trialUUIDMap.right.insert({ 0, u.getUUID() });
-    trialUUIDMap.right.insert({ 1, eta.getUUID() });
-    testUUIDMap.right.insert({ 0, v.getUUID() });
-    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+    trialUUIDMap.right.insert({0, u.getUUID()});
+    trialUUIDMap.right.insert({1, eta.getUUID()});
+    testUUIDMap.right.insert({0, v.getUUID()});
+    testUUIDMap.right.insert({1, zeta.getUUID()});
 
-    Assembly::ProblemAssemblyInput<
-      std::decay_t<decltype(body)>,
-      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
-          body,
-          trialFunctions,
-          testFunctions,
-          offsets,
-          offsets,
-          trialUUIDMap,
-          testUUIDMap,
-          static_cast<size_t>(nTotal),
-          static_cast<size_t>(nTotal));
+    Assembly::ProblemAssemblyInput<std::decay_t<decltype(body)>, decltype(u), decltype(v),
+      decltype(eta), decltype(zeta)>
+      input(body, trialFunctions, testFunctions, offsets, offsets, trialUUIDMap,
+        testUUIDMap, static_cast<size_t>(nTotal), static_cast<size_t>(nTotal));
 
     LinearSystemType seqLS;
     LinearSystemType ompLS;
@@ -526,21 +489,18 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies identification vector master matches sequential for assembly open MP problem by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Assembly_OpenMP_Problem, IdentificationVectorMasterMatchesSequential)
   {
-    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
     mesh.getConnectivity().compute(1, 2);
 
     P1 slaveFES(mesh);
     P1 masterFES(mesh, mesh.getSpaceDimension());
 
     TrialFunction u(slaveFES);
-    TestFunction  v(slaveFES);
+    TestFunction v(slaveFES);
     TrialFunction eta(masterFES);
-    TestFunction  zeta(masterFES);
+    TestFunction zeta(masterFES);
 
-    auto bc =
-      DirichletBC(
-          u,
-          RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
+    auto bc = DirichletBC(u, RealFunction(2.0) * eta.x() + RealFunction(-0.5) * eta.y());
     bc.assemble();
 
     using IdentifiedDOFs = DirichletBCBase<Real>::IdentifiedDOFs;
@@ -551,24 +511,21 @@ namespace Rodin::Tests::Unit
     bool sawMultiMaster = false;
     for (const auto& [slave, row] : ident)
     {
-      (void) slave;
+      (void)slave;
       if (row.first.size() >= 2)
         sawMultiMaster = true;
     }
     ASSERT_TRUE(sawMultiMaster);
 
-    const Index nSlave  = static_cast<Index>(slaveFES.getSize());
+    const Index nSlave = static_cast<Index>(slaveFES.getSize());
     const Index nMaster = static_cast<Index>(masterFES.getSize());
-    const Index nTotal  = nSlave + nMaster;
+    const Index nTotal = nSlave + nMaster;
 
     BilinearForm uu(u, v);
     uu.getOperator().resize(nSlave, nSlave);
-    std::vector<Eigen::Triplet<Real>> triplets{
-      Eigen::Triplet<Real>(0, 0, 2.0),
-      Eigen::Triplet<Real>(0, 1, 3.0),
-      Eigen::Triplet<Real>(1, 0, 5.0),
-      Eigen::Triplet<Real>(1, 1, 7.0)
-    };
+    std::vector<Eigen::Triplet<Real>> triplets{Eigen::Triplet<Real>(0, 0, 2.0),
+      Eigen::Triplet<Real>(0, 1, 3.0), Eigen::Triplet<Real>(1, 0, 5.0),
+      Eigen::Triplet<Real>(1, 1, 7.0)};
     uu.getOperator().setFromTriplets(triplets.begin(), triplets.end());
 
     LinearForm loadU(v);
@@ -582,38 +539,25 @@ namespace Rodin::Tests::Unit
     using LinearSystemType =
       Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
     using ProblemType =
-      Problem<LinearSystemType,
-              decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
+      Problem<LinearSystemType, decltype(u), decltype(v), decltype(eta), decltype(zeta)>;
 
-    auto trialFunctions = Tuple{ std::ref(u), std::ref(eta) };
-    auto testFunctions  = Tuple{ std::ref(v), std::ref(zeta) };
+    auto trialFunctions = Tuple{std::ref(u), std::ref(eta)};
+    auto testFunctions = Tuple{std::ref(v), std::ref(zeta)};
 
-    std::array<size_t, 2> trialOffsets{
-      0, static_cast<size_t>(nSlave)
-    };
-    std::array<size_t, 2> testOffsets{
-      0, static_cast<size_t>(nSlave)
-    };
+    std::array<size_t, 2> trialOffsets{0, static_cast<size_t>(nSlave)};
+    std::array<size_t, 2> testOffsets{0, static_cast<size_t>(nSlave)};
 
     boost::bimap<FormLanguage::Base::UUID, size_t> trialUUIDMap;
     boost::bimap<FormLanguage::Base::UUID, size_t> testUUIDMap;
-    trialUUIDMap.right.insert({ 0, u.getUUID() });
-    trialUUIDMap.right.insert({ 1, eta.getUUID() });
-    testUUIDMap.right.insert({ 0, v.getUUID() });
-    testUUIDMap.right.insert({ 1, zeta.getUUID() });
+    trialUUIDMap.right.insert({0, u.getUUID()});
+    trialUUIDMap.right.insert({1, eta.getUUID()});
+    testUUIDMap.right.insert({0, v.getUUID()});
+    testUUIDMap.right.insert({1, zeta.getUUID()});
 
-    Assembly::ProblemAssemblyInput<
-      std::decay_t<decltype(body)>,
-      decltype(u), decltype(v), decltype(eta), decltype(zeta)> input(
-          body,
-          trialFunctions,
-          testFunctions,
-          trialOffsets,
-          testOffsets,
-          trialUUIDMap,
-          testUUIDMap,
-          static_cast<size_t>(nTotal),
-          static_cast<size_t>(nTotal));
+    Assembly::ProblemAssemblyInput<std::decay_t<decltype(body)>, decltype(u), decltype(v),
+      decltype(eta), decltype(zeta)>
+      input(body, trialFunctions, testFunctions, trialOffsets, testOffsets, trialUUIDMap,
+        testUUIDMap, static_cast<size_t>(nTotal), static_cast<size_t>(nTotal));
 
     LinearSystemType seqLS;
     LinearSystemType ompLS;
@@ -650,17 +594,8 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates Assembly Open MP Problem over the All Geometries parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometries,
-    Assembly_OpenMP_Problem,
-    ::testing::Values(
-      Polytope::Type::Segment,
-      Polytope::Type::Triangle,
-      Polytope::Type::Quadrilateral,
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-    )
-  );
+  INSTANTIATE_TEST_SUITE_P(AllGeometries, Assembly_OpenMP_Problem,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

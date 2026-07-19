@@ -762,7 +762,7 @@ namespace Rodin::Geometry
       }
       case Geometry::Polytope::Type::Pyramid:
       {
-        static const Math::SpatialVector<Real> s_node{{ 0.375, 0.375, 0.25 }};
+        static const Math::SpatialVector<Real> s_node{{0.375, 0.375, 0.25}};
         return s_node;
       }
       case Geometry::Polytope::Type::Wedge:
@@ -834,14 +834,10 @@ namespace Rodin::Geometry
       }
       case Type::Pyramid:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0, 0 }},
-          Math::SpatialPoint{{ 1, 0, 0 }},
-          Math::SpatialPoint{{ 1, 1, 0 }},
-          Math::SpatialPoint{{ 0, 1, 0 }},
-          Math::SpatialPoint{{ 0, 0, 1 }}
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0, 0}}, Math::SpatialPoint{{1, 0, 0}},
+          Math::SpatialPoint{{1, 1, 0}}, Math::SpatialPoint{{0, 1, 0}},
+          Math::SpatialPoint{{0, 0, 1}}};
         return s_nodes[i];
       }
       case Type::Hexahedron:
@@ -1507,8 +1503,7 @@ namespace Rodin::Geometry
       case Type::Pyramid:
       {
         auto sq = [](Real v) { return v * v; };
-        auto projectTri = [](Real u, Real v, Real& ou, Real& ov)
-        {
+        auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
           u = std::max(u, Real(0));
           v = std::max(v, Real(0));
           const Real s = u + v;
@@ -1526,8 +1521,7 @@ namespace Rodin::Geometry
         Real bestd = std::numeric_limits<Real>::infinity();
         Real bx = 0, by = 0, bz = 0;
 
-        auto consider = [&](Real x, Real y, Real z)
-        {
+        auto consider = [&](Real x, Real y, Real z) {
           const Real d = sq(rc[0] - x) + sq(rc[1] - y) + sq(rc[2] - z);
           if (d < bestd)
           {
@@ -1538,10 +1532,8 @@ namespace Rodin::Geometry
           }
         };
 
-        consider(
-            std::clamp(rc[0], Real(0), Real(1)),
-            std::clamp(rc[1], Real(0), Real(1)),
-            Real(0));
+        consider(std::clamp(rc[0], Real(0), Real(1)), std::clamp(rc[1], Real(0), Real(1)),
+          Real(0));
 
         Real u, v;
         projectTri(rc[0], rc[2], u, v);
@@ -1556,7 +1548,9 @@ namespace Rodin::Geometry
         projectTri(Real(1) - rc[1] - rc[2], rc[2], u, v);
         consider(Real(0), Real(1) - u - v, v);
 
-        out[0] = bx; out[1] = by; out[2] = bz;
+        out[0] = bx;
+        out[1] = by;
+        out[2] = bz;
         return;
       }
       case Type::Wedge:
@@ -1822,8 +1816,7 @@ namespace Rodin::Geometry
         // 4: side x=0        (3,0,4)
         assert(local < 5);
 
-        auto projectTri = [](Real u, Real v, Real& ou, Real& ov)
-        {
+        auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
           u = std::max(u, Real(0));
           v = std::max(v, Real(0));
           const Real s = u + v;
@@ -1850,24 +1843,32 @@ namespace Rodin::Geometry
         if (local == 1)
         {
           projectTri(rc[0], rc[2], u, v);
-          out[0] = u; out[1] = Real(0); out[2] = v;
+          out[0] = u;
+          out[1] = Real(0);
+          out[2] = v;
           return;
         }
         if (local == 2)
         {
           projectTri(rc[1], rc[2], u, v);
-          out[0] = Real(1) - v; out[1] = u; out[2] = v;
+          out[0] = Real(1) - v;
+          out[1] = u;
+          out[2] = v;
           return;
         }
         if (local == 3)
         {
           projectTri(Real(1) - rc[0] - rc[2], rc[2], u, v);
-          out[0] = Real(1) - u - v; out[1] = Real(1) - v; out[2] = v;
+          out[0] = Real(1) - u - v;
+          out[1] = Real(1) - v;
+          out[2] = v;
           return;
         }
 
         projectTri(Real(1) - rc[1] - rc[2], rc[2], u, v);
-        out[0] = Real(0); out[1] = Real(1) - u - v; out[2] = v;
+        out[0] = Real(0);
+        out[1] = Real(1) - u - v;
+        out[2] = v;
         return;
       }
       case Type::Wedge:

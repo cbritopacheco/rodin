@@ -18,8 +18,10 @@ static Real periodic_activation(Real t)
   if (tau < 0.13)  return 0.0;
   if (tau < 0.141) return 35.0 * ((tau - 0.13) / 0.011);
   if (tau < 0.281) return 35.0;
-  if (tau < 0.361) return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
-  if (tau < 0.45)  return -20.0;
+  if (tau < 0.361)
+    return 35.0 - 55.0 * ((tau - 0.281) / 0.08);
+  if (tau < 0.45)
+    return -20.0;
   return 0.0;
 }
 
@@ -145,10 +147,7 @@ int main()
   in.proximalLength = 0.4;
   in.distalRadius = 0.0007;
   in.distalLength = 0.004;
-  in.windkesselRheology =
-    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
-
-
+  in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
 
   // Valve parameters
   in.Kat = 9.0e-6;
@@ -260,21 +259,9 @@ int main()
     const Real Q = 4.0 * std::numbers::pi_v<Real> * R * R * s.v;
     const Real pat = in.pAt(s.t);
 
-    out << s.t << ","
-        << s.y << ","
-        << s.v << ","
-        << s.pv << ","
-        << s.par << ","
-        << s.pd << ","
-        << s.ec << ","
-        << s.gamma << ","
-        << s.beta << ","
-        << s.w << ","
-        << s.kc << ","
-        << s.tauc << ","
-        << V << ","
-        << Q << ","
-        << pat << "\n";
+    out << s.t << "," << s.y << "," << s.v << "," << s.pv << "," << s.par << "," << s.pd
+        << "," << s.ec << "," << s.gamma << "," << s.beta << "," << s.w << "," << s.kc
+        << "," << s.tauc << "," << V << "," << Q << "," << pat << "\n";
   }
 
   return 0;

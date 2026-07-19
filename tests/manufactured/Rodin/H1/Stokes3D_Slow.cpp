@@ -114,14 +114,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     EXPECT_NEAR(error_p, 0, 2e-3);
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Stokes3D_Test_12,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-      )
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Stokes3D_Test_12,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

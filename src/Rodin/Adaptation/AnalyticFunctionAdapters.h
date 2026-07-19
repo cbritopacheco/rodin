@@ -63,11 +63,14 @@ namespace Rodin::Adaptation
         Variational::VectorFunctionBase<ScalarType, AnalyticVectorFunction<F>>;
 
       AnalyticVectorFunction(F f, std::size_t dimension)
-        : m_f(std::move(f)), m_dimension(dimension)
+        : m_f(std::move(f)),
+          m_dimension(dimension)
       {}
 
       AnalyticVectorFunction(const AnalyticVectorFunction& other)
-        : Parent(other), m_f(other.m_f), m_dimension(other.m_dimension)
+        : Parent(other),
+          m_f(other.m_f),
+          m_dimension(other.m_dimension)
       {}
 
       AnalyticVectorFunction(AnalyticVectorFunction&& other)
@@ -82,14 +85,19 @@ namespace Rodin::Adaptation
       }
 
       std::size_t getDimension() const noexcept
-      { return m_dimension; }
+      {
+        return m_dimension;
+      }
 
-      Optional<std::size_t>
-      getOrder(const Geometry::Polytope&) const noexcept
-      { return std::nullopt; }
+      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
+      }
 
       AnalyticVectorFunction* copy() const noexcept override
-      { return new AnalyticVectorFunction(*this); }
+      {
+        return new AnalyticVectorFunction(*this);
+      }
 
     private:
       F m_f;
@@ -115,18 +123,23 @@ namespace Rodin::Adaptation
         Variational::MatrixFunctionBase<ScalarType, AnalyticMatrixFunction<F>>;
 
       AnalyticMatrixFunction(F f, std::size_t rows, std::size_t cols)
-        : m_f(std::move(f)), m_rows(rows), m_cols(cols)
+        : m_f(std::move(f)),
+          m_rows(rows),
+          m_cols(cols)
       {}
 
       AnalyticMatrixFunction(const AnalyticMatrixFunction& other)
         : Parent(other),
-          m_f(other.m_f), m_rows(other.m_rows), m_cols(other.m_cols)
+          m_f(other.m_f),
+          m_rows(other.m_rows),
+          m_cols(other.m_cols)
       {}
 
       AnalyticMatrixFunction(AnalyticMatrixFunction&& other)
         : Parent(std::move(other)),
           m_f(std::move(other.m_f)),
-          m_rows(other.m_rows), m_cols(other.m_cols)
+          m_rows(other.m_rows),
+          m_cols(other.m_cols)
       {}
 
       RangeType getValue(const Geometry::Point& p) const
@@ -134,15 +147,24 @@ namespace Rodin::Adaptation
         return m_f(p);
       }
 
-      std::size_t getRows() const noexcept { return m_rows; }
-      std::size_t getColumns() const noexcept { return m_cols; }
+      std::size_t getRows() const noexcept
+      {
+        return m_rows;
+      }
+      std::size_t getColumns() const noexcept
+      {
+        return m_cols;
+      }
 
-      Optional<std::size_t>
-      getOrder(const Geometry::Polytope&) const noexcept
-      { return std::nullopt; }
+      Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
+      {
+        return std::nullopt;
+      }
 
       AnalyticMatrixFunction* copy() const noexcept override
-      { return new AnalyticMatrixFunction(*this); }
+      {
+        return new AnalyticMatrixFunction(*this);
+      }
 
     private:
       F m_f;
@@ -151,8 +173,7 @@ namespace Rodin::Adaptation
   };
 
   template <class F>
-  AnalyticMatrixFunction(F, std::size_t, std::size_t)
-    -> AnalyticMatrixFunction<F>;
+  AnalyticMatrixFunction(F, std::size_t, std::size_t) -> AnalyticMatrixFunction<F>;
 }
 
 #endif

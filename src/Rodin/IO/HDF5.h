@@ -622,7 +622,8 @@ namespace Rodin::IO
         case PT::Triangle:      return 4;
         case PT::Quadrilateral: return 5;
         case PT::Tetrahedron:   return 6;
-        case PT::Pyramid:       return 7;
+        case PT::Pyramid:
+          return 7;
         case PT::Wedge:         return 8;
         case PT::Hexahedron:    return 9;
       }
@@ -2592,7 +2593,8 @@ namespace Rodin::IO
         byGeometry[static_cast<size_t>(Geometry::Polytope::Type::Tetrahedron)] =
           static_cast<HDF5::U64>(connectivity.getCount(Geometry::Polytope::Type::Tetrahedron));
         byGeometry[static_cast<size_t>(Geometry::Polytope::Type::Pyramid)] =
-          static_cast<HDF5::U64>(connectivity.getCount(Geometry::Polytope::Type::Pyramid));
+          static_cast<HDF5::U64>(
+            connectivity.getCount(Geometry::Polytope::Type::Pyramid));
         byGeometry[static_cast<size_t>(Geometry::Polytope::Type::Wedge)] =
           static_cast<HDF5::U64>(connectivity.getCount(Geometry::Polytope::Type::Wedge));
         byGeometry[static_cast<size_t>(Geometry::Polytope::Type::Hexahedron)] =

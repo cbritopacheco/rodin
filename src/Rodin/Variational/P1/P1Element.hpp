@@ -190,11 +190,12 @@ namespace Rodin::Variational
           {
             return z;
           }
-          default: [[unlikely]]
-          {
-            assert(false);
-            return Math::nan<Scalar>();
-          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Wedge:
@@ -668,11 +669,12 @@ namespace Rodin::Variational
                 return Math::nan<Scalar>();
               }
             }
-            default: [[unlikely]]
-            {
-              assert(false);
-              return Math::nan<Scalar>();
-            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
           }
         }
         case Geometry::Polytope::Type::Wedge:

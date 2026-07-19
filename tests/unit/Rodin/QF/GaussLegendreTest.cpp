@@ -272,7 +272,7 @@ TEST_F(GaussLegendreTest, HexahedronGeometry)
 TEST_F(GaussLegendreTest, PyramidGeometry)
 {
   GaussLegendre gl_pyr(Polytope::Type::Pyramid, 2, 2, 2);
-  EXPECT_EQ(gl_pyr.getSize(), 8);  // 2x2x2 collapsed tensor points
+  EXPECT_EQ(gl_pyr.getSize(), 8); // 2x2x2 collapsed tensor points
   EXPECT_EQ(gl_pyr.getGeometry(), Polytope::Type::Pyramid);
 
   double total_weight = 0.0;

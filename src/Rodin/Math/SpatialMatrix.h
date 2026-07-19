@@ -110,8 +110,7 @@ namespace Rodin::Math
 
       /// @brief Constructs a spatial matrix from an Eigen matrix expression.
       template <class EigenDerived>
-      constexpr
-      SpatialMatrix(const Eigen::MatrixBase<EigenDerived>& other)
+      constexpr SpatialMatrix(const Eigen::MatrixBase<EigenDerived>& other)
         : m_rows(0),
           m_cols(0)
       {
@@ -1541,8 +1540,7 @@ namespace Rodin::Math
       }
 
     private:
-      constexpr
-      void zeroStorage() noexcept
+      constexpr void zeroStorage() noexcept
       {
         m_data.setZero();
       }
@@ -2349,11 +2347,10 @@ namespace Rodin::Math
       typename FormLanguage::Mult<typename EigenDerived::Scalar, Scalar>::Type;
     assert(static_cast<std::uint8_t>(s.cols()) == m.rows());
     assert(static_cast<std::uint8_t>(s.rows()) <= SpatialMatrix<OutScalar>::MaxSize);
-    SpatialMatrix<OutScalar> result(
-      static_cast<std::uint8_t>(s.rows()), m.cols());
-    result = s * m.getData().topLeftCorner(
-      static_cast<Eigen::Index>(m.rows()),
-      static_cast<Eigen::Index>(m.cols()));
+    SpatialMatrix<OutScalar> result(static_cast<std::uint8_t>(s.rows()), m.cols());
+    result = s *
+      m.getData().topLeftCorner(
+        static_cast<Eigen::Index>(m.rows()), static_cast<Eigen::Index>(m.cols()));
     return result;
   }
 
@@ -2368,11 +2365,10 @@ namespace Rodin::Math
       typename FormLanguage::Mult<Scalar, typename EigenDerived::Scalar>::Type;
     assert(m.cols() == static_cast<std::uint8_t>(s.rows()));
     assert(static_cast<std::uint8_t>(s.cols()) <= SpatialMatrix<OutScalar>::MaxSize);
-    SpatialMatrix<OutScalar> result(
-      m.rows(), static_cast<std::uint8_t>(s.cols()));
+    SpatialMatrix<OutScalar> result(m.rows(), static_cast<std::uint8_t>(s.cols()));
     result = m.getData().topLeftCorner(
-      static_cast<Eigen::Index>(m.rows()),
-      static_cast<Eigen::Index>(m.cols())) * s;
+               static_cast<Eigen::Index>(m.rows()), static_cast<Eigen::Index>(m.cols())) *
+      s;
     return result;
   }
 

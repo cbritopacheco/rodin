@@ -7,7 +7,6 @@
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
-
 /**
  * @file
  * @brief Distributed P1 finite element space specialization on MPI meshes.
@@ -185,7 +184,8 @@ namespace Rodin::Variational
            */
           template <class Callable>
           CallablePullback(const Geometry::Polytope& polytope, Callable&& v)
-            : m_polytope(polytope), m_v(std::forward<Callable>(v))
+            : m_polytope(polytope),
+              m_v(std::forward<Callable>(v))
           {}
 
           /// @brief Copy constructor.
@@ -341,9 +341,11 @@ namespace Rodin::Variational
           UnorderedSet<int> nbrs;
           for (const auto& [i, peers] : halo)
             for (const Index r : peers)
-              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
           for (const auto& [lv, own] : owner)
-            if (static_cast<int>(own) != rank) nbrs.insert(static_cast<int>(own));
+            if (static_cast<int>(own) != rank)
+              nbrs.insert(static_cast<int>(own));
           neighbors.assign(nbrs.begin(), nbrs.end());
         }
 
@@ -492,9 +494,11 @@ namespace Rodin::Variational
           UnorderedSet<int> nbrs;
           for (const auto& [i, peers] : halo)
             for (const Index r : peers)
-              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
           for (const auto& [lv, own] : owner)
-            if (static_cast<int>(own) != rank) nbrs.insert(static_cast<int>(own));
+            if (static_cast<int>(own) != rank)
+              nbrs.insert(static_cast<int>(own));
           neighbors.assign(nbrs.begin(), nbrs.end());
         }
 
@@ -536,7 +540,7 @@ namespace Rodin::Variational
               {
                 const int rpeer = static_cast<int>(peer);
                 assert(rpeer != rank);
-                push[rpeer].push_back({ gid, s_send });
+                push[rpeer].push_back({gid, s_send});
               }
             }
           }

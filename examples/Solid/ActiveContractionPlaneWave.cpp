@@ -64,21 +64,21 @@ namespace
 {
   struct LocalState
   {
-    Real ec    = 0.0;
-    Real gamma = 0.0;
-    Real beta  = 0.0;
-    Real e1D = 0.0;   // committed fiber strain e_1D^n
+      Real ec = 0.0;
+      Real gamma = 0.0;
+      Real beta = 0.0;
+      Real e1D = 0.0;   // committed fiber strain e_1D^n
   };
 
   using StateBuffer = std::vector<std::vector<LocalState>>;
 
   struct StepDiagnostics
   {
-    Real minActiveExtension = std::numeric_limits<Real>::infinity();
-    Real maxActiveExtension = -std::numeric_limits<Real>::infinity();
-    Real maxGamma = 0.0;
-    Real maxBeta = 0.0;
-    size_t maxLocalIterations = 0;
+      Real minActiveExtension = std::numeric_limits<Real>::infinity();
+      Real maxActiveExtension = -std::numeric_limits<Real>::infinity();
+      Real maxGamma = 0.0;
+      Real maxBeta = 0.0;
+      size_t maxLocalIterations = 0;
   };
 
   size_t parseSize(const char* value, const char* name)
@@ -145,13 +145,13 @@ int main(int argc, char** argv)
 
   // ---- geometry -----------------------------------------------------------
   Mesh mesh;
-  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, { nc, nc, nc });
+  mesh = mesh.UniformGrid(Polytope::Type::Tetrahedron, {nc, nc, nc});
   mesh.scale(1.0 / static_cast<Real>(nc - 1));
   mesh.getConnectivity().compute(2, 3);
   mesh.save("miaow.mesh", IO::FileFormat::MEDIT);
 
-  std::cout << "Mesh: " << mesh.getVertexCount() << " vertices, "
-            << mesh.getCellCount() << " cells." << std::endl;
+  std::cout << "Mesh: " << mesh.getVertexCount() << " vertices, " << mesh.getCellCount()
+            << " cells." << std::endl;
 
   // ---- label top boundary -------------------------------------------------
   constexpr Attribute topBC = 1;
@@ -166,7 +166,7 @@ int main(int argc, char** argv)
       ySum += mesh.getVertexCoordinates(verts[i])(1);
     const Real yMid = ySum / static_cast<Real>(nv);
     if (yMid > 1.0 - eps)
-      mesh.setAttribute({ 2, it->getIndex() }, topBC);
+      mesh.setAttribute({2, it->getIndex()}, topBC);
   }
 
   // ---- finite-element spaces ----------------------------------------------
@@ -175,26 +175,26 @@ int main(int argc, char** argv)
   P1 Sh(mesh);        // scalar (electrical activation)
 
   // ---- materials ----------------------------------------------------------
-  const Real E      = 50.0;
-  const Real nu     = 0.3;
+  const Real E = 50.0;
+  const Real nu = 0.3;
   const Real lambda = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu));
-  const Real mu     = E / (2.0 * (1.0 + nu));
-  const Real rho    = 1.0;
+  const Real mu = E / (2.0 * (1.0 + nu));
+  const Real rho = 1.0;
   Solid::NeoHookean passive(lambda, mu);
 
   Solid::ActiveFiberLaw::Parameters activeParams;
   activeParams.stiffness = activeScale * 20.0;
-  activeParams.damping              = 300;
-  activeParams.destructionRate      = 0.4;
+  activeParams.damping = 300;
+  activeParams.destructionRate = 0.4;
   activeParams.crossBridgeStiffness = activeScale * 100.0;
   activeParams.contractility = activeScale * 20.0;
-  activeParams.initial.extension    = 0.0;
-  activeParams.initial.stiffness    = 0.0;
-  activeParams.initial.stress       = 0.0;
+  activeParams.initial.extension = 0.0;
+  activeParams.initial.stiffness = 0.0;
+  activeParams.initial.stress = 0.0;
   Solid::ActiveFiberLaw activeLaw(activeParams);
 
-  Solid::ActiveContraction<Solid::NeoHookean, Solid::ActiveFiberLaw>
-    law(passive, activeLaw);
+  Solid::ActiveContraction<Solid::NeoHookean, Solid::ActiveFiberLaw> law(
+    passive, activeLaw);
   law.setLocalTolerance(1e-14).setLocalMaxIterations(80);
 
   // ---- repeated electrical activation plane waves -------------------------
@@ -203,24 +203,23 @@ int main(int argc, char** argv)
   // time so there is a quiet relaxation gap between waves.
   struct PlaneWaveParams
   {
-    Real amplitude;
-    Real speed;
-    Real width;
-    Real start;
-    Real gap;
+      Real amplitude;
+      Real speed;
+      Real width;
+      Real start;
+      Real gap;
   };
 
   const size_t nWaves = 2;
 
   PlaneWaveParams wave;
   wave.amplitude = activeScale * 20.0;
-  wave.speed          = 0.5;
-  wave.width          = 0.05;
-  wave.start          = 0;
-  wave.gap            = 1.5;
+  wave.speed = 0.5;
+  wave.width = 0.05;
+  wave.start = 0;
+  wave.gap = 1.5;
 
-  auto activationAt = [&](Real y, Real t) -> Real
-  {
+  auto activationAt = [&](Real y, Real t) -> Real {
     Real activation = 0.0;
     for (size_t k = 0; k < nWaves; ++k)
     {
@@ -236,12 +235,10 @@ int main(int argc, char** argv)
                                                 // negative at rest
   };
 
-  const Real   dtStep = 0.02;
+  const Real dtStep = 0.02;
   const Real traversalTime = (1.0 - wave.start) / wave.speed;
   const Real tEnd =
-    static_cast<Real>(nWaves - 1) * wave.gap
-    + traversalTime
-    + 0.4 / wave.speed;
+    static_cast<Real>(nWaves - 1) * wave.gap + traversalTime + 0.4 / wave.speed;
   const size_t fullSteps = static_cast<size_t>(tEnd / dtStep) + 1;
   const size_t nSteps =
     requestedSteps == 0 ? fullSteps : std::min(requestedSteps, fullSteps);
@@ -251,9 +248,8 @@ int main(int argc, char** argv)
   // ---- per-quadrature-point state buffer ----------------------------------
   StateBuffer state(mesh.getCellCount());
 
-  auto activeInput = [&](Solid::ConstitutivePoint& cp)
-  {
-    const Index cellIdx   = cp.get<Solid::Tags::CellIndex>();
+  auto activeInput = [&](Solid::ConstitutivePoint& cp) {
+    const Index cellIdx = cp.get<Solid::Tags::CellIndex>();
     const std::size_t qpIdx = cp.get<Solid::Tags::QuadraturePointIndex>();
 
     if (cellIdx >= state.size())
@@ -283,7 +279,7 @@ int main(int argc, char** argv)
   // ---- solution fields ----------------------------------------------------
   GridFunction u(Vh);
   u.setName("Displacement");
-  u = VectorFunction{ Zero(), Zero() };
+  u = VectorFunction{Zero(), Zero()};
 
   GridFunction uPrevious(Vh);
   uPrevious = u;
@@ -293,14 +289,13 @@ int main(int argc, char** argv)
 
   GridFunction activationField(Sh);
   activationField.setName("Activation");
-  activationField = [&](const Geometry::Point& p)
-  {
+  activationField = [&](const Geometry::Point& p) {
     return activationAt(p.getPhysicalCoordinates()(1), currentTime);
   };
 
   GridFunction fiberField(Vh);
   fiberField.setName("FiberDirection");
-  fiberField = VectorFunction{ RealFunction(1.0), Zero() };
+  fiberField = VectorFunction{RealFunction(1.0), Zero()};
 
   auto computeMaxNodalDisplacement = [&]() -> Real {
     Real maxDisplacement = 0.0;
@@ -325,9 +320,8 @@ int main(int argc, char** argv)
   grid.setMesh(mesh);
   grid.add(u);
   grid.add(activationField);
-  grid.add(fiberField,
-           IO::XDMF::Center::Node,
-           IO::XDMF::AttributePolicy::Static);   // written once, reused
+  grid.add(fiberField, IO::XDMF::Center::Node,
+    IO::XDMF::AttributePolicy::Static);   // written once, reused
   xdmf.write(0.0);
 
   // ---- commit sweep -------------------------------------------------------
@@ -357,8 +351,8 @@ int main(int argc, char** argv)
 
   // ---- time loop ----------------------------------------------------------
   TrialFunction du(Vh);
-  TestFunction  v(Vh);
-  auto zero = VectorFunction{ Zero(), Zero() };
+  TestFunction v(Vh);
+  auto zero = VectorFunction{Zero(), Zero()};
 
   std::cout << std::scientific << std::setprecision(6);
   std::cout << "Time steps: " << nSteps;
@@ -386,7 +380,6 @@ int main(int argc, char** argv)
     else
       u.getData() = uPrevious.getData();
 
-
     Real activationMin = std::numeric_limits<Real>::infinity();
     Real activationMax = -std::numeric_limits<Real>::infinity();
     for (auto it = mesh.getVertex(); it; ++it)
@@ -396,40 +389,31 @@ int main(int argc, char** argv)
       activationMax = std::max(activationMax, a);
     }
 
-    std::cout
-      << "\n[step " << step << " / " << nSteps << "]"
-      << " t = " << currentTime
-      << " scheme = " << (useBDF2 ? "BDF2" : "BE")
-      << " activation = [" << activationMin << ", " << activationMax << "]"
-      << " |u_guess| = " << u.getData().norm()
-      << std::endl;
+    std::cout << "\n[step " << step << " / " << nSteps << "]"
+              << " t = " << currentTime << " scheme = " << (useBDF2 ? "BDF2" : "BE")
+              << " activation = [" << activationMin << ", " << activationMax << "]"
+              << " |u_guess| = " << u.getData().norm() << std::endl;
 
     auto ivw =
       Solid::InternalVirtualWork(law, u).setInput(activeInput).setOutput(commitOutput);
 
     Problem newton(du, v);
-    newton =
-             ivw(du, v)
-           + (rho * bdfA0 / dtStep) * Integral(du, v)
-           + (rho / dtStep)
-             * Integral(bdfA0 * u + bdfA1 * uPrevious
-                        + bdfA2 * uPreviousPrevious, v)
-           + DirichletBC(du, zero).on(topBC);
+    newton = ivw(du, v) + (rho * bdfA0 / dtStep) * Integral(du, v) +
+      (rho / dtStep) *
+        Integral(bdfA0 * u + bdfA1 * uPrevious + bdfA2 * uPreviousPrevious, v) +
+      DirichletBC(du, zero).on(topBC);
 
     CG linearSolver(newton);
     linearSolver.setTolerance(1e-8).setMaxIterations(2000);
     NewtonSolver solver(linearSolver);
-    solver.setMaxIterations(50)
-          .setAbsoluteTolerance(1e-9)
-          .setRelativeTolerance(1e-7);
+    solver.setMaxIterations(50).setAbsoluteTolerance(1e-9).setRelativeTolerance(1e-7);
     Real previousNewtonResidual = std::numeric_limits<Real>::quiet_NaN();
     solver.setMonitor([&](const auto& report) {
       std::cout << "  Newton " << std::setw(2) << report.iterations
                 << " residual = " << report.finalResidual
                 << " step = " << report.finalStepNorm
                 << " damping = " << report.dampingFactor;
-      if (std::isfinite(previousNewtonResidual)
-          && previousNewtonResidual > 0.0)
+      if (std::isfinite(previousNewtonResidual) && previousNewtonResidual > 0.0)
       {
         std::cout << " ratio = " << report.finalResidual / previousNewtonResidual;
       }
@@ -454,10 +438,8 @@ int main(int argc, char** argv)
     const Real maxNodalDisplacement = computeMaxNodalDisplacement();
     peakMaxNodalDisplacement = std::max(peakMaxNodalDisplacement, maxNodalDisplacement);
 
-    const auto bdfData =
-      bdfA0 * u.getData()
-      + bdfA1 * uPrevious.getData()
-      + bdfA2 * uPreviousPrevious.getData();
+    const auto bdfData = bdfA0 * u.getData() + bdfA1 * uPrevious.getData() +
+      bdfA2 * uPreviousPrevious.getData();
 
     std::cout << "  summary:"
               << " converged = " << (report.converged ? "yes" : "no")
@@ -484,8 +466,7 @@ int main(int argc, char** argv)
     uPrevious = u;
 
     // Update activation field from current time and mesh node positions
-    activationField = [&](const Geometry::Point& p)
-    {
+    activationField = [&](const Geometry::Point& p) {
       return activationAt(p.getPhysicalCoordinates()(1), currentTime);
     };
 

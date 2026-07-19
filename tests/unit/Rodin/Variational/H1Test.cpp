@@ -256,7 +256,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies pyramid H1 2 uniform grid build for variational H1 space by checking exact expected values.
   TEST(Rodin_Variational_H1_Space, Pyramid_H1_2_UniformGrid_Build)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, {2, 2, 2});
     mesh.getConnectivity().compute(3, 2);
     mesh.getConnectivity().compute(2, 1);
     mesh.getConnectivity().compute(1, 0);
