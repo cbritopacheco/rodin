@@ -213,7 +213,12 @@ namespace Rodin::Variational
       {
         static const Math::Matrix<Real> s_inv = [] {
           const auto& V = VandermondeTriangle<K>::getMatrix();
-          Math::ThinSVD<Math::Matrix<Real>> svd(V);
+#if EIGEN_VERSION_AT_LEAST(3, 4, 90)
+          Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
+            svd(V);
+#else
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+#endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();
         }();
@@ -401,7 +406,12 @@ namespace Rodin::Variational
       {
         static const Math::Matrix<Real> s_inv = [] {
           const auto& V = VandermondeTetrahedron<K>::getMatrix();
-          Math::ThinSVD<Math::Matrix<Real>> svd(V);
+#if EIGEN_VERSION_AT_LEAST(3, 4, 90)
+          Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
+            svd(V);
+#else
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+#endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();
         }();
