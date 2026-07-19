@@ -891,7 +891,7 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_P1Element_Vector, VectorDimensions_Pyramid)
   {
     VectorP1Element<Real> elem(Polytope::Type::Pyramid, 3);
-    EXPECT_EQ(elem.getCount(), 15);  // 3 components × 5 nodes
+    EXPECT_EQ(elem.getCount(), 15); // 3 components × 5 nodes
   }
 
   // ========================================================================
@@ -902,9 +902,9 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_P1Element_LinearForm, ScalarLinearForm_AllGeometries)
   {
     // Test LinearForm evaluation for P1 elements across all geometries
-    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    for (auto geom :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP1Element elem(geom);
 
@@ -981,7 +981,7 @@ namespace Rodin::Tests::Unit
   {
     // Test that gradient functions work correctly across geometries
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
+           Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       RealP1Element elem(geom);
 
@@ -1149,7 +1149,7 @@ namespace Rodin::Tests::Unit
   {
     // Test that P1 element exactly interpolates linear functions
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
+           Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       RealP1Element elem(geom);
 

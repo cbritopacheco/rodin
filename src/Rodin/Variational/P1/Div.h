@@ -435,9 +435,7 @@ namespace Rodin::Variational
           const size_t nv = feScalar.getCount();
 
           const auto& rc =
-            qf
-              ? qf->getPoint(ip.getIndex())
-              : pt.getReferenceCoordinates();
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           const auto& Jinv = pt.getJacobianInverse();
 

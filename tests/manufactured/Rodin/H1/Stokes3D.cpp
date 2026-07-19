@@ -154,14 +154,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
   }
 
   /// @brief Instantiates Manufactured Stokes 3 D Test 12 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Stokes3D_Test_12,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-      )
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Stokes3D_Test_12,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

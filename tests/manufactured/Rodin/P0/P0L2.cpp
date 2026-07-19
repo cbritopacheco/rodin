@@ -32,7 +32,8 @@ namespace Rodin::Tests::Manufactured::P0L2
     void SetUp() override
     {
       const auto geom = GetParam();
-      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron || geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
+      if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron ||
+        geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
       {
         m_mesh = Mesh().UniformGrid(geom, { NX, NY, NZ });
         m_mesh.scale(1.0 / (NX - 1));
@@ -137,14 +138,7 @@ namespace Rodin::Tests::Manufactured::P0L2
   );
 
   /// @brief Instantiates Manufactured P0 L 2 Test 20 x 20 x 20 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_P0_L2_Test_20x20x20,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-      )
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_P0_L2_Test_20x20x20,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

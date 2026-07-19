@@ -61,7 +61,8 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Triangle:      return "Triangle";
         case Polytope::Type::Quadrilateral: return "Quadrilateral";
         case Polytope::Type::Tetrahedron:   return "Tetrahedron";
-        case Polytope::Type::Pyramid:       return "Pyramid";
+        case Polytope::Type::Pyramid:
+          return "Pyramid";
         case Polytope::Type::Hexahedron:    return "Hexahedron";
         case Polytope::Type::Wedge:         return "Wedge";
       }
@@ -96,22 +97,14 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Instantiates P0 MFEM Grid Function Coverage over the All Supported Geometries parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      AllSupportedGeometries,
-      P0MFEMGridFunctionCoverage,
-      ::testing::Values(
-        Polytope::Type::Point,
-        Polytope::Type::Segment,
-        Polytope::Type::Triangle,
-        Polytope::Type::Quadrilateral,
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      [](const ::testing::TestParamInfo<Polytope::Type>& info)
-      {
-        return geometryName(info.param);
-      });
+  INSTANTIATE_TEST_SUITE_P(AllSupportedGeometries, P0MFEMGridFunctionCoverage,
+    ::testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
+      return geometryName(info.param);
+    });
 
   /// @brief Verifies scalar multiline load for IO MFEM P0 grid function by checking tolerance-based numerical results.
   TEST(Rodin_IO_MFEM_P0_GridFunction, ScalarMultilineLoad)

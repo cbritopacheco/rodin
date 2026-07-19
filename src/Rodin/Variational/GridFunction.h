@@ -1169,12 +1169,9 @@ namespace Rodin::Variational
           size_t d, Index i, const IntegrationPoint& ip) const
       {
         auto& cache = getEvaluationCache();
-        if (!cache.hasBasisValues
-            || cache.owner != this
-            || cache.d != d
-            || cache.i != i
-            || cache.qf != ip.getQuadratureFormula()
-            || cache.qp != ip.getIndex())
+        if (!cache.hasBasisValues || cache.owner != this || cache.d != d ||
+          cache.i != i || cache.qf != ip.getQuadratureFormula() ||
+          cache.qp != ip.getIndex())
         {
           const auto* fes = &this->getFiniteElementSpace();
           const auto& fe = fes->getFiniteElement(d, i);
@@ -1190,7 +1187,7 @@ namespace Rodin::Variational
           cache.basisValues.resize(count);
           for (Index local = 0; local < count; ++local)
           {
-            const auto mapping = fes->getPushforward({ d, i }, fe.getBasis(local));
+            const auto mapping = fes->getPushforward({d, i}, fe.getBasis(local));
             cache.basisValues[local] = mapping(p);
           }
           cache.hasBasisValues = true;
@@ -1520,11 +1517,11 @@ namespace Rodin::Variational
        * @param[in] polytope Entity whose finite element order is requested
        * @returns Polynomial order when available
        */
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
         const auto& fes = this->getFiniteElementSpace();
-        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex()).getOrder();
+        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
+          .getOrder();
       }
 
     private:

@@ -303,7 +303,8 @@ namespace Rodin::Tests::Unit
   {
     RealP0Element k(Polytope::Type::Pyramid);
 
-    EXPECT_NEAR(k.getBasis(0)(Math::Vector<Real>{{0.25, 0.25, 0.25}}), 1, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(
+      k.getBasis(0)(Math::Vector<Real>{{0.25, 0.25, 0.25}}), 1, RODIN_FUZZY_CONSTANT);
 
     const auto& node = k.getNode(0);
     EXPECT_NEAR(node.x(), 0.375, RODIN_FUZZY_CONSTANT);
@@ -651,9 +652,9 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies partition of unity all vector dimensions for final test P0 element vector by checking tolerance-based numerical results.
   TEST(FinalTest_P0Element_Vector, PartitionOfUnity_AllVectorDimensions)
   {
-    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    for (auto geom :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -703,9 +704,8 @@ namespace Rodin::Tests::Unit
   {
     // Test LinearForm evaluation for P0 elements across all geometries
     for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
-                      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid,
-                      Polytope::Type::Wedge})
+           Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+           Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP0Element elem(geom);
 
@@ -727,7 +727,7 @@ namespace Rodin::Tests::Unit
   {
     // Test LinearForm for vector P0 elements with different vector dimensions
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
+           Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -766,9 +766,9 @@ namespace Rodin::Tests::Unit
   TEST(FinalTest_P0Element_Interpolation, ScalarConstantInterpolation)
   {
     // Test that P0 element correctly interpolates constant functions
-    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Pyramid, Polytope::Type::Wedge})
+    for (auto geom :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP0Element elem(geom);
 

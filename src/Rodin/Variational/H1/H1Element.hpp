@@ -44,85 +44,85 @@ namespace Rodin::Variational
   template <size_t K>
   struct PyramidIndex
   {
-    static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
+      static constexpr size_t Count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
-    struct IJ
-    {
-      size_t i;
-      size_t j;
-    };
+      struct IJ
+      {
+          size_t i;
+          size_t j;
+      };
 
-    static constexpr size_t getLayerOffset(size_t layer)
-    {
-      size_t out = 0;
-      for (size_t k = 0; k < layer; ++k)
+      static constexpr size_t getLayerOffset(size_t layer)
+      {
+        size_t out = 0;
+        for (size_t k = 0; k < layer; ++k)
+        {
+          const size_t n = K - k + 1;
+          out += n * n;
+        }
+        return out;
+      }
+
+      static constexpr size_t getIndex(size_t i, size_t j, size_t k)
       {
         const size_t n = K - k + 1;
-        out += n * n;
+        return getLayerOffset(k) + j * n + i;
       }
-      return out;
-    }
 
-    static constexpr size_t getIndex(size_t i, size_t j, size_t k)
-    {
-      const size_t n = K - k + 1;
-      return getLayerOffset(k) + j * n + i;
-    }
-
-    static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
-    {
-      size_t rem = idx;
-      for (k = 0; k <= K; ++k)
+      static constexpr void decode(size_t idx, size_t& i, size_t& j, size_t& k)
       {
-        const size_t n = K - k + 1;
-        const size_t layer = n * n;
-        if (rem < layer)
+        size_t rem = idx;
+        for (k = 0; k <= K; ++k)
         {
-          j = rem / n;
-          i = rem % n;
-          return;
+          const size_t n = K - k + 1;
+          const size_t layer = n * n;
+          if (rem < layer)
+          {
+            j = rem / n;
+            i = rem % n;
+            return;
+          }
+          rem -= layer;
         }
-        rem -= layer;
+
+        i = j = k = 0;
       }
 
-      i = j = k = 0;
-    }
-
-    static constexpr IJ getTriangleLattice(size_t alpha)
-    {
-      size_t pos = 0;
-      for (size_t j = 0; j <= K; ++j)
+      static constexpr IJ getTriangleLattice(size_t alpha)
       {
-        for (size_t i = 0; i <= K - j; ++i, ++pos)
+        size_t pos = 0;
+        for (size_t j = 0; j <= K; ++j)
         {
-          if (pos == alpha)
-            return IJ{ i, j };
+          for (size_t i = 0; i <= K - j; ++i, ++pos)
+          {
+            if (pos == alpha)
+              return IJ{i, j};
+          }
+        }
+        return IJ{0, 0};
+      }
+
+      static constexpr size_t getSideIndex(size_t local, size_t alpha)
+      {
+        const auto ij = getTriangleLattice(alpha);
+        const size_t i = ij.i;
+        const size_t k = ij.j;
+        const size_t n = K - k;
+
+        switch (local)
+        {
+          case 1:
+            return getIndex(i, 0, k);
+          case 2:
+            return getIndex(n, i, k);
+          case 3:
+            return getIndex(n - i, n, k);
+          case 4:
+            return getIndex(0, n - i, k);
+          default:
+            return 0;
         }
       }
-      return IJ{ 0, 0 };
-    }
-
-    static constexpr size_t getSideIndex(size_t local, size_t alpha)
-    {
-      const auto ij = getTriangleLattice(alpha);
-      const size_t i = ij.i;
-      const size_t k = ij.j;
-      const size_t n = K - k;
-
-      switch (local)
-      {
-        case 1:
-          return getIndex(i, 0, k);
-        case 2:
-          return getIndex(n, i, k);
-        case 3:
-          return getIndex(n - i, n, k);
-        case 4:
-          return getIndex(0, n - i, k);
-        default:
-          return 0;
-      }
-    }
   };
 
   template <size_t K>
@@ -193,9 +193,8 @@ namespace Rodin::Variational
         const Real a = r.x() / q;
         const Real b = r.y() / q;
 
-        return BernsteinPyramid<K>::getBasis(n, i, a)
-             * BernsteinPyramid<K>::getBasis(n, j, b)
-             * BernsteinPyramid<K>::getBasis(K, k, z);
+        return BernsteinPyramid<K>::getBasis(n, i, a) *
+          BernsteinPyramid<K>::getBasis(n, j, b) * BernsteinPyramid<K>::getBasis(K, k, z);
       }
 
       static Real getDerivative(size_t mode, size_t deriv, const Math::SpatialPoint& r)
@@ -212,9 +211,9 @@ namespace Rodin::Variational
         const Real a = r.x() / q;
         const Real b = r.y() / q;
 
-        const Real Ba  = BernsteinPyramid<K>::getBasis(n, i, a);
-        const Real Bb  = BernsteinPyramid<K>::getBasis(n, j, b);
-        const Real Bz  = BernsteinPyramid<K>::getBasis(K, k, z);
+        const Real Ba = BernsteinPyramid<K>::getBasis(n, i, a);
+        const Real Bb = BernsteinPyramid<K>::getBasis(n, j, b);
+        const Real Bz = BernsteinPyramid<K>::getBasis(K, k, z);
         const Real dBa = BernsteinPyramid<K>::getDerivative(n, i, a);
         const Real dBb = BernsteinPyramid<K>::getDerivative(n, j, b);
         const Real dBz = BernsteinPyramid<K>::getDerivative(K, k, z);
@@ -224,8 +223,7 @@ namespace Rodin::Variational
         if (deriv == 1)
           return Ba * dBb * Bz / q;
         if (deriv == 2)
-          return (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz
-               + Ba * Bb * dBz;
+          return (dBa * (a / q) * Bb + Ba * dBb * (b / q)) * Bz + Ba * Bb * dBz;
         return 0;
       }
   };
@@ -261,7 +259,8 @@ namespace Rodin::Variational
           Eigen::BDCSVD<Math::Matrix<Real>, Eigen::ComputeThinU | Eigen::ComputeThinV>
             svd(V);
 #else
-          Eigen::BDCSVD<Math::Matrix<Real>> svd(V, Eigen::ComputeThinU | Eigen::ComputeThinV);
+          Eigen::BDCSVD<Math::Matrix<Real>> svd(
+            V, Eigen::ComputeThinU | Eigen::ComputeThinV);
 #endif
           const Math::Matrix<Real> I = Math::Matrix<Real>::Identity(V.rows(), V.cols());
           return svd.solve(I).eval();
@@ -820,8 +819,8 @@ namespace Rodin::Variational
           Scalar result = Scalar(0);
           for (size_t mode = 0; mode < count; ++mode)
           {
-            result += inverse(mode, m_local)
-                    * PyramidModal<K>::getDerivative(mode, m_i, r);
+            result +=
+              inverse(mode, m_local) * PyramidModal<K>::getDerivative(mode, m_i, r);
           }
 
           return result;
@@ -937,7 +936,7 @@ namespace Rodin::Variational
           const Real dlz = LagrangeBasisSegment<K>::getDerivative(k, z);
 
           Real val = 0;
-          if (m_i == 0)      // \partial/\partialx
+          if (m_i == 0) // \partial/\partialx
             val = dlx * ly * lz;
           else if (m_i == 1) // \partial/\partialy
             val = lx * dly * lz;

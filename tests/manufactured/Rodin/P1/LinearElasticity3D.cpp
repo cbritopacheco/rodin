@@ -91,7 +91,7 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   };
 
   /// @brief Helper used by the tests to Elasticity 3 D Test 8.
-  using Elasticity3DTest8  = Elasticity3DFixture<8>;
+  using Elasticity3DTest8 = Elasticity3DFixture<8>;
   /// @brief Helper used by the tests to Elasticity 3 D Test 16.
   using Elasticity3DTest16 = Elasticity3DFixture<16>;
   /// @brief Helper used by the tests to Elasticity 3 D Test 32.
@@ -333,35 +333,17 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   }
 
   /// @brief Instantiates Elasticity 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Elasticity3DTest8,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Elasticity3DTest8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Elasticity 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Elasticity3DTest16,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Elasticity3DTest16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Elasticity 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Elasticity3DTest32,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Elasticity3DTest32,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

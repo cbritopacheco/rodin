@@ -121,7 +121,8 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Triangle:      return "Triangle";
         case Polytope::Type::Quadrilateral: return "Quadrilateral";
         case Polytope::Type::Tetrahedron:   return "Tetrahedron";
-        case Polytope::Type::Pyramid:       return "Pyramid";
+        case Polytope::Type::Pyramid:
+          return "Pyramid";
         case Polytope::Type::Hexahedron:    return "Hexahedron";
         case Polytope::Type::Wedge:         return "Wedge";
       }
@@ -340,22 +341,14 @@ namespace Rodin::Tests::Unit
     });
 
   /// @brief Instantiates Mesh Format Coverage over the All Supported Geometries parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-      AllSupportedGeometries,
-      MeshFormatCoverage,
-      ::testing::Values(
-        Polytope::Type::Point,
-        Polytope::Type::Segment,
-        Polytope::Type::Triangle,
-        Polytope::Type::Quadrilateral,
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      [](const ::testing::TestParamInfo<Polytope::Type>& info)
-      {
-        return geometryName(info.param);
-      });
+  INSTANTIATE_TEST_SUITE_P(AllSupportedGeometries, MeshFormatCoverage,
+    ::testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
+      return geometryName(info.param);
+    });
 
   /// @brief Verifies sanity test MEDIT 2 D square for IO mesh loader by checking exact expected values.
   TEST(Rodin_IO_MeshLoader, SanityTest_MEDIT_2D_Square)

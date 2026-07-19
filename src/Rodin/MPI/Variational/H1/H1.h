@@ -482,8 +482,7 @@ namespace Rodin::Variational
             // Pyramid DOF ordering follows horizontal square layers:
             // layer k has (K-k+1)^2 nodes. Interior DOFs are strictly away
             // from the base and all four triangular side faces.
-            auto offset = [](size_t layer)
-            {
+            auto offset = [](size_t layer) {
               size_t out = 0;
               for (size_t kk = 0; kk < layer; ++kk)
               {
@@ -862,9 +861,11 @@ namespace Rodin::Variational
             const auto& dimensionHaloNeighbors = shard.getHalo(d);
             for (const auto& [i, peers] : dimensionHaloNeighbors)
               for (const Index r : peers)
-                if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+                if (static_cast<int>(r) != rank)
+                  nbrs.insert(static_cast<int>(r));
             for (const auto& [i, r] : owner)
-              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
             dimensionNeighbors.assign(nbrs.begin(), nbrs.end());
           }
 

@@ -169,7 +169,10 @@ namespace Rodin::Tests::Unit
   {
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0,0)=0.2; H(0,1)=0.0; H(1,0)=0.0; H(1,1)=0.0;
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.0;
     state.setDisplacementGradient(H);
 
     Solid::ConstitutivePoint cp(state);
@@ -467,7 +470,9 @@ namespace Rodin::Tests::Unit
 
     Solid::ConstitutivePoint cp(state);
     Math::SpatialVector<Real> fiber(3);
-    fiber[0] = 1.0; fiber[1] = 0.0; fiber[2] = 0.0;
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    fiber[2] = 0.0;
     cp.set<Solid::Tags::FiberDirection>(fiber);
 
     Solid::HolzapfelOgden::Cache cache;
@@ -488,23 +493,37 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.08; H(0,1)=0.03; H(0,2)=0.01;
-    H(1,0)=-0.02; H(1,1)=0.06; H(1,2)=0.04;
-    H(2,0)=0.01; H(2,1)=-0.03; H(2,2)=0.05;
+    H(0, 0) = 0.08;
+    H(0, 1) = 0.03;
+    H(0, 2) = 0.01;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.06;
+    H(1, 2) = 0.04;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.03;
+    H(2, 2) = 0.05;
     state.setDisplacementGradient(H);
 
     Solid::ConstitutivePoint cp(state);
     Math::SpatialVector<Real> fiber(3);
-    fiber[0] = 0.8; fiber[1] = 0.4; fiber[2] = 0.2;
+    fiber[0] = 0.8;
+    fiber[1] = 0.4;
+    fiber[2] = 0.2;
     cp.set<Solid::Tags::FiberDirection>(fiber);
 
     Solid::HolzapfelOgden::Cache cache;
     law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.2; dF(0,1)=-0.1; dF(0,2)=0.05;
-    dF(1,0)=0.03; dF(1,1)=0.15; dF(1,2)=-0.07;
-    dF(2,0)=-0.04; dF(2,1)=0.08; dF(2,2)=0.12;
+    dF(0, 0) = 0.2;
+    dF(0, 1) = -0.1;
+    dF(0, 2) = 0.05;
+    dF(1, 0) = 0.03;
+    dF(1, 1) = 0.15;
+    dF(1, 2) = -0.07;
+    dF(2, 0) = -0.04;
+    dF(2, 1) = 0.08;
+    dF(2, 2) = 0.12;
 
     Math::SpatialMatrix<Real> dP;
     law.getMaterialTangent(dP, cache, cp, dF);
@@ -545,7 +564,8 @@ namespace Rodin::Tests::Unit
 
     Solid::ConstitutivePoint cp(state);
     Math::SpatialVector<Real> fiber(2);
-    fiber[0] = 1.0; fiber[1] = 0.0;
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::ActiveExtension>(0.0);
 
@@ -577,13 +597,16 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0, 0) = 0.07; H(0, 1) = 0.02;
-    H(1, 0) = -0.03; H(1, 1) = 0.05;
+    H(0, 0) = 0.07;
+    H(0, 1) = 0.02;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.05;
     state.setDisplacementGradient(H);
 
     Solid::ConstitutivePoint cp(state);
     Math::SpatialVector<Real> fiber(2);
-    fiber[0] = 0.8; fiber[1] = 0.6;
+    fiber[0] = 0.8;
+    fiber[1] = 0.6;
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::ActiveExtension>(-0.06);
 
@@ -591,8 +614,10 @@ namespace Rodin::Tests::Unit
     law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0, 0) = 0.21; dF(0, 1) = -0.13;
-    dF(1, 0) = 0.07; dF(1, 1) = 0.18;
+    dF(0, 0) = 0.21;
+    dF(0, 1) = -0.13;
+    dF(1, 0) = 0.07;
+    dF(1, 1) = 0.18;
 
     Math::SpatialMatrix<Real> dP;
     law.getMaterialTangent(dP, cache, cp, dF);
@@ -629,14 +654,22 @@ namespace Rodin::Tests::Unit
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.04; H(0,1)=0.02; H(0,2)=-0.01;
-    H(1,0)=-0.03; H(1,1)=0.06; H(1,2)=0.02;
-    H(2,0)=0.01; H(2,1)=-0.02; H(2,2)=0.05;
+    H(0, 0) = 0.04;
+    H(0, 1) = 0.02;
+    H(0, 2) = -0.01;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.06;
+    H(1, 2) = 0.02;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.02;
+    H(2, 2) = 0.05;
     state.setDisplacementGradient(H);
 
     Solid::ConstitutivePoint cp(state);
     Math::SpatialVector<Real> fiber(3);
-    fiber[0] = 0.7; fiber[1] = 0.5; fiber[2] = 0.3;
+    fiber[0] = 0.7;
+    fiber[1] = 0.5;
+    fiber[2] = 0.3;
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::ActiveExtension>(-0.04);
 
@@ -644,9 +677,15 @@ namespace Rodin::Tests::Unit
     law.setCache(cache, cp);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.18; dF(0,1)=-0.09; dF(0,2)=0.05;
-    dF(1,0)=0.04; dF(1,1)=0.13; dF(1,2)=-0.07;
-    dF(2,0)=-0.05; dF(2,1)=0.06; dF(2,2)=0.10;
+    dF(0, 0) = 0.18;
+    dF(0, 1) = -0.09;
+    dF(0, 2) = 0.05;
+    dF(1, 0) = 0.04;
+    dF(1, 1) = 0.13;
+    dF(1, 2) = -0.07;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.06;
+    dF(2, 2) = 0.10;
 
     Math::SpatialMatrix<Real> dP;
     law.getMaterialTangent(dP, cache, cp, dF);
@@ -678,24 +717,27 @@ namespace Rodin::Tests::Unit
     // difference of P with respect to F at fixed previous state.
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
-    activeInput.stiffness            = 200.0;
-    activeInput.damping              = 0.5;
-    activeInput.destructionRate      = 0.4;
+    activeInput.stiffness = 200.0;
+    activeInput.damping = 0.5;
+    activeInput.destructionRate = 0.4;
     activeInput.crossBridgeStiffness = 100.0;
-    activeInput.contractility        = 80.0;
+    activeInput.contractility = 80.0;
     Solid::ActiveFiberLaw active(activeInput);
     Solid::ActiveContraction law(passive, active);
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0, 0) = 0.06; H(0, 1) = 0.02;
-    H(1, 0) = -0.03; H(1, 1) = 0.04;
+    H(0, 0) = 0.06;
+    H(0, 1) = 0.02;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.04;
     state.setDisplacementGradient(H);
 
     auto buildPoint = [&](const Solid::KinematicState& s) {
       Solid::ConstitutivePoint cp(s);
       Math::SpatialVector<Real> fiber(2);
-      fiber[0] = 0.8; fiber[1] = 0.6;
+      fiber[0] = 0.8;
+      fiber[1] = 0.6;
       cp.set<Solid::Tags::FiberDirection>(fiber);
       cp.set<Solid::Tags::TimeStep>(0.01);
       cp.set<Solid::Tags::PreviousActiveExtension>(-0.04);
@@ -712,8 +754,10 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(cache.localIterations, 30u);
 
     Math::SpatialMatrix<Real> dF(2, 2);
-    dF(0, 0) = 0.21; dF(0, 1) = -0.13;
-    dF(1, 0) = 0.07; dF(1, 1) = 0.18;
+    dF(0, 0) = 0.21;
+    dF(0, 1) = -0.13;
+    dF(1, 0) = 0.07;
+    dF(1, 1) = 0.18;
 
     Math::SpatialMatrix<Real> dP;
     law.getMaterialTangent(dP, cache, cp, dF);
@@ -740,25 +784,33 @@ namespace Rodin::Tests::Unit
   {
     Solid::NeoHookean passive(20.0, 8.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
-    activeInput.stiffness            = 60.0;
-    activeInput.damping              = 0.3;
-    activeInput.destructionRate      = 0.5;
+    activeInput.stiffness = 60.0;
+    activeInput.damping = 0.3;
+    activeInput.destructionRate = 0.5;
     activeInput.crossBridgeStiffness = 40.0;
-    activeInput.contractility        = 30.0;
+    activeInput.contractility = 30.0;
     Solid::ActiveFiberLaw active(activeInput);
     Solid::ActiveContraction law(passive, active);
 
     Solid::KinematicState state(3);
     Math::SpatialMatrix<Real> H(3, 3);
-    H(0,0)=0.04; H(0,1)=0.02; H(0,2)=-0.01;
-    H(1,0)=-0.03; H(1,1)=0.05; H(1,2)=0.02;
-    H(2,0)=0.01; H(2,1)=-0.02; H(2,2)=0.03;
+    H(0, 0) = 0.04;
+    H(0, 1) = 0.02;
+    H(0, 2) = -0.01;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.05;
+    H(1, 2) = 0.02;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.02;
+    H(2, 2) = 0.03;
     state.setDisplacementGradient(H);
 
     auto buildPoint = [&](const Solid::KinematicState& s) {
       Solid::ConstitutivePoint cp(s);
       Math::SpatialVector<Real> fiber(3);
-      fiber[0] = 0.7; fiber[1] = 0.5; fiber[2] = 0.3;
+      fiber[0] = 0.7;
+      fiber[1] = 0.5;
+      fiber[2] = 0.3;
       cp.set<Solid::Tags::FiberDirection>(fiber);
       cp.set<Solid::Tags::TimeStep>(0.005);
       cp.set<Solid::Tags::PreviousActiveExtension>(-0.03);
@@ -774,9 +826,15 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(cache.dynamic);
 
     Math::SpatialMatrix<Real> dF(3, 3);
-    dF(0,0)=0.18; dF(0,1)=-0.09; dF(0,2)=0.05;
-    dF(1,0)=0.04; dF(1,1)=0.13; dF(1,2)=-0.07;
-    dF(2,0)=-0.05; dF(2,1)=0.06; dF(2,2)=0.10;
+    dF(0, 0) = 0.18;
+    dF(0, 1) = -0.09;
+    dF(0, 2) = 0.05;
+    dF(1, 0) = 0.04;
+    dF(1, 1) = 0.13;
+    dF(1, 2) = -0.07;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.06;
+    dF(2, 2) = 0.10;
 
     Math::SpatialMatrix<Real> dP;
     law.getMaterialTangent(dP, cache, cp, dF);
@@ -805,23 +863,26 @@ namespace Rodin::Tests::Unit
     // machine precision regardless of where the global state sits.
     Solid::NeoHookean passive(0.0, 0.0);
     Solid::ActiveFiberLaw::Parameters activeInput;
-    activeInput.stiffness            = 200.0;
-    activeInput.damping              = 0.5;
-    activeInput.destructionRate      = 0.4;
+    activeInput.stiffness = 200.0;
+    activeInput.damping = 0.5;
+    activeInput.destructionRate = 0.4;
     activeInput.crossBridgeStiffness = 100.0;
-    activeInput.contractility        = 80.0;
+    activeInput.contractility = 80.0;
     Solid::ActiveFiberLaw active(activeInput);
     Solid::ActiveContraction law(passive, active);
 
     Solid::KinematicState state(2);
     Math::SpatialMatrix<Real> H(2, 2);
-    H(0, 0) = 0.10; H(0, 1) = 0.03;
-    H(1, 0) = -0.02; H(1, 1) = 0.06;
+    H(0, 0) = 0.10;
+    H(0, 1) = 0.03;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.06;
     state.setDisplacementGradient(H);
 
     Solid::ConstitutivePoint cp(state);
     Math::SpatialVector<Real> fiber(2);
-    fiber[0] = 1.0; fiber[1] = 0.0;
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
     cp.set<Solid::Tags::FiberDirection>(fiber);
     cp.set<Solid::Tags::TimeStep>(0.01);
     cp.set<Solid::Tags::PreviousActiveExtension>(-0.05);

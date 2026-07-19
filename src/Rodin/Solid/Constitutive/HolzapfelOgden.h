@@ -94,14 +94,7 @@ namespace Rodin::Solid
       {}
 
       /// @brief Constructs the law from scalar material parameters.
-      HolzapfelOgden(
-          Real mu1,
-          Real mu2,
-          Real C0,
-          Real C1,
-          Real C2,
-          Real C3,
-          Real kappa)
+      HolzapfelOgden(Real mu1, Real mu2, Real C0, Real C1, Real C2, Real C3, Real kappa)
         : m_params{mu1, mu2, C0, C1, C2, C3, kappa}
       {}
 
@@ -120,28 +113,22 @@ namespace Rodin::Solid
       /// @brief Returns the stored strain-energy density.
       Real getStrainEnergyDensity(const Cache& cache, const ConstitutivePoint&) const
       {
-        return m_params.mu1 * (cache.I1bar - 3.0)
-             + m_params.mu2 * (cache.I2bar - 3.0)
-             + m_params.C0 * std::exp(m_params.C1 * square(cache.I1bar - 3.0))
-             + m_params.C2 * std::exp(m_params.C3 * square(cache.I4bar - 1.0))
-             + m_params.kappa * (cache.J - 1.0 - std::log(cache.J));
+        return m_params.mu1 * (cache.I1bar - 3.0) + m_params.mu2 * (cache.I2bar - 3.0) +
+          m_params.C0 * std::exp(m_params.C1 * square(cache.I1bar - 3.0)) +
+          m_params.C2 * std::exp(m_params.C3 * square(cache.I4bar - 1.0)) +
+          m_params.kappa * (cache.J - 1.0 - std::log(cache.J));
       }
 
       /// @brief Computes the first Piola-Kirchhoff stress.
-      void getFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const ConstitutivePoint& cp) const
+      void getFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P, const Cache& cache,
+        const ConstitutivePoint& cp) const
       {
         computeFirstPiolaKirchhoffStress(P, cache, cp.getKinematicState());
       }
 
       /// @brief Computes the material tangent action by directional differencing.
-      void getMaterialTangent(
-          Math::SpatialMatrix<Real>& dP,
-          const Cache& cache,
-          const ConstitutivePoint& cp,
-          const Math::SpatialMatrix<Real>& dF) const
+      void getMaterialTangent(Math::SpatialMatrix<Real>& dP, const Cache& cache,
+        const ConstitutivePoint& cp, const Math::SpatialMatrix<Real>& dF) const
       {
         const auto& state = cp.getKinematicState();
         const auto& H = state.getDisplacementGradient();
@@ -166,10 +153,8 @@ namespace Rodin::Solid
         return x * x;
       }
 
-      void setCache(
-          Cache& cache,
-          const KinematicState& state,
-          const Math::SpatialVector<Real>& direction) const
+      void setCache(Cache& cache, const KinematicState& state,
+        const Math::SpatialVector<Real>& direction) const
       {
         const auto& C = state.getRightCauchyGreenTensor();
         cache.J = state.getJacobian();
@@ -185,47 +170,38 @@ namespace Rodin::Solid
         cache.I4bar = cache.I4 * cache.I3m13;
       }
 
-      void computeFirstPiolaKirchhoffStress(
-          Math::SpatialMatrix<Real>& P,
-          const Cache& cache,
-          const KinematicState& state) const
+      void computeFirstPiolaKirchhoffStress(Math::SpatialMatrix<Real>& P,
+        const Cache& cache, const KinematicState& state) const
       {
         const auto& F = state.getDeformationGradient();
         const auto& C = state.getRightCauchyGreenTensor();
         const auto& Cinv = C.inverse();
         const size_t d = state.getDimension();
 
-        Math::SpatialMatrix<Real> I(static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
+        Math::SpatialMatrix<Real> I(
+          static_cast<std::uint8_t>(d), static_cast<std::uint8_t>(d));
         I.setIdentity();
-        const Math::SpatialMatrix<Real> A =
-          FiberKinematics::dyad(cache.direction);
+        const Math::SpatialMatrix<Real> A = FiberKinematics::dyad(cache.direction);
 
-        const Real W1 =
-          2.0 * m_params.C0 * m_params.C1 * cache.I3m13
-            * (cache.I1bar - 3.0)
-            * std::exp(m_params.C1 * square(cache.I1bar - 3.0))
-          + m_params.mu1 * cache.I3m13;
+        const Real W1 = 2.0 * m_params.C0 * m_params.C1 * cache.I3m13 *
+            (cache.I1bar - 3.0) * std::exp(m_params.C1 * square(cache.I1bar - 3.0)) +
+          m_params.mu1 * cache.I3m13;
         const Real W2 = m_params.mu2 * cache.I3m23;
-        const Real W4 =
-          2.0 * m_params.C2 * m_params.C3 * cache.I3m13
-            * (cache.I4bar - 1.0)
-            * std::exp(m_params.C3 * square(cache.I4bar - 1.0));
+        const Real W4 = 2.0 * m_params.C2 * m_params.C3 * cache.I3m13 *
+          (cache.I4bar - 1.0) * std::exp(m_params.C3 * square(cache.I4bar - 1.0));
         const Real W3 =
-          -(1.0 / 3.0) * m_params.mu1 * cache.I1 * std::pow(cache.I3, -4.0 / 3.0)
-          -(2.0 / 3.0) * m_params.mu2 * cache.I2 * std::pow(cache.I3, -5.0 / 3.0)
-          -(2.0 / 3.0) * m_params.C0 * m_params.C1 * cache.I1
-            * std::pow(cache.I3, -4.0 / 3.0) * (cache.I1bar - 3.0)
-            * std::exp(m_params.C1 * square(cache.I1bar - 3.0))
-          -(1.0 / 3.0) * 2.0 * m_params.C2 * m_params.C3 * cache.I4
-            * std::pow(cache.I3, -4.0 / 3.0) * (cache.I4bar - 1.0)
-            * std::exp(m_params.C3 * square(cache.I4bar - 1.0))
-          + 0.5 * m_params.kappa * (std::pow(cache.I3, -0.5) - 1.0 / cache.I3);
+          -(1.0 / 3.0) * m_params.mu1 * cache.I1 * std::pow(cache.I3, -4.0 / 3.0) -
+          (2.0 / 3.0) * m_params.mu2 * cache.I2 * std::pow(cache.I3, -5.0 / 3.0) -
+          (2.0 / 3.0) * m_params.C0 * m_params.C1 * cache.I1 *
+            std::pow(cache.I3, -4.0 / 3.0) * (cache.I1bar - 3.0) *
+            std::exp(m_params.C1 * square(cache.I1bar - 3.0)) -
+          (1.0 / 3.0) * 2.0 * m_params.C2 * m_params.C3 * cache.I4 *
+            std::pow(cache.I3, -4.0 / 3.0) * (cache.I4bar - 1.0) *
+            std::exp(m_params.C3 * square(cache.I4bar - 1.0)) +
+          0.5 * m_params.kappa * (std::pow(cache.I3, -0.5) - 1.0 / cache.I3);
 
         const Math::SpatialMatrix<Real> dWdC =
-          W1 * I
-          + W2 * (cache.I1 * I + (-1.0) * C)
-          + W3 * cache.I3 * Cinv
-          + W4 * A;
+          W1 * I + W2 * (cache.I1 * I + (-1.0) * C) + W3 * cache.I3 * Cinv + W4 * A;
 
         P = 2.0 * F * dWdC;
       }

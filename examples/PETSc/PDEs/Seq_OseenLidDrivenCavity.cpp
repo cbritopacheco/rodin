@@ -276,7 +276,6 @@ int main(int argc, char** argv)
 
       t += dt;
 
-
       // Oseen / Picard linearization:
       //   (u_old \cdot \nabla)u
       const auto conv_u = Mult(Jacobian(u), u_old);

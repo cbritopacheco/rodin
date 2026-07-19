@@ -67,7 +67,7 @@ namespace Rodin::Adaptation
       Math::SpatialMatrix<Real> AinvT;  ///< A_K^{-T}
       Math::SpatialMatrix<Real> C;      ///< A_K A_K^T
       Math::Matrix<Real> gradN;         ///< 3x2: rows are spatial grads of P1 basis
-    /// @brief Vertex indices of the triangular cell.
+      /// @brief Vertex indices of the triangular cell.
       std::array<Index, 3> vertices = {{0, 0, 0}};
   };
 

@@ -1581,35 +1581,27 @@ namespace Rodin::Tests::Unit
       Mesh<Context::MPI>::UniformGrid(ctx, Polytope::Type::Pyramid, {4, 3, 3});
 
     EXPECT_EQ(mpiMesh.getDimension(), 3u)
-      << "Rank " << world.rank()
-      << ": Pyramid UniformGrid dimension should be 3.";
+      << "Rank " << world.rank() << ": Pyramid UniformGrid dimension should be 3.";
     EXPECT_EQ(mpiMesh.getSpaceDimension(), 3u)
-      << "Rank " << world.rank()
-      << ": Pyramid UniformGrid space dimension should be 3.";
+      << "Rank " << world.rank() << ": Pyramid UniformGrid space dimension should be 3.";
 
     const auto refMesh =
       Mesh<Context::Local>::UniformGrid(Polytope::Type::Pyramid, {4, 3, 3});
     const size_t D = 3;
 
     EXPECT_EQ(mpiMesh.getPolytopeCount(D), refMesh.getPolytopeCount(D))
-      << "Rank " << world.rank()
-      << ": Pyramid UniformGrid global cell count mismatch.";
+      << "Rank " << world.rank() << ": Pyramid UniformGrid global cell count mismatch.";
     EXPECT_EQ(mpiMesh.getPolytopeCount(Polytope::Type::Pyramid),
-              refMesh.getPolytopeCount(Polytope::Type::Pyramid))
-      << "Rank " << world.rank()
-      << ": Pyramid UniformGrid geometry count mismatch.";
+      refMesh.getPolytopeCount(Polytope::Type::Pyramid))
+      << "Rank " << world.rank() << ": Pyramid UniformGrid geometry count mismatch.";
     EXPECT_EQ(mpiMesh.getPolytopeCount(0), refMesh.getPolytopeCount(0))
-      << "Rank " << world.rank()
-      << ": Pyramid UniformGrid global vertex count mismatch.";
+      << "Rank " << world.rank() << ": Pyramid UniformGrid global vertex count mismatch.";
 
     const auto& shard = mpiMesh.getShard();
-    for (Index i = 0;
-         i < static_cast<Index>(shard.getPolytopeCount(D));
-         ++i)
+    for (Index i = 0; i < static_cast<Index>(shard.getPolytopeCount(D)); ++i)
     {
       EXPECT_EQ(shard.getGeometry(D, i), Polytope::Type::Pyramid)
-        << "Rank " << world.rank() << " cell " << i
-        << ": expected Pyramid geometry.";
+        << "Rank " << world.rank() << " cell " << i << ": expected Pyramid geometry.";
     }
   }
 

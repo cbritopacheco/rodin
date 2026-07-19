@@ -294,7 +294,8 @@ namespace Rodin::Variational
           UnorderedSet<int> nbrs;
           for (const auto& [i, peers] : halo)
             for (const Index r : peers)
-              if (static_cast<int>(r) != rank) nbrs.insert(static_cast<int>(r));
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
           for (const auto& entry : owner)
             if (static_cast<int>(entry.second) != rank)
               nbrs.insert(static_cast<int>(entry.second));

@@ -477,9 +477,8 @@ namespace Rodin::Assembly
    * @tparam FES2 Finite element space of @f$ v @f$
    * @tparam Sp Shape function space type (Trial / Test) of @f$ A(v) @f$
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
   class DirichletBCShapeFunctionAssemblyInput
   {
     public:
@@ -487,11 +486,10 @@ namespace Rodin::Assembly
       using OperandType = Variational::TrialFunction<Sol1, FES1>;
 
       /// @brief Shape-function expression type on the right-hand side.
-      using ValueType   = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
+      using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
 
       /// @brief Dirichlet condition represented by this input.
-      using DirichletBCType =
-        Variational::DirichletBC<OperandType, ValueType>;
+      using DirichletBCType = Variational::DirichletBC<OperandType, ValueType>;
 
       /**
        * @brief Constructs identification Dirichlet BC assembly input.
@@ -500,23 +498,30 @@ namespace Rodin::Assembly
        * @param v Shape-function expression used as the master value.
        * @param essBdr Boundary attributes where the condition applies.
        */
-      DirichletBCShapeFunctionAssemblyInput(
-          const OperandType& u, const ValueType& v,
-          const FlatSet<Geometry::Attribute>& essBdr)
-        : m_u(u), m_v(v), m_essBdr(essBdr)
+      DirichletBCShapeFunctionAssemblyInput(const OperandType& u, const ValueType& v,
+        const FlatSet<Geometry::Attribute>& essBdr)
+        : m_u(u),
+          m_v(v),
+          m_essBdr(essBdr)
       {}
 
       /**
        * @brief Gets the slave trial function operand.
        * @return Reference to the constrained trial function.
        */
-      const OperandType& getOperand() const { return m_u.get(); }
+      const OperandType& getOperand() const
+      {
+        return m_u.get();
+      }
 
       /**
        * @brief Gets the shape-function expression on the right-hand side.
        * @return Reference to the master expression.
        */
-      const ValueType& getShapeFunction() const { return m_v.get(); }
+      const ValueType& getShapeFunction() const
+      {
+        return m_v.get();
+      }
 
       /**
        * @brief Gets the essential boundary attributes.
@@ -529,7 +534,7 @@ namespace Rodin::Assembly
 
     private:
       std::reference_wrapper<const OperandType> m_u;
-      std::reference_wrapper<const ValueType>   m_v;
+      std::reference_wrapper<const ValueType> m_v;
       std::reference_wrapper<const FlatSet<Geometry::Attribute>> m_essBdr;
   };
 

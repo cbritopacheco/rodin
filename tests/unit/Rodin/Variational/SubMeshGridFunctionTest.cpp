@@ -186,7 +186,8 @@ namespace Rodin::Tests::Unit
   }
 
   /// @brief Skin SubMesh: (d-1)-dimensional boundary of the full 2D mesh.
-  TEST(Rodin_Variational_P1_ParentMesh, GridFunction_EvaluateAtBoundarySubMeshPoint_Inclusion)
+  TEST(Rodin_Variational_P1_ParentMesh,
+    GridFunction_EvaluateAtBoundarySubMeshPoint_Inclusion)
   {
     // Skin SubMesh: (d-1)-dimensional boundary of the full 2D mesh.
     // The FES is on the parent 2D mesh; evaluate at a boundary edge point.
@@ -200,7 +201,7 @@ namespace Rodin::Tests::Unit
 
     SubMesh<Context::Local> skin = mesh.skin();
 
-    const size_t edgeDim = skin.getDimension();   // = 1 for 2D mesh
+    const size_t edgeDim = skin.getDimension(); // = 1 for 2D mesh
     auto it = skin.getPolytope(edgeDim, 0);
     const auto& edgePolytope = *it;
     // Midpoint of the segment in reference coordinates

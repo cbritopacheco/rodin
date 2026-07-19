@@ -61,7 +61,8 @@ namespace
       case Polytope::Type::Quadrilateral: return "Quad2D";
       case Polytope::Type::Tetrahedron:   return "Tet3D";
       case Polytope::Type::Hexahedron:    return "Hex3D";
-      case Polytope::Type::Pyramid:       return "Pyramid3D";
+      case Polytope::Type::Pyramid:
+        return "Pyramid3D";
       case Polytope::Type::Wedge:         return "Wedge3D";
       default:                            return "Unknown";
     }
@@ -211,19 +212,11 @@ namespace
     }
   };
 
-  INSTANTIATE_TEST_SUITE_P(
-      AllDimensions,
-      PETScHDF5,
-      ::testing::Values(
-          Polytope::Type::Segment,
-          Polytope::Type::Triangle,
-          Polytope::Type::Quadrilateral,
-          Polytope::Type::Tetrahedron,
-          Polytope::Type::Hexahedron,
-          Polytope::Type::Pyramid,
-          Polytope::Type::Wedge
-      ),
-      PETScPolytopeNameGenerator());
+  INSTANTIATE_TEST_SUITE_P(AllDimensions, PETScHDF5,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge),
+    PETScPolytopeNameGenerator());
 }
 
 int main(int argc, char** argv)

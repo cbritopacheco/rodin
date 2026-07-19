@@ -470,7 +470,9 @@ namespace
         case Polytope::Type::Quadrilateral: g = "Quadrilateral"; break;
         case Polytope::Type::Tetrahedron:   g = "Tetrahedron";   break;
         case Polytope::Type::Hexahedron:    g = "Hexahedron";    break;
-        case Polytope::Type::Pyramid:       g = "Pyramid";       break;
+        case Polytope::Type::Pyramid:
+          g = "Pyramid";
+          break;
         case Polytope::Type::Wedge:         g = "Wedge";         break;
         default:                            g = "Unknown";        break;
       }
@@ -561,19 +563,12 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
   }
 
   /// @brief Instantiates H1 Linear Elasticity 3 D over the All Geometries And Degrees parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1LinearElasticity3D,
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1LinearElasticity3D,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Pyramid,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(2, 3, 4)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(2, 3, 4)),
+    ParamName{});
 } // namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
 
 // ---------------------------------------------------------------------------

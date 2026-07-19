@@ -432,40 +432,39 @@ namespace Rodin::Assembly
           if (dbc.getOperand().getUUID() != u.getUUID())
             continue;
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
-                constraints.setFixed(
-                    static_cast<Index>(local),
-                    static_cast<PetscScalar>(value));
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
-                const auto& masters = pair.first;
-                const auto& coeffs = pair.second;
-                std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
-                entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+                for (const auto& [local, value] : dofs)
+                  constraints.setFixed(
+                    static_cast<Index>(local), static_cast<PetscScalar>(value));
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
+              {
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
                 {
-                  entries.push_back({
-                      static_cast<Index>(masters[k]),
-                      static_cast<PetscScalar>(coeffs[k]) });
-                }
-                const auto valueIt = affineValues.find(slave);
-                const PetscScalar value =
-                  valueIt == affineValues.end()
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(masters.size()));
+                  for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+                  {
+                    entries.push_back({static_cast<Index>(masters[k]),
+                      static_cast<PetscScalar>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const PetscScalar value = valueIt == affineValues.end()
                     ? PetscScalar(0)
                     : static_cast<PetscScalar>(valueIt->second);
-                constraints.setIdentification(static_cast<Index>(slave), entries, value);
+                  constraints.setIdentification(
+                    static_cast<Index>(slave), entries, value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
@@ -476,10 +475,9 @@ namespace Rodin::Assembly
         }
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
-          const PetscScalar colValue =
-            constraints.isIdentified(col)
-              ? constraints.getIdentificationValue(col)
-              : PetscScalar(0);
+          const PetscScalar colValue = constraints.isIdentified(col)
+            ? constraints.getIdentificationValue(col)
+            : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
@@ -510,8 +508,7 @@ namespace Rodin::Assembly
           }
         };
 
-        auto vector_entry = [&](Index row, PetscScalar val)
-        {
+        auto vector_entry = [&](Index row, PetscScalar val) {
           if (val == PetscScalar(0))
             return;
           for (const auto& r : constraints.expand(row))
@@ -746,13 +743,8 @@ namespace Rodin::Assembly
             if (rbegin <= gs && gs < rend)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
 
-          ierr = MatZeroRows(
-              A,
-              static_cast<PetscInt>(rowsToZero.size()),
-              rowsToZero.empty() ? nullptr : rowsToZero.data(),
-              0.0,
-              nullptr,
-              nullptr);
+          ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
+            rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
 
@@ -1105,47 +1097,46 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
 
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
-                constraints.setFixed(
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
+              {
+                for (const auto& [local, value] : dofs)
+                  constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              const auto vUUIDOpt = dbc.getValueUUID();
-              assert(vUUIDOpt);
-              const size_t vBlock = findTrialBlock(*vUUIDOpt);
-              const size_t vOff = trialOffsets[vBlock];
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
-                const auto& masters = pair.first;
-                const auto& coeffs = pair.second;
-                std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
-                entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+                const auto vUUIDOpt = dbc.getValueUUID();
+                assert(vUUIDOpt);
+                const size_t vBlock = findTrialBlock(*vUUIDOpt);
+                const size_t vOff = trialOffsets[vBlock];
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
                 {
-                  entries.push_back({
-                      static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
-                      static_cast<PetscScalar>(coeffs[k]) });
-                }
-                const auto valueIt = affineValues.find(slave);
-                const PetscScalar value =
-                  valueIt == affineValues.end()
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(masters.size()));
+                  for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+                  {
+                    entries.push_back(
+                      {static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
+                        static_cast<PetscScalar>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const PetscScalar value = valueIt == affineValues.end()
                     ? PetscScalar(0)
                     : static_cast<PetscScalar>(valueIt->second);
-                constraints.setIdentification(
-                    static_cast<Index>(uOff + static_cast<size_t>(slave)),
-                    entries,
+                  constraints.setIdentification(
+                    static_cast<Index>(uOff + static_cast<size_t>(slave)), entries,
                     value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
@@ -1155,11 +1146,9 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
-        auto ownsTrialGlobal = [&](Index g) -> bool
-        {
+        auto ownsTrialGlobal = [&](Index g) -> bool {
           bool owned = false;
-          us.iapply([&](size_t i, const auto& uref)
-          {
+          us.iapply([&](size_t i, const auto& uref) {
             size_t begin, end;
             uref.get().getFiniteElementSpace().getOwnershipRange(begin, end);
             const size_t off = trialOffsets[i];
@@ -1170,10 +1159,9 @@ namespace Rodin::Assembly
         };
 
         auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
-          const PetscScalar colValue =
-            constraints.isIdentified(col)
-              ? constraints.getIdentificationValue(col)
-              : PetscScalar(0);
+          const PetscScalar colValue = constraints.isIdentified(col)
+            ? constraints.getIdentificationValue(col)
+            : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
@@ -1187,8 +1175,7 @@ namespace Rodin::Assembly
             for (const auto& c : constraints.expand(col))
             {
               const PetscInt J = static_cast<PetscInt>(c.index);
-              const PetscScalar v =
-                r.coefficient * val * c.coefficient;
+              const PetscScalar v = r.coefficient * val * c.coefficient;
               // Insert unconditionally. PETSc decides whether zero-valued
               // insertions affect the pattern according to its current
               // matrix options.
@@ -1199,8 +1186,7 @@ namespace Rodin::Assembly
           }
         };
 
-        auto vector_entry = [&](Index row, PetscScalar val)
-        {
+        auto vector_entry = [&](Index row, PetscScalar val) {
           if (val == PetscScalar(0))
             return;
           for (const auto& r : constraints.expand(row))
@@ -1475,13 +1461,8 @@ namespace Rodin::Assembly
             if (ownsTrialGlobal(gs))
               rowsToZero.push_back(static_cast<PetscInt>(gs));
 
-          ierr = MatZeroRows(
-              A,
-              static_cast<PetscInt>(rowsToZero.size()),
-              rowsToZero.empty() ? nullptr : rowsToZero.data(),
-              0.0,
-              nullptr,
-              nullptr);
+          ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
+            rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
 
@@ -1548,12 +1529,9 @@ namespace Rodin::Assembly
           ierr = VecZeroEntries(bcVec);
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
-          ierr = VecSetValues(
-              bcVec,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              bcVals.empty() ? nullptr : bcVals.data(),
-              INSERT_VALUES);
+          ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
+            bcIdx.empty() ? nullptr : bcIdx.data(),
+            bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
           ierr = VecAssemblyBegin(bcVec);
@@ -1562,13 +1540,8 @@ namespace Rodin::Assembly
           ierr = VecAssemblyEnd(bcVec);
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
-          ierr = MatZeroRowsColumns(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              1.0,
-              bcVec,
-              b);
+          ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+            bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
           ierr = VecDestroy(&bcVec);

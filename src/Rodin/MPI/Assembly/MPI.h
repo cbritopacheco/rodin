@@ -170,8 +170,7 @@ namespace Rodin::Assembly
 
         res.clear();
 
-        auto assembleFace = [&](const Geometry::Polytope& face)
-        {
+        auto assembleFace = [&](const Geometry::Polytope& face) {
           const Index i = face.getIndex();
 
           if (!essBdr.empty())
@@ -229,19 +228,14 @@ namespace Rodin::Assembly
    * own DOF connectivity. Generalises to non-trivial @f$ A @f$ by evaluating
    * @c Av.getBasis(j) with a live @c IntegrationPoint built from @p p.
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
-  class MPI<
-    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Sol1, FES1>,
-      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
-    : public AssemblyBase<
-        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-        Variational::DirichletBC<
-          Variational::TrialFunction<Sol1, FES1>,
-          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
+  class MPI<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+    final : public AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+              Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+                Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
       /// @brief Output map containing slave DOF indices and master coefficients.
@@ -251,8 +245,7 @@ namespace Rodin::Assembly
       /// @brief Shape-function expression used as the boundary value.
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
       /// @brief Concrete Dirichlet boundary-condition type.
-      using DirichletBCType =
-        Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
       /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
       /// @brief Input payload type consumed by execute().
@@ -261,9 +254,13 @@ namespace Rodin::Assembly
       /// @brief Default constructor.
       MPI() = default;
       /// @brief Copy constructor.
-      MPI(const MPI& other) : Parent(other) {}
+      MPI(const MPI& other)
+        : Parent(other)
+      {}
       /// @brief Move constructor.
-      MPI(MPI&& other) : Parent(std::move(other)) {}
+      MPI(MPI&& other)
+        : Parent(std::move(other))
+      {}
 
       /**
        * @brief Assembles distributed identification constraints.
@@ -282,14 +279,14 @@ namespace Rodin::Assembly
 
         res.clear();
 
-        auto assembleFace = [&](const Geometry::Polytope& face)
-        {
+        auto assembleFace = [&](const Geometry::Polytope& face) {
           const Index fi = face.getIndex();
 
           if (!essBdr.empty())
           {
             const auto a = face.getAttribute();
-            if (!a || !essBdr.contains(*a)) return;
+            if (!a || !essBdr.contains(*a))
+              return;
           }
 
           const auto& feU = fesU.getFiniteElement(faceDim, fi);
@@ -303,18 +300,17 @@ namespace Rodin::Assembly
           {
             const Index slave = slaveDOFs[s];
             auto pos = res.find(slave);
-            if (pos != res.end()) continue;
+            if (pos != res.end())
+              continue;
 
-            std::vector<Index>  mIdx;
+            std::vector<Index> mIdx;
             std::vector<Scalar> mCoef;
             mIdx.reserve(static_cast<size_t>(nMasters));
             mCoef.reserve(static_cast<size_t>(nMasters));
 
             for (Index j = 0; j < nMasters; j++)
             {
-              auto basisCallable = [&Av, j]
-                                   (const Geometry::Point& p)
-              {
+              auto basisCallable = [&Av, j](const Geometry::Point& p) {
                 const Variational::IntegrationPoint ip(p);
                 Av.setIntegrationPoint(ip);
                 return Av.getBasis(static_cast<size_t>(j));
@@ -329,7 +325,8 @@ namespace Rodin::Assembly
               }
             }
 
-            if (mIdx.empty()) continue;
+            if (mIdx.empty())
+              continue;
 
             const Index n = static_cast<Index>(mIdx.size());
             IndexArray masters(n);
@@ -337,10 +334,10 @@ namespace Rodin::Assembly
             for (Index k = 0; k < n; k++)
             {
               masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
-              coeffs.coeffRef(k)  = mCoef[static_cast<size_t>(k)];
+              coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];
             }
-            res.emplace_hint(pos, slave,
-                std::pair{ std::move(masters), std::move(coeffs) });
+            res.emplace_hint(
+              pos, slave, std::pair{std::move(masters), std::move(coeffs)});
           }
         };
 

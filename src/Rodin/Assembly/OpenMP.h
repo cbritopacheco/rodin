@@ -879,7 +879,8 @@ namespace Rodin::Assembly
 #pragma omp for
           for (Index i = 0; i < faceCount; ++i)
           {
-            if (essBdr.empty() && !mesh.isBoundary(i)) continue;
+            if (essBdr.empty() && !mesh.isBoundary(i))
+              continue;
             if (!essBdr.empty())
             {
               const auto a = mesh.getAttribute(faceDim, i);
@@ -1049,45 +1050,43 @@ namespace Rodin::Assembly
             continue;
 
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
-                constraints.setFixed(
-                    static_cast<Index>(local),
-                    static_cast<ScalarType>(value));
-              }
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              // Single-FES path: master = same FES as slave, no offset.
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
-              {
-                const auto& masters = pair.first;
-                const auto& coeffs  = pair.second;
-                const Index n =
-                    static_cast<Index>(masters.size());
-                std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
-                entries.reserve(static_cast<size_t>(n));
-                for (Index k = 0; k < n; k++)
+                for (const auto& [local, value] : dofs)
                 {
-                  entries.push_back({
-                      static_cast<Index>(masters[k]),
-                      static_cast<ScalarType>(coeffs[k]) });
+                  constraints.setFixed(
+                    static_cast<Index>(local), static_cast<ScalarType>(value));
                 }
-                const auto valueIt = affineValues.find(slave);
-                const ScalarType value =
-                  valueIt == affineValues.end()
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
+              {
+                // Single-FES path: master = same FES as slave, no offset.
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
+                {
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  const Index n = static_cast<Index>(masters.size());
+                  std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(n));
+                  for (Index k = 0; k < n; k++)
+                  {
+                    entries.push_back({static_cast<Index>(masters[k]),
+                      static_cast<ScalarType>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const ScalarType value = valueIt == affineValues.end()
                     ? ScalarType(0)
                     : static_cast<ScalarType>(valueIt->second);
-                constraints.setIdentification(static_cast<Index>(slave), entries, value);
+                  constraints.setIdentification(
+                    static_cast<Index>(slave), entries, value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         if constexpr (IsSparse)
@@ -1103,10 +1102,9 @@ namespace Rodin::Assembly
             if (val == ScalarType(0))
               return;
 
-            const ScalarType colValue =
-              constraints.isIdentified(col)
-                ? constraints.getIdentificationValue(col)
-                : ScalarType(0);
+            const ScalarType colValue = constraints.isIdentified(col)
+              ? constraints.getIdentificationValue(col)
+              : ScalarType(0);
 
             for (const auto& r : constraints.expand(row))
             {
@@ -1114,7 +1112,7 @@ namespace Rodin::Assembly
                 localRhs.emplace_back(r.index, -r.coefficient * val * colValue);
               for (const auto& c : constraints.expand(col))
                 localT.emplace_back(
-                    r.index, c.index, r.coefficient * val * c.coefficient);
+                  r.index, c.index, r.coefficient * val * c.coefficient);
             }
           };
 
@@ -1354,8 +1352,7 @@ namespace Rodin::Assembly
             if (constraints.isFixed(i))
             {
               all.emplace_back(i, i, ScalarType(1));
-              b.coeffRef(static_cast<size_t>(i)) =
-                constraints.getFixedValue(i);
+              b.coeffRef(static_cast<size_t>(i)) = constraints.getFixedValue(i);
             }
           }
 
@@ -1421,18 +1418,16 @@ namespace Rodin::Assembly
                     const ScalarType val = Math::conj(integrator->integrate(j, i));
                     if (val != ScalarType(0))
                     {
-                      const ScalarType colValue =
-                        constraints.isIdentified(J)
-                          ? constraints.getIdentificationValue(J)
-                          : ScalarType(0);
+                      const ScalarType colValue = constraints.isIdentified(J)
+                        ? constraints.getIdentificationValue(J)
+                        : ScalarType(0);
                       for (const auto& r : constraints.expand(I))
                       {
                         if (colValue != ScalarType(0))
                           localRhs[static_cast<size_t>(r.index)] -=
                             r.coefficient * val * colValue;
                         for (const auto& c : constraints.expand(J))
-                          Alocal(r.index, c.index) +=
-                            r.coefficient * val * c.coefficient;
+                          Alocal(r.index, c.index) += r.coefficient * val * c.coefficient;
                       }
                     }
                   }
@@ -1500,10 +1495,9 @@ namespace Rodin::Assembly
                       const ScalarType val = Math::conj(integrator->integrate(j, i));
                       if (val != ScalarType(0))
                       {
-                        const ScalarType colValue =
-                          constraints.isIdentified(J)
-                            ? constraints.getIdentificationValue(J)
-                            : ScalarType(0);
+                        const ScalarType colValue = constraints.isIdentified(J)
+                          ? constraints.getIdentificationValue(J)
+                          : ScalarType(0);
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
@@ -1535,15 +1529,14 @@ namespace Rodin::Assembly
                 {
                   const ScalarType colValue =
                     constraints.isIdentified(static_cast<Index>(j))
-                      ? constraints.getIdentificationValue(static_cast<Index>(j))
-                      : ScalarType(0);
+                    ? constraints.getIdentificationValue(static_cast<Index>(j))
+                    : ScalarType(0);
                   for (const auto& r : constraints.expand(static_cast<Index>(i)))
                   {
                     if (colValue != ScalarType(0))
                       b.coeffRef(r.index) -= r.coefficient * val * colValue;
                     for (const auto& c : constraints.expand(static_cast<Index>(j)))
-                      A(r.index, c.index) +=
-                        r.coefficient * val * c.coefficient;
+                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
                   }
                 }
               }
@@ -1588,8 +1581,7 @@ namespace Rodin::Assembly
                   const ScalarType val =
                     -static_cast<ScalarType>(integrator->integrate(l));
                   for (const auto& r : constraints.expand(I))
-                    localRhs[static_cast<size_t>(r.index)] +=
-                      r.coefficient * val;
+                    localRhs[static_cast<size_t>(r.index)] += r.coefficient * val;
                 }
               }
             }
@@ -1825,52 +1817,47 @@ namespace Rodin::Assembly
           const size_t uOff   = trialOffsets[uBlock];
 
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
-                const Index I = static_cast<Index>(
-                    uOff + static_cast<size_t>(local));
-                constraints.setFixed(I, static_cast<ScalarType>(value));
-              }
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              const auto vUUIDOpt = dbc.getValueUUID();
-              assert(vUUIDOpt
-                  && "Identification DBC missing value UUID");
-              const size_t vBlock = findTrialBlock(*vUUIDOpt);
-              const size_t vOff   = trialOffsets[vBlock];
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
-              {
-                const auto& masters = pair.first;
-                const auto& coeffs  = pair.second;
-                const Index gs = static_cast<Index>(
-                    uOff + static_cast<size_t>(slave));
-                const Index n =
-                    static_cast<Index>(masters.size());
-                std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
-                entries.reserve(static_cast<size_t>(n));
-                for (Index k = 0; k < n; k++)
+                for (const auto& [local, value] : dofs)
                 {
-                  const Index gm = static_cast<Index>(
-                      vOff + static_cast<size_t>(masters[k]));
-                  entries.push_back(
-                      { gm, static_cast<ScalarType>(coeffs[k]) });
+                  const Index I = static_cast<Index>(uOff + static_cast<size_t>(local));
+                  constraints.setFixed(I, static_cast<ScalarType>(value));
                 }
-                const auto valueIt = affineValues.find(slave);
-                const ScalarType value =
-                  valueIt == affineValues.end()
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
+              {
+                const auto vUUIDOpt = dbc.getValueUUID();
+                assert(vUUIDOpt && "Identification DBC missing value UUID");
+                const size_t vBlock = findTrialBlock(*vUUIDOpt);
+                const size_t vOff = trialOffsets[vBlock];
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
+                {
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  const Index gs = static_cast<Index>(uOff + static_cast<size_t>(slave));
+                  const Index n = static_cast<Index>(masters.size());
+                  std::vector<typename ConstraintMap<ScalarType>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(n));
+                  for (Index k = 0; k < n; k++)
+                  {
+                    const Index gm =
+                      static_cast<Index>(vOff + static_cast<size_t>(masters[k]));
+                    entries.push_back({gm, static_cast<ScalarType>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const ScalarType value = valueIt == affineValues.end()
                     ? ScalarType(0)
                     : static_cast<ScalarType>(valueIt->second);
-                constraints.setIdentification(gs, entries, value);
+                  constraints.setIdentification(gs, entries, value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         // ------------------------------------------------------------------
@@ -1900,10 +1887,9 @@ namespace Rodin::Assembly
           if (val == ScalarType(0))
             return;
 
-          const ScalarType colValue =
-            constraints.isIdentified(col)
-              ? constraints.getIdentificationValue(col)
-              : ScalarType(0);
+          const ScalarType colValue = constraints.isIdentified(col)
+            ? constraints.getIdentificationValue(col)
+            : ScalarType(0);
 
           for (const auto& r : constraints.expand(row))
           {
@@ -1912,7 +1898,7 @@ namespace Rodin::Assembly
                 r.index, -r.coefficient * val * colValue);
             for (const auto& c : constraints.expand(col))
               tchunks[static_cast<size_t>(tid)].emplace_back(
-                  r.index, c.index, r.coefficient * val * c.coefficient);
+                r.index, c.index, r.coefficient * val * c.coefficient);
           }
         };
 
@@ -1984,10 +1970,9 @@ namespace Rodin::Assembly
                         sparseEntry(tid, I, J, val);
                       else
                       {
-                        const ScalarType colValue =
-                          constraints.isIdentified(J)
-                            ? constraints.getIdentificationValue(J)
-                            : ScalarType(0);
+                        const ScalarType colValue = constraints.isIdentified(J)
+                          ? constraints.getIdentificationValue(J)
+                          : ScalarType(0);
                         for (const auto& r : constraints.expand(I))
                         {
                           if (colValue != ScalarType(0))
@@ -2092,10 +2077,9 @@ namespace Rodin::Assembly
                           sparseEntry(tid, I, J, val);
                         else
                         {
-                          const ScalarType colValue =
-                            constraints.isIdentified(J)
-                              ? constraints.getIdentificationValue(J)
-                              : ScalarType(0);
+                          const ScalarType colValue = constraints.isIdentified(J)
+                            ? constraints.getIdentificationValue(J)
+                            : ScalarType(0);
                           for (const auto& r : constraints.expand(I))
                           {
                             if (colValue != ScalarType(0))
@@ -2282,8 +2266,7 @@ namespace Rodin::Assembly
             if (constraints.isFixed(I))
             {
               all.emplace_back(I, I, ScalarType(1));
-              b.coeffRef(static_cast<size_t>(I)) =
-                constraints.getFixedValue(I);
+              b.coeffRef(static_cast<size_t>(I)) = constraints.getFixedValue(I);
             }
           }
 
@@ -2321,17 +2304,15 @@ namespace Rodin::Assembly
                 {
                   const Index I = static_cast<Index>(vOff) + i;
                   const Index J = static_cast<Index>(uOff) + j;
-                  const ScalarType colValue =
-                    constraints.isIdentified(J)
-                      ? constraints.getIdentificationValue(J)
-                      : ScalarType(0);
+                  const ScalarType colValue = constraints.isIdentified(J)
+                    ? constraints.getIdentificationValue(J)
+                    : ScalarType(0);
                   for (const auto& r : constraints.expand(I))
                   {
                     if (colValue != ScalarType(0))
                       b.coeffRef(r.index) -= r.coefficient * val * colValue;
                     for (const auto& c : constraints.expand(J))
-                      A(r.index, c.index) +=
-                        r.coefficient * val * c.coefficient;
+                      A(r.index, c.index) += r.coefficient * val * c.coefficient;
                   }
                 }
               }
@@ -2416,19 +2397,14 @@ namespace Rodin::Assembly
    * The expensive part (the linear-system constraint application) is
    * parallelized inside the problem-level OpenMP assembler above.
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
-  class OpenMP<
-    IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-    Variational::DirichletBC<
-      Variational::TrialFunction<Sol1, FES1>,
-      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>> final
-    : public AssemblyBase<
-        IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
-        Variational::DirichletBC<
-          Variational::TrialFunction<Sol1, FES1>,
-          Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
+  class OpenMP<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+    Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+      Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
+    final : public AssemblyBase<IndexMap<std::pair<IndexArray, Math::Vector<Scalar>>>,
+              Variational::DirichletBC<Variational::TrialFunction<Sol1, FES1>,
+                Variational::ShapeFunctionBase<Derived2, FES2, Sp>>>
   {
     public:
       /// @brief Output map type for slave-to-master identifications.
@@ -2441,8 +2417,7 @@ namespace Rodin::Assembly
       using ValueType = Variational::ShapeFunctionBase<Derived2, FES2, Sp>;
 
       /// @brief Dirichlet condition type.
-      using DirichletBCType =
-        Variational::DirichletBC<TrialFunctionType, ValueType>;
+      using DirichletBCType = Variational::DirichletBC<TrialFunctionType, ValueType>;
 
       /// @brief Parent class type.
       using Parent = AssemblyBase<OutputType, DirichletBCType>;
@@ -2454,10 +2429,14 @@ namespace Rodin::Assembly
       OpenMP() = default;
 
       /// @brief Copy constructor.
-      OpenMP(const OpenMP& other) : Parent(other) {}
+      OpenMP(const OpenMP& other)
+        : Parent(other)
+      {}
 
       /// @brief Move constructor.
-      OpenMP(OpenMP&& other) : Parent(std::move(other)) {}
+      OpenMP(OpenMP&& other)
+        : Parent(std::move(other))
+      {}
 
       /**
        * @brief Executes identification Dirichlet boundary condition assembly.
@@ -2478,11 +2457,13 @@ namespace Rodin::Assembly
         res.clear();
         for (Index fi = 0; fi < mesh.getFaceCount(); fi++)
         {
-          if (essBdr.empty() && !mesh.isBoundary(fi)) continue;
+          if (essBdr.empty() && !mesh.isBoundary(fi))
+            continue;
           if (!essBdr.empty())
           {
             const auto a = mesh.getAttribute(faceDim, fi);
-            if (!a || !essBdr.count(*a)) continue;
+            if (!a || !essBdr.count(*a))
+              continue;
           }
 
           const auto& feU = fesU.getFiniteElement(faceDim, fi);
@@ -2494,18 +2475,17 @@ namespace Rodin::Assembly
           for (Index s = 0; s < static_cast<Index>(feU.getCount()); s++)
           {
             const Index slave = slaveDOFs[s];
-            if (res.find(slave) != res.end()) continue;
+            if (res.find(slave) != res.end())
+              continue;
 
-            std::vector<Index>  mIdx;
+            std::vector<Index> mIdx;
             std::vector<Scalar> mCoef;
             mIdx.reserve(static_cast<size_t>(nMasters));
             mCoef.reserve(static_cast<size_t>(nMasters));
 
             for (Index j = 0; j < nMasters; j++)
             {
-              auto basisCallable = [&Av, j]
-                                   (const Geometry::Point& p)
-              {
+              auto basisCallable = [&Av, j](const Geometry::Point& p) {
                 const Variational::IntegrationPoint ip(p);
                 Av.setIntegrationPoint(ip);
                 return Av.getBasis(static_cast<size_t>(j));
@@ -2520,17 +2500,17 @@ namespace Rodin::Assembly
               }
             }
 
-            if (mIdx.empty()) continue;
+            if (mIdx.empty())
+              continue;
             const Index n = static_cast<Index>(mIdx.size());
             IndexArray masters(n);
             Math::Vector<Scalar> coeffs(n);
             for (Index k = 0; k < n; k++)
             {
               masters.coeffRef(k) = mIdx[static_cast<size_t>(k)];
-              coeffs.coeffRef(k)  = mCoef[static_cast<size_t>(k)];
+              coeffs.coeffRef(k) = mCoef[static_cast<size_t>(k)];
             }
-            res.emplace(slave,
-                std::pair{ std::move(masters), std::move(coeffs) });
+            res.emplace(slave, std::pair{std::move(masters), std::move(coeffs)});
           }
         }
       }
@@ -2539,7 +2519,10 @@ namespace Rodin::Assembly
        * @brief Creates a polymorphic copy.
        * @return Pointer to a new copy.
        */
-      OpenMP* copy() const noexcept override { return new OpenMP(*this); }
+      OpenMP* copy() const noexcept override
+      {
+        return new OpenMP(*this);
+      }
   };
 }
 

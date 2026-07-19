@@ -22,10 +22,10 @@ namespace Rodin::Geometry
   {
     struct MaxSize
     {
-      size_t operator()(size_t lhs, size_t rhs) const
-      {
-        return std::max(lhs, rhs);
-      }
+        size_t operator()(size_t lhs, size_t rhs) const
+        {
+          return std::max(lhs, rhs);
+        }
     };
   }
 
@@ -33,8 +33,8 @@ namespace Rodin::Geometry
   // Builder
   // ---------------------------------------------------------------------------
 
-  SubMesh<Context::MPI>::Builder&
-  SubMesh<Context::MPI>::Builder::initialize(const Mesh<Context::MPI>& parent)
+  SubMesh<Context::MPI>::Builder& SubMesh<Context::MPI>::Builder::initialize(
+    const Mesh<Context::MPI>& parent)
   {
     const auto& shard = parent.getShard();
     const size_t dim = parent.getDimension();
@@ -52,8 +52,8 @@ namespace Rodin::Geometry
     return *this;
   }
 
-  SubMesh<Context::MPI>::Builder&
-  SubMesh<Context::MPI>::Builder::include(size_t d, Index parentLocalIdx)
+  SubMesh<Context::MPI>::Builder& SubMesh<Context::MPI>::Builder::include(
+    size_t d, Index parentLocalIdx)
   {
     assert(m_parent.has_value());
     const auto& parentMesh = m_parent.value().get();
@@ -215,24 +215,24 @@ namespace Rodin::Geometry
     // -------------------------------------------------------------------------
     {
       const auto& comm = parentMesh.getContext().getCommunicator();
-      const int   rank = comm.rank();
+      const int rank = comm.rank();
       const size_t maxDim = parentMesh.getDimension();
 
       for (size_t d = 0; d <= maxDim; ++d)
       {
-        const auto& pm    = shard.getPolytopeMap(d);
-        const size_t n    = pm.left.size();
+        const auto& pm = shard.getPolytopeMap(d);
+        const size_t n = pm.left.size();
 
         auto& subState = shard.getState(d);
         auto& subOwner = shard.getOwner(d);
-        auto& subHalo  = shard.getHalo(d);
+        auto& subHalo = shard.getHalo(d);
 
         // Build the neighbor set from the PARENT shard so that the send/recv
         // pattern is symmetric across all ranks without global communication.
         // Rationale: if e is Shared(owner=A) on B in the parent, A has B in its
         // parent halo — both A and B therefore appear in each other's set.
         const auto& pOwner = parentShard.getOwner(d);
-        const auto& pHalo  = parentShard.getHalo(d);
+        const auto& pHalo = parentShard.getHalo(d);
 
         UnorderedSet<int> neighborSet;
         for (const auto& [li, r] : pOwner)
@@ -382,7 +382,7 @@ namespace Rodin::Geometry
               continue; // should not happen
 
             const Index localIdx = static_cast<Index>(pit->second);
-            const int   newOwner = queriers.front(); // already sorted, front = min
+            const int newOwner = queriers.front(); // already sorted, front = min
 
             if (newOwner == rank)
             {
@@ -411,7 +411,7 @@ namespace Rodin::Geometry
     result.Parent::operator=(meshBuilder.finalize());
     result.m_s2ps = std::move(m_s2ps);
     result.m_dimension = boost::mpi::all_reduce(
-        parentMesh.getContext().getCommunicator(), m_dimension, MaxSize{});
+      parentMesh.getContext().getCommunicator(), m_dimension, MaxSize{});
     return result;
   }
 
@@ -419,8 +419,7 @@ namespace Rodin::Geometry
   // SubMesh<Context::MPI>
   // ---------------------------------------------------------------------------
 
-  SubMesh<Context::MPI>::SubMesh(
-      std::reference_wrapper<const Mesh<Context::MPI>> parent)
+  SubMesh<Context::MPI>::SubMesh(std::reference_wrapper<const Mesh<Context::MPI>> parent)
     : Parent(parent.get().getContext()),
       m_parent(parent)
   {
@@ -500,6 +499,7 @@ namespace Rodin::Geometry
       i = find->second;
     }
 
-    return Point(*getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
+    return Point(
+      *getPolytope(d, i), p.getReferenceCoordinates(), p.getPhysicalCoordinates());
   }
 }
