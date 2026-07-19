@@ -8,8 +8,8 @@
  * @file Common.h
  * @brief Common MMG integration types and utility accessors.
  */
-#ifndef RODIN_EXTERNAL_MMG_COMMON_H
-#define RODIN_EXTERNAL_MMG_COMMON_H
+#ifndef RODIN_MMG_COMMON_H
+#define RODIN_MMG_COMMON_H
 
 #include <variant>
 

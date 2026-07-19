@@ -13,6 +13,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies construction from trial test for variational problem.
 TEST(Rodin_Variational_Problem, ConstructionFromTrialTest)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -25,6 +26,7 @@ TEST(Rodin_Variational_Problem, ConstructionFromTrialTest)
   SUCCEED();
 }
 
+/// @brief Verifies assemble poisson for variational problem by checking form assembly.
 TEST(Rodin_Variational_Problem, AssemblePoisson)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -45,6 +47,7 @@ TEST(Rodin_Variational_Problem, AssemblePoisson)
   SUCCEED();
 }
 
+/// @brief Verifies solve poisson for variational problem by checking true predicates, solver behavior.
 TEST(Rodin_Variational_Problem, SolvePoisson)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -76,6 +79,7 @@ TEST(Rodin_Variational_Problem, SolvePoisson)
   EXPECT_TRUE(hasNonZero);
 }
 
+/// @brief Verifies solution size for variational problem by checking exact expected values, solver behavior.
 TEST(Rodin_Variational_Problem, SolutionSize)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });

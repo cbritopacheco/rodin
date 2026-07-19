@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_MPI_VARIATIONAL_FINITEELEMENTSPACE_H
 #define RODIN_MPI_VARIATIONAL_FINITEELEMENTSPACE_H
 
@@ -15,9 +21,9 @@ namespace Rodin::Variational
   /**
    * @brief Represents a finite element space defined on a distributed mesh.
    *
-   * This CRTP base specializes @ref Rodin::Variational::FiniteElementSpace for
+   * This CRTP base specializes `Rodin::Variational::FiniteElementSpace` for
    * @ref Rodin::Geometry::Mesh<Rodin::Context::MPI>. Concrete distributed spaces
-   * (such as MPI @ref Rodin::Variational::P1) provide the implementation for
+   * (such as MPI `Rodin::Variational::P1`) provide the implementation for
    * local-to-global index translation, local finite elements, and geometric
    * mappings.
    *
@@ -113,6 +119,44 @@ namespace Rodin::Variational
       auto getInverseMapping(const std::pair<size_t, Index>& idx, const CallableType& v) const
       {
         return static_cast<const Derived&>(*this).geInverseMapping(idx, v);
+      }
+
+      /**
+       * @brief Evaluates a distributed finite element expansion on a physical element.
+       *
+       * The local reference expansion is formed from the shard coefficients and
+       * the derived space pushforward is applied once to the complete function:
+       * @f[
+       *   u_h(x)
+       *   =
+       *   \psi_K^{-1}
+       *   \left(
+       *     \sum_i c_i \widehat{\varphi}_i
+       *   \right)(x).
+       * @f]
+       * The operation is independent of the range transformation used by the
+       * space and therefore also applies to Piola-mapped finite elements.
+       *
+       * @tparam Range Range type of the finite element expansion.
+       * @tparam Coefficient Callable returning a local shard coefficient.
+       * @param[out] out Value of the expansion.
+       * @param[in] idx Dimension and local index of the physical element.
+       * @param[in] coefficient Local coefficient accessor.
+       * @param[in] p Point on the physical element.
+       */
+      template <class Range, class Coefficient>
+      void evaluate(Range& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& derived = static_cast<const Derived&>(*this);
+        const auto& fe = derived.getFiniteElement(idx.first, idx.second);
+        const auto expansion = [&](const Math::SpatialPoint& rc) {
+          Range value;
+          fe.evaluate(value, coefficient, rc);
+          return value;
+        };
+        const auto mapping = derived.getPushforward(idx, expansion);
+        out = mapping(p);
       }
   };
 }

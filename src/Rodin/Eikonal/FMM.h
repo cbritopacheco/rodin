@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MODELS_EIKONAL_FMM_H
-#define RODIN_MODELS_EIKONAL_FMM_H
+#ifndef RODIN_EIKONAL_FMM_H
+#define RODIN_EIKONAL_FMM_H
 
 /**
  * @file FMM.h
@@ -357,7 +357,7 @@ namespace Rodin::Eikonal
       }
 
       static Real computeEdgeGeodesicDistance(
-          Index a, Index b, Index edge_idx, const Mesh& mesh)
+        Index a, Index b, Index edgeIdx, const Mesh& mesh)
       {
         // For now, use geometric distance as approximation
         // In the future, this could integrate along curved edges using PolytopeTransformation

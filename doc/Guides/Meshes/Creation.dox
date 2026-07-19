@@ -67,7 +67,7 @@
 
   @subsection guides-meshes-creation-files-loading Loading Meshes
 
-  Use @ref Rodin::Geometry::Mesh::load "Mesh::load()" with an explicit
+  Use @ref Rodin::Geometry::Mesh "Mesh::load()" with an explicit
   @ref Rodin::IO::FileFormat "IO::FileFormat":
 
   @code{.cpp}
@@ -256,6 +256,6 @@
   - @ref guides-meshes-io "Mesh I/O"
   - @ref guides-meshes "Meshes overview"
   - @ref Rodin::Geometry::Mesh "Mesh class reference"
-  - Example: @ref examples/Geometry/UniformGrid.cpp
+  - Example: `examples/Geometry/UniformGrid.cpp`
 
   */

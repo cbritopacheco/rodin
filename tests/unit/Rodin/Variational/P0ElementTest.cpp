@@ -14,6 +14,7 @@ using namespace Rodin::Test::Random;
 namespace Rodin::Tests::Unit
 {
   // Test P0 element on Point geometry
+  /// @brief Verifies sanity test 0 D reference point for variational real P0 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP0Element, SanityTest_0D_Reference_Point)
   {
     RealP0Element k(Polytope::Type::Point);
@@ -29,6 +30,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element on Segment geometry
+  /// @brief Verifies sanity test 1 D reference segment for variational real P0 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP0Element, SanityTest_1D_Reference_Segment)
   {
     RealP0Element k(Polytope::Type::Segment);
@@ -58,6 +60,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element derivatives on Segment (should all be zero)
+  /// @brief Verifies derivative test 1 D reference segment for variational real P0 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP0Element, DerivativeTest_1D_Reference_Segment)
   {
     RealP0Element k(Polytope::Type::Segment);
@@ -72,6 +75,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element on Triangle geometry
+  /// @brief Verifies sanity test 2 D reference triangle for variational real P0 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP0Element, SanityTest_2D_Reference_Triangle)
   {
     RealP0Element k(Polytope::Type::Triangle);
@@ -114,6 +118,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element derivatives on Triangle (should all be zero)
+  /// @brief Verifies derivative test 2 D reference triangle for variational real P0 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP0Element, DerivativeTest_2D_Reference_Triangle)
   {
     RealP0Element k(Polytope::Type::Triangle);
@@ -130,6 +135,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element on Quadrilateral geometry
+  /// @brief Verifies sanity test 2 D reference quadrilateral for variational real P0 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP0Element, SanityTest_2D_Reference_Quadrilateral)
   {
     RealP0Element k(Polytope::Type::Quadrilateral);
@@ -168,6 +174,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element on Tetrahedron geometry
+  /// @brief Verifies sanity test 3 D reference tetrahedron for variational real P0 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP0Element, SanityTest_3D_Reference_Tetrahedron)
   {
     RealP0Element k(Polytope::Type::Tetrahedron);
@@ -203,6 +210,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element derivatives on Tetrahedron (should all be zero)
+  /// @brief Verifies derivative test 3 D reference tetrahedron for variational real P0 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP0Element, DerivativeTest_3D_Reference_Tetrahedron)
   {
     RealP0Element k(Polytope::Type::Tetrahedron);
@@ -221,6 +229,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Fuzzy test for P0 element on different geometries
+  /// @brief Verifies fuzzy test all geometries for variational real P0 element by checking tolerance-based numerical results.
   TEST(Rodin_Variational_RealP0Element, FuzzyTest_AllGeometries)
   {
     constexpr size_t n = 25;
@@ -254,6 +263,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test P0 element on Wedge geometry
+  /// @brief Verifies sanity test 3 D reference wedge for variational real P0 element by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Variational_RealP0Element, SanityTest_3D_Reference_Wedge)
   {
     RealP0Element k(Polytope::Type::Wedge);
@@ -288,6 +298,24 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(k.getOrder(), 0);
   }
 
+  /// @brief Verifies sanity test 3 D reference pyramid for variational real P0 element by checking tolerance-based numerical results, exact expected values.
+  TEST(Rodin_Variational_RealP0Element, SanityTest_3D_Reference_Pyramid)
+  {
+    RealP0Element k(Polytope::Type::Pyramid);
+
+    EXPECT_NEAR(
+      k.getBasis(0)(Math::Vector<Real>{{0.25, 0.25, 0.25}}), 1, RODIN_FUZZY_CONSTANT);
+
+    const auto& node = k.getNode(0);
+    EXPECT_NEAR(node.x(), 0.375, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(node.y(), 0.375, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(node.z(), 0.25, RODIN_FUZZY_CONSTANT);
+
+    EXPECT_EQ(k.getCount(), 1);
+    EXPECT_EQ(k.getOrder(), 0);
+  }
+
+  /// @brief Verifies partition of unity all geometries for final test P0 element real by checking tolerance-based numerical results.
   TEST(FinalTest_P0Element_Real, PartitionOfUnity_AllGeometries)
   {
     constexpr size_t n = 20;
@@ -340,8 +368,21 @@ namespace Rodin::Tests::Unit
         }
       }
     }
+
+    // Pyramid
+    {
+      RealP0Element elem(Polytope::Type::Pyramid);
+      for (size_t i = 0; i < n; i++)
+      {
+        const Real z = gen();
+        const Real q = 1.0 - z;
+        Math::Vector<Real> p{{gen() * q, gen() * q, z}};
+        EXPECT_NEAR(elem.getBasis(0)(p), 1.0, RODIN_FUZZY_CONSTANT);
+      }
+    }
   }
 
+  /// @brief P0 should exactly reproduce constant functions.
   TEST(FinalTest_P0Element_Real, ConstantReproduction_AllGeometries)
   {
     // P0 should exactly reproduce constant functions
@@ -364,6 +405,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief All derivatives of P0 elements should be zero.
   TEST(FinalTest_P0Element_Real, ZeroDerivatives_AllGeometries)
   {
     // All derivatives of P0 elements should be zero
@@ -396,8 +438,21 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(deriv_y(p), 0.0, RODIN_FUZZY_CONSTANT);
       EXPECT_NEAR(deriv_z(p), 0.0, RODIN_FUZZY_CONSTANT);
     }
+
+    // Pyramid
+    {
+      RealP0Element elem(Polytope::Type::Pyramid);
+      auto deriv_x = elem.getBasis(0).getDerivative<1>(0);
+      auto deriv_y = elem.getBasis(0).getDerivative<1>(1);
+      auto deriv_z = elem.getBasis(0).getDerivative<1>(2);
+      Math::Vector<Real> p{{0.2, 0.3, 0.1}};
+      EXPECT_NEAR(deriv_x(p), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(deriv_y(p), 0.0, RODIN_FUZZY_CONSTANT);
+      EXPECT_NEAR(deriv_z(p), 0.0, RODIN_FUZZY_CONSTANT);
+    }
   }
 
+  /// @brief Verifies partition of unity all geometries for final test P0 element complex by checking tolerance-based numerical results.
   TEST(FinalTest_P0Element_Complex, PartitionOfUnity_AllGeometries)
   {
     constexpr size_t n = 20;
@@ -433,6 +488,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies complex arithmetic for final test P0 element complex by checking tolerance-based numerical results.
   TEST(FinalTest_P0Element_Complex, ComplexArithmetic)
   {
     using Complex = std::complex<Real>;
@@ -447,6 +503,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(interpolated.imag(), 4.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies component structure 2 D for final test P0 element vector by checking tolerance-based numerical results, exact expected values.
   TEST(FinalTest_P0Element_Vector, ComponentStructure_2D)
   {
     VectorP0Element<Real> elem(Polytope::Type::Triangle, 2);
@@ -473,6 +530,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies component structure 3 D for final test P0 element vector by checking tolerance-based numerical results, exact expected values.
   TEST(FinalTest_P0Element_Vector, ComponentStructure_3D)
   {
     VectorP0Element<Real> elem(Polytope::Type::Tetrahedron, 3);
@@ -493,6 +551,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies vector field reproduction for final test P0 element vector by checking tolerance-based numerical results.
   TEST(FinalTest_P0Element_Vector, VectorFieldReproduction)
   {
     VectorP0Element<Real> elem(Polytope::Type::Triangle, 2);
@@ -517,6 +576,7 @@ namespace Rodin::Tests::Unit
   // NEW COMPREHENSIVE TESTS FOR P0ELEMENT VECTOR DIMENSIONS
   // ========================================================================
 
+  /// @brief Test vdim=1, 2, 3 on Segment.
   TEST(FinalTest_P0Element_Vector, VectorDimensions_1D_2D_3D_AllGeometries)
   {
     // Test vdim=1, 2, 3 on Segment
@@ -578,13 +638,23 @@ namespace Rodin::Tests::Unit
         EXPECT_EQ(elem.getCount(), vdim);
       }
     }
+
+    // Test vdim=1, 2, 3 on Pyramid
+    {
+      for (size_t vdim : {1, 2, 3})
+      {
+        VectorP0Element<Real> elem(Polytope::Type::Pyramid, vdim);
+        EXPECT_EQ(elem.getCount(), vdim);
+      }
+    }
   }
 
+  /// @brief Verifies partition of unity all vector dimensions for final test P0 element vector by checking tolerance-based numerical results.
   TEST(FinalTest_P0Element_Vector, PartitionOfUnity_AllVectorDimensions)
   {
-    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Wedge})
+    for (auto geom :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -602,6 +672,7 @@ namespace Rodin::Tests::Unit
             p = Math::Vector<Real>{{0.3, 0.3}};
             break;
           case Polytope::Type::Tetrahedron:
+          case Polytope::Type::Pyramid:
           case Polytope::Type::Wedge:
             p = Math::Vector<Real>{{0.25, 0.25, 0.25}};
             break;
@@ -628,12 +699,13 @@ namespace Rodin::Tests::Unit
   // LINEARFORM TESTS FOR P0ELEMENT
   // ========================================================================
 
+  /// @brief Test LinearForm evaluation for P0 elements across all geometries.
   TEST(FinalTest_P0Element_LinearForm, LinearForm_AllGeometries)
   {
     // Test LinearForm evaluation for P0 elements across all geometries
     for (auto geom : {Polytope::Type::Point, Polytope::Type::Segment,
-                      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
-                      Polytope::Type::Tetrahedron, Polytope::Type::Wedge})
+           Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+           Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP0Element elem(geom);
 
@@ -650,11 +722,12 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test LinearForm for vector P0 elements with different vector dimensions.
   TEST(FinalTest_P0Element_LinearForm, VectorLinearForm_AllVectorDimensions)
   {
     // Test LinearForm for vector P0 elements with different vector dimensions
     for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Tetrahedron})
+           Polytope::Type::Tetrahedron, Polytope::Type::Pyramid})
     {
       for (size_t vdim : {1, 2, 3})
       {
@@ -689,12 +762,13 @@ namespace Rodin::Tests::Unit
   // INTERPOLATION TESTS FOR P0ELEMENT
   // ========================================================================
 
+  /// @brief Test that P0 element correctly interpolates constant functions.
   TEST(FinalTest_P0Element_Interpolation, ScalarConstantInterpolation)
   {
     // Test that P0 element correctly interpolates constant functions
-    for (auto geom : {Polytope::Type::Segment, Polytope::Type::Triangle,
-                      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-                      Polytope::Type::Wedge})
+    for (auto geom :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       RealP0Element elem(geom);
 
@@ -717,6 +791,7 @@ namespace Rodin::Tests::Unit
           p = Math::Vector<Real>{{0.4, 0.3}};
           break;
         case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Wedge:
           p = Math::Vector<Real>{{0.2, 0.3, 0.4}};
           break;
@@ -729,6 +804,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test vector P0 element interpolation for constant vector fields.
   TEST(FinalTest_P0Element_Interpolation, VectorConstantInterpolation)
   {
     // Test vector P0 element interpolation for constant vector fields
@@ -765,6 +841,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test interpolation accuracy at multiple points for P0 element.
   TEST(FinalTest_P0Element_Interpolation, InterpolationAccuracy_MultiplePoints)
   {
     // Test interpolation accuracy at multiple points for P0 element

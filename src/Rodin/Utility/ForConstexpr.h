@@ -48,6 +48,10 @@ namespace Rodin::Utility
 
   namespace Internal
   {
+    /**
+     * @brief Invokes a callable once for each index in an index sequence.
+     * @param f Callable receiving a @c std::integral_constant<size_t,I>.
+     */
     template <size_t ... Is, class F>
     constexpr void ForIndexImpl(F&& f, std::index_sequence<Is...>)
     {

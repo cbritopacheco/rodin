@@ -15,6 +15,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- Builder basic construction ----
 
+  /// @brief Verifies build from boundary faces for geometry sub mesh by checking true predicates.
   TEST(Geometry_SubMesh, BuildFromBoundaryFaces)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -32,6 +33,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(boundary.isSubMesh());
   }
 
+  /// @brief Verifies get parent for geometry sub mesh by checking exact expected values.
   TEST(Geometry_SubMesh, GetParent)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -48,6 +50,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&boundary.getParent(), &mesh);
   }
 
+  /// @brief Verifies get ancestors for geometry sub mesh by checking exact expected values.
   TEST(Geometry_SubMesh, GetAncestors)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -66,6 +69,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&ancestors.front().get(), &mesh);
   }
 
+  /// @brief Verifies polytope map for geometry sub mesh by checking exact expected values.
   TEST(Geometry_SubMesh, PolytopeMap)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -95,6 +99,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies vertex polytope map for geometry sub mesh by checking exact expected values.
   TEST(Geometry_SubMesh, VertexPolytopeMap)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -122,6 +127,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Mesh operations producing SubMeshes ----
 
+  /// @brief Verifies skin produces submesh for geometry sub mesh by checking exact expected values, true predicates.
   TEST(Geometry_SubMesh, SkinProducesSubmesh)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -137,6 +143,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(skin.getVertexCount(), 0);
   }
 
+  /// @brief Verifies trim single attribute for geometry sub mesh by checking true predicates.
   TEST(Geometry_SubMesh, TrimSingleAttribute)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -154,6 +161,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(trimmed.getCellCount(), 0);
   }
 
+  /// @brief Verifies keep single attribute for geometry sub mesh by checking exact expected values, true predicates.
   TEST(Geometry_SubMesh, KeepSingleAttribute)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -169,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(kept.getCellCount(), halfCells);
   }
 
+  /// @brief Verifies trim and keep are complementary for geometry sub mesh by checking exact expected values.
   TEST(Geometry_SubMesh, TrimAndKeepAreComplementary)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -187,6 +196,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Move semantics ----
 
+  /// @brief Verifies move construction for geometry sub mesh by checking exact expected values, true predicates, move semantics.
   TEST(Geometry_SubMesh, MoveConstruction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -202,6 +212,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(moved.isSubMesh());
   }
 
+  /// @brief Verifies is sub mesh flag for geometry sub mesh by checking true predicates, false predicates.
   TEST(Geometry_SubMesh, IsSubMeshFlag)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -214,6 +225,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(mesh.isSubMesh());
   }
 
+  /// @brief Verifies as sub mesh for geometry sub mesh by checking exact expected values, true predicates.
   TEST(Geometry_SubMesh, AsSubMesh)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});

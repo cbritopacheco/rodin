@@ -19,6 +19,7 @@ namespace Rodin::Tests::Unit
   // FeketeTriangle Node Count Tests
   //==========================================================================
 
+  /// @brief (K+1)(K+2)/2 = (1)(2)/2 = 1.
   TEST(FeketeTriangle, NodeCount_K0)
   {
     // (K+1)(K+2)/2 = (1)(2)/2 = 1
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTriangle<0>::getNodes().size(), 1);
   }
 
+  /// @brief (K+1)(K+2)/2 = (2)(3)/2 = 3.
   TEST(FeketeTriangle, NodeCount_K1)
   {
     // (K+1)(K+2)/2 = (2)(3)/2 = 3
@@ -33,6 +35,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTriangle<1>::getNodes().size(), 3);
   }
 
+  /// @brief (K+1)(K+2)/2 = (3)(4)/2 = 6.
   TEST(FeketeTriangle, NodeCount_K2)
   {
     // (K+1)(K+2)/2 = (3)(4)/2 = 6
@@ -40,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTriangle<2>::getNodes().size(), 6);
   }
 
+  /// @brief (K+1)(K+2)/2 = (4)(5)/2 = 10.
   TEST(FeketeTriangle, NodeCount_K3)
   {
     // (K+1)(K+2)/2 = (4)(5)/2 = 10
@@ -47,6 +51,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTriangle<3>::getNodes().size(), 10);
   }
 
+  /// @brief (K+1)(K+2)/2 = (6)(7)/2 = 21.
   TEST(FeketeTriangle, NodeCount_K5)
   {
     // (K+1)(K+2)/2 = (6)(7)/2 = 21
@@ -58,6 +63,7 @@ namespace Rodin::Tests::Unit
   // FeketeTriangle Node Location Tests
   //==========================================================================
 
+  /// @brief All nodes should be in the reference triangle: x >= 0, y >= 0, x + y <= 1.
   TEST(FeketeTriangle, NodesInReferenceTriangle_K2)
   {
     // All nodes should be in the reference triangle: x >= 0, y >= 0, x + y <= 1
@@ -70,6 +76,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies nodes in reference triangle K 5 for fekete triangle.
   TEST(FeketeTriangle, NodesInReferenceTriangle_K5)
   {
     const auto& nodes = FeketeTriangle<5>::getNodes();
@@ -81,6 +88,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies nodes in reference triangle K 10 for fekete triangle.
   TEST(FeketeTriangle, NodesInReferenceTriangle_K10)
   {
     const auto& nodes = FeketeTriangle<10>::getNodes();
@@ -96,6 +104,7 @@ namespace Rodin::Tests::Unit
   // FeketeTriangle Vertex Tests
   //==========================================================================
 
+  /// @brief K=1 should contain the three vertices.
   TEST(FeketeTriangle, ContainsVertices_K1)
   {
     // K=1 should contain the three vertices
@@ -121,6 +130,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_y1);
   }
 
+  /// @brief Verifies contains vertices K 5 for fekete triangle by checking true predicates.
   TEST(FeketeTriangle, ContainsVertices_K5)
   {
     const auto& nodes = FeketeTriangle<5>::getNodes();
@@ -148,6 +158,7 @@ namespace Rodin::Tests::Unit
   // FeketeTetrahedron Node Count Tests
   //==========================================================================
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (1)(2)(3)/6 = 1.
   TEST(FeketeTetrahedron, NodeCount_K0)
   {
     // (K+1)(K+2)(K+3)/6 = (1)(2)(3)/6 = 1
@@ -155,6 +166,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTetrahedron<0>::getNodes().size(), 1);
   }
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (2)(3)(4)/6 = 4.
   TEST(FeketeTetrahedron, NodeCount_K1)
   {
     // (K+1)(K+2)(K+3)/6 = (2)(3)(4)/6 = 4
@@ -162,6 +174,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTetrahedron<1>::getNodes().size(), 4);
   }
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (3)(4)(5)/6 = 10.
   TEST(FeketeTetrahedron, NodeCount_K2)
   {
     // (K+1)(K+2)(K+3)/6 = (3)(4)(5)/6 = 10
@@ -169,6 +182,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTetrahedron<2>::getNodes().size(), 10);
   }
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (4)(5)(6)/6 = 20.
   TEST(FeketeTetrahedron, NodeCount_K3)
   {
     // (K+1)(K+2)(K+3)/6 = (4)(5)(6)/6 = 20
@@ -176,6 +190,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTetrahedron<3>::getNodes().size(), 20);
   }
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (6)(7)(8)/6 = 56.
   TEST(FeketeTetrahedron, NodeCount_K5)
   {
     // (K+1)(K+2)(K+3)/6 = (6)(7)(8)/6 = 56
@@ -187,6 +202,7 @@ namespace Rodin::Tests::Unit
   // FeketeTetrahedron Node Location Tests
   //==========================================================================
 
+  /// @brief All nodes should be in the reference tetrahedron:.
   TEST(FeketeTetrahedron, NodesInReferenceTetrahedron_K2)
   {
     // All nodes should be in the reference tetrahedron:
@@ -201,6 +217,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies nodes in reference tetrahedron K 5 for fekete tetrahedron.
   TEST(FeketeTetrahedron, NodesInReferenceTetrahedron_K5)
   {
     const auto& nodes = FeketeTetrahedron<5>::getNodes();
@@ -217,6 +234,7 @@ namespace Rodin::Tests::Unit
   // FeketeTetrahedron Vertex Tests
   //==========================================================================
 
+  /// @brief K=1 should contain the four vertices.
   TEST(FeketeTetrahedron, ContainsVertices_K1)
   {
     // K=1 should contain the four vertices
@@ -245,6 +263,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v3);
   }
 
+  /// @brief Verifies contains vertices K 5 for fekete tetrahedron by checking true predicates.
   TEST(FeketeTetrahedron, ContainsVertices_K5)
   {
     const auto& nodes = FeketeTetrahedron<5>::getNodes();
@@ -276,6 +295,7 @@ namespace Rodin::Tests::Unit
   // Fekete Node Uniqueness Tests
   //==========================================================================
 
+  /// @brief Verifies nodes are unique K 5 for fekete triangle.
   TEST(FeketeTriangle, NodesAreUnique_K5)
   {
     const auto& nodes = FeketeTriangle<5>::getNodes();
@@ -293,6 +313,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies nodes are unique K 3 for fekete tetrahedron.
   TEST(FeketeTetrahedron, NodesAreUnique_K3)
   {
     const auto& nodes = FeketeTetrahedron<3>::getNodes();
@@ -315,6 +336,7 @@ namespace Rodin::Tests::Unit
   // Higher Order Tests (K = 6)
   //==========================================================================
 
+  /// @brief (K+1)(K+2)/2 = (7)(8)/2 = 28.
   TEST(FeketeTriangle, NodeCount_K6)
   {
     // (K+1)(K+2)/2 = (7)(8)/2 = 28
@@ -322,6 +344,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTriangle<6>::getNodes().size(), 28);
   }
 
+  /// @brief Verifies nodes in reference triangle K 6 for fekete triangle.
   TEST(FeketeTriangle, NodesInReferenceTriangle_K6)
   {
     const auto& nodes = FeketeTriangle<6>::getNodes();
@@ -333,6 +356,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies contains vertices K 6 for fekete triangle by checking true predicates.
   TEST(FeketeTriangle, ContainsVertices_K6)
   {
     const auto& nodes = FeketeTriangle<6>::getNodes();
@@ -356,6 +380,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_y1);
   }
 
+  /// @brief Verifies nodes are unique K 6 for fekete triangle.
   TEST(FeketeTriangle, NodesAreUnique_K6)
   {
     const auto& nodes = FeketeTriangle<6>::getNodes();
@@ -373,6 +398,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (7)(8)(9)/6 = 84.
   TEST(FeketeTetrahedron, NodeCount_K6)
   {
     // (K+1)(K+2)(K+3)/6 = (7)(8)(9)/6 = 84
@@ -380,6 +406,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTetrahedron<6>::getNodes().size(), 84);
   }
 
+  /// @brief Verifies nodes in reference tetrahedron K 6 for fekete tetrahedron.
   TEST(FeketeTetrahedron, NodesInReferenceTetrahedron_K6)
   {
     const auto& nodes = FeketeTetrahedron<6>::getNodes();
@@ -392,6 +419,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies contains vertices K 6 for fekete tetrahedron by checking true predicates.
   TEST(FeketeTetrahedron, ContainsVertices_K6)
   {
     const auto& nodes = FeketeTetrahedron<6>::getNodes();
@@ -419,6 +447,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v3);
   }
 
+  /// @brief Verifies nodes are unique K 5 for fekete tetrahedron.
   TEST(FeketeTetrahedron, NodesAreUnique_K5)
   {
     const auto& nodes = FeketeTetrahedron<5>::getNodes();
@@ -441,6 +470,7 @@ namespace Rodin::Tests::Unit
   // Very High Order Tests (K = 15)
   //==========================================================================
 
+  /// @brief (K+1)(K+2)/2 = (16)(17)/2 = 136.
   TEST(FeketeTriangle, NodeCount_K15)
   {
     // (K+1)(K+2)/2 = (16)(17)/2 = 136
@@ -448,6 +478,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTriangle<15>::getNodes().size(), 136);
   }
 
+  /// @brief Verifies nodes in reference triangle K 15 for fekete triangle.
   TEST(FeketeTriangle, NodesInReferenceTriangle_K15)
   {
     const auto& nodes = FeketeTriangle<15>::getNodes();
@@ -459,6 +490,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies contains vertices K 15 for fekete triangle by checking true predicates.
   TEST(FeketeTriangle, ContainsVertices_K15)
   {
     const auto& nodes = FeketeTriangle<15>::getNodes();
@@ -482,6 +514,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_y1);
   }
 
+  /// @brief Verifies nodes are unique K 15 for fekete triangle.
   TEST(FeketeTriangle, NodesAreUnique_K15)
   {
     const auto& nodes = FeketeTriangle<15>::getNodes();
@@ -499,6 +532,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief (K+1)(K+2)(K+3)/6 = (16)(17)(18)/6 = 816.
   TEST(FeketeTetrahedron, NodeCount_K15)
   {
     // (K+1)(K+2)(K+3)/6 = (16)(17)(18)/6 = 816
@@ -506,6 +540,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(FeketeTetrahedron<15>::getNodes().size(), 816);
   }
 
+  /// @brief Verifies nodes in reference tetrahedron K 15 for fekete tetrahedron.
   TEST(FeketeTetrahedron, NodesInReferenceTetrahedron_K15)
   {
     const auto& nodes = FeketeTetrahedron<15>::getNodes();
@@ -518,6 +553,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies contains vertices K 15 for fekete tetrahedron by checking true predicates.
   TEST(FeketeTetrahedron, ContainsVertices_K15)
   {
     const auto& nodes = FeketeTetrahedron<15>::getNodes();
@@ -545,6 +581,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(has_v3);
   }
 
+  /// @brief Verifies nodes are unique K 15 for fekete tetrahedron.
   TEST(FeketeTetrahedron, NodesAreUnique_K15)
   {
     const auto& nodes = FeketeTetrahedron<15>::getNodes();

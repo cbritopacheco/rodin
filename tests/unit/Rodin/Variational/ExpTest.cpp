@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function zero for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, RealFunction_Zero)
   {
     RealFunction f(0.0);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function one for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, RealFunction_One)
   {
     RealFunction f(1.0);
@@ -42,6 +44,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), M_E, 1e-10);
   }
 
+  /// @brief Verifies real function negative value for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, RealFunction_NegativeValue)
   {
     RealFunction f(-1.0);
@@ -57,6 +60,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), 1.0 / M_E, 1e-10);
   }
 
+  /// @brief Verifies real function large value for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, RealFunction_LargeValue)
   {
     RealFunction f(2.0);
@@ -72,6 +76,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), std::exp(2.0), 1e-10);
   }
 
+  /// @brief Verifies real function small value for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, RealFunction_SmallValue)
   {
     RealFunction f(0.1);
@@ -89,6 +94,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), 1.1, 1e-2);
   }
 
+  /// @brief Verifies real function natural log for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, RealFunction_NaturalLog)
   {
     RealFunction f(std::log(2.0));
@@ -105,6 +111,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies grid function exponential for variational exp by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Exp, GridFunction_Exponential)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -126,6 +133,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_result.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Verifies chained operations for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ChainedOperations)
   {
     RealFunction f(0.5);
@@ -142,6 +150,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_exp_f.getValue(p), std::exp(std::exp(0.5)), 1e-10);
   }
 
+  /// @brief Verifies exponential sum for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialSum)
   {
     RealFunction f1(1.0);
@@ -159,6 +168,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_sum.getValue(p), std::exp(3.0), 1e-10);
   }
 
+  /// @brief Verifies exponential product for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialProduct)
   {
     RealFunction f1(2.0);
@@ -176,6 +186,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_product.getValue(p), M_E, 1e-10);
   }
 
+  /// @brief Verifies exponential laws for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialLaws)
   {
     RealFunction f1(2.0);
@@ -199,6 +210,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(product_exp.getValue(p), exp_sum.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies exponential negative sum for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialNegativeSum)
   {
     RealFunction f1(3.0);
@@ -216,6 +228,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_sum.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies very small value for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, VerySmallValue)
   {
     RealFunction f(-10.0);
@@ -232,6 +245,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(exp_result.getValue(p), 1e-4);  // Should be very small
   }
 
+  /// @brief Verifies exponential growth for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialGrowth)
   {
     RealFunction f(5.0);
@@ -248,6 +262,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(exp_result.getValue(p), 100.0);  // Should be large
   }
 
+  /// @brief Verifies exponential with sqrt for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialWithSqrt)
   {
     RealFunction f(4.0);
@@ -264,6 +279,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_sqrt.getValue(p), std::exp(2.0), 1e-10);
   }
 
+  /// @brief Verifies exponential powers for variational exp by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Exp, ExponentialPowers)
   {
     RealFunction f(2.0);
@@ -284,6 +300,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(exp_squared.getValue(p), exp_double.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies exponential monotonicity for variational exp.
   TEST(Rodin_Variational_Exp, ExponentialMonotonicity)
   {
     RealFunction f1(1.0);
@@ -302,6 +319,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(exp1.getValue(p), exp2.getValue(p));
   }
 
+  /// @brief Verifies exponential positivity for variational exp.
   TEST(Rodin_Variational_Exp, ExponentialPositivity)
   {
     RealFunction f(-100.0);  // Very negative value

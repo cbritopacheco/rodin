@@ -38,7 +38,7 @@
   @subsection guides-io-mesh-loading Loading Meshes
 
   Meshes can be loaded from files in supported formats using the
-  @ref Rodin::Geometry::Mesh::load "Mesh::load()" method. The file format
+  @ref Rodin::Geometry::Mesh "Mesh::load()" method. The file format
   must be explicitly specified via @ref Rodin::IO::FileFormat "IO::FileFormat":
 
   @code{.cpp}
@@ -348,7 +348,7 @@
   @endcode
 
   See the @ref examples-mmg-index "MMG examples" for more details on using
-  Rodin's @ref Rodin::External::MMG "MMG" integration.
+  Rodin's @ref Rodin::MMG "MMG" integration.
 
   @section guides-io-workflow Recommended Workflow
 

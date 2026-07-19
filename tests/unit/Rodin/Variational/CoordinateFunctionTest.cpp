@@ -13,6 +13,7 @@ using namespace Rodin::Variational;
 
 // --- F::X tests ---
 
+/// @brief Verifies returns X coordinate for variational F X by checking tolerance-based numerical results.
 TEST(Rodin_Variational_F_X, ReturnsXCoordinate)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -30,6 +31,7 @@ TEST(Rodin_Variational_F_X, ReturnsXCoordinate)
   EXPECT_NEAR(val, xCoord, 1e-10);
 }
 
+/// @brief Verifies different points for variational F X by checking tolerance-based numerical results.
 TEST(Rodin_Variational_F_X, DifferentPoints)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -48,6 +50,7 @@ TEST(Rodin_Variational_F_X, DifferentPoints)
   }
 }
 
+/// @brief Verifies copy for variational F X by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_F_X, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -60,6 +63,7 @@ TEST(Rodin_Variational_F_X, Copy)
   EXPECT_NEAR(copy.getValue(p), xFunc.getValue(p), 1e-10);
 }
 
+/// @brief Verifies get order for variational F X by checking true predicates.
 TEST(Rodin_Variational_F_X, GetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -73,6 +77,7 @@ TEST(Rodin_Variational_F_X, GetOrder)
 
 // --- F::Y tests ---
 
+/// @brief Verifies returns Y coordinate for variational F Y by checking tolerance-based numerical results.
 TEST(Rodin_Variational_F_Y, ReturnsYCoordinate)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -83,6 +88,7 @@ TEST(Rodin_Variational_F_Y, ReturnsYCoordinate)
   EXPECT_NEAR(F::y.getValue(p), p.y(), 1e-10);
 }
 
+/// @brief Verifies copy for variational F Y by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_F_Y, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -97,6 +103,7 @@ TEST(Rodin_Variational_F_Y, Copy)
 
 // --- Composition test ---
 
+/// @brief Verifies X plus Y for variational F by checking tolerance-based numerical results.
 TEST(Rodin_Variational_F, XPlusY)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -109,6 +116,7 @@ TEST(Rodin_Variational_F, XPlusY)
   EXPECT_NEAR(sum.getValue(p), expected, 1e-10);
 }
 
+/// @brief Verifies X times Y for variational F by checking tolerance-based numerical results.
 TEST(Rodin_Variational_F, XTimesY)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });

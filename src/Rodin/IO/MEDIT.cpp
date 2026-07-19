@@ -11,6 +11,7 @@
 
 namespace Rodin::IO
 {
+  /// @cond
   std::istream& MeshLoader<FileFormat::MEDIT, Context::Local>::getline(std::istream& is, std::string& line)
   {
     m_currentLineNumber++;
@@ -75,6 +76,7 @@ namespace Rodin::IO
   void MeshLoader<FileFormat::MEDIT, Context::Local>::readEntities(std::istream& is)
   {
     std::string line;
+    Index vertex = 0;
     while (getline(is, line))
     {
       if (MEDIT::ParseEmptyLine()(line.begin(), line.end()))
@@ -125,7 +127,7 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             m_build.vertex(std::move(data->vertex));
-            m_build.attribute({ 0, i }, data->attribute);
+            m_build.attribute({0, vertex++}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -145,8 +147,10 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::Segment, std::move(data->vertices));
-            m_build.attribute({ 1, i }, data->attribute);
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Segment, std::move(data->vertices), index);
+            m_build.attribute({1, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -166,8 +170,10 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::Triangle, std::move(data->vertices));
-            m_build.attribute({ 2, i }, data->attribute);
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Triangle, std::move(data->vertices), index);
+            m_build.attribute({2, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -187,8 +193,10 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices));
-            m_build.attribute({ 2, i }, data->attribute);
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Quadrilateral, std::move(data->vertices), index);
+            m_build.attribute({2, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -208,8 +216,31 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::Wedge, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Wedge, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
+          }
+          continue;
+        }
+        case MEDIT::Keyword::Pyramids:
+        {
+          m_build.reserve(3, *count);
+          for (size_t i = 0; i < *count; i++)
+          {
+            getline(is, line);
+            auto data = MEDIT::ParseEntity(5)(line.begin(), line.end());
+            if (!data)
+            {
+              Alert::MemberFunctionException(*this, __func__)
+                << "Failed to parse Pyramid on line "
+                << std::to_string(m_currentLineNumber) << "." << Alert::Raise;
+            }
+            data->vertices -= 1;
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Pyramid, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue;
         }
@@ -229,8 +260,10 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Tetrahedron, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -250,8 +283,10 @@ namespace Rodin::IO
                 << Alert::Raise;
             }
             data->vertices -= 1;
-            m_build.polytope(Geometry::Polytope::Type::Hexahedron, std::move(data->vertices));
-            m_build.attribute({ 3, i }, data->attribute);
+            Index index;
+            m_build.polytope(
+              Geometry::Polytope::Type::Hexahedron, std::move(data->vertices), index);
+            m_build.attribute({3, index}, data->attribute);
           }
           continue; // Continue the while loop
         }
@@ -342,6 +377,11 @@ namespace Rodin::IO
               os << MEDIT::Keyword::Wedges << '\n';
               break;
             }
+            case Geometry::Polytope::Type::Pyramid:
+            {
+              os << MEDIT::Keyword::Pyramids << '\n';
+              break;
+            }
           }
           const size_t d = Geometry::Polytope::Traits(g).getDimension();
           if (d <= mesh.getDimension())
@@ -395,6 +435,13 @@ namespace Rodin::IO
                        << vertices(3) + 1 << ' ' << vertices(4) + 1 << ' ' << vertices(5) + 1;
                     break;
                   }
+                  case Geometry::Polytope::Type::Pyramid:
+                  {
+                    os << vertices(0) + 1 << ' ' << vertices(1) + 1 << ' '
+                       << vertices(2) + 1 << ' ' << vertices(3) + 1 << ' '
+                       << vertices(4) + 1;
+                    break;
+                  }
                 }
                 os << ' ' << it->getAttribute().value_or(RODIN_IO_MEDIT_DEFAULT_POLYTOPE_ATTRIBUTE) << '\n';
               }
@@ -423,4 +470,5 @@ namespace Rodin::IO
     printEntities(os);
     if (pEnd) printEnd(os);
   }
+  /// @endcond
 }

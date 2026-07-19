@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_P0g_P0G_H
-#define RODIN_VARIATIONAL_P0g_P0G_H
+#ifndef RODIN_VARIATIONAL_P0G_P0G_H
+#define RODIN_VARIATIONAL_P0G_P0G_H
 
 #include <cassert>
 #include <cstddef>
@@ -27,6 +27,7 @@
 
 #include "P0gElement.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Number, class Mesh>
@@ -35,7 +36,9 @@ namespace Rodin::FormLanguage
     using MeshType    = Mesh;
     using ScalarType  = Number;
     using RangeType   = ScalarType;
+    /// @brief Execution context type.
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    /// @brief Finite element type.
     using ElementType = Variational::P0gElement<RangeType>;
   };
 
@@ -45,7 +48,9 @@ namespace Rodin::FormLanguage
     using MeshType    = Mesh;
     using ScalarType  = Number;
     using RangeType   = Math::SpatialVector<ScalarType>;
+    /// @brief Execution context type.
     using ContextType = typename FormLanguage::Traits<MeshType>::ContextType;
+    /// @brief Finite element type.
     using ElementType = Variational::P0gElement<Math::SpatialVector<ScalarType>>;
   };
 }
@@ -75,8 +80,10 @@ namespace Rodin::Variational
     public:
       using ScalarType  = Real;
       using RangeType   = ScalarType;
+      /// @brief Execution context type.
       using ContextType = Context::Local;
       using MeshType    = Geometry::Mesh<ContextType>;
+      /// @brief Finite element type.
       using ElementType = P0gElement<RangeType>;
       using Parent      = FiniteElementSpace<MeshType, P0g<RangeType, MeshType>>;
 
@@ -129,11 +136,37 @@ namespace Rodin::Variational
         : m_mesh(mesh)
       {}
 
-      P0g(const P0g&) = default;
+      P0g(const P0g& other)
+        : Parent(other),
+          m_mesh(other.m_mesh)
+      {}
 
-      P0g(P0g&&) = default;
+      P0g(P0g&& other)
+        : Parent(std::move(other)),
+          m_mesh(std::move(other.m_mesh))
+      {}
 
       ~P0g() override = default;
+
+      P0g& operator=(const P0g& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(other);
+          m_mesh = other.m_mesh;
+        }
+        return *this;
+      }
+
+      P0g& operator=(P0g&& other)
+      {
+        if (this != &other)
+        {
+          Parent::operator=(std::move(other));
+          m_mesh = std::move(other.m_mesh);
+        }
+        return *this;
+      }
 
       size_t getSize() const override
       {
@@ -160,11 +193,13 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Triangle:
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Tetrahedron:
+          case Geometry::Polytope::Type::Pyramid:
           case Geometry::Polytope::Type::Wedge:
           case Geometry::Polytope::Type::Hexahedron:
           {
-            // One thread-local element per call site; geometry is set in ctor.
-            // Returning a reference is required by the FES API.
+            // Unlike the fixed P0/P1/H1 elements, this cached element is
+            // reassigned when the requested geometry changes. It must remain
+            // thread-local while the FES API returns it by reference.
             static thread_local ElementType e(Geometry::Polytope::Type::Point);
             if (e.getGeometry() != g)
               e = ElementType(g);
@@ -218,8 +253,10 @@ namespace Rodin::Variational
     public:
       using ScalarType  = Real;
       using RangeType   = Math::SpatialVector<Real>;
+      /// @brief Execution context type.
       using ContextType = Context::Local;
       using MeshType    = Geometry::Mesh<ContextType>;
+      /// @brief Finite element type.
       using ElementType = P0gElement<Math::SpatialVector<ScalarType>>;
       using Parent      = FiniteElementSpace<MeshType, P0g<Math::SpatialVector<Real>, MeshType>>;
 
@@ -282,11 +319,48 @@ namespace Rodin::Variational
         : P0g(mesh, VDim)
       {}
 
-      P0g(const P0g&) = default;
-      P0g(P0g&&) = default;
+      P0g(const P0g& other)
+        : Parent(other),
+          m_dofs(other.m_dofs),
+          m_mesh(other.m_mesh),
+          m_vdim(other.m_vdim)
+      {}
+
+      P0g(P0g&& other)
+        : Parent(std::move(other)),
+          m_dofs(std::move(other.m_dofs)),
+          m_mesh(std::move(other.m_mesh)),
+          m_vdim(std::move(other.m_vdim))
+      {}
+
       ~P0g() override = default;
 
+      P0g& operator=(const P0g& other)
+      {
+        Parent::operator=(other);
+        if (this != &other)
+        {
+          m_dofs = other.m_dofs;
+          m_vdim = other.m_vdim;
+          m_mesh = other.m_mesh;
+        }
+        return *this;
+      }
+
+      P0g& operator=(P0g&& other)
+      {
+        Parent::operator=(std::move(other));
+        if (this != &other)
+        {
+          m_dofs = std::move(other.m_dofs);
+          m_vdim = std::move(other.m_vdim);
+          m_mesh = std::move(other.m_mesh);
+        }
+        return *this;
+      }
+
       size_t getSize() const override { return m_vdim; }
+
       size_t getVectorDimension() const override { return m_vdim; }
 
       const MeshType& getMesh() const override { return m_mesh.get(); }
@@ -301,9 +375,12 @@ namespace Rodin::Variational
           case Geometry::Polytope::Type::Triangle:
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Tetrahedron:
+          case Geometry::Polytope::Type::Pyramid:
           case Geometry::Polytope::Type::Wedge:
           case Geometry::Polytope::Type::Hexahedron:
           {
+            // Geometry and vector dimension both select the returned element;
+            // sharing this mutable cache would race between evaluations.
             static thread_local ElementType e(Geometry::Polytope::Type::Point, 1);
             if (e.getGeometry() != g || e.getCount() != m_vdim)
               e = ElementType(g, m_vdim);
@@ -365,4 +442,5 @@ namespace Rodin::Variational
   using VectorP0g = P0g<Math::SpatialVector<Real>, Mesh>;
 }
 
+/// @endcond
 #endif

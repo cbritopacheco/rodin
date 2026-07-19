@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, RealFunction_Addition)
   {
     RealFunction f1(3.0);
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 10.0, 1e-10);
   }
 
+  /// @brief Verifies real function zero addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, RealFunction_ZeroAddition)
   {
     RealFunction f1(42.0);
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 42.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, RealFunction_NegativeAddition)
   {
     RealFunction f1(10.0);
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 7.0, 1e-10);
   }
 
+  /// @brief Verifies vector function addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, VectorFunction_Addition)
   {
     VectorFunction vf1{1.0, 2.0};
@@ -77,6 +81,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(1), 6.0, 1e-10);
   }
 
+  /// @brief Verifies vector function zero vector addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, VectorFunction_ZeroVector_Addition)
   {
     VectorFunction vf1{5.0, -2.0, 8.0};
@@ -96,6 +101,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(result(2), 8.0, 1e-10);
   }
 
+  /// @brief Verifies grid function addition for variational sum by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Sum, GridFunction_Addition)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -120,6 +126,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies chained addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, ChainedAddition)
   {
     RealFunction f1(1.0);
@@ -137,6 +144,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 6.0, 1e-10);
   }
 
+  /// @brief Verifies mixed scalar vector components for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, MixedScalarVector_Components)
   {
     RealFunction scalar1(5.0);
@@ -162,6 +170,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(y_comp.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies associativity test for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, AssociativityTest)
   {
     RealFunction f1(10.0);
@@ -182,6 +191,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum1.getValue(p), 60.0, 1e-10);
   }
 
+  /// @brief Verifies commutativity test for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, CommutativityTest)
   {
     RealFunction f1(15.0);
@@ -201,6 +211,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum1.getValue(p), 40.0, 1e-10);
   }
 
+  /// @brief Verifies large value addition for variational sum by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sum, LargeValueAddition)
   {
     RealFunction f1(1e6);

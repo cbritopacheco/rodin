@@ -48,6 +48,7 @@
 
 #include "P1Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Scalar>
@@ -156,6 +157,45 @@ namespace Rodin::Variational
             assert(false);
             return Math::nan<Scalar>();
           }
+        }
+      }
+      case Geometry::Polytope::Type::Pyramid:
+      {
+        const auto& x = r.x();
+        const auto& y = r.y();
+        const auto& z = r.z();
+        const auto q = 1 - z;
+        if (q == 0)
+          return m_local == 4 ? 1 : 0;
+
+        switch (m_local)
+        {
+          case 0:
+          {
+            return (q - x) * (q - y) / q;
+          }
+          case 1:
+          {
+            return x * (q - y) / q;
+          }
+          case 2:
+          {
+            return x * y / q;
+          }
+          case 3:
+          {
+            return (q - x) * y / q;
+          }
+          case 4:
+          {
+            return z;
+          }
+          default:
+            [[unlikely]]
+            {
+              assert(false);
+              return Math::nan<Scalar>();
+            }
         }
       }
       case Geometry::Polytope::Type::Wedge:
@@ -517,6 +557,126 @@ namespace Rodin::Variational
             }
           }
         }
+        case Geometry::Polytope::Type::Pyramid:
+        {
+          const auto& x = r.x();
+          const auto& y = r.y();
+          const auto& z = r.z();
+          const auto q = 1 - z;
+
+          if (q == 0)
+          {
+            if (m_local == 4 && m_i == 2)
+              return 1;
+            return 0;
+          }
+
+          switch (m_local)
+          {
+            case 0:
+            {
+              if (m_i == 0)
+              {
+                return -1 + y / q;
+              }
+              else if (m_i == 1)
+              {
+                return -1 + x / q;
+              }
+              else if (m_i == 2)
+              {
+                return -1 + x * y / (q * q);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 1:
+            {
+              if (m_i == 0)
+              {
+                return 1 - y / q;
+              }
+              else if (m_i == 1)
+              {
+                return -x / q;
+              }
+              else if (m_i == 2)
+              {
+                return -x * y / (q * q);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 2:
+            {
+              if (m_i == 0)
+              {
+                return y / q;
+              }
+              else if (m_i == 1)
+              {
+                return x / q;
+              }
+              else if (m_i == 2)
+              {
+                return x * y / (q * q);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 3:
+            {
+              if (m_i == 0)
+              {
+                return -y / q;
+              }
+              else if (m_i == 1)
+              {
+                return 1 - x / q;
+              }
+              else if (m_i == 2)
+              {
+                return -x * y / (q * q);
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            case 4:
+            {
+              if (m_i == 0 || m_i == 1)
+              {
+                return 0;
+              }
+              else if (m_i == 2)
+              {
+                return 1;
+              }
+              else [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+            }
+            default:
+              [[unlikely]]
+              {
+                assert(false);
+                return Math::nan<Scalar>();
+              }
+          }
+        }
         case Geometry::Polytope::Type::Wedge:
         {
           switch (m_local)
@@ -851,5 +1011,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif
-

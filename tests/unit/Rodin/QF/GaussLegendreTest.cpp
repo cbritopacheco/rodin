@@ -43,6 +43,7 @@ class GaussLegendreTest : public ::testing::Test
 };
 
 // Test basic construction and properties
+/// @brief Test default constructor (order 2).
 TEST_F(GaussLegendreTest, BasicConstruction)
 {
   // Test default constructor (order 2)
@@ -57,6 +58,7 @@ TEST_F(GaussLegendreTest, BasicConstruction)
 }
 
 // Test Point geometry
+/// @brief Verifies point geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
 TEST_F(GaussLegendreTest, PointGeometry)
 {
   GaussLegendre gl_point(Polytope::Type::Point);
@@ -71,6 +73,7 @@ TEST_F(GaussLegendreTest, PointGeometry)
 }
 
 // Test Segment geometry with different orders
+/// @brief Test order 1 (should have 1 point).
 TEST_F(GaussLegendreTest, SegmentGeometry)
 {
   // Test order 1 (should have 1 point)
@@ -94,6 +97,7 @@ TEST_F(GaussLegendreTest, SegmentGeometry)
 }
 
 // Test quadrature accuracy for segments
+/// @brief N-point Gauss-Legendre quadrature should integrate polynomials of degree 2n-1 exactly.
 TEST_F(GaussLegendreTest, SegmentQuadratureAccuracy)
 {
   // n-point Gauss-Legendre quadrature should integrate polynomials of degree 2n-1 exactly
@@ -121,6 +125,7 @@ TEST_F(GaussLegendreTest, SegmentQuadratureAccuracy)
 }
 
 // Test Quadrilateral geometry
+/// @brief Test uniform order.
 TEST_F(GaussLegendreTest, QuadrilateralGeometry)
 {
   // Test uniform order
@@ -153,6 +158,7 @@ TEST_F(GaussLegendreTest, QuadrilateralGeometry)
 }
 
 // Test Triangle geometry
+/// @brief Verifies triangle geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
 TEST_F(GaussLegendreTest, TriangleGeometry)
 {
   GaussLegendre gl_tri(Polytope::Type::Triangle, 2);
@@ -179,6 +185,7 @@ TEST_F(GaussLegendreTest, TriangleGeometry)
 }
 
 // Test Tetrahedron geometry
+/// @brief Verifies tetrahedron geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
 TEST_F(GaussLegendreTest, TetrahedronGeometry)
 {
   GaussLegendre gl_tet(Polytope::Type::Tetrahedron, 2, 2, 2);
@@ -206,6 +213,7 @@ TEST_F(GaussLegendreTest, TetrahedronGeometry)
 }
 
 // Test Wedge geometry
+/// @brief Verifies wedge geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
 TEST_F(GaussLegendreTest, WedgeGeometry)
 {
   GaussLegendre gl_wedge(Polytope::Type::Wedge, 2, 3);
@@ -233,7 +241,63 @@ TEST_F(GaussLegendreTest, WedgeGeometry)
   EXPECT_NEAR(total_weight, 0.5, 1e-12);
 }
 
+// Test Hexahedron geometry
+/// @brief Verifies hexahedron geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
+TEST_F(GaussLegendreTest, HexahedronGeometry)
+{
+  GaussLegendre gl_hex(Polytope::Type::Hexahedron, 2, 2, 2);
+  EXPECT_EQ(gl_hex.getSize(), 8);
+  EXPECT_EQ(gl_hex.getGeometry(), Polytope::Type::Hexahedron);
+
+  double total_weight = 0.0;
+  for (size_t i = 0; i < gl_hex.getSize(); ++i)
+  {
+    const auto& point = gl_hex.getPoint(i);
+    EXPECT_EQ(point.size(), 3);
+    EXPECT_GE(point[0], 0.0);
+    EXPECT_GE(point[1], 0.0);
+    EXPECT_GE(point[2], 0.0);
+    EXPECT_LE(point[0], 1.0);
+    EXPECT_LE(point[1], 1.0);
+    EXPECT_LE(point[2], 1.0);
+
+    total_weight += gl_hex.getWeight(i);
+  }
+
+  EXPECT_NEAR(total_weight, 1.0, 1e-12);
+}
+
+// Test Pyramid geometry
+/// @brief Verifies pyramid geometry for gauss legendre test by checking tolerance-based numerical results, exact expected values.
+TEST_F(GaussLegendreTest, PyramidGeometry)
+{
+  GaussLegendre gl_pyr(Polytope::Type::Pyramid, 2, 2, 2);
+  EXPECT_EQ(gl_pyr.getSize(), 8); // 2x2x2 collapsed tensor points
+  EXPECT_EQ(gl_pyr.getGeometry(), Polytope::Type::Pyramid);
+
+  double total_weight = 0.0;
+  double z_moment = 0.0;
+  for (size_t i = 0; i < gl_pyr.getSize(); ++i)
+  {
+    const auto& point = gl_pyr.getPoint(i);
+    EXPECT_EQ(point.size(), 3);
+    EXPECT_GE(point[0], 0.0);
+    EXPECT_GE(point[1], 0.0);
+    EXPECT_GE(point[2], 0.0);
+    EXPECT_LE(point[2], 1.0);
+    EXPECT_LE(point[0], 1.0 - point[2] + 1e-14);
+    EXPECT_LE(point[1], 1.0 - point[2] + 1e-14);
+
+    total_weight += gl_pyr.getWeight(i);
+    z_moment += gl_pyr.getWeight(i) * point[2];
+  }
+
+  EXPECT_NEAR(total_weight, 1.0 / 3.0, 1e-12);
+  EXPECT_NEAR(z_moment, 1.0 / 12.0, 1e-12);
+}
+
 // Test copy functionality
+/// @brief Verifies copy functionality for gauss legendre test by checking tolerance-based numerical results, exact expected values, copy semantics.
 TEST_F(GaussLegendreTest, CopyFunctionality)
 {
   GaussLegendre original(Polytope::Type::Segment, 3);
@@ -274,6 +338,7 @@ TEST_F(GaussLegendreTest, CopyFunctionality)
 }
 
 // Test symmetry properties
+/// @brief Test that Gauss-Legendre points are symmetric on segments.
 TEST_F(GaussLegendreTest, SymmetryProperties)
 {
   // Test that Gauss-Legendre points are symmetric on segments
@@ -290,6 +355,7 @@ TEST_F(GaussLegendreTest, SymmetryProperties)
 }
 
 // Test edge cases and parameter validation
+/// @brief Test with minimum order (1).
 TEST_F(GaussLegendreTest, EdgeCases)
 {
   // Test with minimum order (1)

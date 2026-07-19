@@ -26,9 +26,11 @@ namespace Rodin::Tests::Unit
   //==========================================================================
 
   // Tolerance for geometric comparisons (whether a point is on a face)
+  /// @brief Helper used by the tests to FACE TOL.
   constexpr Real FACE_TOL = 1e-10;
 
   // Epsilon for division by zero protection
+  /// @brief Helper used by the tests to FACE EPS.
   const Real FACE_EPS = std::numeric_limits<Real>::epsilon() * 100;
 
   //==========================================================================
@@ -108,8 +110,11 @@ namespace Rodin::Tests::Unit
   }
 
   // Axis indices for coordinate projection
+  /// @brief Helper used by the tests to AXIS X.
   constexpr int AXIS_X = 0;
+  /// @brief Helper used by the tests to AXIS Y.
   constexpr int AXIS_Y = 1;
+  /// @brief Helper used by the tests to AXIS Z.
   constexpr int AXIS_Z = 2;
 
   /**
@@ -215,10 +220,9 @@ namespace Rodin::Tests::Unit
   // Extract 2D coordinates of nodes lying on a specific triangular face of tetrahedron
   // Returns vector of (x, y) in reference triangle coordinates
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Tetrahedron Triangle Face Nodes.
   std::vector<std::pair<Real, Real>> extractTetrahedronTriangleFaceNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1,
-      Real x2, Real y2, Real z2)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1, Real x2, Real y2, Real z2)
   {
     std::vector<std::pair<Real, Real>> coords;
     const auto& nodes = FeketeTetrahedron<K>::getNodes();
@@ -243,10 +247,9 @@ namespace Rodin::Tests::Unit
 
   // Extract 2D coordinates of nodes lying on a specific triangular face of wedge
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Wedge Triangle Face Nodes.
   std::vector<std::pair<Real, Real>> extractWedgeTriangleFaceNodes(
-      Real x0, Real y0, Real z0,
-      Real x1, Real y1, Real z1,
-      Real x2, Real y2, Real z2)
+    Real x0, Real y0, Real z0, Real x1, Real y1, Real z1, Real x2, Real y2, Real z2)
   {
     std::vector<std::pair<Real, Real>> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);
@@ -269,6 +272,7 @@ namespace Rodin::Tests::Unit
 
   // Extract 2D coordinates from 2D Triangle element
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Triangle Nodes.
   std::vector<std::pair<Real, Real>> extractTriangleNodes()
   {
     std::vector<std::pair<Real, Real>> coords;
@@ -285,11 +289,12 @@ namespace Rodin::Tests::Unit
   // Extract 2D coordinates of nodes lying on a specific quad face of wedge
   // Returns vector of (s, t) in reference quadrilateral coordinates [0,1]x[0,1]
   template <size_t K>
-  std::vector<std::pair<Real, Real>> extractWedgeQuadFaceNodes(
-      Real x0, Real y0, Real z0,  // (0,0)
-      Real x1, Real y1, Real z1,  // (1,0)
-      Real x2, Real y2, Real z2,  // (1,1)
-      Real x3, Real y3, Real z3)  // (0,1)
+  /// @brief Helper used by the tests to Extract Wedge Quad Face Nodes.
+  std::vector<std::pair<Real, Real>> extractWedgeQuadFaceNodes(Real x0, Real y0,
+    Real z0,  // (0,0)
+    Real x1, Real y1, Real z1,  // (1,0)
+    Real x2, Real y2, Real z2,  // (1,1)
+    Real x3, Real y3, Real z3)  // (0,1)
   {
     std::vector<std::pair<Real, Real>> coords;
     const auto& nodes = H1Element<K, Real>::getNodes(Polytope::Type::Wedge);
@@ -311,6 +316,7 @@ namespace Rodin::Tests::Unit
 
   // Extract 2D coordinates from 2D Quadrilateral element
   template <size_t K>
+  /// @brief Helper used by the tests to Extract Quadrilateral Nodes.
   std::vector<std::pair<Real, Real>> extractQuadrilateralNodes()
   {
     std::vector<std::pair<Real, Real>> coords;
@@ -325,6 +331,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Sort 2D coordinates for comparison (by x then y)
+  /// @brief Helper used by the tests to Sort Coords 2 D.
   inline void sortCoords2D(std::vector<std::pair<Real, Real>>& coords)
   {
     std::sort(coords.begin(), coords.end(),
@@ -336,6 +343,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Compare two sets of 2D coordinates
+  /// @brief Helper used by the tests to Compare Face Coordinates.
   inline void compareFaceCoordinates(
       std::vector<std::pair<Real, Real>> face1,
       std::vector<std::pair<Real, Real>> face2,
@@ -367,6 +375,7 @@ namespace Rodin::Tests::Unit
   // Face 0 (base): vertices 0,1,2 => (0,0,0), (1,0,0), (0,1,0) on z=0 plane
   //==========================================================================
 
+  /// @brief Base face of tetrahedron (z=0 plane) should match reference triangle.
   TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K2)
   {
     // Base face of tetrahedron (z=0 plane) should match reference triangle
@@ -381,6 +390,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face", "Triangle");
   }
 
+  /// @brief Verifies tetrahedron base face matches triangle K 3 for face conformity.
   TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K3)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<3>(
@@ -394,6 +404,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face K=3", "Triangle K=3");
   }
 
+  /// @brief Verifies tetrahedron base face matches triangle K 4 for face conformity.
   TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K4)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<4>(
@@ -407,6 +418,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face K=4", "Triangle K=4");
   }
 
+  /// @brief Verifies tetrahedron base face matches triangle K 5 for face conformity.
   TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K5)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<5>(
@@ -420,6 +432,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face K=5", "Triangle K=5");
   }
 
+  /// @brief Verifies tetrahedron base face matches triangle K 6 for face conformity.
   TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K6)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<6>(
@@ -433,6 +446,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face K=6", "Triangle K=6");
   }
 
+  /// @brief Face with vertices 0,1,3: (0,0,0), (1,0,0), (0,0,1) on y=0 plane.
   TEST(FaceConformity, Tetrahedron_Face013_MatchesTriangle_K3)
   {
     // Face with vertices 0,1,3: (0,0,0), (1,0,0), (0,0,1) on y=0 plane
@@ -447,6 +461,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron face (y=0)", "Triangle K=3");
   }
 
+  /// @brief Face with vertices 0,2,3: (0,0,0), (0,1,0), (0,0,1) on x=0 plane.
   TEST(FaceConformity, Tetrahedron_Face023_MatchesTriangle_K3)
   {
     // Face with vertices 0,2,3: (0,0,0), (0,1,0), (0,0,1) on x=0 plane
@@ -461,6 +476,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron face (x=0)", "Triangle K=3");
   }
 
+  /// @brief Face with vertices 1,2,3: (1,0,0), (0,1,0), (0,0,1) diagonal face.
   TEST(FaceConformity, Tetrahedron_Face123_MatchesTriangle_K3)
   {
     // Face with vertices 1,2,3: (1,0,0), (0,1,0), (0,0,1) diagonal face
@@ -482,6 +498,7 @@ namespace Rodin::Tests::Unit
   // Top face (z=1): (0,0,1), (1,0,1), (0,1,1)
   //==========================================================================
 
+  /// @brief Bottom triangular face of wedge (z=0).
   TEST(FaceConformity, Wedge_BottomFace_MatchesTriangle_K2)
   {
     // Bottom triangular face of wedge (z=0)
@@ -496,6 +513,7 @@ namespace Rodin::Tests::Unit
                            "Wedge bottom face", "Triangle");
   }
 
+  /// @brief Verifies wedge bottom face matches triangle K 3 for face conformity.
   TEST(FaceConformity, Wedge_BottomFace_MatchesTriangle_K3)
   {
     auto wedge_face = extractWedgeTriangleFaceNodes<3>(
@@ -509,6 +527,7 @@ namespace Rodin::Tests::Unit
                            "Wedge bottom face K=3", "Triangle K=3");
   }
 
+  /// @brief Verifies wedge bottom face matches triangle K 4 for face conformity.
   TEST(FaceConformity, Wedge_BottomFace_MatchesTriangle_K4)
   {
     auto wedge_face = extractWedgeTriangleFaceNodes<4>(
@@ -522,6 +541,7 @@ namespace Rodin::Tests::Unit
                            "Wedge bottom face K=4", "Triangle K=4");
   }
 
+  /// @brief Top triangular face of wedge (z=1).
   TEST(FaceConformity, Wedge_TopFace_MatchesTriangle_K3)
   {
     // Top triangular face of wedge (z=1)
@@ -536,6 +556,7 @@ namespace Rodin::Tests::Unit
                            "Wedge top face K=3", "Triangle K=3");
   }
 
+  /// @brief Verifies wedge top face matches triangle K 4 for face conformity.
   TEST(FaceConformity, Wedge_TopFace_MatchesTriangle_K4)
   {
     auto wedge_face = extractWedgeTriangleFaceNodes<4>(
@@ -553,6 +574,7 @@ namespace Rodin::Tests::Unit
   // Tetrahedron triangular faces match Wedge triangular faces
   //==========================================================================
 
+  /// @brief Both have triangular faces - they should have the same node distribution.
   TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K2)
   {
     // Both have triangular faces - they should have the same node distribution
@@ -570,6 +592,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron triangle face", "Wedge triangle face");
   }
 
+  /// @brief Verifies tetrahedron wedge triangle faces match K 3 for face conformity.
   TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K3)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<3>(
@@ -586,6 +609,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron triangle face K=3", "Wedge triangle face K=3");
   }
 
+  /// @brief Verifies tetrahedron wedge triangle faces match K 4 for face conformity.
   TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K4)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<4>(
@@ -602,6 +626,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron triangle face K=4", "Wedge triangle face K=4");
   }
 
+  /// @brief Verifies tetrahedron wedge triangle faces match K 5 for face conformity.
   TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K5)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<5>(
@@ -618,6 +643,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron triangle face K=5", "Wedge triangle face K=5");
   }
 
+  /// @brief Verifies tetrahedron wedge triangle faces match K 6 for face conformity.
   TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K6)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<6>(
@@ -642,6 +668,7 @@ namespace Rodin::Tests::Unit
   // Face 3 (diagonal): (1,0,0)-(0,1,0)-(0,1,1)-(1,0,1)
   //==========================================================================
 
+  /// @brief Quad face at y=0.
   TEST(FaceConformity, Wedge_QuadFaceY0_MatchesQuadrilateral_K2)
   {
     // Quad face at y=0
@@ -657,6 +684,7 @@ namespace Rodin::Tests::Unit
                            "Wedge quad face (y=0)", "Quadrilateral");
   }
 
+  /// @brief Verifies wedge quad face Y 0 matches quadrilateral K 3 for face conformity.
   TEST(FaceConformity, Wedge_QuadFaceY0_MatchesQuadrilateral_K3)
   {
     auto wedge_face = extractWedgeQuadFaceNodes<3>(
@@ -671,6 +699,7 @@ namespace Rodin::Tests::Unit
                            "Wedge quad face (y=0) K=3", "Quadrilateral K=3");
   }
 
+  /// @brief Verifies wedge quad face Y 0 matches quadrilateral K 4 for face conformity.
   TEST(FaceConformity, Wedge_QuadFaceY0_MatchesQuadrilateral_K4)
   {
     auto wedge_face = extractWedgeQuadFaceNodes<4>(
@@ -685,6 +714,7 @@ namespace Rodin::Tests::Unit
                            "Wedge quad face (y=0) K=4", "Quadrilateral K=4");
   }
 
+  /// @brief Quad face at x=0.
   TEST(FaceConformity, Wedge_QuadFaceX0_MatchesQuadrilateral_K3)
   {
     // Quad face at x=0
@@ -700,6 +730,7 @@ namespace Rodin::Tests::Unit
                            "Wedge quad face (x=0) K=3", "Quadrilateral K=3");
   }
 
+  /// @brief Verifies wedge quad face X 0 matches quadrilateral K 4 for face conformity.
   TEST(FaceConformity, Wedge_QuadFaceX0_MatchesQuadrilateral_K4)
   {
     auto wedge_face = extractWedgeQuadFaceNodes<4>(
@@ -718,6 +749,7 @@ namespace Rodin::Tests::Unit
   // High-order conformity tests
   //==========================================================================
 
+  /// @brief Reference triangle nodes.
   TEST(FaceConformity, WedgeTriangleFaces_Match_K5)
   {
     // Reference triangle nodes
@@ -740,6 +772,7 @@ namespace Rodin::Tests::Unit
                            "Wedge top face K=5", "Triangle K=5");
   }
 
+  /// @brief Verifies wedge triangle faces match K 6 for face conformity.
   TEST(FaceConformity, WedgeTriangleFaces_Match_K6)
   {
     auto tri_nodes = extractTriangleNodes<6>();
@@ -752,6 +785,7 @@ namespace Rodin::Tests::Unit
                            "Wedge bottom face K=6", "Triangle K=6");
   }
 
+  /// @brief Verifies all quad faces match K 5 for face conformity.
   TEST(FaceConformity, AllQuadFaces_Match_K5)
   {
     auto quad_nodes = extractQuadrilateralNodes<5>();
@@ -775,6 +809,7 @@ namespace Rodin::Tests::Unit
                            "Wedge quad face (x=0) K=5", "Quadrilateral K=5");
   }
 
+  /// @brief Verifies all quad faces match K 6 for face conformity.
   TEST(FaceConformity, AllQuadFaces_Match_K6)
   {
     auto quad_nodes = extractQuadrilateralNodes<6>();
@@ -792,6 +827,7 @@ namespace Rodin::Tests::Unit
   // Cross-geometry comprehensive tests
   //==========================================================================
 
+  /// @brief Triangle should have (K+1)(K+2)/2 = 6 nodes at K=2.
   TEST(FaceConformity, TriangleFaceNodeCount_K2)
   {
     // Triangle should have (K+1)(K+2)/2 = 6 nodes at K=2
@@ -811,6 +847,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(wedge_face.size(), 6u);
   }
 
+  /// @brief Triangle should have (K+1)(K+2)/2 = 10 nodes at K=3.
   TEST(FaceConformity, TriangleFaceNodeCount_K3)
   {
     // Triangle should have (K+1)(K+2)/2 = 10 nodes at K=3
@@ -830,6 +867,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(wedge_face.size(), 10u);
   }
 
+  /// @brief Quadrilateral should have (K+1)^2 = 9 nodes at K=2.
   TEST(FaceConformity, QuadFaceNodeCount_K2)
   {
     // Quadrilateral should have (K+1)^2 = 9 nodes at K=2
@@ -844,6 +882,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(wedge_face.size(), 9u);
   }
 
+  /// @brief Quadrilateral should have (K+1)^2 = 16 nodes at K=3.
   TEST(FaceConformity, QuadFaceNodeCount_K3)
   {
     // Quadrilateral should have (K+1)^2 = 16 nodes at K=3
@@ -862,6 +901,7 @@ namespace Rodin::Tests::Unit
   // Very high-order conformity tests (K = 15)
   //==========================================================================
 
+  /// @brief Verifies tetrahedron base face matches triangle K 15 for face conformity.
   TEST(FaceConformity, Tetrahedron_BaseFace_MatchesTriangle_K15)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<15>(
@@ -875,6 +915,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron base face K=15", "Triangle K=15");
   }
 
+  /// @brief Verifies tetrahedron all faces match triangle K 15 for face conformity.
   TEST(FaceConformity, Tetrahedron_AllFaces_MatchTriangle_K15)
   {
     auto tri_nodes = extractTriangleNodes<15>();
@@ -912,6 +953,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron diagonal face K=15", "Triangle K=15");
   }
 
+  /// @brief Verifies wedge triangle faces match triangle K 15 for face conformity.
   TEST(FaceConformity, Wedge_TriangleFaces_MatchTriangle_K15)
   {
     auto tri_nodes = extractTriangleNodes<15>();
@@ -933,6 +975,7 @@ namespace Rodin::Tests::Unit
                            "Wedge top face K=15", "Triangle K=15");
   }
 
+  /// @brief Verifies tetrahedron wedge triangle faces match K 15 for face conformity.
   TEST(FaceConformity, Tetrahedron_Wedge_TriangleFaces_Match_K15)
   {
     auto tet_face = extractTetrahedronTriangleFaceNodes<15>(
@@ -949,6 +992,7 @@ namespace Rodin::Tests::Unit
                            "Tetrahedron triangle face K=15", "Wedge triangle face K=15");
   }
 
+  /// @brief Verifies wedge quad faces match quadrilateral K 15 for face conformity.
   TEST(FaceConformity, Wedge_QuadFaces_MatchQuadrilateral_K15)
   {
     auto quad_nodes = extractQuadrilateralNodes<15>();
@@ -972,6 +1016,7 @@ namespace Rodin::Tests::Unit
                            "Wedge quad face (x=0) K=15", "Quadrilateral K=15");
   }
 
+  /// @brief Triangle should have (K+1)(K+2)/2 = 136 nodes at K=15.
   TEST(FaceConformity, TriangleFaceNodeCount_K15)
   {
     // Triangle should have (K+1)(K+2)/2 = 136 nodes at K=15
@@ -991,6 +1036,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(wedge_face.size(), 136u);
   }
 
+  /// @brief Quadrilateral should have (K+1)^2 = 256 nodes at K=15.
   TEST(FaceConformity, QuadFaceNodeCount_K15)
   {
     // Quadrilateral should have (K+1)^2 = 256 nodes at K=15

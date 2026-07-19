@@ -18,12 +18,14 @@ namespace Rodin::Tests::Unit
   // EmptyIndexGenerator Tests
   // ============================================================================
 
+  /// @brief Verifies default construction for geometry empty index generator by checking true predicates.
   TEST(Geometry_EmptyIndexGenerator, DefaultConstruction)
   {
     EmptyIndexGenerator gen;
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies copy construction for geometry empty index generator by checking true predicates, copy semantics.
   TEST(Geometry_EmptyIndexGenerator, CopyConstruction)
   {
     EmptyIndexGenerator gen1;
@@ -32,6 +34,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen2.end());
   }
 
+  /// @brief Verifies move construction for geometry empty index generator by checking true predicates, move semantics.
   TEST(Geometry_EmptyIndexGenerator, MoveConstruction)
   {
     EmptyIndexGenerator gen1;
@@ -40,12 +43,14 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen2.end());
   }
 
+  /// @brief Verifies always at end for geometry empty index generator by checking true predicates.
   TEST(Geometry_EmptyIndexGenerator, AlwaysAtEnd)
   {
     EmptyIndexGenerator gen;
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies copy for geometry empty index generator by checking true predicates, copy semantics.
   TEST(Geometry_EmptyIndexGenerator, Copy)
   {
     EmptyIndexGenerator gen;
@@ -54,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(copy->end());
   }
 
+  /// @brief Verifies move for geometry empty index generator by checking true predicates, move semantics.
   TEST(Geometry_EmptyIndexGenerator, Move)
   {
     EmptyIndexGenerator gen;
@@ -66,18 +72,21 @@ namespace Rodin::Tests::Unit
   // BoundedIndexGenerator Tests
   // ============================================================================
 
+  /// @brief Verifies construction for geometry bounded index generator by checking false predicates.
   TEST(Geometry_BoundedIndexGenerator, Construction)
   {
     BoundedIndexGenerator gen(0, 5);
     EXPECT_FALSE(gen.end());
   }
 
+  /// @brief Verifies empty range for geometry bounded index generator by checking true predicates.
   TEST(Geometry_BoundedIndexGenerator, EmptyRange)
   {
     BoundedIndexGenerator gen(5, 5);
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies copy construction for geometry bounded index generator by checking true predicates, copy semantics.
   TEST(Geometry_BoundedIndexGenerator, CopyConstruction)
   {
     BoundedIndexGenerator gen1(0, 3);
@@ -87,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen2.end());
   }
 
+  /// @brief Verifies move construction for geometry bounded index generator by checking false predicates, move semantics.
   TEST(Geometry_BoundedIndexGenerator, MoveConstruction)
   {
     BoundedIndexGenerator gen1(0, 3);
@@ -95,12 +105,14 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(gen2.end());
   }
 
+  /// @brief Verifies dereference for geometry bounded index generator by checking exact expected values.
   TEST(Geometry_BoundedIndexGenerator, Dereference)
   {
     BoundedIndexGenerator gen(10, 15);
     EXPECT_EQ(*gen, 10);
   }
 
+  /// @brief Verifies increment for geometry bounded index generator by checking exact expected values, true predicates.
   TEST(Geometry_BoundedIndexGenerator, Increment)
   {
     BoundedIndexGenerator gen(0, 3);
@@ -114,6 +126,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies full iteration for geometry bounded index generator by checking exact expected values.
   TEST(Geometry_BoundedIndexGenerator, FullIteration)
   {
     BoundedIndexGenerator gen(5, 10);
@@ -133,6 +146,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(indices[4], 9);
   }
 
+  /// @brief Verifies copy for geometry bounded index generator by checking true predicates, copy semantics.
   TEST(Geometry_BoundedIndexGenerator, Copy)
   {
     BoundedIndexGenerator gen(0, 3);
@@ -142,6 +156,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(copy->end());
   }
 
+  /// @brief Verifies move for geometry bounded index generator by checking exact expected values, false predicates, move semantics.
   TEST(Geometry_BoundedIndexGenerator, Move)
   {
     BoundedIndexGenerator gen(0, 3);
@@ -151,6 +166,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(**moved, 0);
   }
 
+  /// @brief Verifies single element for geometry bounded index generator by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_BoundedIndexGenerator, SingleElement)
   {
     BoundedIndexGenerator gen(42, 43);
@@ -161,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies large range for geometry bounded index generator by checking exact expected values.
   TEST(Geometry_BoundedIndexGenerator, LargeRange)
   {
     BoundedIndexGenerator gen(0, 1000);
@@ -179,6 +196,7 @@ namespace Rodin::Tests::Unit
   // VectorIndexGenerator Tests
   // ============================================================================
 
+  /// @brief Verifies empty vector for geometry vector index generator by checking true predicates, move semantics.
   TEST(Geometry_VectorIndexGenerator, EmptyVector)
   {
     std::vector<Index> indices;
@@ -187,6 +205,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies single element for geometry vector index generator by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_VectorIndexGenerator, SingleElement)
   {
     std::vector<Index> indices{42};
@@ -198,6 +217,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies multiple elements for geometry vector index generator by checking exact expected values, true predicates, move semantics.
   TEST(Geometry_VectorIndexGenerator, MultipleElements)
   {
     std::vector<Index> indices{10, 20, 30, 40};
@@ -214,6 +234,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies full iteration for geometry vector index generator by checking exact expected values, move semantics.
   TEST(Geometry_VectorIndexGenerator, FullIteration)
   {
     std::vector<Index> original{1, 3, 5, 7, 9};
@@ -234,6 +255,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result[4], 9);
   }
 
+  /// @brief Verifies copy for geometry vector index generator by checking exact expected values, copy semantics, move semantics.
   TEST(Geometry_VectorIndexGenerator, Copy)
   {
     std::vector<Index> indices{1, 2, 3};
@@ -247,6 +269,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(**copy, 2);
   }
 
+  /// @brief Verifies move for geometry vector index generator by checking exact expected values, false predicates, move semantics.
   TEST(Geometry_VectorIndexGenerator, Move)
   {
     std::vector<Index> indices{5, 10, 15};
@@ -262,6 +285,7 @@ namespace Rodin::Tests::Unit
   // SetIndexGenerator Tests
   // ============================================================================
 
+  /// @brief Verifies empty set for geometry set index generator by checking true predicates, move semantics.
   TEST(Geometry_SetIndexGenerator, EmptySet)
   {
     IndexSet indices;
@@ -270,6 +294,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies single element for geometry set index generator by checking exact expected values, true predicates, false predicates.
   TEST(Geometry_SetIndexGenerator, SingleElement)
   {
     IndexSet indices{42};
@@ -281,6 +306,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(gen.end());
   }
 
+  /// @brief Verifies multiple elements sorted for geometry set index generator by checking exact expected values, move semantics.
   TEST(Geometry_SetIndexGenerator, MultipleElementsSorted)
   {
     IndexSet indices{30, 10, 20, 40};  // Set will sort these
@@ -301,6 +327,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result[3], 40);
   }
 
+  /// @brief Verifies copy for geometry set index generator by checking exact expected values, false predicates, copy semantics.
   TEST(Geometry_SetIndexGenerator, Copy)
   {
     IndexSet indices{1, 2, 3};
@@ -312,6 +339,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(**copy, 1);
   }
 
+  /// @brief Verifies move for geometry set index generator by checking exact expected values, false predicates, move semantics.
   TEST(Geometry_SetIndexGenerator, Move)
   {
     IndexSet indices{5, 10, 15};
@@ -323,6 +351,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(**moved, 5);
   }
 
+  /// @brief Verifies construct with const ref for geometry set index generator by checking exact expected values, false predicates.
   TEST(Geometry_SetIndexGenerator, ConstructWithConstRef)
   {
     IndexSet indices{7, 14, 21};

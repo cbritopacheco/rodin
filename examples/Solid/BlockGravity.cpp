@@ -104,18 +104,11 @@ int main(int, char**)
 
     auto bodyForce = VectorFunction{ Zero(), RealFunction(gy) };
 
-    Solid::MaterialTangent tangent(law, du, v);
-    tangent.setDisplacement(u);
-
-    Solid::InternalForce residual(law, v);
-    residual.setDisplacement(u);
+    auto ivw = Solid::InternalVirtualWork(law, u);
 
     // Newton linearization:  K δu = -F_int(u) + F_body
     Problem newton(du, v);
-    newton = tangent
-           + residual
-           - Integral(bodyForce, v)
-           + DirichletBC(du, zero).on(bottomBC);
+    newton = ivw(du, v) - Integral(bodyForce, v) + DirichletBC(du, zero).on(bottomBC);
 
     SparseLU linearSolver(newton);
     NewtonSolver solver(linearSolver);
@@ -125,7 +118,7 @@ int main(int, char**)
 
     solver.solve(u);
 
-    xdmf.write(static_cast<Real>(step));
+    xdmf.write(static_cast<Real>(step)).flush();
   }
 
   return 0;

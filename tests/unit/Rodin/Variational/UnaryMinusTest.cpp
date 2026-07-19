@@ -11,6 +11,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies scalar constant for variational unary minus by checking tolerance-based numerical results.
 TEST(Rodin_Variational_UnaryMinus, ScalarConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -24,6 +25,7 @@ TEST(Rodin_Variational_UnaryMinus, ScalarConstant)
   EXPECT_NEAR(neg.getValue(p), -3.0, 1e-10);
 }
 
+/// @brief Verifies scalar zero for variational unary minus by checking tolerance-based numerical results.
 TEST(Rodin_Variational_UnaryMinus, ScalarZero)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -37,6 +39,7 @@ TEST(Rodin_Variational_UnaryMinus, ScalarZero)
   EXPECT_NEAR(neg.getValue(p), 0.0, 1e-10);
 }
 
+/// @brief Verifies scalar negative for variational unary minus by checking tolerance-based numerical results.
 TEST(Rodin_Variational_UnaryMinus, ScalarNegative)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -50,6 +53,7 @@ TEST(Rodin_Variational_UnaryMinus, ScalarNegative)
   EXPECT_NEAR(neg.getValue(p), 7.5, 1e-10);
 }
 
+/// @brief Verifies double negation for variational unary minus by checking tolerance-based numerical results.
 TEST(Rodin_Variational_UnaryMinus, DoubleNegation)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -63,6 +67,7 @@ TEST(Rodin_Variational_UnaryMinus, DoubleNegation)
   EXPECT_NEAR(doubleNeg.getValue(p), 5.0, 1e-10);
 }
 
+/// @brief Verifies copy for variational unary minus by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_UnaryMinus, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -77,6 +82,7 @@ TEST(Rodin_Variational_UnaryMinus, Copy)
   EXPECT_NEAR(copy.getValue(p), -4.0, 1e-10);
 }
 
+/// @brief Verifies get order for variational unary minus by checking exact expected values, true predicates.
 TEST(Rodin_Variational_UnaryMinus, GetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

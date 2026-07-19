@@ -87,14 +87,21 @@ namespace Rodin::Geometry
       class Key
       {
         public:
+          /// @brief Fixed-capacity storage of vertex indices (no heap allocation).
           using Vertices = std::array<Index, RODIN_MAXIMUM_POLYTOPE_VERTICES>;
           static_assert(RODIN_MAXIMUM_POLYTOPE_VERTICES == 8);
 
+          /// @brief Iterator over the vertex indices.
           using iterator = Vertices::iterator;
+          /// @brief Const iterator over the vertex indices.
           using const_iterator = Vertices::const_iterator;
+          /// @brief Element type (a vertex index).
           using value_type = Index;
+          /// @brief Reference to a vertex index.
           using reference = Index&;
+          /// @brief Const reference to a vertex index.
           using const_reference = const Index&;
+          /// @brief Type used for the vertex count.
           using size_type = std::uint8_t;
 
           /**
@@ -106,7 +113,8 @@ namespace Rodin::Geometry
            */
           struct SymmetricEquality
           {
-            bool operator()(const Key& a, const Key& b) const;
+              /// @brief Returns whether two keys have the same vertex multiset.
+              bool operator()(const Key& a, const Key& b) const;
           };
 
           /**
@@ -118,9 +126,11 @@ namespace Rodin::Geometry
            */
           struct SymmetricHash
           {
-            std::size_t operator()(const Key& poly) const;
+              /// @brief Returns an order-independent hash of the key's vertices.
+              std::size_t operator()(const Key& poly) const;
           };
 
+          /// @brief SplitMix64 bit-mixing hash of a 64-bit value.
           constexpr
           static inline std::uint64_t sm64(std::uint64_t x)
           {
@@ -131,6 +141,7 @@ namespace Rodin::Geometry
             return x;
           }
 
+          /// @brief Sorts @p a and @p b into non-decreasing order.
           constexpr
           static inline void cswap(Index& a, Index& b)
           {
@@ -138,34 +149,49 @@ namespace Rodin::Geometry
               std::swap(a, b);
           }
 
+          /// @brief Constructs an empty key (zero vertices).
           Key();
 
+          /// @brief Constructs a key with @p n uninitialized vertices.
           Key(std::uint8_t n);
 
+          /// @brief Constructs a key from a list of vertex indices.
           Key(std::initializer_list<Index> vertices);
 
+          /// @brief Returns a reference to vertex index @p i.
           Index& operator()(std::uint8_t i);
 
+          /// @brief Returns a const reference to vertex index @p i.
           const Index& operator()(std::uint8_t i) const;
 
+          /// @brief Returns a reference to vertex index @p i.
           Index& operator[](std::uint8_t i);
 
+          /// @brief Returns a const reference to vertex index @p i.
           const Index& operator[](std::uint8_t i) const;
 
+          /// @brief Sets the number of vertices; returns a reference to this key.
           Key& resize(std::uint8_t n);
 
+          /// @brief Returns the number of vertices.
           std::uint8_t size() const;
 
+          /// @brief Returns the underlying fixed-capacity vertex array.
           const Vertices& getVertices() const;
 
+          /// @brief Returns an iterator to the first vertex index.
           Vertices::iterator begin();
 
+          /// @brief Returns an iterator past the last vertex index.
           Vertices::iterator end();
 
+          /// @brief Returns a const iterator to the first vertex index.
           Vertices::const_iterator begin() const;
 
+          /// @brief Returns a const iterator past the last vertex index.
           Vertices::const_iterator end() const;
 
+          /// @brief Serializes the key (for boost::serialization).
           template <class Archive>
           void serialize(Archive& ar, const unsigned int)
           {
@@ -192,6 +218,7 @@ namespace Rodin::Geometry
         Triangle,       ///< 2D triangular element
         Quadrilateral,  ///< 2D quadrilateral element
         Tetrahedron,    ///< 3D tetrahedral element
+        Pyramid, ///< 3D pyramidal element (quadrilateral base)
         Hexahedron,     ///< 3D hexahedral element
         Wedge           ///< 3D prismatic element (triangular prism)
       };
@@ -325,16 +352,9 @@ namespace Rodin::Geometry
        *
        * Useful for iterating over all geometry types at compile time.
        */
-      static constexpr std::array<Type, 7> Types
-      {
-        Type::Point,
-        Type::Segment,
-        Type::Triangle,
-        Type::Quadrilateral,
-        Type::Tetrahedron,
-        Type::Hexahedron,
-        Type::Wedge
-      };
+      static constexpr std::array<Type, 8> Types{Type::Point, Type::Segment,
+        Type::Triangle, Type::Quadrilateral, Type::Tetrahedron, Type::Pyramid,
+        Type::Hexahedron, Type::Wedge};
 
       /**
        * @brief Constructs a polytope with given dimension and index.

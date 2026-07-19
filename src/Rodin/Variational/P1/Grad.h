@@ -27,6 +27,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -46,16 +47,21 @@ namespace Rodin::Variational
     : public GradBase<GridFunction<P1<Scalar, Mesh>, Data>, Grad<GridFunction<P1<Scalar, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Scalar, Mesh>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<Scalar>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       /**
@@ -194,17 +200,22 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P1<Scalar, Mesh>, SpaceType>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
       struct Cache
@@ -262,7 +273,7 @@ namespace Rodin::Variational
           }
         };
 
-        // Cached physical gradients ∇_x φ_a (one per scalar basis function)
+        // Cached physical gradients \nabla_x φ_a (one per scalar basis function)
         std::vector<SpatialVectorType> grad;
 
         CellKey cellKey;
@@ -328,6 +339,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
+        const auto* qf = ip.getQuadratureFormula();
 
         // ---- cell key: allocate/size once per cell
         typename Cache::CellKey ckey;
@@ -338,8 +350,8 @@ namespace Rodin::Variational
         ckey.transOrder = transOrder;
         ckey.valid = true;
 
-        const bool cell_changed = !(m_cache.cellKey == ckey);
-        if (cell_changed)
+        const bool cellChanged = !(m_cache.cellKey == ckey);
+        if (cellChanged)
         {
           m_cache.cellKey = ckey;
           m_cache.qpKey = {}; // invalidate qp cache
@@ -354,18 +366,17 @@ namespace Rodin::Variational
         }
 
         // ---- decide if gradients depend on quadrature point
-        const bool tensor_ref =
-          (geom == Geometry::Polytope::Type::Quadrilateral) ||
+        const bool tensorRef = (geom == Geometry::Polytope::Type::Quadrilateral) ||
           (geom == Geometry::Polytope::Type::Wedge) ||
           (geom == Geometry::Polytope::Type::Hexahedron);
 
-        const bool needs_qp = (transOrder > 1) || tensor_ref;
+        const bool needsQp = (transOrder > 1) || tensorRef;
 
         typename Cache::QpKey qkey;
-        if (needs_qp)
+        if (needsQp)
         {
-          qkey.qf = &ip.getQuadratureFormula();
-          qkey.qp = ip.getIndex();
+          qkey.qf = qf;
+          qkey.qp = qf ? ip.getIndex() : 0;
           qkey.valid = true;
         }
         else
@@ -376,22 +387,21 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !(m_cache.qpKey == qkey);
-        if (cell_changed || qp_changed)
+        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
+        if (cellChanged || qpChanged)
         {
           m_cache.qpKey = qkey;
 
           const P1Element<ScalarType> fe(geom);
           const size_t nv = fe.getCount();
 
-          const auto& qf = ip.getQuadratureFormula();
-          const size_t qp = ip.getIndex();
-          const auto& rc = qf.getPoint(qp);
+          const auto& rc =
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           // J^{-T} at this integration point (constant for affine maps)
           const auto JinvT = pt.getJacobianInverse().transpose();
 
-          // Compute physical gradients: ∇_x φ_a = J^{-T} ∇_hat φ_a
+          // Compute physical gradients: \nabla_x φ_a = J^{-T} \nabla_hat φ_a
           for (size_t a = 0; a < nv; ++a)
           {
             // Reference gradient (size d). Build without using GradientFunction()
@@ -407,12 +417,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr const SpatialVectorType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.grad.size());
-        return m_cache.grad[local].getData().head(m_cache.cellKey.d);
+        return m_cache.grad[local];
       }
 
       constexpr
@@ -436,4 +445,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

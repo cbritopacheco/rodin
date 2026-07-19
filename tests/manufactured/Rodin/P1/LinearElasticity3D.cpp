@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Linear-elasticity manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a linear-elasticity manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -28,7 +36,7 @@ using namespace Rodin::Solver;
  * eps(u) = 0.5 (grad u + grad u^T)
  *
  * Weak form:
- *   ∫ [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = ∫ f·v dx
+ *   ∫ [ lambda (div u)(div v) + 2 mu eps(u):eps(v) ] dx = ∫ f· v dx
  *
  * NOTE on geometry: Rodin's UniformGrid({M,M,M}) produces coordinates {0,...,M-1}.
  * We scale by 1/(M-1) so the domain is [0,1]^3.
@@ -43,13 +51,13 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   // ----------------------------
   // Fixture: build mesh once
   // ----------------------------
-  template <Polytope::Type G, size_t M>
-  class Elasticity3DFixture : public ::testing::Test
+  template <size_t M>
+  class Elasticity3DFixture : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       void SetUp() override
       {
-        m_mesh = Mesh().UniformGrid(G, {M, M, M});
+        m_mesh = Mesh().UniformGrid(GetParam(), {M, M, M});
         m_mesh.scale(Real(1) / Real(M - 1)); // map {0..M-1} -> [0,1]
         // (2,3) is enough for element-to-face. Add other connectivities if needed by BC code.
         m_mesh.getConnectivity().compute(2, 3);
@@ -82,13 +90,15 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
       Mesh<Context::Local> m_mesh;
   };
 
-  using Tetra8  = Elasticity3DFixture<Polytope::Type::Tetrahedron, 8>;
-  using Hex8    = Elasticity3DFixture<Polytope::Type::Hexahedron,   8>;
-  using Tetra16 = Elasticity3DFixture<Polytope::Type::Tetrahedron, 16>;
-  using Hex16    = Elasticity3DFixture<Polytope::Type::Hexahedron,   16>;
-  using Tetra32 = Elasticity3DFixture<Polytope::Type::Tetrahedron, 32>;
+  /// @brief Helper used by the tests to Elasticity 3 D Test 8.
+  using Elasticity3DTest8 = Elasticity3DFixture<8>;
+  /// @brief Helper used by the tests to Elasticity 3 D Test 16.
+  using Elasticity3DTest16 = Elasticity3DFixture<16>;
+  /// @brief Helper used by the tests to Elasticity 3 D Test 32.
+  using Elasticity3DTest32 = Elasticity3DFixture<32>;
 
-  TEST_F(Tetra8, LinearElasticity3D_P1ExactResidual)
+  /// @brief Verifies linear elasticity 3 D P1 exact residual for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(Elasticity3DTest8, LinearElasticity3D_P1ExactResidual)
   {
     const Real lambda = 1.0, mu = 1.0;
     const size_t dim = mesh().getSpaceDimension();
@@ -130,7 +140,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   // These are "exact" PDE solutions with f = 0.
   // ------------------------------------------------------------
 
-  TEST_F(Tetra8, AffineExact_Identity)
+  /// @brief Verifies affine exact identity for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(Elasticity3DTest8, AffineExact_Identity)
   {
     const Real lambda = 1.0, mu = 1.0;
     const size_t dim = mesh().getSpaceDimension();
@@ -154,7 +165,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_NEAR(rel, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_F(Hex8, AffineExact_Identity)
+  /// @brief Verifies affine exact identity alt material for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(Elasticity3DTest8, AffineExact_IdentityAltMaterial)
   {
     const Real lambda = 1.5, mu = 0.5;
     const size_t dim = mesh().getSpaceDimension();
@@ -177,7 +189,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_NEAR(rel, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
-  TEST_F(Tetra8, GeneralAffine_Tetrahedron)
+  /// @brief Verifies general affine for elasticity 3 D test 8 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(Elasticity3DTest8, GeneralAffine)
   {
     const Real lambda = 1.5, mu = 0.5;
     const size_t dim = mesh().getSpaceDimension();
@@ -216,7 +229,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
   // on a fixed mesh, so we use a relaxed bound.
   // ------------------------------------------------------------
 
-  TEST_F(Hex8, Polynomial_Hexahedron)
+  /// @brief Verifies polynomial for elasticity 3 D test 8 by checking solver behavior.
+  TEST_P(Elasticity3DTest8, Polynomial)
   {
     const Real lambda = 2.0, mu = 1.0;
     const size_t dim = mesh().getSpaceDimension();
@@ -251,7 +265,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_LT(rel, RODIN_FUZZY_CONSTANT); // relaxed fixed-mesh check
   }
 
-  TEST_F(Tetra32, MixedComponents_Tetrahedron)
+  /// @brief Verifies mixed components for elasticity 3 D test 32 by checking solver behavior.
+  TEST_P(Elasticity3DTest32, MixedComponents)
   {
     const Real lambda = 1.0, mu = 1.0;
     const size_t dim = mesh().getSpaceDimension();
@@ -285,7 +300,8 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
     EXPECT_LT(0.1 * rel, RODIN_FUZZY_CONSTANT); // relaxed fixed-mesh check
   }
 
-  TEST_F(Hex16, Polynomial_Hexahedron)
+  /// @brief Verifies polynomial refined for elasticity 3 D test 16 by checking solver behavior.
+  TEST_P(Elasticity3DTest16, Polynomial_Refined)
   {
     const Real lambda = 2.0, mu = 1.0;
     const size_t dim = mesh().getSpaceDimension();
@@ -311,8 +327,23 @@ namespace Rodin::Tests::Manufactured::LinearElasticity3D
 
     CG(elasticity).solve();
 
-    // On the refined mesh, relative error should improve vs Hex8; keep a relaxed bound.
+    // On the refined mesh, relative error should improve; keep a relaxed bound.
     const Real rel = relL2Frob(mesh(), u.getSolution(), u_exact);
     EXPECT_LT(rel, RODIN_FUZZY_CONSTANT);
   }
+
+  /// @brief Instantiates Elasticity 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Elasticity3DTest8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
+
+  /// @brief Instantiates Elasticity 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Elasticity3DTest16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
+
+  /// @brief Instantiates Elasticity 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Elasticity3DTest32,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

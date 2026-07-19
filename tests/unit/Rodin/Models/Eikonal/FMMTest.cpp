@@ -25,6 +25,7 @@ namespace Rodin::Tests::Unit
   };
 
   // Test 1: Basic functionality - single point source on 2D triangular mesh
+  /// @brief Verifies single point source 2 D triangle for FMM test by checking false predicates, solver behavior.
   TEST_F(FMMTest, SinglePointSource_2D_Triangle)
   {
     // Create simple 2D triangular mesh
@@ -85,6 +86,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 2: Surface mesh - 2D surface embedded in 3D
+  /// @brief Verifies surface mesh box triangle for FMM test by checking exact expected values, false predicates, solver behavior.
   TEST_F(FMMTest, SurfaceMesh_Box_Triangle)
   {
     // Create surface mesh using Box function
@@ -152,6 +154,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 3: Volumetric mesh - 3D tetrahedra
+  /// @brief Verifies volume mesh 3 D tetrahedron for FMM test by checking exact expected values, false predicates, solver behavior.
   TEST_F(FMMTest, VolumeMesh_3D_Tetrahedron)
   {
     // Create 3D tetrahedral mesh
@@ -222,6 +225,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 4: Variable speed function
+  /// @brief Verifies variable speed function 2 D for FMM test by checking false predicates, solver behavior.
   TEST_F(FMMTest, VariableSpeedFunction_2D)
   {
     // Create 2D mesh
@@ -272,6 +276,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 5: Multiple sources
+  /// @brief Verifies multiple sources 2 D for FMM test by checking false predicates, solver behavior.
   TEST_F(FMMTest, MultipleSources_2D)
   {
     // Create 2D mesh
@@ -342,6 +347,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 7: Empty interface handling
+  /// @brief Verifies empty interface for FMM test by checking true predicates, solver behavior.
   TEST_F(FMMTest, EmptyInterface)
   {
     // Create simple mesh
@@ -372,6 +378,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 8: Boundary interface - initial front is the boundary of the mesh
+  /// @brief Verifies boundary interface 2 D for FMM test by checking false predicates, solver behavior.
   TEST_F(FMMTest, BoundaryInterface_2D)
   {
     // Create 2D triangular mesh
@@ -448,6 +455,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 9: Interior rectangular interface
+  /// @brief Verifies interior rectangular interface 2 D for FMM test by checking tolerance-based numerical results, true predicates, false predicates.
   TEST_F(FMMTest, InteriorRectangularInterface_2D)
   {
     // Create 2D triangular mesh
@@ -560,6 +568,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 10: Large mesh stress test
+  /// @brief Verifies large mesh stress test 2 D for FMM test by checking false predicates, solver behavior.
   TEST_F(FMMTest, LargeMeshStressTest_2D)
   {
     // Create larger 2D mesh to test performance
@@ -632,6 +641,7 @@ namespace Rodin::Tests::Unit
   }
 
   // Test 11: Multiple disconnected interfaces
+  /// @brief Verifies multiple disconnected interfaces 2 D for FMM test by checking false predicates, solver behavior.
   TEST_F(FMMTest, MultipleDisconnectedInterfaces_2D)
   {
     // Create 2D mesh

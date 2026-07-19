@@ -22,13 +22,13 @@ gtest_discover_tests(RodinGeometryMeshTest
     LABELS unit
 )
 
-add_executable(RodinGeometryIsoparametricTransformationTest IsoparametricTransformationTest.cpp)
-target_link_libraries(RodinGeometryIsoparametricTransformationTest
+add_executable(RodinGeometryParametricTransformationTest ParametricTransformationTest.cpp)
+target_link_libraries(RodinGeometryParametricTransformationTest
   PUBLIC
   GTest::gtest
   GTest::gtest_main
   Rodin::Geometry)
-gtest_discover_tests(RodinGeometryIsoparametricTransformationTest
+gtest_discover_tests(RodinGeometryParametricTransformationTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -114,6 +114,19 @@ target_link_libraries(RodinGeometryPolytopeQuadratureIndexTest
   Rodin::Geometry
   Rodin::QF)
 gtest_discover_tests(RodinGeometryPolytopeQuadratureIndexTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryPolytopeTransformationIndexTest
+  PolytopeTransformationIndexTest.cpp)
+target_link_libraries(RodinGeometryPolytopeTransformationIndexTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryPolytopeTransformationIndexTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit
@@ -271,6 +284,18 @@ target_link_libraries(RodinGeometryPolytopeExtTest
   GTest::gtest_main
   Rodin::Geometry)
 gtest_discover_tests(RodinGeometryPolytopeExtTest
+  DISCOVERY_MODE PRE_TEST
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinGeometryMinSTCutTest MinSTCutTest.cpp)
+target_link_libraries(RodinGeometryMinSTCutTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry)
+gtest_discover_tests(RodinGeometryMinSTCutTest
   DISCOVERY_MODE PRE_TEST
   PROPERTIES
     LABELS unit

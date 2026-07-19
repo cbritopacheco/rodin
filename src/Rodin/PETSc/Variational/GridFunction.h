@@ -7,13 +7,16 @@
 #ifndef RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 #define RODIN_PETSC_VARIATIONAL_GRIDFUNCTION_H
 
+#include <atomic>
+#include <mutex>
+
 /**
  * @file GridFunction.h
  * @brief PETSc specialization of finite element grid functions.
  *
  * This file provides the partial specialization of
  * @ref Rodin::Variational::GridFunction for the PETSc vector backend
- * (`::Vec`). It enables the Rodin finite element framework to store
+ * (@c Vec). It enables the Rodin finite element framework to store
  * degrees of freedom inside PETSc distributed vectors, supporting both
  * purely local (sequential) and MPI-parallel computations.
  *
@@ -31,7 +34,7 @@
  * - @f$ N @f$ is the total number of DOFs in the finite element space
  *
  * In the PETSc specialization the coefficient vector @f$ \mathbf{u} =
- * (u_1, \ldots, u_N) @f$ is stored in a PETSc `Vec` object.  In MPI
+ * (u_1, \ldots, u_N) @f$ is stored in a PETSc @c Vec object.  In MPI
  * mode this vector is partitioned across MPI ranks and augmented with a
  * ghost layer so that every rank can read DOFs shared with adjacent mesh
  * partitions without explicit point-to-point communication.
@@ -123,10 +126,10 @@ namespace Rodin::Variational
   /**
    * @ingroup GridFunctionSpecializations
    * @brief Grid function specialization storing DOF coefficients in a PETSc
-   *        vector (`::Vec`).
+   *        vector (@c Vec).
    *
    * This partial specialization replaces the default Eigen-based coefficient
-   * storage with a PETSc `Vec`, making it possible to assemble and solve
+   * storage with a PETSc @c Vec, making it possible to assemble and solve
    * variational problems entirely within the PETSc ecosystem.  The class
    * supports both sequential (`Context::Local`) and distributed
    * (`Context::MPI`) finite element spaces.
@@ -223,7 +226,7 @@ namespace Rodin::Variational
       using FESType =
         FES;
 
-      /// @brief Underlying PETSc vector data type (`::Vec`), used to store the
+      /// @brief Underlying PETSc vector data type (@c Vec), used to store the
       ///        DOF coefficient vector @f$ \mathbf{u} @f$.
       using DataType =
         ::Vec;
@@ -332,7 +335,8 @@ namespace Rodin::Variational
             const Index global = fes.getGlobalIndex(i);
             if (global < m_begin || global >= m_end)
             {
-              auto [it, inserted] = m_ghosts.right.emplace(global, offset);
+              [[maybe_unused]] auto [it, inserted] =
+                m_ghosts.right.emplace(global, offset);
               assert(inserted);
               offset++;
             }
@@ -342,7 +346,7 @@ namespace Rodin::Variational
           for (const auto& [global, offset] : m_ghosts.right)
           {
             assert(offset >= 0);
-            assert(offset < m_ghosts.left.size());
+            assert(static_cast<size_t>(offset) < m_ghosts.left.size());
             m_ghosts.left[offset] = global;
           }
 
@@ -514,6 +518,7 @@ namespace Rodin::Variational
         this->release();
       }
 
+      /// @brief Sets every entry of the PETSc vector to a scalar value.
       GridFunction& operator=(const ScalarType& value)
       {
         static_cast<const GridFunction&>(*this).flush();
@@ -546,11 +551,13 @@ namespace Rodin::Variational
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ScalarType res;
-        ierr = VecMin(data, idx, &res);
+        PetscInt pidx;
+        PetscReal res;
+        ierr = VecMin(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
-        return res;
+        idx = static_cast<Index>(pidx);
+        return static_cast<ScalarType>(res);
       }
 
       /**
@@ -568,11 +575,13 @@ namespace Rodin::Variational
         this->flush();
         PetscErrorCode ierr;
         auto& data = this->getData();
-        ScalarType res;
-        ierr = VecMax(data, idx, &res);
+        PetscInt pidx;
+        PetscReal res;
+        ierr = VecMax(data, &pidx, &res);
         assert(ierr == PETSC_SUCCESS);
         (void) ierr;
-        return res;
+        idx = static_cast<Index>(pidx);
+        return static_cast<ScalarType>(res);
       }
 
       /**
@@ -624,7 +633,8 @@ namespace Rodin::Variational
        */
       const ScalarType& operator[](Index global) const
       {
-        this->acquire();
+        if (!m_readAcquired.load(std::memory_order_acquire))
+          this->acquire();
 
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -1101,34 +1111,39 @@ namespace Rodin::Variational
        */
       const GridFunction& acquire() const
       {
+        if (m_readAcquired.load(std::memory_order_acquire))
+          return *this;
+
+        std::lock_guard<std::mutex> lock(m_readMutex);
+        if (m_read.acquired)
+        {
+          m_readAcquired.store(true, std::memory_order_release);
+          return *this;
+        }
+
         PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
-          if (!m_read.acquired)
-          {
-            ierr = VecGetArrayRead(m_data, &m_read.raw);
-            assert(ierr == PETSC_SUCCESS);
+          ierr = VecGetArrayRead(m_data, &m_read.raw);
+          assert(ierr == PETSC_SUCCESS);
 
-            m_read.acquired = true;
-          }
+          m_read.acquired = true;
         }
         else if constexpr (std::is_same_v<FESMeshContextType, Context::MPI>)
         {
-          if (!m_read.acquired)
-          {
-            ierr = VecGhostGetLocalForm(m_data, &m_read.ghost);
-            assert(ierr == PETSC_SUCCESS);
+          ierr = VecGhostGetLocalForm(m_data, &m_read.ghost);
+          assert(ierr == PETSC_SUCCESS);
 
-            ierr = VecGetArrayRead(m_read.ghost, &m_read.raw);
-            assert(ierr == PETSC_SUCCESS);
+          ierr = VecGetArrayRead(m_read.ghost, &m_read.raw);
+          assert(ierr == PETSC_SUCCESS);
 
-            m_read.acquired = true;
-          }
+          m_read.acquired = true;
         }
         else
         {
           assert(false);
         }
+        m_readAcquired.store(true, std::memory_order_release);
         (void) ierr;
         return *this;
       }
@@ -1210,6 +1225,10 @@ namespace Rodin::Variational
        */
       const GridFunction& flush() const
       {
+        if (!m_readAcquired.exchange(false, std::memory_order_acq_rel))
+          return *this;
+
+        std::lock_guard<std::mutex> lock(m_readMutex);
         PetscErrorCode ierr;
         if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
         {
@@ -1242,14 +1261,14 @@ namespace Rodin::Variational
         return *this;
       }
 
-      /// @brief Returns a mutable reference to the raw PETSc `Vec` handle,
+      /// @brief Returns a mutable reference to the raw PETSc @c Vec handle,
       ///        e.g. for passing to PETSc API functions directly.
       auto& getData()
       {
         return m_data;
       }
 
-      /// @brief Returns a read-only reference to the raw PETSc `Vec` handle.
+      /// @brief Returns a read-only reference to the raw PETSc @c Vec handle.
       const DataType& getData() const
       {
         return m_data;
@@ -1270,14 +1289,12 @@ namespace Rodin::Variational
       }
 
       /// @brief Returns the polynomial order of the finite element space on
-      ///        the given polytope, if known.
-      ///
-      /// For general PETSc grid functions the order is not stored explicitly
-      /// and `std::nullopt` is returned.
-      constexpr
-      Optional<size_t> getOrder(const Geometry::Polytope&) const
+      ///        the given polytope.
+      constexpr Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
       {
-        return std::nullopt;
+        const auto& fes = this->getFiniteElementSpace();
+        return fes.getFiniteElement(polytope.getDimension(), polytope.getIndex())
+          .getOrder();
       }
 
       /**
@@ -1300,8 +1317,9 @@ namespace Rodin::Variational
       {
         PetscErrorCode ierr;
 
-        if (m_read.acquired)
+        if (m_readAcquired.exchange(false, std::memory_order_acq_rel))
         {
+          std::lock_guard<std::mutex> lock(m_readMutex);
           assert(m_read.raw);
           if constexpr (std::is_same_v<FESMeshContextType, Context::Local>)
           {
@@ -1355,12 +1373,15 @@ namespace Rodin::Variational
       }
 
     private:
-      DataType m_data;          ///< Underlying PETSc `Vec` storing the DOF coefficient vector @f$ \mathbf{u} @f$.
+      DataType
+        m_data; ///< Underlying PETSc @c Vec storing the DOF coefficient vector @f$ \mathbf{u} @f$.
       size_t m_begin, m_end;    ///< Owned DOF range @f$[\texttt{m\_begin}, \texttt{m\_end})@f$ (MPI mode); unused in Local mode.
       GhostBimap m_ghosts;      ///< Bidirectional ghost DOF index mapping (MPI mode); empty in Local mode.
 
       mutable ArrayRead m_read;   ///< Read-access state (mutable to allow const `acquire`/`flush`).
       mutable ArrayWrite m_write; ///< Write-access state (mutable to allow const `acquire`/`flush`).
+      mutable std::atomic_bool m_readAcquired{false};
+      mutable std::mutex m_readMutex;
   };
 }
 
@@ -1427,7 +1448,7 @@ namespace Rodin::FormLanguage
   {
     /// @brief Finite element space type associated with this grid function.
     using FESType = FES;
-    /// @brief Data storage type (PETSc vector `::Vec`).
+    /// @brief Data storage type (PETSc vector @c Vec).
     using DataType = ::Vec;
   };
 }

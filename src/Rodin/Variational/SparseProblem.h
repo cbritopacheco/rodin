@@ -47,6 +47,7 @@
 
 #include "Problem.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class ... Parameters>
@@ -67,6 +68,7 @@ namespace Rodin::Variational
   class SparseProblem<LinearSystem, U, V> : public Problem<LinearSystem, U, V>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Problem<LinearSystem, U, V>;
       using Parent::Parent;
       using Parent::operator=;
@@ -88,5 +90,5 @@ namespace Rodin::Variational
           U, V>;
 }
 
+/// @endcond
 #endif
-

@@ -19,26 +19,31 @@ namespace Rodin::Tests::Unit
   // GLL Node Count Tests
   //==========================================================================
 
+  /// @brief Verifies node count K 0 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K0)
   {
     EXPECT_EQ(GLL<0>::getCount(), 1);
   }
 
+  /// @brief Verifies node count K 1 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K1)
   {
     EXPECT_EQ(GLL<1>::getCount(), 2);
   }
 
+  /// @brief Verifies node count K 2 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K2)
   {
     EXPECT_EQ(GLL<2>::getCount(), 3);
   }
 
+  /// @brief Verifies node count K 5 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K5)
   {
     EXPECT_EQ(GLL<5>::getCount(), 6);
   }
 
+  /// @brief Verifies node count K 10 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K10)
   {
     EXPECT_EQ(GLL<10>::getCount(), 11);
@@ -48,6 +53,7 @@ namespace Rodin::Tests::Unit
   // GLL Node Endpoint Tests (K >= 1)
   //==========================================================================
 
+  /// @brief Verifies endpoints K 1 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Endpoints_K1)
   {
     const auto& nodes = GLL<1>::getNodes();
@@ -55,6 +61,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[1], 1.0, 1e-14);
   }
 
+  /// @brief Verifies endpoints K 2 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Endpoints_K2)
   {
     const auto& nodes = GLL<2>::getNodes();
@@ -62,6 +69,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[2], 1.0, 1e-14);
   }
 
+  /// @brief Verifies endpoints K 5 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Endpoints_K5)
   {
     const auto& nodes = GLL<5>::getNodes();
@@ -69,6 +77,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[5], 1.0, 1e-14);
   }
 
+  /// @brief Verifies endpoints K 10 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Endpoints_K10)
   {
     const auto& nodes = GLL<10>::getNodes();
@@ -80,6 +89,7 @@ namespace Rodin::Tests::Unit
   // GLL Node Ordering Tests (ascending)
   //==========================================================================
 
+  /// @brief Verifies ascending K 2 for GLL.
   TEST(GLL, Ascending_K2)
   {
     const auto& nodes = GLL<2>::getNodes();
@@ -87,6 +97,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LT(nodes[1], nodes[2]);
   }
 
+  /// @brief Verifies ascending K 5 for GLL.
   TEST(GLL, Ascending_K5)
   {
     const auto& nodes = GLL<5>::getNodes();
@@ -96,6 +107,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies ascending K 10 for GLL.
   TEST(GLL, Ascending_K10)
   {
     const auto& nodes = GLL<10>::getNodes();
@@ -109,6 +121,7 @@ namespace Rodin::Tests::Unit
   // GLL Node Symmetry Tests
   //==========================================================================
 
+  /// @brief GLL nodes are symmetric about 0.
   TEST(GLL, Symmetry_K2)
   {
     // GLL nodes are symmetric about 0
@@ -117,6 +130,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[0], -nodes[2], 1e-14);
   }
 
+  /// @brief Verifies symmetry K 3 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Symmetry_K3)
   {
     const auto& nodes = GLL<3>::getNodes();
@@ -124,6 +138,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[1], -nodes[2], 1e-14);
   }
 
+  /// @brief Verifies symmetry K 4 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Symmetry_K4)
   {
     const auto& nodes = GLL<4>::getNodes();
@@ -132,6 +147,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[1], -nodes[3], 1e-14);
   }
 
+  /// @brief Verifies symmetry K 5 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Symmetry_K5)
   {
     const auto& nodes = GLL<5>::getNodes();
@@ -144,6 +160,7 @@ namespace Rodin::Tests::Unit
   // GLL Known Values Tests
   //==========================================================================
 
+  /// @brief K=2: nodes are -1, 0, 1.
   TEST(GLL, KnownValues_K2)
   {
     // K=2: nodes are -1, 0, 1
@@ -153,6 +170,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[2], 1.0, 1e-14);
   }
 
+  /// @brief K=3: nodes are -1, -1/sqrt(5), 1/sqrt(5), 1.
   TEST(GLL, KnownValues_K3)
   {
     // K=3: nodes are -1, -1/sqrt(5), 1/sqrt(5), 1
@@ -164,6 +182,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[3], 1.0, 1e-14);
   }
 
+  /// @brief K=4: nodes are -1, -sqrt(3/7), 0, sqrt(3/7), 1.
   TEST(GLL, KnownValues_K4)
   {
     // K=4: nodes are -1, -sqrt(3/7), 0, sqrt(3/7), 1
@@ -180,6 +199,7 @@ namespace Rodin::Tests::Unit
   // GLL01 (mapped to [0,1]) Tests
   //==========================================================================
 
+  /// @brief Verifies node count for GLL 01 by checking exact expected values.
   TEST(GLL01, NodeCount)
   {
     EXPECT_EQ(GLL01<0>::getCount(), 1);
@@ -187,6 +207,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(GLL01<5>::getCount(), 6);
   }
 
+  /// @brief Verifies endpoints K 1 for GLL 01 by checking tolerance-based numerical results.
   TEST(GLL01, Endpoints_K1)
   {
     const auto& nodes = GLL01<1>::getNodes();
@@ -194,6 +215,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[1], 1.0, 1e-14);
   }
 
+  /// @brief Verifies endpoints K 2 for GLL 01 by checking tolerance-based numerical results.
   TEST(GLL01, Endpoints_K2)
   {
     const auto& nodes = GLL01<2>::getNodes();
@@ -201,6 +223,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[2], 1.0, 1e-14);
   }
 
+  /// @brief Verifies endpoints K 5 for GLL 01 by checking tolerance-based numerical results.
   TEST(GLL01, Endpoints_K5)
   {
     const auto& nodes = GLL01<5>::getNodes();
@@ -208,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[5], 1.0, 1e-14);
   }
 
+  /// @brief K=2 on [0,1]: 0, 0.5, 1.
   TEST(GLL01, KnownValues_K2)
   {
     // K=2 on [0,1]: 0, 0.5, 1
@@ -217,6 +241,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[2], 1.0, 1e-14);
   }
 
+  /// @brief GLL01 = (GLL + 1) / 2.
   TEST(GLL01, MappingConsistency)
   {
     // GLL01 = (GLL + 1) / 2
@@ -230,6 +255,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies ascending K 5 for GLL 01.
   TEST(GLL01, Ascending_K5)
   {
     const auto& nodes = GLL01<5>::getNodes();
@@ -239,6 +265,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief All nodes should be in [0, 1].
   TEST(GLL01, Range_K10)
   {
     // All nodes should be in [0, 1]
@@ -254,6 +281,7 @@ namespace Rodin::Tests::Unit
   // GLL Interior Node Property Tests
   //==========================================================================
 
+  /// @brief All interior nodes should be in (-1, 1).
   TEST(GLL, InteriorNodesInInterval_K5)
   {
     // All interior nodes should be in (-1, 1)
@@ -265,6 +293,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies interior nodes in interval K 10 for GLL.
   TEST(GLL, InteriorNodesInInterval_K10)
   {
     const auto& nodes = GLL<10>::getNodes();
@@ -279,6 +308,7 @@ namespace Rodin::Tests::Unit
   // GLL Static Access Tests
   //==========================================================================
 
+  /// @brief Verifies get node K 3 for GLL by checking tolerance-based numerical results.
   TEST(GLL, GetNode_K3)
   {
     EXPECT_NEAR(GLL<3>::getNode(0), -1.0, 1e-14);
@@ -289,6 +319,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(GLL<3>::getNode(2), 1.0 / sqrt5, 1e-14);
   }
 
+  /// @brief Verifies get node K 3 for GLL 01 by checking tolerance-based numerical results.
   TEST(GLL01, GetNode_K3)
   {
     EXPECT_NEAR(GLL01<3>::getNode(0), 0.0, 1e-14);
@@ -303,6 +334,7 @@ namespace Rodin::Tests::Unit
   // Higher Order Tests (K = 5, 6)
   //==========================================================================
 
+  /// @brief K=5: 6 nodes including -1 and 1.
   TEST(GLL, KnownValues_K5)
   {
     // K=5: 6 nodes including -1 and 1
@@ -315,6 +347,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[2], -nodes[3], 1e-14);
   }
 
+  /// @brief Verifies symmetry K 6 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Symmetry_K6)
   {
     const auto& nodes = GLL<6>::getNodes();
@@ -328,6 +361,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[2], -nodes[4], 1e-14);
   }
 
+  /// @brief Verifies ascending K 6 for GLL.
   TEST(GLL, Ascending_K6)
   {
     const auto& nodes = GLL<6>::getNodes();
@@ -337,6 +371,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies endpoints K 6 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Endpoints_K6)
   {
     const auto& nodes = GLL<6>::getNodes();
@@ -344,6 +379,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[6], 1.0, 1e-14);
   }
 
+  /// @brief Verifies interior nodes in interval K 6 for GLL.
   TEST(GLL, InteriorNodesInInterval_K6)
   {
     const auto& nodes = GLL<6>::getNodes();
@@ -354,6 +390,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies endpoints K 6 for GLL 01 by checking tolerance-based numerical results.
   TEST(GLL01, Endpoints_K6)
   {
     const auto& nodes = GLL01<6>::getNodes();
@@ -361,6 +398,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[6], 1.0, 1e-14);
   }
 
+  /// @brief GLL01 = (GLL + 1) / 2.
   TEST(GLL01, MappingConsistency_K6)
   {
     // GLL01 = (GLL + 1) / 2
@@ -374,6 +412,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief All nodes should be in [0, 1].
   TEST(GLL01, Range_K6)
   {
     // All nodes should be in [0, 1]
@@ -385,11 +424,13 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies node count K 6 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K6)
   {
     EXPECT_EQ(GLL<6>::getCount(), 7);
   }
 
+  /// @brief Verifies node count K 6 for GLL 01 by checking exact expected values.
   TEST(GLL01, NodeCount_K6)
   {
     EXPECT_EQ(GLL01<6>::getCount(), 7);
@@ -399,11 +440,13 @@ namespace Rodin::Tests::Unit
   // Very High Order Tests (K = 15)
   //==========================================================================
 
+  /// @brief Verifies node count K 15 for GLL by checking exact expected values.
   TEST(GLL, NodeCount_K15)
   {
     EXPECT_EQ(GLL<15>::getCount(), 16);
   }
 
+  /// @brief Verifies endpoints K 15 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Endpoints_K15)
   {
     const auto& nodes = GLL<15>::getNodes();
@@ -411,6 +454,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[15], 1.0, 1e-14);
   }
 
+  /// @brief Verifies ascending K 15 for GLL.
   TEST(GLL, Ascending_K15)
   {
     const auto& nodes = GLL<15>::getNodes();
@@ -420,6 +464,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies symmetry K 15 for GLL by checking tolerance-based numerical results.
   TEST(GLL, Symmetry_K15)
   {
     const auto& nodes = GLL<15>::getNodes();
@@ -435,6 +480,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[7], -nodes[8], 1e-14);
   }
 
+  /// @brief Verifies interior nodes in interval K 15 for GLL.
   TEST(GLL, InteriorNodesInInterval_K15)
   {
     const auto& nodes = GLL<15>::getNodes();
@@ -445,11 +491,13 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies node count K 15 for GLL 01 by checking exact expected values.
   TEST(GLL01, NodeCount_K15)
   {
     EXPECT_EQ(GLL01<15>::getCount(), 16);
   }
 
+  /// @brief Verifies endpoints K 15 for GLL 01 by checking tolerance-based numerical results.
   TEST(GLL01, Endpoints_K15)
   {
     const auto& nodes = GLL01<15>::getNodes();
@@ -457,6 +505,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(nodes[15], 1.0, 1e-14);
   }
 
+  /// @brief GLL01 = (GLL + 1) / 2.
   TEST(GLL01, MappingConsistency_K15)
   {
     // GLL01 = (GLL + 1) / 2
@@ -470,6 +519,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief All nodes should be in [0, 1].
   TEST(GLL01, Range_K15)
   {
     // All nodes should be in [0, 1]
@@ -481,6 +531,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies ascending K 15 for GLL 01.
   TEST(GLL01, Ascending_K15)
   {
     const auto& nodes = GLL01<15>::getNodes();

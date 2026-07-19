@@ -42,6 +42,7 @@ namespace Rodin::Tests::Unit
 
   //=== Basic Functionality Tests ============================================
 
+  /// @brief Verifies basic copy for copyable by checking exact expected values, copy semantics.
   TEST(Rodin_Copyable, BasicCopy)
   {
     TestCopyable original(42);
@@ -55,6 +56,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(typedCopy->getValue(), 42);
   }
 
+  /// @brief Verifies copy independence for copyable by checking exact expected values, copy semantics.
   TEST(Rodin_Copyable, CopyIndependence)
   {
     TestCopyable original(100);
@@ -67,6 +69,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(&original, copied.get());
   }
 
+  /// @brief Verifies polymorphic copy for copyable by checking exact expected values, copy semantics.
   TEST(Rodin_Copyable, PolymorphicCopy)
   {
     std::unique_ptr<Copyable> original = std::make_unique<TestCopyable>(77);
@@ -83,6 +86,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(originalTyped->getValue(), copiedTyped->getValue());
   }
 
+  /// @brief Verifies string value copy for copyable by checking exact expected values, copy semantics.
   TEST(Rodin_Copyable, StringValueCopy)
   {
     TestCopyableWithValue original("test_string");
@@ -93,6 +97,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(&original, copied.get());
   }
 
+  /// @brief Verifies empty string copy for copyable by checking exact expected values, copy semantics.
   TEST(Rodin_Copyable, EmptyStringCopy)
   {
     TestCopyableWithValue original("");
@@ -102,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(copied->getValue(), "");
   }
 
+  /// @brief Verify that copy() is declared as noexcept.
   TEST(Rodin_Copyable, NoExceptSpecification)
   {
     // Verify that copy() is declared as noexcept

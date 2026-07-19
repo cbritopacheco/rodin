@@ -15,7 +15,7 @@
   or features receive finer elements, while smooth regions are coarsened.
   This produces more accurate results with fewer degrees of freedom.
 
-  The @ref Rodin::External::MMG "MMG" module supports metric-based mesh
+  The @ref Rodin::MMG "MMG" module supports metric-based mesh
   adaptation where a solution field or metric tensor guides the remesher.
 
   @section examples-mmg-adapt-workflow Typical Workflow
@@ -64,10 +64,24 @@
   }
   @endcode
 
+  @section examples-mmg-adapt-behavior Expected Behavior
+
+  `MMG::Adapt` is intended for size-map-driven remeshing. It may insert,
+  remove, and move vertices to match the requested metric subject to the
+  configured `hmin`, `hmax`, Hausdorff, and gradation constraints. For pure
+  mesh-quality cleanup without an external size map, use
+  @ref Rodin::MMG::Optimizer "MMG::Optimizer".
+
+  Required entities can be marked on @ref Rodin::MMG::Mesh "MMG::Mesh" and
+  are converted to MMG `MG_REQ` tags. See
+  @ref examples-mmg-behavior-required "Required entity behavior" for the
+  distinction between uncut entities, optimization, and level-set cuts.
+
   @section examples-mmg-adapt-see-also See Also
 
   - @ref examples-mmg-mesh_optimization "Mesh optimization"
+  - @ref examples-mmg-behavior "MMG behavior and guarantees"
   - @ref examples-pdes-poisson "Poisson equation"
-  - @ref Rodin::External::MMG "MMG namespace"
+  - @ref Rodin::MMG "MMG namespace"
 
   */

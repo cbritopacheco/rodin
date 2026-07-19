@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_IM_H
 #define RODIN_VARIATIONAL_IM_H
 
@@ -9,6 +15,7 @@
 #include "ForwardDecls.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -35,8 +42,10 @@ namespace Rodin::Variational
   class Im<FunctionBase<NestedDerived>> : public RealFunctionBase<Im<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Im<FunctionBase<NestedDerived>>>;
 
       /**
@@ -113,4 +122,5 @@ namespace Rodin::Variational
 
 }
 
+/// @endcond
 #endif

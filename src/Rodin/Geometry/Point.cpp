@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #include <Eigen/Cholesky>
 
 #include "Rodin/Configure.h"
@@ -19,10 +25,6 @@ namespace Rodin::Geometry
 
   PointBase::PointBase(const Polytope& polytope, const Math::SpatialPoint& pc)
     : m_polytope(polytope), m_pc(pc)
-  {}
-
-  PointBase::PointBase(const Polytope& polytope, Math::SpatialPoint&& pc)
-    : m_polytope(polytope), m_pc(std::move(pc))
   {}
 
   bool PointBase::operator<(const PointBase& p) const
@@ -331,32 +333,13 @@ namespace Rodin::Geometry
 
   Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc)
     : PointBase(polytope),
-      m_rc(std::cref(rc))
+      m_rc(rc)
   {}
 
-  Point::Point(const Polytope& polytope, Math::SpatialPoint&& rc)
-    : PointBase(polytope),
-      m_rc(std::move(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc)
+  Point::Point(
+    const Polytope& polytope, const Math::SpatialPoint& rc, const Math::SpatialPoint& pc)
     : PointBase(polytope, pc),
-      m_rc(std::cref(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, const Math::SpatialPoint& rc, Math::SpatialPoint&& pc)
-    : PointBase(polytope, std::move(pc)),
-      m_rc(std::cref(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, Math::SpatialPoint&& rc, const Math::SpatialPoint& pc)
-    : PointBase(polytope, pc),
-      m_rc(std::move(rc))
-  {}
-
-  Point::Point(const Polytope& polytope, Math::SpatialPoint&& rc, Math::SpatialPoint&& pc)
-    : PointBase(polytope, std::move(pc)),
-      m_rc(std::move(rc))
+      m_rc(rc)
   {}
 
   Point::Point(const Point& other)
@@ -371,13 +354,6 @@ namespace Rodin::Geometry
 
   const Math::SpatialVector<Real>& Point::getReferenceCoordinates() const
   {
-    if (std::holds_alternative<const Math::SpatialPoint>(m_rc))
-    {
-      return std::get<const Math::SpatialPoint>(m_rc);
-    }
-    else
-    {
-      return std::get<std::reference_wrapper<Math::SpatialPoint>>(m_rc).get();
-    }
+    return m_rc;
   }
 }

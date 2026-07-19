@@ -1,0 +1,159 @@
+/**
+  @page examples-mmg-behavior MMG behavior and guarantees
+  @brief Tested behavior of Rodin's MMG wrappers, required entities, and level-set cuts
+
+  @m_keywords{MMG, Required Entities, Level Set, NoSplit, MG_REQ}
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section examples-mmg-behavior-overview Overview
+
+  Rodin's @ref Rodin::MMG "MMG" module wraps the Mmg Platform for local mesh
+  processing. It provides three distinct workflows:
+
+  | Workflow | Rodin entry point | Expected behavior |
+  |----------|-------------------|-------------------|
+  | Mesh-quality optimization | @ref Rodin::MMG::Optimizer "MMG::Optimizer" | Improves element quality while staying close to the existing local size distribution |
+  | Metric/field adaptation | @ref Rodin::MMG::Adapt "MMG::Adapt" | Refines, coarsens, moves, and reconnects elements according to a size field |
+  | Level-set discretization | @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" | Cuts an input mesh with an isovalue and produces a body-fitted mesh or extracted surface |
+
+  All three workflows convert @ref Rodin::MMG::Mesh "MMG::Mesh" to native MMG
+  data structures, run MMG, and convert the result back to Rodin. The returned
+  mesh is therefore a new mesh topology chosen by MMG; users should not assume
+  that every input element index still names the same geometric entity after
+  remeshing.
+
+  @section examples-mmg-behavior-required Required entity behavior
+
+  @ref Rodin::MMG::Mesh "MMG::Mesh" stores required vertices, edges,
+  triangles, and tetrahedra:
+
+  @code{.cpp}
+  mesh.setRequiredVertex(vertexIndex);
+  mesh.setRequiredEdge(edgeIndex);
+  mesh.setRequiredTriangle(triangleIndex);
+  mesh.setRequiredTetrahedron(tetrahedronIndex);
+  @endcode
+
+  These sets are:
+
+  - written to MEDIT as `RequiredVertices`, `RequiredEdges`,
+    `RequiredTriangles`, and `RequiredTetrahedra`;
+  - read back from MEDIT into the same Rodin metadata;
+  - passed to native MMG structures as `MG_REQ` tags;
+  - recovered from native MMG output when converting back to Rodin;
+  - restored by the optimizer and level-set wrappers when the original index is
+    still valid in the output.
+
+  The test suite covers this metadata path in 2D and 3D, including MEDIT I/O,
+  native MMG conversion, optimization, and level-set discretization.
+  In MMG3D, triangle metadata is boundary-surface metadata: when face-cell
+  incidence is available, Rodin exports only boundary triangles to MMG's
+  native triangle table. Interior faces of a tetrahedral mesh are not a
+  supported MMG3D `RequiredTriangles` preservation mechanism.
+
+  @subsection examples-mmg-behavior-required-uncut Uncut level-set entities
+
+  For level-set discretization, Rodin has explicit geometry-preservation tests
+  for required entities that are not crossed by the level set:
+
+  - in 2D, required vertices, edges, and triangles retain their required
+    metadata and the original entity coordinates remain present in the output;
+  - in 3D, required vertices, edges, triangles, and tetrahedra retain their
+    required metadata and the original entity coordinates remain present in the
+    output.
+
+  These tests compare geometry, not only the required index sets. This is the
+  expected behavior for required entities that are away from the level-set cut.
+
+  @subsection examples-mmg-behavior-required-cut Cut-through level-set entities
+
+  Required entities are not a hard "never cut this element" constraint when
+  MMG level-set discretization must conform the mesh to an isovalue crossing
+  that entity.
+
+  In particular, for 3D level-set discretization, if the zero level set cuts a
+  required boundary triangle face in a tetrahedral mesh, MMG may replace that
+  triangle. Interior tetrahedral faces are not passed to MMG as boundary
+  triangles. The same caveat applies to other cut-through entities. In this
+  situation MMG can emit a warning containing `Required entity ignored.`
+
+  Rodin intentionally documents and tests this behavior rather than promising a
+  stricter guarantee than MMG provides.
+
+  @section examples-mmg-behavior-nosplit NoSplit and material labels
+
+  @ref Rodin::MMG::LevelSetDiscretizer::noSplit "LevelSetDiscretizer::noSplit"
+  applies MMG's material split policy to a material reference:
+
+  @code{.cpp}
+  MMG::Mesh result = MMG::LevelSetDiscretizer()
+    .split(interior, { interior, exterior })
+    .noSplit(protectedReference)
+    .discretize(levelSet);
+  @endcode
+
+  `noSplit(ref)` means that the material with reference `ref` should not be
+  split into the configured inside/outside references. It does not mean that a
+  particular edge, triangle face, or tetrahedron is an immutable geometric
+  object.
+
+  The characterization tests cover the following cut-through combinations:
+
+  | Protected entity | Extra labels or requirements | Exact original geometry preserved? |
+  |------------------|------------------------------|------------------------------------|
+  | edge in a 2D triangle mesh | required edge and `noSplit` on containing triangles | no |
+  | triangle in a 2D mesh | individual label, with or without required triangle | no |
+  | edge in a 3D tetrahedral mesh | required edge and `noSplit` on adjacent tetrahedra | no |
+  | triangle face in a 3D tetrahedral mesh | required triangle and/or individual face label | no |
+  | triangle face in a 3D tetrahedral mesh | `noSplit` on adjacent tetrahedra | no |
+  | triangle face in a 3D tetrahedral mesh | required vertices, edges, face, and adjacent tetrahedra | no |
+  | tetrahedron in a 3D mesh | required tetrahedron and `noSplit` on its material reference | no |
+
+  The practical rule is:
+
+  - if the level set does not cut the required entity, Rodin's tested behavior
+    is preservation of the required metadata and original geometry;
+  - if the level set cuts the entity, MMG may alter it to conform the output
+    mesh to the interface, even when `MG_REQ`, individual labels, adjacent
+    tetrahedron labels, and `noSplit` are used.
+
+  @section examples-mmg-behavior-workarounds Workarounds for protected geometry
+
+  If an element or face must remain untouched, treat that requirement as an
+  input validity condition before calling MMG level-set discretization:
+
+  - preflight the level-set values on the protected entity and reject the step
+    if the isovalue crosses it;
+  - change or clamp the level set so the protected entity lies entirely on one
+    side of the cut;
+  - pre-partition the mesh so the protected surface is already part of the
+    mesh/interface rather than asking MMG to cut through it;
+  - use `noSplit(ref)` only for material-reference splitting policy, not as an
+    element-integrity guarantee.
+
+  @section examples-mmg-behavior-tests Test coverage
+
+  The MMG unit suite exercises:
+
+  - required vertex, edge, triangle, and tetrahedron API lifecycle;
+  - MEDIT I/O round trips for required entities;
+  - native MMG conversion with required entities;
+  - optimization preservation of required metadata;
+  - level-set discretization preservation for uncut required geometry in 2D and
+    3D;
+  - cut-through characterization with `MG_REQ`, labels, adjacent tetrahedra,
+    local closure requirements, and `noSplit`.
+
+  @section examples-mmg-behavior-see-also See Also
+
+  - @ref examples-mmg-simple_io "MMG I/O"
+  - @ref examples-mmg-mesh_optimization "Mesh optimization"
+  - @ref examples-mmg-mesh_adaptation "Mesh adaptation"
+  - @ref examples-shapeoptimization-levelset_cantilever "Level-set cantilever"
+  - @ref Rodin::MMG "MMG namespace"
+
+  @m_footernavigation
+  */

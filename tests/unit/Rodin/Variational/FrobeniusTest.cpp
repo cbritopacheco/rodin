@@ -11,6 +11,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies identity 2 x 2 for variational frobenius by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Frobenius, Identity2x2)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -25,6 +26,7 @@ TEST(Rodin_Variational_Frobenius, Identity2x2)
   EXPECT_NEAR(frob.getValue(p), std::sqrt(2.0), 1e-10);
 }
 
+/// @brief Verifies identity 3 x 3 for variational frobenius by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Frobenius, Identity3x3)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -39,6 +41,7 @@ TEST(Rodin_Variational_Frobenius, Identity3x3)
   EXPECT_NEAR(frob.getValue(p), std::sqrt(3.0), 1e-10);
 }
 
+/// @brief Verifies copy for variational frobenius by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Frobenius, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

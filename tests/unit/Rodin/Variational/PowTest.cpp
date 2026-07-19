@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function square root for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_SquareRoot)
   {
     RealFunction f(4.0);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies real function square for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_Square)
   {
     RealFunction f(3.0);
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies real function cube for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_Cube)
   {
     RealFunction f(2.0);
@@ -56,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 8.0, 1e-10);
   }
 
+  /// @brief Verifies real function zero power for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_ZeroPower)
   {
     RealFunction f(5.0);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function power of one for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_PowerOfOne)
   {
     RealFunction f(7.0);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 7.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative power for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_NegativePower)
   {
     RealFunction f(2.0);
@@ -101,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies real function fractional power for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, RealFunction_FractionalPower)
   {
     RealFunction f(8.0);
@@ -116,6 +123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies grid function power operation for variational pow by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Pow, GridFunction_PowerOperation)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -137,6 +145,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies chained power operations for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, ChainedPowerOperations)
   {
     RealFunction f(2.0);
@@ -153,6 +162,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow2.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies power of zero for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, PowerOfZero)
   {
     RealFunction f(0.0);
@@ -168,6 +178,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies power of one for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, PowerOfOne)
   {
     RealFunction f(1.0);
@@ -183,6 +194,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies large exponent for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, LargeExponent)
   {
     RealFunction f(2.0);
@@ -198,6 +210,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 1024.0, 1e-10);
   }
 
+  /// @brief Verifies negative base power for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, NegativeBasePower)
   {
     RealFunction f(-2.0);
@@ -213,6 +226,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), -8.0, 1e-10);
   }
 
+  /// @brief Verifies even power negative base for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, EvenPowerNegativeBase)
   {
     RealFunction f(-3.0);
@@ -228,6 +242,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies power law validation for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, PowerLawValidation)
   {
     RealFunction f(3.0);
@@ -247,6 +262,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_mn.getValue(p), 729.0, 1e-10); // 3^6 = 729
   }
 
+  /// @brief Verifies integer exponent for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, IntegerExponent)
   {
     RealFunction f(5.0);
@@ -262,6 +278,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(pow_result.getValue(p), 625.0, 1e-10); // 5^4 = 625
   }
 
+  /// @brief Verifies small fractional exponent for variational pow by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Pow, SmallFractionalExponent)
   {
     RealFunction f(16.0);

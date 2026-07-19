@@ -302,7 +302,7 @@ int main(int, char**)
   DirichletBC dbc(uBC, zero);
   dbc.on(leftBC);
   dbc.assemble();
-  const IndexMap<Real> dbcMap = dbc.getDOFs();
+  const IndexMap<Real> dbcMap = std::get<IndexMap<Real>>(dbc.getDOFs());
 
   // ---- output -------------------------------------------------------------
   IO::XDMF xdmf("CantileverBeam");
@@ -312,7 +312,7 @@ int main(int, char**)
   grid.add(vel);
   grid.add(acc);
 
-  xdmf.write(0.0);
+  xdmf.write(0.0).flush();
 
   // ---- time loop ----------------------------------------------------------
   constexpr Real maxTraction = -1.0; // downward
@@ -342,11 +342,7 @@ int main(int, char**)
     u = uPred;
 
     // ---- nonlinear solid operators ----------------------------------------
-    Solid::MaterialTangent tangent(law, du, w);
-    tangent.setDisplacement(u);
-
-    Solid::InternalForce internal(law, w);
-    internal.setDisplacement(u);
+    auto ivw = Solid::InternalVirtualWork(law, u);
 
     // Effective nonlinear problem:
     //
@@ -363,17 +359,10 @@ int main(int, char**)
     //   J(u^k)[du] + R(u^k) = 0
     //
     Problem newton(du, w);
-    newton =
-          tangent
-           + aMass * Integral(du, w)
-           + aDamp * Integral(du, w)
-           + internal
-           + aMass * Integral(u, w)
-           + aDamp * Integral(u, w)
-           - BoundaryIntegral(traction, w).over(rightBC)
-           - aMass * Integral(uPred, w)
-           + c * Integral(rhsDamp, w)
-           + DirichletBC(du, zero).on(leftBC);
+    newton = ivw(du, w) + aMass * Integral(du, w) + aDamp * Integral(du, w) +
+      aMass * Integral(u, w) + aDamp * Integral(u, w) -
+      BoundaryIntegral(traction, w).over(rightBC) - aMass * Integral(uPred, w) +
+      c * Integral(rhsDamp, w) + DirichletBC(du, zero).on(leftBC);
 
     // Discrete derivative check once, at the first time step and first Newton base point
     if (step == 1)

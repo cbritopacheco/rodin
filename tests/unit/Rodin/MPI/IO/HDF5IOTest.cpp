@@ -41,6 +41,7 @@ namespace
         return LocalMesh::UniformGrid(type, { 4, 4 });
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
+      case Polytope::Type::Pyramid:
       case Polytope::Type::Wedge:
         return LocalMesh::UniformGrid(type, { 3, 3, 3 });
       default:
@@ -58,6 +59,8 @@ namespace
       case Polytope::Type::Quadrilateral: return "Quad2D";
       case Polytope::Type::Tetrahedron:   return "Tet3D";
       case Polytope::Type::Hexahedron:    return "Hex3D";
+      case Polytope::Type::Pyramid:
+        return "Pyramid3D";
       case Polytope::Type::Wedge:         return "Wedge3D";
       default:                            return "Unknown";
     }
@@ -81,6 +84,7 @@ namespace
 
   // --- MPI Mesh HDF5 round-trip via MeshPrinter/MeshLoader -------------------
 
+  /// @brief Verifies mesh round trip via printer loader for MPI mesh HDF 5 by checking exact expected values, MPI behavior.
   TEST_P(MPIMeshHDF5, MeshRoundTripViaPrinterLoader)
   {
     const auto type = GetParam();
@@ -123,6 +127,7 @@ namespace
 
   // --- MPI Mesh persistence does not create XDMF datasets -------------------
 
+  /// @brief Verifies mesh persistence no XDMF for MPI mesh HDF 5 by checking exact expected values, MPI behavior.
   TEST_P(MPIMeshHDF5, MeshPersistenceNoXDMF)
   {
     const auto type = GetParam();
@@ -149,6 +154,7 @@ namespace
 
   // --- MPI Mesh XDMF visualization -------------------------------------------
 
+  /// @brief Verifies XDMF visualization topology for MPI mesh HDF 5 by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIMeshHDF5, XDMFVisualizationTopology)
   {
     const auto type = GetParam();
@@ -190,6 +196,7 @@ namespace
 
   // --- XDMF write-and-close full workflow ------------------------------------
 
+  /// @brief Verifies XDMF write and close for MPI mesh HDF 5 by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIMeshHDF5, XDMFWriteAndClose)
   {
     const auto type = GetParam();
@@ -394,6 +401,7 @@ namespace
 
   // --- Shard path helpers ---------------------------------------------------
 
+  /// @brief Verifies path helpers for shard metadata by checking exact expected values.
   TEST(ShardMetadata, PathHelpers)
   {
     EXPECT_EQ(HDF5::shardStatePath(0), "/Shard/State/0");
@@ -413,18 +421,11 @@ namespace
     }
   };
 
-  INSTANTIATE_TEST_SUITE_P(
-      AllDimensions,
-      MPIMeshHDF5,
-      ::testing::Values(
-          Polytope::Type::Segment,
-          Polytope::Type::Triangle,
-          Polytope::Type::Quadrilateral,
-          Polytope::Type::Tetrahedron,
-          Polytope::Type::Hexahedron,
-          Polytope::Type::Wedge
-      ),
-      MPIPolytopeNameGenerator());
+  INSTANTIATE_TEST_SUITE_P(AllDimensions, MPIMeshHDF5,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge),
+    MPIPolytopeNameGenerator());
 
   // ===========================================================================
   // Distributed XDMF tests using MPI_COMM_SELF (single-rank distributed mode)
@@ -436,6 +437,7 @@ namespace
    */
   class MPIDistributedXDMF : public ::testing::TestWithParam<Polytope::Type> {};
 
+  /// @brief Verifies file per rank visualization for MPI distributed XDMF by checking exact expected values, true predicates, MPI behavior.
   TEST_P(MPIDistributedXDMF, FilePerRankVisualization)
   {
     const auto type = GetParam();
@@ -487,6 +489,7 @@ namespace
     boost::filesystem::remove_all(testDir);
   }
 
+  /// @brief Verifies file per rank with attributes for MPI distributed XDMF by checking true predicates, MPI behavior.
   TEST_P(MPIDistributedXDMF, FilePerRankWithAttributes)
   {
     const auto type = GetParam();
@@ -526,18 +529,11 @@ namespace
     boost::filesystem::remove_all(testDir);
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-      AllDimensions,
-      MPIDistributedXDMF,
-      ::testing::Values(
-          Polytope::Type::Segment,
-          Polytope::Type::Triangle,
-          Polytope::Type::Quadrilateral,
-          Polytope::Type::Tetrahedron,
-          Polytope::Type::Hexahedron,
-          Polytope::Type::Wedge
-      ),
-      MPIPolytopeNameGenerator());
+  INSTANTIATE_TEST_SUITE_P(AllDimensions, MPIDistributedXDMF,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge),
+    MPIPolytopeNameGenerator());
 }
 
 int main(int argc, char** argv)

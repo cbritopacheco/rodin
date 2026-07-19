@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file ForwardDecls.h
  * @brief Forward declarations for the Assembly module.
@@ -7,6 +13,8 @@
  */
 #ifndef RODIN_ASSEMBLY_FORWARDDECLS_H
 #define RODIN_ASSEMBLY_FORWARDDECLS_H
+
+#include "Rodin/Variational/ForwardDecls.h"
 
 namespace Rodin::Assembly
 {
@@ -94,6 +102,18 @@ namespace Rodin::Assembly
    */
   template <class Scalar, class Solution, class FES, class ValueDerived>
   class DirichletBCAssemblyInput;
+
+  /**
+   * @brief Input data for identification-style Dirichlet BC assembly
+   *        (`u = A(v)`).
+   *
+   * Encapsulates the slave trial function @f$ u @f$, the right-hand-side
+   * shape-function expression @f$ A(v) @f$, and the essential boundary
+   * attributes.
+   */
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
+  class DirichletBCShapeFunctionAssemblyInput;
 
   /**
    * @brief Default assembly strategy selector.

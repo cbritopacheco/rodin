@@ -45,6 +45,7 @@ namespace Rodin::Utility
   class OptionalReference : public Optional<std::reference_wrapper<T>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Optional<std::reference_wrapper<T>>;  ///< Parent type alias
       using Parent::Parent;  ///< Inherit constructors
 

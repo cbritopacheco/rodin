@@ -42,7 +42,7 @@ namespace Rodin::IO
     public:
       /// @brief Finite element space type.
       using FESType   = FES;
-      /// @brief PETSc vector data type (`::Vec`).
+      /// @brief PETSc vector data type (@c Vec).
       using DataType  = ::Vec;
       /// @brief Parent printer base class.
       using Parent    = GridFunctionPrinterBase<FileFormat::MEDIT, FES, DataType>;
@@ -62,6 +62,10 @@ namespace Rodin::IO
 
       using Parent::Parent;
 
+      /**
+       * @brief Writes PETSc-backed grid function coefficients in MEDIT order.
+       * @param[in,out] os Output stream receiving one vertex value per line.
+       */
       void printData(std::ostream& os) override
       {
         os << std::setprecision(std::numeric_limits<PetscReal>::max_digits10);

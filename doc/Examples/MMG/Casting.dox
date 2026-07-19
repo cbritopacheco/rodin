@@ -10,10 +10,15 @@
 
   @section examples-mmg-cast-intro Introduction
 
-  The @ref Rodin::External::MMG "MMG::Mesh" class extends
+  The @ref Rodin::MMG "MMG::Mesh" class extends
   @ref Rodin::Geometry::Mesh "Mesh<Context::Local>" and can be used wherever
   a regular mesh is expected. This section explains how to work with both
   types interchangeably.
+
+  @note Assigning from a plain @ref Rodin::Geometry::Mesh "Geometry::Mesh" to
+  an `MMG::Mesh` keeps the topology and coordinates but clears MMG-specific
+  metadata, because the base mesh does not carry corners, ridges, or required
+  entity sets.
 
   @section examples-mmg-cast-create Creating an MMG Mesh
 
@@ -73,8 +78,9 @@
 
   @section examples-mmg-cast-see-also See Also
 
-  - @ref examples-mmg-simple_io "MMG I/O" — File I/O details
-  - @ref examples-mmg-mesh_optimization "Mesh optimization" — Remeshing
-  - @ref Rodin::External::MMG "MMG namespace"
+  - @ref examples-mmg-simple_io "MMG I/O" - File I/O details
+  - @ref examples-mmg-mesh_optimization "Mesh optimization" - Remeshing
+  - @ref examples-mmg-behavior "MMG behavior and guarantees"
+  - @ref Rodin::MMG "MMG namespace"
 
   */

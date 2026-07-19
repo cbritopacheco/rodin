@@ -1,11 +1,17 @@
-#ifndef RODIN_SOLVER_PETSC_SNES_H
-#define RODIN_SOLVER_PETSC_SNES_H
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+#ifndef RODIN_PETSC_SOLVER_SNES_H
+#define RODIN_PETSC_SOLVER_SNES_H
 
 /**
  * @file SNES.h
  * @brief PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper for Rodin.
  *
- * Wraps the PETSc `SNES` context for solving nonlinear systems
+ * Wraps the PETSc @c SNES context for solving nonlinear systems
  * @f$ F(x) = 0 @f$ using Newton-type methods.  At each Newton iteration
  * the Jacobian system is solved by the associated
  * @ref Rodin::Solver::KSP linear solver.
@@ -18,6 +24,7 @@
 #include <petscsnes.h>
 
 #include <functional>
+#include <petscsystypes.h>
 
 #include "Rodin/FormLanguage/Traits.h"
 #include "Rodin/PETSc/Object.h"
@@ -37,7 +44,8 @@ namespace Rodin::FormLanguage
   template <>
   struct Traits<Solver::KSP>
   {
-    using LinearSystemType = PETSc::Math::LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = PETSc::Math::LinearSystem;
   };
 }
 
@@ -46,7 +54,7 @@ namespace Rodin::Solver
   /**
    * @brief PETSc SNES (Scalable Nonlinear Equations Solvers) wrapper.
    *
-   * Wraps the PETSc `SNES` context for solving nonlinear systems
+   * Wraps the PETSc @c SNES context for solving nonlinear systems
    * @f$ F(x) = 0 @f$ using Newton-type methods.  Inherits
    * @ref Rodin::Solver::NewtonSolverBase<KSP> so that the linear
    * sub-problems arising at each Newton step are solved by the
@@ -64,13 +72,13 @@ namespace Rodin::Solver
     : public PETSc::Object<::SNES>, public NewtonSolverBase<KSP>
   {
     public:
-      /// @brief Handle type for the raw PETSc `SNES` context pointer.
+      /// @brief Handle type for the raw PETSc @c SNES context pointer.
       using HandleType = ::SNES;
 
       /// @brief Linear system type coupling @f$ A @f$, @f$ \mathbf{b} @f$, and @f$ \mathbf{x} @f$.
       using LinearSystemType = PETSc::Math::LinearSystem;
 
-      /// @brief PETSc vector type (`::Vec`) for the nonlinear residual and solution.
+      /// @brief PETSc vector type (@c Vec) for the nonlinear residual and solution.
       using VectorType = ::Vec;
 
       /**
@@ -78,7 +86,7 @@ namespace Rodin::Solver
        *        state-dependent Rodin fields from the current SNES iterate.
        *
        * The argument is the current iterate expressed as a Rodin
-       * @ref Rodin::PETSc::Math::Vector (a PETSc `Vec`).  Typical usage:
+       * @ref Rodin::PETSc::Math::Vector (a PETSc @c Vec).  Typical usage:
        * @code
        * snes.setStateUpdate([&](const PETSc::Math::Vector& x) {
        *   uState.setData(x, 0);
@@ -99,10 +107,15 @@ namespace Rodin::Solver
 
       using NewtonSolverParent::solve;
 
+      /// @brief Default nonlinear relative residual tolerance.
       static constexpr PetscReal DEFAULT_RTOL   = 1e-8;
+      /// @brief Default nonlinear absolute residual tolerance.
       static constexpr PetscReal DEFAULT_ABSTOL = 1e-50;
+      /// @brief Default step norm convergence tolerance.
       static constexpr PetscReal DEFAULT_STOL   = 1e-8;
+      /// @brief Default maximum number of nonlinear iterations.
       static constexpr PetscInt  DEFAULT_MAXIT  = 50;
+      /// @brief Default maximum number of residual evaluations.
       static constexpr PetscInt  DEFAULT_MAXF   = 10000;
 
       /**
@@ -168,9 +181,12 @@ namespace Rodin::Solver
        *
        * The solution vector is obtained directly from
        * @c ksp.getProblem().getLinearSystem().getSolution(), so no manual
-       * initial-guess packing is needed.  After the first solve the solution
-       * vector retains its value, providing a natural warm-start for subsequent
-       * time steps.
+       * initial-guess packing is needed. A full @c Problem::assemble() seeds
+       * this vector from the trial function data, so the initial iterate is
+       * the trial functions' state — consistent with
+       * @c NewtonSolverBase::solve(GridFunction&). After the first solve the
+       * solution vector retains its value, providing a natural warm start for
+       * subsequent time steps.
        */
       void solve();
 
@@ -190,6 +206,11 @@ namespace Rodin::Solver
        */
       bool converged() const;
 
+      /**
+       * @brief Returns PETSc's convergence reason from the most recent solve.
+       * @returns Positive values for convergence, negative values for
+       *          divergence, and zero before PETSc has decided.
+       */
       ::SNESConvergedReason getConvergedReason() const;
 
       /// @brief Returns a mutable reference to the underlying PETSc SNES handle.
@@ -208,18 +229,24 @@ namespace Rodin::Solver
       }
 
     private:
+      static PetscErrorCode Update(::Vec x, void* ctx);
+      static PetscErrorCode Assemble(
+        ::Vec x, void* ctx, Variational::AssemblyTarget target);
       static PetscErrorCode Residual(::SNES snes, ::Vec x, ::Vec f, void* ctx);
       static PetscErrorCode Jacobian(::SNES snes, ::Vec x, ::Mat J, ::Mat P, void* ctx);
 
     private:
       HandleType m_snes;   ///< Underlying PETSc SNES context.
       ::SNESType m_type;   ///< Requested SNES algorithm type.
-      PetscReal m_abstol,  ///< Absolute convergence tolerance.
-                m_rtol,    ///< Relative convergence tolerance.
-                m_stol;    ///< Step norm convergence tolerance.
-      PetscInt m_maxIt,    ///< Maximum nonlinear iterations.
-               m_maxF;     ///< Maximum function evaluations.
-      StateUpdate m_stateUpdate; ///< Optional state synchronization callback.
+      ::PetscReal m_abstol, ///< Absolute convergence tolerance.
+        m_rtol, ///< Relative convergence tolerance.
+        m_stol; ///< Step norm convergence tolerance.
+      ::PetscInt m_maxIt, ///< Maximum nonlinear iterations.
+        m_maxF; ///< Maximum function evaluations.
+      StateUpdate m_update; ///< Optional state synchronization callback.
+      Optional<::PetscObjectState> m_lhsAssembled;
+      Optional<::PetscObjectState> m_rhsAssembled;
+      Optional<::PetscObjectState> m_updated;
   };
 }
 
@@ -231,4 +258,4 @@ namespace Rodin::PETSc::Solver
   using SNES = Rodin::Solver::SNES;
 }
 
-#endif // RODIN_SOLVER_PETSC_SNES_H
+#endif // RODIN_PETSC_SOLVER_SNES_H

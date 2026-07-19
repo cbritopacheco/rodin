@@ -37,6 +37,7 @@ namespace Rodin::Math
   class Rad : public Unit<Rad, Real>
   {
     public:
+      /// @brief Parent class type.
       using Parent = Unit<Rad, Real>;
       using Parent::Parent;
   };

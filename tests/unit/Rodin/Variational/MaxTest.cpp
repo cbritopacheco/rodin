@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function two values for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, RealFunction_TwoValues)
   {
     RealFunction f1(3.0);
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 7.0, 1e-10);
   }
 
+  /// @brief Verifies real function equal values for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, RealFunction_EqualValues)
   {
     RealFunction f1(5.0);
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative values for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, RealFunction_NegativeValues)
   {
     RealFunction f1(-2.0);
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), -2.0, 1e-10);
   }
 
+  /// @brief Verifies real function mixed signs for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, RealFunction_MixedSigns)
   {
     RealFunction f1(-3.0);
@@ -75,6 +79,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies real function with zero for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, RealFunction_WithZero)
   {
     RealFunction f1(0.0);
@@ -91,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function small values for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, RealFunction_SmallValues)
   {
     RealFunction f1(1e-6);
@@ -107,6 +113,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 1e-5, 1e-16);
   }
 
+  /// @brief Verifies grid function maximum for variational max by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Max, GridFunction_Maximum)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -131,6 +138,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies chained maximum for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, ChainedMaximum)
   {
     RealFunction f1(10.0);
@@ -148,6 +156,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 10.0, 1e-10);
   }
 
+  /// @brief Verifies commutativity for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, Commutativity)
   {
     RealFunction f1(8.0);
@@ -167,6 +176,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max1.getValue(p), 8.0, 1e-10);
   }
 
+  /// @brief Verifies associativity for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, Associativity)
   {
     RealFunction f1(6.0);
@@ -187,6 +197,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max1.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies idempotence for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, Idempotence)
   {
     RealFunction f(12.0);
@@ -203,6 +214,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 12.0, 1e-10);
   }
 
+  /// @brief Verifies large values for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, LargeValues)
   {
     RealFunction f1(1e6);
@@ -219,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 2e6, 1e-3);
   }
 
+  /// @brief Verifies max with operations for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, MaxWithOperations)
   {
     RealFunction f1(4.0);
@@ -238,6 +251,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies max monotonicity for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, MaxMonotonicity)
   {
     RealFunction f1(3.0);
@@ -260,6 +274,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max2.getValue(p), 7.0, 1e-10);
   }
 
+  /// @brief Verifies max with absolute value for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, MaxWithAbsoluteValue)
   {
     RealFunction f1(-5.0);
@@ -278,6 +293,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies fractional values for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, FractionalValues)
   {
     RealFunction f1(0.3);
@@ -294,6 +310,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 0.7, 1e-10);
   }
 
+  /// @brief Verifies max min relationship for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, MaxMinRelationship)
   {
     RealFunction f1(4.0);
@@ -316,6 +333,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum.getValue(p), 13.0, 1e-10);
   }
 
+  /// @brief Verifies max with pow for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, MaxWithPow)
   {
     RealFunction f1(2.0);
@@ -335,6 +353,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(max_result.getValue(p), 9.0, 1e-10);
   }
 
+  /// @brief Verifies negative zero comparison for variational max by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Max, NegativeZeroComparison)
   {
     RealFunction f1(-0.0);

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_VARIATIONAL_TESTFUNCTION_H
 #define RODIN_PETSC_VARIATIONAL_TESTFUNCTION_H
 
@@ -5,8 +11,8 @@
  * @file TestFunction.h
  * @brief PETSc-aware test function wrappers.
  *
- * Provides the @ref Rodin::PETSc::Variational::TestFunction class, a thin
- * wrapper around @ref Rodin::Variational::TestFunction that lives in the
+ * Provides the PETSc-aware test-function wrapper class, a thin
+ * wrapper around the core variational test function that lives in the
  * PETSc namespace and triggers PETSc-specific template argument deduction
  * for linear forms, bilinear forms, and problems.
  *
@@ -24,7 +30,7 @@ namespace Rodin::PETSc::Variational
   /**
    * @brief PETSc-aware test function wrapper.
    *
-   * Inherits all functionality from @ref Rodin::Variational::TestFunction
+   * Inherits all functionality from `Rodin::Variational::TestFunction`
    * and triggers PETSc-specific CTAD so that constructing a
    * `PETSc::Variational::TestFunction` from a finite element space
    * automatically selects the PETSc-backed linear form, bilinear form,
@@ -42,7 +48,7 @@ namespace Rodin::PETSc::Variational
       using FESType =
         FES;
 
-      /// @brief Parent class type (@ref Rodin::Variational::TestFunction).
+      /// @brief Parent class type (`Rodin::Variational::TestFunction`).
       using Parent =
         Rodin::Variational::TestFunction<FESType>;
 
@@ -63,7 +69,8 @@ namespace Rodin::Variational
   template <class FES>
   struct IsTestFunction<PETSc::Variational::TestFunction<FES>>
   {
-    static constexpr Boolean Value = true;
+    /// @brief True because the PETSc wrapper models a test function.
+      static constexpr Boolean Value = true;
   };
 }
 

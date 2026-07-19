@@ -27,6 +27,7 @@ namespace
 //  EQ
 // ============================================================
 
+/// @brief Verifies equal constants for variational EQ by checking true predicates.
 TEST(Rodin_Variational_EQ, EqualConstants)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -39,6 +40,7 @@ TEST(Rodin_Variational_EQ, EqualConstants)
   EXPECT_TRUE(eq.getValue(p));
 }
 
+/// @brief Verifies unequal constants for variational EQ by checking false predicates.
 TEST(Rodin_Variational_EQ, UnequalConstants)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -51,6 +53,7 @@ TEST(Rodin_Variational_EQ, UnequalConstants)
   EXPECT_FALSE(eq.getValue(p));
 }
 
+/// @brief Verifies number LHS for variational EQ by checking true predicates.
 TEST(Rodin_Variational_EQ, NumberLHS)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -62,6 +65,7 @@ TEST(Rodin_Variational_EQ, NumberLHS)
   EXPECT_TRUE(eq.getValue(p));
 }
 
+/// @brief Verifies number RHS for variational EQ by checking false predicates.
 TEST(Rodin_Variational_EQ, NumberRHS)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -73,6 +77,7 @@ TEST(Rodin_Variational_EQ, NumberRHS)
   EXPECT_FALSE(eq.getValue(p));
 }
 
+/// @brief Verifies copy for variational EQ by checking true predicates, copy semantics.
 TEST(Rodin_Variational_EQ, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -90,6 +95,7 @@ TEST(Rodin_Variational_EQ, Copy)
 //  NEQ
 // ============================================================
 
+/// @brief Verifies unequal constants for variational NEQ by checking true predicates.
 TEST(Rodin_Variational_NEQ, UnequalConstants)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -102,6 +108,7 @@ TEST(Rodin_Variational_NEQ, UnequalConstants)
   EXPECT_TRUE(neq.getValue(p));
 }
 
+/// @brief Verifies equal constants for variational NEQ by checking false predicates.
 TEST(Rodin_Variational_NEQ, EqualConstants)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -114,6 +121,7 @@ TEST(Rodin_Variational_NEQ, EqualConstants)
   EXPECT_FALSE(neq.getValue(p));
 }
 
+/// @brief Verifies number LHS for variational NEQ by checking true predicates.
 TEST(Rodin_Variational_NEQ, NumberLHS)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -125,6 +133,7 @@ TEST(Rodin_Variational_NEQ, NumberLHS)
   EXPECT_TRUE(neq.getValue(p));
 }
 
+/// @brief Verifies number RHS for variational NEQ by checking false predicates.
 TEST(Rodin_Variational_NEQ, NumberRHS)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -136,6 +145,7 @@ TEST(Rodin_Variational_NEQ, NumberRHS)
   EXPECT_FALSE(neq.getValue(p));
 }
 
+/// @brief Verifies copy for variational NEQ by checking true predicates, copy semantics.
 TEST(Rodin_Variational_NEQ, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -153,6 +163,7 @@ TEST(Rodin_Variational_NEQ, Copy)
 //  LT
 // ============================================================
 
+/// @brief Verifies less than for variational LT by checking true predicates, false predicates.
 TEST(Rodin_Variational_LT, LessThan)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -165,6 +176,7 @@ TEST(Rodin_Variational_LT, LessThan)
   EXPECT_FALSE((b < a).getValue(p));
 }
 
+/// @brief Verifies equal for variational LT by checking false predicates.
 TEST(Rodin_Variational_LT, Equal)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -176,6 +188,7 @@ TEST(Rodin_Variational_LT, Equal)
   EXPECT_FALSE((a < b).getValue(p));
 }
 
+/// @brief Verifies number operands for variational LT by checking true predicates, false predicates.
 TEST(Rodin_Variational_LT, NumberOperands)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -188,6 +201,7 @@ TEST(Rodin_Variational_LT, NumberOperands)
   EXPECT_FALSE((a < 1.0).getValue(p));
 }
 
+/// @brief Verifies copy for variational LT by checking true predicates, copy semantics.
 TEST(Rodin_Variational_LT, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -205,6 +219,7 @@ TEST(Rodin_Variational_LT, Copy)
 //  GT
 // ============================================================
 
+/// @brief Verifies greater than for variational GT by checking true predicates, false predicates.
 TEST(Rodin_Variational_GT, GreaterThan)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -217,6 +232,7 @@ TEST(Rodin_Variational_GT, GreaterThan)
   EXPECT_FALSE((b > a).getValue(p));
 }
 
+/// @brief Verifies equal for variational GT by checking false predicates.
 TEST(Rodin_Variational_GT, Equal)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -228,6 +244,7 @@ TEST(Rodin_Variational_GT, Equal)
   EXPECT_FALSE((a > b).getValue(p));
 }
 
+/// @brief Verifies number operands for variational GT by checking true predicates, false predicates.
 TEST(Rodin_Variational_GT, NumberOperands)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -240,6 +257,7 @@ TEST(Rodin_Variational_GT, NumberOperands)
   EXPECT_FALSE((a > 3.0).getValue(p));
 }
 
+/// @brief Verifies copy for variational GT by checking true predicates, copy semantics.
 TEST(Rodin_Variational_GT, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -257,6 +275,7 @@ TEST(Rodin_Variational_GT, Copy)
 //  LEQ
 // ============================================================
 
+/// @brief Verifies less or equal for variational LEQ by checking true predicates, false predicates.
 TEST(Rodin_Variational_LEQ, LessOrEqual)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -271,6 +290,7 @@ TEST(Rodin_Variational_LEQ, LessOrEqual)
   EXPECT_FALSE((b <= a).getValue(p));  // greater
 }
 
+/// @brief Verifies number operands for variational LEQ by checking true predicates, false predicates.
 TEST(Rodin_Variational_LEQ, NumberOperands)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -284,6 +304,7 @@ TEST(Rodin_Variational_LEQ, NumberOperands)
   EXPECT_TRUE((1.0 <= a).getValue(p));
 }
 
+/// @brief Verifies copy for variational LEQ by checking true predicates, copy semantics.
 TEST(Rodin_Variational_LEQ, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -301,6 +322,7 @@ TEST(Rodin_Variational_LEQ, Copy)
 //  GEQ
 // ============================================================
 
+/// @brief Verifies greater or equal for variational GEQ by checking true predicates, false predicates.
 TEST(Rodin_Variational_GEQ, GreaterOrEqual)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -315,6 +337,7 @@ TEST(Rodin_Variational_GEQ, GreaterOrEqual)
   EXPECT_FALSE((b >= a).getValue(p));  // less
 }
 
+/// @brief Verifies number operands for variational GEQ by checking true predicates, false predicates.
 TEST(Rodin_Variational_GEQ, NumberOperands)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -328,6 +351,7 @@ TEST(Rodin_Variational_GEQ, NumberOperands)
   EXPECT_TRUE((4.0 >= a).getValue(p));
 }
 
+/// @brief Verifies copy for variational GEQ by checking true predicates, copy semantics.
 TEST(Rodin_Variational_GEQ, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

@@ -72,12 +72,11 @@ namespace Rodin::Variational
         if (k == 0)
           return static_cast<Real>(1.0);
 
-        const Real a_ab  = alpha + beta;
+        const Real aAb = alpha + beta;
         const Real two   = static_cast<Real>(2.0);
 
         Real P0 = static_cast<Real>(1.0);
-        Real P1 = static_cast<Real>(0.5) *
-                  (alpha - beta + (a_ab + two) * x);
+        Real P1 = static_cast<Real>(0.5) * (alpha - beta + (aAb + two) * x);
 
         if (k == 1)
           return P1;
@@ -87,25 +86,19 @@ namespace Rodin::Variational
         for (size_t n = 1; n < k; ++n)
         {
           const Real nn    = static_cast<Real>(n);
-          const Real two_n = two * nn;
+          const Real twoN = two * nn;
 
-          const Real a1 =
-            two * (nn + static_cast<Real>(1.0))
-                * (nn + a_ab + static_cast<Real>(1.0))
-                * (two_n + a_ab);
+          const Real a1 = two * (nn + static_cast<Real>(1.0)) *
+            (nn + aAb + static_cast<Real>(1.0)) * (twoN + aAb);
 
           const Real a2 =
-            (two_n + a_ab + static_cast<Real>(1.0))
-            * (alpha * alpha - beta * beta);
+            (twoN + aAb + static_cast<Real>(1.0)) * (alpha * alpha - beta * beta);
 
-          const Real a3 =
-            (two_n + a_ab)
-            * (two_n + a_ab + static_cast<Real>(1.0))
-            * (two_n + a_ab + static_cast<Real>(2.0));
+          const Real a3 = (twoN + aAb) * (twoN + aAb + static_cast<Real>(1.0)) *
+            (twoN + aAb + static_cast<Real>(2.0));
 
           const Real a4 =
-            two * (nn + alpha) * (nn + beta)
-            * (two_n + a_ab + static_cast<Real>(2.0));
+            two * (nn + alpha) * (nn + beta) * (twoN + aAb + static_cast<Real>(2.0));
 
           P2 = ((a2 + a3 * x) * P1 - a4 * P0) / a1;
           P0 = P1;

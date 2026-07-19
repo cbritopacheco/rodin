@@ -32,3 +32,16 @@ gtest_discover_tests(RodinTestExpectedResultTableTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinTestFDProbeTest FDProbeTest.cpp)
+target_link_libraries(RodinTestFDProbeTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::Test)
+gtest_discover_tests(RodinTestFDProbeTest
+  PROPERTIES
+    LABELS unit
+)

@@ -26,6 +26,7 @@ namespace Rodin::Tests::Unit
 
   //=== Variant Constructors ==================================================
 
+  /// @brief Verifies variant constructor for tuple by checking exact expected values.
   TEST(Rodin_Tuple, VariantConstructor)
   {
     {
@@ -70,6 +71,7 @@ namespace Rodin::Tests::Unit
 
   //=== Copy and Move Semantics ===============================================
 
+  /// @brief Verifies copy constructor for tuple by checking exact expected values, copy semantics.
   TEST(Rodin_Tuple, CopyConstructor)
   {
     Tuple t1{1, 'a', 1.0};
@@ -81,6 +83,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(t2.get<2>(), 1.0);
   }
 
+  /// @brief Verifies copy assignment for tuple by checking exact expected values, copy semantics.
   TEST(Rodin_Tuple, CopyAssignment)
   {
     Tuple t1{1, 2, 3};
@@ -93,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(t2.get<2>(), 3);
   }
 
+  /// @brief Verifies move constructor for tuple by checking exact expected values, move semantics.
   TEST(Rodin_Tuple, MoveConstructor)
   {
     Tuple t1{7, 8, 9};
@@ -104,6 +108,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(t2.get<2>(), 9);
   }
 
+  /// @brief Verifies move assignment for tuple by checking exact expected values, move semantics.
   TEST(Rodin_Tuple, MoveAssignment)
   {
     Tuple t1{7, 8, 9};
@@ -117,6 +122,7 @@ namespace Rodin::Tests::Unit
 
   //=== Concatenation =========================================================
 
+  /// @brief Verifies concatenate non empty for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ConcatenateNonEmpty)
   {
     Tuple t1{1, 'a', 1.0};
@@ -133,6 +139,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(r.get<5>(), 2.0);
   }
 
+  /// @brief Verifies concatenate with empty for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ConcatenateWithEmpty)
   {
     Tuple t1{1, 2, 3};
@@ -151,6 +158,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(concat2.get<2>(), 3);
   }
 
+  /// @brief Verifies concatenate chain for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ConcatenateChain)
   {
     Tuple t1{1};
@@ -166,6 +174,7 @@ namespace Rodin::Tests::Unit
 
   //=== Zip ===================================================================
 
+  /// @brief Verifies zip two tuples for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ZipTwoTuples)
   {
     Tuple t1{1, 'a', 1.0};
@@ -176,6 +185,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(r.size(), t2.size());
   }
 
+  /// @brief Verifies zip multiple tuples for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ZipMultipleTuples)
   {
     Tuple t1{1, 2, 3};
@@ -189,6 +199,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(zipped.get<2>(), 3 + 30 + 300);
   }
 
+  /// @brief Verifies zip custom lambda for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ZipCustomLambda)
   {
     Tuple t1{2, 3, 4};
@@ -204,6 +215,7 @@ namespace Rodin::Tests::Unit
 
   //=== Reduce ================================================================
 
+  /// @brief Verifies reduce sum for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ReduceSum)
   {
     {
@@ -219,6 +231,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies reduce product for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ReduceProduct)
   {
     Tuple t{2, 3, 4};
@@ -226,6 +239,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result, 24);
   }
 
+  /// @brief Verifies reduce two elements for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ReduceTwoElements)
   {
     Tuple t{5, 10};
@@ -235,6 +249,7 @@ namespace Rodin::Tests::Unit
 
   //=== Map ===================================================================
 
+  /// @brief Verifies map transform for tuple by checking exact expected values.
   TEST(Rodin_Tuple, MapTransform)
   {
     Tuple t{1, 2, 3};
@@ -244,6 +259,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mapped.get<2>(), 30);
   }
 
+  /// @brief Verifies map transform const for tuple by checking exact expected values.
   TEST(Rodin_Tuple, MapTransformConst)
   {
     const Tuple t{2, 3, 4};
@@ -253,6 +269,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(mapped.get<2>(), 9);
   }
 
+  /// @brief Verifies map return different type for tuple by checking exact expected values.
   TEST(Rodin_Tuple, MapReturnDifferentType)
   {
     Tuple t{1, 2, 3};
@@ -264,6 +281,7 @@ namespace Rodin::Tests::Unit
 
   //=== Filter ================================================================
 
+  /// @brief Mixed types: ints and doubles.
   TEST(Rodin_Tuple, FilterIntegrals)
   {
     // Mixed types: ints and doubles.
@@ -275,6 +293,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(filtered.get<2>(), 5);
   }
 
+  /// @brief Verifies filter always true for tuple by checking exact expected values.
   TEST(Rodin_Tuple, FilterAlwaysTrue)
   {
     Tuple t{10, 20, 30};
@@ -285,6 +304,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(filtered.get<2>(), 30);
   }
 
+  /// @brief Verifies filter always false for tuple by checking exact expected values.
   TEST(Rodin_Tuple, FilterAlwaysFalse)
   {
     Tuple t{10, 20, 30};
@@ -294,6 +314,7 @@ namespace Rodin::Tests::Unit
 
   //=== Apply and IApply ======================================================
 
+  /// @brief Verifies apply modification for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ApplyModification)
   {
     Tuple t{10, 20, 30};
@@ -303,6 +324,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(t.get<2>(), 3);
   }
 
+  /// @brief Verifies apply const for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ApplyConst)
   {
     const Tuple t{100, 200, 300};
@@ -315,6 +337,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(collected[2], 3);
   }
 
+  /// @brief Verifies I apply with index for tuple by checking exact expected values.
   TEST(Rodin_Tuple, IApplyWithIndex)
   {
     Tuple t{0, 0, 0};
@@ -326,6 +349,7 @@ namespace Rodin::Tests::Unit
 
   // //=== Product ===============================================================
 
+  /// @brief Verifies product default pairing for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ProductDefaultPairing)
   {
     Tuple t1{1, 2};
@@ -349,6 +373,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(p3.second(), 'y');
   }
 
+  /// @brief Verifies product custom function for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ProductCustomFunction)
   {
     Tuple t1{1, 2};
@@ -363,6 +388,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(productResult.get<3>(), 22);
   }
 
+  /// @brief Verifies product with empty tuple for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ProductWithEmptyTuple)
   {
     Tuple t{1, 2, 3};
@@ -371,6 +397,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(productResult.size(), 0);
   }
 
+  /// @brief Verifies product non square for tuple by checking exact expected values.
   TEST(Rodin_Tuple, ProductNonSquare)
   {
     Tuple t1{1, 2, 3};
@@ -389,6 +416,7 @@ namespace Rodin::Tests::Unit
 
   //=== IndexTuple Helper =====================================================
 
+  /// @brief Should create a tuple holding indices: 0, 1, 2, 3, 4.
   TEST(Rodin_Tuple, GenerateIndexTuple)
   {
     // Should create a tuple holding indices: 0, 1, 2, 3, 4.
@@ -401,6 +429,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(indexTuple.get<4>(), 4);
   }
 
+  /// @brief Verifies get const and non const for tuple by checking exact expected values.
   TEST(Rodin_Tuple, GetConstAndNonConst)
   {
     Tuple t{42, 84};

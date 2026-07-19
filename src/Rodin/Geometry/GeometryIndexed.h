@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_GEOMETRYINDEXED_H
-#define RODIN_VARIATIONAL_GEOMETRYINDEXED_H
+#ifndef RODIN_GEOMETRY_GEOMETRYINDEXED_H
+#define RODIN_GEOMETRY_GEOMETRYINDEXED_H
 
 /**
  * @file
@@ -171,8 +171,8 @@ namespace Rodin::Geometry
      * @param ar Archive object
      * @param version Serialization version (unused)
      */
-    template<class Archive>
-    void serialize(Archive& ar, const unsigned int)
+    template <class Archive>
+    void serialize(Archive& ar, const unsigned int version)
     {
       for (size_t i = 0; i < Count; ++i)
         ar & *ptr(i);

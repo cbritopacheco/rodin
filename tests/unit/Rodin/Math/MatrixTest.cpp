@@ -22,6 +22,7 @@ class MatrixTest : public ::testing::Test
 };
 
 // Test basic matrix type aliases
+/// @brief Test that Matrix<Real> is the same as RealMatrix.
 TEST_F(MatrixTest, TypeAliases)
 {
   // Test that Matrix<Real> is the same as RealMatrix
@@ -32,6 +33,7 @@ TEST_F(MatrixTest, TypeAliases)
 }
 
 // Test matrix construction and basic operations
+/// @brief Test default construction.
 TEST_F(MatrixTest, Construction)
 {
   // Test default construction
@@ -54,6 +56,7 @@ TEST_F(MatrixTest, Construction)
 }
 
 // Test matrix assignment and access
+/// @brief Verifies assignment and access for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, AssignmentAndAccess)
 {
   RealMatrix m(2, 2);
@@ -72,6 +75,7 @@ TEST_F(MatrixTest, AssignmentAndAccess)
 }
 
 // Test matrix arithmetic operations
+/// @brief Verifies arithmetic operations for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, ArithmeticOperations)
 {
   RealMatrix m1(2, 2);
@@ -105,6 +109,7 @@ TEST_F(MatrixTest, ArithmeticOperations)
 }
 
 // Test matrix multiplication
+/// @brief Verifies matrix multiplication for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, MatrixMultiplication)
 {
   RealMatrix m1(2, 3);
@@ -128,6 +133,7 @@ TEST_F(MatrixTest, MatrixMultiplication)
 }
 
 // Test FixedSizeMatrix
+/// @brief Verifies fixed size matrix for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, FixedSizeMatrix)
 {
   using Matrix2x2 = FixedSizeMatrix<Real, 2, 2>;
@@ -151,6 +157,7 @@ TEST_F(MatrixTest, FixedSizeMatrix)
 }
 
 // Test SpatialMatrix functionality
+/// @brief Verifies spatial matrix for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, SpatialMatrix)
 {
   SpatialMatrix<Real> sm(3, 3);
@@ -172,7 +179,31 @@ TEST_F(MatrixTest, SpatialMatrix)
   }
 }
 
+/// @brief Verifies spatial matrix unary minus for matrix test by checking tolerance-based numerical results, exact expected values.
+TEST_F(MatrixTest, SpatialMatrixUnaryMinus)
+{
+  SpatialMatrix<Real> sm(2, 3);
+  sm(0, 0) = 1.0;
+  sm(0, 1) = -2.0;
+  sm(0, 2) = 3.0;
+  sm(1, 0) = -4.0;
+  sm(1, 1) = 5.0;
+  sm(1, 2) = -6.0;
+
+  const auto negated = -sm;
+
+  EXPECT_EQ(negated.rows(), 2);
+  EXPECT_EQ(negated.cols(), 3);
+  EXPECT_DOUBLE_EQ(negated(0, 0), -1.0);
+  EXPECT_DOUBLE_EQ(negated(0, 1), 2.0);
+  EXPECT_DOUBLE_EQ(negated(0, 2), -3.0);
+  EXPECT_DOUBLE_EQ(negated(1, 0), 4.0);
+  EXPECT_DOUBLE_EQ(negated(1, 1), -5.0);
+  EXPECT_DOUBLE_EQ(negated(1, 2), 6.0);
+}
+
 // Test complex matrix operations
+/// @brief Verifies complex matrix for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, ComplexMatrix)
 {
   ComplexMatrix cm(2, 2);
@@ -194,6 +225,7 @@ TEST_F(MatrixTest, ComplexMatrix)
 }
 
 // Test matrix resizing
+/// @brief Verifies resizing for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, Resizing)
 {
   RealMatrix m(2, 2);
@@ -217,6 +249,7 @@ TEST_F(MatrixTest, Resizing)
 }
 
 // Test matrix norms and properties
+/// @brief Verifies matrix properties for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, MatrixProperties)
 {
   RealMatrix m(2, 2);
@@ -241,6 +274,7 @@ TEST_F(MatrixTest, MatrixProperties)
 
 // --- Comprehensive SpatialMatrix Tests ---
 
+/// @brief Verifies spatial matrix construction for matrix test by checking exact expected values.
 TEST_F(MatrixTest, SpatialMatrixConstruction)
 {
   SpatialMatrix<Real> sm;
@@ -256,6 +290,7 @@ TEST_F(MatrixTest, SpatialMatrixConstruction)
   EXPECT_EQ(sm3.cols(), 3);
 }
 
+/// @brief Verifies spatial matrix element access for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixElementAccess)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -270,6 +305,7 @@ TEST_F(MatrixTest, SpatialMatrixElementAccess)
   EXPECT_DOUBLE_EQ(sm(1, 1), 4.0);
 }
 
+/// @brief Verifies spatial matrix set zero constant identity for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixSetZeroConstantIdentity)
 {
   SpatialMatrix<Real> sm(3, 3);
@@ -295,6 +331,7 @@ TEST_F(MatrixTest, SpatialMatrixSetZeroConstantIdentity)
     }
 }
 
+/// @brief Verifies spatial matrix resize for matrix test by checking exact expected values.
 TEST_F(MatrixTest, SpatialMatrixResize)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -308,6 +345,7 @@ TEST_F(MatrixTest, SpatialMatrixResize)
   EXPECT_EQ(sm.cols(), 3);
 }
 
+/// @brief Verifies spatial matrix norms for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixNorms)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -320,6 +358,7 @@ TEST_F(MatrixTest, SpatialMatrixNorms)
   EXPECT_DOUBLE_EQ(sm.norm(), 5.0);
 }
 
+/// @brief Verifies spatial matrix dot for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixDot)
 {
   SpatialMatrix<Real> a(2, 2);
@@ -333,6 +372,7 @@ TEST_F(MatrixTest, SpatialMatrixDot)
   EXPECT_DOUBLE_EQ(a.dot(b), 70.0);
 }
 
+/// @brief Verifies spatial matrix transpose for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, SpatialMatrixTranspose)
 {
   SpatialMatrix<Real> sm(2, 3);
@@ -350,6 +390,7 @@ TEST_F(MatrixTest, SpatialMatrixTranspose)
   EXPECT_DOUBLE_EQ(t(2, 1), 6.0);
 }
 
+/// @brief Verifies spatial matrix trace for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixTrace)
 {
   SpatialMatrix<Real> sm1(1, 1);
@@ -366,6 +407,7 @@ TEST_F(MatrixTest, SpatialMatrixTrace)
   EXPECT_DOUBLE_EQ(sm3.trace(), 3.0);
 }
 
+/// @brief Verifies spatial matrix value for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixValue)
 {
   SpatialMatrix<Real> sm(1, 1);
@@ -373,6 +415,7 @@ TEST_F(MatrixTest, SpatialMatrixValue)
   EXPECT_DOUBLE_EQ(sm.value(), 7.5);
 }
 
+/// @brief Verifies spatial matrix determinant 1 x 1 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixDeterminant1x1)
 {
   SpatialMatrix<Real> sm(1, 1);
@@ -380,6 +423,7 @@ TEST_F(MatrixTest, SpatialMatrixDeterminant1x1)
   EXPECT_DOUBLE_EQ(sm.determinant(), 5.0);
 }
 
+/// @brief Verifies spatial matrix determinant 2 x 2 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixDeterminant2x2)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -388,6 +432,7 @@ TEST_F(MatrixTest, SpatialMatrixDeterminant2x2)
   EXPECT_DOUBLE_EQ(sm.determinant(), -2.0);
 }
 
+/// @brief Verifies spatial matrix determinant 3 x 3 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixDeterminant3x3)
 {
   SpatialMatrix<Real> sm(3, 3);
@@ -397,6 +442,7 @@ TEST_F(MatrixTest, SpatialMatrixDeterminant3x3)
   EXPECT_NEAR(sm.determinant(), 1.0, 1e-10);
 }
 
+/// @brief Verifies spatial matrix inverse 1 x 1 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixInverse1x1)
 {
   SpatialMatrix<Real> sm(1, 1);
@@ -405,6 +451,7 @@ TEST_F(MatrixTest, SpatialMatrixInverse1x1)
   EXPECT_DOUBLE_EQ(inv(0, 0), 0.25);
 }
 
+/// @brief Verifies spatial matrix inverse 2 x 2 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixInverse2x2)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -418,6 +465,7 @@ TEST_F(MatrixTest, SpatialMatrixInverse2x2)
   EXPECT_NEAR(inv(1, 1), 0.4, 1e-10);
 }
 
+/// @brief Verifies spatial matrix inverse 3 x 3 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixInverse3x3)
 {
   SpatialMatrix<Real> sm(3, 3);
@@ -437,6 +485,7 @@ TEST_F(MatrixTest, SpatialMatrixInverse3x3)
   EXPECT_NEAR(inv(2, 2), 1.0 / 3.0, 1e-10);
 }
 
+/// @brief Verifies spatial matrix solve for matrix test by checking tolerance-based numerical results, solver behavior.
 TEST_F(MatrixTest, SpatialMatrixSolve)
 {
   SpatialMatrix<Real> A(2, 2);
@@ -452,6 +501,7 @@ TEST_F(MatrixTest, SpatialMatrixSolve)
   EXPECT_NEAR(x(1), 1.8, 1e-10);
 }
 
+/// @brief Verifies spatial matrix row col for matrix test by checking tolerance-based numerical results, exact expected values.
 TEST_F(MatrixTest, SpatialMatrixRowCol)
 {
   SpatialMatrix<Real> sm(2, 3);
@@ -470,6 +520,7 @@ TEST_F(MatrixTest, SpatialMatrixRowCol)
   EXPECT_DOUBLE_EQ(c(1), 5.0);
 }
 
+/// @brief Verifies spatial matrix scalar multiply for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixScalarMultiply)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -483,6 +534,7 @@ TEST_F(MatrixTest, SpatialMatrixScalarMultiply)
   EXPECT_DOUBLE_EQ(sm(1, 1), 8.0);
 }
 
+/// @brief Verifies spatial matrix matrix multiply for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixMatrixMultiply)
 {
   SpatialMatrix<Real> a(2, 2);
@@ -500,6 +552,7 @@ TEST_F(MatrixTest, SpatialMatrixMatrixMultiply)
   EXPECT_DOUBLE_EQ(a(1, 1), 50.0);
 }
 
+/// @brief Verifies spatial matrix pseudo inverse for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixPseudoInverse)
 {
   SpatialMatrix<Real> sm(2, 2);
@@ -516,6 +569,7 @@ TEST_F(MatrixTest, SpatialMatrixPseudoInverse)
     }
 }
 
+/// @brief Verifies spatial matrix non square for matrix test by checking exact expected values.
 TEST_F(MatrixTest, SpatialMatrixNonSquare)
 {
   SpatialMatrix<Real> sm(2, 3);
@@ -530,6 +584,7 @@ TEST_F(MatrixTest, SpatialMatrixNonSquare)
   EXPECT_EQ(t.cols(), 2);
 }
 
+/// @brief Verifies spatial matrix binary add for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixBinaryAdd)
 {
   SpatialMatrix<Real> a(2, 2);
@@ -547,6 +602,7 @@ TEST_F(MatrixTest, SpatialMatrixBinaryAdd)
   EXPECT_DOUBLE_EQ(c(1, 1), 12.0);
 }
 
+/// @brief Verifies spatial matrix binary subtract for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixBinarySubtract)
 {
   SpatialMatrix<Real> a(2, 2);
@@ -564,6 +620,7 @@ TEST_F(MatrixTest, SpatialMatrixBinarySubtract)
   EXPECT_DOUBLE_EQ(c(1, 1), 4.0);
 }
 
+/// @brief Verifies spatial matrix binary multiply for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixBinaryMultiply)
 {
   SpatialMatrix<Real> a(2, 2);
@@ -581,6 +638,7 @@ TEST_F(MatrixTest, SpatialMatrixBinaryMultiply)
   EXPECT_DOUBLE_EQ(c(1, 1), 50.0);
 }
 
+/// @brief Verifies spatial matrix binary subtract 3 x 3 for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixBinarySubtract3x3)
 {
   SpatialMatrix<Real> a(3, 3);
@@ -595,6 +653,7 @@ TEST_F(MatrixTest, SpatialMatrixBinarySubtract3x3)
       EXPECT_DOUBLE_EQ(c(i, j), 0.0);
 }
 
+/// @brief Verifies spatial matrix binary subtract non square for matrix test by checking tolerance-based numerical results.
 TEST_F(MatrixTest, SpatialMatrixBinarySubtractNonSquare)
 {
   SpatialMatrix<Real> a(2, 3);

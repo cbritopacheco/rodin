@@ -19,19 +19,69 @@
   changes** (create holes, merge components) by advecting a level-set
   function and recovering the implicit domain at each iteration.
 
-  The optimization minimizes compliance subject to a volume constraint:
+  The optimization minimizes compliance with a volume penalty. Let
+  @f$\Omega \subset D@f$ be the material region, let @f$\Gamma_D@f$ be the
+  clamped boundary, and let @f$\Gamma_N@f$ be the loaded boundary. The state
+  displacement @f$u : \Omega \to \mathbb{R}^d@f$ solves linear elasticity:
+
+  @f[
+    \int_\Omega A e(u) : e(v)\,dx
+      = \int_{\Gamma_N} f \cdot v\,ds
+      \qquad
+      \forall v \in H^1_{\Gamma_D}(\Omega;\mathbb{R}^d),
+  @f]
+
+  where
+
+  @f[
+    e(u) = \frac{1}{2}\left(\nabla u + \nabla u^T\right),
+    \qquad
+    A e(u) = 2\mu e(u) + \lambda \operatorname{tr}(e(u)) I.
+  @f]
+
+  The minimized functional is
 
   @f[
     \min_\Omega \; J(\Omega) = \int_\Omega A e(u) : e(u)\,dx
                                + \ell\,|\Omega_{\mathrm{int}}|
   @f]
 
+  with @f$\ell@f$ the volume penalty. The level-set function @f$\phi@f$
+  represents the material by sign:
+
+  @f[
+    \Omega = \{x \in D : \phi(x) > 0\}, \qquad
+    D \setminus \overline{\Omega} = \{x \in D : \phi(x) < 0\},
+    \qquad
+    \Gamma = \{x \in D : \phi(x) = 0\}.
+  @f]
+
+  The shape derivative is converted into a smooth vector field @f$g@f$ by a
+  Hilbertian regularization:
+
+  @f[
+    \int_D \alpha^2 \nabla g : \nabla w + g \cdot w\,dx
+      =
+    \int_\Gamma \left(A e(u):e(u) - \ell\right) n \cdot w\,ds
+      \qquad \forall w.
+  @f]
+
+  The level set is then transported by a descent velocity using the advection
+  equation
+
+  @f[
+    \partial_t \phi + g \cdot \nabla \phi = 0,
+  @f]
+
+  and the zero level set is re-discretized with
+  @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer".
+
   @section examples-shapeopt-ls-setup Problem Setup
 
   @subsection examples-shapeopt-ls-setup-includes Includes
 
   In addition to the standard Rodin modules, we need the
-  @ref Rodin::Distance "Distance" module (Eikonal solver) and the
+  @ref Rodin::Distance "Distance" module (Eikonal solver), the
   @ref Rodin::Advection "Advection" module (Lagrangian advection):
 
   @code{.cpp}
@@ -53,8 +103,7 @@
   @subsection examples-shapeopt-ls-setup-params Parameters
 
   The mesh is partitioned into `interior` (material present) and `exterior`
-  (void) regions. The level-set function is positive inside the material and
-  negative outside:
+  (void) regions. The example uses a positive-inside level-set convention:
 
   @code{.cpp}
   static constexpr Attribute interior = 1, exterior = 2;
@@ -73,8 +122,8 @@
 
   @subsection examples-shapeopt-ls-loop-remesh Step 1 — Remesh
 
-  At the start of each iteration, we remesh the current domain using
-  @ref Rodin::External::MMG "MMG::Optimizer":
+  At the start of each iteration, we improve the current body-fitted mesh
+  using @ref Rodin::MMG::Optimizer "MMG::Optimizer":
 
   @code{.cpp}
   MMG::Optimizer().setHMax(hmax)
@@ -156,8 +205,9 @@
 
   @subsection examples-shapeopt-ls-loop-recover Step 6 — Recover the Domain
 
-  The new domain is recovered by applying the @ref Rodin::External::MMG
-  "MMG::LevelSetDiscretizer" to the advected level-set function:
+  The new domain is recovered by applying
+  @ref Rodin::MMG::LevelSetDiscretizer "MMG::LevelSetDiscretizer" to the
+  advected level-set function:
 
   @code{.cpp}
   th = MMG::LevelSetDiscretizer()
@@ -198,6 +248,7 @@
 
   - @ref examples-shapeoptimization-simple_cantilever "Simple cantilever" —
     Boundary-variation approach
+  - @ref examples-mmg-behavior "MMG behavior and guarantees"
   - @ref examples-pdes-elasticity "Linear elasticity"
   - @ref gallery "Gallery"
 

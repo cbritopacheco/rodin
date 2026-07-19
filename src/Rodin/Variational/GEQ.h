@@ -35,6 +35,7 @@
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -51,10 +52,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent = BooleanFunctionBase<GEQ<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>;
 
       GEQ(const LHSType& lhs, const RHSType& rhs)
@@ -140,4 +144,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

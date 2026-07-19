@@ -34,16 +34,20 @@
 #include "ForwardDecls.h"
 #include "H1Element.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Scalar, class Mesh, class Data>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::H1<K, Scalar, Mesh>, Data>>>
   {
-    using FESType = Variational::H1<K, Scalar, Mesh>;
+    /// @brief Finite element space type.
+      using FESType = Variational::H1<K, Scalar, Mesh>;
 
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
 
-    using RangeType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Scalar;
   };
 }
 
@@ -69,16 +73,21 @@ namespace Rodin::Variational
         Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Scalar;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = DerivativeBase<OperandType, Derivative<OperandType>>;
 
       /**
@@ -117,7 +126,9 @@ namespace Rodin::Variational
         const auto& gf  = this->getOperand();
         const auto& fes = gf.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, i);
-        const auto& tab = fe.getTabulation(ip.getQuadratureFormula());
+        const auto* qf = ip.getQuadratureFormula();
+        assert(qf);
+        const auto& tab = fe.getTabulation(*qf);
         const auto JinvT = p.getJacobianInverse().transpose();
 
         SpatialVectorType ref(static_cast<std::uint8_t>(d));
@@ -247,4 +258,5 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<H1<K, Scalar, Mesh>, Data>>;
 }
 
+/// @endcond
 #endif

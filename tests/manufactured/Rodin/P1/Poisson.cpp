@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Poisson manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Poisson manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -57,13 +65,17 @@ namespace Rodin::Tests::Manufactured::Poisson
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Poisson Test 16 x 16.
   using Manufactured_Poisson_Test_16x16 =
     Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<16>;
+  /// @brief Helper used by the tests to Manufactured Poisson Test 32 x 32.
   using Manufactured_Poisson_Test_32x32 =
     Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<32>;
+  /// @brief Helper used by the tests to Manufactured Poisson Test 64 x 64.
   using Manufactured_Poisson_Test_64x64 =
     Rodin::Tests::Manufactured::Poisson::Manufactured_Poisson_Test<64>;
 
+  /// @brief Verifies poisson P1 exact for manufactured poisson test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_16x16, Poisson_P1Exact)
   {
     Mesh mesh = this->getMesh();
@@ -1574,12 +1586,14 @@ namespace Rodin::Tests::Manufactured::Poisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured Poisson Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Manufactured_Poisson_Test_16x16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Verifies complex poisson plane wave for manufactured poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_PlaneWave)
   {
     Mesh mesh = this->getMesh();
@@ -1615,6 +1629,7 @@ namespace Rodin::Tests::Manufactured::Poisson
     }
   }
 
+  /// @brief Verifies complex poisson complex polynomial for manufactured poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_ComplexPolynomial)
   {
     Mesh mesh = this->getMesh();
@@ -1648,6 +1663,7 @@ namespace Rodin::Tests::Manufactured::Poisson
     }
   }
 
+  /// @brief Verifies complex poisson exponential sine separation for manufactured poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_ExponentialSineSeparation)
   {
     auto pi = Math::Constants::pi();
@@ -1682,6 +1698,7 @@ namespace Rodin::Tests::Manufactured::Poisson
     }
   }
 
+  /// @brief Verifies complex poisson sum independent sinusoids for manufactured poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_SumIndependentSinusoids)
   {
     auto pi = Math::Constants::pi();
@@ -1726,6 +1743,7 @@ namespace Rodin::Tests::Manufactured::Poisson
     }
   }
 
+  /// @brief Verifies complex poisson mixed exponential polynomial for manufactured poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_MixedExponentialPolynomial)
   {
     auto pi = Math::Constants::pi();
@@ -1781,6 +1799,7 @@ namespace Rodin::Tests::Manufactured::Poisson
     }
   }
 
+  /// @brief Verifies complex poisson sine vs polynomial for manufactured poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_Test_32x32, ComplexPoisson_SineVsPolynomial)
   {
     auto pi = Math::Constants::pi();
@@ -1832,12 +1851,14 @@ namespace Rodin::Tests::Manufactured::Poisson
     }
   }
 
+  /// @brief Instantiates Manufactured Poisson Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Manufactured_Poisson_Test_32x32,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Poisson Test 64 x 64 over the Mesh Params 64 x 64 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
     Manufactured_Poisson_Test_64x64,

@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_VARIATIONAL_P1_DERIVATIVE_H
 #define RODIN_VARIATIONAL_P1_DERIVATIVE_H
 
@@ -23,16 +29,20 @@
 #include "Rodin/Variational/Derivative.h"
 #include "Rodin/Variational/IntegrationPoint.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
   struct Traits<Variational::Derivative<Variational::GridFunction<Variational::P1<Range, Mesh>, Data>>>
   {
-    using FESType = Variational::P1<Range, Mesh>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Range, Mesh>;
 
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
 
-    using RangeType = Range;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -40,12 +50,15 @@ namespace Rodin::FormLanguage
     Variational::Derivative<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-    using FESType = Variational::P1<Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Range, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
 
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, SpaceType>;
 
-    using RangeType = Range;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -60,16 +73,21 @@ namespace Rodin::Variational
     : public DerivativeBase<GridFunction<P1<Range, Mesh>, Data>, Derivative<GridFunction<P1<Range, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Range;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = DerivativeBase<OperandType, Derivative<OperandType>>;
 
       /**
@@ -195,4 +213,5 @@ namespace Rodin::Variational
     -> Derivative<GridFunction<P1<Range, Mesh>, Data>>;
 }
 
+/// @endcond
 #endif

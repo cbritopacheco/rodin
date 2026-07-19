@@ -25,6 +25,7 @@
 #include "IntegrationPoint.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -170,8 +171,10 @@ namespace Rodin::Variational
         it2->getTransformation().inverse(rc2, pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        const IntegrationPoint ip1(p1, ip.getQuadratureFormula(), ip.getIndex());
-        const IntegrationPoint ip2(p2, ip.getQuadratureFormula(), ip.getIndex());
+        const auto* qf = ip.getQuadratureFormula();
+        assert(qf);
+        const IntegrationPoint ip1(p1, qf, ip.getIndex());
+        const IntegrationPoint ip2(p2, qf, ip.getIndex());
         const auto v1 = getOperand().getValue(ip1);
         const auto v2 = getOperand().getValue(ip2);
         return 0.5 * (v1 + v2);
@@ -225,10 +228,13 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Average<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Average<OperandType>, FES, Space>;
 
       /**
@@ -338,8 +344,10 @@ namespace Rodin::Variational
         it2->getTransformation().inverse(rc2, pc);
         const Geometry::Point p1(std::cref(*it1), std::cref(rc1), pc);
         const Geometry::Point p2(std::cref(*it2), std::cref(rc2), pc);
-        const IntegrationPoint ip1(p1, m_ip->getQuadratureFormula(), m_ip->getIndex());
-        const IntegrationPoint ip2(p2, m_ip->getQuadratureFormula(), m_ip->getIndex());
+        const auto* qf = m_ip->getQuadratureFormula();
+        assert(qf);
+        const IntegrationPoint ip1(p1, qf, m_ip->getIndex());
+        const IntegrationPoint ip2(p2, qf, m_ip->getIndex());
         m_operand->setIntegrationPoint(ip1);
         const auto val1 = m_operand->getBasis(local);
         m_operand->setIntegrationPoint(ip2);
@@ -381,4 +389,5 @@ namespace Rodin::Variational
     -> Average<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

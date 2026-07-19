@@ -1,3 +1,13 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
+/**
+ * @file ShapeFunction.h
+ * @brief Shape function specializations for the H1 finite element space.
+ */
 #ifndef RODIN_VARIATIONAL_H1_SHAPEFUNCTION_H
 #define RODIN_VARIATIONAL_H1_SHAPEFUNCTION_H
 
@@ -9,6 +19,7 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Derived, size_t K, class Scalar, class Mesh, ShapeFunctionSpaceType Space>
@@ -19,12 +30,15 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,
@@ -105,16 +119,16 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto& qf  = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const auto* qf = ip.getQuadratureFormula();
+        const size_t qp = qf ? ip.getIndex() : 0;
 
         typename Cache::Key key;
         key.geom  = geom;
-        key.qf    = &qf;
+        key.qf = qf;
         key.qp    = qp;
         key.valid = true;
 
-        if (!(m_cache.key == key))
+        if (!qf || !(m_cache.key == key))
         {
           m_cache.key = key;
 
@@ -123,11 +137,19 @@ namespace Rodin::Variational
 
           m_cache.basis.resize(ndof);
 
-          // Fast path: use element tabulation (basis + gradients in ref coords)
-          const auto& tab = fe.getTabulation(qf);
-
-          for (size_t a = 0; a < ndof; ++a)
-            m_cache.basis[a] = tab.getBasis(qp, a);
+          if (qf)
+          {
+            // Fast path: use element tabulation inside quadrature loops.
+            const auto& tab = fe.getTabulation(*qf);
+            for (size_t a = 0; a < ndof; ++a)
+              m_cache.basis[a] = tab.getBasis(qp, a);
+          }
+          else
+          {
+            const auto& rc = p.getReferenceCoordinates();
+            for (size_t a = 0; a < ndof; ++a)
+              m_cache.basis[a] = fe.getBasis(a)(rc);
+          }
         }
 
         return *this;
@@ -172,12 +194,15 @@ namespace Rodin::Variational
         Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = H1<K, Math::SpatialVector<Scalar>, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType; // == Scalar
       using RangeType  = typename FormLanguage::Traits<FESType>::RangeType;  // == Math::Vector<Scalar>
 
+      /// @brief Parent class type.
       using Parent =
         ShapeFunctionBase<
           ShapeFunction<Derived, FESType, SpaceType>,
@@ -245,8 +270,9 @@ namespace Rodin::Variational
       size_t getDOFs(const Geometry::Polytope& polytope) const
       {
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();
-        const size_t ndof_scalar = H1Element<K, ScalarType>(polytope.getGeometry()).getCount();
-        return ndof_scalar * vdim;
+        const size_t ndofScalar =
+          H1Element<K, ScalarType>(polytope.getGeometry()).getCount();
+        return ndofScalar * vdim;
       }
 
       constexpr
@@ -264,35 +290,36 @@ namespace Rodin::Variational
         const auto& poly = p.getPolytope();
         const auto  geom = poly.getGeometry();
 
-        const auto& qf  = ip.getQuadratureFormula();
-        const size_t qp = ip.getIndex();
+        const auto* qf = ip.getQuadratureFormula();
+        const size_t qp = qf ? ip.getIndex() : 0;
 
         const size_t vdim = this->getFiniteElementSpace().getVectorDimension();
 
         typename Cache::Key key;
         key.geom  = geom;
-        key.qf    = &qf;
+        key.qf = qf;
         key.qp    = qp;
         key.vdim  = vdim;
         key.valid = true;
 
-        if (!(m_cache.key == key))
+        if (!qf || !(m_cache.key == key))
         {
           m_cache.key = key;
 
           // Scalar tabulation
-          const H1Element<K, ScalarType> fe_scalar(geom);
-          const size_t ndof_scalar = fe_scalar.getCount();
-          const size_t ndof = ndof_scalar * vdim;
+          const H1Element<K, ScalarType> feScalar(geom);
+          const size_t ndofScalar = feScalar.getCount();
+          const size_t ndof = ndofScalar * vdim;
 
           m_cache.basis.resize(ndof);
 
-          const auto& tab = fe_scalar.getTabulation(qf);
+          const auto* tab = qf ? &feScalar.getTabulation(*qf) : nullptr;
+          const auto& rc = p.getReferenceCoordinates();
 
           // φ_{a,c} = φ_a e_c
-          for (size_t a = 0; a < ndof_scalar; ++a)
+          for (size_t a = 0; a < ndofScalar; ++a)
           {
-            const ScalarType val = tab.getBasis(qp, a);
+            const ScalarType val = qf ? tab->getBasis(qp, a) : feScalar.getBasis(a)(rc);
             for (size_t c = 0; c < vdim; ++c)
             {
               RangeType v;
@@ -339,4 +366,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

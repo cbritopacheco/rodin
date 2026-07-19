@@ -461,7 +461,7 @@ if (TARGET SuiteSparse::SPQR)
       INTERFACE_LINK_LIBRARIES SuiteSparse::CHOLMOD)
   else (TARGET SuiteSparse::CHOLMOD)
     # Consider SPQR not found if CHOLMOD cannot be found
-    set (SuiteSparse_SQPR_FOUND FALSE)
+    set (SuiteSparse_SPQR_FOUND FALSE)
   endif (TARGET SuiteSparse::CHOLMOD)
 endif (TARGET SuiteSparse::SPQR)
 
@@ -516,6 +516,12 @@ if (TARGET SuiteSparse::Partition)
 else (TARGET SuiteSparse::Partition)
   set (SuiteSparse_Partition_FOUND FALSE)
 endif (TARGET SuiteSparse::Partition)
+
+foreach (component IN LISTS SuiteSparse_FIND_COMPONENTS)
+  if (TARGET SuiteSparse::${component})
+    set (SuiteSparse_${component}_FOUND TRUE)
+  endif()
+endforeach()
 
 suitesparse_reset_find_library_prefix()
 

@@ -32,6 +32,7 @@
 // Local (constitutive point, input injection)
 #include "Solid/Local/ConstitutivePoint.h"
 #include "Solid/Local/Input.h"
+#include "Solid/Local/FiberKinematics.h"
 
 // Kinematics
 #include "Solid/Kinematics/KinematicState.h"
@@ -43,12 +44,14 @@
 #include "Solid/Constitutive/NeoHookean.h"
 #include "Solid/Constitutive/SaintVenantKirchhoff.h"
 #include "Solid/Constitutive/MooneyRivlin.h"
+#include "Solid/Constitutive/HolzapfelOgden.h"
+#include "Solid/Constitutive/ActiveFiberLaw.h"
+#include "Solid/Constitutive/ActiveContraction.h"
 
 // Integrators
-#include "Solid/Integrators/InternalForce.h"
-#include "Solid/Integrators/MaterialTangent.h"
-#include "Solid/Integrators/BodyForce.h"
-#include "Solid/Integrators/TractionForce.h"
+#include "Solid/Integrators/InternalVirtualWorkResidual.h"
+#include "Solid/Integrators/InternalVirtualWorkTangent.h"
+#include "Solid/Integrators/InternalVirtualWork.h"
 
 // Fields
 #include "Solid/Fields/GreenLagrangeStrain.h"

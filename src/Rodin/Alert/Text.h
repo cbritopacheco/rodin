@@ -327,14 +327,40 @@ namespace Rodin::Alert
       FlatSet<Attribute> m_attributes;
   };
 
-  Text(const std::string&) -> Text<NoColorT, NoColorT>;
+  /**
+   * @brief Deduction guide for uncolored text.
+   * @param text The text content.
+   */
+  Text(const std::string& text) -> Text<NoColorT, NoColorT>;
 
+  /**
+   * @brief Deduction guide for text with a foreground color.
+   * @tparam F Foreground color type.
+   * @param text The text content.
+   * @param fg The foreground color.
+   */
   template <class F>
-  Text(const std::string&, const F&) -> Text<F, NoColorT>;
+  Text(const std::string& text, const F& fg) -> Text<F, NoColorT>;
 
+  /**
+   * @brief Deduction guide for text with foreground and background colors.
+   * @tparam F Foreground color type.
+   * @tparam B Background color type.
+   * @param text The text content.
+   * @param fg The foreground color.
+   * @param bg The background color.
+   */
   template <class F, class B>
-  Text(const std::string&, const F&, const B&) -> Text<F, B>;
+  Text(const std::string& text, const F& fg, const B& bg) -> Text<F, B>;
 
+  /**
+   * @brief Writes text with foreground and background formatting.
+   * @tparam Foreground Foreground color type.
+   * @tparam Background Background color type.
+   * @param os The output stream.
+   * @param text The text to write.
+   * @return Reference to the output stream.
+   */
   template <class Foreground, class Background>
   std::ostream& operator<<(std::ostream& os, const Text<Foreground, Background>& text)
   {
@@ -346,6 +372,13 @@ namespace Rodin::Alert
     return os;
   }
 
+  /**
+   * @brief Writes text with foreground formatting.
+   * @tparam Foreground Foreground color type.
+   * @param os The output stream.
+   * @param text The text to write.
+   * @return Reference to the output stream.
+   */
   template <class Foreground>
   std::ostream& operator<<(std::ostream& os, const Text<Foreground, NoColorT>& text)
   {
@@ -357,6 +390,13 @@ namespace Rodin::Alert
     return os;
   }
 
+  /**
+   * @brief Writes text with background formatting.
+   * @tparam Background Background color type.
+   * @param os The output stream.
+   * @param text The text to write.
+   * @return Reference to the output stream.
+   */
   template <class Background>
   std::ostream& operator<<(std::ostream& os, const Text<NoColorT, Background>& text)
   {
@@ -368,6 +408,12 @@ namespace Rodin::Alert
     return os;
   }
 
+  /**
+   * @brief Writes text without color formatting.
+   * @param os The output stream.
+   * @param text The text to write.
+   * @return Reference to the output stream.
+   */
   inline
   std::ostream& operator<<(std::ostream& os, const Text<NoColorT, NoColorT>& text)
   {
@@ -380,4 +426,3 @@ namespace Rodin::Alert
 }
 
 #endif
-

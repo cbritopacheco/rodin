@@ -45,11 +45,16 @@ namespace Rodin::Solver
   class NewtonSolverBase : public Copyable
   {
     public:
+      /// @brief Linear solver type used by this Newton solver.
       using LinearSolverType = LinearSolver;
+      /// @brief Linear system type.
       using LinearSystemType = typename FormLanguage::Traits<LinearSolver>::LinearSystemType;
+      /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
+      /// @brief Solution vector type.
       using SolutionType = typename FormLanguage::Traits<LinearSystemType>::VectorType;
 
+      /// @brief Parent class type.
       using Parent = Copyable;
 
       virtual ~NewtonSolverBase() = default;
@@ -114,11 +119,19 @@ namespace Rodin::Solver
       }
 
     protected:
+      /**
+       * @brief Returns the problem assembled by the associated linear solver.
+       * @return Mutable problem reference.
+       */
       ProblemBaseType& getProblem() noexcept
       {
         return m_solver.get().getProblem();
       }
 
+      /**
+       * @brief Returns the problem assembled by the associated linear solver.
+       * @return Const problem reference.
+       */
       const ProblemBaseType& getProblem() const noexcept
       {
         return m_solver.get().getProblem();
@@ -146,6 +159,24 @@ namespace Rodin::Solver
    *   x^{k+1} = x^k + \alpha\,\delta x^k,
    * @f]
    * where @f$ \alpha > 0 @f$ is a constant damping factor.
+   *
+   * @par Globalization
+   * The damping factor is @e constant: this solver performs no line search
+   * and no step-acceptance test, so convergence is only guaranteed close to
+   * a solution (the classical local quadratic convergence of Newton's
+   * method). Practical consequences:
+   * - For problems solved far from equilibrium (large loads, strong
+   *   nonlinearity), use @e incremental @e loading — ramp the load over
+   *   several solves so each Newton run starts inside its basin of
+   *   attraction (see @c examples/Solid/BlockGravity.cpp).
+   * - Merit functions with barriers (e.g. terms that blow up as an element
+   *   Jacobian determinant approaches zero) cannot be minimized reliably
+   *   with a constant step: they require a backtracking line search with a
+   *   validity test, which callers must currently implement around this
+   *   solver.
+   * - A damping factor @f$ \alpha < 1 @f$ trades convergence speed for
+   *   robustness and can stabilize mildly nonconvex problems, but it is not
+   *   a substitute for a line search.
    *
    * The nonlinear state vector passed to @c solve() is updated in place and is
    * used both as the initial guess and as the storage for the final iterate.
@@ -209,6 +240,26 @@ namespace Rodin::Solver
    * - damping factor: 1.0
    * - monitor: none
    *
+   * @par Usage
+   * A typical nonlinear solve pairs a Newton problem in the increment
+   * @f$ \delta u @f$ with a linear solver and iterates into the state
+   * @f$ u @f$:
+   * @code{.cpp}
+   * auto ivw = Solid::InternalVirtualWork(law, u);  // residual + tangent
+   *
+   * Problem newton(du, v);
+   * newton = ivw(du, v)
+   *        - Integral(load, v)
+   *        + DirichletBC(du, zero).on(fixedBoundary);
+   *
+   * SparseLU linearSolver(newton);
+   * NewtonSolver solver(linearSolver);
+   * solver.setMaxIterations(50)
+   *       .setAbsoluteTolerance(1e-10)
+   *       .setRelativeTolerance(1e-8);
+   * solver.solve(u);   // u is the initial guess and receives the solution
+   * @endcode
+   *
    * @tparam LinearSolver
    *   Type of the linear solver used at each Newton step. It must have a
    *   @c FormLanguage::Traits specialization exposing @c LinearSystemType.
@@ -221,7 +272,7 @@ namespace Rodin::Solver
       /**
        * @brief Reason why the most recent solve terminated.
        */
-      enum class ConvergenceReason
+      enum class ConvergedReason
       {
         /**
          * @brief The absolute residual tolerance was satisfied.
@@ -241,7 +292,15 @@ namespace Rodin::Solver
         /**
          * @brief The maximum number of Newton iterations was reached.
          */
-        MaxIterations
+        MaxIterations,
+
+        ResidualNormIsNotFinite,
+
+        StepNormIsNotFinite,
+
+        StepRejected,
+
+        UserCriterion
       };
 
       /**
@@ -264,12 +323,12 @@ namespace Rodin::Solver
         /**
          * @brief Residual norm at the initial iterate.
          */
-        Real initial_residual = 0.0;
+        Real initialResidual = 0.0;
 
         /**
          * @brief Residual norm of the last assembled tangential system.
          */
-        Real final_residual = 0.0;
+        Real finalResidual = 0.0;
 
         /**
          * @brief Norm of the last damped Newton correction.
@@ -280,12 +339,12 @@ namespace Rodin::Solver
          * @f]
          * It is zero until a linear correction has been computed.
          */
-        Real final_step_norm = 0.0;
+        Real finalStepNorm = 0.0;
 
         /**
          * @brief Damping factor used during the solve.
          */
-        Real damping_factor = 1.0;
+        Real dampingFactor = 1.0;
 
         /**
          * @brief Reason for termination.
@@ -293,7 +352,7 @@ namespace Rodin::Solver
          * The default value corresponds to non-convergence by exhaustion of the
          * iteration budget.
          */
-        ConvergenceReason reason = ConvergenceReason::MaxIterations;
+        ConvergedReason reason = ConvergedReason::MaxIterations;
 
         /**
          * @brief Whether the solve terminated by a convergence criterion.
@@ -310,11 +369,33 @@ namespace Rodin::Solver
        */
       using Monitor = std::function<void(const Report&)>;
 
+      /// @brief Parent class type.
       using Parent = NewtonSolverBase<LinearSolver>;
+      /// @brief Linear system type.
       using LinearSystemType = typename Parent::LinearSystemType;
+      /// @brief Associated problem base type.
       using ProblemBaseType = typename Parent::ProblemBaseType;
+      /// @brief Solution vector type.
       using SolutionType = typename Parent::SolutionType;
+      /// @brief Linear solver type used by this Newton solver.
       using LinearSolverType = LinearSolver;
+
+      /**
+       * @brief Outcome of a single Newton step.
+       */
+      struct StepResult
+      {
+        /// @brief Whether the step was accepted by the policy.
+          bool accepted = true;
+        /// @brief Whether the policy declares convergence.
+          bool converged = false;
+        /// @brief Norm reported for the accepted or rejected step.
+          Real stepNorm = 0.0;
+      };
+
+      /// @brief Callback type for custom Newton step acceptance and updates.
+      using StepPolicy =
+        std::function<StepResult(SolutionType&, LinearSystemType&, Report&)>;
 
       using Parent::solve;
 
@@ -341,7 +422,8 @@ namespace Rodin::Solver
           m_rtol(1e-8),
           m_stol(0.0),
           m_alpha(1.0),
-          m_monitor(std::nullopt)
+          m_monitor(std::nullopt),
+          m_stepPolicy(std::nullopt)
       {}
 
       ~NewtonSolver() override = default;
@@ -541,6 +623,26 @@ namespace Rodin::Solver
       }
 
       /**
+       * @brief Sets the optional custom step policy.
+       * @param policy Optional policy used to accept, reject, or update steps.
+       * @returns Reference to this solver.
+       */
+      NewtonSolver& setStepPolicy(Optional<StepPolicy> policy)
+      {
+        m_stepPolicy = std::move(policy);
+        return *this;
+      }
+
+      /**
+       * @brief Gets the optional custom step policy.
+       * @returns The currently installed step policy, if any.
+       */
+      const Optional<StepPolicy>& getStepPolicy() const noexcept
+      {
+        return m_stepPolicy;
+      }
+
+      /**
        * @brief Gets the report of the most recent solve.
        *
        * @returns Diagnostic report for the last call to @c solve().
@@ -587,7 +689,7 @@ namespace Rodin::Solver
       void solve(SolutionType& x) override
       {
         m_report = Report{};
-        m_report.damping_factor = m_alpha;
+        m_report.dampingFactor = m_alpha;
 
         Real r0 = 0.0;
 
@@ -601,22 +703,27 @@ namespace Rodin::Solver
 
           if (!std::isfinite(r))
           {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Residual norm is not finite."
-              << Alert::Raise;
+            m_report.iterations = it;
+            m_report.initialResidual = r0;
+            m_report.finalResidual = r;
+            m_report.finalStepNorm = 0.0;
+            m_report.reason = ConvergedReason::ResidualNormIsNotFinite;
+            m_report.converged = false;
+            notify();
+            return;
           }
 
           if (it == 0)
             r0 = r;
 
           m_report.iterations = it;
-          m_report.initial_residual = r0;
-          m_report.final_residual = r;
-          m_report.final_step_norm = 0.0;
+          m_report.initialResidual = r0;
+          m_report.finalResidual = r;
+          m_report.finalStepNorm = 0.0;
 
           if (r <= m_atol)
           {
-            m_report.reason = ConvergenceReason::AbsoluteTolerance;
+            m_report.reason = ConvergedReason::AbsoluteTolerance;
             m_report.converged = true;
             notify();
             return;
@@ -624,27 +731,68 @@ namespace Rodin::Solver
 
           if (r0 > 0.0 && r <= m_rtol * r0)
           {
-            m_report.reason = ConvergenceReason::RelativeTolerance;
+            m_report.reason = ConvergedReason::RelativeTolerance;
             m_report.converged = true;
             notify();
             return;
           }
 
+          // The tangential solve always starts from a zero initial guess:
+          // the increment vanishes as Newton converges, so zero is its
+          // natural limit. This overrides the assembly-seeded guess, which
+          // holds the previous increment.
+          auto& increment = linearSystem.getSolution();
+          increment.resize(linearSystem.getVector().size());
+          increment.setZero();
+
           this->getLinearSolver().solve();
+
+          if (m_stepPolicy)
+          {
+            const StepResult step = (*m_stepPolicy)(x, linearSystem, m_report);
+            if (!std::isfinite(step.stepNorm))
+            {
+              m_report.reason = ConvergedReason::StepNormIsNotFinite;
+              m_report.converged = false;
+              notify();
+              return;
+            }
+
+            m_report.finalStepNorm = step.stepNorm;
+            if (!step.accepted)
+            {
+              m_report.reason = ConvergedReason::StepRejected;
+              m_report.converged = false;
+              notify();
+              return;
+            }
+
+            if (step.converged)
+            {
+              m_report.reason = ConvergedReason::UserCriterion;
+              m_report.converged = true;
+              notify();
+              return;
+            }
+
+            notify();
+            continue;
+          }
 
           const Real dxNorm = m_alpha * linearSystem.getSolution().norm();
           if (!std::isfinite(dxNorm))
           {
-            Alert::MemberFunctionException(*this, __func__)
-              << "Step norm is not finite."
-              << Alert::Raise;
+            m_report.reason = ConvergedReason::StepNormIsNotFinite;
+            m_report.converged = false;
+            notify();
+            return;
           }
 
-          m_report.final_step_norm = dxNorm;
+          m_report.finalStepNorm = dxNorm;
 
           if (m_stol > 0.0 && dxNorm <= m_stol)
           {
-            m_report.reason = ConvergenceReason::StepTolerance;
+            m_report.reason = ConvergedReason::StepTolerance;
             m_report.converged = true;
             notify();
             x += m_alpha * linearSystem.getSolution();
@@ -656,7 +804,7 @@ namespace Rodin::Solver
         }
 
         m_report.iterations = m_maxIt;
-        m_report.reason = ConvergenceReason::MaxIterations;
+        m_report.reason = ConvergedReason::MaxIterations;
         m_report.converged = false;
       }
 
@@ -712,6 +860,9 @@ namespace Rodin::Solver
        * Default value: none.
        */
       Optional<Monitor> m_monitor;
+
+      /// @brief Optional custom step policy.
+      Optional<StepPolicy> m_stepPolicy;
 
       /**
        * @brief Diagnostic report of the most recent solve.

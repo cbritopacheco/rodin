@@ -53,7 +53,7 @@
   @subsection guides-io-meshformats-medit-mmg Using with MMG
 
   When working with the MMG remeshing tools through Rodin's
-  @ref Rodin::External::MMG module, the MEDIT format is used for mesh
+  @ref Rodin::MMG module, the MEDIT format is used for mesh
   exchange:
 
   @code{.cpp}

@@ -8,8 +8,8 @@
  * @file LevelSetDiscretizer.h
  * @brief Level-set based implicit-domain discretization utilities.
  */
-#ifndef RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
-#define RODIN_EXTERNAL_MMG_IMPLICITDOMAINMESHER_H
+#ifndef RODIN_MMG_LEVELSETDISCRETIZER_H
+#define RODIN_MMG_LEVELSETDISCRETIZER_H
 
 #include "Mesh.h"
 
@@ -30,6 +30,13 @@ namespace Rodin::MMG
    * multi-material meshes can be split into interior/exterior regions with
    * user-defined labels.
    *
+   * The output topology is chosen by MMG. In particular, required entities
+   * and `noSplit()` material policies do not force an entity crossed by the
+   * level set to remain geometrically untouched. Rodin's tested behavior is
+   * that required vertices, edges, triangles, and tetrahedra away from the cut
+   * keep their metadata and original geometry in the covered 2D/3D cases.
+   * Cut-through required entities may be replaced by MMG.
+   *
    * The canonical signed-distance interpretation is:
    * @f[
    *  \left\{
@@ -43,6 +50,8 @@ namespace Rodin::MMG
    *
    * Inherits common remeshing controls from @ref MMG5 (hmin/hmax/hausdorff/
    * gradation/angle detection).
+   *
+   * @see @ref examples-mmg-behavior
    */
   class LevelSetDiscretizer : public MMG5
   {
@@ -135,6 +144,10 @@ namespace Rodin::MMG
        * @brief Indicates that a material reference should not be split.
        * @param[in] ref Material reference that should not be split
        * @returns Reference to self (for method chaining)
+       *
+       * This configures MMG's material-reference split policy. It does not
+       * make each individual edge, triangle, or tetrahedron with that
+       * reference immutable when the level set cuts through it.
        */
       LevelSetDiscretizer& noSplit(const Geometry::Attribute& ref);
 
@@ -147,6 +160,11 @@ namespace Rodin::MMG
        *
        * The material reference of the generated level-set boundary defaults to
        * `10` unless changed via @ref setBoundaryReference.
+       *
+       * @note Required entities that are not crossed by the level set are
+       * tested to keep their metadata and original geometry in Rodin's 2D/3D
+       * cases. If the level set crosses a required entity, MMG may replace it
+       * while conforming the output mesh to the isovalue.
        */
       MMG::Mesh discretize(const MMG::RealGridFunction& ls);
 
@@ -209,7 +227,7 @@ namespace Rodin::MMG
        * @brief Gets the configured material split map.
        * @returns Immutable split policy map.
        *
-       * This is the user-provided map set by @ref setSplit/@ref split/@ref noSplit.
+       * This is the user-provided map set by setSplit() / split() / noSplit().
        * Internally, the implementation may derive temporary unique labels, but
        * those are not exposed here.
        */

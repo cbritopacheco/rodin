@@ -30,14 +30,14 @@
   | Solver | Class | Matrix requirement | Notes |
   |--------|-------|-------------------|-------|
   | @ref Rodin::Solver::SparseLU "SparseLU" | `Solver::SparseLU` | Any non-singular | General-purpose, good default for small/medium problems |
-  | @ref Rodin::Solver::UMFPack "UMFPack" | `Solver::UMFPack` | Any non-singular | SuiteSparse-based, often faster than SparseLU |
-  | @ref Rodin::Solver::CHOLMOD "CHOLMOD" | `Solver::CHOLMOD` | Symmetric positive definite | SuiteSparse Cholesky factorization |
+  | `UMFPack` | `Solver::UMFPack` | Any non-singular | SuiteSparse-based, often faster than SparseLU |
+  | `CHOLMOD` | `Solver::CHOLMOD` | Symmetric positive definite | SuiteSparse Cholesky factorization |
   | @ref Rodin::Solver::SimplicialLLT "SimplicialLLT" | `Solver::SimplicialLLT` | Symmetric positive definite | Eigen's simplicial Cholesky @f$ LL^T @f$ |
   | @ref Rodin::Solver::SimplicialLDLT "SimplicialLDLT" | `Solver::SimplicialLDLT` | Symmetric | Eigen's simplicial @f$ LDL^T @f$ factorization |
   | @ref Rodin::Solver::LDLT "LDLT" | `Solver::LDLT` | Symmetric | Dense @f$ LDL^T @f$ factorization |
   | @ref Rodin::Solver::HouseholderQR "HouseholderQR" | `Solver::HouseholderQR` | Any | Dense QR factorization |
   | @ref Rodin::Solver::SparseQR "SparseQR" | `Solver::SparseQR` | Any | Sparse QR factorization |
-  | @ref Rodin::Solver::SPQR "SPQR" | `Solver::SPQR` | Any | SuiteSparse sparse QR |
+  | `SPQR` | `Solver::SPQR` | Any | SuiteSparse sparse QR |
 
   @subsection guides-solvers-available-iterative Iterative Solvers
 
@@ -102,7 +102,7 @@
 
   @subsection guides-solvers-direct-umfpack UMFPack
 
-  @ref Rodin::Solver::UMFPack "UMFPack" is an alternative direct solver
+  `UMFPack` is an alternative direct solver
   from the SuiteSparse library. It is especially effective for general
   unsymmetric sparse systems and often outperforms SparseLU on larger
   problems:
@@ -187,8 +187,8 @@
   | Method | Default | Description |
   |--------|---------|-------------|
   | `setMaxIterations(n)` | 100 | Maximum Newton iterations |
-  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Converged when @f$ \|r\| \le \mathrm{atol} @f$ |
-  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Converged when @f$ \|r\|/\|r_0\| \le \mathrm{rtol} @f$ |
+  | `setAbsoluteTolerance(tol)` | @f$ 10^{-12} @f$ | Converged when @f$ \lVert r\rVert \le \mathrm{atol} @f$ |
+  | `setRelativeTolerance(tol)` | @f$ 10^{-8} @f$ | Converged when @f$ \lVert r\rVert/\lVert r_0\rVert \le \mathrm{rtol} @f$ |
 
   Convergence is declared when **either** criterion is satisfied (not both).
 
@@ -332,7 +332,7 @@
   When Rodin is built with PETSc support (`RODIN_USE_PETSC=ON`), additional
   solvers become available that support both sequential and MPI-distributed
   linear systems.  PETSc solvers work with
-  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" and are
+  `PETSc::Math::LinearSystem` and are
   activated by using `PETSc::Variational::TrialFunction` /
   `PETSc::Variational::TestFunction` instead of the standard trial/test
   functions.

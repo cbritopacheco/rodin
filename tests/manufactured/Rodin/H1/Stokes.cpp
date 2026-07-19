@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Stokes manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Stokes manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -67,13 +75,17 @@ namespace Rodin::Tests::Manufactured::Stokes
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Stokes Test 16 x 16.
   using Manufactured_Stokes_Test_16x16 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<16>;
+  /// @brief Helper used by the tests to Manufactured Stokes Test 32 x 32.
   using Manufactured_Stokes_Test_32x32 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<32>;
+  /// @brief Helper used by the tests to Manufactured Stokes Test 64 x 64.
   using Manufactured_Stokes_Test_64x64 =
     Rodin::Tests::Manufactured::Stokes::Manufactured_Stokes_Test<64>;
 
+  /// @brief Verifies stokes P1 exact residual for manufactured stokes test 16 x 16 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Manufactured_Stokes_Test_16x16, Stokes_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -131,7 +143,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Compute lambda_exact in a way consistent with the assembled discrete system:
     // Let re0_p be the pressure-block residual with lambda=0.
     // Let g = A_pλ be the pressure-block response to the lambda DOF.
-    // Choose lambda to minimize ||re_p||_2: lambda* = -(g·re0_p)/(g·g).
+    // Choose lambda to minimize ||re_p||_2: lambda* = -(g\cdotre0_p)/(g\cdotg).
     x_exact[lambdaIndex] = 0.0;
 
     auto re0 = (A * x_exact - b).eval();
@@ -249,7 +261,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     TestFunction  q(ph); // Pressure test function
 
     // Assemble the weak form:
-    // ∫ ∇u : ∇v - ∫ p div(v) - ∫ q div(u) = ∫ f · v
+    // \int \nabla u : \nabla v - \int p div(v) - \int q div(u) = \int f \cdot v
     Problem stokes(u, p, v, q);
     stokes = Integral(Jacobian(u), Jacobian(v))
            - Integral(p, Div(v))
@@ -273,7 +285,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Volume
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -326,8 +338,8 @@ namespace Rodin::Tests::Manufactured::Stokes
     H1 ph(std::integral_constant<size_t, 1>{}, mesh);
 
     // Manufactured velocity solution (divergence-free)
-    // Using u = (y(1-y), -x(1-x)) 
-    // ∇·u = ∂(y(1-y))/∂x + ∂(-x(1-x))/∂y = 0 + 0 = 0 ✓
+    // Using u = (y(1-y), -x(1-x))
+    // ∇·u = \partial(y(1-y))/\partialx + \partial(-x(1-x))/\partialy = 0 + 0 = 0 ✓
     VectorFunction u_exact{
       F::y * (1 - F::y),
       -F::x * (1 - F::x)
@@ -337,8 +349,8 @@ namespace Rodin::Tests::Manufactured::Stokes
     auto p_exact = F::x + F::y - 1;
 
     // Forcing function: f = -Δu + ∇p
-    // -Δ(y(1-y)) = -∂²/∂y²[y(1-y)] = -(-2) = 2
-    // -Δ(-x(1-x)) = -∂²/∂x²[-x(1-x)] = -(-(-2)) = -2
+    // -Δ(y(1-y)) = -\partial²/\partialy²[y(1-y)] = -(-2) = 2
+    // -Δ(-x(1-x)) = -\partial²/\partialx²[-x(1-x)] = -(-(-2)) = -2
     // ∇p = (1, 1)
     // Therefore f = (2+1, -2+1) = (3, -1)
     VectorFunction f{ 3.0, -1.0 };
@@ -373,7 +385,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Volume
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -474,7 +486,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Compute the L^2 error for pressure
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -533,17 +545,17 @@ namespace Rodin::Tests::Manufactured::Stokes
 
     // Manufactured velocity solution (divergence-free)
     // Using stream function ψ = x²(1-x)² y²(1-y)²
-    // u₁ = ∂ψ/∂y, u₂ = -∂ψ/∂x ensures ∇·u = 0
+    // u₁ = \partialψ/\partialy, u₂ = -\partialψ/\partialx ensures ∇·u = 0
 
-    // ∂ψ/∂y = x²(1-x)² · [2y(1-y)² - 2y²(1-y)]
+    // \partialψ/\partialy = x²(1-x)² \cdot [2y(1-y)² - 2y²(1-y)]
     //       = 2x²(1-x)² y(1-y) [1-y-y]
     //       = 2x²(1-x)² y(1-y)(1-2y)
     auto u1 = 2 * pow(F::x, 2) * pow(1 - F::x, 2) * F::y * (1 - F::y) * (1 - 2 * F::y);
 
-    // ∂ψ/∂x = [2x(1-x)² - 2x²(1-x)] · y²(1-y)²
+    // \partialψ/\partialx = [2x(1-x)² - 2x²(1-x)] \cdot y²(1-y)²
     //       = 2x(1-x) y²(1-y)² [1-x-x]
     //       = 2x(1-x) y²(1-y)² (1-2x)
-    // u₂ = -∂ψ/∂x
+    // u₂ = -\partialψ/\partialx
     auto u2 = -2 * F::x * (1 - F::x) * pow(F::y, 2) * pow(1 - F::y, 2) * (1 - 2 * F::x);
 
     VectorFunction u_exact{ u1, u2 };
@@ -552,16 +564,16 @@ namespace Rodin::Tests::Manufactured::Stokes
     auto p_exact = pow(F::x, 2) - pow(F::y, 2);
 
     // Compute Laplacian components
-    // For u1 = 2x²(1-x)² y(1-y)(1-2y), compute ∂²u1/∂x² + ∂²u1/∂y²
+    // For u1 = 2x²(1-x)² y(1-y)(1-2y), compute \partial²u1/\partialx² + \partial²u1/\partialy²
     // This is quite involved, so I'll compute it symbolically:
 
-    // ∂²u1/∂x² = 2y(1-y)(1-2y) · [2(1-x)² - 8x(1-x) + 2x²]
-    //          = 2y(1-y)(1-2y) · 2[(1-x)² - 4x(1-x) + x²]
-    //          = 4y(1-y)(1-2y) · [1 - 2x + x² - 4x + 4x² + x²]
-    //          = 4y(1-y)(1-2y) · [1 - 6x + 6x²]
+    // \partial²u1/\partialx² = 2y(1-y)(1-2y) \cdot [2(1-x)² - 8x(1-x) + 2x²]
+    //          = 2y(1-y)(1-2y) \cdot 2[(1-x)² - 4x(1-x) + x²]
+    //          = 4y(1-y)(1-2y) \cdot [1 - 2x + x² - 4x + 4x² + x²]
+    //          = 4y(1-y)(1-2y) \cdot [1 - 6x + 6x²]
     auto d2u1_dx2 = 4 * F::y * (1 - F::y) * (1 - 2 * F::y) * (1 - 6 * F::x + 6 * pow(F::x, 2));
 
-    // ∂²u1/∂y² = 2x²(1-x)² · [∂²/∂y²(y(1-y)(1-2y))]
+    // \partial²u1/\partialy² = 2x²(1-x)² \cdot [\partial²/\partialy²(y(1-y)(1-2y))]
     // Let g(y) = y(1-y)(1-2y) = y(1-3y+2y²) = y - 3y² + 2y³
     // g'(y) = 1 - 6y + 6y²
     // g''(y) = -6 + 12y
@@ -623,7 +635,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     // Volume
     Real vol = mesh.getMeasure(mesh.getDimension());
 
-    // Mean difference c = (1/|Ω|) ∫ (p_h - p_exact)
+    // Mean difference c = (1/|\Omega|) \int (p_h - p_exact)
     GridFunction mean(sh);
     mean = p.getSolution() - p_exact;
     Real mean_diff = Integral(mean).compute() / vol;
@@ -637,6 +649,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     EXPECT_NEAR(error_p, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies navier stokes picard taylor green for manufactured stokes test 32 x 32 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Manufactured_Stokes_Test_32x32, NavierStokes_Picard_TaylorGreen)
   {
     const Real pi = Rodin::Math::Constants::pi();
@@ -698,7 +711,7 @@ namespace Rodin::Tests::Manufactured::Stokes
     {
       Problem ns(u, p, lambda, v, q, mu);
 
-      // Frozen convection: (w · ∇)u = J(u) * w
+      // Frozen convection: (w \cdot \nabla)u = J(u) * w
       const auto conv_u = Mult(Jacobian(u), w);
 
       ns =
@@ -821,18 +834,21 @@ namespace Rodin::Tests::Manufactured::Stokes
     EXPECT_LT(fixedPointPressureDefect, 1e-6);
   }
 
+  /// @brief Instantiates Manufactured Stokes Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Manufactured_Stokes_Test_16x16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Stokes Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Manufactured_Stokes_Test_32x32,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Stokes Test 64 x 64 over the Mesh Params 64 x 64 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
     Manufactured_Stokes_Test_64x64,

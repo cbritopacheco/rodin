@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Stokes manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Stokes manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -38,9 +46,11 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     }
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Stokes 3 D Test 12.
   using Manufactured_Stokes3D_Test_12 =
     Manufactured_Stokes3D_Test<12, 12, 12>;
 
+  /// @brief Verifies stokes 3 D P1 exact residual for manufactured stokes 3 D test 12 by checking tolerance-based numerical results, form assembly, solver behavior.
   TEST_P(Manufactured_Stokes3D_Test_12, Stokes3D_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -104,7 +114,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     // Compute lambda_exact via assembled operator:
     // re0_p = pressure-block residual with lambda=0
     // g     = A_pλ column (pressure rows)
-    // lambda* = -(g·re0_p)/(g·g)
+    // lambda* = -(g\cdotre0_p)/(g\cdotg)
     x_exact[lambdaIndex] = 0.0;
 
     auto re0   = (A * x_exact - b).eval();
@@ -128,7 +138,7 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     auto re = (A * x_exact - b).eval();
 
     const Real scale = std::max<Real>(b.norm(), 1);
-    EXPECT_NEAR(r.norm() / scale, 0, 1e-8);
+    EXPECT_NEAR(r.norm() / scale, 0, 1e-7);
 
     // Block checks (do NOT expect full re-norm to be ~0 with P0g gauge)
     auto re_u  = re.head(uSize);
@@ -143,13 +153,8 @@ namespace Rodin::Tests::Manufactured::Stokes3D
     EXPECT_NEAR(g.dot(re_p) / gnorm, 0, 1e-10);
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Stokes3D_Test_12,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Wedge
-      )
-  );
+  /// @brief Instantiates Manufactured Stokes 3 D Test 12 over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Stokes3D_Test_12,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

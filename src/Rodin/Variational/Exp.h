@@ -18,6 +18,7 @@
 #include "Function.h"
 #include "RealFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -52,10 +53,13 @@ namespace Rodin::Variational
     : public RealFunctionBase<Exp<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = RealFunctionBase<Exp<OperandType>>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
       /**
@@ -145,4 +149,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

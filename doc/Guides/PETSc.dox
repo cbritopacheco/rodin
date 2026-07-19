@@ -13,7 +13,7 @@
   (PETSc) into the finite element pipeline.  It provides:
 
   - PETSc-backed trial/test functions, grid functions, bilinear forms, and
-    linear forms that store data in PETSc `Vec` and `Mat` objects.
+    linear forms that store data in PETSc @c Vec and @c Mat objects.
   - KSP (Krylov subspace) and SNES (nonlinear) solver wrappers.
   - Sequential, OpenMP, and MPI assembly strategies targeting PETSc objects.
   - Seamless support for both `Context::Local` (single-process) and
@@ -52,12 +52,12 @@
 
   The CTAD deduction guide automatically associates the trial function with a
   `PETSc::Variational::GridFunction` as its solution type, ensuring that the
-  discrete solution is stored in a PETSc `Vec`.
+  discrete solution is stored in a PETSc @c Vec.
 
   @subsection guides-petsc-gridfunction Grid Functions
 
-  @ref Rodin::PETSc::Variational::GridFunction "PETSc::Variational::GridFunction"
-  stores DOF coefficients in a PETSc `Vec`.  It supports:
+  `PETSc::Variational::GridFunction`
+  stores DOF coefficients in a PETSc @c Vec.  It supports:
 
   | Feature | Description |
   |---------|-------------|
@@ -80,7 +80,7 @@
   @subsection guides-petsc-forms Bilinear and Linear Forms
 
   When PETSc trial/test functions are used, `BilinearForm` assembles into a
-  PETSc `Mat` and `LinearForm` assembles into a PETSc `Vec`:
+  PETSc @c Mat and `LinearForm` assembles into a PETSc @c Vec:
 
   @code{.cpp}
   // Automatically selected via CTAD
@@ -98,7 +98,7 @@
   @subsection guides-petsc-problem Problem
 
   The PETSc `Problem` assembles into a
-  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" containing
+  `PETSc::Math::LinearSystem` containing
   the system matrix @f$ A @f$, right-hand side @f$ \mathbf{b} @f$, and
   solution @f$ \mathbf{x} @f$:
 
@@ -119,7 +119,7 @@
   @subsection guides-petsc-solvers-ksp KSP: Krylov Subspace Solvers
 
   @ref Rodin::Solver::KSP "KSP" is the base PETSc linear solver.  It wraps
-  the PETSc `KSP` context and supports programmatic configuration as well
+  the PETSc @c KSP context and supports programmatic configuration as well
   as command-line overrides.
 
   @code{.cpp}
@@ -184,7 +184,7 @@
 
   @section guides-petsc-linearsystem Linear System
 
-  @ref Rodin::PETSc::Math::LinearSystem "PETSc::Math::LinearSystem" couples
+  `PETSc::Math::LinearSystem` couples
   the PETSc matrix, RHS vector, and solution vector:
 
   @code{.cpp}

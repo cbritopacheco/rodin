@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_ALERT_COLOR_H
-#define RODIN_ALERT_COLOR_H
+#ifndef RODIN_ALERT_BOLD_H
+#define RODIN_ALERT_BOLD_H
 
 namespace Rodin::Alert
 {

@@ -6,7 +6,10 @@
  */
 #include <gtest/gtest.h>
 
+#include <array>
+#include <atomic>
 #include <memory>
+#include <thread>
 #include <vector>
 
 #include <Rodin/Alert/Exception.h>
@@ -37,6 +40,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies caches single formula per polytope for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, CachesSingleFormulaPerPolytope)
   {
     auto mesh = makeTriangleMesh();
@@ -63,6 +67,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&q1.getQuadratureFormula(), &qf);
   }
 
+  /// @brief Verifies distinguishes quadrature formula keys for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, DistinguishesQuadratureFormulaKeys)
   {
     auto mesh = makeTriangleMesh();
@@ -98,6 +103,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&qg.getQuadratureFormula(), &qf2);
   }
 
+  /// @brief Verifies clear drops cached entries for geometry polytope quadrature index by checking exact expected values.
   TEST(Geometry_PolytopeQuadratureIndex, ClearDropsCachedEntries)
   {
     auto mesh = makeTriangleMesh();
@@ -127,6 +133,38 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&q2.getQuadratureFormula(), &qf);
   }
 
+  /// @brief Verifies mesh move constructor drops stale entries for geometry polytope quadrature index by checking exact expected values, move semantics.
+  TEST(Geometry_PolytopeQuadratureIndex, MeshMoveConstructorDropsStaleEntries)
+  {
+    auto mesh = makeTriangleMesh();
+    QF::Centroid qf(Polytope::Type::Triangle);
+
+    mesh.getQuadrature(2, 0, qf);
+
+    Mesh<Context::Local> moved(std::move(mesh));
+    const auto& quadrature = moved.getQuadrature(2, 0, qf);
+    const auto& point = quadrature.getPoint(0);
+
+    EXPECT_EQ(&point.getPolytope().getMesh(), &static_cast<const MeshBase&>(moved));
+  }
+
+  /// @brief Verifies mesh move assignment drops stale entries for geometry polytope quadrature index by checking exact expected values, move semantics.
+  TEST(Geometry_PolytopeQuadratureIndex, MeshMoveAssignmentDropsStaleEntries)
+  {
+    auto mesh = makeTriangleMesh();
+    QF::Centroid qf(Polytope::Type::Triangle);
+
+    mesh.getQuadrature(2, 0, qf);
+
+    Mesh<Context::Local> moved;
+    moved = std::move(mesh);
+    const auto& quadrature = moved.getQuadrature(2, 0, qf);
+    const auto& point = quadrature.getPoint(0);
+
+    EXPECT_EQ(&point.getPolytope().getMesh(), &static_cast<const MeshBase&>(moved));
+  }
+
+  /// @brief Verifies throws on invalid dimension for geometry polytope quadrature index by checking exception behavior.
   TEST(Geometry_PolytopeQuadratureIndex, ThrowsOnInvalidDimension)
   {
     auto mesh = makeTriangleMesh();
@@ -149,6 +187,7 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
+  /// @brief Verifies throws on out of range polytope index for geometry polytope quadrature index by checking exception behavior.
   TEST(Geometry_PolytopeQuadratureIndex, ThrowsOnOutOfRangePolytopeIndex)
   {
     auto mesh = makeTriangleMesh();
@@ -172,6 +211,7 @@ namespace Rodin::Tests::Unit
       Alert::Exception);
   }
 
+  /// @brief Verifies exceeding capacity does not throw for geometry polytope quadrature index by checking no-throw behavior.
   TEST(Geometry_PolytopeQuadratureIndex, ExceedingCapacityDoesNotThrow)
   {
     auto mesh = makeTriangleMesh();
@@ -203,7 +243,8 @@ namespace Rodin::Tests::Unit
     }
   }
 
-  TEST(Geometry_PolytopeQuadratureIndex, RebuildsEvictedFormulaAfterCapacityExceeded)
+  /// @brief Verifies formula entries remain stable beyond the former bounded-cache capacity.
+  TEST(Geometry_PolytopeQuadratureIndex, RetainsFormulaBeyondFormerCapacity)
   {
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
@@ -238,8 +279,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope);
 
-    // Insert one more distinct formula. This should evict one entry by
-    // round-robin replacement, not throw.
+    // Insert one more distinct formula.
     quadratureFormulas.emplace_back(
       std::make_unique<QF::Centroid>(Polytope::Type::Triangle));
 
@@ -257,9 +297,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
 
-    // The first inserted formula should have been evicted under round-robin
-    // replacement, since the insertion order was sequential and no older entry
-    // was reinserted into the bounded cache.
+    // Stable formula storage retains the first quadrature until clear().
     index.get(
       {2, 0},
       mesh.getPolytopeCount(2),
@@ -272,10 +310,11 @@ namespace Rodin::Tests::Unit
           *quadratureFormulas.front());
       });
 
-    EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 2);
+    EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
   }
 
-  TEST(Geometry_PolytopeQuadratureIndex, HotEntryPreservesImmediateRepeatAfterOverflow)
+  /// @brief Verifies immediate repeated access after registering several formulas.
+  TEST(Geometry_PolytopeQuadratureIndex, PreservesImmediateRepeatAcrossFormulas)
   {
     auto mesh = makeTriangleMesh();
     const auto polytope = *mesh.getPolytope(2, 0);
@@ -309,8 +348,7 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
 
-    // Immediate repeat of the most recently inserted formula should be served
-    // from the hot entry or the bounded cache without rebuilding.
+    // Immediate repeat of the most recently inserted formula should not rebuild.
     const auto& q1 = index.get(
       {2, 0},
       mesh.getPolytopeCount(2),
@@ -337,5 +375,44 @@ namespace Rodin::Tests::Unit
 
     EXPECT_EQ(&q1, &q2);
     EXPECT_EQ(factoryCalls, kMaxQuadraturesPerPolytope + 1);
+  }
+
+  /// @brief Verifies that concurrent formula lookup constructs each cached entry once.
+  TEST(Geometry_PolytopeQuadratureIndex, ConstructsDistinctFormulasConcurrently)
+  {
+    constexpr size_t formulaCount = 8;
+    constexpr size_t repetitions = 64;
+
+    auto mesh = makeTriangleMesh();
+    const auto polytope = *mesh.getPolytope(2, 0);
+
+    PolytopeQuadratureIndex index;
+    index.initialize(mesh.getDimension());
+
+    std::array<std::unique_ptr<QF::Centroid>, formulaCount> formulas;
+    std::array<std::atomic<size_t>, formulaCount> factoryCalls{};
+    for (auto& formula : formulas)
+      formula = std::make_unique<QF::Centroid>(Polytope::Type::Triangle);
+
+    std::vector<std::thread> threads;
+    threads.reserve(formulaCount);
+    for (size_t i = 0; i < formulaCount; ++i)
+      threads.emplace_back([&, i]() {
+        for (size_t repetition = 0; repetition < repetitions; ++repetition)
+        {
+          const auto& quadrature =
+            index.get({2, 0}, mesh.getPolytopeCount(2), *formulas[i], [&]() {
+              ++factoryCalls[i];
+              return std::make_unique<PolytopeQuadrature>(polytope, *formulas[i]);
+            });
+          EXPECT_EQ(&quadrature.getQuadratureFormula(), formulas[i].get());
+        }
+      });
+
+    for (auto& thread : threads)
+      thread.join();
+
+    for (const auto& calls : factoryCalls)
+      EXPECT_EQ(calls.load(), 1u);
   }
 }

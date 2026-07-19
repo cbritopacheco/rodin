@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Eikonal/fmm manufactured distance regression tests.
+ *
+ * These tests assemble Rodin variational forms for a Eikonal/FMM manufactured distance regression, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the Eikonal finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Variational.h"
@@ -59,9 +67,12 @@ namespace Rodin::Tests::Manufactured::Eikonal
     }
   };
 
+  /// @brief Helper used by the manufactured tests to Eikonal 2 D Test.
   using Eikonal2DTest = EikonalManufacturedTest<33, 33, 1>;
+  /// @brief Helper used by the manufactured tests to Eikonal 3 D Test.
   using Eikonal3DTest = EikonalManufacturedTest<33, 33, 33>;
 
+  /// @brief Verifies constant speed point source for eikonal 2 D test by checking false predicates, solver behavior.
   TEST_P(Eikonal2DTest, ConstantSpeed_PointSource)
   {
     auto mesh = buildMesh();
@@ -91,6 +102,7 @@ namespace Rodin::Tests::Manufactured::Eikonal
     checkDistance(mesh, u, tol);
   }
 
+  /// @brief Verifies constant speed point source for eikonal 3 D test by checking false predicates, solver behavior.
   TEST_P(Eikonal3DTest, ConstantSpeed_PointSource)
   {
     auto mesh = buildMesh();
@@ -117,10 +129,11 @@ namespace Rodin::Tests::Manufactured::Eikonal
     fmm.seed(interface);
     fmm.solve();
 
-    const Real tol = 9e-2;
+    const Real tol = GetParam() == Polytope::Type::Wedge ? 1.1e-1 : 9e-2;
     checkDistance(mesh, u, tol);
   }
 
+  /// @brief Instantiates Eikonal 2 D Test over the Polytope Coverage 2 D parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     PolytopeCoverage2D,
     Eikonal2DTest,
@@ -128,10 +141,8 @@ namespace Rodin::Tests::Manufactured::Eikonal
       Polytope::Type::Triangle)
   );
 
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Eikonal3DTest,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron)
-  );
+  /// @brief Instantiates Eikonal 3 D Test over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Eikonal3DTest,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

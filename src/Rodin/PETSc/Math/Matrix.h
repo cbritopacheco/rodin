@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_PETSC_MATH_MATRIX_H
 #define RODIN_PETSC_MATH_MATRIX_H
 
@@ -5,7 +11,7 @@
  * @file
  * @brief PETSc matrix type alias and form-language traits.
  *
- * Introduces @ref Rodin::PETSc::Math::Matrix as an alias for `::Mat` and
+ * Introduces @ref Rodin::PETSc::Math::Matrix as an alias for @c Mat and
  * provides the @ref Rodin::FormLanguage::Traits specialization so that
  * Rodin's type-trait machinery recognises PETSc matrices.
  *
@@ -37,12 +43,13 @@ namespace Rodin::FormLanguage
   /**
    * @brief Traits specialization for PETSc matrices.
    *
-   * Allows the form language to deduce the scalar type of a `::Mat`.
+   * Allows the form language to deduce the scalar type of a @c Mat.
    */
   template <>
   struct Traits<::Mat>
   {
-    using ScalarType = PetscScalar;
+    /// @brief Scalar value type.
+      using ScalarType = PetscScalar;
   };
 }
 

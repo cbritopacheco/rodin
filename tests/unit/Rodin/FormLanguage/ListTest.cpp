@@ -56,6 +56,7 @@ namespace Rodin::Tests::Unit
 {
   //=== Construction Tests ===================================================
 
+  /// @brief Verifies default construction for form language list by checking exact expected values, true predicates.
   TEST(FormLanguage_List, DefaultConstruction)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -63,6 +64,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list.size(), 0);
   }
 
+  /// @brief Verifies copy construction for form language list by checking exact expected values, copy semantics.
   TEST(FormLanguage_List, CopyConstruction)
   {
     Rodin::FormLanguage::List<TestElement> list1;
@@ -83,6 +85,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list1.at(0).getValue(), 42);
   }
 
+  /// @brief Verifies move construction for form language list by checking exact expected values, move semantics.
   TEST(FormLanguage_List, MoveConstruction)
   {
     Rodin::FormLanguage::List<TestElement> list1;
@@ -97,6 +100,7 @@ namespace Rodin::Tests::Unit
 
   //=== Assignment Tests =====================================================
 
+  /// @brief Verifies copy assignment for form language list by checking exact expected values, copy semantics.
   TEST(FormLanguage_List, CopyAssignment)
   {
     Rodin::FormLanguage::List<TestElement> list1;
@@ -114,6 +118,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list2.at(1).getValue(), 99);
   }
 
+  /// @brief Verifies move assignment for form language list by checking exact expected values, move semantics.
   TEST(FormLanguage_List, MoveAssignment)
   {
     Rodin::FormLanguage::List<TestElement> list1;
@@ -130,6 +135,7 @@ namespace Rodin::Tests::Unit
 
   //=== Add and Access Tests =================================================
 
+  /// @brief Verifies add single element for form language list by checking exact expected values, false predicates.
   TEST(FormLanguage_List, AddSingleElement)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -142,6 +148,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list.at(0).getValue(), 42);
   }
 
+  /// @brief Verifies add multiple elements for form language list by checking exact expected values.
   TEST(FormLanguage_List, AddMultipleElements)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -157,6 +164,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list.at(2).getValue(), 30);
   }
 
+  /// @brief Verifies add another list for form language list by checking exact expected values.
   TEST(FormLanguage_List, AddAnotherList)
   {
     Rodin::FormLanguage::List<TestElement> list1;
@@ -176,6 +184,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list2.at(2).getValue(), 20);
   }
 
+  /// @brief Verifies at access const for form language list by checking exact expected values.
   TEST(FormLanguage_List, AtAccessConst)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -188,6 +197,7 @@ namespace Rodin::Tests::Unit
 
   //=== Clear Test ===========================================================
 
+  /// @brief Verifies clear for form language list by checking exact expected values, true predicates.
   TEST(FormLanguage_List, Clear)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -206,6 +216,7 @@ namespace Rodin::Tests::Unit
 
   //=== Iterator Tests =======================================================
 
+  /// @brief Verifies iterator begin end for form language list by checking exact expected values.
   TEST(FormLanguage_List, IteratorBeginEnd)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -228,6 +239,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(it, list.end());
   }
 
+  /// @brief Verifies iterator post increment for form language list by checking exact expected values.
   TEST(FormLanguage_List, IteratorPostIncrement)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -243,6 +255,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ((*it).getValue(), 20);
   }
 
+  /// @brief Verifies iterator range based for for form language list by checking exact expected values.
   TEST(FormLanguage_List, IteratorRangeBasedFor)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -261,6 +274,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(sum, 60);
   }
 
+  /// @brief Verifies const iterator begin end for form language list by checking exact expected values.
   TEST(FormLanguage_List, ConstIteratorBeginEnd)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -281,6 +295,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(it, constList.end());
   }
 
+  /// @brief Verifies const iterator C begin C end for form language list by checking exact expected values.
   TEST(FormLanguage_List, ConstIteratorCBeginCEnd)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -299,6 +314,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(it, list.cend());
   }
 
+  /// @brief Verifies const iterator range based for for form language list by checking exact expected values.
   TEST(FormLanguage_List, ConstIteratorRangeBasedFor)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -321,6 +337,7 @@ namespace Rodin::Tests::Unit
 
   //=== Copy Method Test =====================================================
 
+  /// @brief Verifies copy method for form language list by checking exact expected values, copy semantics.
   TEST(FormLanguage_List, CopyMethod)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -342,6 +359,7 @@ namespace Rodin::Tests::Unit
 
   //=== Empty List Edge Cases ================================================
 
+  /// @brief Verifies empty list iterators for form language list by checking exact expected values.
   TEST(FormLanguage_List, EmptyListIterators)
   {
     Rodin::FormLanguage::List<TestElement> list;
@@ -350,6 +368,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list.cbegin(), list.cend());
   }
 
+  /// @brief Verifies empty list copy for form language list by checking exact expected values, true predicates, copy semantics.
   TEST(FormLanguage_List, EmptyListCopy)
   {
     Rodin::FormLanguage::List<TestElement> list1;
@@ -359,6 +378,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(list2.size(), 0);
   }
 
+  /// @brief Verifies clear empty list for form language list by checking exact expected values, true predicates.
   TEST(FormLanguage_List, ClearEmptyList)
   {
     Rodin::FormLanguage::List<TestElement> list;

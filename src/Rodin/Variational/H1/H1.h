@@ -33,24 +33,33 @@
 
 #include "Rodin/Utility/DependentValue.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Scalar, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Scalar;
-    using RangeType = ScalarType;
-    using ElementType = Variational::H1Element<K, RangeType>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = ScalarType;
+    /// @brief Finite element type.
+      using ElementType = Variational::H1Element<K, RangeType>;
   };
 
   template <size_t K, class Scalar, class Mesh>
   struct Traits<Variational::H1<K, Math::SpatialVector<Scalar>, Mesh>>
   {
-    using MeshType = Mesh;
-    using ScalarType = Scalar;
-    using RangeType = Math::SpatialVector<ScalarType>;
-    using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
+    /// @brief Mesh type.
+      using MeshType = Mesh;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Math::SpatialVector<ScalarType>;
+    /// @brief Finite element type.
+      using ElementType = Variational::H1Element<K, Math::SpatialVector<ScalarType>>;
   };
 }
 
@@ -121,6 +130,7 @@ namespace Rodin::Variational
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Range type of value
@@ -380,42 +390,47 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Point);
+            static const ElementType s_element(Geometry::Polytope::Type::Point);
             return s_element;
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Segment);
+            static const ElementType s_element(Geometry::Polytope::Type::Segment);
             return s_element;
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Triangle);
+            static const ElementType s_element(Geometry::Polytope::Type::Triangle);
             return s_element;
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
+            static const ElementType s_element(Geometry::Polytope::Type::Quadrilateral);
             return s_element;
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
+            static const ElementType s_element(Geometry::Polytope::Type::Tetrahedron);
+            return s_element;
+          }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static const ElementType s_element(Geometry::Polytope::Type::Pyramid);
             return s_element;
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Wedge);
+            static const ElementType s_element(Geometry::Polytope::Type::Wedge);
             return s_element;
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local const ElementType s_element(Geometry::Polytope::Type::Hexahedron);
+            static const ElementType s_element(Geometry::Polytope::Type::Hexahedron);
             return s_element;
           }
         }
         assert(false);
-        static thread_local const ElementType s_null;
+        static const ElementType s_null;
         return s_null;
       }
 
@@ -500,6 +515,22 @@ namespace Rodin::Variational
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 
+      /**
+       * @brief Evaluates the scalar expansion directly at reference coordinates.
+       *
+       * The scalar Lagrange pushforward is composition with the element map;
+       * therefore a point already carrying reference coordinates requires no
+       * range transformation.
+       */
+      template <class Coefficient>
+      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
+      }
+
     private:
       std::reference_wrapper<const MeshType> m_mesh;
 
@@ -547,6 +578,7 @@ namespace Rodin::Variational
     public:
       static_assert(K > 0, "Polynomial degree K must be greater than 0.");
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Range type of value
@@ -671,84 +703,79 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Point, 0),
-              ElementType(Geometry::Polytope::Type::Point, 1),
-              ElementType(Geometry::Polytope::Type::Point, 2),
-              ElementType(Geometry::Polytope::Type::Point, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Point, 0),
+                ElementType(Geometry::Polytope::Type::Point, 1),
+                ElementType(Geometry::Polytope::Type::Point, 2),
+                ElementType(Geometry::Polytope::Type::Point, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Segment:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Segment, 0),
-              ElementType(Geometry::Polytope::Type::Segment, 1),
-              ElementType(Geometry::Polytope::Type::Segment, 2),
-              ElementType(Geometry::Polytope::Type::Segment, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Segment, 0),
+                ElementType(Geometry::Polytope::Type::Segment, 1),
+                ElementType(Geometry::Polytope::Type::Segment, 2),
+                ElementType(Geometry::Polytope::Type::Segment, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Triangle:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Triangle, 0),
-              ElementType(Geometry::Polytope::Type::Triangle, 1),
-              ElementType(Geometry::Polytope::Type::Triangle, 2),
-              ElementType(Geometry::Polytope::Type::Triangle, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Triangle, 0),
+                ElementType(Geometry::Polytope::Type::Triangle, 1),
+                ElementType(Geometry::Polytope::Type::Triangle, 2),
+                ElementType(Geometry::Polytope::Type::Triangle, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Quadrilateral:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 2),
-              ElementType(Geometry::Polytope::Type::Quadrilateral, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Quadrilateral, 0),
+                ElementType(Geometry::Polytope::Type::Quadrilateral, 1),
+                ElementType(Geometry::Polytope::Type::Quadrilateral, 2),
+                ElementType(Geometry::Polytope::Type::Quadrilateral, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Tetrahedron:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
-              ElementType(Geometry::Polytope::Type::Tetrahedron, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Tetrahedron, 0),
+                ElementType(Geometry::Polytope::Type::Tetrahedron, 1),
+                ElementType(Geometry::Polytope::Type::Tetrahedron, 2),
+                ElementType(Geometry::Polytope::Type::Tetrahedron, 3)};
+            return s_elements[m_vdim];
+          }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Pyramid, 0),
+                ElementType(Geometry::Polytope::Type::Pyramid, 1),
+                ElementType(Geometry::Polytope::Type::Pyramid, 2),
+                ElementType(Geometry::Polytope::Type::Pyramid, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Wedge:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Wedge, 0),
-              ElementType(Geometry::Polytope::Type::Wedge, 1),
-              ElementType(Geometry::Polytope::Type::Wedge, 2),
-              ElementType(Geometry::Polytope::Type::Wedge, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Wedge, 0),
+                ElementType(Geometry::Polytope::Type::Wedge, 1),
+                ElementType(Geometry::Polytope::Type::Wedge, 2),
+                ElementType(Geometry::Polytope::Type::Wedge, 3)};
             return s_elements[m_vdim];
           }
           case Geometry::Polytope::Type::Hexahedron:
           {
-            static thread_local std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1> s_elements =
-            {
-              ElementType(Geometry::Polytope::Type::Hexahedron, 0),
-              ElementType(Geometry::Polytope::Type::Hexahedron, 1),
-              ElementType(Geometry::Polytope::Type::Hexahedron, 2),
-              ElementType(Geometry::Polytope::Type::Hexahedron, 3)
-            };
+            static const std::array<ElementType, RODIN_MAXIMAL_SPACE_DIMENSION + 1>
+              s_elements = {ElementType(Geometry::Polytope::Type::Hexahedron, 0),
+                ElementType(Geometry::Polytope::Type::Hexahedron, 1),
+                ElementType(Geometry::Polytope::Type::Hexahedron, 2),
+                ElementType(Geometry::Polytope::Type::Hexahedron, 3)};
             return s_elements[m_vdim];
           }
         }
         assert(false);
-        static thread_local ElementType s_null(Geometry::Polytope::Type::Point, 0);
+        static const ElementType s_null(Geometry::Polytope::Type::Point, 0);
         return s_null;
       }
 
@@ -793,6 +820,21 @@ namespace Rodin::Variational
         return Pushforward<Callable>(std::forward<Callable>(v));
       }
 
+      /**
+       * @brief Evaluates the vector expansion directly at reference coordinates.
+       *
+       * Vector H1 uses a componentwise Lagrange map and therefore requires no
+       * range transformation after the structured local contraction.
+       */
+      template <class Coefficient>
+      constexpr void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
+      }
+
     private:
       std::reference_wrapper<const Geometry::Mesh<ContextType>> m_mesh;
       size_t m_vdim;
@@ -816,4 +858,5 @@ namespace Rodin::Variational
 
 #include "H1.hpp"
 
+/// @endcond
 #endif

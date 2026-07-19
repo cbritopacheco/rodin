@@ -4,6 +4,11 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/**
+ * @file RandomPointOnTriangle.h
+ * @brief Uniform random point sampling on reference triangles for
+ * randomized tests.
+ */
 #ifndef RODIN_TEST_RANDOM_RANDOMPOINTONTRIANGLE_H
 #define RODIN_TEST_RANDOM_RANDOMPOINTONTRIANGLE_H
 
@@ -12,6 +17,9 @@
 
 namespace Rodin::Test::Random
 {
+  /**
+   * @brief Random point generator on the reference triangle.
+   */
   class PointOnTriangle
   {
     public:
@@ -22,6 +30,10 @@ namespace Rodin::Test::Random
           m_gen(0, 1)
       {}
 
+      /**
+       * @brief Generates a random point.
+       * @return Point sampled on the reference triangle.
+       */
       Math::Vector2<Real> operator()()
       {
         auto x = m_gen();

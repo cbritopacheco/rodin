@@ -223,6 +223,7 @@ namespace Rodin::Geometry
         std::vector<Index> left;             ///< Local shard index -> distributed index
         UnorderedMap<Index, Index> right;    ///< Distributed index -> local shard index
 
+        /// @brief Serializes the local/distributed index maps.
         template <class Archive>
         void serialize(Archive& ar, const unsigned int version)
         {
@@ -269,6 +270,7 @@ namespace Rodin::Geometry
       class Builder
       {
         public:
+          /// @brief Builder initialization mode.
           enum class Mode
           {
             None,    ///< Uninitialized builder

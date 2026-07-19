@@ -16,6 +16,7 @@
 #include "ShapeFunction.h"
 #include "MatrixFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -41,10 +42,13 @@ namespace Rodin::Variational
     : public FunctionBase<Transpose<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Transpose<OperandType>>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
       /**
@@ -89,7 +93,10 @@ namespace Rodin::Variational
       auto getValue(const Point& p) const
       {
         const auto v = getOperand().getValue(p);
-        return v.transpose();
+        if constexpr (requires { v.transpose().eval(); })
+          return v.transpose().eval();
+        else
+          return v.transpose();
       }
 
       Optional<size_t> getOrder(const Geometry::Polytope& polytope) const
@@ -128,10 +135,13 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Transpose<OperandType>, FES, Space>;
 
       /**
@@ -211,8 +221,11 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto v = getOperand().getBasis(local);
-        return v.transpose();
+        decltype(auto) v = getOperand().getBasis(local);
+        if constexpr (requires { v.transpose().eval(); })
+          return v.transpose().eval();
+        else
+          return v.transpose();
       }
 
       /**
@@ -247,4 +260,5 @@ namespace Rodin::Variational
     -> Transpose<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

@@ -6,6 +6,7 @@ using namespace Rodin;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies const getters for MPI context by checking exact expected values, MPI behavior.
   TEST(Rodin_MPI_Context, ConstGetters)
   {
     int argc = 0;

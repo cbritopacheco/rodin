@@ -20,6 +20,7 @@ class RandomFloatTest : public ::testing::Test
 };
 
 // Test basic construction and type constraints
+/// @brief Test default construction.
 TEST_F(RandomFloatTest, Construction)
 {
   // Test default construction
@@ -42,6 +43,7 @@ TEST_F(RandomFloatTest, Construction)
 }
 
 // Test range constraints
+/// @brief Test that values are within specified range.
 TEST_F(RandomFloatTest, RangeConstraints)
 {
   // Test that values are within specified range
@@ -59,6 +61,7 @@ TEST_F(RandomFloatTest, RangeConstraints)
 }
 
 // Test seed functionality
+/// @brief Test getSeed.
 TEST_F(RandomFloatTest, SeedFunctionality)
 {
   // Test getSeed
@@ -82,6 +85,7 @@ TEST_F(RandomFloatTest, SeedFunctionality)
 }
 
 // Test deterministic behavior with fixed seed
+/// @brief Verifies deterministic behavior for random float test by checking exact expected values.
 TEST_F(RandomFloatTest, DeterministicBehavior)
 {
   unsigned int seed = 12345;
@@ -102,6 +106,7 @@ TEST_F(RandomFloatTest, DeterministicBehavior)
 }
 
 // Test different range scenarios
+/// @brief Test positive range.
 TEST_F(RandomFloatTest, DifferentRanges)
 {
   // Test positive range
@@ -142,6 +147,7 @@ TEST_F(RandomFloatTest, DifferentRanges)
 }
 
 // Test with different floating point types
+/// @brief Test with float.
 TEST_F(RandomFloatTest, DifferentTypes)
 {
   // Test with float
@@ -173,6 +179,7 @@ TEST_F(RandomFloatTest, DifferentTypes)
 }
 
 // Test statistical properties (basic distribution test)
+/// @brief Verifies statistical properties for random float test by checking tolerance-based numerical results.
 TEST_F(RandomFloatTest, StatisticalProperties)
 {
   RandomFloat<Real> rf(0.0, 1.0, 888);
@@ -201,6 +208,7 @@ TEST_F(RandomFloatTest, StatisticalProperties)
 }
 
 // Test edge cases
+/// @brief Test with very large range.
 TEST_F(RandomFloatTest, EdgeCases)
 {
   // Test with very large range
@@ -231,6 +239,7 @@ TEST_F(RandomFloatTest, EdgeCases)
 }
 
 // Test operator() multiple calls
+/// @brief Verifies operator call for random float test.
 TEST_F(RandomFloatTest, OperatorCall)
 {
   RandomFloat<Real> rf(-2.0, 3.0, 161718);
@@ -255,6 +264,7 @@ TEST_F(RandomFloatTest, OperatorCall)
 }
 
 // Test copy and assignment behavior
+/// @brief Verifies copy and assignment for random float test by checking exact expected values, copy semantics.
 TEST_F(RandomFloatTest, CopyAndAssignment)
 {
   RandomFloat<Real> rf1(0.0, 1.0, 192021);
@@ -270,6 +280,7 @@ TEST_F(RandomFloatTest, CopyAndAssignment)
 }
 
 // Test type safety (compile-time test)
+/// @brief These should compile fine.
 TEST_F(RandomFloatTest, TypeSafety)
 {
   // These should compile fine

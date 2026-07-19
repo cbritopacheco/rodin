@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Nonlinear poisson manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a nonlinear Poisson manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 #include "Rodin/Assembly.h"
 #include "Rodin/Solver/NewtonSolver.h"
@@ -63,6 +71,7 @@ namespace Rodin::Tests::Manufactured::NonLinearPoisson
     }
   }
 
+  /// @brief Verifies non linear poisson unit square dirichlet fixed point for manufactured P1 by checking tolerance-based numerical results, manufactured-solution convergence.
   TEST(Rodin_Manufactured_P1, NonLinearPoisson_UnitSquareDirichlet_FixedPoint)
   {
     const Real pi = Math::Constants::pi();
@@ -80,6 +89,7 @@ namespace Rodin::Tests::Manufactured::NonLinearPoisson
     EXPECT_NEAR(l2ErrorSquared, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies non linear poisson unit square dirichlet newton solver for manufactured P1 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST(Rodin_Manufactured_P1, NonLinearPoisson_UnitSquareDirichlet_NewtonSolver)
   {
     const Real pi = Math::Constants::pi();

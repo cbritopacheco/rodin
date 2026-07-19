@@ -1,0 +1,4 @@
+# clang-tidy naming baseline (file<TAB>kind<TAB>identifier).
+# Shrink by fixing names; regenerate with
+#   python3 dev/check_clang_tidy.py --flags ... --update-baseline
+# Never grow this file to silence a new finding.

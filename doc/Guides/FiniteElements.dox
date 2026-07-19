@@ -89,7 +89,7 @@
 
   The values @f$ \sigma_i(p) @f$ are the **degrees of freedom** (DOF values)
   of @f$ p @f$. In Rodin, these DOF values are stored as the coefficient
-  vector of a @ref Rodin::Variational::GridFunction "GridFunction".
+  vector of a `GridFunction`.
 
   @section fem-ciarlet-examples Common Finite Elements
 
@@ -117,7 +117,7 @@
   std::cout << Vh.getSize() << std::endl;
   @endcode
 
-  The @ref Rodin::Variational::P1 "P1" class constructs one DOF per mesh
+  The `P1` class constructs one DOF per mesh
   vertex, producing a space of continuous piecewise linear functions that
   is @f$ H^1 @f$-conforming.
 
@@ -139,7 +139,7 @@
   std::cout << Wh.getSize() << std::endl;
   @endcode
 
-  The @ref Rodin::Variational::P0 "P0" class constructs one DOF per mesh
+  The `P0` class constructs one DOF per mesh
   cell. Functions in P0 are discontinuous across cell boundaries, making this
   space a subspace of @f$ L^2(\Omega) @f$ (not @f$ H^1 @f$).
 
@@ -154,7 +154,7 @@
   - @f$ \Sigma @f$ = point evaluations at the 3 vertices and 3 edge midpoints
 
   In Rodin, higher-order elements are provided by the
-  @ref Rodin::Variational::H1 "H1<k>" class:
+  `H1<k>` class:
 
   @code{.cpp}
   // Quadratic (P2) finite element space
@@ -192,10 +192,10 @@
 
   | Conformity | Continuity requirement | Typical use | Rodin class |
   |------------|----------------------|-------------|-------------|
-  | @f$ H^1 @f$-conforming | Continuous across element boundaries | Scalar PDEs (Poisson, heat) | @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::H1 "H1" |
+  | @f$ H^1 @f$-conforming | Continuous across element boundaries | Scalar PDEs (Poisson, heat) | `P1`, `H1` |
   | @f$ H(\mathrm{div}) @f$-conforming | Normal component continuous | Mixed methods, fluid flow | — |
   | @f$ H(\mathrm{curl}) @f$-conforming | Tangential component continuous | Electromagnetics | — |
-  | @f$ L^2 @f$ (no conformity) | No continuity required | Discontinuous Galerkin, indicators | @ref Rodin::Variational::P0 "P0" |
+  | @f$ L^2 @f$ (no conformity) | No continuity required | Discontinuous Galerkin, indicators | `P0` |
 
   Rodin currently provides @f$ H^1 @f$-conforming elements (P1, H1) and
   @f$ L^2 @f$ elements (P0). The P1 and H1 spaces produce global functions
@@ -210,12 +210,12 @@
   | Ciarlet component | Mathematical object | Rodin class |
   |-------------------|---------------------|-------------|
   | @f$ K @f$ | Reference element geometry | @ref Rodin::Geometry::Polytope "Polytope" + @ref Rodin::Geometry::Polytope::Type "Polytope::Type" |
-  | @f$ P @f$ | Local polynomial space | Defined internally by @ref Rodin::Variational::P0 "P0", @ref Rodin::Variational::P1 "P1", @ref Rodin::Variational::H1 "H1" |
+  | @f$ P @f$ | Local polynomial space | Defined internally by `P0`, `P1`, `H1` |
   | @f$ \Sigma @f$ | Degrees of freedom | DOF numbering managed by the finite element space class |
   | @f$ V_h @f$ | Global finite element space | The space object itself (e.g. `P1 Vh(mesh)`) |
-  | @f$ u_h \in V_h @f$ | Discrete function | @ref Rodin::Variational::GridFunction "GridFunction" |
-  | @f$ u @f$ (unknown) | Trial function | @ref Rodin::Variational::TrialFunction "TrialFunction" |
-  | @f$ v @f$ (weight) | Test function | @ref Rodin::Variational::TestFunction "TestFunction" |
+  | @f$ u_h \in V_h @f$ | Discrete function | `GridFunction` |
+  | @f$ u @f$ (unknown) | Trial function | `TrialFunction` |
+  | @f$ v @f$ (weight) | Test function | `TestFunction` |
 
   @code{.cpp}
   // The mesh provides the cells K and the geometric transformations F_K

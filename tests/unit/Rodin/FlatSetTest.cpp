@@ -8,6 +8,7 @@ namespace Rodin::Tests::Unit
 {
   //=== IndexSetEquality Tests ===============================================
 
+  /// @brief Verifies index set equality both empty for flat set by checking true predicates.
   TEST(Rodin_FlatSet, IndexSetEquality_BothEmpty)
   {
     IndexSet a, b;
@@ -15,6 +16,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(eq(a, b));
   }
 
+  /// @brief Verifies index set equality different sizes for flat set by checking false predicates.
   TEST(Rodin_FlatSet, IndexSetEquality_DifferentSizes)
   {
     IndexSet a{1, 2, 3};
@@ -23,6 +25,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(eq(a, b));
   }
 
+  /// @brief Verifies index set equality same size different elements for flat set by checking false predicates.
   TEST(Rodin_FlatSet, IndexSetEquality_SameSizeDifferentElements)
   {
     IndexSet a{1, 2, 3};
@@ -31,6 +34,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(eq(a, b));
   }
 
+  /// @brief Verifies index set equality same elements for flat set by checking true predicates.
   TEST(Rodin_FlatSet, IndexSetEquality_SameElements)
   {
     IndexSet a{1, 2, 3};
@@ -39,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(eq(a, b));
   }
 
+  /// @brief Verifies index set equality single element for flat set by checking true predicates, false predicates.
   TEST(Rodin_FlatSet, IndexSetEquality_SingleElement)
   {
     IndexSet a{42};
@@ -50,6 +55,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(eq(a, c));
   }
 
+  /// @brief Note: FlatSet maintains sorted order, so this tests the underlying comparison.
   TEST(Rodin_FlatSet, IndexSetEquality_OrderMatters)
   {
     // Note: FlatSet maintains sorted order, so this tests the underlying comparison
@@ -59,6 +65,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(eq(a, b));  // Should be equal because FlatSet sorts elements
   }
 
+  /// @brief Verifies index set equality large set for flat set by checking true predicates, false predicates.
   TEST(Rodin_FlatSet, IndexSetEquality_LargeSet)
   {
     IndexSet a, b;
@@ -79,6 +86,7 @@ namespace Rodin::Tests::Unit
 
   //=== IndexSetHash Tests ===================================================
 
+  /// @brief Verifies index set hash empty set for flat set by checking exact expected values.
   TEST(Rodin_FlatSet, IndexSetHash_EmptySet)
   {
     IndexSet empty;
@@ -89,6 +97,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hash, hasher(empty));
   }
 
+  /// @brief Verifies index set hash single element for flat set by checking exact expected values.
   TEST(Rodin_FlatSet, IndexSetHash_SingleElement)
   {
     IndexSet a{42};
@@ -101,6 +110,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(hasher(a), hasher(c));  // Different elements should have different hash (usually)
   }
 
+  /// @brief Verifies index set hash multiple elements for flat set by checking exact expected values.
   TEST(Rodin_FlatSet, IndexSetHash_MultipleElements)
   {
     IndexSet a{1, 2, 3};
@@ -113,6 +123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(hasher(a), hasher(c));
   }
 
+  /// @brief Verifies index set hash order independent for flat set by checking exact expected values.
   TEST(Rodin_FlatSet, IndexSetHash_OrderIndependent)
   {
     IndexSet a{1, 2, 3};
@@ -122,6 +133,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hasher(a), hasher(b));  // Should be equal since FlatSet sorts
   }
 
+  /// @brief Verifies index set hash consistency for flat set by checking exact expected values.
   TEST(Rodin_FlatSet, IndexSetHash_Consistency)
   {
     IndexSet set{5, 10, 15, 20};
@@ -135,6 +147,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hash2, hash3);
   }
 
+  /// @brief Verifies index set hash different sets for flat set.
   TEST(Rodin_FlatSet, IndexSetHash_DifferentSets)
   {
     IndexSetHash hasher;
@@ -158,6 +171,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(hash3, hash4);
   }
 
+  /// @brief Verifies index set hash large set for flat set by checking exact expected values.
   TEST(Rodin_FlatSet, IndexSetHash_LargeSet)
   {
     IndexSet largeSet;
@@ -180,6 +194,7 @@ namespace Rodin::Tests::Unit
 
   //=== Integration Tests ====================================================
 
+  /// @brief Verifies equality and hash consistency for flat set by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_FlatSet, EqualityAndHashConsistency)
   {
     IndexSet a{10, 20, 30};
@@ -198,6 +213,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(hasher(a), hasher(c));
   }
 
+  /// @brief Test that functors can be used with parentheses operator.
   TEST(Rodin_FlatSet, FunctorCallOperator)
   {
     // Test that functors can be used with parentheses operator

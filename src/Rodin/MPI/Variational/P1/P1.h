@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 #ifndef RODIN_MPI_VARIATIONAL_P1_P1_H
 #define RODIN_MPI_VARIATIONAL_P1_P1_H
 
@@ -13,7 +19,10 @@
 
 #include <mpi.h>
 #include <sys/mman.h>
+#include <type_traits>
+#include <utility>
 
+#include <boost/mpi/collectives.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/split_free.hpp>
 #include "Rodin/Serialization/Optional.h"
@@ -160,6 +169,59 @@ namespace Rodin::Variational
       };
 
       /**
+       * @brief Pullback of a pointwise callable to the reference polytope.
+       */
+      template <class CallableType>
+      class CallablePullback
+        : public FiniteElementSpacePullbackBase<CallablePullback<CallableType>>
+      {
+        public:
+          /**
+           * @brief Constructs a pullback for a pointwise callable.
+           * @tparam Callable Callable type accepted by the wrapper.
+           * @param polytope Physical polytope.
+           * @param v Callable evaluated on physical points.
+           */
+          template <class Callable>
+          CallablePullback(const Geometry::Polytope& polytope, Callable&& v)
+            : m_polytope(polytope),
+              m_v(std::forward<Callable>(v))
+          {}
+
+          /// @brief Copy constructor.
+          CallablePullback(const CallablePullback&) = default;
+
+          /**
+           * @brief Evaluates the pulled-back callable.
+           * @param r Reference coordinates.
+           * @return Callable value at the mapped physical point.
+           */
+          auto operator()(const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(p);
+          }
+
+          /**
+           * @brief Evaluates the pulled-back callable into storage.
+           * @tparam T Result storage type.
+           * @param res Result storage.
+           * @param r Reference coordinates.
+           * @return Value returned by the wrapped callable.
+           */
+          template <class T>
+          auto operator()(T& res, const Math::SpatialVector<Real>& r) const
+          {
+            const Geometry::Point p(m_polytope, r);
+            return m_v(res, p);
+          }
+
+        private:
+          Geometry::Polytope m_polytope;
+          CallableType m_v;
+      };
+
+      /**
        * @brief Pushforward of a function from the reference polytope.
        *
        * Given a function @f$ \hat v @f$ defined on the reference polytope
@@ -258,7 +320,6 @@ namespace Rodin::Variational
         const auto& halo  = shard.getHalo(0);   // owned local vertex -> remote ranks that also contain it
         const auto& owner = shard.getOwner(0);  // shared/ghost local vertex -> owner rank
 
-        const int P    = comm.size();
         const int rank = comm.rank();
 
         // Count all owned local vertices, not just those present in halo(0).
@@ -272,13 +333,30 @@ namespace Rodin::Variational
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        std::vector<std::vector<std::pair<Index, Index>>> send(P); // to peer: (globalVertexId, globalDof)
-        std::vector<std::vector<std::pair<Index, Index>>> recv(P); // from owner: (globalVertexId, globalDof)
-        std::vector<char> need_recv(P, 0);
+        // Build the symmetric neighbor set from vertex halo ∪ owner.
+        // Using the full neighbor set ensures every isend has a matching
+        // irecv and no messages are orphaned between sequential FES builds.
+        std::vector<int> neighbors;
+        {
+          UnorderedSet<int> nbrs;
+          for (const auto& [i, peers] : halo)
+            for (const Index r : peers)
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
+          for (const auto& [lv, own] : owner)
+            if (static_cast<int>(own) != rank)
+              nbrs.insert(static_cast<int>(own));
+          neighbors.assign(nbrs.begin(), nbrs.end());
+        }
+
+        // send[r]: (globalVertexId, globalDof) pairs for neighbor r.
+        UnorderedMap<int, std::vector<std::pair<Index, Index>>> send;
+        for (int r : neighbors)
+          send[r]; // default-construct empty entry
 
         // owned + non-owned is a good upper bound
-        std::vector<std::pair<Index, Index>> gl_pairs;
-        gl_pairs.reserve(shard.getVertexCount());
+        std::vector<std::pair<Index, Index>> globalLocalPairs;
+        globalLocalPairs.reserve(shard.getVertexCount());
 
         // Number every owned local vertex.
         Index dofIdx = 0;
@@ -291,9 +369,9 @@ namespace Rodin::Variational
           const Index local  = m_fes.getDOFs(0, lv)[0];
           const Index global = m_offset + dofIdx++;
 
-          gl_pairs.push_back({ global, local });
+          globalLocalPairs.push_back({global, local});
 
-          // Only shared owned vertices appear in halo(0).
+          // Notify all neighbors that also hold this vertex.
           auto hit = halo.find(lv);
           if (hit != halo.end())
           {
@@ -308,74 +386,69 @@ namespace Rodin::Variational
         }
         assert(dofIdx == static_cast<Index>(m_owned));
 
-        // Non-owned local vertices (Shared or Ghost) need owner numbering.
-        for (const auto& [lv, own] : owner)
-        {
-          (void) lv;
-          const int ro = static_cast<int>(own);
-          if (ro != rank)
-            need_recv[ro] = 1;
-        }
+        // Symmetric exchange: every neighbor always sends and receives,
+        // even if the payload is empty.  Tag 51 is reserved for scalar P1
+        // DOF exchange and does not overlap with other FES or SubMesh tags.
+        static constexpr int kTagP1Dof = 51;
 
+        UnorderedMap<int, std::vector<std::pair<Index, Index>>> recv;
         std::vector<boost::mpi::request> reqs;
-        reqs.reserve(static_cast<size_t>(2 * P));
+        reqs.reserve(2 * neighbors.size());
 
-        for (int r = 0; r < P; ++r)
+        for (int r : neighbors)
         {
-          if (need_recv[r])
-            reqs.push_back(comm.irecv(r, 0, recv[r]));
-        }
-
-        for (int r = 0; r < P; ++r)
-        {
-          if (!send[r].empty())
-            reqs.push_back(comm.isend(r, 0, send[r]));
+          recv[r]; // default-construct
+          reqs.push_back(comm.irecv(r, kTagP1Dof, recv[r]));
+          reqs.push_back(comm.isend(r, kTagP1Dof, send[r]));
         }
 
         boost::mpi::wait_all(reqs.begin(), reqs.end());
 
         // Install remote numbering for non-owned local vertices.
-        for (int r = 0; r < P; ++r)
+        for (auto& [r, msgs] : recv)
         {
-          for (const auto& [gid, global] : recv[r])
+          for (const auto& [gid, global] : msgs)
           {
             const auto lvOpt = mesh.getLocalIndex(0, gid);
-            assert(lvOpt);
+            // The owner's halo is derived from the parent shard, which may
+            // list ranks that have this vertex only in ghost cells.  When the
+            // mesh is a SubMesh that excludes those ghost cells the vertex is
+            // absent here, so simply skip the entry.
+            if (!lvOpt)
+              continue;
             const Index lv = *lvOpt;
 
             // This should only populate non-owned vertices.
             assert(!shard.isOwned(0, lv));
 
             const Index local = m_fes.getDOFs(0, lv)[0];
-            gl_pairs.push_back({ global, local });
+            globalLocalPairs.push_back({global, local});
           }
         }
 
-        std::sort(gl_pairs.begin(), gl_pairs.end(),
-                  [](const auto& a, const auto& b) { return a.first < b.first; });
+        std::sort(globalLocalPairs.begin(), globalLocalPairs.end(),
+          [](const auto& a, const auto& b) { return a.first < b.first; });
 
-        gl_pairs.erase(
-            std::unique(gl_pairs.begin(), gl_pairs.end(),
-                        [](const auto& a, const auto& b)
-                        {
-                          return a.first == b.first;
-                        }),
-            gl_pairs.end());
+        globalLocalPairs.erase(
+          std::unique(globalLocalPairs.begin(), globalLocalPairs.end(),
+            [](const auto& a, const auto& b) { return a.first == b.first; }),
+          globalLocalPairs.end());
 
-        m_local_to_global.right = FlatMap<Index, Index>(gl_pairs.begin(), gl_pairs.end());
+        m_localToGlobal.right =
+          FlatMap<Index, Index>(globalLocalPairs.begin(), globalLocalPairs.end());
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
-        for (const auto& [global, local] : m_local_to_global.right)
+        for (const auto& [global, local] : m_localToGlobal.right)
         {
           assert(local < localDofCount);
-          m_local_to_global.left[local] = global;
+          m_localToGlobal.left[local] = global;
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -415,7 +488,26 @@ namespace Rodin::Variational
         const size_t inclusive = boost::mpi::scan(comm, m_owned, std::plus<size_t>());
         m_offset = inclusive - m_owned;
 
-        FlatMap<Index, std::vector<std::pair<Index, std::vector<Index>>>> push, pull;
+        // Build the symmetric neighbor set from vertex halo ∪ owner.
+        std::vector<int> neighbors;
+        {
+          UnorderedSet<int> nbrs;
+          for (const auto& [i, peers] : halo)
+            for (const Index r : peers)
+              if (static_cast<int>(r) != rank)
+                nbrs.insert(static_cast<int>(r));
+          for (const auto& [lv, own] : owner)
+            if (static_cast<int>(own) != rank)
+              nbrs.insert(static_cast<int>(own));
+          neighbors.assign(nbrs.begin(), nbrs.end());
+        }
+
+        // push[r]: (gid, [globalDOFs]) to send to neighbor r.
+        // pull[r]: (gid, [globalDOFs]) to receive from neighbor r.
+        using MsgVec = std::vector<std::pair<Index, std::vector<Index>>>;
+        UnorderedMap<int, MsgVec> push;
+        for (int r : neighbors)
+          push[r]; // default-construct empty entry
 
         Index dofIdx = 0;
         for (size_t i = 0; i < shard.getVertexCount(); ++i)
@@ -433,78 +525,83 @@ namespace Rodin::Variational
               const Index global = m_offset + dofIdx;
               s_send.push_back(global);
 
-              const auto [it, inserted] = m_local_to_global.right.emplace(global, local);
+              [[maybe_unused]] const auto [it, inserted] =
+                m_localToGlobal.right.emplace(global, local);
               assert(inserted);
 
               ++dofIdx;
             }
 
-            // Only vertices that are also present remotely appear in halo.
+            // Notify all neighbors that also hold this vertex.
             auto hit = halo.find(i);
             if (hit != halo.end())
             {
               for (const Index& peer : hit->second)
               {
-                assert(peer != static_cast<Index>(rank));
-                push[peer].push_back({ gid, s_send });
+                const int rpeer = static_cast<int>(peer);
+                assert(rpeer != rank);
+                push[rpeer].push_back({gid, s_send});
               }
             }
-          }
-          else
-          {
-            // Non-owned vertices are either Shared or Ghost and must have an owner.
-            auto oit = owner.find(i);
-            assert(oit != owner.end());
-            pull.try_emplace(oit->second);
           }
         }
 
         assert(dofIdx == static_cast<Index>(m_owned));
 
-        std::vector<boost::mpi::request> irecv;
-        irecv.reserve(pull.size());
-        for (auto& [own, requested] : pull)
-          irecv.push_back(comm.irecv(own, 0, pull[own]));
+        // Symmetric exchange: every neighbor always sends and receives,
+        // even if the payload is empty.  Tag 52 is reserved for vector P1
+        // DOF exchange and does not overlap with other FES or SubMesh tags.
+        static constexpr int kTagP1VecDof = 52;
 
-        std::vector<boost::mpi::request> isend;
-        isend.reserve(push.size());
-        for (const auto& [peer, requested] : push)
-          isend.push_back(comm.isend(peer, 0, push[peer]));
+        UnorderedMap<int, MsgVec> pull;
+        std::vector<boost::mpi::request> reqs;
+        reqs.reserve(2 * neighbors.size());
 
-        boost::mpi::wait_all(isend.begin(), isend.end());
-        boost::mpi::wait_all(irecv.begin(), irecv.end());
-
-        for (const auto& [own, requested] : pull)
+        for (int r : neighbors)
         {
-          (void) own;
-          for (const auto& [gid, global] : requested)
+          pull[r]; // default-construct
+          reqs.push_back(comm.irecv(r, kTagP1VecDof, pull[r]));
+          reqs.push_back(comm.isend(r, kTagP1VecDof, push[r]));
+        }
+
+        boost::mpi::wait_all(reqs.begin(), reqs.end());
+
+        for (auto& [own, msgs] : pull)
+        {
+          for (const auto& [gid, global] : msgs)
           {
             const auto i = mesh.getLocalIndex(0, gid);
-            assert(i);
+            // The owner's halo is derived from the parent shard and may
+            // include ranks that only have this vertex via ghost cells.
+            // When the mesh is a SubMesh that excludes those ghost cells
+            // the vertex is absent here, so skip the entry.
+            if (!i)
+              continue;
 
             const auto& dofs = m_fes.getDOFs(0, *i);
-            assert(dofs.size() == global.size());
+            assert(static_cast<size_t>(dofs.size()) == global.size());
 
-            for (size_t k = 0; k < global.size(); ++k)
+            for (size_t k = 0; k < static_cast<size_t>(global.size()); ++k)
             {
-              const auto [it, inserted] = m_local_to_global.right.emplace(global[k], dofs[k]);
+              [[maybe_unused]] const auto [it, inserted] =
+                m_localToGlobal.right.emplace(global[k], dofs[k]);
               assert(inserted);
             }
           }
         }
 
         const size_t localDofCount = m_fes.getSize();
-        m_local_to_global.left.assign(localDofCount, std::numeric_limits<Index>::max());
+        m_localToGlobal.left.assign(localDofCount, std::numeric_limits<Index>::max());
 
-        for (const auto& [global, local] : m_local_to_global.right)
+        for (const auto& [global, local] : m_localToGlobal.right)
         {
           assert(local < localDofCount);
-          m_local_to_global.left[local] = global;
+          m_localToGlobal.left[local] = global;
         }
 
 #ifndef NDEBUG
         for (size_t local = 0; local < localDofCount; ++local)
-          assert(m_local_to_global.left[local] != std::numeric_limits<Index>::max());
+          assert(m_localToGlobal.left[local] != std::numeric_limits<Index>::max());
 #endif
       }
 
@@ -556,7 +653,7 @@ namespace Rodin::Variational
        */
       Index getGlobalIndex(Index localIdx) const
       {
-        return m_local_to_global.left.at(localIdx);
+        return m_localToGlobal.left.at(localIdx);
       }
 
       /**
@@ -570,8 +667,8 @@ namespace Rodin::Variational
        */
       Optional<Index> getLocalIndex(Index globalIdx) const
       {
-        auto find = m_local_to_global.right.find(globalIdx);
-        if (find == m_local_to_global.right.end())
+        auto find = m_localToGlobal.right.find(globalIdx);
+        if (find == m_localToGlobal.right.end())
           return std::nullopt;
         else
           return *find;
@@ -654,8 +751,7 @@ namespace Rodin::Variational
       const IndexArray& getDOFs(size_t d, Index i) const override
       {
         static thread_local IndexArray s_dofs;
-        const auto& shard = getMesh().getShard();
-        assert(i < shard.getPolytopeCount(d));
+        assert(i < getMesh().getShard().getPolytopeCount(d));
 
         s_dofs = m_fes.getDOFs(d, i);
         for (auto& dof : s_dofs)
@@ -676,8 +772,7 @@ namespace Rodin::Variational
       Index getGlobalIndex(const std::pair<size_t, Index>& p, Index localDof) const override
       {
         const auto& [d, i] = p;
-        const auto& shard = getMesh().getShard();
-        assert(i < shard.getPolytopeCount(d));
+        assert(i < getMesh().getShard().getPolytopeCount(d));
 
         const Index local = m_fes.getGlobalIndex({ d, i }, localDof);
         return getGlobalIndex(local);
@@ -700,6 +795,22 @@ namespace Rodin::Variational
       }
 
       /**
+       * @brief Returns a pullback wrapper for a pointwise callable on local polytope @f$(d, i)@f$.
+       *
+       * This mirrors the local P1 callable path and is used by identification
+       * coefficient discovery when evaluating shape-function expressions at a
+       * @ref Geometry::Point outside a quadrature loop.
+       */
+      template <class CallableType>
+      auto getPullback(const std::pair<size_t, Index>& p, CallableType&& v) const
+      {
+        const auto& [d, i] = p;
+        const auto& mesh = getMesh();
+        return CallablePullback<CallableType>(
+          *mesh.getPolytope(d, i), std::forward<CallableType>(v));
+      }
+
+      /**
        * @brief Returns a pushforward wrapper on local polytope @f$(d, i)@f$.
        *
        * @tparam CallableType Callable defined on reference coordinates.
@@ -707,9 +818,10 @@ namespace Rodin::Variational
        * @return Pushforward wrapper mapping physical points to reference evaluation.
        */
       template <class CallableType>
-      auto getPushforward(const std::pair<size_t, Index>&, const CallableType& v) const
+      auto getPushforward(const std::pair<size_t, Index>&, CallableType&& v) const
       {
-        return typename FESType::template Pushforward<CallableType>(v);
+        return typename FESType::template Pushforward<CallableType>(
+          std::forward<CallableType>(v));
       }
 
       /**
@@ -720,9 +832,22 @@ namespace Rodin::Variational
        * @return Pushforward wrapper mapping physical points to reference evaluation.
        */
       template <class CallableType>
-      auto getPushforward(const Geometry::Polytope&, const CallableType& v) const
+      auto getPushforward(const Geometry::Polytope&, CallableType&& v) const
       {
-        return typename FESType::Pushforward(v);
+        return typename FESType::template Pushforward<CallableType>(
+          std::forward<CallableType>(v));
+      }
+
+      /**
+       * @brief Evaluates the local shard expansion directly at reference coordinates.
+       */
+      template <class Coefficient>
+      void evaluate(RangeType& out, const std::pair<size_t, Index>& idx,
+        Coefficient&& coefficient, const Geometry::Point& p) const
+      {
+        const auto& fe = getFiniteElement(idx.first, idx.second);
+        fe.evaluate(
+          out, std::forward<Coefficient>(coefficient), p.getReferenceCoordinates());
       }
 
     private:
@@ -731,7 +856,7 @@ namespace Rodin::Variational
 
       size_t m_offset;
       size_t m_owned;
-      IndexBimap m_local_to_global;
+      IndexBimap m_localToGlobal;
   };
 }
 

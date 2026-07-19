@@ -14,7 +14,7 @@
   (vertices, edges, faces, cells) in a mesh relate to each other. In Rodin,
   this is managed by the @ref Rodin::Geometry::Connectivity "Connectivity"
   class, which is accessed through
-  @ref Rodin::Geometry::Mesh::getConnectivity "Mesh::getConnectivity()".
+  @ref Rodin::Geometry::Mesh "Mesh::getConnectivity()".
 
   Connectivity is essential for:
   - Identifying boundary entities for imposing boundary conditions
@@ -44,7 +44,7 @@
   @section guides-connectivity-compute Computing Connectivity
 
   Connectivity relations are computed on demand using the
-  @ref Rodin::Geometry::Connectivity::compute "compute()" method:
+  @ref Rodin::Geometry::Connectivity "compute()" method:
 
   @code{.cpp}
   Mesh mesh;

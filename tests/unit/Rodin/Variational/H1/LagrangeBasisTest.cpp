@@ -19,6 +19,7 @@ namespace Rodin::Tests::Unit
   // LagrangeBasis1D Tests
   //==========================================================================
 
+  /// @brief On equispaced nodes [0, 0.5, 1].
   TEST(LagrangeBasis1D, LagrangeProperty_K2)
   {
     // On equispaced nodes [0, 0.5, 1]
@@ -35,6 +36,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 2 for lagrange basis 1 D by checking tolerance-based numerical results.
   TEST(LagrangeBasis1D, PartitionOfUnity_K2)
   {
     std::array<Real, 3> nodes = {0.0, 0.5, 1.0};
@@ -48,6 +50,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Sum of derivatives should be 0 (derivative of constant 1).
   TEST(LagrangeBasis1D, DerivativeSum_K2)
   {
     // Sum of derivatives should be 0 (derivative of constant 1)
@@ -66,11 +69,13 @@ namespace Rodin::Tests::Unit
   // LagrangeBasisPoint Tests
   //==========================================================================
 
+  /// @brief Verifies basis K 0 for lagrange basis point by checking tolerance-based numerical results.
   TEST(LagrangeBasisPoint, Basis_K0)
   {
     EXPECT_NEAR(LagrangeBasisPoint<0>::getBasis(), 1.0, 1e-14);
   }
 
+  /// @brief Verifies derivative K 0 for lagrange basis point by checking tolerance-based numerical results.
   TEST(LagrangeBasisPoint, Derivative_K0)
   {
     EXPECT_NEAR(LagrangeBasisPoint<0>::getDerivative(), 0.0, 1e-14);
@@ -80,6 +85,7 @@ namespace Rodin::Tests::Unit
   // LagrangeBasisSegment Tests (using GLL01 nodes)
   //==========================================================================
 
+  /// @brief GLL01<2> nodes are at 0, 0.5, 1.
   TEST(LagrangeBasisSegment, LagrangeProperty_K2)
   {
     // GLL01<2> nodes are at 0, 0.5, 1
@@ -96,6 +102,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies lagrange property K 3 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, LagrangeProperty_K3)
   {
     const auto& nodes = GLL01<3>::getNodes();
@@ -111,6 +118,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 3 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, PartitionOfUnity_K3)
   {
     for (Real x = 0.0; x <= 1.0; x += 0.05)
@@ -122,6 +130,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies derivative sum K 3 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, DerivativeSum_K3)
   {
     for (Real x = 0.1; x <= 0.9; x += 0.1)
@@ -137,6 +146,7 @@ namespace Rodin::Tests::Unit
   // LagrangeBasisTriangle Tests
   //==========================================================================
 
+  /// @brief K=1 has 3 nodes: (0,0), (1,0), (0,1).
   TEST(LagrangeBasisTriangle, LagrangeProperty_K1)
   {
     // K=1 has 3 nodes: (0,0), (1,0), (0,1)
@@ -157,6 +167,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 2 for lagrange basis triangle by checking tolerance-based numerical results.
   TEST(LagrangeBasisTriangle, PartitionOfUnity_K2)
   {
     // Test at interior point
@@ -174,6 +185,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 1.0, 1e-14);
   }
 
+  /// @brief Verifies partition of unity K 3 for lagrange basis triangle by checking tolerance-based numerical results.
   TEST(LagrangeBasisTriangle, PartitionOfUnity_K3)
   {
     // Test at several points
@@ -197,6 +209,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies derivative sum K 2 for lagrange basis triangle by checking tolerance-based numerical results.
   TEST(LagrangeBasisTriangle, DerivativeSum_K2)
   {
     Real x = 0.3, y = 0.3;
@@ -219,6 +232,7 @@ namespace Rodin::Tests::Unit
   // LagrangeBasisTetrahedron Tests
   //==========================================================================
 
+  /// @brief K=1 has 4 nodes: (0,0,0), (1,0,0), (0,1,0), (0,0,1).
   TEST(LagrangeBasisTetrahedron, LagrangeProperty_K1)
   {
     // K=1 has 4 nodes: (0,0,0), (1,0,0), (0,1,0), (0,0,1)
@@ -242,6 +256,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 2 for lagrange basis tetrahedron by checking tolerance-based numerical results.
   TEST(LagrangeBasisTetrahedron, PartitionOfUnity_K2)
   {
     Real x = 0.2, y = 0.2, z = 0.2;
@@ -260,6 +275,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 1.0, 1e-14);
   }
 
+  /// @brief Verifies derivative sum K 2 for lagrange basis tetrahedron by checking tolerance-based numerical results.
   TEST(LagrangeBasisTetrahedron, DerivativeSum_K2)
   {
     Real x = 0.2, y = 0.2, z = 0.2;
@@ -286,6 +302,7 @@ namespace Rodin::Tests::Unit
   // LagrangeBasisQuadrilateral Tests
   //==========================================================================
 
+  /// @brief Verifies lagrange property K 2 for lagrange basis quadrilateral by checking tolerance-based numerical results.
   TEST(LagrangeBasisQuadrilateral, LagrangeProperty_K2)
   {
     const auto& nodes = GLL01<2>::getNodes();
@@ -307,6 +324,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 3 for lagrange basis quadrilateral by checking tolerance-based numerical results.
   TEST(LagrangeBasisQuadrilateral, PartitionOfUnity_K3)
   {
     for (Real x = 0.1; x <= 0.9; x += 0.2)
@@ -326,6 +344,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies derivative sum K 2 for lagrange basis quadrilateral by checking tolerance-based numerical results.
   TEST(LagrangeBasisQuadrilateral, DerivativeSum_K2)
   {
     Real x = 0.3, y = 0.7;
@@ -347,6 +366,7 @@ namespace Rodin::Tests::Unit
   // LagrangeBasisWedge Tests
   //==========================================================================
 
+  /// @brief Verifies partition of unity K 2 for lagrange basis wedge by checking tolerance-based numerical results.
   TEST(LagrangeBasisWedge, PartitionOfUnity_K2)
   {
     Real x = 0.2, y = 0.2, z = 0.5;  // Point inside wedge
@@ -365,6 +385,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 1.0, 1e-14);
   }
 
+  /// @brief Verifies derivative sum K 2 for lagrange basis wedge by checking tolerance-based numerical results.
   TEST(LagrangeBasisWedge, DerivativeSum_K2)
   {
     Real x = 0.2, y = 0.2, z = 0.5;
@@ -391,6 +412,7 @@ namespace Rodin::Tests::Unit
   // Higher Order Tests (K = 5, 6)
   //==========================================================================
 
+  /// @brief Verifies lagrange property K 5 for lagrange basis 1 D by checking tolerance-based numerical results.
   TEST(LagrangeBasis1D, LagrangeProperty_K5)
   {
     const auto& nodes = GLL01<5>::getNodes();
@@ -406,6 +428,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 6 for lagrange basis 1 D by checking tolerance-based numerical results.
   TEST(LagrangeBasis1D, PartitionOfUnity_K6)
   {
     const auto& nodes = GLL01<6>::getNodes();
@@ -419,6 +442,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies lagrange property K 5 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, LagrangeProperty_K5)
   {
     const auto& nodes = GLL01<5>::getNodes();
@@ -434,6 +458,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 6 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, PartitionOfUnity_K6)
   {
     for (Real x = 0.0; x <= 1.0; x += 0.05)
@@ -445,6 +470,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 5 for lagrange basis triangle by checking tolerance-based numerical results.
   TEST(LagrangeBasisTriangle, PartitionOfUnity_K5)
   {
     std::vector<std::pair<Real, Real>> test_points = {
@@ -467,6 +493,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 6 for lagrange basis triangle by checking tolerance-based numerical results.
   TEST(LagrangeBasisTriangle, PartitionOfUnity_K6)
   {
     Real x = 0.25, y = 0.25;
@@ -482,6 +509,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 1.0, 1e-11);
   }
 
+  /// @brief Verifies partition of unity K 5 for lagrange basis tetrahedron by checking tolerance-based numerical results.
   TEST(LagrangeBasisTetrahedron, PartitionOfUnity_K5)
   {
     Real x = 0.15, y = 0.15, z = 0.15;
@@ -500,6 +528,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 1.0, 1e-11);
   }
 
+  /// @brief Verifies lagrange property K 5 for lagrange basis quadrilateral by checking tolerance-based numerical results.
   TEST(LagrangeBasisQuadrilateral, LagrangeProperty_K5)
   {
     const auto& nodes = GLL01<5>::getNodes();
@@ -521,6 +550,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 6 for lagrange basis quadrilateral by checking tolerance-based numerical results.
   TEST(LagrangeBasisQuadrilateral, PartitionOfUnity_K6)
   {
     for (Real x = 0.1; x <= 0.9; x += 0.2)
@@ -540,6 +570,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 5 for lagrange basis wedge by checking tolerance-based numerical results.
   TEST(LagrangeBasisWedge, PartitionOfUnity_K5)
   {
     Real x = 0.15, y = 0.15, z = 0.5;
@@ -562,6 +593,7 @@ namespace Rodin::Tests::Unit
   // Very High Order Tests (K = 15)
   //==========================================================================
 
+  /// @brief Verifies lagrange property K 15 for lagrange basis 1 D by checking tolerance-based numerical results.
   TEST(LagrangeBasis1D, LagrangeProperty_K15)
   {
     const auto& nodes = GLL01<15>::getNodes();
@@ -577,6 +609,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 15 for lagrange basis 1 D by checking tolerance-based numerical results.
   TEST(LagrangeBasis1D, PartitionOfUnity_K15)
   {
     const auto& nodes = GLL01<15>::getNodes();
@@ -590,6 +623,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies lagrange property K 15 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, LagrangeProperty_K15)
   {
     const auto& nodes = GLL01<15>::getNodes();
@@ -605,6 +639,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 15 for lagrange basis segment by checking tolerance-based numerical results.
   TEST(LagrangeBasisSegment, PartitionOfUnity_K15)
   {
     for (Real x = 0.0; x <= 1.0; x += 0.05)
@@ -616,6 +651,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 15 for lagrange basis triangle by checking tolerance-based numerical results.
   TEST(LagrangeBasisTriangle, PartitionOfUnity_K15)
   {
     std::vector<std::pair<Real, Real>> test_points = {
@@ -638,6 +674,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 15 for lagrange basis tetrahedron by checking tolerance-based numerical results.
   TEST(LagrangeBasisTetrahedron, PartitionOfUnity_K15)
   {
     Real x = 0.15, y = 0.15, z = 0.15;
@@ -656,6 +693,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sum, 1.0, 1e-7);
   }
 
+  /// @brief Verifies partition of unity K 15 for lagrange basis quadrilateral by checking tolerance-based numerical results.
   TEST(LagrangeBasisQuadrilateral, PartitionOfUnity_K15)
   {
     for (Real x = 0.1; x <= 0.9; x += 0.2)
@@ -675,6 +713,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies partition of unity K 15 for lagrange basis wedge by checking tolerance-based numerical results.
   TEST(LagrangeBasisWedge, PartitionOfUnity_K15)
   {
     Real x = 0.15, y = 0.15, z = 0.5;

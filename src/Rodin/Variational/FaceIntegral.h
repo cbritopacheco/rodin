@@ -48,6 +48,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -80,12 +81,16 @@ namespace Rodin::Variational
           ShapeFunctionBase<RHSDerived, TestFES, TestSpace>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<LHSDerived, TrialFES, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<RHSDerived, TestFES, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
       /**
@@ -179,8 +184,10 @@ namespace Rodin::Variational
     : public QuadratureRule<ShapeFunctionBase<NestedDerived, FES, TestSpace>>
   {
     public:
+      /// @brief Integrand expression type.
       using IntegrandType = ShapeFunctionBase<NestedDerived, FES, TestSpace>;
 
+      /// @brief Parent class type.
       using Parent = QuadratureRule<IntegrandType>;
 
       template <class LHSDerived, class RHSDerived>
@@ -225,4 +232,5 @@ namespace Rodin::Variational
     -> FaceIntegral<ShapeFunctionBase<Dot<FunctionBase<LHSDerived>, ShapeFunctionBase<RHSDerived, FES, TestSpace>>, FES, TestSpace>>;
 }
 
+/// @endcond
 #endif

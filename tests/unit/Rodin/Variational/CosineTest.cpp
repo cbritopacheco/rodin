@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function zero for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_Zero)
   {
     RealFunction f(0.0);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over two for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_PiOverTwo)
   {
     RealFunction f(M_PI / 2.0);
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_Pi)
   {
     RealFunction f(M_PI);
@@ -56,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), -1.0, 1e-10);
   }
 
+  /// @brief Verifies real function three pi over two for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_ThreePiOverTwo)
   {
     RealFunction f(3.0 * M_PI / 2.0);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function two pi for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_TwoPi)
   {
     RealFunction f(2.0 * M_PI);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over six for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_PiOverSix)
   {
     RealFunction f(M_PI / 6.0);
@@ -101,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), std::sqrt(3.0) / 2.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over four for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_PiOverFour)
   {
     RealFunction f(M_PI / 4.0);
@@ -116,6 +123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), std::sqrt(2.0) / 2.0, 1e-10);
   }
 
+  /// @brief Verifies real function pi over three for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_PiOverThree)
   {
     RealFunction f(M_PI / 3.0);
@@ -131,6 +139,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies real function negative value for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, RealFunction_NegativeValue)
   {
     RealFunction f(-M_PI / 3.0);
@@ -146,6 +155,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies grid function cos wave for variational cos by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Cos, GridFunction_CosWave)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -167,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies chained operations for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, ChainedOperations)
   {
     RealFunction f(M_PI / 3.0);
@@ -183,6 +194,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_cos_f.getValue(p), std::cos(0.5), 1e-10);
   }
 
+  /// @brief Verifies periodicity for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, Periodicity)
   {
     RealFunction f1(M_PI / 4.0);
@@ -201,6 +213,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos1.getValue(p), cos2.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies cos of sum for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosOfSum)
   {
     RealFunction f1(M_PI / 6.0);  // π/6
@@ -218,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_sum.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies small angle for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, SmallAngle)
   {
     RealFunction f(0.1);  // Small angle in radians
@@ -235,6 +249,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 1.0 - 0.01/2.0, 1e-4);  // Approximate equality
   }
 
+  /// @brief Verifies large angle for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, LargeAngle)
   {
     RealFunction f(10.0 * M_PI);
@@ -251,6 +266,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies cos squared identity for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosSquaredIdentity)
   {
     RealFunction f(M_PI / 6.0);
@@ -269,6 +285,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_squared.getValue(p), 3.0 / 4.0, 1e-10);
   }
 
+  /// @brief Verifies cos with multiplication for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosWithMultiplication)
   {
     RealFunction f(M_PI / 6.0);
@@ -286,6 +303,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_product.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies cos even function for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosEvenFunction)
   {
     RealFunction f(M_PI / 4.0);
@@ -304,6 +322,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_neg_f.getValue(p), cos_f.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies sin cos identity for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, SinCosIdentity)
   {
     RealFunction f(M_PI / 4.0);
@@ -324,6 +343,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(identity.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies cos phase shift for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosPhaseShift)
   {
     RealFunction f(M_PI / 6.0);
@@ -341,6 +361,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(cos_shifted.getValue(p), -0.5, 1e-10);
   }
 
+  /// @brief Verifies cos pythagorean identity for variational cos by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Cos, CosPythagoreanIdentity)
   {
     RealFunction f(M_PI / 3.0);

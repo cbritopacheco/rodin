@@ -25,6 +25,7 @@ class TraitsTest : public ::testing::Test
 };
 
 // Test IsEigenObject trait
+/// @brief Test with Eigen types.
 TEST_F(TraitsTest, IsEigenObjectTrait)
 {
   // Test with Eigen types
@@ -47,6 +48,7 @@ TEST_F(TraitsTest, IsEigenObjectTrait)
 }
 
 // Test IsEigenObject with const and reference types
+/// @brief Test with const types.
 TEST_F(TraitsTest, IsEigenObjectWithCVRef)
 {
   // Test with const types
@@ -64,6 +66,7 @@ TEST_F(TraitsTest, IsEigenObjectWithCVRef)
 }
 
 // Test Traits specializations for basic types
+/// @brief Test Boolean traits.
 TEST_F(TraitsTest, BasicTypeTraits)
 {
   // Test Boolean traits
@@ -84,6 +87,7 @@ TEST_F(TraitsTest, BasicTypeTraits)
 }
 
 // Test Sum trait
+/// @brief Note: These tests check that the trait compiles and has the expected behavior.
 TEST_F(TraitsTest, SumTrait)
 {
   // Note: These tests check that the trait compiles and has the expected behavior
@@ -105,6 +109,7 @@ TEST_F(TraitsTest, SumTrait)
 }
 
 // Test Minus trait
+/// @brief Test binary minus trait.
 TEST_F(TraitsTest, MinusTrait)
 {
   // Test binary minus trait
@@ -131,6 +136,7 @@ TEST_F(TraitsTest, MinusTrait)
 }
 
 // Test Mult trait
+/// @brief Verifies mult trait for traits test.
 TEST_F(TraitsTest, MultTrait)
 {
   using RealMult = Mult<Real, Real>;
@@ -149,6 +155,7 @@ TEST_F(TraitsTest, MultTrait)
 }
 
 // Test Division trait
+/// @brief Verifies division trait for traits test.
 TEST_F(TraitsTest, DivisionTrait)
 {
   using RealDiv = Division<Real, Real>;
@@ -167,6 +174,7 @@ TEST_F(TraitsTest, DivisionTrait)
 }
 
 // Test Dot trait
+/// @brief Verifies dot trait for traits test.
 TEST_F(TraitsTest, DotTrait)
 {
   using RealDot = Dot<Real, Real>;
@@ -185,6 +193,7 @@ TEST_F(TraitsTest, DotTrait)
 }
 
 // Test trait composition and nesting
+/// @brief Test that traits can be composed.
 TEST_F(TraitsTest, TraitComposition)
 {
   // Test that traits can be composed
@@ -200,6 +209,7 @@ TEST_F(TraitsTest, TraitComposition)
 }
 
 // Test traits with vector and matrix types
+/// @brief Test Sum with vector types.
 TEST_F(TraitsTest, VectorMatrixTraits)
 {
   // Test Sum with vector types
@@ -216,6 +226,7 @@ TEST_F(TraitsTest, VectorMatrixTraits)
 }
 
 // Test trait edge cases
+/// @brief Test traits with the same type.
 TEST_F(TraitsTest, EdgeCases)
 {
   // Test traits with the same type
@@ -234,6 +245,7 @@ TEST_F(TraitsTest, EdgeCases)
 }
 
 // Test that all traits are properly defined as structs
+/// @brief Verify that all traits are properly structured.
 TEST_F(TraitsTest, TraitStructureValidation)
 {
   // Verify that all traits are properly structured

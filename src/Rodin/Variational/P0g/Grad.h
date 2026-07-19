@@ -24,6 +24,7 @@
 
 #include "Rodin/Variational/P0g/ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   template <class Operand, class Derived>
@@ -37,12 +38,16 @@ namespace Rodin::Variational
     : public GradBase<GridFunction<P0g<Scalar, Mesh>, Data>, Grad<GridFunction<P0g<Scalar, Mesh>, Data>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P0g<Scalar, Mesh>;
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = GradBase<OperandType, Grad<OperandType>>;
 
       explicit Grad(const OperandType& u)
@@ -94,14 +99,18 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Grad<ShapeFunction<NestedDerived, P0g<Scalar, Mesh>, SpaceType>>, P0g<Scalar, Mesh>, SpaceType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P0g<Scalar, Mesh>;
       static constexpr ShapeFunctionSpaceType Space = SpaceType;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<NestedDerived, FESType, Space>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Grad<OperandType>, FESType, Space>;
 
       explicit Grad(const OperandType& u)
@@ -193,4 +202,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

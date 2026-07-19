@@ -307,6 +307,7 @@ namespace Rodin::Tests::Unit
   // Shard — Move and copy semantics
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies move constructor for geometry shard by checking exact expected values, true predicates, move semantics.
   TEST(Rodin_Geometry_Shard, MoveConstructor)
   {
     Shard::Builder sb;
@@ -332,6 +333,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(moved.isOwned(2, 0));
   }
 
+  /// @brief Verifies move assignment for geometry shard by checking exact expected values, true predicates, move semantics.
   TEST(Rodin_Geometry_Shard, MoveAssignment)
   {
     Shard::Builder sb;
@@ -363,6 +365,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(assigned.getOwner(0).at(2), 3u);
   }
 
+  /// @brief Verifies copy constructor for geometry shard by checking exact expected values, true predicates, copy semantics.
   TEST(Rodin_Geometry_Shard, CopyConstructor)
   {
     Shard::Builder sb;
@@ -396,6 +399,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — include() idempotency (parent mode)
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder parent mode include idempotent for geometry shard by checking exact expected values, true predicates, false predicates.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_IncludeIdempotent)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -419,6 +423,7 @@ namespace Rodin::Tests::Unit
   // Shard — Owner and halo metadata via Builder
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies owner and halo metadata direct mode for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, OwnerAndHaloMetadata_DirectMode)
   {
     Shard::Builder sb;
@@ -460,6 +465,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Parent-based mode with Quadrilateral mesh
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder parent mode quadrilateral for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Quadrilateral)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Quadrilateral, {3, 3});
@@ -489,6 +495,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Parent-based mode with Segment (1D) mesh
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder parent mode segment for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Segment)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Segment, {5});
@@ -519,6 +526,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Parent-based mode with Tetrahedron (3D) mesh
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder parent mode tetrahedron for geometry shard by checking exact expected values.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Tetrahedron)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -545,6 +553,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Parent-based mode with Hexahedron (3D) mesh
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder parent mode hexahedron for geometry shard by checking exact expected values.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Hexahedron)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Hexahedron, {3, 3, 3});
@@ -567,9 +576,37 @@ namespace Rodin::Tests::Unit
   }
 
   // ---------------------------------------------------------------------------
+  // Shard::Builder — Parent-based mode with Pyramid (3D) mesh
+  // ---------------------------------------------------------------------------
+
+  /// @brief Verifies builder parent mode pyramid for geometry shard by checking exact expected values.
+  TEST(Rodin_Geometry_Shard, Builder_ParentMode_Pyramid)
+  {
+    auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+    mesh.getConnectivity().compute(D, 0);
+
+    Shard::Builder sb;
+    sb.initialize(mesh);
+
+    for (Index v = 0; v < mesh.getVertexCount(); v++)
+      sb.include({0, v}, Shard::State::Owned);
+    for (Index c = 0; c < mesh.getCellCount(); c++)
+      sb.include({D, c}, Shard::State::Owned);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), mesh.getVertexCount());
+    EXPECT_EQ(shard.getCellCount(), mesh.getCellCount());
+    EXPECT_EQ(shard.getDimension(), 3u);
+  }
+
+  // ---------------------------------------------------------------------------
   // Shard::Builder — Parent-based mode with Wedge (3D) mesh
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder parent mode wedge for geometry shard by checking exact expected values.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Wedge)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(Polytope::Type::Wedge, {3, 3, 3});
@@ -595,6 +632,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Direct mode with Quadrilateral
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder direct mode quadrilateral for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_DirectMode_Quadrilateral)
   {
     Shard::Builder sb;
@@ -626,6 +664,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Direct mode with Segment (1D)
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder direct mode segment for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_DirectMode_Segment)
   {
     Shard::Builder sb;
@@ -663,6 +702,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Direct mode with Tetrahedron (3D)
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder direct mode tetrahedron for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_DirectMode_Tetrahedron)
   {
     Shard::Builder sb;
@@ -700,6 +740,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Direct mode with Hexahedron (3D)
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder direct mode hexahedron for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_DirectMode_Hexahedron)
   {
     Shard::Builder sb;
@@ -737,9 +778,49 @@ namespace Rodin::Tests::Unit
   }
 
   // ---------------------------------------------------------------------------
+  // Shard::Builder — Direct mode with Pyramid (3D)
+  // ---------------------------------------------------------------------------
+
+  /// @brief Verifies builder direct mode pyramid for geometry shard by checking exact expected values, true predicates.
+  TEST(Rodin_Geometry_Shard, Builder_DirectMode_Pyramid)
+  {
+    Shard::Builder sb;
+    sb.initialize(3, 3);
+
+    Index v0 = sb.vertex(0, Math::SpatialPoint{{0.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v1 = sb.vertex(1, Math::SpatialPoint{{1.0, 0.0, 0.0}}, Shard::State::Owned);
+    Index v2 = sb.vertex(2, Math::SpatialPoint{{1.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v3 = sb.vertex(3, Math::SpatialPoint{{0.0, 1.0, 0.0}}, Shard::State::Owned);
+    Index v4 = sb.vertex(4, Math::SpatialPoint{{0.5, 0.5, 1.0}}, Shard::State::Shared);
+
+    IndexArray vs(5);
+    vs << v0, v1, v2, v3, v4;
+    Index p0 = sb.polytope(3, 250, Polytope::Type::Pyramid, vs, Shard::State::Owned);
+    EXPECT_EQ(p0, 0u);
+
+    sb.setOwner(0, v4, 1);
+    sb.halo(0, v0, 1);
+
+    Shard shard = sb.finalize();
+
+    EXPECT_EQ(shard.getVertexCount(), 5u);
+    EXPECT_EQ(shard.getCellCount(), 1u);
+    EXPECT_EQ(shard.getDimension(), 3u);
+
+    EXPECT_TRUE(shard.isOwned(3, p0));
+    EXPECT_TRUE(shard.isShared(0, v4));
+    EXPECT_EQ(shard.getOwner(0).at(v4), 1u);
+
+    const auto& haloMap = shard.getHalo(0);
+    ASSERT_NE(haloMap.find(v0), haloMap.end());
+    EXPECT_TRUE(haloMap.at(v0).count(1) > 0);
+  }
+
+  // ---------------------------------------------------------------------------
   // Shard::Builder — Parent-based mode with mixed 2D mesh (tri+quad)
   // ---------------------------------------------------------------------------
 
+  /// @brief Build a mixed mesh: 2 triangles + 1 quadrilateral sharing vertices.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Mixed2D_TriQuad)
   {
     // Build a mixed mesh: 2 triangles + 1 quadrilateral sharing vertices
@@ -795,6 +876,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Parent-based mode with mixed 2D: partial inclusion
   // ---------------------------------------------------------------------------
 
+  /// @brief Same mixed mesh but only include one triangle and one quad, with.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Mixed2D_Partial)
   {
     // Same mixed mesh but only include one triangle and one quad, with
@@ -854,6 +936,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Parent-based mode with mixed 3D (tet+wedge)
   // ---------------------------------------------------------------------------
 
+  /// @brief 3D mixed mesh: 1 tetrahedron + 1 wedge sharing a triangular face.
   TEST(Rodin_Geometry_Shard, Builder_ParentMode_Mixed3D_TetWedge)
   {
     // 3D mixed mesh: 1 tetrahedron + 1 wedge sharing a triangular face
@@ -908,6 +991,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Direct mode with Wedge (3D)
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder direct mode wedge for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_DirectMode_Wedge)
   {
     Shard::Builder sb;
@@ -949,6 +1033,7 @@ namespace Rodin::Tests::Unit
   // Shard::Builder — Direct mode with mixed 2D (tri + quad)
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies builder direct mode mixed 2 D for geometry shard by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Shard, Builder_DirectMode_Mixed2D)
   {
     Shard::Builder sb;

@@ -57,7 +57,7 @@ int main(int, char**)
     };
 
     // export snapshot
-    xdmf.write(t);
+    xdmf.write(t).flush();
   }
 
   return 0;

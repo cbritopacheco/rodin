@@ -642,3 +642,14 @@ gtest_discover_tests(RodinVariationalMixedProblemPreassembledBFTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalSubMeshGridFunctionTest SubMeshGridFunctionTest.cpp)
+target_link_libraries(RodinVariationalSubMeshGridFunctionTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalSubMeshGridFunctionTest
+  PROPERTIES
+    LABELS unit
+)

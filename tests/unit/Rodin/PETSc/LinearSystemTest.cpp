@@ -15,6 +15,7 @@
 
 namespace
 {
+  /// @brief Verifies eliminate does not write locked solution vector for PET sc linear system by checking tolerance-based numerical results, exact expected values.
   TEST(PETSc_LinearSystem, EliminateDoesNotWriteLockedSolutionVector)
   {
     Rodin::PETSc::Math::LinearSystem system(PETSC_COMM_SELF);

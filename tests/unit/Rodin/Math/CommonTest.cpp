@@ -6,6 +6,9 @@
  */
 #include <gtest/gtest.h>
 
+#include <type_traits>
+#include <utility>
+
 #include "Rodin/Math/Common.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Math/SpatialMatrix.h"
@@ -22,6 +25,7 @@ class CommonTest : public ::testing::Test
 };
 
 // Test abs function for various types
+/// @brief Test abs for Real numbers.
 TEST_F(CommonTest, AbsFunction)
 {
   // Test abs for Real numbers
@@ -41,6 +45,7 @@ TEST_F(CommonTest, AbsFunction)
 }
 
 // Test exp function
+/// @brief Test exp for various values.
 TEST_F(CommonTest, ExpFunction)
 {
   // Test exp for various values
@@ -55,6 +60,7 @@ TEST_F(CommonTest, ExpFunction)
 }
 
 // Test conj function for complex numbers
+/// @brief Test complex conjugate.
 TEST_F(CommonTest, ConjFunction)
 {
   // Test complex conjugate
@@ -83,10 +89,15 @@ TEST_F(CommonTest, ConjFunction)
 }
 
 // Test conj function for Eigen matrices
+/// @brief Test conjugate of real matrix (should be unchanged).
 TEST_F(CommonTest, ConjMatrixFunction)
 {
+  using MatrixType = Eigen::Matrix<Real, 2, 2>;
+  static_assert(
+    std::is_same_v<decltype(conj(std::declval<const MatrixType&>())), MatrixType>);
+
   // Test conjugate of real matrix (should be unchanged)
-  Eigen::Matrix<Real, 2, 2> realMat;
+  MatrixType realMat;
   realMat << 1.0, 2.0,
              3.0, 4.0;
 
@@ -113,6 +124,7 @@ TEST_F(CommonTest, ConjMatrixFunction)
 }
 
 // Test conj function for Eigen vectors
+/// @brief Test conjugate of real vector.
 TEST_F(CommonTest, ConjVectorFunction)
 {
   // Test conjugate of real vector
@@ -138,6 +150,7 @@ TEST_F(CommonTest, ConjVectorFunction)
 }
 
 // Test edge cases and special values
+/// @brief Test with very small numbers.
 TEST_F(CommonTest, EdgeCases)
 {
   // Test with very small numbers
@@ -159,6 +172,7 @@ TEST_F(CommonTest, EdgeCases)
 }
 
 // Test const nature of functions where applicable
+/// @brief Test that abs is const.
 TEST_F(CommonTest, constFunctions)
 {
   // Test that abs is const
@@ -177,6 +191,7 @@ TEST_F(CommonTest, constFunctions)
 }
 
 // Test mathematical properties
+/// @brief Test that |z|^2 = z * conj(z) for complex numbers.
 TEST_F(CommonTest, MathematicalProperties)
 {
   // Test that |z|^2 = z * conj(z) for complex numbers
@@ -201,6 +216,7 @@ TEST_F(CommonTest, MathematicalProperties)
 }
 
 // Test function composition and chaining
+/// @brief Test abs(exp(x)) for various x.
 TEST_F(CommonTest, FunctionComposition)
 {
   // Test abs(exp(x)) for various x
@@ -218,6 +234,7 @@ TEST_F(CommonTest, FunctionComposition)
   EXPECT_DOUBLE_EQ(abs(conj(z)), abs(z));
 }
 
+/// @brief Verifies pow 2 function for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, Pow2Function)
 {
   EXPECT_DOUBLE_EQ(pow2(3.0), 9.0);
@@ -225,6 +242,7 @@ TEST_F(CommonTest, Pow2Function)
   EXPECT_DOUBLE_EQ(pow2(0.0), 0.0);
 }
 
+/// @brief Verifies pow N function for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, PowNFunction)
 {
   EXPECT_DOUBLE_EQ((pow<0>(5.0)), 1.0);
@@ -235,6 +253,7 @@ TEST_F(CommonTest, PowNFunction)
   EXPECT_DOUBLE_EQ((pow<10>(2.0)), 1024.0);
 }
 
+/// @brief Verifies pow runtime function for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, PowRuntimeFunction)
 {
   EXPECT_DOUBLE_EQ(pow(2.0, 3.0), 8.0);
@@ -242,6 +261,7 @@ TEST_F(CommonTest, PowRuntimeFunction)
   EXPECT_DOUBLE_EQ(pow(2.0, 0.0), 1.0);
 }
 
+/// @brief Verifies sqrt function for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, SqrtFunction)
 {
   EXPECT_DOUBLE_EQ(sqrt(4.0), 2.0);
@@ -251,6 +271,7 @@ TEST_F(CommonTest, SqrtFunction)
   EXPECT_NEAR(sqrt(2.0), 1.41421356, 1e-6);
 }
 
+/// @brief Verifies is na N function for common test by checking true predicates, false predicates.
 TEST_F(CommonTest, IsNaNFunction)
 {
   EXPECT_TRUE(isNaN(nan<Real>()));
@@ -262,6 +283,7 @@ TEST_F(CommonTest, IsNaNFunction)
   EXPECT_FALSE(isNaN(Complex(1.0, 2.0)));
 }
 
+/// @brief Verifies is inf function for common test by checking true predicates, false predicates.
 TEST_F(CommonTest, IsInfFunction)
 {
   EXPECT_TRUE(isInf(std::numeric_limits<Real>::infinity()));
@@ -270,6 +292,7 @@ TEST_F(CommonTest, IsInfFunction)
   EXPECT_FALSE(isInf(0.0));
 }
 
+/// @brief Verifies trig functions for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, TrigFunctions)
 {
   EXPECT_DOUBLE_EQ(cos(0.0), 1.0);
@@ -280,6 +303,7 @@ TEST_F(CommonTest, TrigFunctions)
   EXPECT_NEAR(tan(M_PI / 4.0), 1.0, 1e-10);
 }
 
+/// @brief Verifies hyperbolic functions for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, HyperbolicFunctions)
 {
   EXPECT_DOUBLE_EQ(cosh(0.0), 1.0);
@@ -290,6 +314,7 @@ TEST_F(CommonTest, HyperbolicFunctions)
   EXPECT_NEAR(tanh(1.0), 0.7615942, 1e-6);
 }
 
+/// @brief Verifies inverse trig functions for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, InverseTrigFunctions)
 {
   EXPECT_DOUBLE_EQ(acos(1.0), 0.0);
@@ -302,6 +327,7 @@ TEST_F(CommonTest, InverseTrigFunctions)
   EXPECT_DOUBLE_EQ(atan2(0.0, 1.0), 0.0);
 }
 
+/// @brief Verifies log functions for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, LogFunctions)
 {
   EXPECT_DOUBLE_EQ(log(1.0), 0.0);
@@ -312,6 +338,7 @@ TEST_F(CommonTest, LogFunctions)
   EXPECT_DOUBLE_EQ(log10(100.0), 2.0);
 }
 
+/// @brief Verifies sgn function for common test by checking tolerance-based numerical results, exact expected values.
 TEST_F(CommonTest, SgnFunction)
 {
   EXPECT_DOUBLE_EQ(sgn(-5.0), -1.0);
@@ -322,6 +349,7 @@ TEST_F(CommonTest, SgnFunction)
   EXPECT_EQ(sgn(0), 0);
 }
 
+/// @brief Verifies binom function for common test by checking exact expected values.
 TEST_F(CommonTest, BinomFunction)
 {
   EXPECT_EQ(binom(Integer(5), Integer(2)), 10);
@@ -331,6 +359,7 @@ TEST_F(CommonTest, BinomFunction)
   EXPECT_EQ(binom(Integer(5), Integer(5)), 1);
 }
 
+/// @brief Verifies factorial function for common test by checking exact expected values.
 TEST_F(CommonTest, FactorialFunction)
 {
   EXPECT_EQ(factorial(Integer(0)), 1);
@@ -339,6 +368,7 @@ TEST_F(CommonTest, FactorialFunction)
   EXPECT_EQ(factorial(Integer(10)), 3628800);
 }
 
+/// @brief Verifies permutation function for common test by checking exact expected values.
 TEST_F(CommonTest, PermutationFunction)
 {
   EXPECT_EQ(permutation(Integer(5), Integer(2)), 20);
@@ -346,6 +376,7 @@ TEST_F(CommonTest, PermutationFunction)
   EXPECT_EQ(permutation(Integer(5), Integer(5)), 120);
 }
 
+/// @brief Verifies nan factory for common test by checking true predicates.
 TEST_F(CommonTest, NanFactory)
 {
   EXPECT_TRUE(isNaN(nan<Real>()));
@@ -356,6 +387,7 @@ TEST_F(CommonTest, NanFactory)
   EXPECT_TRUE(std::isnan(cn.imag()));
 }
 
+/// @brief Verifies form language helpers for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, FormLanguageHelpers)
 {
   EXPECT_DOUBLE_EQ(sum(2.0, 3.0), 5.0);
@@ -365,6 +397,7 @@ TEST_F(CommonTest, FormLanguageHelpers)
   EXPECT_DOUBLE_EQ(division(10.0, 2.0), 5.0);
 }
 
+/// @brief Verifies dot product scalar for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, DotProductScalar)
 {
   EXPECT_DOUBLE_EQ(dot(Real(2.0), Real(3.0)), 6.0);
@@ -376,6 +409,7 @@ TEST_F(CommonTest, DotProductScalar)
   EXPECT_DOUBLE_EQ(result.imag(), 2.0);
 }
 
+/// @brief Verifies dot product eigen for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, DotProductEigen)
 {
   Eigen::Vector3d v1(1, 2, 3);
@@ -383,6 +417,7 @@ TEST_F(CommonTest, DotProductEigen)
   EXPECT_DOUBLE_EQ(dot(v1, v2), 32.0);
 }
 
+/// @brief Verifies min function for common test by checking tolerance-based numerical results, exact expected values.
 TEST_F(CommonTest, MinFunction)
 {
   EXPECT_DOUBLE_EQ(min(3.0, 5.0), 3.0);
@@ -392,6 +427,7 @@ TEST_F(CommonTest, MinFunction)
   EXPECT_EQ(min(2, 7), 2);
 }
 
+/// @brief Verifies max function for common test by checking tolerance-based numerical results, exact expected values.
 TEST_F(CommonTest, MaxFunction)
 {
   EXPECT_DOUBLE_EQ(max(3.0, 5.0), 5.0);
@@ -401,6 +437,7 @@ TEST_F(CommonTest, MaxFunction)
   EXPECT_EQ(max(2, 7), 7);
 }
 
+/// @brief Verifies clamp function for common test by checking tolerance-based numerical results, exact expected values.
 TEST_F(CommonTest, ClampFunction)
 {
   EXPECT_DOUBLE_EQ(clamp(5.0, 0.0, 10.0), 5.0);
@@ -413,6 +450,7 @@ TEST_F(CommonTest, ClampFunction)
   EXPECT_EQ(clamp(7, 1, 5), 5);
 }
 
+/// @brief Verifies dot product spatial vector for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, DotProductSpatialVector)
 {
   SpatialVector<Real> a({1.0, 2.0, 3.0});
@@ -420,6 +458,7 @@ TEST_F(CommonTest, DotProductSpatialVector)
   EXPECT_DOUBLE_EQ(dot(a, b), 32.0);
 }
 
+/// @brief Verifies dot product spatial matrix for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, DotProductSpatialMatrix)
 {
   SpatialMatrix<Real> a(2, 2);
@@ -433,6 +472,7 @@ TEST_F(CommonTest, DotProductSpatialMatrix)
   EXPECT_DOUBLE_EQ(dot(a, b), 70.0);
 }
 
+/// @brief Verifies dot product mixed eigen spatial vector for common test by checking tolerance-based numerical results.
 TEST_F(CommonTest, DotProductMixedEigenSpatialVector)
 {
   Eigen::Vector3d ev(1, 2, 3);

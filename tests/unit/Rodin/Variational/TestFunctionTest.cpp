@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test build for variational real P1 test function by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_TestFunction, SanityTest_Build)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -20,6 +21,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(v.Space, TestSpace);
   }
 
+  /// @brief Verifies fuzzy test uniform grid 4 x 4 for variational real P1 test function by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -29,6 +31,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(v.Space, TestSpace);
   }
 
+  /// @brief Verifies copy test for variational real P1 test function by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Real_P1_TestFunction, CopyTest)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -42,6 +45,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies copy constructor for variational real P1 test function by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_Real_P1_TestFunction, CopyConstructor)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -52,6 +56,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(v_copy.Space, v.Space);
   }
 
+  /// @brief Verifies move constructor for variational real P1 test function by checking exact expected values, move semantics.
   TEST(Rodin_Variational_Real_P1_TestFunction, MoveConstructor)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -62,6 +67,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(v_moved.Space, TestSpace);
   }
 
+  /// @brief Verifies sanity test build for variational vector P1 test function by checking exact expected values.
   TEST(Rodin_Variational_Vector_P1_TestFunction, SanityTest_Build)
   {
     constexpr size_t vdim = 2;
@@ -72,6 +78,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(v.Space, TestSpace);
   }
 
+  /// @brief Verifies component access 2 D for variational vector P1 test function.
   TEST(Rodin_Variational_Vector_P1_TestFunction, ComponentAccess_2D)
   {
     constexpr size_t vdim = 2;
@@ -85,6 +92,7 @@ namespace Rodin::Tests::Unit
     // Components should have scalar range shape
   }
 
+  /// @brief Verifies component access 3 D for variational vector P1 test function.
   TEST(Rodin_Variational_Vector_P1_TestFunction, ComponentAccess_3D)
   {
     constexpr size_t vdim = 3;
@@ -99,6 +107,7 @@ namespace Rodin::Tests::Unit
     // Components should have scalar range shape
   }
 
+  /// @brief Verifies get leaf for variational real P1 test function by checking exact expected values.
   TEST(Rodin_Variational_Real_P1_TestFunction, GetLeaf)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

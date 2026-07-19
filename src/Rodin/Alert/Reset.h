@@ -24,15 +24,19 @@ namespace Rodin::Alert
     constexpr
     ResetT() = default;
 
+    /// @brief Copy constructor.
     constexpr
     ResetT(const ResetT&) = default;
 
+    /// @brief Move constructor.
     constexpr
     ResetT(ResetT&&) = default;
 
+    /// @brief Copy assignment operator.
     constexpr
     ResetT& operator=(const ResetT&) = default;
 
+    /// @brief Move assignment operator.
     constexpr
     ResetT& operator=(ResetT&&) = default;
   };

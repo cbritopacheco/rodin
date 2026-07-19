@@ -33,7 +33,6 @@
 
 #include <any>
 #include <typeindex>
-#include <unordered_map>
 #include <cassert>
 #include <functional>
 
@@ -63,25 +62,97 @@ namespace Rodin::Solid
     /// @brief Tag for the fiber direction vector.
     struct FiberDirection
     {
-      using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet direction vector.
     struct SheetDirection
     {
-      using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the sheet-normal direction vector.
     struct SheetNormalDirection
     {
-      using Type = Math::SpatialVector<Real>;
+      /// @brief Stored value type for this tag.
+        using Type = Math::SpatialVector<Real>;
     };
 
     /// @brief Tag for the activation parameter.
     struct Activation
     {
-      using Type = Real;
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for the active fiber extension @f$e_c^{n+1}@f$.
+    struct ActiveExtension
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for the previous active fiber extension @f$e_c^n@f$.
+    struct PreviousActiveExtension
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for the previous fiber strain @f$e_{1D}^n@f$.
+    ///
+    /// When present, the series law is evaluated at the midpoint fiber strain
+    /// @f$e_{1D}^{n+\frac{1}{2}}@f$, as in the compatible discretization of
+    /// Chapelle, Le Tallec, Moireau and Sorine (2012), eq. (26). When absent,
+    /// the series law falls back to the current fiber strain.
+    struct PreviousFiberStrain
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for the active-law time step.
+    struct TimeStep
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for the scalar electrical/chemical activation input.
+    struct ElectricalActivation
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for previous active variable @f$\gamma^n@f$.
+    struct PreviousActiveGamma
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for previous active variable @f$\beta^n@f$.
+    struct PreviousActiveBeta
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Real;
+    };
+
+    /// @brief Tag for the index of the current cell (polytope) being assembled.
+    struct CellIndex
+    {
+      /// @brief Stored value type for this tag.
+        using Type = Index;
+    };
+
+    /// @brief Tag for the index of the current quadrature point within the cell.
+    struct QuadraturePointIndex
+    {
+      /// @brief Stored value type for this tag.
+        using Type = std::size_t;
     };
   }
 
@@ -123,6 +194,26 @@ namespace Rodin::Solid
   {
     public:
       /**
+       * @brief Auxiliary tag capacity reserved on construction.
+       *
+       * A ConstitutivePoint is built at every quadrature point, so the tag
+       * storage is reserved once up front rather than grown one @c set() at a
+       * time.
+       *
+       * This is a capacity hint, not a limit: the tag set is open, and setting
+       * more tags than this simply reallocates. It is sized well above the
+       * tags declared in @ref Tags so that user-defined tags also fit without
+       * reallocating.
+       *
+       * The cost is @c ReservedTags * 40 bytes per point, but a point is a
+       * stack-local built and destroyed per quadrature point, so at most one
+       * is live per thread, and reserved-but-unset slots are never
+       * constructed or touched. Raising this from 13 to 64 was measured to
+       * cost nothing, serial or threaded.
+       */
+      static constexpr size_t ReservedTags = 32;
+
+      /**
        * @brief Constructs a constitutive point from a geometric point and kinematic state.
        *
        * This is the primary constructor used by integrators.  The Geometry::Point
@@ -139,7 +230,9 @@ namespace Rodin::Solid
       explicit ConstitutivePoint(const Geometry::Point& point, const KinematicState& state)
         : m_point(std::cref(point)),
           m_state(std::cref(state))
-      {}
+      {
+        m_aux.reserve(ReservedTags);
+      }
 
       /**
        * @brief Constructs a constitutive point from a kinematic state only.
@@ -151,11 +244,17 @@ namespace Rodin::Solid
        */
       explicit ConstitutivePoint(const KinematicState& state)
         : m_state(std::cref(state))
-      {}
+      {
+        m_aux.reserve(ReservedTags);
+      }
 
+      /// @brief Copy constructor.
       ConstitutivePoint(const ConstitutivePoint&) = default;
+      /// @brief Move constructor.
       ConstitutivePoint(ConstitutivePoint&&) = default;
+      /// @brief Copy assignment operator.
       ConstitutivePoint& operator=(const ConstitutivePoint&) = default;
+      /// @brief Move assignment operator.
       ConstitutivePoint& operator=(ConstitutivePoint&&) = default;
 
       /// @brief Gets the kinematic state.
@@ -227,7 +326,7 @@ namespace Rodin::Solid
     private:
       Optional<std::reference_wrapper<const Geometry::Point>> m_point;
       std::reference_wrapper<const KinematicState> m_state;
-      std::unordered_map<std::type_index, std::any> m_aux;
+      FlatMap<std::type_index, std::any> m_aux;
   };
 }
 

@@ -15,6 +15,7 @@ using namespace Rodin::Variational;
 //  Cosh
 // ============================================================
 
+/// @brief Verifies zero for variational cosh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Cosh, Zero)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -28,6 +29,7 @@ TEST(Rodin_Variational_Cosh, Zero)
   EXPECT_NEAR(result.getValue(p), 1.0, 1e-10);
 }
 
+/// @brief Verifies one for variational cosh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Cosh, One)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -41,6 +43,7 @@ TEST(Rodin_Variational_Cosh, One)
   EXPECT_NEAR(result.getValue(p), std::cosh(1.0), 1e-10);
 }
 
+/// @brief Verifies negative for variational cosh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Cosh, Negative)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -55,6 +58,7 @@ TEST(Rodin_Variational_Cosh, Negative)
   EXPECT_NEAR(result.getValue(p), std::cosh(2.0), 1e-10);
 }
 
+/// @brief Verifies even function for variational cosh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Cosh, EvenFunction)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -68,6 +72,7 @@ TEST(Rodin_Variational_Cosh, EvenFunction)
   EXPECT_NEAR(Cosh(pos).getValue(p), Cosh(neg).getValue(p), 1e-10);
 }
 
+/// @brief Verifies copy for variational cosh by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Cosh, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -82,6 +87,7 @@ TEST(Rodin_Variational_Cosh, Copy)
   EXPECT_NEAR(copy.getValue(p), std::cosh(1.0), 1e-10);
 }
 
+/// @brief Verifies helper function for variational cosh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Cosh, HelperFunction)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -98,6 +104,7 @@ TEST(Rodin_Variational_Cosh, HelperFunction)
 //  Sinh
 // ============================================================
 
+/// @brief Verifies zero for variational sinh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Sinh, Zero)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -111,6 +118,7 @@ TEST(Rodin_Variational_Sinh, Zero)
   EXPECT_NEAR(result.getValue(p), 0.0, 1e-10);
 }
 
+/// @brief Verifies one for variational sinh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Sinh, One)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -124,6 +132,7 @@ TEST(Rodin_Variational_Sinh, One)
   EXPECT_NEAR(result.getValue(p), std::sinh(1.0), 1e-10);
 }
 
+/// @brief Verifies negative for variational sinh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Sinh, Negative)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -138,6 +147,7 @@ TEST(Rodin_Variational_Sinh, Negative)
   EXPECT_NEAR(result.getValue(p), -std::sinh(2.0), 1e-10);
 }
 
+/// @brief Verifies odd function for variational sinh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Sinh, OddFunction)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -151,6 +161,7 @@ TEST(Rodin_Variational_Sinh, OddFunction)
   EXPECT_NEAR(Sinh(pos).getValue(p), -Sinh(neg).getValue(p), 1e-10);
 }
 
+/// @brief Verifies cosh sinh identity for variational sinh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Sinh, CoshSinhIdentity)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -167,6 +178,7 @@ TEST(Rodin_Variational_Sinh, CoshSinhIdentity)
   EXPECT_NEAR(identity.getValue(p), 1.0, 1e-10);
 }
 
+/// @brief Verifies copy for variational sinh by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Sinh, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -181,6 +193,7 @@ TEST(Rodin_Variational_Sinh, Copy)
   EXPECT_NEAR(copy.getValue(p), std::sinh(1.0), 1e-10);
 }
 
+/// @brief Verifies helper function for variational sinh by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Sinh, HelperFunction)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

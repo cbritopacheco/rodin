@@ -10,6 +10,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies two by two for variational identity matrix by checking tolerance-based numerical results, exact expected values.
 TEST(Rodin_Variational_IdentityMatrix, TwoByTwo)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -28,6 +29,7 @@ TEST(Rodin_Variational_IdentityMatrix, TwoByTwo)
   EXPECT_NEAR(val(1, 1), 1.0, 1e-15);
 }
 
+/// @brief Verifies three by three for variational identity matrix by checking tolerance-based numerical results, exact expected values.
 TEST(Rodin_Variational_IdentityMatrix, ThreeByThree)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -45,18 +47,21 @@ TEST(Rodin_Variational_IdentityMatrix, ThreeByThree)
       EXPECT_NEAR(val(i, j), (i == j) ? 1.0 : 0.0, 1e-15);
 }
 
+/// @brief Verifies rows for variational identity matrix by checking exact expected values.
 TEST(Rodin_Variational_IdentityMatrix, Rows)
 {
   IdentityMatrix I(4);
   EXPECT_EQ(I.getRows(), 4u);
 }
 
+/// @brief Verifies columns for variational identity matrix by checking exact expected values.
 TEST(Rodin_Variational_IdentityMatrix, Columns)
 {
   IdentityMatrix I(4);
   EXPECT_EQ(I.getColumns(), 4u);
 }
 
+/// @brief Verifies get order for variational identity matrix by checking exact expected values, true predicates.
 TEST(Rodin_Variational_IdentityMatrix, GetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -69,6 +74,7 @@ TEST(Rodin_Variational_IdentityMatrix, GetOrder)
   EXPECT_EQ(*order, 0u);
 }
 
+/// @brief Verifies copy for variational identity matrix by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_IdentityMatrix, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

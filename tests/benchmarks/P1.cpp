@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief P1 finite element benchmark coverage
+ *
+ * Benchmarks P1 finite-element-space construction and grid-function projection on hand-built and uniform triangular meshes. The cases measure how mesh size affects space setup and projection of coordinate-dependent scalar fields.
+ */
+
 #include <benchmark/benchmark.h>
 
 #include <boost/filesystem.hpp>
@@ -62,6 +70,7 @@ namespace Rodin::Tests::Benchmarks
       MeshType uniformTriangularMesh128;
   };
 
+  /// @brief Measures construction of a P1 space on a 16x16 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular16_Build)
   (benchmark::State& st)
   {
@@ -72,6 +81,7 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
+  /// @brief Measures construction of a P1 space on a 32x32 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular32_Build)
   (benchmark::State& st)
   {
@@ -82,6 +92,7 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
+  /// @brief Measures construction of a P1 space on a 64x64 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular64_Build)
   (benchmark::State& st)
   {
@@ -92,6 +103,7 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
+  /// @brief Measures construction of a P1 space on a 128x128 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular128_Build)
   (benchmark::State& st)
   {
@@ -102,6 +114,7 @@ namespace Rodin::Tests::Benchmarks
     }
   }
 
+  /// @brief Measures scalar grid-function projection of x+y on a two-triangle square mesh.
   BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
@@ -112,6 +125,7 @@ namespace Rodin::Tests::Benchmarks
       gf.project(Region::Cells, c);
   }
 
+  /// @brief Measures scalar grid-function projection of x+y on a 16x16 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
@@ -122,6 +136,7 @@ namespace Rodin::Tests::Benchmarks
       gf.project(Region::Cells, c);
   }
 
+  /// @brief Measures scalar grid-function projection of x+y on a 32x32 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Real_SumOfComponents)
   (benchmark::State& st)
   {
@@ -132,6 +147,7 @@ namespace Rodin::Tests::Benchmarks
       gf.project(Region::Cells, c);
   }
 
+  /// @brief Measures vector grid-function projection of coordinate components on a two-triangle square mesh.
   BENCHMARK_F(P1Benchmark, 2D_Square_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
@@ -146,6 +162,7 @@ namespace Rodin::Tests::Benchmarks
       gf.project(Region::Cells, c);
   }
 
+  /// @brief Measures vector grid-function projection of coordinate components on a 16x16 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular16_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {
@@ -160,6 +177,7 @@ namespace Rodin::Tests::Benchmarks
       gf.project(Region::Cells, c);
   }
 
+  /// @brief Measures vector grid-function projection of coordinate components on a 32x32 triangular mesh.
   BENCHMARK_F(P1Benchmark, UniformTriangular32_GridFunction_Projection_Vector_Components)
   (benchmark::State& st)
   {

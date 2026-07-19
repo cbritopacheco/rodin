@@ -89,7 +89,7 @@
   @section guides-polytopes-meshgen Using Polytopes for Mesh Generation
 
   The polytope type determines the element shapes when generating uniform
-  meshes via @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()":
+  meshes via @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()":
 
   @code{.cpp}
   #include <Rodin/Geometry.h>

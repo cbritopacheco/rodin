@@ -24,6 +24,7 @@ namespace
 //  AND
 // ============================================================
 
+/// @brief Verifies true and true for variational AND by checking true predicates.
 TEST(Rodin_Variational_AND, TrueAndTrue)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -38,6 +39,7 @@ TEST(Rodin_Variational_AND, TrueAndTrue)
   EXPECT_TRUE(result.getValue(p));
 }
 
+/// @brief Verifies true and false for variational AND by checking false predicates.
 TEST(Rodin_Variational_AND, TrueAndFalse)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -52,6 +54,7 @@ TEST(Rodin_Variational_AND, TrueAndFalse)
   EXPECT_FALSE(result.getValue(p));
 }
 
+/// @brief Verifies false and false for variational AND by checking false predicates.
 TEST(Rodin_Variational_AND, FalseAndFalse)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -66,6 +69,7 @@ TEST(Rodin_Variational_AND, FalseAndFalse)
   EXPECT_FALSE(result.getValue(p));
 }
 
+/// @brief Verifies with boolean constant for variational AND by checking true predicates, false predicates.
 TEST(Rodin_Variational_AND, WithBooleanConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -81,6 +85,7 @@ TEST(Rodin_Variational_AND, WithBooleanConstant)
   EXPECT_FALSE((cond && false).getValue(p));
 }
 
+/// @brief Verifies copy for variational AND by checking true predicates, copy semantics.
 TEST(Rodin_Variational_AND, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -100,6 +105,7 @@ TEST(Rodin_Variational_AND, Copy)
 //  OR
 // ============================================================
 
+/// @brief Verifies true or false for variational OR by checking true predicates.
 TEST(Rodin_Variational_OR, TrueOrFalse)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -114,6 +120,7 @@ TEST(Rodin_Variational_OR, TrueOrFalse)
   EXPECT_TRUE(result.getValue(p));
 }
 
+/// @brief Verifies false or false for variational OR by checking false predicates.
 TEST(Rodin_Variational_OR, FalseOrFalse)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -128,6 +135,7 @@ TEST(Rodin_Variational_OR, FalseOrFalse)
   EXPECT_FALSE(result.getValue(p));
 }
 
+/// @brief Verifies true or true for variational OR by checking true predicates.
 TEST(Rodin_Variational_OR, TrueOrTrue)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -142,6 +150,7 @@ TEST(Rodin_Variational_OR, TrueOrTrue)
   EXPECT_TRUE(result.getValue(p));
 }
 
+/// @brief Verifies with boolean constant for variational OR by checking true predicates.
 TEST(Rodin_Variational_OR, WithBooleanConstant)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -156,6 +165,7 @@ TEST(Rodin_Variational_OR, WithBooleanConstant)
   EXPECT_TRUE((false || cond).getValue(p));
 }
 
+/// @brief Verifies copy for variational OR by checking true predicates, copy semantics.
 TEST(Rodin_Variational_OR, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

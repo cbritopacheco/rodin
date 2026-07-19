@@ -70,10 +70,12 @@ namespace Rodin::Math
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Type traits for a Math::SparseMatrix: exposes the scalar type.
   template <class Number>
   struct Traits<Math::SparseMatrix<Number>>
   {
-    using ScalarType = Number;
+    /// @brief Scalar value type.
+      using ScalarType = Number;
   };
 }
 

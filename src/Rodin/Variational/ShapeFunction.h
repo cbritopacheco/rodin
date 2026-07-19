@@ -26,6 +26,7 @@
 #include "Rodin/Geometry/Polytope.h"
 #include "Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Derived, class FES, Variational::ShapeFunctionSpaceType Space>
@@ -33,15 +34,19 @@ namespace Rodin::FormLanguage
   {
     using DerivedType = Derived;
 
+    /// @brief Finite element space type.
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    /// @brief Result type of the evaluation.
     using ResultType =
       typename ResultOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    /// @brief Range (evaluation value) type.
     using RangeType =
       typename RangeOf<Variational::ShapeFunctionBase<Derived, FES, SpaceType>>::Type;
 
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<RangeType>::ScalarType;
   };
 
@@ -50,19 +55,23 @@ namespace Rodin::FormLanguage
   {
     using DerivedType = Derived;
 
+    /// @brief Finite element space type.
     using FESType = FES;
     static constexpr const Variational::ShapeFunctionSpaceType SpaceType = Space;
 
+    /// @brief Result type of the evaluation.
     using ResultType =
       typename ResultOf<
         Variational::ShapeFunctionBase<
           Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
+    /// @brief Range (evaluation value) type.
     using RangeType =
       typename RangeOf<
         Variational::ShapeFunctionBase<
           Variational::ShapeFunction<Derived, FES, SpaceType>, FES, SpaceType>>::Type;
 
+    /// @brief Scalar value type.
     using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
   };
 }
@@ -277,10 +286,26 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getIntegrationPoint();
       }
 
+      /**
+       * @brief Sets the current integration point.
+       *
+       * This is the preferred path while integrating: it carries both the
+       * geometric point and its quadrature metadata so shape functions can
+       * reuse tabulations and cache entries tied to the active quadrature rule.
+       * For pointwise evaluations outside a quadrature loop, construct an
+       * @ref IntegrationPoint from a @ref Geometry::Point (which sets a
+       * @c nullptr quadrature formula) and pass it here.
+       */
       constexpr
       Derived& setIntegrationPoint(const IntegrationPoint& ip)
       {
         return static_cast<Derived&>(*this).setIntegrationPoint(ip);
+      }
+
+      Derived& setPoint(const Geometry::Point& p)
+      {
+        m_pointIntegrationPoint.emplace(p);
+        return static_cast<Derived&>(*this).setIntegrationPoint(*m_pointIntegrationPoint);
       }
 
       /**
@@ -348,7 +373,7 @@ namespace Rodin::Variational
        * - Returns std::nullopt for non-polynomial expressions.
        * - The value is not guaranteed to be sharp.
        *
-       * @param geom Reference geometry type.
+       * @param poly Polytope on which the order is queried.
        * @return Polynomial order bound, or std::nullopt if not polynomial.
        */
       constexpr
@@ -368,7 +393,9 @@ namespace Rodin::Variational
 
     private:
       std::reference_wrapper<const FES> m_fes;
+      Optional<IntegrationPoint> m_pointIntegrationPoint;
   };
 }
 
+/// @endcond
 #endif

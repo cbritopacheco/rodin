@@ -17,14 +17,17 @@
 #define RODIN_VARIATIONAL_BILINEARFORMINTEGRATOR_H
 
 #include <memory>
+#include <type_traits>
 
 #include "Rodin/Geometry/Types.h"
 #include "Rodin/Geometry/Region.h"
 #include "Rodin/FormLanguage/Base.h"
 
 #include "ForwardDecls.h"
+#include "ShapeFunction.h"
 #include "Integrator.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -75,10 +78,13 @@ namespace Rodin::Variational
        * Creates an integrator that will compute contributions involving both
        * the trial function @f$ u @f$ and test function @f$ v @f$.
        */
-      template <class Solution, class TrialFES, class TestFES>
-      BilinearFormIntegratorBase(
-          const TrialFunction<Solution, TrialFES>& u, const TestFunction<TestFES>& v)
-        : m_u(u.copy()), m_v(v.copy())
+      template <class TrialFunctionType, class TestFunctionType,
+        std::enable_if_t<IsTrialFunction<std::decay_t<TrialFunctionType>>::Value &&
+            IsTestFunction<std::decay_t<TestFunctionType>>::Value,
+          int> = 0>
+      BilinearFormIntegratorBase(const TrialFunctionType& u, const TestFunctionType& v)
+        : m_u(u.copy()),
+          m_v(v.copy())
       {}
 
       /**
@@ -169,8 +175,10 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase<Number, LocalBilinearFormIntegratorBase<Number>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Parent class type.
       using Parent = BilinearFormIntegratorBase<ScalarType, LocalBilinearFormIntegratorBase>;
 
       using Parent::Parent;
@@ -253,8 +261,10 @@ namespace Rodin::Variational
     : public BilinearFormIntegratorBase<Number, GlobalBilinearFormIntegratorBase<Number>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Parent class type.
       using Parent = BilinearFormIntegratorBase<ScalarType, GlobalBilinearFormIntegratorBase<ScalarType>>;
 
       using Parent::Parent;
@@ -338,4 +348,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

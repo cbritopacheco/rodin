@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Poisson assembly benchmark coverage
+ *
+ * Benchmarks assembly of a scalar P1 Poisson problem on a 16x16 triangular grid, with both unit diffusion and explicit constant coefficient forms. The cases isolate form assembly cost from mesh and finite-element-space setup.
+ */
+
 #include <benchmark/benchmark.h>
 
 #include <boost/filesystem.hpp>
@@ -43,9 +51,11 @@ namespace Rodin::Tests::Benchmarks
       std::unique_ptr<FESType> vhPtr;
   };
 
+  /// @brief Measures P1 Poisson assembly with unit diffusion and constant source on a 16x16 triangular grid.
   BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_NoCoefficient_ConstantSource)
   (benchmark::State& st)
   {
+    /// @cond RODIN_TEST_INTERNAL
     assert(vhPtr);
     const auto& vh = *vhPtr;
     TrialFunction u(vh);
@@ -59,11 +69,14 @@ namespace Rodin::Tests::Benchmarks
 
     for (auto _ : st)
       poisson.assemble();
+    /// @endcond
   }
 
+  /// @brief Measures P1 Poisson assembly with an explicit constant diffusion coefficient and constant source.
   BENCHMARK_F(Poisson_UniformGrid_16x16, Assembly_ConstantCoefficient_ConstantSource)
   (benchmark::State& st)
   {
+    /// @cond RODIN_TEST_INTERNAL
     assert(vhPtr);
     const auto& vh = *vhPtr;
     TrialFunction u(vh);
@@ -78,5 +91,6 @@ namespace Rodin::Tests::Benchmarks
 
     for (auto _ : st)
       poisson.assemble();
+    /// @endcond
   }
 }

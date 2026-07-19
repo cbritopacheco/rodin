@@ -23,7 +23,7 @@ namespace Rodin::Utility
    * @tparam T The type to check.
    *
    * This trait uses SFINAE to detect whether a type T has a nested
-   * member type named `Type`. The primary template handles the case
+   * member type named @c Type. The primary template handles the case
    * where no such member exists.
    *
    * Example usage:

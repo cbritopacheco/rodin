@@ -12,6 +12,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies real value unchanged for variational conjugate by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Conjugate, RealValueUnchanged)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -27,6 +28,7 @@ TEST(Rodin_Variational_Conjugate, RealValueUnchanged)
   EXPECT_NEAR(val.imag(), 0.0, 1e-10);
 }
 
+/// @brief Verifies imaginary part for variational conjugate by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Conjugate, ImaginaryPart)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -42,6 +44,7 @@ TEST(Rodin_Variational_Conjugate, ImaginaryPart)
   EXPECT_NEAR(val.imag(), -5.0, 1e-10);
 }
 
+/// @brief Verifies pure imaginary for variational conjugate by checking tolerance-based numerical results.
 TEST(Rodin_Variational_Conjugate, PureImaginary)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -57,6 +60,7 @@ TEST(Rodin_Variational_Conjugate, PureImaginary)
   EXPECT_NEAR(val.imag(), -4.0, 1e-10);
 }
 
+/// @brief Verifies copy for variational conjugate by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_Conjugate, Copy)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -73,6 +77,7 @@ TEST(Rodin_Variational_Conjugate, Copy)
   EXPECT_NEAR(val.imag(), -2.0, 1e-10);
 }
 
+/// @brief Verifies get order for variational conjugate by checking exact expected values, true predicates.
 TEST(Rodin_Variational_Conjugate, GetOrder)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });

@@ -27,6 +27,13 @@
 #include <bitset>
 #include <optional>
 
+// GCC's -Warray-bounds falsely fires inside Boost.Container's flat
+// containers at -O2 (diagnostic is attributed to the Boost headers, so it
+// must be suppressed around the includes rather than at the call sites).
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 #include <boost/unordered_map.hpp>
 #include <boost/container/map.hpp>
 #include <boost/unordered_set.hpp>
@@ -34,6 +41,9 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/container/deque.hpp>
 #include <boost/container/list.hpp>
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 #include <Eigen/Core>
 
@@ -135,6 +145,8 @@ namespace Rodin
   template <class T>
   using Optional = std::optional<T>;
 
+  /// Standard string view type.
+  /// @ingroup RodinTypes
   using StringView = std::string_view;
 
 #if __cpp_size_t_suffix < 202011L

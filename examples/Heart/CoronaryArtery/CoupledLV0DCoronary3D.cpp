@@ -220,6 +220,7 @@ namespace Rodin::Examples::Heart
     input.mu = cfg.lv.mu;
     input.eta = cfg.lv.eta;
     input.alpha = cfg.lv.alpha;
+    input.alphaR = cfg.lv.alphaR;
     input.k0 = cfg.lv.k0;
     input.sigma0 = cfg.lv.sigma0;
 
@@ -227,6 +228,17 @@ namespace Rodin::Examples::Heart
     input.Cp = cfg.lv.Cp;
     input.Rd = cfg.lv.Rd;
     input.Cd = cfg.lv.Cd;
+
+    input.proximalRadius = cfg.lv.proximalRadius;
+    input.proximalLength = cfg.lv.proximalLength;
+    input.distalRadius = cfg.lv.distalRadius;
+    input.distalLength = cfg.lv.distalLength;
+
+    input.mu_0 = cfg.lv.mu_0;
+    input.mu_Inf = cfg.lv.mu_Inf;
+    input.lambda = cfg.lv.lambda;
+    input.n = cfg.lv.n;
+    input.yasuda = cfg.lv.yasuda;
 
     input.Kat = cfg.lv.Kat;
     input.Kp  = cfg.lv.Kp;
@@ -249,6 +261,25 @@ namespace Rodin::Examples::Heart
       [p = cfg.atrialPressure](Real t) { return atrial_pressure(p, t); };
     input.u =
       [a = cfg.activation](Real t) { return periodic_activation(a, t); };
+    input.m0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
+                 lowEc = cfg.lv.relaxationM0LowEc,
+                 highEc = cfg.lv.relaxationM0HighEc](Real ec) {
+      if (highEc <= lowEc)
+        return high;
+      if (ec <= lowEc)
+        return low;
+      if (ec >= highEc)
+        return high;
+      const Real s = (ec - lowEc) / (highEc - lowEc);
+      return (1.0 - s) * low + s * high;
+    };
+    input.dm0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
+                  lowEc = cfg.lv.relaxationM0LowEc,
+                  highEc = cfg.lv.relaxationM0HighEc](Real ec) {
+      if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
+        return 0.0;
+      return (high - low) / (highEc - lowEc);
+    };
 
     {
       using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
@@ -267,13 +298,13 @@ namespace Rodin::Examples::Heart
     return input;
   }
 
-  void CoupledLV0DCoronary3D::updateRCR(RCR& bc, Real Q, Real dt)
+  void CoupledLV0DCoronary3D::updateRCR(const Model& model, RCR& bc, Real Q, Real dt)
   {
     const Real a = bc.C / dt;
 
-    bc.pc =
-      (a * bc.pc + Q + bc.pd / bc.Rd)
-      / (a + 1.0 / bc.Rd);
+    const auto& s = model.getState();
+
+    bc.pc = (a * bc.pc + Q + s.pv / bc.Rd) / (a + 1.0 / bc.Rd);
 
     bc.qd = (bc.pc - bc.pd) / bc.Rd;
     bc.pout = bc.pc + bc.Rp * Q;
@@ -639,6 +670,7 @@ namespace Rodin::Examples::Heart
     s0.beta = (s0.gamma > 0.0) ? (m_input.initActiveStress / s0.gamma) : 0.0;
     s0.kc = s0.gamma * s0.gamma;
     s0.tauc = s0.gamma * s0.beta;
+    s0.w = m_input.m0(s0.ec);
 
     m_model.initialize(s0);
   }
@@ -697,20 +729,15 @@ namespace Rodin::Examples::Heart
 
     const auto& s = m_model.getState();
 
-    Alert::Info()
-      << "Initial 0D state:" << Alert::NewLine
-      << "y     = " << s.y << Alert::NewLine
-      << "v     = " << s.v << Alert::NewLine
-      << "pv    = " << s.pv << Alert::NewLine
-      << "par   = " << s.par << Alert::NewLine
-      << "pd    = " << s.pd << Alert::NewLine
-      << "ec    = " << s.ec << Alert::NewLine
-      << "gamma = " << s.gamma << Alert::NewLine
-      << "beta  = " << s.beta << Alert::NewLine
-      << "kc    = " << s.kc << Alert::NewLine
-      << "tauc  = " << s.tauc << Alert::NewLine
-      << "3D flow mode: " << flowModeName(m_cfg.flowMode)
-      << Alert::Raise;
+    Alert::Info() << "Initial 0D state:" << Alert::NewLine << "y     = " << s.y
+                  << Alert::NewLine << "v     = " << s.v << Alert::NewLine
+                  << "pv    = " << s.pv << Alert::NewLine << "par   = " << s.par
+                  << Alert::NewLine << "pd    = " << s.pd << Alert::NewLine
+                  << "ec    = " << s.ec << Alert::NewLine << "gamma = " << s.gamma
+                  << Alert::NewLine << "beta  = " << s.beta << Alert::NewLine
+                  << "w     = " << s.w << Alert::NewLine << "kc    = " << s.kc
+                  << Alert::NewLine << "tauc  = " << s.tauc << Alert::NewLine
+                  << "3D flow mode: " << flowModeName(m_cfg.flowMode) << Alert::Raise;
   }
 
   bool CoupledLV0DCoronary3D::isRoot() const
@@ -1110,6 +1137,7 @@ namespace Rodin::Examples::Heart
     d.ec = s.ec;
     d.gamma = s.gamma;
     d.beta = s.beta;
+    d.w = s.w;
     d.kc = s.kc;
     d.tauc = s.tauc;
 
@@ -1140,52 +1168,52 @@ namespace Rodin::Examples::Heart
     if (!isRoot())
       return;
 
-    m_csv
-      << "t,"
-      << "LeftAtriumPressure,"
-      << "VenaCavaPressure,"
-      << "LeftVentricleDisplacement,"
-      << "LeftVentricleVelocity,"
-      << "LeftVentricleRadius,"
-      << "LeftVentricleVolume,"
-      << "LeftVentriclePressure,"
-      << "AortaPressure,"
-      << "DistalPressure,"
-      << "LeftVentricleFlow,"
-      << "CoronaryInletFlux,"
-      << "CoronaryOutlet4Flux,"
-      << "CoronaryOutlet5Flux,"
-      << "CoronaryOutlet6Flux,"
-      << "CoronaryOutlet7Flux,"
-      << "CoronaryOutlet8Flux,"
-      << "CoronaryOutlet9Flux,"
-      << "CoronaryOutletFluxTotal,"
-      << "CoronaryOutlet4DistalFlux,"
-      << "CoronaryOutlet5DistalFlux,"
-      << "CoronaryOutlet6DistalFlux,"
-      << "CoronaryOutlet7DistalFlux,"
-      << "CoronaryOutlet8DistalFlux,"
-      << "CoronaryOutlet9DistalFlux,"
-      << "CoronaryDistalFluxTotal,"
-      << "CoronaryCapChargingFluxTotal,"
-      << "CoronaryOutlet4CapPressure,"
-      << "CoronaryOutlet5CapPressure,"
-      << "CoronaryOutlet6CapPressure,"
-      << "CoronaryOutlet7CapPressure,"
-      << "CoronaryOutlet8CapPressure,"
-      << "CoronaryOutlet9CapPressure,"
-      << "CoronaryOutlet4Pressure,"
-      << "CoronaryOutlet5Pressure,"
-      << "CoronaryOutlet6Pressure,"
-      << "CoronaryOutlet7Pressure,"
-      << "CoronaryOutlet8Pressure,"
-      << "CoronaryOutlet9Pressure,"
-      << "FlowBalance,"
-      << "ec,"
-      << "gamma,"
-      << "beta,"
-      << "kc,"
-      << "tauc\n";
+    m_csv << "t,"
+          << "LeftAtriumPressure,"
+          << "VenaCavaPressure,"
+          << "LeftVentricleDisplacement,"
+          << "LeftVentricleVelocity,"
+          << "LeftVentricleRadius,"
+          << "LeftVentricleVolume,"
+          << "LeftVentriclePressure,"
+          << "AortaPressure,"
+          << "DistalPressure,"
+          << "LeftVentricleFlow,"
+          << "CoronaryInletFlux,"
+          << "CoronaryOutlet4Flux,"
+          << "CoronaryOutlet5Flux,"
+          << "CoronaryOutlet6Flux,"
+          << "CoronaryOutlet7Flux,"
+          << "CoronaryOutlet8Flux,"
+          << "CoronaryOutlet9Flux,"
+          << "CoronaryOutletFluxTotal,"
+          << "CoronaryOutlet4DistalFlux,"
+          << "CoronaryOutlet5DistalFlux,"
+          << "CoronaryOutlet6DistalFlux,"
+          << "CoronaryOutlet7DistalFlux,"
+          << "CoronaryOutlet8DistalFlux,"
+          << "CoronaryOutlet9DistalFlux,"
+          << "CoronaryDistalFluxTotal,"
+          << "CoronaryCapChargingFluxTotal,"
+          << "CoronaryOutlet4CapPressure,"
+          << "CoronaryOutlet5CapPressure,"
+          << "CoronaryOutlet6CapPressure,"
+          << "CoronaryOutlet7CapPressure,"
+          << "CoronaryOutlet8CapPressure,"
+          << "CoronaryOutlet9CapPressure,"
+          << "CoronaryOutlet4Pressure,"
+          << "CoronaryOutlet5Pressure,"
+          << "CoronaryOutlet6Pressure,"
+          << "CoronaryOutlet7Pressure,"
+          << "CoronaryOutlet8Pressure,"
+          << "CoronaryOutlet9Pressure,"
+          << "FlowBalance,"
+          << "ec,"
+          << "gamma,"
+          << "beta,"
+          << "w,"
+          << "kc,"
+          << "tauc\n";
 
     m_csv.flush();
   }
@@ -1203,52 +1231,20 @@ namespace Rodin::Examples::Heart
       return (it == m.end()) ? 0.0 : it->second;
     };
 
-    m_csv
-      << d.t << ','
-      << d.pat << ','
-      << d.psv << ','
-      << d.y << ','
-      << d.v << ','
-      << d.radius << ','
-      << d.lvVolume << ','
-      << d.pv << ','
-      << d.par << ','
-      << d.pd << ','
-      << d.lvFlow << ','
-      << d.qIn << ','
-      << get(d.qOut, 4) << ','
-      << get(d.qOut, 5) << ','
-      << get(d.qOut, 6) << ','
-      << get(d.qOut, 7) << ','
-      << get(d.qOut, 8) << ','
-      << get(d.qOut, 9) << ','
-      << d.qOutSum << ','
-      << get(d.qDistal, 4) << ','
-      << get(d.qDistal, 5) << ','
-      << get(d.qDistal, 6) << ','
-      << get(d.qDistal, 7) << ','
-      << get(d.qDistal, 8) << ','
-      << get(d.qDistal, 9) << ','
-      << d.qDistalSum << ','
-      << d.qCapChargingSum << ','
-      << get(d.pc, 4) << ','
-      << get(d.pc, 5) << ','
-      << get(d.pc, 6) << ','
-      << get(d.pc, 7) << ','
-      << get(d.pc, 8) << ','
-      << get(d.pc, 9) << ','
-      << get(d.pOut, 4) << ','
-      << get(d.pOut, 5) << ','
-      << get(d.pOut, 6) << ','
-      << get(d.pOut, 7) << ','
-      << get(d.pOut, 8) << ','
-      << get(d.pOut, 9) << ','
-      << d.flowBalance << ','
-      << d.ec << ','
-      << d.gamma << ','
-      << d.beta << ','
-      << d.kc << ','
-      << d.tauc << '\n';
+    m_csv << d.t << ',' << d.pat << ',' << d.psv << ',' << d.y << ',' << d.v << ','
+          << d.radius << ',' << d.lvVolume << ',' << d.pv << ',' << d.par << ',' << d.pd
+          << ',' << d.lvFlow << ',' << d.qIn << ',' << get(d.qOut, 4) << ','
+          << get(d.qOut, 5) << ',' << get(d.qOut, 6) << ',' << get(d.qOut, 7) << ','
+          << get(d.qOut, 8) << ',' << get(d.qOut, 9) << ',' << d.qOutSum << ','
+          << get(d.qDistal, 4) << ',' << get(d.qDistal, 5) << ',' << get(d.qDistal, 6)
+          << ',' << get(d.qDistal, 7) << ',' << get(d.qDistal, 8) << ','
+          << get(d.qDistal, 9) << ',' << d.qDistalSum << ',' << d.qCapChargingSum << ','
+          << get(d.pc, 4) << ',' << get(d.pc, 5) << ',' << get(d.pc, 6) << ','
+          << get(d.pc, 7) << ',' << get(d.pc, 8) << ',' << get(d.pc, 9) << ','
+          << get(d.pOut, 4) << ',' << get(d.pOut, 5) << ',' << get(d.pOut, 6) << ','
+          << get(d.pOut, 7) << ',' << get(d.pOut, 8) << ',' << get(d.pOut, 9) << ','
+          << d.flowBalance << ',' << d.ec << ',' << d.gamma << ',' << d.beta << ',' << d.w
+          << ',' << d.kc << ',' << d.tauc << '\n';
 
     m_csv.flush();
   }
@@ -1439,8 +1435,6 @@ namespace Rodin::Examples::Heart
         accepted = true;
         nextDt = std::min(baseDt, solverDt / factor);
       }
-
-      ++acceptedStep;
     }
 
     m_cfg.dt = baseDt;

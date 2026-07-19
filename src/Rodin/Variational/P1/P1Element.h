@@ -36,6 +36,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -44,8 +45,10 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P1Element<Range>>
   {
-    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    using RangeType = Range;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -84,6 +87,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Scalar>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -207,14 +211,13 @@ namespace Rodin::Variational
                * @param r Reference point in the element (gradient is constant, so r doesn't affect result)
                * @return Constant gradient vector
                */
-              const ReturnType& operator()(const Math::SpatialPoint& r) const
+              ReturnType operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(dim);
+                ReturnType out(static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < dim; ++i)
-                  s_out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
-                return s_out;
+                  out(i) = DerivativeFunction<1>(i, m_local, m_g)(r);
+                return out;
               }
 
             private:
@@ -310,7 +313,7 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local LinearForm s_lf(0, g);
+            static const LinearForm s_lf(0, g);
             assert(i == 0);
             return s_lf;
           }
@@ -320,12 +323,12 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local LinearForm s_lf(0, g);
+                static const LinearForm s_lf(0, g);
                 return s_lf;
               }
               case 1:
               {
-                static thread_local LinearForm s_lf(1, g);
+                static const LinearForm s_lf(1, g);
                 return s_lf;
               }
               default:
@@ -342,17 +345,17 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local LinearForm s_lf(0, g);
+                static const LinearForm s_lf(0, g);
                 return s_lf;
               }
               case 1:
               {
-                static thread_local LinearForm s_lf(1, g);
+                static const LinearForm s_lf(1, g);
                 return s_lf;
               }
               case 2:
               {
-                static thread_local LinearForm s_lf(2, g);
+                static const LinearForm s_lf(2, g);
                 return s_lf;
               }
               default:
@@ -369,22 +372,22 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local LinearForm s_lf(0, g);
+                static const LinearForm s_lf(0, g);
                 return s_lf;
               }
               case 1:
               {
-                static thread_local LinearForm s_lf(1, g);
+                static const LinearForm s_lf(1, g);
                 return s_lf;
               }
               case 2:
               {
-                static thread_local LinearForm s_lf(2, g);
+                static const LinearForm s_lf(2, g);
                 return s_lf;
               }
               case 3:
               {
-                static thread_local LinearForm s_lf(3, g);
+                static const LinearForm s_lf(3, g);
                 return s_lf;
               }
               default:
@@ -401,22 +404,60 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local LinearForm s_lf(0, g);
+                static const LinearForm s_lf(0, g);
                 return s_lf;
               }
               case 1:
               {
-                static thread_local LinearForm s_lf(1, g);
+                static const LinearForm s_lf(1, g);
                 return s_lf;
               }
               case 2:
               {
-                static thread_local LinearForm s_lf(2, g);
+                static const LinearForm s_lf(2, g);
                 return s_lf;
               }
               case 3:
               {
-                static thread_local LinearForm s_lf(3, g);
+                static const LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static const LinearForm s_lf(0, g);
+                return s_lf;
+              }
+              case 1:
+              {
+                static const LinearForm s_lf(1, g);
+                return s_lf;
+              }
+              case 2:
+              {
+                static const LinearForm s_lf(2, g);
+                return s_lf;
+              }
+              case 3:
+              {
+                static const LinearForm s_lf(3, g);
+                return s_lf;
+              }
+              case 4:
+              {
+                static const LinearForm s_lf(4, g);
                 return s_lf;
               }
               default:
@@ -434,32 +475,32 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local LinearForm s_lf(0, g);
+                static const LinearForm s_lf(0, g);
                 return s_lf;
               }
               case 1:
               {
-                static thread_local LinearForm s_lf(1, g);
+                static const LinearForm s_lf(1, g);
                 return s_lf;
               }
               case 2:
               {
-                static thread_local LinearForm s_lf(2, g);
+                static const LinearForm s_lf(2, g);
                 return s_lf;
               }
               case 3:
               {
-                static thread_local LinearForm s_lf(3, g);
+                static const LinearForm s_lf(3, g);
                 return s_lf;
               }
               case 4:
               {
-                static thread_local LinearForm s_lf(4, g);
+                static const LinearForm s_lf(4, g);
                 return s_lf;
               }
               case 5:
               {
-                static thread_local LinearForm s_lf(5, g);
+                static const LinearForm s_lf(5, g);
                 return s_lf;
               }
               default:
@@ -477,42 +518,42 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local LinearForm s_lf(0, g);
+                static const LinearForm s_lf(0, g);
                 return s_lf;
               }
               case 1:
               {
-                static thread_local LinearForm s_lf(1, g);
+                static const LinearForm s_lf(1, g);
                 return s_lf;
               }
               case 2:
               {
-                static thread_local LinearForm s_lf(2, g);
+                static const LinearForm s_lf(2, g);
                 return s_lf;
               }
               case 3:
               {
-                static thread_local LinearForm s_lf(3, g);
+                static const LinearForm s_lf(3, g);
                 return s_lf;
               }
               case 4:
               {
-                static thread_local LinearForm s_lf(4, g);
+                static const LinearForm s_lf(4, g);
                 return s_lf;
               }
               case 5:
               {
-                static thread_local LinearForm s_lf(5, g);
+                static const LinearForm s_lf(5, g);
                 return s_lf;
               }
               case 6:
               {
-                static thread_local LinearForm s_lf(6, g);
+                static const LinearForm s_lf(6, g);
                 return s_lf;
               }
               case 7:
               {
-                static thread_local LinearForm s_lf(7, g);
+                static const LinearForm s_lf(7, g);
                 return s_lf;
               }
               default:
@@ -524,7 +565,7 @@ namespace Rodin::Variational
             break;
           }
         }
-        static thread_local LinearForm s_null(0, g);
+        static const LinearForm s_null(0, g);
         assert(false);
         return s_null;
       }
@@ -536,7 +577,7 @@ namespace Rodin::Variational
         {
           case Geometry::Polytope::Type::Point:
           {
-            static thread_local BasisFunction s_basis(0, g);
+            static const BasisFunction s_basis(0, g);
             assert(i == 0);
             return s_basis;
           }
@@ -546,12 +587,12 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local BasisFunction s_basis(0, g);
+                static const BasisFunction s_basis(0, g);
                 return s_basis;
               }
               case 1:
               {
-                static thread_local BasisFunction s_basis(1, g);
+                static const BasisFunction s_basis(1, g);
                 return s_basis;
               }
               default:
@@ -568,17 +609,17 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local BasisFunction s_basis(0, g);
+                static const BasisFunction s_basis(0, g);
                 return s_basis;
               }
               case 1:
               {
-                static thread_local BasisFunction s_basis(1, g);
+                static const BasisFunction s_basis(1, g);
                 return s_basis;
               }
               case 2:
               {
-                static thread_local BasisFunction s_basis(2, g);
+                static const BasisFunction s_basis(2, g);
                 return s_basis;
               }
               default:
@@ -595,22 +636,22 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local BasisFunction s_basis(0, g);
+                static const BasisFunction s_basis(0, g);
                 return s_basis;
               }
               case 1:
               {
-                static thread_local BasisFunction s_basis(1, g);
+                static const BasisFunction s_basis(1, g);
                 return s_basis;
               }
               case 2:
               {
-                static thread_local BasisFunction s_basis(2, g);
+                static const BasisFunction s_basis(2, g);
                 return s_basis;
               }
               case 3:
               {
-                static thread_local BasisFunction s_basis(3, g);
+                static const BasisFunction s_basis(3, g);
                 return s_basis;
               }
               default:
@@ -627,22 +668,59 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local BasisFunction s_basis(0, g);
+                static const BasisFunction s_basis(0, g);
                 return s_basis;
               }
               case 1:
               {
-                static thread_local BasisFunction s_basis(1, g);
+                static const BasisFunction s_basis(1, g);
                 return s_basis;
               }
               case 2:
               {
-                static thread_local BasisFunction s_basis(2, g);
+                static const BasisFunction s_basis(2, g);
                 return s_basis;
               }
               case 3:
               {
-                static thread_local BasisFunction s_basis(3, g);
+                static const BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              default:
+              {
+                assert(false);
+                break;
+              }
+            }
+            break;
+          }
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            switch (i)
+            {
+              case 0:
+              {
+                static const BasisFunction s_basis(0, g);
+                return s_basis;
+              }
+              case 1:
+              {
+                static const BasisFunction s_basis(1, g);
+                return s_basis;
+              }
+              case 2:
+              {
+                static const BasisFunction s_basis(2, g);
+                return s_basis;
+              }
+              case 3:
+              {
+                static const BasisFunction s_basis(3, g);
+                return s_basis;
+              }
+              case 4:
+              {
+                static const BasisFunction s_basis(4, g);
                 return s_basis;
               }
               default:
@@ -659,32 +737,32 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local BasisFunction s_basis(0, g);
+                static const BasisFunction s_basis(0, g);
                 return s_basis;
               }
               case 1:
               {
-                static thread_local BasisFunction s_basis(1, g);
+                static const BasisFunction s_basis(1, g);
                 return s_basis;
               }
               case 2:
               {
-                static thread_local BasisFunction s_basis(2, g);
+                static const BasisFunction s_basis(2, g);
                 return s_basis;
               }
               case 3:
               {
-                static thread_local BasisFunction s_basis(3, g);
+                static const BasisFunction s_basis(3, g);
                 return s_basis;
               }
               case 4:
               {
-                static thread_local BasisFunction s_basis(4, g);
+                static const BasisFunction s_basis(4, g);
                 return s_basis;
               }
               case 5:
               {
-                static thread_local BasisFunction s_basis(5, g);
+                static const BasisFunction s_basis(5, g);
                 return s_basis;
               }
               default:
@@ -702,42 +780,42 @@ namespace Rodin::Variational
             {
               case 0:
               {
-                static thread_local BasisFunction s_basis(0, g);
+                static const BasisFunction s_basis(0, g);
                 return s_basis;
               }
               case 1:
               {
-                static thread_local BasisFunction s_basis(1, g);
+                static const BasisFunction s_basis(1, g);
                 return s_basis;
               }
               case 2:
               {
-                static thread_local BasisFunction s_basis(2, g);
+                static const BasisFunction s_basis(2, g);
                 return s_basis;
               }
               case 3:
               {
-                static thread_local BasisFunction s_basis(3, g);
+                static const BasisFunction s_basis(3, g);
                 return s_basis;
               }
               case 4:
               {
-                static thread_local BasisFunction s_basis(4, g);
+                static const BasisFunction s_basis(4, g);
                 return s_basis;
               }
               case 5:
               {
-                static thread_local BasisFunction s_basis(5, g);
+                static const BasisFunction s_basis(5, g);
                 return s_basis;
               }
               case 6:
               {
-                static thread_local BasisFunction s_basis(6, g);
+                static const BasisFunction s_basis(6, g);
                 return s_basis;
               }
               case 7:
               {
-                static thread_local BasisFunction s_basis(7, g);
+                static const BasisFunction s_basis(7, g);
                 return s_basis;
               }
               default:
@@ -749,7 +827,7 @@ namespace Rodin::Variational
             break;
           }
         }
-        static thread_local BasisFunction s_null(0, g);
+        static const BasisFunction s_null(0, g);
         assert(false);
         return s_null;
       }
@@ -766,6 +844,7 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
+          case Geometry::Polytope::Type::Pyramid:
             return 2;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
@@ -809,6 +888,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P1Element<Math::SpatialVector<Scalar>>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -931,17 +1011,17 @@ namespace Rodin::Variational
               constexpr
               JacobianFunction(JacobianFunction&&) = default;
 
-              const ReturnType& operator()(const Math::SpatialPoint& r) const
+              ReturnType operator()(const Math::SpatialPoint& r) const
               {
-                static thread_local ReturnType s_out;
                 const size_t dim = Geometry::Polytope::Traits(m_g).getDimension();
-                s_out.resize(m_vdim, dim);
+                ReturnType out(
+                  static_cast<std::uint8_t>(m_vdim), static_cast<std::uint8_t>(dim));
                 for (size_t i = 0; i < m_vdim; ++i)
                 {
                   for (size_t j = 0; j < dim; ++j)
-                    s_out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
+                    out(i, j) = DerivativeFunction<1>(i, j, m_vdim, m_local, m_g)(r);
                 }
-                return s_out;
+                return out;
               }
 
             private:
@@ -961,14 +1041,13 @@ namespace Rodin::Variational
           constexpr
           BasisFunction(BasisFunction&&) = default;
 
-          const ReturnType& operator()(const Math::SpatialPoint& rc) const
+          ReturnType operator()(const Math::SpatialPoint& rc) const
           {
-            static thread_local ReturnType s_out;
-            s_out = ReturnType(static_cast<std::uint8_t>(m_vdim));
-            s_out.setZero();
-            s_out[static_cast<std::uint8_t>(m_local % m_vdim)] =
+            ReturnType out(static_cast<std::uint8_t>(m_vdim));
+            out.setZero();
+            out[static_cast<std::uint8_t>(m_local % m_vdim)] =
               P1Element<ScalarType>(m_g).getBasis(m_local / m_vdim)(rc);
-            return s_out;
+            return out;
           }
 
           template <size_t Order>
@@ -1068,6 +1147,27 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getVertex(local / m_vdim);
       }
 
+      template <class Coefficient>
+      constexpr void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
+      {
+        assert(m_vdim > 0);
+        out.resize(m_vdim);
+        out.setZero();
+
+        const P1Element<ScalarType> scalarfe(this->getGeometry());
+        const size_t nv = scalarfe.getCount();
+        for (size_t vertex = 0; vertex < nv; ++vertex)
+        {
+          const ScalarType phi = scalarfe.getBasis(vertex)(rc);
+          for (size_t component = 0; component < m_vdim; ++component)
+          {
+            const size_t local = vertex * m_vdim + component;
+            out(component) += coefficient(local) * phi;
+          }
+        }
+      }
+
       constexpr
       size_t getOrder() const
       {
@@ -1081,6 +1181,7 @@ namespace Rodin::Variational
             return 1;
           case Geometry::Polytope::Type::Quadrilateral:
           case Geometry::Polytope::Type::Wedge:
+          case Geometry::Polytope::Type::Pyramid:
             return 2;
           case Geometry::Polytope::Type::Hexahedron:
             return 3;
@@ -1106,4 +1207,5 @@ namespace Rodin::Variational
 
 #include "P1Element.hpp"
 
+/// @endcond
 #endif

@@ -7,6 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinMPI_HEADERS
   Geometry/Mesh.h
+  Geometry/SubMesh.h
   Geometry/Sharder.h
   Assembly/MPI.h
   IO/HDF5.h
@@ -16,6 +17,7 @@ set(RodinMPI_HEADERS
 
 set(RodinMPI_SRCS
   Geometry/Mesh.cpp
+  Geometry/SubMesh.cpp
   Geometry/Sharder.cpp
   Context/MPI.cpp
   Assembly/MPI.cpp

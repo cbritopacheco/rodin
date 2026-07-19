@@ -90,7 +90,7 @@
 
   @subsection examples-pdes-elasticity-impl-setup Setup
 
-  We load the mesh using @ref Rodin::Geometry::Mesh::load "Mesh::load()",
+  We load the mesh using @ref Rodin::Geometry::Mesh "Mesh::load()",
   define a vector-valued @ref Rodin::Variational::P1 "P1" finite element
   space with @f$ d @f$ components (one per spatial dimension), and set the
   material parameters:

@@ -16,6 +16,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- isTensorProduct ----
 
+  /// @brief Verifies point is tensor product for geometry polytope traits ext by checking true predicates.
   TEST(Geometry_PolytopeTraitsExt, Point_IsTensorProduct)
   {
     Polytope::Traits traits(Polytope::Type::Point);
@@ -24,6 +25,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies segment is both for geometry polytope traits ext by checking true predicates.
   TEST(Geometry_PolytopeTraitsExt, Segment_IsBoth)
   {
     Polytope::Traits traits(Polytope::Type::Segment);
@@ -32,6 +34,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies triangle is not tensor product for geometry polytope traits ext by checking true predicates, false predicates.
   TEST(Geometry_PolytopeTraitsExt, Triangle_IsNotTensorProduct)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
@@ -39,6 +42,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies quadrilateral is tensor product for geometry polytope traits ext by checking true predicates, false predicates.
   TEST(Geometry_PolytopeTraitsExt, Quadrilateral_IsTensorProduct)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
@@ -46,6 +50,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies tetrahedron is not tensor product for geometry polytope traits ext by checking true predicates, false predicates.
   TEST(Geometry_PolytopeTraitsExt, Tetrahedron_IsNotTensorProduct)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
@@ -53,6 +58,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies hexahedron is tensor product for geometry polytope traits ext by checking true predicates, false predicates.
   TEST(Geometry_PolytopeTraitsExt, Hexahedron_IsTensorProduct)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
@@ -60,6 +66,15 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies pyramid is not tensor product for geometry polytope traits ext by checking false predicates.
+  TEST(Geometry_PolytopeTraitsExt, Pyramid_IsNotTensorProduct)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_FALSE(traits.isSimplex());
+    EXPECT_FALSE(traits.isTensorProduct());
+  }
+
+  /// @brief Wedge = triangle × segment, so it is a tensor product element.
   TEST(Geometry_PolytopeTraitsExt, Wedge_IsTensorProduct)
   {
     // Wedge = triangle × segment, so it is a tensor product element
@@ -68,20 +83,30 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(traits.isTensorProduct());
   }
 
+  /// @brief Verifies hexahedron dimension for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, Hexahedron_Dimension)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
     EXPECT_EQ(traits.getDimension(), 3);
   }
 
+  /// @brief Verifies hexahedron vertex count for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, Hexahedron_VertexCount)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
     EXPECT_EQ(traits.getVertexCount(), 8);
   }
 
+  /// @brief Verifies pyramid vertex count for geometry polytope traits ext by checking exact expected values.
+  TEST(Geometry_PolytopeTraitsExt, Pyramid_VertexCount)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    EXPECT_EQ(traits.getVertexCount(), 5);
+  }
+
   // ---- getCentroid ----
 
+  /// @brief Verifies point centroid for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, PointCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Point);
@@ -90,6 +115,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(c.size(), 0);  // 0-dimensional
   }
 
+  /// @brief Verifies segment centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PolytopeTraitsExt, SegmentCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Segment);
@@ -99,6 +125,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c(0), 0.5, 1e-14);
   }
 
+  /// @brief Verifies triangle centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PolytopeTraitsExt, TriangleCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
@@ -109,6 +136,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c(1), 1.0 / 3.0, 1e-14);
   }
 
+  /// @brief Verifies quadrilateral centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PolytopeTraitsExt, QuadrilateralCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
@@ -119,6 +147,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c(1), 0.5, 1e-14);
   }
 
+  /// @brief Verifies tetrahedron centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PolytopeTraitsExt, TetrahedronCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
@@ -130,6 +159,18 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(c(2), 0.25, 1e-14);
   }
 
+  /// @brief Verifies pyramid centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
+  TEST(Geometry_PolytopeTraitsExt, PyramidCentroid)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    const auto& c = traits.getCentroid();
+    EXPECT_EQ(c.size(), 3);
+    EXPECT_NEAR(c(0), 0.375, 1e-14);
+    EXPECT_NEAR(c(1), 0.375, 1e-14);
+    EXPECT_NEAR(c(2), 0.25, 1e-14);
+  }
+
+  /// @brief Verifies hexahedron centroid for geometry polytope traits ext by checking tolerance-based numerical results, exact expected values.
   TEST(Geometry_PolytopeTraitsExt, HexahedronCentroid)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
@@ -143,6 +184,7 @@ namespace Rodin::Tests::Unit
 
   // ---- getHalfSpace value validation ----
 
+  /// @brief Verifies triangle half space values for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, TriangleHalfSpace_Values)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
@@ -153,6 +195,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hs.vector.size(), 3);
   }
 
+  /// @brief Verifies quadrilateral half space values for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, QuadrilateralHalfSpace_Values)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
@@ -163,6 +206,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hs.vector.size(), 4);
   }
 
+  /// @brief Verifies tetrahedron half space values for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, TetrahedronHalfSpace_Values)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
@@ -173,6 +217,17 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(hs.vector.size(), 4);
   }
 
+  /// @brief Verifies pyramid half space values for geometry polytope traits ext by checking exact expected values.
+  TEST(Geometry_PolytopeTraitsExt, PyramidHalfSpace_Values)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    const auto& hs = traits.getHalfSpace();
+    EXPECT_EQ(hs.matrix.rows(), 5);
+    EXPECT_EQ(hs.matrix.cols(), 3);
+    EXPECT_EQ(hs.vector.size(), 5);
+  }
+
+  /// @brief Verifies hexahedron half space values for geometry polytope traits ext by checking exact expected values.
   TEST(Geometry_PolytopeTraitsExt, HexahedronHalfSpace_Values)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);
@@ -185,6 +240,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Centroid is inside reference element (half-space test) ----
 
+  /// @brief Verifies centroid inside reference element triangle for geometry polytope traits ext.
   TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Triangle)
   {
     Polytope::Traits traits(Polytope::Type::Triangle);
@@ -200,6 +256,7 @@ namespace Rodin::Tests::Unit
       EXPECT_LE(result(i), hs.vector(i) + 1e-14);
   }
 
+  /// @brief Verifies centroid inside reference element quad for geometry polytope traits ext.
   TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Quad)
   {
     Polytope::Traits traits(Polytope::Type::Quadrilateral);
@@ -213,6 +270,7 @@ namespace Rodin::Tests::Unit
       EXPECT_LE(result(i), hs.vector(i) + 1e-14);
   }
 
+  /// @brief Verifies centroid inside reference element tet for geometry polytope traits ext.
   TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Tet)
   {
     Polytope::Traits traits(Polytope::Type::Tetrahedron);
@@ -226,6 +284,21 @@ namespace Rodin::Tests::Unit
       EXPECT_LE(result(i), hs.vector(i) + 1e-14);
   }
 
+  /// @brief Verifies centroid inside reference element pyramid for geometry polytope traits ext.
+  TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Pyramid)
+  {
+    Polytope::Traits traits(Polytope::Type::Pyramid);
+    const auto& c = traits.getCentroid();
+    const auto& hs = traits.getHalfSpace();
+    Eigen::VectorXd cv(c.size());
+    for (int j = 0; j < cv.size(); ++j)
+      cv(j) = c(j);
+    Eigen::VectorXd result = hs.matrix * cv;
+    for (int i = 0; i < result.size(); ++i)
+      EXPECT_LE(result(i), hs.vector(i) + 1e-14);
+  }
+
+  /// @brief Verifies centroid inside reference element hex for geometry polytope traits ext.
   TEST(Geometry_PolytopeTraitsExt, CentroidInsideReferenceElement_Hex)
   {
     Polytope::Traits traits(Polytope::Type::Hexahedron);

@@ -14,7 +14,7 @@
  *
  * Geometries:
  *   2D — Triangle, Quadrilateral
- *   3D — Tetrahedron, Hexahedron, Wedge
+ *   3D — Tetrahedron, Hexahedron, Pyramid, Wedge
  *
  * Each GTest parametrization is invoked by CTest with
  * MPIEXEC_NUMPROC_FLAG set to 1, 2, 3, 4, and 6 ranks.
@@ -79,6 +79,7 @@
 #  define RODIN_GETPID _getpid
 #else
 #  include <unistd.h>
+/// @brief Compatibility macro used by MPI manufactured tests to query the current process id.
 #  define RODIN_GETPID getpid
 #endif
 
@@ -469,6 +470,9 @@ namespace
         case Polytope::Type::Quadrilateral: g = "Quadrilateral"; break;
         case Polytope::Type::Tetrahedron:   g = "Tetrahedron";   break;
         case Polytope::Type::Hexahedron:    g = "Hexahedron";    break;
+        case Polytope::Type::Pyramid:
+          g = "Pyramid";
+          break;
         case Polytope::Type::Wedge:         g = "Wedge";         break;
         default:                            g = "Unknown";        break;
       }
@@ -482,6 +486,7 @@ namespace
 // ---------------------------------------------------------------------------
 namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
 {
+  /// @brief Helper used by the tests to Param.
   using Param = std::tuple<Polytope::Type, size_t>;
 
   // =========================================================================
@@ -513,6 +518,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
         << " K=" << K;
   }
 
+  /// @brief Instantiates H1 Linear Elasticity 2 D over the All Geometries And Degrees parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
     H1LinearElasticity2D,
@@ -524,7 +530,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
   );
 
   // =========================================================================
-  // 3D: Tetrahedron, Hexahedron, and Wedge × K ∈ {2,3,4}
+  // 3D: Tetrahedron, Hexahedron, Pyramid, and Wedge × K ∈ {2,3,4}
   // =========================================================================
 
   class H1LinearElasticity3D : public ::testing::TestWithParam<Param> {};
@@ -556,23 +562,19 @@ namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
         << " K=" << K;
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1LinearElasticity3D,
+  /// @brief Instantiates H1 Linear Elasticity 3 D over the All Geometries And Degrees parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1LinearElasticity3D,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(2, 3, 4)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(2, 3, 4)),
+    ParamName{});
 } // namespace Rodin::Tests::Manufactured::MPI::H1LinearElasticity
 
 // ---------------------------------------------------------------------------
 // main() — initializes MPI and PETSc before running all tests.
 // ---------------------------------------------------------------------------
+/// @brief Initializes the parallel test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);

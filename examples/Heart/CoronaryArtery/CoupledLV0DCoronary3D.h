@@ -96,15 +96,15 @@ namespace Rodin::Examples::Heart
       struct CarreauYasuda
       {
         /// @brief Low-shear viscosity.
-        Real mu0 = 0.04868;
+        Real mu0 = 0.0186058;
         /// @brief Infinite-shear viscosity.
-        Real muInf = 0.003605;
+        Real muInf = 0.0042963;
         /// @brief Relaxation time.
-        Real lambda = 3.39;
+        Real lambda = 0.2435;
         /// @brief Power-law index.
-        Real n = 0.198;
+        Real n = 0.2079;
         /// @brief Yasuda transition exponent.
-        Real yasuda = 1.235;
+        Real yasuda = 1.5410;
         /// @brief Shear-rate regularization used in the 3D viscosity.
         Real gammaRegularization = 1.0e-3;
       };
@@ -163,19 +163,19 @@ namespace Rodin::Examples::Heart
         /// @brief Period of the prescribed cardiac cycle.
         Real period = 0.85;
         /// @brief Activation ramp start.
-        Real tRampStart = 0.13;
+        Real tRampStart = 0.15;
         /// @brief Activation ramp end.
-        Real tRampEnd = 0.141;
+        Real tRampEnd = 0.17;
         /// @brief Activation plateau end.
-        Real tPlateauEnd = 0.281;
+        Real tPlateauEnd = 0.22;
         /// @brief Relaxation ramp end.
-        Real tRelaxEnd = 0.361;
+        Real tRelaxEnd = 0.36;
         /// @brief Negative activation plateau end.
         Real tNegativeEnd = 0.45;
         /// @brief Positive activation plateau value.
         Real positiveValue = 35.0;
         /// @brief Negative activation plateau value.
-        Real negativeValue = -12.0;
+        Real negativeValue = -20.0;
       };
 
       /**
@@ -213,35 +213,38 @@ namespace Rodin::Examples::Heart
         /// @brief 0D fluid density.
         Real rho = 1.0e3;
         /// @brief Reference radius.
-        Real R0 = 2.36e-2;
+        Real R0 = 2.3e-2;
         /// @brief Reference wall thickness.
-        Real d0 = 1.42e-2;
+        Real d0 = 1.4e-2;
         /// @brief Passive elastic stiffness.
-        Real Es = 3.0e5;
+
+        Real Es = 3.0e6;
         /// @brief Viscous parameter.
         Real mu = 70.0;
         /// @brief Viscous parameter.
         Real eta = 70.0;
         /// @brief Active stress gain.
-        Real alpha = 3.0;
+        Real alpha = 1.5;
+        /// @brief Load-dependent relaxation time scale.
+        Real alphaR = 0.12;
         /// @brief Active stiffness scale.
         Real k0 = 1.0e5;
         /// @brief Active stress scale.
-        Real sigma0 = 5.0e5;
+        Real sigma0 = 1.24e5;
         /// @brief Proximal arterial resistance.
-        Real Rp = 8.0e6;
+        Real Rp = 5e7;
         /// @brief Proximal arterial compliance.
-        Real Cp = 5.0e-9;
+        Real Cp = 2.5e-9;
         /// @brief Distal arterial resistance.
         Real Rd = 1.0e8;
         /// @brief Distal arterial compliance.
-        Real Cd = 1.0e-8;
+        Real Cd = 5.0e-9;
         /// @brief Atrial valve coefficient.
-        Real Kat = 8.0e-7;
+        Real Kat = 9.0e-6;
         /// @brief Peripheral valve coefficient.
         Real Kp = 5.0e-10;
         /// @brief Arterial valve coefficient.
-        Real Kar = 1.3e-5;
+        Real Kar = 1.e-6;
         /// @brief LV cavity capacity.
         Real cavityCapacity = 5.0e-12;
         /// @brief Local 0D Newton absolute tolerance.
@@ -258,6 +261,14 @@ namespace Rodin::Examples::Heart
         Real initActiveStiffness = 0.0;
         /// @brief Initial active stress.
         Real initActiveStress = 0.0;
+        /// @brief Low-fiber-deformation target for load-dependent relaxation.
+        Real relaxationM0Low = 1.6;
+        /// @brief High-fiber-deformation target for load-dependent relaxation.
+        Real relaxationM0High = 1.0;
+        /// @brief Fiber deformation at which m0 reaches relaxationM0Low.
+        Real relaxationM0LowEc = 0.0;
+        /// @brief Fiber deformation at which m0 reaches relaxationM0High.
+        Real relaxationM0HighEc = 2.0;
         /// @brief Systemic venous pressure callback value.
         Real systemicVenousPressure = 1.0e3;
         /// @brief Passive energy parameter mu1.
@@ -292,6 +303,24 @@ namespace Rodin::Examples::Heart
         Real initialPar = 11000.0;
         /// @brief Initial distal pressure.
         Real initialPd = 10000.0;
+        /// @brief Low-shear viscosity.
+        Real mu_0 = 0.0186058;
+        /// @brief Infinite-shear viscosity.
+        Real mu_Inf = 0.0042963;
+        /// @brief Relaxation time.
+        Real lambda = 0.2435;
+        /// @brief Power-law index.
+        Real n = 0.2079;
+        /// @brief Yasuda transition exponent.
+        Real yasuda = 1.5410;
+        /// @brief Proximal surrogate vessel radius.
+        Real proximalRadius = 0.015;
+        /// @brief Proximal surrogate vessel length.
+        Real proximalLength = 0.4;
+        /// @brief Distal surrogate vessel radius.
+        Real distalRadius = 0.0005;
+        /// @brief Distal surrogate vessel length.
+        Real distalLength = 0.004;
       };
 
       /**
@@ -369,7 +398,7 @@ namespace Rodin::Examples::Heart
         /// @brief 0D LV model parameters and initial conditions.
         LVModel lv;
         /// @brief Default RCR parameters copied to every outlet at startup.
-        RCR defaultRCR{5.0e8, 5.0e-11, 1.0e9, 400.0, 10500.0, 11000.0};
+        RCR defaultRCR{1.0e8, 1.0e-11, 1.0e9, 500.0, 10500.0, 11000.0};
       };
 
       explicit CoupledLV0DCoronary3D(const Rodin::Context::MPI& context);
@@ -407,6 +436,7 @@ namespace Rodin::Examples::Heart
         Real ec = 0.0;
         Real gamma = 0.0;
         Real beta = 0.0;
+        Real w = 1.0;
         Real kc = 0.0;
         Real tauc = 0.0;
 
@@ -425,7 +455,7 @@ namespace Rodin::Examples::Heart
       static Model::Input makeInput(const Config& cfg);
       static MeshType makeMesh(const Rodin::Context::MPI& context, const Config& cfg);
 
-      static void updateRCR(RCR& bc, Real Q, Real dt);
+      static void updateRCR(const Model& model, RCR& bc, Real Q, Real dt);
       static void updateRCRNonNew(
           const Config& cfg, const Model& model, RCR& bc, Real Q, Real dt);
       static Real periodic_activation(const Activation& cfg, Real t);

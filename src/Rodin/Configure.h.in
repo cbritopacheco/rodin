@@ -4,8 +4,10 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+/** @cond */
 #ifndef RODIN_CONFIGURE_H
 #define RODIN_CONFIGURE_H
+/** @endcond */
 
 /**
  * @file
@@ -17,14 +19,34 @@
  * @brief Preprocessor directives defined by Rodin.
  */
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Rodin version string.
+ */
 #define RODIN_VERSION "@RODIN_VERSION@"
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Rodin major version number.
+ */
 #define RODIN_VERSION_MAJOR @RODIN_VERSION_MAJOR@
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Rodin minor version number.
+ */
 #define RODIN_VERSION_MINOR @RODIN_VERSION_MINOR@
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Rodin patch version number.
+ */
 #define RODIN_VERSION_PATCH @RODIN_VERSION_PATCH@
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Encoded Rodin version number.
+ */
 #define RODIN_VERSION_CODE @RODIN_VERSION_CODE@
 
 /**
@@ -223,6 +245,10 @@
  */
 #define RODIN_MAXIMAL_SPACE_DIMENSION 3
 
+/**
+ * @ingroup RodinDirectives
+ * @brief Maximum number of vertices supported by a polytope.
+ */
 #define RODIN_MAXIMUM_POLYTOPE_VERTICES 8
 
 /**
@@ -230,4 +256,6 @@
  */
 #define RODIN_FUZZY_CONSTANT 1e-5
 
+/** @cond */
 #endif
+/** @endcond */

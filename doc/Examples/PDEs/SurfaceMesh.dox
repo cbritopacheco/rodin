@@ -63,7 +63,7 @@
 
   @subsection examples-pdes-surface-space Finite Element Space
 
-  We use @ref Rodin::Variational::H1 "H1" elements (higher-order continuous
+  We use `H1` elements (higher-order continuous
   Lagrange elements) to better approximate the solution on the curved
   surface:
 
@@ -99,9 +99,9 @@
   cg.printIterations(true);
 
   Problem rd(u, v);
-  rd = Integral(Grad(u), Grad(v))    // Surface stiffness: ∫_Γ ∇_Γ u · ∇_Γ v ds
-     + Integral(u, v)                // Mass term: ∫_Γ u v ds
-     - Integral(f, v);               // Load: ∫_Γ f v ds
+  rd = Integral(Grad(u), Grad(v))    // Surface stiffness: \int_\Gamma \nabla_\Gamma u \cdot \nabla_\Gamma v ds
+     + Integral(u, v)                // Mass term: \int_\Gamma u v ds
+     - Integral(f, v);               // Load: \int_\Gamma f v ds
   rd.solve(cg);
   @endcode
 

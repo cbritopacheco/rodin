@@ -38,6 +38,7 @@
 #include "ForwardDecls.h"
 #include "BooleanFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -54,10 +55,13 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<GT<FunctionBase<LHSDerived>, FunctionBase<RHSDerived>>>
   {
     public:
+      /// @brief Left-hand side operand type.
       using LHSType = FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = FunctionBase<RHSDerived>;
 
+      /// @brief Parent class type.
       using Parent = BooleanFunctionBase<GT<LHSType, RHSType>>;
 
       GT(const LHSType& lhs, const RHSType& rhs)
@@ -144,4 +148,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

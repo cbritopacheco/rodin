@@ -17,6 +17,7 @@ namespace Rodin::Tests::Unit
   // KinematicState tests
   // ========================================================================
 
+  /// @brief Verifies identity for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, Identity)
   {
     Solid::KinematicState state(2);
@@ -38,6 +39,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(C(i, j), (i == j) ? 1.0 : 0.0, 1e-14);
   }
 
+  /// @brief Verifies simple shear 2 D for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, SimpleShear2D)
   {
     Solid::KinematicState state(2);
@@ -65,6 +67,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(C(1, 1), 1.01, 1e-14);
   }
 
+  /// @brief Verifies uniform expansion 3 D for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, UniformExpansion3D)
   {
     Solid::KinematicState state(3);
@@ -80,6 +83,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(state.getLogJacobian(), std::log(expected_J), 1e-12);
   }
 
+  /// @brief Verifies inverse consistency for solid kinematic state by checking tolerance-based numerical results.
   TEST(Rodin_Solid_KinematicState, InverseConsistency)
   {
     Solid::KinematicState state(2);
@@ -104,6 +108,7 @@ namespace Rodin::Tests::Unit
   // Invariants tests
   // ========================================================================
 
+  /// @brief Verifies identity for solid isotropic invariants by checking tolerance-based numerical results.
   TEST(Rodin_Solid_IsotropicInvariants, Identity)
   {
     Solid::KinematicState state(2);
@@ -120,6 +125,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(inv.getThirdInvariant(), 1.0, 1e-14);
   }
 
+  /// @brief Verifies identity 3 D for solid isotropic invariants by checking tolerance-based numerical results.
   TEST(Rodin_Solid_IsotropicInvariants, Identity3D)
   {
     Solid::KinematicState state(3);
@@ -136,6 +142,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(inv.getThirdInvariant(), 1.0, 1e-14);
   }
 
+  /// @brief Verifies aligned fiber for solid fiber invariants by checking tolerance-based numerical results.
   TEST(Rodin_Solid_FiberInvariants, AlignedFiber)
   {
     Solid::KinematicState state(2);
@@ -157,10 +164,36 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(fib.getFifthInvariant(), 1.44 * 1.44, 1e-12);
   }
 
+  /// @brief Verifies normalized direction and strain for solid fiber kinematics by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_FiberKinematics, NormalizedDirectionAndStrain)
+  {
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.2;
+    H(0, 1) = 0.0;
+    H(1, 0) = 0.0;
+    H(1, 1) = 0.0;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> direction(2);
+    direction[0] = 2.0;
+    direction[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(direction);
+
+    Solid::FiberKinematics fiber(cp);
+
+    EXPECT_NEAR(fiber.direction()[0], 1.0, 1e-14);
+    EXPECT_NEAR(fiber.direction()[1], 0.0, 1e-14);
+    EXPECT_NEAR(fiber.I4(), 1.44, 1e-12);
+    EXPECT_NEAR(fiber.strain(), 0.22, 1e-12);
+  }
+
   // ========================================================================
   // NeoHookean tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, ZeroDeformation)
   {
     const Real lambda = 1.0, mu = 0.5;
@@ -185,6 +218,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
 
+  /// @brief Verifies stress symmetry under pure stretch for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, StressSymmetryUnderPureStretch)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -208,6 +242,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(P(0, 0), P(1, 1), 1e-13);
   }
 
+  /// @brief Verifies tangent finite difference for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, TangentFiniteDifference)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -254,6 +289,7 @@ namespace Rodin::Tests::Unit
   // SaintVenantKirchhoff tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, ZeroDeformation)
   {
     const Real lambda = 1.0, mu = 0.5;
@@ -277,6 +313,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getStrainEnergyDensity(cache, cp), 0.0, 1e-14);
   }
 
+  /// @brief Verifies tangent finite difference for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, TangentFiniteDifference)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -318,6 +355,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
   }
 
+  /// @brief For small deformations, SVK should behave like linear elasticity.
   TEST(Rodin_Solid_SaintVenantKirchhoff, ReducesToLinearElasticity)
   {
     // For small deformations, SVK should behave like linear elasticity
@@ -352,6 +390,7 @@ namespace Rodin::Tests::Unit
   // MooneyRivlin tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, ZeroDeformation)
   {
     const Real c1 = 0.5, c2 = 0.1, kappa = 10.0;
@@ -373,6 +412,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(P(i, j), 0.0, 1e-12);
   }
 
+  /// @brief Verifies tangent finite difference for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, TangentFiniteDifference)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -415,9 +455,486 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
+  // Holzapfel-Ogden and active contraction tests
+  // ========================================================================
+
+  /// @brief Verifies zero deformation stress free for solid holzapfel ogden by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_HolzapfelOgden, ZeroDeformationStressFree)
+  {
+    Solid::HolzapfelOgden law(0.5, 0.2, 0.1, 1.5, 0.3, 2.0, 10.0);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H.setZero();
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    fiber[2] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+
+    Solid::HolzapfelOgden::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> P;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(P(i, j), 0.0, 1e-12);
+  }
+
+  /// @brief Verifies tangent finite difference 3 D for solid holzapfel ogden by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_HolzapfelOgden, TangentFiniteDifference3D)
+  {
+    Solid::HolzapfelOgden law(0.5, 0.2, 0.1, 1.5, 0.3, 2.0, 10.0);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H(0, 0) = 0.08;
+    H(0, 1) = 0.03;
+    H(0, 2) = 0.01;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.06;
+    H(1, 2) = 0.04;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.03;
+    H(2, 2) = 0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 0.8;
+    fiber[1] = 0.4;
+    fiber[2] = 0.2;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+
+    Solid::HolzapfelOgden::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(3, 3);
+    dF(0, 0) = 0.2;
+    dF(0, 1) = -0.1;
+    dF(0, 2) = 0.05;
+    dF(1, 0) = 0.03;
+    dF(1, 1) = 0.15;
+    dF(1, 2) = -0.07;
+    dF(2, 0) = -0.04;
+    dF(2, 1) = 0.08;
+    dF(2, 2) = 0.12;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(3);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus(statePlus);
+    cpPlus.set<Solid::Tags::FiberDirection>(fiber);
+    Solid::HolzapfelOgden::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-8);
+  }
+
+  /// @brief Verifies adds fiber stress for solid active contraction by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_ActiveContraction, AddsFiberStress)
+  {
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 10.0;
+    activeInput.initial.extension = 0.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H.setZero();
+    H(0, 0) = 0.1;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::ActiveExtension>(0.0);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> P;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+
+    const Real strain = 0.5 * (1.1 * 1.1 - 1.0);
+    const Real stress = activeInput.stiffness * strain;
+    EXPECT_NEAR(P(0, 0), 1.1 * stress, 1e-12);
+    EXPECT_NEAR(P(0, 1), 0.0, 1e-12);
+    EXPECT_NEAR(P(1, 0), 0.0, 1e-12);
+    EXPECT_NEAR(P(1, 1), 0.0, 1e-12);
+  }
+
+  /// @brief Pure active contribution: zero passive parameters so the FD check.
+  TEST(Rodin_Solid_ActiveContraction, TangentFiniteDifference2D)
+  {
+    // Pure active contribution: zero passive parameters so the FD check
+    // isolates the active fiber tangent.
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 50.0;
+    activeInput.initial.extension = 0.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.07;
+    H(0, 1) = 0.02;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 0.8;
+    fiber[1] = 0.6;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::ActiveExtension>(-0.06);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(2, 2);
+    dF(0, 0) = 0.21;
+    dF(0, 1) = -0.13;
+    dF(1, 0) = 0.07;
+    dF(1, 1) = 0.18;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(2);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus(statePlus);
+    cpPlus.set<Solid::Tags::FiberDirection>(fiber);
+    cpPlus.set<Solid::Tags::ActiveExtension>(-0.06);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
+  }
+
+  /// @brief Mixed passive + active in 3D, fiber not aligned with an axis.
+  TEST(Rodin_Solid_ActiveContraction, TangentFiniteDifference3DWithPassive)
+  {
+    // Mixed passive + active in 3D, fiber not aligned with an axis.
+    Solid::NeoHookean passive(20.0, 8.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 30.0;
+    activeInput.initial.extension = 0.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H(0, 0) = 0.04;
+    H(0, 1) = 0.02;
+    H(0, 2) = -0.01;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.06;
+    H(1, 2) = 0.02;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.02;
+    H(2, 2) = 0.05;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 0.7;
+    fiber[1] = 0.5;
+    fiber[2] = 0.3;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::ActiveExtension>(-0.04);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    Math::SpatialMatrix<Real> dF(3, 3);
+    dF(0, 0) = 0.18;
+    dF(0, 1) = -0.09;
+    dF(0, 2) = 0.05;
+    dF(1, 0) = 0.04;
+    dF(1, 1) = 0.13;
+    dF(1, 2) = -0.07;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.06;
+    dF(2, 2) = 0.10;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(3);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus(statePlus);
+    cpPlus.set<Solid::Tags::FiberDirection>(fiber);
+    cpPlus.set<Solid::Tags::ActiveExtension>(-0.04);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 1e-6);
+  }
+
+  /// @brief Verifies that, after the per-quadrature-point local Newton on c.
+  TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference2D)
+  {
+    // Verifies that, after the per-quadrature-point local Newton on c
+    // converges, the Schur-condensed material tangent matches a finite
+    // difference of P with respect to F at fixed previous state.
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 200.0;
+    activeInput.damping = 0.5;
+    activeInput.destructionRate = 0.4;
+    activeInput.crossBridgeStiffness = 100.0;
+    activeInput.contractility = 80.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.06;
+    H(0, 1) = 0.02;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.04;
+    state.setDisplacementGradient(H);
+
+    auto buildPoint = [&](const Solid::KinematicState& s) {
+      Solid::ConstitutivePoint cp(s);
+      Math::SpatialVector<Real> fiber(2);
+      fiber[0] = 0.8;
+      fiber[1] = 0.6;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.01);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.04);
+      cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
+      cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
+      cp.set<Solid::Tags::ElectricalActivation>(0.7);
+      return cp;
+    };
+
+    Solid::ConstitutivePoint cp = buildPoint(state);
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+    EXPECT_TRUE(cache.dynamic);
+    EXPECT_LT(cache.localIterations, 30u);
+
+    Math::SpatialMatrix<Real> dF(2, 2);
+    dF(0, 0) = 0.21;
+    dF(0, 1) = -0.13;
+    dF(1, 0) = 0.07;
+    dF(1, 1) = 0.18;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(2);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
+  }
+
+  /// @brief Verifies dynamic tangent finite difference 3 D with passive for solid active contraction by checking tolerance-based numerical results, true predicates.
+  TEST(Rodin_Solid_ActiveContraction, DynamicTangentFiniteDifference3DWithPassive)
+  {
+    Solid::NeoHookean passive(20.0, 8.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 60.0;
+    activeInput.damping = 0.3;
+    activeInput.destructionRate = 0.5;
+    activeInput.crossBridgeStiffness = 40.0;
+    activeInput.contractility = 30.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(3);
+    Math::SpatialMatrix<Real> H(3, 3);
+    H(0, 0) = 0.04;
+    H(0, 1) = 0.02;
+    H(0, 2) = -0.01;
+    H(1, 0) = -0.03;
+    H(1, 1) = 0.05;
+    H(1, 2) = 0.02;
+    H(2, 0) = 0.01;
+    H(2, 1) = -0.02;
+    H(2, 2) = 0.03;
+    state.setDisplacementGradient(H);
+
+    auto buildPoint = [&](const Solid::KinematicState& s) {
+      Solid::ConstitutivePoint cp(s);
+      Math::SpatialVector<Real> fiber(3);
+      fiber[0] = 0.7;
+      fiber[1] = 0.5;
+      fiber[2] = 0.3;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.005);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.03);
+      cp.set<Solid::Tags::PreviousActiveGamma>(1.5);
+      cp.set<Solid::Tags::PreviousActiveBeta>(0.8);
+      cp.set<Solid::Tags::ElectricalActivation>(1.2);
+      return cp;
+    };
+
+    Solid::ConstitutivePoint cp = buildPoint(state);
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+    EXPECT_TRUE(cache.dynamic);
+
+    Math::SpatialMatrix<Real> dF(3, 3);
+    dF(0, 0) = 0.18;
+    dF(0, 1) = -0.09;
+    dF(0, 2) = 0.05;
+    dF(1, 0) = 0.04;
+    dF(1, 1) = 0.13;
+    dF(1, 2) = -0.07;
+    dF(2, 0) = -0.05;
+    dF(2, 1) = 0.06;
+    dF(2, 2) = 0.10;
+
+    Math::SpatialMatrix<Real> dP;
+    law.getMaterialTangent(dP, cache, cp, dF);
+
+    const Real eps = 1e-7;
+    Solid::KinematicState statePlus(3);
+    statePlus.setDisplacementGradient(H + eps * dF);
+    Solid::ConstitutivePoint cpPlus = buildPoint(statePlus);
+    typename decltype(law)::Cache cachePlus;
+    law.setCache(cachePlus, cpPlus);
+
+    Math::SpatialMatrix<Real> P, PPlus;
+    law.getFirstPiolaKirchhoffStress(P, cache, cp);
+    law.getFirstPiolaKirchhoffStress(PPlus, cachePlus, cpPlus);
+    Math::SpatialMatrix<Real> dPfd = (1.0 / eps) * PPlus + (-1.0 / eps) * P;
+
+    for (int i = 0; i < 3; ++i)
+      for (int j = 0; j < 3; ++j)
+        EXPECT_NEAR(dP(i, j), dPfd(i, j), 5e-5);
+  }
+
+  /// @brief After the local Newton converges, the dynamic residual should be at.
+  TEST(Rodin_Solid_ActiveContraction, DynamicLocalSolveResidualIsZero)
+  {
+    // After the local Newton converges, the dynamic residual should be at
+    // machine precision regardless of where the global state sits.
+    Solid::NeoHookean passive(0.0, 0.0);
+    Solid::ActiveFiberLaw::Parameters activeInput;
+    activeInput.stiffness = 200.0;
+    activeInput.damping = 0.5;
+    activeInput.destructionRate = 0.4;
+    activeInput.crossBridgeStiffness = 100.0;
+    activeInput.contractility = 80.0;
+    Solid::ActiveFiberLaw active(activeInput);
+    Solid::ActiveContraction law(passive, active);
+
+    Solid::KinematicState state(2);
+    Math::SpatialMatrix<Real> H(2, 2);
+    H(0, 0) = 0.10;
+    H(0, 1) = 0.03;
+    H(1, 0) = -0.02;
+    H(1, 1) = 0.06;
+    state.setDisplacementGradient(H);
+
+    Solid::ConstitutivePoint cp(state);
+    Math::SpatialVector<Real> fiber(2);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::TimeStep>(0.01);
+    cp.set<Solid::Tags::PreviousActiveExtension>(-0.05);
+    cp.set<Solid::Tags::PreviousActiveGamma>(2.0);
+    cp.set<Solid::Tags::PreviousActiveBeta>(1.5);
+    cp.set<Solid::Tags::ElectricalActivation>(0.9);
+
+    typename decltype(law)::Cache cache;
+    law.setCache(cache, cp);
+
+    EXPECT_TRUE(cache.dynamic);
+    EXPECT_NEAR(cache.active.residual, 0.0, 1e-11);
+  }
+
+  /// @brief Verifies static stress derivative finite difference for solid active fiber law by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_ActiveFiberLaw, StaticStressDerivativeFiniteDifference)
+  {
+    Solid::ActiveFiberLaw::Parameters params;
+    params.stiffness = 50.0;
+    Solid::ActiveFiberLaw law(params);
+
+    const Real e = 0.07;
+    const Real c = -0.06;
+    const Real eps = 1e-5;
+
+    // Central differences: O(eps^2) truncation error.
+    const Real fdDe = (law.stress(e + eps, c) - law.stress(e - eps, c)) / (2 * eps);
+    EXPECT_NEAR(law.dStressDe(c), fdDe, 1e-7);
+
+    const Real fdDc = (law.stress(e, c + eps) - law.stress(e, c - eps)) / (2 * eps);
+    EXPECT_NEAR(law.dStressDc(e, c), fdDc, 1e-5);
+  }
+
+  /// @brief Verifies initial values for solid active fiber law by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_ActiveFiberLaw, InitialValues)
+  {
+    Solid::ActiveFiberLaw::Parameters parameters;
+    parameters.initial.stiffness = 4.0;
+    parameters.initial.stress = 6.0;
+
+    Solid::ActiveFiberLaw law(parameters);
+    const auto state = law.initialState();
+
+    EXPECT_NEAR(state.gamma, 2.0, 1e-14);
+    EXPECT_NEAR(state.beta, 3.0, 1e-14);
+  }
+
+  // ========================================================================
   // Hooke tests
   // ========================================================================
 
+  /// @brief Verifies isotropic stress for solid hooke by checking tolerance-based numerical results.
   TEST(Rodin_Solid_Hooke, IsotropicStress)
   {
     Solid::Hooke hooke(1.0, 0.5);
@@ -436,6 +953,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sigma(1, 0), 0.05, 1e-14);
   }
 
+  /// @brief Verifies young poisson conversion for solid hooke by checking tolerance-based numerical results.
   TEST(Rodin_Solid_Hooke, YoungPoissonConversion)
   {
     const Real E = 200.0, nu = 0.3;
@@ -452,6 +970,7 @@ namespace Rodin::Tests::Unit
   // PostProcessing tests
   // ========================================================================
 
+  /// @brief Verifies zero deformation for solid green lagrange strain by checking tolerance-based numerical results.
   TEST(Rodin_Solid_GreenLagrangeStrain, ZeroDeformation)
   {
     Solid::KinematicState state(2);
@@ -468,6 +987,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(E(i, j), 0.0, 1e-14);
   }
 
+  /// @brief Verifies pure extension for solid green lagrange strain by checking tolerance-based numerical results.
   TEST(Rodin_Solid_GreenLagrangeStrain, PureExtension)
   {
     Solid::KinematicState state(2);
@@ -487,6 +1007,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(E(1, 0), 0.0, 1e-14);
   }
 
+  /// @brief Verifies symmetry check for solid cauchy stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_CauchyStress, SymmetryCheck)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -512,6 +1033,7 @@ namespace Rodin::Tests::Unit
   // ConstitutivePoint tag tests
   // ========================================================================
 
+  /// @brief Verifies typed tag set get for solid constitutive point by checking tolerance-based numerical results, true predicates, false predicates.
   TEST(Rodin_Solid_ConstitutivePoint, TypedTagSetGet)
   {
     Solid::KinematicState state(2);
@@ -541,6 +1063,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cp.has<Solid::Tags::SheetNormalDirection>());
   }
 
+  /// @brief Verifies reference wrapper semantics for solid constitutive point by checking tolerance-based numerical results, false predicates.
   TEST(Rodin_Solid_ConstitutivePoint, ReferenceWrapperSemantics)
   {
     Solid::KinematicState state(2);
@@ -557,6 +1080,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(cp.getPoint().has_value());
   }
 
+  /// @brief Verifies custom tag for solid constitutive point by checking tolerance-based numerical results, true predicates.
   TEST(Rodin_Solid_ConstitutivePoint, CustomTag)
   {
     struct MyCustomTag
@@ -576,10 +1100,11 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
-  // InternalForce tests
+  // InternalVirtualWorkResidual tests
   // ========================================================================
 
-  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce)
+  /// @brief Verifies zero displacement zero force for solid internal virtual work residual by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -594,11 +1119,10 @@ namespace Rodin::Tests::Unit
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
 
-    Solid::InternalForce force(law, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setDisplacement(gf);
+
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -608,7 +1132,8 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
-  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce_SVK)
+  /// @brief Verifies zero displacement zero force SVK for solid internal virtual work residual by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce_SVK)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -619,13 +1144,12 @@ namespace Rodin::Tests::Unit
     const size_t vdim = 2;
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
+
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
     Solid::SaintVenantKirchhoff law(2.0, 1.0);
-    Solid::InternalForce force(law, v);
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    force.setDisplacement(gf);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -635,7 +1159,8 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-14);
   }
 
-  TEST(Rodin_Solid_InternalForce, ZeroDisplacementZeroForce_MooneyRivlin)
+  /// @brief Verifies zero displacement zero force mooney rivlin for solid internal virtual work residual by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, ZeroDisplacementZeroForce_MooneyRivlin)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -647,12 +1172,11 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::MooneyRivlin law(0.5, 0.2, 5.0);
-    Solid::InternalForce force(law, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    force.setDisplacement(gf);
+
+    Solid::MooneyRivlin law(0.5, 0.2, 5.0);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -662,7 +1186,8 @@ namespace Rodin::Tests::Unit
       EXPECT_NEAR(force.integrate(i), 0.0, 1e-12);
   }
 
-  TEST(Rodin_Solid_InternalForce, NonZeroDisplacementNonZeroForce)
+  /// @brief Verifies non zero displacement non zero force for solid internal virtual work residual.
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, NonZeroDisplacementNonZeroForce)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -674,15 +1199,14 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::InternalForce force(law, v);
-
     // Set a non-trivial displacement (uniform extension)
     GridFunction gf(Vh);
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    force.setDisplacement(gf);
+
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -695,7 +1219,8 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(norm, 1e-14);
   }
 
-  TEST(Rodin_Solid_InternalForce, WithInputFunction)
+  /// @brief Verifies with input function for solid internal virtual work residual by checking true predicates.
+  TEST(Rodin_Solid_InternalVirtualWork_Residual, WithInputFunction)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -707,9 +1232,11 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::InternalForce force(law, v);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalVirtualWorkResidual force(law, v, gf);
     bool inputCalled = false;
     force.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
@@ -717,10 +1244,6 @@ namespace Rodin::Tests::Unit
       fiber[0] = 1.0; fiber[1] = 0.0;
       cp.set<Solid::Tags::FiberDirection>(fiber);
     });
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    force.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     force.setPolytope(*cellIt);
@@ -730,10 +1253,11 @@ namespace Rodin::Tests::Unit
   }
 
   // ========================================================================
-  // MaterialTangent tests
+  // InternalVirtualWorkTangent tests
   // ========================================================================
 
-  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry)
+  /// @brief Verifies zero displacement symmetry for solid internal virtual work tangent by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -749,11 +1273,10 @@ namespace Rodin::Tests::Unit
     const Real lambda = 2.0, mu = 1.0;
     Solid::NeoHookean law(lambda, mu);
 
-    Solid::MaterialTangent tangent(law, u, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
-    tangent.setDisplacement(gf);
+
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -764,7 +1287,8 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry_SVK)
+  /// @brief Verifies zero displacement symmetry SVK for solid internal virtual work tangent by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry_SVK)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -776,13 +1300,12 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TrialFunction u(Vh);
     TestFunction v(Vh);
+
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
     Solid::SaintVenantKirchhoff law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    tangent.setDisplacement(gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -793,7 +1316,8 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, ZeroDisplacementSymmetry_MooneyRivlin)
+  /// @brief Verifies zero displacement symmetry mooney rivlin for solid internal virtual work tangent by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, ZeroDisplacementSymmetry_MooneyRivlin)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -805,13 +1329,12 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TrialFunction u(Vh);
     TestFunction v(Vh);
+
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
     Solid::MooneyRivlin law(0.5, 0.2, 5.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    tangent.setDisplacement(gf);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -822,7 +1345,8 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-12);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, NonZeroDisplacementSymmetry)
+  /// @brief Verifies non zero displacement symmetry for solid internal virtual work tangent by checking tolerance-based numerical results.
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, NonZeroDisplacementSymmetry)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -834,16 +1358,15 @@ namespace Rodin::Tests::Unit
     P1 Vh(mesh, vdim);
     TrialFunction u(Vh);
     TestFunction v(Vh);
-
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
 
     // Non-trivial linearization point
     GridFunction gf(Vh);
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setDisplacement(gf);
+
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -854,7 +1377,8 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(tangent.integrate(i, j), tangent.integrate(j, i), 1e-10);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, NonZeroDisplacementNonTrivial)
+  /// @brief Verifies non zero displacement non trivial for solid internal virtual work tangent.
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, NonZeroDisplacementNonTrivial)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -867,14 +1391,13 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
-
     GridFunction gf(Vh);
     gf.getData().setZero();
     for (Index i = 0; i < static_cast<Index>(Vh.getSize()); ++i)
       gf.getData()(i) = 0.01 * static_cast<Real>(i % 3);
-    tangent.setDisplacement(gf);
+
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -888,7 +1411,8 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(norm, 1e-14);
   }
 
-  TEST(Rodin_Solid_MaterialTangent, WithInputFunction)
+  /// @brief Verifies with input function for solid internal virtual work tangent by checking true predicates.
+  TEST(Rodin_Solid_InternalVirtualWork_Tangent, WithInputFunction)
   {
     using namespace Rodin::Geometry;
     using namespace Rodin::Variational;
@@ -901,18 +1425,16 @@ namespace Rodin::Tests::Unit
     TrialFunction u(Vh);
     TestFunction v(Vh);
 
-    Solid::NeoHookean law(2.0, 1.0);
-    Solid::MaterialTangent tangent(law, u, v);
+    GridFunction gf(Vh);
+    gf.getData().setZero();
 
+    Solid::NeoHookean law(2.0, 1.0);
+    Solid::InternalVirtualWorkTangent tangent(law, u, v, gf);
     bool inputCalled = false;
     tangent.setInput([&](Solid::ConstitutivePoint& cp) {
       inputCalled = true;
       cp.set<Solid::Tags::Activation>(1.0);
     });
-
-    GridFunction gf(Vh);
-    gf.getData().setZero();
-    tangent.setDisplacement(gf);
 
     auto cellIt = mesh.getCell(0);
     tangent.setPolytope(*cellIt);
@@ -924,6 +1446,7 @@ namespace Rodin::Tests::Unit
   // 3D tests
   // ========================================================================
 
+  /// @brief Verifies tangent finite difference 3 D for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, TangentFiniteDifference3D)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -969,6 +1492,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
   }
 
+  /// @brief Verifies tangent finite difference 3 D for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, TangentFiniteDifference3D)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1013,6 +1537,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(dP_analytical(i, j), dP_fd(i, j), 1e-5);
   }
 
+  /// @brief Verifies tangent finite difference 3 D for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, TangentFiniteDifference3D)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1061,6 +1586,7 @@ namespace Rodin::Tests::Unit
   // Additional law tests
   // ========================================================================
 
+  /// @brief Verifies energy positive under deformation for solid neo hookean.
   TEST(Rodin_Solid_NeoHookean, EnergyPositiveUnderDeformation)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1078,6 +1604,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
 
+  /// @brief Verifies energy positive under deformation for solid saint venant kirchhoff.
   TEST(Rodin_Solid_SaintVenantKirchhoff, EnergyPositiveUnderDeformation)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1094,6 +1621,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
 
+  /// @brief Verifies energy positive under deformation for solid mooney rivlin.
   TEST(Rodin_Solid_MooneyRivlin, EnergyPositiveUnderDeformation)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1110,6 +1638,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(law.getStrainEnergyDensity(cache, cp), 0.0);
   }
 
+  /// @brief For isotropic material: K = lambda + 2*mu/d (2D), K = lambda + 2*mu/3 (3D).
   TEST(Rodin_Solid_Hooke, BulkModulusConsistency)
   {
     // For isotropic material: K = lambda + 2*mu/d (2D), K = lambda + 2*mu/3 (3D)
@@ -1125,6 +1654,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(K3D, K3D_direct, 1e-10);
   }
 
+  /// @brief Verifies symmetry with SVK for solid cauchy stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_CauchyStress, SymmetryWithSVK)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1146,6 +1676,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
   }
 
+  /// @brief Verifies symmetry with mooney rivlin for solid cauchy stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_CauchyStress, SymmetryWithMooneyRivlin)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1166,6 +1697,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sigma(0, 1), sigma(1, 0), 1e-12);
   }
 
+  /// @brief Verifies consistency with law for solid first piola kirchhoff stress by checking tolerance-based numerical results.
   TEST(Rodin_Solid_FirstPiolaKirchhoffStress, ConsistencyWithLaw)
   {
     const Real lambda = 2.0, mu = 1.0;
@@ -1193,6 +1725,7 @@ namespace Rodin::Tests::Unit
         EXPECT_NEAR(P_direct(i, j), P_wrapper(i, j), 1e-14);
   }
 
+  /// @brief Verifies parameter accessors for solid mooney rivlin by checking tolerance-based numerical results.
   TEST(Rodin_Solid_MooneyRivlin, ParameterAccessors)
   {
     const Real c1 = 0.5, c2 = 0.2, kappa = 5.0;
@@ -1203,6 +1736,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getBulkModulus(), kappa, 1e-14);
   }
 
+  /// @brief Verifies parameter accessors for solid neo hookean by checking tolerance-based numerical results.
   TEST(Rodin_Solid_NeoHookean, ParameterAccessors)
   {
     Solid::NeoHookean law(3.0, 1.5);
@@ -1210,10 +1744,324 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(law.getShearModulus(), 1.5, 1e-14);
   }
 
+  /// @brief Verifies parameter accessors for solid saint venant kirchhoff by checking tolerance-based numerical results.
   TEST(Rodin_Solid_SaintVenantKirchhoff, ParameterAccessors)
   {
     Solid::SaintVenantKirchhoff law(4.0, 2.0);
     EXPECT_NEAR(law.getLameFirstParameter(), 4.0, 1e-14);
     EXPECT_NEAR(law.getShearModulus(), 2.0, 1e-14);
+  }
+
+  // ========================================================================
+  // ConstitutivePoint tag storage tests
+  //
+  // The tag storage is a reserved FlatMap keyed by type_index. These cover
+  // the round-trip, the open tag set (tags declared outside the library),
+  // and the ReservedTags boundary, since ReservedTags is a capacity hint
+  // and must not behave as a limit.
+  // ========================================================================
+
+  namespace
+  {
+    /// @brief A tag declared outside the library, of a declared value type.
+    struct UserScalarTag
+    {
+        using Type = Real;
+    };
+
+    /// @brief A tag declared outside the library, of a type no library tag uses.
+    struct UserMatrixTag
+    {
+        using Type = Math::SpatialMatrix<Real>;
+    };
+
+    /// @brief A family of distinct tag types, used to exceed ReservedTags.
+    template <std::size_t I>
+    struct OverflowTag
+    {
+        using Type = Real;
+    };
+
+    Solid::KinematicState makeIdentityState()
+    {
+      Solid::KinematicState state(3);
+      Math::SpatialMatrix<Real> H(3, 3);
+      H.setZero();
+      state.setDisplacementGradient(H);
+      return state;
+    }
+  }
+
+  /// @brief Verifies a declared tag round-trips through the constitutive point.
+  TEST(Rodin_Solid_ConstitutivePoint, DeclaredTagRoundTrips)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    EXPECT_FALSE(cp.has<Solid::Tags::TimeStep>());
+
+    cp.set<Solid::Tags::TimeStep>(0.25);
+
+    EXPECT_TRUE(cp.has<Solid::Tags::TimeStep>());
+    EXPECT_NEAR(cp.get<Solid::Tags::TimeStep>(), 0.25, 1e-14);
+  }
+
+  /// @brief Verifies setting a tag twice overwrites rather than duplicates.
+  TEST(Rodin_Solid_ConstitutivePoint, SetOverwrites)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    cp.set<Solid::Tags::TimeStep>(0.25);
+    cp.set<Solid::Tags::TimeStep>(0.5);
+
+    EXPECT_NEAR(cp.get<Solid::Tags::TimeStep>(), 0.5, 1e-14);
+  }
+
+  /// @brief Verifies distinct tags of the same value type do not alias.
+  TEST(Rodin_Solid_ConstitutivePoint, DistinctTagsOfSameTypeDoNotAlias)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    cp.set<Solid::Tags::PreviousActiveGamma>(1.5);
+    cp.set<Solid::Tags::PreviousActiveBeta>(2.5);
+
+    EXPECT_NEAR(cp.get<Solid::Tags::PreviousActiveGamma>(), 1.5, 1e-14);
+    EXPECT_NEAR(cp.get<Solid::Tags::PreviousActiveBeta>(), 2.5, 1e-14);
+  }
+
+  /// @brief Verifies an unset tag reports absent, and a set tag does not make
+  ///        an unrelated tag appear present.
+  TEST(Rodin_Solid_ConstitutivePoint, UnsetTagIsAbsent)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    cp.set<Solid::Tags::TimeStep>(0.25);
+
+    EXPECT_TRUE(cp.has<Solid::Tags::TimeStep>());
+    EXPECT_FALSE(cp.has<Solid::Tags::ElectricalActivation>());
+    EXPECT_FALSE(cp.has<Solid::Tags::FiberDirection>());
+  }
+
+  /// @brief Verifies the tag set is open: tags declared outside the library,
+  ///        including one whose value type no library tag uses, round-trip.
+  TEST(Rodin_Solid_ConstitutivePoint, UserDefinedTagRoundTrips)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    Math::SpatialMatrix<Real> m(3, 3);
+    m.setIdentity();
+
+    cp.set<UserScalarTag>(0.42);
+    cp.set<UserMatrixTag>(m);
+
+    ASSERT_TRUE(cp.has<UserScalarTag>());
+    ASSERT_TRUE(cp.has<UserMatrixTag>());
+    EXPECT_NEAR(cp.get<UserScalarTag>(), 0.42, 1e-14);
+    EXPECT_NEAR(cp.get<UserMatrixTag>()(0, 0), 1.0, 1e-14);
+    EXPECT_NEAR(cp.get<UserMatrixTag>()(0, 1), 0.0, 1e-14);
+  }
+
+  /// @brief Boundary: ReservedTags is a capacity hint, not a limit. Setting
+  ///        more tags than are reserved must still round-trip; the storage
+  ///        reallocates.
+  TEST(Rodin_Solid_ConstitutivePoint, ExceedingReservedTagsStillRoundTrips)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    // One distinct tag type per index, more than ReservedTags of them.
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+      (cp.set<OverflowTag<I>>(static_cast<Real>(I)), ...);
+    }(std::make_index_sequence<Solid::ConstitutivePoint::ReservedTags + 8>{});
+
+    // gtest macros expand to statements, so check inside a function body.
+    auto check = [&]<std::size_t I>() {
+      EXPECT_TRUE(cp.has<OverflowTag<I>>());
+      EXPECT_NEAR(cp.get<OverflowTag<I>>(), static_cast<Real>(I), 1e-14);
+    };
+
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+      (check.template operator()<I>(), ...);
+    }(std::make_index_sequence<Solid::ConstitutivePoint::ReservedTags + 8>{});
+  }
+
+  /// @brief Verifies a copied constitutive point carries its tags.
+  TEST(Rodin_Solid_ConstitutivePoint, CopyCarriesTags)
+  {
+    auto state = makeIdentityState();
+    Solid::ConstitutivePoint cp(state);
+
+    Math::SpatialVector<Real> fiber(3);
+    fiber[0] = 1.0;
+    fiber[1] = 0.0;
+    fiber[2] = 0.0;
+    cp.set<Solid::Tags::FiberDirection>(fiber);
+    cp.set<Solid::Tags::TimeStep>(0.25);
+
+    Solid::ConstitutivePoint copy(cp);
+
+    ASSERT_TRUE(copy.has<Solid::Tags::FiberDirection>());
+    EXPECT_NEAR(copy.get<Solid::Tags::FiberDirection>()[0], 1.0, 1e-14);
+    EXPECT_NEAR(copy.get<Solid::Tags::TimeStep>(), 0.25, 1e-14);
+  }
+
+  // ========================================================================
+  // ActiveContraction midpoint fiber strain tests
+  //
+  // The series law is evaluated at e_1D^{n+1/2} when Tags::PreviousFiberStrain
+  // is supplied (Chapelle, Le Tallec, Moireau, Sorine 2012, eq. 26). These
+  // pin that directly rather than through finite differences: the local solve
+  // depends on the evaluation strain alone, so supplying a previous strain
+  // must give the same active extension as evaluating at the midpoint with no
+  // tag at all.
+  // ========================================================================
+
+  namespace
+  {
+    /// @brief Builds a kinematic state with a prescribed fiber strain along x.
+    ///
+    /// For F = diag(1+a,1,1) and fiber (1,0,0): I4 = (1+a)^2, so the
+    /// Green-Lagrange fiber strain is ((1+a)^2 - 1)/2. Invert for a.
+    Solid::KinematicState makeUniaxialStateWithFiberStrain(Real strain)
+    {
+      const Real a = std::sqrt(1.0 + 2.0 * strain) - 1.0;
+      Solid::KinematicState state(3);
+      Math::SpatialMatrix<Real> H(3, 3);
+      H.setZero();
+      H(0, 0) = a;
+      state.setDisplacementGradient(H);
+      return state;
+    }
+
+    Solid::ActiveContraction<Solid::NeoHookean, Solid::ActiveFiberLaw>
+    makeActiveContractionLaw()
+    {
+      Solid::NeoHookean passive(0.0, 0.0);
+      Solid::ActiveFiberLaw::Parameters p;
+      p.stiffness = 80.0;
+      p.damping = 0.4;
+      p.destructionRate = 0.5;
+      p.crossBridgeStiffness = 60.0;
+      p.contractility = 40.0;
+      Solid::ActiveContraction law(passive, Solid::ActiveFiberLaw(p));
+      law.setLocalTolerance(1e-14).setLocalMaxIterations(80);
+      return law;
+    }
+
+    void setDynamicTags(Solid::ConstitutivePoint& cp)
+    {
+      Math::SpatialVector<Real> fiber(3);
+      fiber[0] = 1.0;
+      fiber[1] = 0.0;
+      fiber[2] = 0.0;
+      cp.set<Solid::Tags::FiberDirection>(fiber);
+      cp.set<Solid::Tags::TimeStep>(0.01);
+      cp.set<Solid::Tags::PreviousActiveExtension>(-0.035);
+      cp.set<Solid::Tags::PreviousActiveGamma>(1.7);
+      cp.set<Solid::Tags::PreviousActiveBeta>(0.9);
+      cp.set<Solid::Tags::ElectricalActivation>(1.1);
+    }
+  }
+
+  /// @brief Verifies the series law is evaluated at the midpoint fiber strain:
+  ///        supplying a previous strain must reproduce the active extension
+  ///        obtained by evaluating at the midpoint directly.
+  TEST(Rodin_Solid_ActiveContraction, MidpointStrainIsUsedForTheSeriesLaw)
+  {
+    auto law = makeActiveContractionLaw();
+
+    const Real ePrev = -0.02;
+    const Real eCurr = 0.06;
+    const Real eMid = 0.5 * (eCurr + ePrev);
+
+    // Midpoint via the tag: current strain eCurr, previous strain ePrev.
+    auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpA(stateA);
+    setDynamicTags(cpA);
+    cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
+    decltype(law)::Cache cacheA;
+    law.setCache(cacheA, cpA);
+
+    // The same evaluation strain, reached directly with no tag.
+    auto stateB = makeUniaxialStateWithFiberStrain(eMid);
+    Solid::ConstitutivePoint cpB(stateB);
+    setDynamicTags(cpB);
+    decltype(law)::Cache cacheB;
+    law.setCache(cacheB, cpB);
+
+    ASSERT_TRUE(cacheA.dynamic);
+    ASSERT_TRUE(cacheB.dynamic);
+
+    // cache.strain is the *current* fiber strain, so these differ ...
+    EXPECT_NEAR(cacheA.strain, eCurr, 1e-12);
+    EXPECT_NEAR(cacheB.strain, eMid, 1e-12);
+
+    // ... but the local solve sees the same evaluation strain, so the
+    // converged active extension must agree.
+    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+  }
+
+  /// @brief Verifies the condensed tangent carries the 1/2 chain-rule factor
+  ///        when the midpoint strain is used, since d(e^{n+1/2})/d(e^{n+1}) = 1/2.
+  TEST(Rodin_Solid_ActiveContraction, MidpointStrainHalvesTheCondensedTangent)
+  {
+    auto law = makeActiveContractionLaw();
+
+    const Real ePrev = -0.02;
+    const Real eCurr = 0.06;
+    const Real eMid = 0.5 * (eCurr + ePrev);
+
+    auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpA(stateA);
+    setDynamicTags(cpA);
+    cpA.set<Solid::Tags::PreviousFiberStrain>(ePrev);
+    decltype(law)::Cache cacheA;
+    law.setCache(cacheA, cpA);
+
+    auto stateB = makeUniaxialStateWithFiberStrain(eMid);
+    Solid::ConstitutivePoint cpB(stateB);
+    setDynamicTags(cpB);
+    decltype(law)::Cache cacheB;
+    law.setCache(cacheB, cpB);
+
+    EXPECT_GT(std::abs(cacheB.active.tangent), 1e-8);
+    EXPECT_NEAR(cacheA.active.tangent, 0.5 * cacheB.active.tangent, 1e-9);
+  }
+
+  /// @brief Regression: omitting Tags::PreviousFiberStrain must reproduce the
+  ///        pre-midpoint behaviour exactly -- the series law falls back to the
+  ///        current strain and the tangent carries no 1/2 factor. Existing
+  ///        callers that never set the tag must be unaffected.
+  TEST(Rodin_Solid_ActiveContraction, OmittingPreviousFiberStrainFallsBackToCurrentStrain)
+  {
+    auto law = makeActiveContractionLaw();
+
+    const Real eCurr = 0.06;
+
+    // No tag: the evaluation strain is the current strain.
+    auto stateA = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpA(stateA);
+    setDynamicTags(cpA);
+    decltype(law)::Cache cacheA;
+    law.setCache(cacheA, cpA);
+
+    // Tag equal to the current strain: the midpoint *is* the current strain,
+    // so the local solve must agree, while the tangent picks up the 1/2.
+    auto stateB = makeUniaxialStateWithFiberStrain(eCurr);
+    Solid::ConstitutivePoint cpB(stateB);
+    setDynamicTags(cpB);
+    cpB.set<Solid::Tags::PreviousFiberStrain>(eCurr);
+    decltype(law)::Cache cacheB;
+    law.setCache(cacheB, cpB);
+
+    EXPECT_NEAR(cacheA.activeExtension, cacheB.activeExtension, 1e-12);
+    // Guard: without this the tangent comparison would pass trivially if the
+    // tangent were near zero.
+    EXPECT_GT(std::abs(cacheA.active.tangent), 1e-8);
+    EXPECT_NEAR(cacheB.active.tangent, 0.5 * cacheA.active.tangent, 1e-9);
   }
 }

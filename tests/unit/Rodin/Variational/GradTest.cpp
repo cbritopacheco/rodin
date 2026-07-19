@@ -1,4 +1,8 @@
 #include <gtest/gtest.h>
+
+#include <type_traits>
+#include <utility>
+
 #include "Rodin/Test/Random.h"
 
 #include "Rodin/Variational.h"
@@ -12,6 +16,34 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies that basis forwarding preserves cached references and values.
+  TEST(Rodin_Variational_Grad, ShapeFunctionBasisValueCategories)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
+
+    P1 scalarP1(mesh);
+    TrialFunction scalarTrial(scalarP1);
+    using P1GradType = decltype(Grad(scalarTrial));
+    using P1GradBasisType = decltype(std::declval<const P1GradType&>().getBasis(0));
+    static_assert(std::is_lvalue_reference_v<P1GradBasisType>);
+    static_assert(std::is_const_v<std::remove_reference_t<P1GradBasisType>>);
+
+    P1 vectorP1(mesh, 2);
+    TrialFunction vectorTrial(vectorP1);
+    using P1JacobianType = decltype(Jacobian(vectorTrial));
+    using P1JacobianBasisType =
+      decltype(std::declval<const P1JacobianType&>().getBasis(0));
+    static_assert(std::is_lvalue_reference_v<P1JacobianBasisType>);
+    static_assert(std::is_const_v<std::remove_reference_t<P1JacobianBasisType>>);
+
+    P0 scalarP0(mesh);
+    TrialFunction p0Trial(scalarP0);
+    using P0GradType = decltype(Grad(p0Trial));
+    using P0GradBasisType = decltype(std::declval<const P0GradType&>().getBasis(0));
+    static_assert(!std::is_reference_v<P0GradBasisType>);
+  }
+
+  /// @brief Verifies shape function construction for variational grad.
   TEST(Rodin_Variational_Grad, ShapeFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -26,6 +58,7 @@ namespace Rodin::Tests::Unit
     // For 2D, gradient should have 2 components
   }
 
+  /// @brief Verifies grid function construction for variational grad by checking exact expected values.
   TEST(Rodin_Variational_Grad, GridFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -38,6 +71,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&grad_gf.getOperand(), &gf);
   }
 
+  /// @brief Verifies grid function linear function for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, GridFunction_LinearFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -63,6 +97,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(grad_value(1), 4.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function constant function for variational grad by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Grad, GridFunction_ConstantFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -84,6 +119,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(grad_value.norm(), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies copy for variational grad by checking copy semantics.
   TEST(Rodin_Variational_Grad, Copy)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -99,6 +135,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies usage in bilinear form for variational grad by checking false predicates, form assembly.
   TEST(Rodin_Variational_Grad, UsageInBilinearForm)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -107,7 +144,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // Laplacian operator: ∫ ∇u · ∇v dx
+    // Laplacian operator: \int \nabla u \cdot \nabla v dx
     bf = Integral(Grad(u), Grad(v));
 
     EXPECT_FALSE(bf.getLocalIntegrators().empty());
@@ -120,6 +157,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.cols(), 0);
   }
 
+  /// @brief Test with 3D mesh (if supported by the current configuration).
   TEST(Rodin_Variational_Grad, 3D_Mesh)
   {
     // Test with 3D mesh (if supported by the current configuration)
@@ -133,6 +171,7 @@ namespace Rodin::Tests::Unit
     // In 2D, gradient should have 2 components
   }
 
+  /// @brief Verifies grid function quadratic function for variational grad by checking grid-function projection.
   TEST(Rodin_Variational_Grad, GridFunction_QuadraticFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -160,6 +199,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(grad_value.norm(), 0.0);
   }
 
+  /// @brief Verifies multiple evaluations for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, MultipleEvaluations)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -195,6 +235,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies shape function get DO fs triangle P1 for variational grad by checking exact expected values.
   TEST(Rodin_Variational_Grad, ShapeFunction_getDOFs_Triangle_P1)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -212,6 +253,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs, 3);
   }
 
+  /// @brief Verifies shape function get DO fs tetrahedron P1 for variational grad by checking exact expected values.
   TEST(Rodin_Variational_Grad, ShapeFunction_getDOFs_Tetrahedron_P1)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 2, 2});
@@ -230,6 +272,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs, 4);
   }
 
+  /// @brief Verifies random coordinates linear function for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, RandomCoordinates_LinearFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -271,6 +314,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies random coordinates zero gradient for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, RandomCoordinates_ZeroGradient)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
@@ -312,6 +356,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies random coordinates tetrahedron linear function for variational grad by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Grad, RandomCoordinates_Tetrahedron_LinearFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });

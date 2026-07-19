@@ -39,6 +39,7 @@ class AlertIntegrationTest : public ::testing::Test
 };
 
 // Integration test with multiple alert types
+/// @brief Verifies multiple alert types for alert integration test by checking true predicates.
 TEST_F(AlertIntegrationTest, MultipleAlertTypes)
 {
   // Create multiple alerts with different streams

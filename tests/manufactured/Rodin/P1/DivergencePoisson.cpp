@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Divergence-form poisson manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a divergence-form Poisson manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -46,11 +54,14 @@ namespace Rodin::Tests::Manufactured::DivPoisson
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Div Poisson Test 32 x 32.
   using Manufactured_DivPoisson_Test_32x32 =
     Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test<32>;
+  /// @brief Helper used by the tests to Manufactured Div Poisson Test 64 x 64.
   using Manufactured_DivPoisson_Test_64x64 =
     Rodin::Tests::Manufactured::DivPoisson::Manufactured_DivPoisson_Test<64>;
 
+  /// @brief Verifies divergence P1 exact residual for manufactured div poisson test 32 x 32 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_DivPoisson_Test_32x32, Divergence_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -182,6 +193,7 @@ namespace Rodin::Tests::Manufactured::DivPoisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured Div Poisson Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Manufactured_DivPoisson_Test_32x32,

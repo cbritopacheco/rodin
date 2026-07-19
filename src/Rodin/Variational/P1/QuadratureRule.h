@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file QuadratureRule.h
  * @brief Optimized quadrature rules for P1 finite element spaces.
@@ -45,6 +51,7 @@
 
 namespace Rodin::Variational
 {
+  /// @cond RODIN_DOXYGEN_INTERNAL
   /**
    * @ingroup QuadratureRuleSpecializations
    * @brief Integration of a P1 ShapeFunction.
@@ -80,15 +87,19 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
 
+      /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<ShapeFunction<NestedDerived, FESType, TestSpace>>;
 
       using IntegrandRangeType = typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -253,30 +264,38 @@ namespace Rodin::Variational
         ::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType =
         P1<Range, Mesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         FunctionBase<LHSDerived>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, FESType, TestSpace>, FESType, TestSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType =
         typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType =
         typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType =
         ShapeFunctionBase<Dot<LHSType, RHSType>>;
 
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LinearFormIntegratorBase<ScalarType>;
 
@@ -367,7 +386,7 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
-            const IntegrationPoint ip(p, *m_qf, qp);
+            const IntegrationPoint ip(p, m_qf, qp);
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -385,7 +404,7 @@ namespace Rodin::Variational
           for (size_t qp = 0; qp < q.getSize(); ++qp)
           {
             const auto& p = q.getPoint(qp);
-            const IntegrationPoint ip(p, *m_qf, qp);
+            const IntegrationPoint ip(p, m_qf, qp);
             const ScalarType wdet =
               static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -481,23 +500,30 @@ namespace Rodin::Variational
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType =
         typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType =
         typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -509,20 +535,20 @@ namespace Rodin::Variational
           m_integrand(integrand.copy())
       {}
 
-      constexpr
-      QuadratureRule(const QuadratureRule& other)
+      constexpr QuadratureRule(const QuadratureRule& other)
         : Parent(other),
-          m_integrand(other.m_integrand->copy())
+          m_integrand(other.m_integrand->copy()),
+          m_basis(other.m_basis)
       {}
 
-      constexpr
-      QuadratureRule(QuadratureRule&& other)
+      constexpr QuadratureRule(QuadratureRule&& other)
         : Parent(std::move(other)),
           m_integrand(std::move(other.m_integrand)),
           m_polytope(std::move(other.m_polytope)),
           m_qf(std::exchange(other.m_qf, nullptr)),
           m_quadrature(std::exchange(other.m_quadrature, nullptr)),
           m_matrix(std::move(other.m_matrix)),
+          m_basis(std::move(other.m_basis)),
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::move(other.m_geometry))
@@ -567,6 +593,19 @@ namespace Rodin::Variational
           m_geometry = geometry;
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+
+          // Reference P1 basis values depend on the geometry and quadrature
+          // formula, but not on the physical mesh cell.
+          const P1Element<ScalarType> scalarfe(geometry);
+          const size_t nv = scalarfe.getCount();
+          m_basis.resize(
+            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
+            for (size_t a = 0; a < nv; ++a)
+              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
+          }
         }
 
         assert(m_qf);
@@ -580,6 +619,23 @@ namespace Rodin::Variational
 
         const bool symmetric =
           (&trialfes.getMesh() == &testfes.getMesh()) && (ntr == nte);
+        const size_t vdim = [&]() {
+          if constexpr (FormLanguage::IsVectorRange<LHSRangeType>::Value)
+          {
+            const size_t trialVdim = trialfes.getVectorDimension();
+            assert(trialVdim == testfes.getVectorDimension());
+            return trialVdim;
+          }
+          else
+          {
+            return size_t(1);
+          }
+        }();
+        assert(vdim > 0);
+        assert(ntr % vdim == 0);
+        assert(nte % vdim == 0);
+        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
+        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
 
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
@@ -592,24 +648,22 @@ namespace Rodin::Variational
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
-          const auto& rc = m_qf->getPoint(qp);
-
           if constexpr (std::is_same_v<LHSRangeType, ScalarType>)
           {
             if (symmetric)
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testfe.getBasis(ib)(rc);
+                const ScalarType phi_te = m_basis(qp, ib);
 
                 {
-                  const ScalarType kii = wdet * phi_te * trialfe.getBasis(ib)(rc);
+                  const ScalarType kii = wdet * phi_te * m_basis(qp, ib);
                   m_matrix(ib, ib) += kii;
                 }
 
                 for (size_t ia = 0; ia < ib; ++ia)
                 {
-                  const ScalarType kij = wdet * phi_te * trialfe.getBasis(ia)(rc);
+                  const ScalarType kij = wdet * phi_te * m_basis(qp, ia);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -618,10 +672,10 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testfe.getBasis(ib)(rc);
+                const ScalarType phi_te = m_basis(qp, ib);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij = wdet * phi_te * trialfe.getBasis(ia)(rc);
+                  const ScalarType kij = wdet * phi_te * m_basis(qp, ia);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -633,19 +687,22 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto& phi_te = testfe.getBasis(ib)(rc);
+                const size_t vb = ib / vdim;
+                const size_t cb = ib % vdim;
+                const ScalarType phi_te = m_basis(qp, vb);
 
                 {
-                  const ScalarType kii =
-                    wdet * Math::dot(phi_te, trialfe.getBasis(ib)(rc));
+                  const ScalarType kii = wdet * phi_te * phi_te;
                   m_matrix(ib, ib) += kii;
                 }
 
                 for (size_t ia = 0; ia < ib; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
-                  m_matrix(ib, ia) += kij;
+                  if (ia % vdim == cb)
+                  {
+                    const ScalarType phi_tr = m_basis(qp, ia / vdim);
+                    m_matrix(ib, ia) += wdet * phi_te * phi_tr;
+                  }
                 }
               }
             }
@@ -653,12 +710,16 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto& phi_te = testfe.getBasis(ib)(rc);
+                const size_t vb = ib / vdim;
+                const size_t cb = ib % vdim;
+                const ScalarType phi_te = m_basis(qp, vb);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
-                  m_matrix(ib, ia) += kij;
+                  if (ia % vdim == cb)
+                  {
+                    const ScalarType phi_tr = m_basis(qp, ia / vdim);
+                    m_matrix(ib, ia) += wdet * phi_te * phi_tr;
+                  }
                 }
               }
             }
@@ -691,6 +752,7 @@ namespace Rodin::Variational
       const Geometry::PolytopeQuadrature* m_quadrature;
 
       Math::Matrix<ScalarType> m_matrix;
+      Math::Matrix<ScalarType> m_basis;
 
       bool m_set = false;
       size_t m_order = 0;
@@ -775,12 +837,15 @@ namespace Rodin::Variational
       using MultiplicandType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
       using CoefficientRangeType =
@@ -789,15 +854,19 @@ namespace Rodin::Variational
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType =
         typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType =
         typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -828,7 +897,8 @@ namespace Rodin::Variational
           m_set(std::exchange(other.m_set, false)),
           m_order(std::exchange(other.m_order, 0)),
           m_geometry(std::exchange(other.m_geometry, Geometry::Polytope::Type::Point)),
-          m_matrix(std::move(other.m_matrix))
+          m_matrix(std::move(other.m_matrix)),
+          m_basis(std::move(other.m_basis))
       {}
 
       constexpr
@@ -873,6 +943,19 @@ namespace Rodin::Variational
           m_geometry = geometry;
 
           m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+
+          // Reference P1 basis values are shared by every physical cell with
+          // this geometry and quadrature formula.
+          const P1Element<ScalarType> scalarfe(geometry);
+          const size_t nv = scalarfe.getCount();
+          m_basis.resize(
+            static_cast<Eigen::Index>(m_qf->getSize()), static_cast<Eigen::Index>(nv));
+          for (size_t qp = 0; qp < m_qf->getSize(); ++qp)
+          {
+            const auto& rc = m_qf->getPoint(qp);
+            for (size_t a = 0; a < nv; ++a)
+              m_basis(qp, a) = scalarfe.getBasis(a)(rc);
+          }
         }
 
         assert(m_qf);
@@ -884,6 +967,24 @@ namespace Rodin::Variational
         assert(ntr == trialfe.getCount());
         assert(nte == testfe.getCount());
 
+        const size_t vdim = [&]() {
+          if constexpr (FormLanguage::IsVectorRange<MultiplicandRangeType>::Value)
+          {
+            const size_t trialVdim = trialfes.getVectorDimension();
+            assert(trialVdim == testfes.getVectorDimension());
+            return trialVdim;
+          }
+          else
+          {
+            return size_t(1);
+          }
+        }();
+        assert(vdim > 0);
+        assert(ntr % vdim == 0);
+        assert(nte % vdim == 0);
+        assert(static_cast<size_t>(m_basis.cols()) == ntr / vdim);
+        assert(static_cast<size_t>(m_basis.cols()) == nte / vdim);
+
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
 
@@ -892,11 +993,9 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
-
-          const auto& rc = m_qf->getPoint(qp);
 
           if constexpr (std::is_same_v<CoefficientRangeType, ScalarType>)
           {
@@ -906,11 +1005,10 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const ScalarType phi_te = testfe.getBasis(ib)(rc);
+                const ScalarType phi_te = m_basis(qp, ib);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * csv * phi_te * trialfe.getBasis(ia)(rc);
+                  const ScalarType kij = wdet * csv * phi_te * m_basis(qp, ia);
                   m_matrix(ib, ia) += kij;
                 }
               }
@@ -919,12 +1017,16 @@ namespace Rodin::Variational
             {
               for (size_t ib = 0; ib < nte; ++ib)
               {
-                const auto& phi_te = testfe.getBasis(ib)(rc);
+                const size_t vb = ib / vdim;
+                const size_t cb = ib % vdim;
+                const ScalarType phi_te = m_basis(qp, vb);
                 for (size_t ia = 0; ia < ntr; ++ia)
                 {
-                  const ScalarType kij =
-                    wdet * csv * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
-                  m_matrix(ib, ia) += kij;
+                  if (ia % vdim == cb)
+                  {
+                    const ScalarType phi_tr = m_basis(qp, ia / vdim);
+                    m_matrix(ib, ia) += wdet * csv * phi_te * phi_tr;
+                  }
                 }
               }
             }
@@ -939,11 +1041,14 @@ namespace Rodin::Variational
 
             for (size_t ib = 0; ib < nte; ++ib)
             {
-              const auto& phi_te = testfe.getBasis(ib)(rc);
+              const size_t vb = ib / vdim;
+              const size_t cb = ib % vdim;
+              const ScalarType phi_te = m_basis(qp, vb);
               for (size_t ia = 0; ia < ntr; ++ia)
               {
-                const auto& phi_tr = trialfe.getBasis(ia)(rc);
-                m_matrix(ib, ia) += wdet * Math::dot(phi_te, cmv * phi_tr);
+                const size_t ca = ia % vdim;
+                const ScalarType phi_tr = m_basis(qp, ia / vdim);
+                m_matrix(ib, ia) += wdet * phi_te * cmv(cb, ca) * phi_tr;
               }
             }
           }
@@ -977,6 +1082,7 @@ namespace Rodin::Variational
       Geometry::Polytope::Type m_geometry;
 
       Math::Matrix<ScalarType> m_matrix;
+      Math::Matrix<ScalarType> m_basis;
   };
 
   template <class CoefficientDerived, class LHSDerived, class RHSDerived, class Number, class Mesh>
@@ -1047,6 +1153,7 @@ namespace Rodin::Variational
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Grad<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
@@ -1056,6 +1163,7 @@ namespace Rodin::Variational
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
 
@@ -1065,10 +1173,13 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSOperandRangeType, ScalarType>);
@@ -1306,12 +1417,14 @@ namespace Rodin::Variational
       using MultiplicandRangeType =
         typename FormLanguage::Traits<MultiplicandType>::RangeType;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
       using MultiplicandOperandRangeType =
         typename FormLanguage::Traits<MultiplicandOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           Grad<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
@@ -1322,10 +1435,13 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<MultiplicandOperandRangeType, ScalarType>);
@@ -1448,7 +1564,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -1625,19 +1741,25 @@ namespace Rodin::Variational
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>;
 
       using InnerIntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Integrand expression type.
       using IntegrandType = Mult<CoefficientType, InnerIntegrandType>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
       using ScalarType   = typename FormLanguage::Traits<InnerIntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
@@ -1732,7 +1854,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -1757,11 +1879,11 @@ namespace Rodin::Variational
           {
             for (size_t ib = 0; ib < nte; ++ib)
             {
-              const auto& phi_te = testfe.getBasis(ib)(rc);
+              const auto phi_te = testfe.getBasis(ib)(rc);
               for (size_t ia = 0; ia < ntr; ++ia)
               {
-                const ScalarType kij =
-                  wdet * csv * Math::dot(phi_te, trialfe.getBasis(ia)(rc));
+                const auto phi_tr = trialfe.getBasis(ia)(rc);
+                const ScalarType kij = wdet * csv * Math::dot(phi_te, phi_tr);
                 m_matrix(ib, ia) += kij;
               }
             }
@@ -1842,19 +1964,24 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Math::SpatialVector<Real>, LHSMesh>;
       using TestFESType  = P1<Real, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<
         Div<ShapeFunction<LHSDerived, TrialFESType, TrialSpace>>,
         TrialFESType, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<
         ShapeFunction<RHSDerived, TestFESType, TestSpace>,
         TestFESType, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -2063,19 +2190,24 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<P1<Real, LHSMesh>>::ScalarType;
       using TrialFESType = P1<Real, LHSMesh>;
       using TestFESType  = P1<Math::SpatialVector<Real>, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType = ShapeFunctionBase<
         ShapeFunction<LHSDerived, TrialFESType, TrialSpace>,
         TrialFESType, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType = ShapeFunctionBase<
         Div<ShapeFunction<RHSDerived, TestFESType, TestSpace>>,
         TestFESType, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -2298,6 +2430,7 @@ namespace Rodin::Variational
 
       using RHSFESType = P1<RHSRange, RHSMesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
@@ -2308,6 +2441,7 @@ namespace Rodin::Variational
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>>;
@@ -2318,14 +2452,17 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2604,6 +2741,7 @@ namespace Rodin::Variational
         ShapeFunctionBase<
           Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<Mult<CoefficientType, MultiplicandType>>;
 
@@ -2613,6 +2751,7 @@ namespace Rodin::Variational
       using LHSOperandRangeType =
         typename FormLanguage::Traits<LHSOperandType>::RangeType;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           Jacobian<ShapeFunction<RHSDerived, P1<RHSRange, RHSMesh>, TestSpace>>>;
@@ -2623,14 +2762,17 @@ namespace Rodin::Variational
       using RHSOperandRangeType =
         typename FormLanguage::Traits<RHSOperandType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
       using IntegrandRangeType =
         typename FormLanguage::Traits<IntegrandType>::RangeType;
 
+      /// @brief Scalar value type.
       using ScalarType =
         typename FormLanguage::Traits<IntegrandType>::ScalarType;
 
+      /// @brief Parent class type.
       using Parent =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
@@ -2756,7 +2898,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -2895,7 +3037,7 @@ namespace Rodin::Variational
 
   /**
    * @ingroup QuadratureRuleSpecializations
-   * @brief Specialization for ∫ (∇u · f)·v in the case of P1 shape functions
+   * @brief Specialization for @f$ \int (\nabla u \cdot f) \cdot v @f$ in the case of P1 shape functions
    *
    * This class represents the CTAD for the expression:
    * @f[
@@ -2959,19 +3101,24 @@ namespace Rodin::Variational
 
       using CoefficientType = FunctionBase<CoefficientDerived>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         ShapeFunctionBase<
           Mult<TrialSFType, CoefficientType>,
           TrialFESType, TrialSpace>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<
           ShapeFunction<RHSDerived, TestFESType, TestSpace>,
           TestFESType, TestSpace>;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<IntegrandType>::ScalarType;
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       QuadratureRule(const IntegrandType& integrand)
@@ -3085,7 +3232,7 @@ namespace Rodin::Variational
             m_basis.resize(nVertices);
             for (size_t v = 0; v < nVertices; ++v)
             {
-              const auto& bv = testfe.getBasis(v * vdim)(rc);
+              const auto bv = testfe.getBasis(v * vdim)(rc);
               m_basis[v] = bv(0);
             }
           }
@@ -3107,7 +3254,7 @@ namespace Rodin::Variational
         for (size_t qp = 0; qp < q.getSize(); ++qp)
         {
           const auto& p = q.getPoint(qp);
-          const IntegrationPoint ip(p, *m_qf, qp);
+          const IntegrationPoint ip(p, m_qf, qp);
           const ScalarType wdet =
             static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
 
@@ -3227,6 +3374,7 @@ namespace Rodin::Variational
     : public GlobalBilinearFormIntegratorBase<typename FormLanguage::Traits<Range>::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
 
       using KernelType = Kernel;
@@ -3235,18 +3383,24 @@ namespace Rodin::Variational
 
       using TestFESType = P1<Range, Mesh>;
 
+      /// @brief Left-hand side operand type.
       using LHSType =
         Potential<KernelType, ShapeFunctionBase<LHSDerived, TrialFESType, TrialSpace>>;
 
+      /// @brief Right-hand side operand type.
       using RHSType =
         ShapeFunctionBase<RHSDerived, TestFESType, TestSpace>;
 
+      /// @brief Range type of the left-hand side operand.
       using LHSRangeType = typename FormLanguage::Traits<LHSType>::RangeType;
 
+      /// @brief Range type of the right-hand side operand.
       using RHSRangeType = typename FormLanguage::Traits<RHSType>::RangeType;
 
+      /// @brief Integrand expression type.
       using IntegrandType = Dot<LHSType, RHSType>;
 
+      /// @brief Parent class type.
       using Parent = GlobalBilinearFormIntegratorBase<ScalarType>;
 
       static_assert(std::is_same_v<LHSRangeType, RHSRangeType>);
@@ -3301,7 +3455,8 @@ namespace Rodin::Variational
         return *m_integrand;
       }
 
-      QuadratureRule& setPolytope(const Geometry::Polytope& trp, const Geometry::Polytope& tep)
+      QuadratureRule& setPolytope(
+        const Geometry::Polytope& trp, const Geometry::Polytope& tep) override
       {
         m_trp = trp;
         m_tep = tep;
@@ -3598,12 +3753,25 @@ namespace Rodin::Variational
                   for (size_t m = 0; m < trialfe.getCount(); ++m)
                   {
                     const auto& trb = trialfe.getBasis(m);
-                    m_matrix(l, m) = s0 * (m_k0 * trb(rx0)).dot(teb(rz0));
-                    m_matrix(l, m) += s1 * (m_k1 * trb(rx1)).dot(teb(rz1));
-                    m_matrix(l, m) += s2 * (m_k2 * trb(rx2)).dot(teb(rz2));
-                    m_matrix(l, m) += s3 * (m_k3 * trb(rx3)).dot(teb(rz3));
-                    m_matrix(l, m) += s4 * (m_k4 * trb(rx4)).dot(teb(rz4));
-                    m_matrix(l, m) += s5 * (m_k5 * trb(rx5)).dot(teb(rz5));
+                    const auto trv0 = trb(rx0);
+                    const auto tev0 = teb(rz0);
+                    const auto trv1 = trb(rx1);
+                    const auto tev1 = teb(rz1);
+                    const auto trv2 = trb(rx2);
+                    const auto tev2 = teb(rz2);
+                    const auto trv3 = trb(rx3);
+                    const auto tev3 = teb(rz3);
+                    const auto trv4 = trb(rx4);
+                    const auto tev4 = teb(rz4);
+                    const auto trv5 = trb(rx5);
+                    const auto tev5 = teb(rz5);
+
+                    m_matrix(l, m) = s0 * (m_k0 * trv0).dot(tev0);
+                    m_matrix(l, m) += s1 * (m_k1 * trv1).dot(tev1);
+                    m_matrix(l, m) += s2 * (m_k2 * trv2).dot(tev2);
+                    m_matrix(l, m) += s3 * (m_k3 * trv3).dot(tev3);
+                    m_matrix(l, m) += s4 * (m_k4 * trv4).dot(tev4);
+                    m_matrix(l, m) += s5 * (m_k5 * trv5).dot(tev5);
                   }
                 }
                 break;
@@ -3711,6 +3879,7 @@ namespace Rodin::Variational
 
       Math::Matrix<ScalarType> m_matrix;
   };
+  /// @endcond
 }
 
 #endif

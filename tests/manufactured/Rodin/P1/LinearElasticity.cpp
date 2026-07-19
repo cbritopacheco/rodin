@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Linear-elasticity manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a linear-elasticity manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -56,13 +64,17 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Linear Elasticity Test 16 x 16.
   using Manufactured_LinearElasticity_Test_16x16 =
     Rodin::Tests::Manufactured::LinearElasticity::Manufactured_LinearElasticity_Test<16>;
+  /// @brief Helper used by the tests to Manufactured Linear Elasticity Test 32 x 32.
   using Manufactured_LinearElasticity_Test_32x32 =
     Rodin::Tests::Manufactured::LinearElasticity::Manufactured_LinearElasticity_Test<32>;
+  /// @brief Helper used by the tests to Manufactured Linear Elasticity Test 64 x 64.
   using Manufactured_LinearElasticity_Test_64x64 =
     Rodin::Tests::Manufactured::LinearElasticity::Manufactured_LinearElasticity_Test<64>;
 
+  /// @brief Verifies linear elasticity P1 exact residual for manufactured linear elasticity test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_LinearElasticity_Test_16x16, LinearElasticity_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -559,12 +571,14 @@ namespace Rodin::Tests::Manufactured::LinearElasticity
     }
   }
 
+  /// @brief Instantiates Manufactured Linear Elasticity Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Manufactured_LinearElasticity_Test_16x16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Linear Elasticity Test 32 x 32 over the Mesh Params 32 x 32 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams32x32,
     Manufactured_LinearElasticity_Test_32x32,

@@ -29,13 +29,15 @@
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::UnaryMinus<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -61,10 +63,13 @@ namespace Rodin::Variational
     : public FunctionBase<UnaryMinus<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Range type of the operand.
       using OperandRangeType = typename FormLanguage::Traits<OperandType>::RangeType;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<UnaryMinus<OperandType>>;
 
       constexpr
@@ -101,7 +106,10 @@ namespace Rodin::Variational
       auto getValue(const Point& p) const
       {
         const auto v = getOperand().getValue(p);
-        return -v;
+        if constexpr (requires { (-v).eval(); })
+          return (-v).eval();
+        else
+          return -v;
       }
 
       constexpr
@@ -168,11 +176,14 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<UnaryMinus<ShapeFunctionBase<NestedDerived, FES, Space>>, FES, Space>;
 
       constexpr
@@ -235,8 +246,11 @@ namespace Rodin::Variational
       constexpr
       auto getBasis(size_t local) const
       {
-        const auto v = getOperand().getBasis(local);
-        return -v;
+        decltype(auto) v = getOperand().getBasis(local);
+        if constexpr (requires { (-v).eval(); })
+          return (-v).eval();
+        else
+          return -v;
       }
 
       const FES& getFiniteElementSpace() const
@@ -287,10 +301,13 @@ namespace Rodin::Variational
     : public LinearFormIntegratorBase<Number>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Operand type.
       using OperandType = LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = LinearFormIntegratorBase<ScalarType>;
 
       UnaryMinus(const OperandType& op)
@@ -376,12 +393,16 @@ namespace Rodin::Variational
     : public FormLanguage::List<LinearFormIntegratorBase<Number>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Linear form integrator base type.
       using LinearFormIntegratorBaseType = LinearFormIntegratorBase<Number>;
 
+      /// @brief Operand type.
       using OperandType = FormLanguage::List<LinearFormIntegratorBaseType>;
 
+      /// @brief Parent class type.
       using Parent = FormLanguage::List<LinearFormIntegratorBaseType>;
 
       UnaryMinus(const OperandType& op)
@@ -432,10 +453,13 @@ namespace Rodin::Variational
     : public LocalBilinearFormIntegratorBase<Number>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
+      /// @brief Operand type.
       using OperandType = LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
 
       UnaryMinus(const OperandType& op)
@@ -524,14 +548,17 @@ namespace Rodin::Variational
     : public FormLanguage::List<LocalBilinearFormIntegratorBase<Number>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Number;
 
       using LocalBilinearFormIntegratorBaseType =
         LocalBilinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
+      /// @brief Parent class type.
       using Parent =
         FormLanguage::List<LocalBilinearFormIntegratorBaseType>;
 
@@ -576,4 +603,5 @@ namespace Rodin::Variational
   }
 }
 
+/// @endcond
 #endif

@@ -12,6 +12,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies vector grid function construction for variational div by checking exact expected values.
   TEST(Rodin_Variational_Div, VectorGridFunction_Construction)
   {
     constexpr size_t vdim = 2;
@@ -24,6 +25,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&div_gf.getOperand(), &gf);
   }
 
+  /// @brief Verifies vector shape function construction for variational div.
   TEST(Rodin_Variational_Div, VectorShapeFunction_Construction)
   {
     constexpr size_t vdim = 2;
@@ -36,6 +38,7 @@ namespace Rodin::Tests::Unit
     auto div_v = Div(v);
   }
 
+  /// @brief Verifies constant vector field for variational div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Div, ConstantVectorField)
   {
     constexpr size_t vdim = 2;
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies linear vector field for variational div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Div, LinearVectorField)
   {
     constexpr size_t vdim = 2;
@@ -85,6 +89,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 2.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies copy for variational div by checking copy semantics.
   TEST(Rodin_Variational_Div, Copy)
   {
     constexpr size_t vdim = 2;
@@ -100,6 +105,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies usage in linear form for variational div by checking false predicates.
   TEST(Rodin_Variational_Div, UsageInLinearForm)
   {
     constexpr size_t vdim = 2;
@@ -112,13 +118,14 @@ namespace Rodin::Tests::Unit
 
     LinearForm lf(v_scalar);
 
-    // ∫ div(u) * v dx - this is a mixed formulation
+    // \int div(u) * v dx - this is a mixed formulation
     lf = Integral(Div(u_vector), v_scalar);
 
     // This should be constructible
     EXPECT_FALSE(lf.getIntegrators().empty());
   }
 
+  /// @brief Verifies usage in bilinear form for variational div by checking form assembly.
   TEST(Rodin_Variational_Div, UsageInBilinearForm)
   {
     constexpr size_t vdim = 2;
@@ -129,7 +136,7 @@ namespace Rodin::Tests::Unit
     TestFunction v(fes);
     BilinearForm bf(u, v);
 
-    // ∫ div(u) * div(v) dx - part of mixed elasticity formulations
+    // \int div(u) * div(v) dx - part of mixed elasticity formulations
     bf = Integral(Div(u), Div(v));
     bf.assemble();
 
@@ -138,6 +145,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.cols(), 0);
   }
 
+  /// @brief Verifies 3 D vector field for variational div by checking grid-function projection.
   TEST(Rodin_Variational_Div, 3D_VectorField)
   {
     constexpr size_t vdim = 3;
@@ -154,6 +162,7 @@ namespace Rodin::Tests::Unit
     // Test that divergence can be constructed
   }
 
+  /// @brief Verifies zero vector field for variational div by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Div, ZeroVectorField)
   {
     constexpr size_t vdim = 2;
@@ -173,6 +182,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value, 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies multiple evaluations for variational div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Div, MultipleEvaluations)
   {
     constexpr size_t vdim = 2;
@@ -211,6 +221,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies get operand for variational div by checking exact expected values.
   TEST(Rodin_Variational_Div, GetOperand)
   {
     constexpr size_t vdim = 2;
@@ -224,6 +235,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&operand, &gf);
   }
 
+  /// @brief Verifies copy constructor for variational div by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_Div, CopyConstructor)
   {
     constexpr size_t vdim = 2;
@@ -247,6 +259,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_value_orig, div_value_copy, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies move constructor for variational div by checking tolerance-based numerical results, move semantics.
   TEST(Rodin_Variational_Div, MoveConstructor)
   {
     constexpr size_t vdim = 2;
@@ -269,6 +282,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(div_moved.getValue(p), original_value, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies shape function get DO fs triangle P1 for variational div by checking exact expected values.
   TEST(Rodin_Variational_Div, ShapeFunction_getDOFs_Triangle_P1)
   {
     constexpr size_t vdim = 2;
@@ -287,6 +301,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs, 6);
   }
 
+  /// @brief Verifies shape function get DO fs tetrahedron P1 for variational div by checking exact expected values.
   TEST(Rodin_Variational_Div, ShapeFunction_getDOFs_Tetrahedron_P1)
   {
     constexpr size_t vdim = 3;
@@ -306,6 +321,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(dofs, 12);
   }
 
+  /// @brief Verifies random coordinates linear vector field for variational div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Div, RandomCoordinates_LinearVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -350,6 +366,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies random coordinates divergence free field for variational div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Div, RandomCoordinates_DivergenceFreeField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 5, 5 });
@@ -394,6 +411,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies random coordinates tetrahedron linear vector field for variational div by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Div, RandomCoordinates_Tetrahedron_LinearVectorField)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 3, 3, 3 });

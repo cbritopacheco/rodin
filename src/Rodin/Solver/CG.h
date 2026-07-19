@@ -62,10 +62,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for CG solvers.
   template <class LinearSystem>
   struct Traits<Solver::CG<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -185,7 +187,11 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
+        m_solver.compute(axb.getOperator());
+        if (axb.getSolution().size() == axb.getVector().size())
+          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
+        else
+          axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       /**
@@ -295,7 +301,11 @@ namespace Rodin::Solver
        */
       void solve(LinearSystemType& axb) override
       {
-        axb.getSolution() = m_solver.compute(axb.getOperator()).solveWithGuess(axb.getVector(), axb.getSolution());
+        m_solver.compute(axb.getOperator());
+        if (axb.getSolution().size() == axb.getVector().size())
+          axb.getSolution() = m_solver.solveWithGuess(axb.getVector(), axb.getSolution());
+        else
+          axb.getSolution() = m_solver.solve(axb.getVector());
       }
 
       /**
@@ -323,4 +333,3 @@ namespace Rodin::Solver
 }
 
 #endif
-

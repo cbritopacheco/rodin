@@ -12,8 +12,8 @@
  * functions to approximate signed distance functions using the Spalding-Tucker
  * method.
  */
-#ifndef RODIN_MODELS_DISTANCE_SPALDINGTUCKER_H
-#define RODIN_MODELS_DISTANCE_SPALDINGTUCKER_H
+#ifndef RODIN_DISTANCE_SPALDINGTUCKER_H
+#define RODIN_DISTANCE_SPALDINGTUCKER_H
 
 #include "Rodin/Variational/GridFunction.h"
 

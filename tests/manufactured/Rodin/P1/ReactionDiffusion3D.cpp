@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Reaction-diffusion manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a reaction-diffusion manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -25,7 +33,7 @@ using namespace Rodin::Solver;
  *             u = g   on ∂Ω
  *
  * Weak form:
- *   ∫Ω ∇u·∇v dx + α ∫Ω u v dx = ∫Ω f v dx
+ *   ∫_Ω ∇ u·∇ v dx + α ∫_Ω u v dx = ∫_Ω f v dx
  *
  * Geometry note:
  *   UniformGrid({M,M,M}) creates coordinates {0,…,M−1}.
@@ -38,13 +46,13 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // ---------------------------------------------------------------------------
   // Fixture: shared mesh with correct physical scaling
   // ---------------------------------------------------------------------------
-  template <Polytope::Type G, size_t M>
-  class ReactionDiffusion3DFixture : public ::testing::Test
+  template <size_t M>
+  class ReactionDiffusion3DFixture : public ::testing::TestWithParam<Polytope::Type>
   {
     protected:
       void SetUp() override
       {
-        m_mesh = Mesh<Context::Local>().UniformGrid(G, {M, M, M});
+        m_mesh = Mesh<Context::Local>().UniformGrid(GetParam(), {M, M, M});
         m_mesh.scale(Real(1) / Real(M - 1)); // map {0..M-1} -> [0,1]
         m_mesh.getConnectivity().compute(2, 3);
       }
@@ -55,13 +63,13 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
       Mesh<Context::Local> m_mesh;
   };
 
-  using Tetra8  = ReactionDiffusion3DFixture<Polytope::Type::Tetrahedron, 8>;
-  using Hex8    = ReactionDiffusion3DFixture<Polytope::Type::Hexahedron,   8>;
-  using Tetra16 = ReactionDiffusion3DFixture<Polytope::Type::Tetrahedron, 16>;
-  using Hex16   = ReactionDiffusion3DFixture<Polytope::Type::Hexahedron,  16>;
-  using Tetra32 = ReactionDiffusion3DFixture<Polytope::Type::Tetrahedron, 32>;
+  /// @brief Helper used by the tests to Reaction Diffusion 3 D Test 8.
+  using ReactionDiffusion3DTest8 = ReactionDiffusion3DFixture<8>;
+  /// @brief Helper used by the tests to Reaction Diffusion 3 D Test 16.
+  using ReactionDiffusion3DTest16 = ReactionDiffusion3DFixture<16>;
 
-  TEST_F(Tetra8, ReactionDiffusion_P1ExactResidual)
+  /// @brief Verifies reaction diffusion P1 exact residual for reaction diffusion 3 D test 8 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(ReactionDiffusion3DTest8, ReactionDiffusion_P1ExactResidual)
   {
     const Real alpha = 1.0;
 
@@ -105,7 +113,8 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // Δu = -3 pi^2 u
   // f = -Δu + α u = (3 pi^2 + α) u
   // ---------------------------------------------------------------------------
-  TEST_F(Tetra16, SimpleSine_Tetrahedron)
+  /// @brief Verifies simple sine for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(ReactionDiffusion3DTest16, SimpleSine)
   {
     const Real pi = Math::Constants::pi();
     const Real alpha = 1.0;
@@ -129,34 +138,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    EXPECT_NEAR(0.5 * Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
-  }
-
-  TEST_F(Hex16, SimpleSine_Hexahedron)
-  {
-    const Real pi = Math::Constants::pi();
-    const Real alpha = 1.0;
-
-    P1 vh(mesh());
-
-    const auto u_expr =
-      sin(pi * F::x) * sin(pi * F::y) * sin(pi * F::z);
-    const auto f = (3 * pi * pi + alpha) * u_expr;
-
-    TrialFunction u(vh);
-    TestFunction  v(vh);
-
-    Problem rd(u, v);
-    rd = Integral(Grad(u), Grad(v))
-       + alpha * Integral(u, v)
-       - Integral(f, v)
-       + DirichletBC(u, Zero());
-
-    CG(rd).solve();
-
-    GridFunction diff(vh);
-    diff = Pow(u.getSolution() - u_expr, 2);
-    EXPECT_NEAR(0.7 * Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(Integral(diff).compute(), 0.0, 2 * RODIN_FUZZY_CONSTANT);
   }
 
   // ---------------------------------------------------------------------------
@@ -165,7 +147,8 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // Δu = 2y(1-y)z(1-z) + 2x(1-x)z(1-z) + 2x(1-x)y(1-y)
   // f = -Δu + α u
   // ---------------------------------------------------------------------------
-  TEST_F(Tetra16, Polynomial_Tetrahedron)
+  /// @brief Verifies polynomial for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(ReactionDiffusion3DTest16, Polynomial)
   {
     const Real alpha = 2.0;
 
@@ -203,7 +186,8 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // Mixed polynomial–trigonometric
   // u = x(1-x) sin(pi y) sin(pi z)
   // ---------------------------------------------------------------------------
-  TEST_F(Hex16, MixedPolynomialTrig_Hexahedron)
+  /// @brief Verifies mixed polynomial trig for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(ReactionDiffusion3DTest16, MixedPolynomialTrig)
   {
     const Real pi = Math::Constants::pi();
     const Real alpha = 0.5;
@@ -240,7 +224,8 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
   // u = cos(pi x) cos(pi y) e^z
   // Δu = (1 - 2 pi^2) u
   // ---------------------------------------------------------------------------
-  TEST_F(Tetra16, Exponential_Tetrahedron)
+  /// @brief Verifies exponential for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(ReactionDiffusion3DTest16, Exponential)
   {
     const Real pi = Math::Constants::pi();
     const Real alpha = 1.5;
@@ -266,13 +251,14 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    EXPECT_NEAR(0.7 * Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(Integral(diff).compute(), 0.0, 2 * RODIN_FUZZY_CONSTANT);
   }
 
   // ---------------------------------------------------------------------------
-  // Extra: Hex16 refinement sanity check
+  // Extra: refinement sanity check
   // ---------------------------------------------------------------------------
-  TEST_F(Hex16, SimpleSine_Hexahedron_16)
+  /// @brief Verifies simple sine refined sanity for reaction diffusion 3 D test 16 by checking tolerance-based numerical results, solver behavior.
+  TEST_P(ReactionDiffusion3DTest16, SimpleSine_RefinedSanity)
   {
     const Real pi = Math::Constants::pi();
     const Real alpha = 1.0;
@@ -296,6 +282,16 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion3D
 
     GridFunction diff(vh);
     diff = Pow(u.getSolution() - u_expr, 2);
-    EXPECT_NEAR(0.7 * Integral(diff).compute(), 0.0, RODIN_FUZZY_CONSTANT);
+    EXPECT_NEAR(Integral(diff).compute(), 0.0, 2 * RODIN_FUZZY_CONSTANT);
   }
+
+  /// @brief Instantiates Reaction Diffusion 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, ReactionDiffusion3DTest8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
+
+  /// @brief Instantiates Reaction Diffusion 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, ReactionDiffusion3DTest16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

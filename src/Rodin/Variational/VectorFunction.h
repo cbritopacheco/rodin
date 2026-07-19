@@ -30,11 +30,14 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Traits for vector-valued function bases.
   template <class Scalar, class Derived>
   struct Traits<Variational::VectorFunctionBase<Scalar, Derived>>
   {
-    using ScalarType = Scalar;
-    using DerivedType = Derived;
+    /// @brief Scalar value type.
+      using ScalarType = Scalar;
+      /// @brief Derived CRTP function type.
+      using DerivedType = Derived;
   };
 }
 
@@ -155,12 +158,22 @@ namespace Rodin::Variational
 
       virtual ~VectorFunctionBase() = default;
 
+      /**
+       * @brief Evaluates the vector function at a point.
+       * @param[in] p Point at which to evaluate
+       * @returns Vector value at the point
+       */
       constexpr
       auto getValue(const Geometry::Point& p) const
       {
         return static_cast<const Derived&>(*this).getValue(p);
       }
 
+      /**
+       * @brief Evaluates the vector function at an integration point.
+       * @param[in] ip Integration point at which to evaluate
+       * @returns Vector value at the integration point
+       */
       constexpr
       auto getValue(const IntegrationPoint& ip) const
       {
@@ -180,6 +193,11 @@ namespace Rodin::Variational
         return static_cast<const Derived&>(*this).getDimension();
       }
 
+      /**
+       * @brief Returns the polynomial order on a mesh entity.
+       * @param[in] geom Entity whose local polynomial order is requested
+       * @returns Polynomial order when known
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -192,16 +210,24 @@ namespace Rodin::Variational
       }
   };
 
+  /**
+   * @ingroup VectorFunctionSpecializations
+   * @brief Vector function backed by an existing dense vector.
+   */
   template <class Scalar>
   class VectorFunction<Math::Vector<Scalar>> final
     : public VectorFunctionBase<Scalar, VectorFunction<Math::Vector<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<VectorType>>;
 
       /**
@@ -215,33 +241,57 @@ namespace Rodin::Variational
         : m_vector(v)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       VectorFunction(const VectorFunction& other)
         : Parent(other),
           m_vector(other.m_vector)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       VectorFunction(VectorFunction&& other)
         : Parent(std::move(other)),
           m_vector(std::move(other.m_vector))
       {}
 
+      /**
+       * @brief Evaluates the constant vector at a point.
+       * @returns Stored vector value
+       */
       SpatialVectorType getValue(const Geometry::Point&) const
       {
         return SpatialVectorType(m_vector.get());
       }
 
+      /**
+       * @brief Gets the vector dimension.
+       * @returns Number of stored components
+       */
       constexpr
       size_t getDimension() const
       {
         return m_vector.get().size();
       }
 
+      /**
+       * @brief Leaves constant vectors unchanged on trace domains.
+       * @returns Reference to this function
+       */
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }
 
+      /**
+       * @brief Returns the polynomial order of a constant vector.
+       * @returns Zero polynomial order
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -257,6 +307,7 @@ namespace Rodin::Variational
       std::reference_wrapper<const VectorType> m_vector;
   };
 
+  /// @brief CTAD for dense-vector constants.
   template <class Scalar>
   VectorFunction(const Math::Vector<Scalar>&) -> VectorFunction<Math::Vector<Scalar>>;
 
@@ -285,22 +336,30 @@ namespace Rodin::Variational
     : public VectorFunctionBase<Real, VectorFunction<V, Values...>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Number of vector components.
       static constexpr size_t Dimension = 1 + sizeof...(Values);
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
+      /// @brief Small spatial vector value type.
       using SpatialVectorType = Math::SpatialVector<ScalarType>;
+      /// @brief Range (evaluation value) type.
       using RangeType =
         std::conditional_t<
           Dimension <= Math::SpatialVector<ScalarType>::MaxSize,
           SpatialVectorType,
           VectorType>;
 
+      /// @brief Fixed-size vector type used for storage decisions.
       using FixedSizeVectorType = Math::FixedSizeVector<ScalarType, Dimension>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<V, Values...>>;
       /**
        * @brief Constructs a vector with the given values.
+       * @param[in] v First component source
        * @param[in] values Parameter pack of values
        *
        * Each value passed must be convertible to any specialization of
@@ -310,16 +369,29 @@ namespace Rodin::Variational
         : m_fs(RealFunction(v), RealFunction(values)...)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       VectorFunction(const VectorFunction& other)
         : Parent(other),
           m_fs(other.m_fs)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       VectorFunction(VectorFunction&& other)
         : Parent(std::move(other)),
           m_fs(std::move(other.m_fs))
       {}
 
+      /**
+       * @brief Evaluates all component functions at a point.
+       * @param[in] p Point at which to evaluate
+       * @returns Vector value assembled from component functions
+       */
       RangeType getValue(const Geometry::Point& p) const
       {
         RangeType res;
@@ -344,6 +416,11 @@ namespace Rodin::Variational
         return res;
       }
 
+      /**
+       * @brief Evaluates all component functions at an integration point.
+       * @param[in] ip Integration point at which to evaluate
+       * @returns Vector value assembled from component functions
+       */
       RangeType getValue(const IntegrationPoint& ip) const
       {
         RangeType res;
@@ -376,12 +453,21 @@ namespace Rodin::Variational
         return res;
       }
 
+      /**
+       * @brief Gets the vector dimension.
+       * @returns Number of component functions
+       */
       constexpr
       size_t getDimension() const
       {
         return Dimension;
       }
 
+      /**
+       * @brief Applies a trace domain to each component function.
+       * @param[in] attrs Trace-domain specification passed to components
+       * @returns Reference to this function
+       */
       template <class ... Args>
       constexpr
       VectorFunction& traceOf(const Args&... attrs)
@@ -390,6 +476,11 @@ namespace Rodin::Variational
         return *this;
       }
 
+      /**
+       * @brief Returns the maximum known component order on a mesh entity.
+       * @param[in] geom Entity whose local polynomial order is requested
+       * @returns Polynomial order when at least one component reports it
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope& geom) const noexcept
       {
@@ -417,42 +508,73 @@ namespace Rodin::Variational
       std::tuple<RealFunction<V>, RealFunction<Values>...> m_fs;
   };
 
+  /// @brief CTAD for component-wise vector functions.
   template <class V, class ... Values>
   VectorFunction(const V&, const Values&...) -> VectorFunction<V, Values...>;
 
+  /**
+   * @ingroup VectorFunctionSpecializations
+   * @brief Vector function backed by a callable.
+   */
   template <class F>
   class VectorFunction<F> final : public VectorFunctionBase<Real, VectorFunction<F>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
 
+      /// @brief Parent class type.
       using Parent = VectorFunctionBase<ScalarType, VectorFunction<F>>;
 
       using Parent::traceOf;
 
+      /**
+       * @brief Constructs a vector function from a callable.
+       * @param[in] vdim Vector dimension
+       * @param[in] f Callable returning a vector value
+       */
       VectorFunction(size_t vdim, F f)
         : m_vdim(vdim), m_f(f)
       {}
 
+      /**
+       * @brief Copy constructor.
+       * @param[in] other Function to copy
+       */
       VectorFunction(const VectorFunction& other)
         : Parent(other),
           m_vdim(other.m_vdim),
           m_f(other.m_f)
       {}
 
+      /**
+       * @brief Move constructor.
+       * @param[in] other Function to move from
+       */
       VectorFunction(VectorFunction&& other)
         : Parent(std::move(other)),
           m_vdim(std::move(other.m_vdim)),
           m_f(std::move(other.m_f))
       {}
 
+      /**
+       * @brief Evaluates the callable at a point.
+       * @param[in] p Point at which to evaluate
+       * @returns Callable vector value
+       */
       auto getValue(const Geometry::Point& p) const
       {
         return m_f(p);
       }
 
+      /**
+       * @brief Evaluates the callable at an integration point.
+       * @param[in] ip Integration point at which to evaluate
+       * @returns Callable vector value
+       */
       auto getValue(const IntegrationPoint& ip) const
       {
         if constexpr (std::is_invocable_v<F, const IntegrationPoint&>)
@@ -461,12 +583,20 @@ namespace Rodin::Variational
           return m_f(ip.getPoint());
       }
 
+      /**
+       * @brief Leaves callable vector functions unchanged on trace domains.
+       * @returns Reference to this function
+       */
       constexpr
       VectorFunction& traceOf(const FlatSet<Geometry::Attribute>& attr)
       {
         return *this;
       }
 
+      /**
+       * @brief Returns the polynomial order of the callable.
+       * @returns std::nullopt because arbitrary callables have unknown order
+       */
       constexpr
       Optional<size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
@@ -483,6 +613,7 @@ namespace Rodin::Variational
       const F m_f;
   };
 
+  /// @brief CTAD for callable vector functions.
   template <class F, typename = std::enable_if_t<std::is_invocable_v<F, const Geometry::Point&>>>
   VectorFunction(size_t, F) -> VectorFunction<F>;
 }

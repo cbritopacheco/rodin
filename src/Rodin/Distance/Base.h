@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file Base.h
  * @brief Base class for distance function computation models.
@@ -6,8 +12,8 @@
  * for various distance function computation methods by managing interior and
  * interface regions of the computational domain.
  */
-#ifndef RODIN_MODELS_DITANCE_BASE_H
-#define RODIN_MODELS_DITANCE_BASE_H
+#ifndef RODIN_DISTANCE_BASE_H
+#define RODIN_DISTANCE_BASE_H
 
 #include "Rodin/Geometry/Types.h"
 

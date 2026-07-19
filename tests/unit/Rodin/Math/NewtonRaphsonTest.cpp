@@ -20,6 +20,7 @@ class NewtonRaphsonTest : public ::testing::Test
     void TearDown() override {}
 };
 
+/// @brief Verifies default construction for newton raphson test by checking solver behavior.
 TEST_F(NewtonRaphsonTest, DefaultConstruction)
 {
   NewtonRaphson<Real> solver;
@@ -27,12 +28,14 @@ TEST_F(NewtonRaphsonTest, DefaultConstruction)
   (void)solver;
 }
 
+/// @brief Verifies custom tolerances for newton raphson test by checking solver behavior.
 TEST_F(NewtonRaphsonTest, CustomTolerances)
 {
   NewtonRaphson<Real> solver(1e-15, 1e-12, 1e-15, 50);
   (void)solver;
 }
 
+/// @brief F(x) = x^2 - 2, f'(x) = 2x, root = sqrt(2).
 TEST_F(NewtonRaphsonTest, SqrtTwo)
 {
   // f(x) = x^2 - 2, f'(x) = 2x, root = sqrt(2)
@@ -46,6 +49,7 @@ TEST_F(NewtonRaphsonTest, SqrtTwo)
   EXPECT_NEAR(*root, std::sqrt(2.0), 1e-10);
 }
 
+/// @brief F(x) = x^3 - 8, f'(x) = 3x^2, root = 2.
 TEST_F(NewtonRaphsonTest, CubicRoot)
 {
   // f(x) = x^3 - 8, f'(x) = 3x^2, root = 2
@@ -59,6 +63,7 @@ TEST_F(NewtonRaphsonTest, CubicRoot)
   EXPECT_NEAR(*root, 2.0, 1e-10);
 }
 
+/// @brief F(x) = sin(x), f'(x) = cos(x), root at x = pi in [2, 4].
 TEST_F(NewtonRaphsonTest, SinRoot)
 {
   // f(x) = sin(x), f'(x) = cos(x), root at x = pi in [2, 4]
@@ -72,6 +77,7 @@ TEST_F(NewtonRaphsonTest, SinRoot)
   EXPECT_NEAR(*root, M_PI, 1e-10);
 }
 
+/// @brief F(x) = x - 1.001, f'(x) = 1, root at x = 1.001 (near boundary of [1, 2]).
 TEST_F(NewtonRaphsonTest, RootNearBoundary)
 {
   // f(x) = x - 1.001, f'(x) = 1, root at x = 1.001 (near boundary of [1, 2])
@@ -85,6 +91,7 @@ TEST_F(NewtonRaphsonTest, RootNearBoundary)
   EXPECT_NEAR(*root, 1.001, 1e-10);
 }
 
+/// @brief Very tight tolerance with only 1 iteration allowed.
 TEST_F(NewtonRaphsonTest, MaxIterationLimit)
 {
   // Very tight tolerance with only 1 iteration allowed
@@ -99,6 +106,7 @@ TEST_F(NewtonRaphsonTest, MaxIterationLimit)
   (void)root;
 }
 
+/// @brief F(x) = 2x - 6, f'(x) = 2, root = 3.
 TEST_F(NewtonRaphsonTest, LinearFunction)
 {
   // f(x) = 2x - 6, f'(x) = 2, root = 3

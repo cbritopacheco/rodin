@@ -1,0 +1,174 @@
+/**
+  @page guides-solid-mechanics Solid mechanics
+  @brief Finite-strain solid mechanics: kinematics, constitutive laws, and Newton solution
+
+  @tableofcontents
+
+  @m_footernavigation
+
+  @section guides-solid-intro Introduction
+
+  The @ref Rodin::Solid "Solid" module implements finite-strain
+  (hyperelastic) solid mechanics on top of the variational form language.
+  It is organized exactly like the underlying mathematics:
+
+  | Layer | Directory | Contents |
+  |-------|-----------|----------|
+  | Kinematics | `Solid/Kinematics/` | Deformation measures and invariants at a point |
+  | Constitutive laws | `Solid/Constitutive/` | Strain-energy densities and their derivatives |
+  | Integrators | `Solid/Integrators/` | The internal virtual work residual and tangent |
+  | Point plumbing | `Solid/Local/` | Constitutive-point inputs (state, fibers, activation) |
+  | Postprocessing | `Solid/Fields/` | Stress and strain fields for output |
+  | Linear theory | `Solid/Linear/` | Small-strain elasticity integrators |
+
+  Working examples: `examples/Solid/BlockGravity.cpp` (quasi-static
+  NeoHookean block under ramped gravity), `examples/Solid/CantileverBeam.cpp`,
+  and `examples/Solid/ActiveContractionPlaneWave.cpp` (active fiber
+  contraction driven by an activation wave).
+
+  @section guides-solid-kinematics Kinematics
+
+  With displacement @f$ u @f$, the deformation gradient is
+  @f$ F = I + \nabla_X u @f$, the right Cauchy–Green tensor
+  @f$ C = F^\top F @f$, and the Green–Lagrange strain
+  @f$ E = \tfrac12 (C - I) @f$. Isotropic response is expressed through
+  the invariants @f$ I_1 = \operatorname{tr} C @f$, @f$ I_2 @f$,
+  @f$ I_3 = \det C = J^2 @f$; a fiber direction @f$ f_0 @f$ adds the
+  anisotropic invariant @f$ I_{4f} = f_0 \cdot C f_0 @f$ (squared fiber
+  stretch).
+
+  These live in `Solid/Kinematics/` (`KinematicState`, `Invariants`) and
+  are computed *at constitutive points* — laws never see meshes or
+  quadrature, only local state.
+
+  @note Everything the module assembles is **referential** (total
+  Lagrangian): integrals over the reference configuration, gradients
+  @f$ \nabla_X @f$, first Piola–Kirchhoff stress @f$ P @f$. Cauchy (true)
+  stress is a postprocess (@ref guides-solid-fields "Fields"), never an
+  assembly quantity.
+
+  @section guides-solid-laws Constitutive laws
+
+  A hyperelastic law is a strain-energy density @f$ W @f$; stress and
+  tangent follow by differentiation:
+  @f$ P = \partial W / \partial F @f$,
+  @f$ \mathbb{C} = \partial^2 W / \partial F^2 @f$. All laws derive from
+  `HyperElasticLaw` and return, at a constitutive point, the stress and
+  the *consistent* tangent.
+
+  | Law | Energy | Regime / notes |
+  |-----|--------|----------------|
+  | `Hooke` | quadratic in @f$ \varepsilon @f$ | Linear elasticity |
+  | `SaintVenantKirchhoff` | quadratic in @f$ E @f$ | Large rotations, small strains; loses ellipticity in strong compression (a property of the model, not a bug) |
+  | `NeoHookean` | @f$ I_1 @f$-based, compressible | General-purpose rubber-like |
+  | `MooneyRivlin` | @f$ I_1, I_2 @f$-based | Rubber with second-invariant sensitivity |
+  | `HolzapfelOgden` | isotropic matrix + exponential fiber term in @f$ I_{4f} @f$ | Anisotropic soft tissue, one fiber family |
+  | `ActiveFiberLaw` | 1D fiber element with internal state | Active (muscle) contraction |
+  | `ActiveContraction<Passive, Active>` | passive law + active fiber law | Composition wrapper |
+
+  Constructing a law and the internal virtual work form
+  (from `examples/Solid/BlockGravity.cpp`):
+
+  @code{.cpp}
+  Solid::NeoHookean law(lambda, mu);
+  auto ivw = Solid::InternalVirtualWork(law, u);   // u: current displacement GridFunction
+  @endcode
+
+  @section guides-solid-newton The weak form and Newton's method
+
+  Static equilibrium in weak form is
+
+  @f[
+    R(u; v) = \int_{\Omega_0} P(F) : \nabla_X v \; dX - \ell_{ext}(v) = 0 ,
+  @f]
+
+  and Newton's method solves, at each iterate,
+  @f$ R'(u)(\delta u, v) = -R(u; v) @f$. The tangent
+  @f$ R' @f$ contains both the material stiffness (from
+  @f$ \partial^2 W/\partial C^2 @f$) and the geometric (initial-stress)
+  stiffness; omitting the latter forfeits quadratic convergence.
+  `InternalVirtualWork` packages residual and tangent together — the
+  expression `ivw(du, v)` contributes both to the Newton problem:
+
+  @code{.cpp}
+  // Newton linearization:  K δu = -F_int(u) + F_ext
+  Problem newton(du, v);
+  newton = ivw(du, v)
+         - Integral(bodyForce, v)
+         + DirichletBC(du, zero).on(bottomBC);
+
+  SparseLU linearSolver(newton);
+  NewtonSolver solver(linearSolver);
+  solver.setMaxIterations(50)
+        .setAbsoluteTolerance(1e-10)
+        .setRelativeTolerance(1e-8);
+  solver.solve(u);      // iterates du-solves, accumulating into u
+  @endcode
+
+  Note the structure: the *increment* @f$ \delta u @f$ is the trial
+  function; the Dirichlet condition on @f$ \delta u @f$ is homogeneous
+  once @f$ u @f$ satisfies the constraint; loads are ramped in steps
+  (incremental loading) because a full load applied to the undeformed
+  state may lie outside Newton's basin of attraction.
+
+  @section guides-solid-inputs Constitutive-point inputs
+
+  Laws that need more than kinematics (time step, activation, previous
+  internal state, fiber directions) receive them through the
+  *constitutive point* mechanism (`Solid/Local/ConstitutivePoint.h`): the
+  integrators stamp tags — cell index, quadrature-point index, and any
+  user-relevant quantities — onto the point, and a user-supplied input
+  callable maps tags to law inputs:
+
+  @code{.cpp}
+  auto ivw = Solid::InternalVirtualWork(law, u).setInput(activeInput);
+  @endcode
+
+  This keeps laws pure functions of local state (unit-testable against
+  finite differences at a single point) and keeps integrators ignorant of
+  constitutive details. `Solid/Local/FiberKinematics.h` carries preferred
+  directions; fibers are *material* (reference-configuration) vectors —
+  their pushforward @f$ F f_0 @f$ happens inside laws and fields, never in
+  user setup.
+
+  @subsection guides-solid-internal Internal variables
+
+  Active laws evolve internal state (active extension, cross-bridge
+  stiffness-like variables) by local ODEs. Two facts worth knowing:
+
+  - The preferred architecture for internal variables in Rodin is to make
+    them **first-class fields** (grid functions on discontinuous spaces,
+    coupled into the global Newton residual) rather than hiding local
+    solves and Schur-condensed tangents inside the law evaluation.
+  - **Quasi-static problems can latch**: after activation ceases, a
+    contracted configuration can itself be an equilibrium, so the model
+    never relaxes (no sliding, no decay path). The remedies are a
+    spontaneous-decay regularization parameter, or a genuinely dynamic
+    formulation (inertia + Newmark-type integration) in which the elastic
+    restoring force drives relaxation. If a quasi-static simulation
+    "won't relax", check the formulation regime before suspecting the
+    law.
+
+  @section guides-solid-fields Postprocessing fields
+
+  `Solid/Fields/` provides stress/strain functions for output and
+  coupling: `FirstPiolaKirchhoffStress` (@f$ P @f$),
+  `CauchyStress` (@f$ \sigma = J^{-1} P F^\top @f$),
+  `GreenLagrangeStrain` (@f$ E @f$). They are ordinary
+  @ref Rodin::Variational "form-language" functions: project them onto an
+  output space and write them with @ref Rodin::IO::XDMF "IO::XDMF".
+
+  @section guides-solid-units A note on units
+
+  The laws are unit-agnostic; consistency is the user's contract. Mixing
+  a Pa-scale modulus with kPa-scale loads or activation is a silent
+  modeling error no assertion can catch — fix a unit system per example
+  and state it in a comment near the parameters.
+
+  @section guides-solid-seealso See also
+
+  - @ref guides-variational — problem composition
+  - @ref guides-solvers — the Newton solver and linear solvers
+  - @ref Rodin::Heart "Heart" — 0D reduced cardiac models for calibrating
+    the 3D laws
+*/

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_QF_GRUNDMANNMOLLER_H
-#define RODIN_VARIATIONAL_QF_GRUNDMANNMOLLER_H
+#ifndef RODIN_QF_GRUNDMANNMOLLER_H
+#define RODIN_QF_GRUNDMANNMOLLER_H
 
 /**
  * @file
@@ -134,6 +134,10 @@ namespace Rodin::QF
         return m_order;
       }
 
+      /**
+       * @brief Gets the simplex geometry of this Grundmann-Moller rule.
+       * @return Polytope geometry type.
+       */
       Geometry::Polytope::Type getGeometry() const
       {
         return m_geometry;

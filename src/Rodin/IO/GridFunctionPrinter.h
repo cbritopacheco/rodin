@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
-#define RODIN_VARIATIONAL_GRIDFUNCTIONPRINTER_H
+#ifndef RODIN_IO_GRIDFUNCTIONPRINTER_H
+#define RODIN_IO_GRIDFUNCTIONPRINTER_H
 
 #include <functional>
 #include <boost/filesystem.hpp>
@@ -35,13 +35,18 @@ namespace Rodin::IO
   class GridFunctionPrinter : public IO::Printer<Variational::GridFunction<FES, Data>>
   {
     public:
+      /// @brief Grid function type being printed.
       using ObjectType = Variational::GridFunction<FES, Data>;
 
+      /**
+       * @brief Constructs a fallback grid function printer.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinter(const ObjectType& gf)
         : m_gf(gf)
       {}
 
-      void print(std::ostream&) override
+      void print(std::ostream& os) override
       {
         Alert::Exception()
           << "No GridFunctionPrinter specialization for this format/FES/Data combination."
@@ -54,12 +59,23 @@ namespace Rodin::IO
       std::reference_wrapper<const ObjectType> m_gf;
   };
 
+  /**
+   * @brief Base class for concrete grid function printers.
+   *
+   * Stores the grid function by reference and exposes it to derived printers
+   * through @ref getObject().
+   */
   template <FileFormat Fmt, class FES, class Data>
   class GridFunctionPrinterBase : public IO::Printer<Variational::GridFunction<FES, Data>>
   {
     public:
+      /// @brief File format handled by this printer base.
+      static constexpr FileFormat Format = Fmt;
+
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Coefficient data storage type.
       using DataType = Data;
 
       /**
@@ -67,10 +83,17 @@ namespace Rodin::IO
        */
       using ObjectType = Variational::GridFunction<FES, Data>;
 
+      /**
+       * @brief Constructs a grid function printer base.
+       * @param[in] gf Grid function to print.
+       */
       GridFunctionPrinterBase(const ObjectType& gf)
         : m_gf(gf)
       {}
 
+      /**
+       * @brief Returns the grid function bound to this printer.
+       */
       const ObjectType& getObject() const override
       {
         return m_gf.get();

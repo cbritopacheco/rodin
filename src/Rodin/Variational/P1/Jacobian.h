@@ -36,6 +36,7 @@
 #include "Rodin/Variational/Mult.h"
 #include "Rodin/Math/Traits.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class Range, class Data, class Mesh>
@@ -44,8 +45,10 @@ namespace Rodin::FormLanguage
       Variational::GridFunction<
         Variational::P1<Range, Mesh>, Data>>>
   {
-    using FESType = Variational::P1<Range, Mesh>;
-    using OperandType = Variational::GridFunction<FESType, Data>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Range, Mesh>;
+    /// @brief Operand type.
+      using OperandType = Variational::GridFunction<FESType, Data>;
   };
 
   template <class NestedDerived, class Range, class Mesh, Variational::ShapeFunctionSpaceType Space>
@@ -53,9 +56,11 @@ namespace Rodin::FormLanguage
     Variational::Jacobian<
       Variational::ShapeFunction<NestedDerived, Variational::P1<Range, Mesh>, Space>>>
   {
-    using FESType = Variational::P1<Range, Mesh>;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
-    using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
+    /// @brief Finite element space type.
+      using FESType = Variational::P1<Range, Mesh>;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Operand type.
+      using OperandType = Variational::ShapeFunction<NestedDerived, FESType, Space>;
   };
 }
 
@@ -89,16 +94,21 @@ namespace Rodin::Variational
         Jacobian<GridFunction<P1<Math::SpatialVector<Scalar>, Mesh>, Data>>>
   {
     public:
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<Scalar>;
 
+      /// @brief Finite element space type.
       using FESType = P1<Math::SpatialVector<Scalar>, Mesh>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = GridFunction<FESType, Data>;
 
+      /// @brief Parent class type.
       using Parent = JacobianBase<OperandType, Jacobian<OperandType>>;
 
       Jacobian(const OperandType& u)
@@ -188,26 +198,26 @@ namespace Rodin::Variational
         const size_t vdim = fes.getVectorDimension();
 
         const auto geom = polytope.getGeometry();
-        const P1Element<ScalarType> fe_scalar(geom);
-        const size_t nv = fe_scalar.getCount();
+        const P1Element<ScalarType> feScalar(geom);
+        const size_t nv = feScalar.getCount();
 
         // Reference coordinates
         const auto& rc = p.getReferenceCoordinates();
 
         // Build the reference jacobian accumulator:
-        // G = Σ_v u(v) ⊗ ∇_hat φ_v   (vdim x d)
+        // G = Σ_v u(v) ⊗ \nabla_hat φ_v   (vdim x d)
         SpatialMatrixType G(vdim, d);
         G.setZero();
 
         // For each vertex basis (scalar), accumulate:
-        // for each component c: G(c, :) += u_c(v) * ∇_hat φ_v^T
+        // for each component c: G(c, :) += u_c(v) * \nabla_hat φ_v^T
         for (size_t v = 0; v < nv; ++v)
         {
-          // ∇_hat φ_v (size d)
+          // \nabla_hat φ_v (size d)
           // Avoid GradientFunction() to prevent extra vector construction.
           Math::SpatialVector<ScalarType> ghat(d);
           for (size_t k = 0; k < d; ++k)
-            ghat(k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+            ghat(k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
 
           // vertex value u(v) is stored in gf as vdim dofs at that vertex
           // local index = v*vdim + c
@@ -258,17 +268,22 @@ namespace Rodin::Variational
                   "Jacobian<P1> specialization is intended for vector-valued P1.");
 
     public:
+      /// @brief Finite element space type.
       using FESType = P1<Range, Mesh>;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
 
       using SpatialMatrixType = Math::SpatialMatrix<ScalarType>;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunction<ShapeFunctionDerived, FESType, SpaceType>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Jacobian<OperandType>, FESType, SpaceType>;
 
       struct Cache
@@ -404,6 +419,7 @@ namespace Rodin::Variational
         const auto   geom = poly.getGeometry();
 
         const int transOrder = poly.getTransformation().getOrder();
+        const auto* qf = ip.getQuadratureFormula();
 
         const auto& fes = this->getFiniteElementSpace();
         const size_t vdim = fes.getVectorDimension();
@@ -418,8 +434,8 @@ namespace Rodin::Variational
         ckey.vdim = vdim;
         ckey.valid = true;
 
-        const bool cell_changed = !(m_cache.cellKey == ckey);
-        if (cell_changed)
+        const bool cellChanged = !(m_cache.cellKey == ckey);
+        if (cellChanged)
         {
           m_cache.cellKey = ckey;
           m_cache.qpKey = {}; // invalidate qp cache
@@ -437,13 +453,13 @@ namespace Rodin::Variational
         }
 
         // ---- decide if qp needed
-        const bool needs_qp = (transOrder > 1) || isTensorGeom(geom);
+        const bool needsQp = (transOrder > 1) || isTensorGeom(geom);
 
         typename Cache::QpKey qkey;
-        if (needs_qp)
+        if (needsQp)
         {
-          qkey.qf = &ip.getQuadratureFormula();
-          qkey.qp = ip.getIndex();
+          qkey.qf = qf;
+          qkey.qp = qf ? ip.getIndex() : 0;
           qkey.valid = true;
         }
         else
@@ -453,19 +469,18 @@ namespace Rodin::Variational
           qkey.valid = true;
         }
 
-        const bool qp_changed = !(m_cache.qpKey == qkey);
-        if (cell_changed || qp_changed)
+        const bool qpChanged = !qf || !(m_cache.qpKey == qkey);
+        if (cellChanged || qpChanged)
         {
           m_cache.qpKey = qkey;
 
           // Scalar P1 element gives the scalar basis derivatives
-          const P1Element<ScalarType> fe_scalar(geom);
-          const size_t nv = fe_scalar.getCount();
+          const P1Element<ScalarType> feScalar(geom);
+          const size_t nv = feScalar.getCount();
 
-          // rc at this qp
-          const auto& qf = ip.getQuadratureFormula();
-          const size_t qp = ip.getIndex();
-          const auto& rc = qf.getPoint(qp);
+          // Reference coordinates at this sample.
+          const auto& rc =
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           // J^{-1} at this integration point
           const auto Jinv = pt.getJacobianInverse();
@@ -478,7 +493,7 @@ namespace Rodin::Variational
           {
             ghat[v].resize(d);
             for (size_t k = 0; k < d; ++k)
-              ghat[v](k) = fe_scalar.getBasis(v).template getDerivative<1>(k)(rc);
+              ghat[v](k) = feScalar.getBasis(v).template getDerivative<1>(k)(rc);
           }
 
           // Fill each vector basis Jacobian:
@@ -510,13 +525,11 @@ namespace Rodin::Variational
         return *this;
       }
 
-      auto getBasis(size_t local) const
+      const SpatialMatrixType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.jac.size());
-        return m_cache.jac[local].getData().topLeftCorner(
-          m_cache.cellKey.vdim,
-          m_cache.cellKey.d);
+        return m_cache.jac[local];
       }
 
       constexpr
@@ -544,4 +557,5 @@ namespace Rodin::Variational
     -> Jacobian<ShapeFunction<ShapeFunctionDerived, P1<Math::SpatialVector<Number>, Mesh>, Space>>;
 }
 
+/// @endcond
 #endif

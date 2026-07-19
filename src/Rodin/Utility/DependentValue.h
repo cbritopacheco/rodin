@@ -18,7 +18,7 @@ namespace Rodin::Utility
    * @brief Creates a type-dependent compile-time constant value.
    * @ingroup UtilityModule
    * @tparam T The type of the value.
-   * @tparam Value_ The compile-time constant value.
+   * @tparam ValueParam The compile-time constant value.
    * @tparam Args Dependent type parameters (unused, but create type dependency).
    *
    * DependentValue provides a way to create compile-time constants that
@@ -38,10 +38,10 @@ namespace Rodin::Utility
    * }
    * @endcode
    */
-  template <class T, T Value_, class ... Args>
+  template <class T, T ValueParam, class... Args>
   struct DependentValue
   {
-    static constexpr bool Value = Value_;  ///< The dependent value
+      static constexpr bool Value = ValueParam;  ///< The dependent value
   };
 }
 

@@ -49,10 +49,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for SparseLU solvers.
   template <class LinearSystem>
   struct Traits<Solver::SparseLU<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 

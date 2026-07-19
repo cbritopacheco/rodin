@@ -12,6 +12,7 @@ using namespace Rodin;
 using namespace Rodin::Geometry;
 using namespace Rodin::Variational;
 
+/// @brief Verifies L 2 exact match for variational relative error by checking tolerance-based numerical results.
 TEST(Rodin_Variational_RelativeError, L2_ExactMatch)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -24,6 +25,7 @@ TEST(Rodin_Variational_RelativeError, L2_ExactMatch)
   EXPECT_NEAR(err, 0.0, 1e-10);
 }
 
+/// @brief Verifies L 1 exact match for variational relative error by checking tolerance-based numerical results.
 TEST(Rodin_Variational_RelativeError, L1_ExactMatch)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -36,6 +38,7 @@ TEST(Rodin_Variational_RelativeError, L1_ExactMatch)
   EXPECT_NEAR(err, 0.0, 1e-10);
 }
 
+/// @brief Verifies L inf exact match for variational relative error by checking tolerance-based numerical results.
 TEST(Rodin_Variational_RelativeError, LInf_ExactMatch)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -48,6 +51,7 @@ TEST(Rodin_Variational_RelativeError, LInf_ExactMatch)
   EXPECT_NEAR(err, 0.0, 1e-10);
 }
 
+/// @brief Verifies compute with norm for variational relative error by checking tolerance-based numerical results.
 TEST(Rodin_Variational_RelativeError, Compute_WithNorm)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -60,6 +64,7 @@ TEST(Rodin_Variational_RelativeError, Compute_WithNorm)
   EXPECT_NEAR(err, 0.0, 1e-10);
 }
 
+/// @brief Verifies L 2 non zero error for variational relative error by checking tolerance-based numerical results.
 TEST(Rodin_Variational_RelativeError, L2_NonZeroError)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });

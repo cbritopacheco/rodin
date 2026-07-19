@@ -67,6 +67,7 @@
 #define RODIN_GETPID _getpid
 #else
 #include <unistd.h>
+/// @brief Compatibility macro used by MPI manufactured tests to query the current process id.
 #define RODIN_GETPID getpid
 #endif
 
@@ -758,6 +759,7 @@ namespace Rodin::Tests::Manufactured::PETSc::MPI
 // ---------------------------------------------------------------------------
 // main() — initializes MPI and PETSc before running all tests.
 // ---------------------------------------------------------------------------
+/// @brief Initializes the parallel test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);

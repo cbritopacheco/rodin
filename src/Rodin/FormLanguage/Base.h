@@ -36,7 +36,7 @@ namespace Rodin::FormLanguage
    *
    * ## Key Features
    * - **Unique Identification**: Each instance receives a unique UUID for tracking
- * - **Polymorphic Operations**: Support for copying and cloning operations
+   * - **Polymorphic Operations**: Support for copying and cloning operations
    */
   class Base : public Copyable, public Identifiable
   {

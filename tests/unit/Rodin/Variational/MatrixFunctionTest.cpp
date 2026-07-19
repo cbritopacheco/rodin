@@ -19,6 +19,7 @@ static Geometry::Point makePoint(Mesh<Context::Local>& mesh)
   return Geometry::Point(*it, rc);
 }
 
+/// @brief Verifies constant matrix for variational matrix function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_MatrixFunction, ConstantMatrix)
 {
   Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -36,6 +37,7 @@ TEST(Rodin_Variational_MatrixFunction, ConstantMatrix)
   EXPECT_DOUBLE_EQ(val(1, 1), 4.0);
 }
 
+/// @brief Verifies rows and columns for variational matrix function by checking exact expected values.
 TEST(Rodin_Variational_MatrixFunction, RowsAndColumns)
 {
   Math::Matrix<Real> m(3, 2);
@@ -46,6 +48,7 @@ TEST(Rodin_Variational_MatrixFunction, RowsAndColumns)
   EXPECT_EQ(mf.getColumns(), 2u);
 }
 
+/// @brief Verifies copy for variational matrix function by checking tolerance-based numerical results, copy semantics.
 TEST(Rodin_Variational_MatrixFunction, Copy)
 {
   Math::Matrix<Real> m(2, 2);
@@ -66,6 +69,7 @@ TEST(Rodin_Variational_MatrixFunction, Copy)
   delete mfCopy;
 }
 
+/// @brief Verifies get order for variational matrix function by checking exact expected values, true predicates.
 TEST(Rodin_Variational_MatrixFunction, GetOrder)
 {
   Math::Matrix<Real> m(2, 2);
@@ -81,6 +85,7 @@ TEST(Rodin_Variational_MatrixFunction, GetOrder)
   EXPECT_EQ(order.value(), 0u);
 }
 
+/// @brief Verifies identity matrix 2 x 2 for variational matrix function by checking tolerance-based numerical results.
 TEST(Rodin_Variational_MatrixFunction, IdentityMatrix2x2)
 {
   Math::Matrix<Real> m(2, 2);

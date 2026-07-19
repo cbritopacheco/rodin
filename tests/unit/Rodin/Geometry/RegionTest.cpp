@@ -16,6 +16,7 @@ namespace Rodin::Tests::Unit
   // Region Enum Tests
   // ============================================================================
 
+  /// @brief Test that enum values are distinct.
   TEST(Geometry_Region, EnumValues)
   {
     // Test that enum values are distinct
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(static_cast<int>(Region::Boundary), static_cast<int>(Region::Interface));
   }
 
+  /// @brief Verifies assignment and comparison for geometry region by checking exact expected values.
   TEST(Geometry_Region, AssignmentAndComparison)
   {
     Region r1 = Region::Cells;
@@ -37,6 +39,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NE(r1, r3);
   }
 
+  /// @brief Test that all enum values can be assigned.
   TEST(Geometry_Region, AllValuesAccessible)
   {
     // Test that all enum values can be assigned

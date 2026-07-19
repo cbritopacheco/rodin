@@ -20,6 +20,7 @@ namespace Rodin::Tests::Unit
   // with only the boundary faces (like a "box" surface)
   // ==================================================================
 
+  /// @brief Box with segment faces in 2D space.
   TEST(Geometry_MeshBox, Segment_2Nodes)
   {
     // Box with segment faces in 2D space
@@ -28,6 +29,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Verifies segment 4 x 4 nodes for geometry mesh box by checking exact expected values.
   TEST(Geometry_MeshBox, Segment_4x4Nodes)
   {
     auto mesh = LocalMesh::Box(Polytope::Type::Segment, {4, 4});
@@ -35,6 +37,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Box with triangular faces in 3D space.
   TEST(Geometry_MeshBox, Triangle_3Nodes)
   {
     // Box with triangular faces in 3D space
@@ -43,6 +46,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Box with quad faces in 3D space.
   TEST(Geometry_MeshBox, Quadrilateral_3Nodes)
   {
     // Box with quad faces in 3D space
@@ -51,6 +55,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getCellCount(), 0);
   }
 
+  /// @brief Box with point faces in 1D space (just two endpoints).
   TEST(Geometry_MeshBox, Point_2Nodes)
   {
     // Box with point faces in 1D space (just two endpoints)
@@ -59,6 +64,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(mesh.getVertexCount(), 0);
   }
 
+  /// @brief Verifies box 2 D coordinates positive for geometry mesh box.
   TEST(Geometry_MeshBox, Box2D_CoordinatesPositive)
   {
     auto mesh = LocalMesh::Box(Polytope::Type::Segment, {4, 4});
@@ -70,6 +76,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies box 3 D coordinates positive for geometry mesh box.
   TEST(Geometry_MeshBox, Box3D_CoordinatesPositive)
   {
     auto mesh = LocalMesh::Box(Polytope::Type::Triangle, {2, 2, 2});
@@ -86,6 +93,7 @@ namespace Rodin::Tests::Unit
   // Mesh::ccl tests (connected component labeling)
   // ==================================================================
 
+  /// @brief Verifies CCL single component for geometry mesh ops by checking exact expected values.
   TEST(Geometry_MeshOps, CCL_SingleComponent)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -99,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(components[0].size(), mesh.getCellCount());
   }
 
+  /// @brief Verifies CCL with predicates for geometry mesh ops by checking exact expected values.
   TEST(Geometry_MeshOps, CCL_WithPredicates)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -114,6 +123,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.getComponents().size(), 1);
   }
 
+  /// @brief Verifies CCL exclude all for geometry mesh ops by checking exact expected values.
   TEST(Geometry_MeshOps, CCL_ExcludeAll)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -129,6 +139,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(result.getComponents().size(), 0);
   }
 
+  /// @brief Verifies CCL disconnect by predicate for geometry mesh ops by checking exact expected values.
   TEST(Geometry_MeshOps, CCL_DisconnectByPredicate)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -147,6 +158,7 @@ namespace Rodin::Tests::Unit
   // Mesh::trace tests
   // ==================================================================
 
+  /// @brief Verifies trace modifies mesh for geometry mesh ops.
   TEST(Geometry_MeshOps, Trace_ModifiesMesh)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -176,6 +188,7 @@ namespace Rodin::Tests::Unit
   // Mesh::isSurface tests
   // ==================================================================
 
+  /// @brief Verifies is surface 2 D mesh for geometry mesh ops by checking false predicates.
   TEST(Geometry_MeshOps, IsSurface_2DMesh)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -183,6 +196,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(mesh.isSurface());
   }
 
+  /// @brief Verifies is surface boundary for geometry mesh ops by checking true predicates.
   TEST(Geometry_MeshOps, IsSurface_Boundary)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -196,6 +210,7 @@ namespace Rodin::Tests::Unit
   // Mesh::getPolytope tests
   // ==================================================================
 
+  /// @brief Verifies get polytope cell for geometry mesh ops by checking exact expected values, false predicates.
   TEST(Geometry_MeshOps, GetPolytope_Cell)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -204,6 +219,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(it->getDimension(), mesh.getDimension());
   }
 
+  /// @brief Verifies get polytope vertex for geometry mesh ops by checking exact expected values, false predicates.
   TEST(Geometry_MeshOps, GetPolytope_Vertex)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});

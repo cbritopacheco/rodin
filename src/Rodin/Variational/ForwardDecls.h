@@ -28,6 +28,7 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -41,6 +42,19 @@ namespace Rodin::Variational
   {
     Trial, ///< Indicates that the shape function belongs to a trial space.
     Test ///< Indicates that the shape function belongs to a test space.
+  };
+
+  /**
+   * @brief Target for partial problem assembly.
+   *
+   * The default zero-argument Problem::assemble() assembles the full linear
+   * system. This target selects one side of the system for backends that can
+   * assemble the operator and vector independently.
+   */
+  enum class AssemblyTarget
+  {
+    LHS, ///< Assemble the left-hand-side operator only.
+    RHS  ///< Assemble the right-hand-side vector only.
   };
 
   /**
@@ -176,7 +190,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * VectorFunction class, please see @ref VectorFunctionSpecializations.
+   * VectorFunction class, please see `Vec`torFunctionSpecializations.
    *
    * @see VectorFunctionSpecializations
    */
@@ -191,7 +205,7 @@ namespace Rodin::Variational
 
   /**
    * @note For an overview of all the possible specializations of the
-   * MatrixFunction class, please see @ref MatrixFunctionSpecializations.
+   * MatrixFunction class, please see `Mat`rixFunctionSpecializations.
    *
    * @see MatrixFunctionSpecializations
    */
@@ -1103,4 +1117,5 @@ namespace Rodin::Variational
   > class Flow;
 }
 
+/// @endcond
 #endif

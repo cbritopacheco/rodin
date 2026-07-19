@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function two values for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, RealFunction_TwoValues)
   {
     RealFunction f1(3.0);
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Verifies real function equal values for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, RealFunction_EqualValues)
   {
     RealFunction f1(5.0);
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies real function negative values for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, RealFunction_NegativeValues)
   {
     RealFunction f1(-2.0);
@@ -59,6 +62,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), -8.0, 1e-10);
   }
 
+  /// @brief Verifies real function mixed signs for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, RealFunction_MixedSigns)
   {
     RealFunction f1(-3.0);
@@ -75,6 +79,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), -3.0, 1e-10);
   }
 
+  /// @brief Verifies real function with zero for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, RealFunction_WithZero)
   {
     RealFunction f1(0.0);
@@ -91,6 +96,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function small values for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, RealFunction_SmallValues)
   {
     RealFunction f1(1e-6);
@@ -107,6 +113,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 1e-6, 1e-16);
   }
 
+  /// @brief Verifies grid function minimum for variational min by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Min, GridFunction_Minimum)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -131,6 +138,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies chained minimum for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, ChainedMinimum)
   {
     RealFunction f1(10.0);
@@ -148,6 +156,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies commutativity for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, Commutativity)
   {
     RealFunction f1(8.0);
@@ -167,6 +176,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min1.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Verifies associativity for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, Associativity)
   {
     RealFunction f1(6.0);
@@ -187,6 +197,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min1.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies idempotence for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, Idempotence)
   {
     RealFunction f(12.0);
@@ -203,6 +214,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 12.0, 1e-10);
   }
 
+  /// @brief Verifies large values for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, LargeValues)
   {
     RealFunction f1(1e6);
@@ -219,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 1e6, 1e-3);
   }
 
+  /// @brief Verifies min with operations for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, MinWithOperations)
   {
     RealFunction f1(4.0);
@@ -238,6 +251,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 6.0, 1e-10);
   }
 
+  /// @brief Verifies min monotonicity for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, MinMonotonicity)
   {
     RealFunction f1(3.0);
@@ -260,6 +274,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min2.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies min with absolute value for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, MinWithAbsoluteValue)
   {
     RealFunction f1(-5.0);
@@ -278,6 +293,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(min_result.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Verifies fractional values for variational min by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Min, FractionalValues)
   {
     RealFunction f1(0.3);

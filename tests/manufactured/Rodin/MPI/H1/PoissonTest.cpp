@@ -14,7 +14,7 @@
  *
  * Geometries:
  *   2D — Triangle, Quadrilateral
- *   3D — Tetrahedron, Hexahedron, Wedge
+ *   3D — Tetrahedron, Hexahedron, Pyramid, Wedge
  *
  * Each GTest parametrization is invoked by CTest with
  * MPIEXEC_NUMPROC_FLAG set to 1, 2, 3, 4, and 6 ranks.
@@ -35,7 +35,7 @@
  *
  * **Workflow 3 — UniformGrid → Reconcile → Assemble → Solve**
  * Every rank constructs its portion of the mesh independently via
- * `Mesh<Context::MPI>::UniformGrid()`, which builds ghost layers and
+ * the distributed uniform-grid factory, which builds ghost layers and
  * ownership information without any inter-rank communication beyond what the
  * constructor already performs.  Connectivity and reconciliation are then
  * applied before assembly.
@@ -84,6 +84,7 @@
 #  define RODIN_GETPID _getpid
 #else
 #  include <unistd.h>
+/// @brief Compatibility macro used by MPI manufactured tests to query the current process id.
 #  define RODIN_GETPID getpid
 #endif
 
@@ -127,8 +128,8 @@ namespace
    *
    * This helper is shared by all three mesh construction workflows.  It
    * assumes that cell-vertex connectivity (@f$ D \to 0 @f$) is already
-   * present (which is true after shard-gather, HDF5 reload, and
-   * `Mesh<Context::MPI>::UniformGrid`).
+   * present (which is true after shard-gather, HDF5 reload, and direct
+   * distributed grid construction).
    *
    * For 3D meshes the edge chain (@f$ D \to 1 @f$, @f$ D-1 \to 1 @f$,
    * @f$ 1 \to 0 @f$) is computed in addition to the facet chain, and both
@@ -175,7 +176,6 @@ namespace
       Mesh<Context::MPI>&& mesh)
   {
     const auto& comm = ctx.getCommunicator();
-    const size_t D = mesh.getDimension();
 
     const boost::filesystem::path rankFile =
         boost::filesystem::temp_directory_path()
@@ -275,8 +275,8 @@ namespace
   /**
    * @brief **Workflow 3** — UniformGrid → Reconcile → Assemble → Solve.
    *
-   * All ranks construct their portion of the mesh independently via
-   * `Mesh<Context::MPI>::UniformGrid()`, which builds ghost layers and
+   * All ranks construct their portion of the mesh independently via the
+   * distributed uniform-grid factory, which builds ghost layers and
    * ownership information without a rank-0-centric sharding step.
    * Connectivity and reconciliation are applied before assembly.
    */
@@ -439,6 +439,9 @@ namespace
         case Polytope::Type::Quadrilateral: g = "Quadrilateral"; break;
         case Polytope::Type::Tetrahedron:   g = "Tetrahedron";   break;
         case Polytope::Type::Hexahedron:    g = "Hexahedron";    break;
+        case Polytope::Type::Pyramid:
+          g = "Pyramid";
+          break;
         case Polytope::Type::Wedge:         g = "Wedge";         break;
         default:                            g = "Unknown";        break;
       }
@@ -452,6 +455,7 @@ namespace
 // ---------------------------------------------------------------------------
 namespace Rodin::Tests::Manufactured::MPI::H1Poisson
 {
+  /// @brief Helper used by the tests to Param.
   using Param = std::tuple<Polytope::Type, size_t>;
 
   // =========================================================================
@@ -482,6 +486,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
         << " K=" << K;
   }
 
+  /// @brief Instantiates H1 Poisson 2 D Workflow 1 over the All Geometries And Degrees parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
     H1Poisson2D_Workflow1,
@@ -516,18 +521,13 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
         << " K=" << K;
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1Poisson3D_Workflow1,
+  /// @brief Instantiates H1 Poisson 3 D Workflow 1 over the All Geometries And Degrees parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1Poisson3D_Workflow1,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)),
+    ParamName{});
 
   // =========================================================================
   // Workflow 2 — Construct → Shard → Distribute → Reconcile → Assemble → Solve
@@ -557,6 +557,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
         << " K=" << K;
   }
 
+  /// @brief Instantiates H1 Poisson 2 D Workflow 2 over the All Geometries And Degrees parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
     H1Poisson2D_Workflow2,
@@ -591,18 +592,13 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
         << " K=" << K;
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1Poisson3D_Workflow2,
+  /// @brief Instantiates H1 Poisson 3 D Workflow 2 over the All Geometries And Degrees parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1Poisson3D_Workflow2,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)),
+    ParamName{});
 
   // =========================================================================
   // Workflow 3 — UniformGrid → Reconcile → Assemble → Solve
@@ -611,10 +607,10 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
   class H1Poisson2D_Workflow3 : public ::testing::TestWithParam<Param> {};
 
   /**
-   * @brief Workflow 3 — 2D Poisson built via distributed `UniformGrid`.
+   * @brief Workflow 3 — 2D Poisson built via distributed uniform grids.
    *
-   * Mesh: 16×16 grid constructed directly on all ranks via
-   * `Mesh<Context::MPI>::UniformGrid()`, then reconciled.
+   * Mesh: 16×16 grid constructed directly on all ranks via the distributed
+   * uniform-grid factory, then reconciled.
    * Solution: sin(πx)sin(πy).
    * Tolerance: @ref RODIN_FUZZY_CONSTANT.
    */
@@ -633,6 +629,7 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
         << " K=" << K;
   }
 
+  /// @brief Instantiates H1 Poisson 2 D Workflow 3 over the All Geometries And Degrees parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     AllGeometriesAndDegrees,
     H1Poisson2D_Workflow3,
@@ -646,10 +643,10 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
   class H1Poisson3D_Workflow3 : public ::testing::TestWithParam<Param> {};
 
   /**
-   * @brief Workflow 3 — 3D Poisson built via distributed `UniformGrid`.
+   * @brief Workflow 3 — 3D Poisson built via distributed uniform grids.
    *
-   * Mesh: 5×5×5 grid constructed directly on all ranks via
-   * `Mesh<Context::MPI>::UniformGrid()`, then reconciled.
+   * Mesh: 5×5×5 grid constructed directly on all ranks via the distributed
+   * uniform-grid factory, then reconciled.
    * Solution: x(1−x)y(1−y)z(1−z).
    * Tolerance: 10 × @ref RODIN_FUZZY_CONSTANT.
    */
@@ -668,23 +665,19 @@ namespace Rodin::Tests::Manufactured::MPI::H1Poisson
         << " K=" << K;
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    AllGeometriesAndDegrees,
-    H1Poisson3D_Workflow3,
+  /// @brief Instantiates H1 Poisson 3 D Workflow 3 over the All Geometries And Degrees parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllGeometriesAndDegrees, H1Poisson3D_Workflow3,
     testing::Combine(
-      testing::Values(
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      testing::Values<size_t>(1, 2, 3, 4, 6)
-    ),
-    ParamName{}
-  );
+      testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+        Polytope::Type::Pyramid, Polytope::Type::Wedge),
+      testing::Values<size_t>(1, 2, 3, 4, 6)),
+    ParamName{});
 } // namespace Rodin::Tests::Manufactured::MPI::H1Poisson
 
 // ---------------------------------------------------------------------------
 // main() — initializes MPI and PETSc before running all tests.
 // ---------------------------------------------------------------------------
+/// @brief Initializes the parallel test runtime and runs the GoogleTest suite.
 int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);

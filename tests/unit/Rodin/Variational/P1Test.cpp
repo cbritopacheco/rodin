@@ -12,6 +12,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies sanity test 2 D square build for variational real P1 by checking exact expected values.
   TEST(Rodin_Variational_Real_P1, SanityTest_2D_Square_Build)
   {
     constexpr size_t vdim = 1;
@@ -43,6 +44,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Type::Triangle);
   }
 
+  /// @brief Verifies sanity test 2 D square project sum for variational real P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Real_P1_GridFunction, SanityTest_2D_Square_Project_Sum)
   {
     constexpr size_t mdim = 2;
@@ -71,6 +73,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(gf[3], 2, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies triangular uniform grid 16 project on boundary constant for variational real P1 grid function fuzzy test by checking grid-function projection.
   TEST(Rodin_Variational_Real_P1_GridFunction_FuzzyTest, TriangularUniformGrid16_ProjectOnBoundary_Constant)
   {
     constexpr size_t mdim = 2;
@@ -86,6 +89,7 @@ namespace Rodin::Tests::Unit
     gf.project(Region::Boundary, c);
   }
 
+  /// @brief Verifies fuzzy test triangular uniform grid 16 project on boundary sum for variational real P1 grid function by checking grid-function projection.
   TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_TriangularUniformGrid16_ProjectOnBoundary_Sum)
   {
     constexpr size_t mdim = 2;
@@ -101,6 +105,7 @@ namespace Rodin::Tests::Unit
     gf.project(Region::Boundary, c);
   }
 
+  /// @brief Verifies fuzzy test 2 D square project linear function for variational real P1 grid function by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Real_P1_GridFunction, FuzzyTest_2D_Square_Project_LinearFunction)
   {
     constexpr size_t mdim = 2;
@@ -221,6 +226,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies sanity test 2 D square build for variational vector P1 by checking exact expected values.
   TEST(Rodin_Variational_Vector_P1, SanityTest_2D_Square_Build)
   {
     constexpr size_t sdim = 2;
@@ -250,6 +256,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(fes.getFiniteElement(mdim, 1).getGeometry(), Polytope::Type::Triangle);
   }
 
+  /// @brief Verifies fuzzy test 2 D square project for variational vector P1 grid function by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Vector_P1_GridFunction, FuzzyTest_2D_Square_Project)
   {
     constexpr size_t mdim = 2;
@@ -374,6 +381,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies fuzzy test uniform grid 4 x 4 for variational real P1 trial function.
   TEST(Rodin_Variational_Real_P1_TrialFunction, FuzzyTest_UniformGrid_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -381,6 +389,7 @@ namespace Rodin::Tests::Unit
     TrialFunction u(fes);
   }
 
+  /// @brief Verifies fuzzy test uniform grid 4 x 4 for variational real P1 test function.
   TEST(Rodin_Variational_Real_P1_TestFunction, FuzzyTest_UniformGrid_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -388,7 +397,7 @@ namespace Rodin::Tests::Unit
     TrialFunction v(fes);
   }
 
-
+  /// @brief Verifies fuzzy test uniform grid 4 x 4 for variational real P1 linear form by checking form assembly.
   TEST(Rodin_Variational_Real_P1_LinearForm, FuzzyTest_UniformGrid_4x4)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });

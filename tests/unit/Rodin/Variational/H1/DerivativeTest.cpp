@@ -10,6 +10,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies grid function construction for variational H1 derivative by checking exact expected values.
   TEST(Rodin_Variational_H1_Derivative, GridFunction_Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -27,6 +28,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&dy_gf.getOperand(), &gf);
   }
 
+  /// @brief Verifies grid function constant function for variational H1 derivative by checking tolerance-based numerical results.
   TEST(Rodin_Variational_H1_Derivative, GridFunction_ConstantFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -50,6 +52,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dy_gf.getValue(p), 0.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function linear function for variational H1 derivative by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Derivative, GridFunction_LinearFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });
@@ -77,6 +80,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dy_gf.getValue(p), 4.0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies grid function quadratic function for variational H1 derivative by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Derivative, GridFunction_QuadraticFunction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 8, 8 });
@@ -108,6 +112,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(dy_gf.getValue(p), 2.0 * x, 1e-4);
   }
 
+  /// @brief Verifies grid function copy for variational H1 derivative by checking exact expected values, copy semantics.
   TEST(Rodin_Variational_H1_Derivative, GridFunction_Copy)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -124,6 +129,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(&copied.getOperand(), &gf);
   }
 
+  /// @brief Verifies grid function get order for variational H1 derivative by checking exact expected values, true predicates.
   TEST(Rodin_Variational_H1_Derivative, GridFunction_GetOrder)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 2, 2 });
@@ -145,6 +151,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(*order, 1);
   }
 
+  /// @brief Verifies dx dy consistent with grad for variational H1 derivative by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_H1_Derivative, DxDyConsistentWithGrad)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 4, 4 });

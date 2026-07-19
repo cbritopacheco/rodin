@@ -75,9 +75,13 @@ namespace Rodin::Solid
         m_logJ = 0.0;
       }
 
+      /// @brief Copy constructor.
       KinematicState(const KinematicState&) = default;
+      /// @brief Move constructor.
       KinematicState(KinematicState&&) = default;
+      /// @brief Copy assignment operator.
       KinematicState& operator=(const KinematicState&) = default;
+      /// @brief Move assignment operator.
       KinematicState& operator=(KinematicState&&) = default;
 
       /**

@@ -4,7 +4,16 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Poisson manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Poisson manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
+#include <cmath>
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
@@ -20,6 +29,46 @@ using namespace Rodin::Solver;
 
 namespace Rodin::Tests::Manufactured::H1Poisson
 {
+  namespace
+  {
+    constexpr Real BoundaryTolerance = 1e-12;
+    constexpr Attribute LeftAttribute = 1;
+    constexpr Attribute RightAttribute = 2;
+    constexpr Attribute BottomAttribute = 3;
+    constexpr Attribute TopAttribute = 4;
+
+    void labelBoundaryAttributes(Geometry::Mesh<Context::Local>& mesh,
+      Attribute left = LeftAttribute, Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute, Attribute top = TopAttribute)
+    {
+      for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      {
+        Real x = 0;
+        Real y = 0;
+        size_t count = 0;
+        for (const auto vertex : it->getVertices())
+        {
+          const auto coords = mesh.getVertexCoordinates(vertex);
+          x += coords(0);
+          y += coords(1);
+          count++;
+        }
+
+        x /= count;
+        y /= count;
+
+        if (std::abs(x) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), left);
+        else if (std::abs(x - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), right);
+        else if (std::abs(y) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), bottom);
+        else if (std::abs(y - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), top);
+      }
+    }
+  }
+
   template <size_t M>
   class Manufactured_Poisson_H1_Test : public ::testing::TestWithParam<Polytope::Type>
   {
@@ -36,15 +85,19 @@ namespace Rodin::Tests::Manufactured::H1Poisson
       }
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Poisson H1 Test 16 x 16.
   using Manufactured_Poisson_H1_Test_16x16 =
     Rodin::Tests::Manufactured::H1Poisson::Manufactured_Poisson_H1_Test<16>;
 
+  /// @brief Helper used by the manufactured tests to Manufactured Poisson H1 Test 32 x 32.
   using Manufactured_Poisson_H1_Test_32x32 =
     Rodin::Tests::Manufactured::H1Poisson::Manufactured_Poisson_H1_Test<32>;
 
+  /// @brief Helper used by the manufactured tests to Manufactured Poisson H1 Test 64 x 64.
   using Manufactured_Poisson_H1_Test_64x64 =
     Rodin::Tests::Manufactured::H1Poisson::Manufactured_Poisson_H1_Test<64>;
 
+  /// @brief Verifies poisson P1 exact residual H1 for manufactured poisson H1 test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_P1ExactResidual_H1)
   {
     Mesh mesh = this->getMesh();
@@ -82,6 +135,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     EXPECT_NEAR(Integral(diff).compute(), 0, 1e-12);
   }
 
+  /// @brief Verifies poisson simple sine H1 2 for manufactured poisson H1 test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_SimpleSine_H1_2)
   {
     auto pi = Rodin::Math::Constants::pi();
@@ -112,6 +166,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies poisson nonhomogeneous dirichlet H1 2 for manufactured poisson H1 test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_NonhomogeneousDirichlet_H1_2)
   {
     auto pi = Rodin::Math::Constants::pi();
@@ -141,6 +196,39 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies poisson nonhomogeneous dirichlet H1 2 labeled boundary for manufactured poisson H1 test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
+  TEST_P(Manufactured_Poisson_H1_Test_16x16,
+    Poisson_NonhomogeneousDirichlet_H1_2_LabeledBoundary)
+  {
+    auto pi = Rodin::Math::Constants::pi();
+
+    Mesh mesh = this->getMesh();
+    labelBoundaryAttributes(mesh);
+
+    constexpr auto order = std::integral_constant<size_t, 2>{};
+
+    H1 vh(order, mesh);
+
+    TrialFunction u(vh);
+    TestFunction v(vh);
+
+    const auto solution = cos(pi * F::x) * cos(pi * F::y);
+    const auto f = 2 * pi * pi * solution;
+
+    Problem poisson(u, v);
+    poisson = Integral(Grad(u), Grad(v)) - Integral(f, v) +
+      DirichletBC(u, solution)
+        .on(LeftAttribute, RightAttribute, BottomAttribute, TopAttribute);
+    CG(poisson).solve();
+
+    GridFunction diff(vh);
+    diff = Pow(u.getSolution() - solution, 2);
+
+    const Real error = Integral(diff).compute();
+    EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
+  }
+
+  /// @brief Verifies poisson simple sine H1 3 for manufactured poisson H1 test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_H1_Test_16x16, Poisson_SimpleSine_H1_3)
   {
     auto pi = Rodin::Math::Constants::pi();
@@ -171,6 +259,7 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies poisson nonhomogeneous dirichlet H1 3 for manufactured poisson H1 test 64 x 64 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_Poisson_H1_Test_64x64, Poisson_NonhomogeneousDirichlet_H1_3)
   {
     auto pi = Rodin::Math::Constants::pi();
@@ -200,12 +289,14 @@ namespace Rodin::Tests::Manufactured::H1Poisson
     EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Instantiates Manufactured Poisson H1 Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Manufactured_Poisson_H1_Test_16x16,
     ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Poisson H1 Test 64 x 64 over the Mesh Params 64 x 64 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
     Manufactured_Poisson_H1_Test_64x64,

@@ -39,6 +39,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Basic sharding produces the correct number of shards.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies basic sharding triangle mesh 2 parts for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, BasicSharding_TriangleMesh_2Parts)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -65,6 +66,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Every parent cell is owned by exactly one shard.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies every cell owned by exactly one shard for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, EveryCellOwnedByExactlyOneShard)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -105,6 +107,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Every parent vertex appears in at least one shard.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies every vertex present for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, EveryVertexPresent)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {3, 3});
@@ -133,6 +136,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Every vertex is owned by exactly one shard.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies every vertex owned by exactly one shard for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, EveryVertexOwnedByExactlyOneShard)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -169,6 +173,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Ghost cells belong to a neighboring partition.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies ghost cells are neighbors for geometry sharder by checking true predicates.
   TEST(Rodin_Geometry_Sharder, GhostCellsAreNeighbors)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -228,6 +233,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Owner map points to a valid partition for non-owned entities.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies owner map consistency for geometry sharder.
   TEST(Rodin_Geometry_Sharder, OwnerMapConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -266,6 +272,7 @@ namespace Rodin::Tests::Unit
   // is present in those remote shards.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies halo map consistency for geometry sharder by checking true predicates.
   TEST(Rodin_Geometry_Sharder, HaloMapConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -321,6 +328,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — PolytopeMap is bidirectionally consistent in every shard.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies polytope map consistency for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, PolytopeMapConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {3, 3});
@@ -361,6 +369,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Quadrilateral mesh sharding works.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies quadrilateral mesh for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, QuadrilateralMesh)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Quadrilateral, {4, 4});
@@ -397,6 +406,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — Multiple partition counts (2, 3, 4).
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies multiple partition counts for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, MultiplePartitionCounts)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {6, 6});
@@ -433,6 +443,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — isLocal == (isOwned || isShared) for all entities.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies is local consistency for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, IsLocalConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Triangle, {4, 4});
@@ -477,6 +488,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — getContext() returns the context passed at construction.
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies get context for geometry sharder.
   TEST(Rodin_Geometry_Sharder, GetContext)
   {
     Context::Local ctx;
@@ -490,6 +502,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — 1D Segment mesh sharding
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies segment mesh basic sharding for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, SegmentMesh_BasicSharding)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Segment, {8});
@@ -533,6 +546,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(seenVerts.size(), mesh.getVertexCount());
   }
 
+  /// @brief Verifies segment mesh is local consistency for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, SegmentMesh_IsLocalConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Segment, {10});
@@ -569,6 +583,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — 3D Tetrahedron mesh sharding
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies tetrahedron mesh basic sharding for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, TetrahedronMesh_BasicSharding)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -592,6 +607,7 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies tetrahedron mesh cell ownership uniqueness for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, TetrahedronMesh_CellOwnershipUniqueness)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -620,6 +636,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
   }
 
+  /// @brief Verifies tetrahedron mesh ghost cells are neighbors for geometry sharder by checking true predicates.
   TEST(Rodin_Geometry_Sharder, TetrahedronMesh_GhostCellsAreNeighbors)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Tetrahedron, {3, 3, 3});
@@ -672,6 +689,7 @@ namespace Rodin::Tests::Unit
   // SharderBase — 3D Hexahedron mesh sharding
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies hexahedron mesh basic sharding for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, HexahedronMesh_BasicSharding)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Hexahedron, {3, 3, 3});
@@ -704,6 +722,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
   }
 
+  /// @brief Verifies hexahedron mesh owner map consistency for geometry sharder.
   TEST(Rodin_Geometry_Sharder, HexahedronMesh_OwnerMapConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Hexahedron, {3, 3, 3});
@@ -734,9 +753,85 @@ namespace Rodin::Tests::Unit
   }
 
   // ---------------------------------------------------------------------------
+  // SharderBase — 3D Pyramid mesh sharding
+  // ---------------------------------------------------------------------------
+
+  /// @brief Verifies pyramid mesh basic sharding for geometry sharder by checking exact expected values, true predicates.
+  TEST(Rodin_Geometry_Sharder, PyramidMesh_BasicSharding)
+  {
+    auto mesh = makeShardableMesh(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+    EXPECT_EQ(D, 3u);
+
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(2);
+
+    Context::Local ctx;
+    SharderBase<Context::Local> sharder(ctx);
+    sharder.shard(partitioner);
+
+    const auto& shards = sharder.getShards();
+    EXPECT_EQ(shards.size(), 2u);
+
+    std::set<Index> ownedCells;
+    for (const auto& shard : shards)
+    {
+      const auto& cmap = shard.getPolytopeMap(D);
+      for (Index ci = 0; ci < shard.getCellCount(); ci++)
+      {
+        if (shard.isOwned(D, ci))
+        {
+          auto [it, ins] = ownedCells.insert(cmap.left[ci]);
+          EXPECT_TRUE(ins);
+        }
+      }
+    }
+    EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
+  }
+
+  /// @brief Verifies pyramid mesh halo map consistency for geometry sharder by checking true predicates.
+  TEST(Rodin_Geometry_Sharder, PyramidMesh_HaloMapConsistency)
+  {
+    auto mesh = makeShardableMesh(Polytope::Type::Pyramid, {3, 3, 3});
+    const size_t D = mesh.getDimension();
+
+    BalancedCompactPartitioner partitioner(mesh);
+    partitioner.partition(2);
+
+    Context::Local ctx;
+    SharderBase<Context::Local> sharder(ctx);
+    sharder.shard(partitioner);
+
+    const auto& shards = sharder.getShards();
+
+    for (size_t si = 0; si < shards.size(); si++)
+    {
+      const auto& shard = shards[si];
+      for (size_t d = 0; d <= D; d++)
+      {
+        const auto& haloMap = shard.getHalo(d);
+        const auto& pmap = shard.getPolytopeMap(d);
+        for (const auto& [localIdx, remoteRanks] : haloMap)
+        {
+          EXPECT_TRUE(shard.isOwned(d, localIdx));
+          Index parentIdx = pmap.left[localIdx];
+          for (const Index remoteRank : remoteRanks)
+          {
+            EXPECT_LT(remoteRank, shards.size());
+            EXPECT_NE(remoteRank, si);
+            const auto& remotePmap = shards[remoteRank].getPolytopeMap(d);
+            EXPECT_NE(remotePmap.right.find(parentIdx), remotePmap.right.end());
+          }
+        }
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // SharderBase — 3D Wedge mesh sharding
   // ---------------------------------------------------------------------------
 
+  /// @brief Verifies wedge mesh basic sharding for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, WedgeMesh_BasicSharding)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Wedge, {3, 3, 3});
@@ -769,6 +864,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
   }
 
+  /// @brief Verifies wedge mesh halo map consistency for geometry sharder by checking true predicates.
   TEST(Rodin_Geometry_Sharder, WedgeMesh_HaloMapConsistency)
   {
     auto mesh = makeShardableMesh(Polytope::Type::Wedge, {3, 3, 3});
@@ -843,6 +939,7 @@ namespace Rodin::Tests::Unit
     return mesh;
   }
 
+  /// @brief Verifies mixed 2 D basic sharding for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, Mixed2D_BasicSharding)
   {
     auto mesh = makeMixed2DMesh();
@@ -875,6 +972,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
   }
 
+  /// @brief Verifies mixed 2 D vertex ownership uniqueness for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, Mixed2D_VertexOwnershipUniqueness)
   {
     auto mesh = makeMixed2DMesh();
@@ -902,6 +1000,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedVerts.size(), mesh.getVertexCount());
   }
 
+  /// @brief Verifies mixed 2 D polytope map consistency for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, Mixed2D_PolytopeMapConsistency)
   {
     auto mesh = makeMixed2DMesh();
@@ -964,6 +1063,7 @@ namespace Rodin::Tests::Unit
     return mesh;
   }
 
+  /// @brief Verifies mixed 3 D basic sharding for geometry sharder by checking exact expected values, true predicates.
   TEST(Rodin_Geometry_Sharder, Mixed3D_BasicSharding)
   {
     auto mesh = makeMixed3DMesh();
@@ -997,6 +1097,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(ownedCells.size(), mesh.getCellCount());
   }
 
+  /// @brief Verifies mixed 3 D vertex coverage for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, Mixed3D_VertexCoverage)
   {
     auto mesh = makeMixed3DMesh();
@@ -1018,6 +1119,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(seenVerts.size(), mesh.getVertexCount());
   }
 
+  /// @brief Verifies mixed 3 D is local consistency for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, Mixed3D_IsLocalConsistency)
   {
     auto mesh = makeMixed3DMesh();
@@ -1098,6 +1200,7 @@ namespace Rodin::Tests::Unit
     return mesh;
   }
 
+  /// @brief Verifies larger mixed 2 D multiple partitions for geometry sharder by checking exact expected values.
   TEST(Rodin_Geometry_Sharder, LargerMixed2D_MultiplePartitions)
   {
     auto mesh = makeLargerMixed2DMesh();
@@ -1135,12 +1238,12 @@ namespace Rodin::Tests::Unit
   // SharderBase — 3D mesh with multiple partitions across types
   // ---------------------------------------------------------------------------
 
+  /// @brief Test all 3D uniform grid types with multiple partition counts.
   TEST(Rodin_Geometry_Sharder, AllUniformGrid3D_MultiplePartitions)
   {
     // Test all 3D uniform grid types with multiple partition counts
-    for (Polytope::Type type : { Polytope::Type::Tetrahedron,
-                                  Polytope::Type::Hexahedron,
-                                  Polytope::Type::Wedge })
+    for (Polytope::Type type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       auto mesh = makeShardableMesh(type, {3, 3, 3});
       const size_t D = mesh.getDimension();

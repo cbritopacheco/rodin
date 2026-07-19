@@ -11,6 +11,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies real function positive value for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, RealFunction_PositiveValue)
   {
     RealFunction f(4.0);
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies real function zero for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, RealFunction_Zero)
   {
     RealFunction f(0.0);
@@ -41,6 +43,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies real function one for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, RealFunction_One)
   {
     RealFunction f(1.0);
@@ -56,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 1.0, 1e-10);
   }
 
+  /// @brief Verifies real function perfect square for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, RealFunction_PerfectSquare)
   {
     RealFunction f(9.0);
@@ -71,6 +75,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 3.0, 1e-10);
   }
 
+  /// @brief Verifies real function large value for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, RealFunction_LargeValue)
   {
     RealFunction f(100.0);
@@ -86,6 +91,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 10.0, 1e-10);
   }
 
+  /// @brief Verifies real function fractional value for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, RealFunction_FractionalValue)
   {
     RealFunction f(0.25);
@@ -101,6 +107,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 0.5, 1e-10);
   }
 
+  /// @brief Verifies grid function square root for variational sqrt by checking tolerance-based numerical results, grid-function projection.
   TEST(Rodin_Variational_Sqrt, GridFunction_SquareRoot)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, { 3, 3 });
@@ -122,6 +129,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies chained operations for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, ChainedOperations)
   {
     RealFunction f(2.0);
@@ -138,6 +146,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 2.0, 1e-10);
   }
 
+  /// @brief Verifies nested square root for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, NestedSquareRoot)
   {
     RealFunction f(256.0);
@@ -156,6 +165,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt2.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies irrational square root for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, IrrationalSquareRoot)
   {
     RealFunction f(2.0);
@@ -171,6 +181,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), std::sqrt(2.0), 1e-10);
   }
 
+  /// @brief Verifies small value for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, SmallValue)
   {
     RealFunction f(1e-6);
@@ -186,6 +197,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 1e-3, 1e-10);
   }
 
+  /// @brief Verifies very large value for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, VeryLargeValue)
   {
     RealFunction f(1e6);
@@ -201,6 +213,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_result.getValue(p), 1e3, 1e-6);
   }
 
+  /// @brief Verifies combined with other operations for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, CombinedWithOtherOperations)
   {
     RealFunction f1(3.0);
@@ -218,6 +231,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_sum.getValue(p), std::sqrt(7.0), 1e-10);
   }
 
+  /// @brief Verifies sqrt of product for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, SqrtOfProduct)
   {
     RealFunction f1(2.0);
@@ -235,6 +249,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_product.getValue(p), 4.0, 1e-10);
   }
 
+  /// @brief Verifies mathematical identities for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, MathematicalIdentities)
   {
     RealFunction f(5.0);
@@ -253,6 +268,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(sqrt_squared.getValue(p), 5.0, 1e-10);
   }
 
+  /// @brief Verifies equivalence to pow for variational sqrt by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Sqrt, EquivalenceToPow)
   {
     RealFunction f(64.0);

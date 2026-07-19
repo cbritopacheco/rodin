@@ -54,7 +54,7 @@
 
   @subsection examples-densopt-temp-setup-mesh Mesh and Initial Density
 
-  The mesh is loaded and optimized with @ref Rodin::External::MMG
+  The mesh is loaded and optimized with @ref Rodin::MMG
   "MMG::Optimizer":
 
   @code{.cpp}

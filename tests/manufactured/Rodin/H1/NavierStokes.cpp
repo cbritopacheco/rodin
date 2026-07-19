@@ -4,6 +4,14 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
+
+/**
+ * @file
+ * @brief Navier-stokes manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a Navier-Stokes manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the H1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 #include <algorithm>
 #include <limits>
 #include <gtest/gtest.h>
@@ -35,9 +43,11 @@ namespace Rodin::Tests::Manufactured::NavierStokes
       }
   };
 
+  /// @brief Helper used by the manufactured tests to Manufactured Navier Stokes Test 16 x 16.
   using Manufactured_NavierStokes_Test_16x16 =
     Manufactured_NavierStokes_Test<16>;
 
+  /// @brief Verifies navier stokes picard taylor green for manufactured navier stokes test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(Manufactured_NavierStokes_Test_16x16, NavierStokes_Picard_TaylorGreen)
   {
     constexpr Real nu = 1.0;
@@ -179,6 +189,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes
     EXPECT_LT(fixedPointPressureDefect, 1e-6);
   }
 
+  /// @brief Verifies navier stokes picard polynomial vortex for manufactured navier stokes test 16 x 16 by checking tolerance-based numerical results, true predicates, solver behavior.
   TEST_P(Manufactured_NavierStokes_Test_16x16, NavierStokes_Picard_PolynomialVortex)
   {
     constexpr size_t maxPicardIters = 12;
@@ -248,6 +259,7 @@ namespace Rodin::Tests::Manufactured::NavierStokes
     EXPECT_NEAR(error_p, 0, 1e-8);
   }
 
+  /// @brief Instantiates Manufactured Navier Stokes Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams16x16,
     Manufactured_NavierStokes_Test_16x16,

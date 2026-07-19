@@ -12,6 +12,7 @@ using namespace Rodin::Test::Random;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies vector function component access for variational component by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Component, VectorFunction_ComponentAccess)
   {
     VectorFunction vf{10.0, 20.0, 30.0};
@@ -32,6 +33,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp2.getValue(p), 30.0, 1e-10);
   }
 
+  /// @brief Verifies vector shape function component access for variational component.
   TEST(Rodin_Variational_Component, VectorShapeFunction_ComponentAccess)
   {
     constexpr size_t vdim = 2;
@@ -43,6 +45,7 @@ namespace Rodin::Tests::Unit
     auto u_y = u.y();  // This internally uses Component
   }
 
+  /// @brief Verifies copy for variational component by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_Component, Copy)
   {
     VectorFunction vf{5.5, -3.3};
@@ -63,6 +66,7 @@ namespace Rodin::Tests::Unit
     delete copied;
   }
 
+  /// @brief Verifies copy constructor for variational component by checking tolerance-based numerical results, copy semantics.
   TEST(Rodin_Variational_Component, CopyConstructor)
   {
     VectorFunction vf{7.0, 8.0};
@@ -79,6 +83,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp_copy.getValue(p), comp.getValue(p), 1e-10);
   }
 
+  /// @brief Verifies move constructor for variational component by checking tolerance-based numerical results, move semantics.
   TEST(Rodin_Variational_Component, MoveConstructor)
   {
     VectorFunction vf{42.0, 84.0};
@@ -97,6 +102,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp_moved.getValue(p), original_value, 1e-10);
   }
 
+  /// @brief Verifies get operand for variational component by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Component, GetOperand)
   {
     VectorFunction vf{11.0, 22.0};
@@ -116,6 +122,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(operand_value(1), 22.0, 1e-10);
   }
 
+  /// @brief Verifies usage in linear form for variational component by checking form assembly.
   TEST(Rodin_Variational_Component, UsageInLinearForm)
   {
     constexpr size_t vdim = 2;
@@ -133,6 +140,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(vector.size(), 0);
   }
 
+  /// @brief Verifies usage in bilinear form for variational component by checking form assembly.
   TEST(Rodin_Variational_Component, UsageInBilinearForm)
   {
     constexpr size_t vdim = 2;
@@ -151,6 +159,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GT(op.cols(), 0);
   }
 
+  /// @brief Verifies zero component for variational component by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Component, ZeroComponent)
   {
     VectorFunction vf{0.0, 15.0, 0.0};
@@ -168,6 +177,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp2.getValue(p), 0.0, 1e-10);
   }
 
+  /// @brief Verifies negative components for variational component by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Component, NegativeComponents)
   {
     VectorFunction vf{-1.5, -2.5, -3.5};
@@ -187,6 +197,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(comp2.getValue(p), -3.5, 1e-10);
   }
 
+  /// @brief Verifies large vector dimension for variational component by checking tolerance-based numerical results.
   TEST(Rodin_Variational_Component, LargeVectorDimension)
   {
     VectorFunction vf{1.0, 2.0, 3.0, 4.0, 5.0};

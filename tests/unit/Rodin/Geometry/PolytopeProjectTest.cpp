@@ -15,6 +15,7 @@ namespace Rodin::Tests::Unit
 {
   // ---- Segment projections ----
 
+  /// @brief Verifies segment cell for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Segment_Cell)
   {
     Polytope::Project proj(Polytope::Type::Segment);
@@ -24,6 +25,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(0), 0.5, 1e-14);
   }
 
+  /// @brief Verifies segment vertex 0 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Segment_Vertex0)
   {
     Polytope::Project proj(Polytope::Type::Segment);
@@ -34,6 +36,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(0), 0.0, 1e-14);
   }
 
+  /// @brief Verifies segment vertex 1 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Segment_Vertex1)
   {
     Polytope::Project proj(Polytope::Type::Segment);
@@ -45,6 +48,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Triangle projections ----
 
+  /// @brief Verifies triangle cell for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Triangle_Cell)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -55,6 +59,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(1), 0.25, 1e-14);
   }
 
+  /// @brief Verifies triangle face 0 for geometry polytope project.
   TEST(Geometry_PolytopeProject, Triangle_Face0)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -68,6 +73,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(out(0) + out(1), 1.0 + 1e-14);
   }
 
+  /// @brief Verifies triangle face 1 for geometry polytope project.
   TEST(Geometry_PolytopeProject, Triangle_Face1)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -79,6 +85,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(out(0) + out(1), 1.0 + 1e-14);
   }
 
+  /// @brief Verifies triangle face 2 for geometry polytope project.
   TEST(Geometry_PolytopeProject, Triangle_Face2)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -90,6 +97,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(out(0) + out(1), 1.0 + 1e-14);
   }
 
+  /// @brief Verifies triangle vertex 0 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Triangle_Vertex0)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -101,6 +109,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(1), 0.0, 1e-14);
   }
 
+  /// @brief Verifies triangle vertex 1 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Triangle_Vertex1)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -112,6 +121,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(1), 0.0, 1e-14);
   }
 
+  /// @brief Verifies triangle vertex 2 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Triangle_Vertex2)
   {
     Polytope::Project proj(Polytope::Type::Triangle);
@@ -125,6 +135,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Quadrilateral projections ----
 
+  /// @brief Verifies quadrilateral cell for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Quadrilateral_Cell)
   {
     Polytope::Project proj(Polytope::Type::Quadrilateral);
@@ -135,6 +146,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(1), 0.5, 1e-14);
   }
 
+  /// @brief Verifies quadrilateral vertex 0 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Quadrilateral_Vertex0)
   {
     Polytope::Project proj(Polytope::Type::Quadrilateral);
@@ -148,6 +160,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Tetrahedron projections ----
 
+  /// @brief Verifies tetrahedron cell for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Tetrahedron_Cell)
   {
     Polytope::Project proj(Polytope::Type::Tetrahedron);
@@ -159,6 +172,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(2), 0.1, 1e-14);
   }
 
+  /// @brief Verifies tetrahedron face 0 for geometry polytope project.
   TEST(Geometry_PolytopeProject, Tetrahedron_Face0)
   {
     Polytope::Project proj(Polytope::Type::Tetrahedron);
@@ -173,6 +187,7 @@ namespace Rodin::Tests::Unit
     EXPECT_LE(out(0) + out(1) + out(2), 1.0 + 1e-14);
   }
 
+  /// @brief Verifies tetrahedron vertex 0 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Tetrahedron_Vertex0)
   {
     Polytope::Project proj(Polytope::Type::Tetrahedron);
@@ -185,8 +200,49 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(2), 0.0, 1e-14);
   }
 
+  // ---- Pyramid projections ----
+
+  /// @brief Verifies pyramid cell for geometry polytope project by checking tolerance-based numerical results.
+  TEST(Geometry_PolytopeProject, Pyramid_Cell)
+  {
+    Polytope::Project proj(Polytope::Type::Pyramid);
+    Math::SpatialPoint rc{0.2, 0.3, 0.4};
+    Math::SpatialPoint out(3);
+    proj.cell(out, rc);
+    EXPECT_NEAR(out(0), 0.2, 1e-14);
+    EXPECT_NEAR(out(1), 0.3, 1e-14);
+    EXPECT_NEAR(out(2), 0.4, 1e-14);
+
+    Math::SpatialPoint outside{2.0, 2.0, 0.5};
+    proj.cell(out, outside);
+    EXPECT_GE(out(0), -1e-14);
+    EXPECT_GE(out(1), -1e-14);
+    EXPECT_GE(out(2), -1e-14);
+    EXPECT_LE(out(0), 1.0 - out(2) + 1e-14);
+    EXPECT_LE(out(1), 1.0 - out(2) + 1e-14);
+  }
+
+  /// @brief Verifies pyramid faces for geometry polytope project.
+  TEST(Geometry_PolytopeProject, Pyramid_Faces)
+  {
+    Polytope::Project proj(Polytope::Type::Pyramid);
+    Math::SpatialPoint rc{0.2, 0.3, 0.4};
+    Math::SpatialPoint out(3);
+
+    for (size_t f = 0; f < 5; ++f)
+    {
+      proj.face(f, out, rc);
+      EXPECT_GE(out(0), -1e-14);
+      EXPECT_GE(out(1), -1e-14);
+      EXPECT_GE(out(2), -1e-14);
+      EXPECT_LE(out(0), 1.0 - out(2) + 1e-14);
+      EXPECT_LE(out(1), 1.0 - out(2) + 1e-14);
+    }
+  }
+
   // ---- Hexahedron projections ----
 
+  /// @brief Verifies hexahedron cell for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Hexahedron_Cell)
   {
     Polytope::Project proj(Polytope::Type::Hexahedron);
@@ -198,6 +254,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(out(2), 0.5, 1e-14);
   }
 
+  /// @brief Verifies hexahedron vertex 0 for geometry polytope project by checking tolerance-based numerical results.
   TEST(Geometry_PolytopeProject, Hexahedron_Vertex0)
   {
     Polytope::Project proj(Polytope::Type::Hexahedron);
@@ -212,6 +269,7 @@ namespace Rodin::Tests::Unit
 
   // ---- Boundary projection ----
 
+  /// @brief Verifies triangle boundary for geometry polytope project.
   TEST(Geometry_PolytopeProject, Triangle_Boundary)
   {
     Polytope::Project proj(Polytope::Type::Triangle);

@@ -32,14 +32,14 @@
 
   | Space | Polynomial Degree | Continuity | Typical Use |
   |-------|------------------|------------|-------------|
-  | @ref Rodin::Variational::P0 "P0" | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
-  | @ref Rodin::Variational::P0g "P0g" | 0 (global constant) | Continuous | Globally constant functions (1 DOF for scalar, vdim for vector) |
-  | @ref Rodin::Variational::P1 "P1" | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
-  | @ref Rodin::Variational::H1 "H1" | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
+  | `P0` | 0 (constant) | Discontinuous | Piecewise constant quantities, indicators |
+  | `P0g` | 0 (global constant) | Continuous | Globally constant functions (1 DOF for scalar, vdim for vector) |
+  | `P1` | 1 (linear) | @f$ C^0 @f$ (continuous) | Most PDEs: Poisson, elasticity, heat |
+  | `H1` | Arbitrary (order @f$ k @f$) | @f$ C^0 @f$ (continuous) | Higher-order methods, mixed problems (e.g. Taylor-Hood for Navier-Stokes) |
 
   @section fem-spaces-p0 P0: Piecewise Constant Space
 
-  The @ref Rodin::Variational::P0 "P0" space consists of functions that are
+  The `P0` space consists of functions that are
   constant on each cell of the mesh. Functions in P0 are generally
   **discontinuous** across cell boundaries.
 
@@ -81,7 +81,7 @@
 
   @section fem-spaces-p0g P0g: Global Constant Space
 
-  The @ref Rodin::Variational::P0g "P0g" space is a **global constant**
+  The `P0g` space is a **global constant**
   finite element space — it consists of functions that are constant over the
   **entire** mesh (not per-cell like P0).
 
@@ -100,7 +100,7 @@
 
   @section fem-spaces-p1 P1: Piecewise Linear Space
 
-  The @ref Rodin::Variational::P1 "P1" space is the most commonly used finite
+  The `P1` space is the most commonly used finite
   element space. It consists of **continuous** functions that are **linear** on
   each cell.
 
@@ -135,7 +135,7 @@
 
   @section fem-spaces-h1 H1: Higher-Order Space
 
-  The @ref Rodin::Variational::H1 "H1" space provides @f$ H^1 @f$-conforming
+  The `H1` space provides @f$ H^1 @f$-conforming
   finite elements of **arbitrary polynomial order** @f$ k @f$. The polynomial
   order is specified as a **compile-time constant** via
   `std::integral_constant`:
@@ -228,7 +228,7 @@
 
   @section fem-spaces-gridfunctions Grid Functions
 
-  A @ref Rodin::Variational::GridFunction "GridFunction" is a concrete
+  A `GridFunction` is a concrete
   function living in a finite element space. It stores the coefficients
   (DOF values) and can be evaluated, saved, and loaded.
 

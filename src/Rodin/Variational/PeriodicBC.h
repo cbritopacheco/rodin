@@ -52,6 +52,7 @@
 #include "Function.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -69,6 +70,7 @@ namespace Rodin::Variational
   class PeriodicBCBase : public FormLanguage::Base
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
@@ -127,13 +129,16 @@ namespace Rodin::Variational
     : public PeriodicBCBase<typename FormLanguage::Traits<FES>::ScalarType>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
 
+      /// @brief Solution vector type.
       using SolutionType = Solution;
 
       /// Operand type
       using OperandType = TrialFunction<SolutionType, FESType>;
 
+      /// @brief Scalar value type.
       using ScalarType = typename FormLanguage::Traits<FESType>::ScalarType;
 
       using DOFs = IndexMap<std::pair<IndexArray, Math::Vector<ScalarType>>>;
@@ -231,5 +236,5 @@ namespace Rodin::Variational
     -> PeriodicBC<TrialFunction<Solution, FES>, IndexMap<IndexSet>>;
 }
 
+/// @endcond
 #endif
-

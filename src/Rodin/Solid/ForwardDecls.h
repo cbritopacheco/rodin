@@ -23,6 +23,12 @@ namespace Rodin::Solid
     struct SheetDirection;
     struct SheetNormalDirection;
     struct Activation;
+    struct ActiveExtension;
+    struct PreviousActiveExtension;
+    struct TimeStep;
+    struct ElectricalActivation;
+    struct PreviousActiveGamma;
+    struct PreviousActiveBeta;
   }
 
   template <class Derived>
@@ -30,16 +36,29 @@ namespace Rodin::Solid
 
   class IsotropicInvariants;
 
+  class FiberKinematics;
+
   template <class Derived>
   class HyperElasticLaw;
 
   class Hooke;
 
-  template <class LawDerived, class FES>
-  class InternalForce;
+  class HolzapfelOgden;
 
-  template <class LawDerived, class Solution, class FES>
-  class MaterialTangent;
+  class ActiveFiberLaw;
+
+  template <class PassiveLaw, class ActiveLaw>
+  class ActiveContraction;
+
+  template <class LawDerived, class TestFunctionType, class DisplacementType>
+  class InternalVirtualWorkResidual;
+
+  template <class LawDerived, class TrialFunctionType, class TestFunctionType,
+    class DisplacementType>
+  class InternalVirtualWorkTangent;
+
+  template <class Law, class State>
+  class InternalVirtualWork;
 }
 
 #endif

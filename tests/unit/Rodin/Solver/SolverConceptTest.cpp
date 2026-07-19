@@ -42,6 +42,7 @@ class SolverConceptTest : public ::testing::Test
 };
 
 // Test that the LinearSystem concept works with our types
+/// @brief Verifies linear system types for solver concept test by checking solver behavior.
 TEST_F(SolverConceptTest, LinearSystemTypes)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -54,6 +55,7 @@ TEST_F(SolverConceptTest, LinearSystemTypes)
 }
 
 // Test basic solver construction and interface
+/// @brief Verifies basic solver interface for solver concept test by checking true predicates, false predicates, solver behavior.
 TEST_F(SolverConceptTest, BasicSolverInterface)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -69,6 +71,7 @@ TEST_F(SolverConceptTest, BasicSolverInterface)
 }
 
 // Test solver with different scalar types
+/// @brief Test with Real.
 TEST_F(SolverConceptTest, DifferentScalarTypes)
 {
   // Test with Real
@@ -92,6 +95,7 @@ TEST_F(SolverConceptTest, DifferentScalarTypes)
 }
 
 // Test solver copy semantics
+/// @brief Verifies copy semantics for solver concept test by checking true predicates, false predicates, solver behavior.
 TEST_F(SolverConceptTest, CopySemantics)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -113,6 +117,7 @@ TEST_F(SolverConceptTest, CopySemantics)
 }
 
 // Test solver move semantics
+/// @brief Verifies move semantics for solver concept test by checking true predicates, solver behavior, move semantics.
 TEST_F(SolverConceptTest, MoveSemantics)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -135,6 +140,7 @@ TEST_F(SolverConceptTest, MoveSemantics)
 }
 
 // Test multiple solver instances independence
+/// @brief Verifies multiple instances for solver concept test by checking true predicates, false predicates, solver behavior.
 TEST_F(SolverConceptTest, MultipleInstances)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -159,6 +165,7 @@ TEST_F(SolverConceptTest, MultipleInstances)
 }
 
 // Test solver with different matrix and vector combinations
+/// @brief Real sparse matrix with real vector.
 TEST_F(SolverConceptTest, DifferentMatrixVectorCombinations)
 {
   // Real sparse matrix with real vector
@@ -185,6 +192,7 @@ TEST_F(SolverConceptTest, DifferentMatrixVectorCombinations)
 }
 
 // Test solver type traits and metaprogramming
+/// @brief Verifies type traits and metaprogramming for solver concept test by checking solver behavior.
 TEST_F(SolverConceptTest, TypeTraitsAndMetaprogramming)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -210,6 +218,7 @@ TEST_F(SolverConceptTest, TypeTraitsAndMetaprogramming)
 }
 
 // Test const correctness
+/// @brief Verifies const correctness for solver concept test by checking exact expected values, true predicates, solver behavior.
 TEST_F(SolverConceptTest, ConstCorrectness)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;
@@ -229,6 +238,7 @@ TEST_F(SolverConceptTest, ConstCorrectness)
 }
 
 // Test solver lifecycle and RAII
+/// @brief Verifies lifecycle and RAII for solver concept test by checking true predicates, solver behavior.
 TEST_F(SolverConceptTest, LifecycleAndRAII)
 {
   using TestLinearSystem = Math::LinearSystem<Math::SparseMatrix<Real>, Math::Vector<Real>>;

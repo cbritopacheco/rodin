@@ -1,3 +1,9 @@
+/*
+ *          Copyright Carlos BRITO PACHECO 2021 - 2026.
+ * Distributed under the Boost Software License, Version 1.0.
+ *       (See accompanying file LICENSE or copy at
+ *          https://www.boost.org/LICENSE_1_0.txt)
+ */
 /**
  * @file IsPlaneObject.h
  * @brief Type trait for identifying Eigen plain object types.
@@ -6,6 +12,9 @@
  * a type is an Eigen plain object (Matrix, Array, Vector, etc.) that owns
  * its data, as opposed to expression templates or map types.
  */
+#ifndef RODIN_FORMLANGUAGE_ISPLANEOBJECT_H
+#define RODIN_FORMLANGUAGE_ISPLANEOBJECT_H
+
 #include <type_traits>
 
 #include <Eigen/Core>
@@ -71,3 +80,5 @@ namespace Rodin::FormLanguage
     static constexpr const bool Value = std::is_base_of_v<Eigen::PlainObjectBase<Derived>, Derived>;
   };
 }
+
+#endif

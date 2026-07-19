@@ -1,3 +1,11 @@
+add_executable(RodinMPISubMeshGridFunctionTest SubMeshGridFunctionTest.cpp)
+target_link_libraries(RodinMPISubMeshGridFunctionTest
+  PUBLIC
+  GTest::gtest
+  Rodin::Geometry
+  Rodin::Variational
+  Rodin::MPI)
+
 add_executable(RodinMPIP0Test P0Test.cpp)
 target_link_libraries(RodinMPIP0Test
   PUBLIC
@@ -28,6 +36,17 @@ if (MPIEXEC_EXECUTABLE)
 endif()
 
 foreach(np 1 2 3 4)
+  add_test(
+    NAME RodinMPISubMeshGridFunctionTest_np${np}
+    COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}
+            ${_RODIN_MPI_OVERSUBSCRIBE_FLAG}
+            $<TARGET_FILE:RodinMPISubMeshGridFunctionTest>)
+  set_tests_properties(RodinMPISubMeshGridFunctionTest_np${np} PROPERTIES
+    LABELS "unit;distributed"
+    TIMEOUT 30
+  )
+  rodin_suppress_external_mpi_lsan_for_test(RodinMPISubMeshGridFunctionTest_np${np})
+
   add_test(
     NAME RodinMPIP0Test_np${np}
     COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${np}

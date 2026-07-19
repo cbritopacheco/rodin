@@ -1,9 +1,12 @@
+#include <cmath>
+
 #include <gtest/gtest.h>
 
 #include "Rodin/Assembly.h"
 #include "Rodin/Variational.h"
 
 #include "Rodin/Solver/CG.h"
+#include "Rodin/Solver/GMRES.h"
 
 using namespace Rodin;
 using namespace Rodin::Geometry;
@@ -34,8 +37,56 @@ using namespace Rodin::Solver;
  * for all test functions @f$\mathbf{\Phi}=(\phi,\psi)\in [P1]^2@f$ and with
  * the essential condition @f$\mathbf{U}=(g_1,g_2)@f$ on @f$\partial\Omega@f$.
  */
+
+/**
+ * @file
+ * @brief Reaction-diffusion manufactured solution tests.
+ *
+ * These tests assemble Rodin variational forms for a reaction-diffusion manufactured solution, solve the problem on the configured mesh, and compare against analytic fields or expected residual/error behavior. They protect the P1 finite-element and solver path, including boundary-condition handling, geometry coverage, and numerical accuracy of the manufactured workflow.
+ */
+
 namespace Rodin::Tests::Manufactured::ReactionDiffusion
 {
+  namespace
+  {
+    constexpr Real BoundaryTolerance = 1e-12;
+    constexpr Attribute LeftAttribute = 1;
+    constexpr Attribute RightAttribute = 2;
+    constexpr Attribute BottomAttribute = 3;
+    constexpr Attribute TopAttribute = 4;
+
+    void labelBoundaryAttributes(Geometry::Mesh<Context::Local>& mesh,
+      Attribute left = LeftAttribute, Attribute right = RightAttribute,
+      Attribute bottom = BottomAttribute, Attribute top = TopAttribute)
+    {
+      for (auto it = mesh.getBoundary(); !it.end(); ++it)
+      {
+        Real x = 0;
+        Real y = 0;
+        size_t count = 0;
+        for (const auto vertex : it->getVertices())
+        {
+          const auto coords = mesh.getVertexCoordinates(vertex);
+          x += coords(0);
+          y += coords(1);
+          count++;
+        }
+
+        x /= count;
+        y /= count;
+
+        if (std::abs(x) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), left);
+        else if (std::abs(x - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), right);
+        else if (std::abs(y) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), bottom);
+        else if (std::abs(y - 1.0) < BoundaryTolerance)
+          mesh.setAttribute(it.key(), top);
+      }
+    }
+  }
+
   template <size_t M>
   class ManufacturedReactionDiffusionTest : public ::testing::TestWithParam<Polytope::Type>
   {
@@ -50,11 +101,16 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       }
   };
 
+  /// @brief Helper used by the tests to Manufactured Reaction Diffusion Test 16 x 16.
   using ManufacturedReactionDiffusionTest16x16 = ManufacturedReactionDiffusionTest<16>;
+  /// @brief Helper used by the tests to Manufactured Reaction Diffusion Test 32 x 32.
   using ManufacturedReactionDiffusionTest32x32 = ManufacturedReactionDiffusionTest<32>;
+  /// @brief Helper used by the tests to Manufactured Reaction Diffusion Test 64 x 64.
   using ManufacturedReactionDiffusionTest64x64 = ManufacturedReactionDiffusionTest<64>;
+  /// @brief Helper used by the tests to Manufactured Reaction Diffusion Test 128 x 128.
   using ManufacturedReactionDiffusionTest128x128 = ManufacturedReactionDiffusionTest<128>;
 
+  /// @brief Verifies reaction diffusion P1 exact residual for manufactured reaction diffusion test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(ManufacturedReactionDiffusionTest16x16, ReactionDiffusion_P1ExactResidual)
   {
     Mesh mesh = this->getMesh();
@@ -128,7 +184,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       TestFunction  v(vh);
 
       // Assemble the variational problem:
-      // Find u such that ∫ (∇u·∇v + u*v) dx = ∫ f*v dx, with u=0 on ∂Ω.
+      // Find u such that \int (\nabla u\cdot\nabla v + u*v) dx = \int f*v dx, with u=0 on \partial\Omega.
       Problem rd(u, v);
       rd = Integral(Grad(u), Grad(v))
          + Integral(u, v)
@@ -149,6 +205,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       EXPECT_NEAR(error, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies reaction diffusion variable frequency for manufactured reaction diffusion test 64 x 64 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(ManufacturedReactionDiffusionTest64x64, ReactionDiffusion_VariableFrequency)
   {
     auto pi = Math::Constants::pi();
@@ -201,6 +258,7 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
     EXPECT_NEAR(error1, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies weakly coupled reaction diffusion for manufactured reaction diffusion test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
   TEST_P(ManufacturedReactionDiffusionTest16x16, WeaklyCoupledReactionDiffusion)
   {
       auto pi = Math::Constants::pi();
@@ -255,12 +313,48 @@ namespace Rodin::Tests::Manufactured::ReactionDiffusion
       EXPECT_NEAR(error_v, 0, RODIN_FUZZY_CONSTANT);
   }
 
+  /// @brief Verifies identification dirichlet on labeled boundary for manufactured reaction diffusion test 16 x 16 by checking tolerance-based numerical results, solver behavior, manufactured-solution convergence.
+  TEST_P(ManufacturedReactionDiffusionTest16x16, IdentificationDirichletOnLabeledBoundary)
+  {
+    Mesh mesh = this->getMesh();
+    labelBoundaryAttributes(mesh);
+
+    P1 vh(mesh);
+    const auto solution = 2 * F::x + 3 * F::y + 1;
+    const auto forcing = solution;
+
+    TrialFunction u(vh), w(vh);
+    TestFunction phi(vh), psi(vh);
+
+    const FlatSet<Attribute> boundary{
+      LeftAttribute, RightAttribute, BottomAttribute, TopAttribute};
+
+    Problem rd(u, w, phi, psi);
+    rd = Integral(Grad(u), Grad(phi)) + Integral(u, phi) - Integral(forcing, phi) +
+      Integral(Grad(w), Grad(psi)) + Integral(w, psi) - Integral(forcing, psi) +
+      DirichletBC(u, w).on(boundary) +
+      DirichletBC(w, solution)
+        .on(LeftAttribute, RightAttribute, BottomAttribute, TopAttribute);
+
+    GMRES(rd).solve();
+
+    GridFunction diffU(vh);
+    diffU = Pow(u.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diffU).compute(), 0, 1e-12);
+
+    GridFunction diffW(vh);
+    diffW = Pow(w.getSolution() - solution, 2);
+    EXPECT_NEAR(Integral(diffW).compute(), 0, 1e-12);
+  }
+
+  /// @brief Instantiates Manufactured Reaction Diffusion Test 16 x 16 over the Mesh Params 16 x 16 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
       MeshParams16x16,
       ManufacturedReactionDiffusionTest16x16,
       ::testing::Values(Polytope::Type::Quadrilateral, Polytope::Type::Triangle)
   );
 
+  /// @brief Instantiates Manufactured Reaction Diffusion Test 64 x 64 over the Mesh Params 64 x 64 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     MeshParams64x64,
     ManufacturedReactionDiffusionTest64x64,

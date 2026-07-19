@@ -20,6 +20,7 @@ class ExpectedResultTableTest : public ::testing::Test
 };
 
 // Test basic construction and single parameter function
+/// @brief Test with single parameter function.
 TEST_F(ExpectedResultTableTest, BasicConstruction)
 {
   // Test with single parameter function
@@ -33,6 +34,7 @@ TEST_F(ExpectedResultTableTest, BasicConstruction)
 }
 
 // Test ExpectedResult class
+/// @brief Verifies expected result for expected result table test by checking tolerance-based numerical results.
 TEST_F(ExpectedResultTableTest, ExpectedResult)
 {
   using ExpectedResult = ExpectedResultTable<Real, Real, Real>::ExpectedResult;
@@ -50,6 +52,7 @@ TEST_F(ExpectedResultTableTest, ExpectedResult)
 }
 
 // Test two-parameter function evaluation
+/// @brief Verifies two parameter function for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, TwoParameterFunction)
 {
   std::function<Real(Real, Real)> addFunc = [](Real a, Real b) { return a + b; };
@@ -65,6 +68,7 @@ TEST_F(ExpectedResultTableTest, TwoParameterFunction)
 }
 
 // Test failed evaluation
+/// @brief Verifies failed evaluation for expected result table test by checking false predicates.
 TEST_F(ExpectedResultTableTest, FailedEvaluation)
 {
   std::function<Real(Real, Real)> addFunc = [](Real a, Real b) { return a + b; };
@@ -79,6 +83,7 @@ TEST_F(ExpectedResultTableTest, FailedEvaluation)
 }
 
 // Test with multiplication function
+/// @brief Verifies multiplication function for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, MultiplicationFunction)
 {
   std::function<Real(Real, Real)> multiplyFunc = [](Real a, Real b) { return a * b; };
@@ -95,6 +100,7 @@ TEST_F(ExpectedResultTableTest, MultiplicationFunction)
 }
 
 // Test with custom comparison function
+/// @brief Verifies custom comparison for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, CustomComparison)
 {
   std::function<Real(Real, Real)> addFunc = [](Real a, Real b) { return a + b; };
@@ -114,6 +120,7 @@ TEST_F(ExpectedResultTableTest, CustomComparison)
 }
 
 // Test with integer types
+/// @brief Verifies integer types for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, IntegerTypes)
 {
   std::function<int(int)> squareFunc = [](int x) { return x * x; };
@@ -132,6 +139,7 @@ TEST_F(ExpectedResultTableTest, IntegerTypes)
 }
 
 // Test with string types
+/// @brief Verifies string types for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, StringTypes)
 {
   std::function<std::string(std::string, std::string)> concatFunc = 
@@ -149,6 +157,7 @@ TEST_F(ExpectedResultTableTest, StringTypes)
 }
 
 // Test with three parameters
+/// @brief Verifies three parameters for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, ThreeParameters)
 {
   std::function<Real(Real, Real, Real)> sumThreeFunc = 
@@ -165,6 +174,7 @@ TEST_F(ExpectedResultTableTest, ThreeParameters)
 }
 
 // Test push_back with ExpectedResult objects
+/// @brief Verifies push back expected result for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, PushBackExpectedResult)
 {
   using ExpectedResult = ExpectedResultTable<Real, Real, Real>::ExpectedResult;
@@ -184,6 +194,7 @@ TEST_F(ExpectedResultTableTest, PushBackExpectedResult)
 }
 
 // Test with lambda functions
+/// @brief Test with a more complex lambda.
 TEST_F(ExpectedResultTableTest, LambdaFunctions)
 {
   // Test with a more complex lambda
@@ -201,6 +212,7 @@ TEST_F(ExpectedResultTableTest, LambdaFunctions)
 }
 
 // Test error cases and edge conditions
+/// @brief Verifies edge cases for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, EdgeCases)
 {
   std::function<Real(Real, Real)> addFunc = [](Real a, Real b) { return a + b; };
@@ -220,6 +232,7 @@ TEST_F(ExpectedResultTableTest, EdgeCases)
 }
 
 // Test with boolean return type
+/// @brief Verifies boolean return type for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, BooleanReturnType)
 {
   std::function<bool(int, int)> greaterThanFunc = 
@@ -237,6 +250,7 @@ TEST_F(ExpectedResultTableTest, BooleanReturnType)
 }
 
 // Test mixed success and failure
+/// @brief Verifies mixed results for expected result table test by checking false predicates.
 TEST_F(ExpectedResultTableTest, MixedResults)
 {
   std::function<int(int, int)> subtractFunc = [](int a, int b) { return a - b; };
@@ -252,6 +266,7 @@ TEST_F(ExpectedResultTableTest, MixedResults)
 }
 
 // Test performance with many entries
+/// @brief Verifies performance test for expected result table test by checking true predicates.
 TEST_F(ExpectedResultTableTest, PerformanceTest)
 {
   std::function<Real(Real)> identityFunc = [](Real x) { return x; };

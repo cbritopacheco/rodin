@@ -43,6 +43,7 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Quadrilateral:
           return LocalMesh::UniformGrid(geometry, { 3, 3 });
         case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
           return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
@@ -60,6 +61,8 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Triangle:      return "Triangle";
         case Polytope::Type::Quadrilateral: return "Quadrilateral";
         case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Pyramid:
+          return "Pyramid";
         case Polytope::Type::Hexahedron:    return "Hexahedron";
         case Polytope::Type::Wedge:         return "Wedge";
       }
@@ -70,6 +73,7 @@ namespace Rodin::Tests::Unit
   class P0MFEMGridFunctionCoverage : public ::testing::TestWithParam<Polytope::Type>
   {};
 
+  /// @brief Verifies scalar round trip for P0 MFEM grid function coverage by checking tolerance-based numerical results, exact expected values.
   TEST_P(P0MFEMGridFunctionCoverage, ScalarRoundTrip)
   {
     Mesh mesh = makeMesh(GetParam());
@@ -92,22 +96,17 @@ namespace Rodin::Tests::Unit
       EXPECT_DOUBLE_EQ(loaded[i], gf[i]) << "dof " << i;
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-      AllSupportedGeometries,
-      P0MFEMGridFunctionCoverage,
-      ::testing::Values(
-        Polytope::Type::Point,
-        Polytope::Type::Segment,
-        Polytope::Type::Triangle,
-        Polytope::Type::Quadrilateral,
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      [](const ::testing::TestParamInfo<Polytope::Type>& info)
-      {
-        return geometryName(info.param);
-      });
+  /// @brief Instantiates P0 MFEM Grid Function Coverage over the All Supported Geometries parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllSupportedGeometries, P0MFEMGridFunctionCoverage,
+    ::testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
+      return geometryName(info.param);
+    });
 
+  /// @brief Verifies scalar multiline load for IO MFEM P0 grid function by checking tolerance-based numerical results.
   TEST(Rodin_IO_MFEM_P0_GridFunction, ScalarMultilineLoad)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Segment, { 4 });

@@ -62,16 +62,18 @@
  */
 #define RODIN_VARIATIONAL_H1ELEMENT_TOLERANCE 1e-14
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
-   * @ingroup TraitsSpecializations
    */
   template <size_t K, class Range>
   struct Traits<Variational::H1Element<K, Range>>
   {
-    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    using RangeType = Range;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -196,6 +198,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<H1Element<K, Scalar>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -474,6 +477,98 @@ namespace Rodin::Variational
             return s_nodes;
           }
 
+          case Geometry::Polytope::Type::Pyramid:
+          {
+            static const std::vector<Math::SpatialPoint> s_nodes = [] {
+              constexpr size_t count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
+
+              auto offset = [](size_t layer) {
+                size_t out = 0;
+                for (size_t k = 0; k < layer; ++k)
+                {
+                  const size_t n = K - k + 1;
+                  out += n * n;
+                }
+                return out;
+              };
+
+              auto idx = [&](size_t i, size_t j, size_t k) {
+                const size_t n = K - k + 1;
+                return offset(k) + j * n + i;
+              };
+
+              auto triLattice = [](size_t alpha) {
+                struct IJ
+                {
+                    size_t i, j;
+                };
+                size_t pos = 0;
+                for (size_t j = 0; j <= K; ++j)
+                {
+                  for (size_t i = 0; i <= K - j; ++i, ++pos)
+                  {
+                    if (pos == alpha)
+                      return IJ{i, j};
+                  }
+                }
+                return IJ{0, 0};
+              };
+
+              std::vector<Math::SpatialPoint> nodes(count);
+              std::vector<char> assigned(count, 0);
+              const auto& xi = GLL01<K>::getNodes();
+              const auto& tri = FeketeTriangle<K>::getNodes();
+
+              auto set = [&](size_t node, Real x, Real y, Real z) {
+                nodes[node] = Math::SpatialPoint{{x, y, z}};
+                assigned[node] = 1;
+              };
+
+              for (size_t j = 0; j <= K; ++j)
+              {
+                for (size_t i = 0; i <= K; ++i)
+                  set(idx(i, j, 0), xi[i], xi[j], Real(0));
+              }
+
+              for (size_t alpha = 0; alpha < tri.size(); ++alpha)
+              {
+                const auto ij = triLattice(alpha);
+                const size_t i = ij.i;
+                const size_t k = ij.j;
+                const size_t n = K - k;
+                const Real u = tri[alpha].x();
+                const Real v = tri[alpha].y();
+
+                set(idx(i, 0, k), u, Real(0), v);
+                set(idx(n, i, k), Real(1) - v, u, v);
+                set(idx(n - i, n, k), Real(1) - u - v, Real(1) - v, v);
+                set(idx(0, n - i, k), Real(0), Real(1) - u - v, v);
+              }
+
+              for (size_t k = 1; k < K; ++k)
+              {
+                const size_t n = K - k;
+                const Real z = static_cast<Real>(k) / static_cast<Real>(K);
+                const Real q = Real(1) - z;
+                for (size_t j = 1; j < n; ++j)
+                {
+                  for (size_t i = 1; i < n; ++i)
+                  {
+                    const size_t node = idx(i, j, k);
+                    if (!assigned[node])
+                    {
+                      set(node, q * static_cast<Real>(i) / static_cast<Real>(n),
+                        q * static_cast<Real>(j) / static_cast<Real>(n), z);
+                    }
+                  }
+                }
+              }
+
+              return nodes;
+            }();
+            return s_nodes;
+          }
+
           case Geometry::Polytope::Type::Hexahedron:
           {
             static const std::vector<Math::SpatialPoint> s_nodes = [] {
@@ -608,6 +703,8 @@ namespace Rodin::Variational
             return (K + 1) * (K + 1);
           case Geometry::Polytope::Type::Tetrahedron:
             return (K + 1) * (K + 2) * (K + 3) / 6;
+          case Geometry::Polytope::Type::Pyramid:
+            return (K + 1) * (K + 2) * (2 * K + 3) / 6;
           case Geometry::Polytope::Type::Wedge:
             return (K + 1) * (K + 1) * (K + 2) / 2;
           case Geometry::Polytope::Type::Hexahedron:
@@ -665,6 +762,7 @@ namespace Rodin::Variational
 
           case G::Quadrilateral:
           case G::Wedge:
+          case G::Pyramid:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
 
@@ -682,8 +780,8 @@ namespace Rodin::Variational
        * @param ar Archive to serialize to/from
        * @param version Serialization version
        */
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      template <class Archive>
+      void serialize(Archive& ar, const unsigned int version)
       {
         ar & boost::serialization::base_object<Parent>(*this);
       }
@@ -750,6 +848,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<H1Element<K, Math::SpatialVector<Scalar>>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -996,6 +1095,8 @@ namespace Rodin::Variational
             return m_vdim * ((K + 1) * (K + 1));
           case Geometry::Polytope::Type::Tetrahedron:
             return m_vdim * ((K + 1) * (K + 2) * (K + 3) / 6);
+          case Geometry::Polytope::Type::Pyramid:
+            return m_vdim * ((K + 1) * (K + 2) * (2 * K + 3) / 6);
           case Geometry::Polytope::Type::Wedge:
             return m_vdim * ((K + 1) * (K + 1) * (K + 2) / 2);
           case Geometry::Polytope::Type::Hexahedron:
@@ -1023,6 +1124,27 @@ namespace Rodin::Variational
         return H1Element<K, ScalarType>::getNodes(this->getGeometry())[local / m_vdim];
       }
 
+      template <class Coefficient>
+      constexpr void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
+      {
+        assert(m_vdim > 0);
+        out.resize(m_vdim);
+        out.setZero();
+
+        const H1Element<K, ScalarType> scalarfe(this->getGeometry());
+        const size_t count = scalarfe.getCount();
+        for (size_t node = 0; node < count; ++node)
+        {
+          const ScalarType phi = scalarfe.getBasis(node)(rc);
+          for (size_t component = 0; component < m_vdim; ++component)
+          {
+            const size_t local = node * m_vdim + component;
+            out(component) += coefficient(local) * phi;
+          }
+        }
+      }
+
       constexpr
       size_t getOrder() const
       {
@@ -1040,6 +1162,7 @@ namespace Rodin::Variational
 
           case G::Quadrilateral:
           case G::Wedge:
+          case G::Pyramid:
             // Tensor-product type: max total degree is 2K
             return 2 * K;
 
@@ -1051,8 +1174,13 @@ namespace Rodin::Variational
         return 0;
       }
 
-      template<class Archive>
-      void serialize(Archive& ar, const unsigned int)
+      /**
+       * @brief Serializes the element (for boost::serialization).
+       * @param ar Archive to serialize to/from
+       * @param version Serialization version
+       */
+      template <class Archive>
+      void serialize(Archive& ar, const unsigned int version)
       {
         ar & boost::serialization::base_object<Parent>(*this);
         ar & m_vdim;
@@ -1068,4 +1196,5 @@ namespace Rodin::Variational
 
 #include "H1Element.hpp"
 
+/// @endcond
 #endif

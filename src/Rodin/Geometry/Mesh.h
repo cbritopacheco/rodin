@@ -21,7 +21,9 @@
  * - Attribute-based region marking
  */
 
+#include <algorithm>
 #include <deque>
+#include <vector>
 
 #include <boost/filesystem.hpp>
 #include <boost/serialization/access.hpp>
@@ -125,6 +127,11 @@ namespace Rodin::FormLanguage
   };
 }
 
+/**
+ * @defgroup RodinGeometry Geometry Module
+ * @brief Meshes, polytopes, connectivity, and geometric transformations.
+ */
+
 namespace Rodin::Geometry
 {
   /**
@@ -149,7 +156,7 @@ namespace Rodin::Geometry
    *
    * ## Geometric Transformations
    * - Reference-to-physical element mappings
-   * - Isoparametric transformations
+   * - Parametric transformations
    * - Jacobian computations
    *
    * ## Mesh Generation
@@ -810,6 +817,7 @@ namespace Rodin::Geometry
         return *this;
       }
 
+      /// @brief Serializes the mesh (for boost::serialization).
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {
@@ -836,9 +844,10 @@ namespace Rodin::Geometry
     friend class boost::serialization::access;
 
     public:
-      using Context =
-        Context::Local;
+      /// @brief Execution context type.
+      using Context = Rodin::Context::Local;
 
+      /// @brief Parent class type.
       using Parent =
         MeshBase;
 
@@ -946,46 +955,76 @@ namespace Rodin::Geometry
             return polytope(t, IndexArray({ vs }));
           }
 
+          /// @brief Adds a polytope and returns its index via @p index.
+          Builder& polytope(
+            Polytope::Type t, std::initializer_list<Index> vs, Index& index)
+          {
+            return polytope(t, IndexArray({vs}), index);
+          }
+
           /**
            * @brief Adds polytope defined by the given vertices.
            */
           Builder& polytope(Polytope::Type t, const IndexArray& vs);
 
           /**
+           * @brief Adds polytope defined by the given vertices and returns its index.
+           */
+          Builder& polytope(Polytope::Type t, const IndexArray& vs, Index& index);
+
+          /**
            * @brief Adds polytope defined by the given vertices.
            */
           Builder& polytope(Polytope::Type t, IndexArray&& vs);
 
+          /**
+           * @brief Adds polytope defined by the given vertices and returns its index.
+           */
+          Builder& polytope(Polytope::Type t, IndexArray&& vs, Index& index);
+
+          /// @brief Adds a segment from the given vertices.
           template <class T>
           Builder& segment(T&& vs)
           {
             return polytope(Polytope::Type::Segment, std::forward<T>(vs));
           }
 
+          /// @brief Adds a quadrilateral from the given vertices.
           template <class T>
           Builder& quadrilateral(T&& vs)
           {
             return polytope(Polytope::Type::Quadrilateral, std::forward<T>(vs));
           }
 
+          /// @brief Adds a triangle from the given vertices.
           template <class T>
           Builder& triangle(T&& vs)
           {
             return polytope(Polytope::Type::Triangle, std::forward<T>(vs));
           }
 
+          /// @brief Adds a tetrahedron from the given vertices.
           template <class T>
           Builder& tetrahedron(T&& vs)
           {
             return polytope(Polytope::Type::Tetrahedron, std::forward<T>(vs));
           }
 
+          /// @brief Adds a pyramid from the given vertices.
+          template <class T>
+          Builder& pyramid(T&& vs)
+          {
+            return polytope(Polytope::Type::Pyramid, std::forward<T>(vs));
+          }
+
+          /// @brief Adds a hexahedron from the given vertices.
           template <class T>
           Builder& hexahedron(T&& vs)
           {
             return polytope(Polytope::Type::Hexahedron, std::forward<T>(vs));
           }
 
+          /// @brief Adds a wedge from the given vertices.
           template <class T>
           Builder& wedge(T&& vs)
           {
@@ -1039,11 +1078,13 @@ namespace Rodin::Geometry
            */
           Builder& setQuadratureIndex(PolytopeQuadratureIndex&& quadIndex);
 
+          /// @brief Returns the mesh connectivity (incidence relations).
           Connectivity<Context>& getConnectivity()
           {
             return m_connectivity;
           }
 
+          /// @brief Returns the mesh connectivity (incidence relations).
           const Connectivity<Context>& getConnectivity() const
           {
             return m_connectivity;
@@ -1071,6 +1112,15 @@ namespace Rodin::Geometry
         return Builder();
       }
 
+      /**
+       * @brief Generates a uniform grid for a given geometry.
+       *
+       * @param[in] g Geometry type of the cells (e.g., Triangle,
+       * Quadrilateral)
+       * @param[in] l Number of nodes in each coordinate direction
+       * @throws Alert::MemberFunctionException If the shape dimension does
+       * not match the geometry or an axis contains fewer than two grid points.
+       */
       static Mesh UniformGrid(Polytope::Type g, std::initializer_list<size_t> l)
       {
         Array<size_t> shape(l.size());
@@ -1106,13 +1156,19 @@ namespace Rodin::Geometry
        * @param[in] g Geometry type of the cells (e.g., Triangle,
        * Quadrilateral)
        * @param[in] shape Number of nodes in each coordinate direction
+       * @throws Alert::MemberFunctionException If the shape dimension does
+       * not match the geometry or an axis contains fewer than two grid points.
        */
       static Mesh UniformGrid(Polytope::Type g, const Array<size_t>& shape);
 
       /**
        * @brief Generates a box-shaped surface mesh from a face geometry type.
        *
-       * @copydetails Box(Polytope::Type, std::initializer_list<size_t>)
+       * Given a face geometry type @p g of dimension @f$ d @f$, produces
+       * a surface mesh of dimension @f$ d @f$ embedded in @f$ (d+1) @f$
+       * space dimensions. The mesh represents the boundary of the unit
+       * box @f$ [0, N_1] \times [0, N_2] \times \cdots @f$ tessellated
+       * with faces of type @p g.
        *
        * @param[in] g Face geometry type
        * @param[in] shape Number of nodes in each coordinate direction
@@ -1126,6 +1182,11 @@ namespace Rodin::Geometry
         : m_sdim(0)
       {}
 
+      /**
+       * @brief Loads a mesh from a file.
+       * @param[in] filename Path to the mesh file
+       * @param[in] fmt File format of the mesh file
+       */
       Mesh(const boost::filesystem::path& filename, IO::FileFormat fmt)
       {
         load(filename, fmt);
@@ -1328,49 +1389,51 @@ namespace Rodin::Geometry
        * @param[in] f Inclusion predicate
        * @returns Deque of FlatSet<Index>, each set being one connected component.
        *
-       * Uses a breadth-first search algorithm to discover connected components
+       * Uses a graph traversal to discover connected components
        * among polytopes of the specified dimension. Requires that the adjacency
        * connectivity @f$ d \rightarrow d @f$ has been computed beforehand.
        */
       template <class BinaryPredicate, class UnitaryPredicate>
       CCL ccl(size_t d, const BinaryPredicate& p, const UnitaryPredicate& f) const
       {
-        FlatSet<Index> visited;
-        visited.reserve(getPolytopeCount(d));
-        std::deque<Index> searchQueue;
+        const size_t count = getPolytopeCount(d);
+        std::vector<Boolean> visited(count, false);
+        std::vector<Index> searchStack;
+        searchStack.reserve(count);
+        std::vector<Index> component;
         std::deque<FlatSet<Index>> res;
 
         // Perform the labelling
         for (auto it = getPolytope(d); it; ++it)
         {
           const Index i = it->getIndex();
-          if (!visited.count(i))
+          if (!visited[i] && f(*it))
           {
-            if (f(*it))
+            searchStack.push_back(i);
+            visited[i] = true;
+            component.clear();
+
+            while (!searchStack.empty())
             {
-              res.push_back({});
-              searchQueue.push_back(i);
-            }
-            while (searchQueue.size() > 0)
-            {
-              const Index idx = searchQueue.back();
+              const Index idx = searchStack.back();
               const auto el = getPolytope(d, idx);
-              searchQueue.pop_back();
-              const auto result = visited.insert(idx);
-              const Boolean inserted = result.second;
-              if (inserted)
+              searchStack.pop_back();
+              component.push_back(idx);
+
+              for (auto adj = el->getAdjacent(); adj; ++adj)
               {
-                res.back().insert(idx);
-                for (auto adj = el->getAdjacent(); adj; ++adj)
+                const Index adjacent = adj->getIndex();
+                if (!visited[adjacent] && p(*el, *adj) && f(*adj))
                 {
-                  if (p(*el, *adj))
-                  {
-                    if (f(*adj))
-                      searchQueue.push_back(adj->getIndex());
-                  }
+                  visited[adjacent] = true;
+                  searchStack.push_back(adjacent);
                 }
               }
             }
+
+            std::sort(component.begin(), component.end());
+            res.emplace_back(
+              boost::container::ordered_unique_range, component.begin(), component.end());
           }
         }
         return res;
@@ -1596,11 +1659,13 @@ namespace Rodin::Geometry
 
       virtual Optional<Attribute> getAttribute(size_t dimension, Index index) const override;
 
+      /// @brief Returns the mesh connectivity (incidence relations).
       virtual Connectivity<Context>& getConnectivity() override
       {
         return m_connectivity;
       }
 
+      /// @brief Returns the mesh connectivity (incidence relations).
       virtual const Connectivity<Context>& getConnectivity() const override
       {
         return m_connectivity;
@@ -1626,7 +1691,7 @@ namespace Rodin::Geometry
        * @param[in] i Index of the polytope
        * @returns Heap-allocated transformation (caller takes ownership)
        *
-       * Constructs the isoparametric transformation based on the current vertex
+       * Constructs the parametric transformation based on the current vertex
        * coordinates and polytope geometry type. This is used internally by
        * getPolytopeTransformation() when no cached transformation exists.
        */
@@ -1635,6 +1700,7 @@ namespace Rodin::Geometry
       virtual const PolytopeQuadrature&
       getQuadrature(size_t dimension, Index idx, const QF::QuadratureFormulaBase& qf) const override;
 
+      /// @brief Serializes the mesh (for boost::serialization).
       template<class Archive>
       void serialize(Archive& ar, const unsigned int)
       {

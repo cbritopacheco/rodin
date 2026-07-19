@@ -8,6 +8,7 @@ namespace Rodin::Tests::Unit
 {
   //=== Basic Type Tests =====================================================
 
+  /// @brief Test that basic types are defined and have expected properties.
   TEST(Rodin_Types, BasicTypes)
   {
     // Test that basic types are defined and have expected properties
@@ -26,6 +27,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(r, 1.414);
   }
 
+  /// @brief Verify expected sizes for the types.
   TEST(Rodin_Types, TypeSizes)
   {
     // Verify expected sizes for the types
@@ -37,6 +39,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(sizeof(Real), sizeof(Double));
   }
 
+  /// @brief Verifies complex type for types by checking tolerance-based numerical results.
   TEST(Rodin_Types, ComplexType)
   {
     Complex c1(1.0, 2.0);
@@ -55,6 +58,7 @@ namespace Rodin::Tests::Unit
 
   //=== Container Type Tests =================================================
 
+  /// @brief Verifies list type for types by checking exact expected values.
   TEST(Rodin_Types, ListType)
   {
     List<Integer> intList;
@@ -67,6 +71,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(intList.back(), 3);
   }
 
+  /// @brief Verifies deque type for types by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Types, DequeType)
   {
     Deque<Double> doubleDeque;
@@ -80,6 +85,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(doubleDeque[2], 3.3);
   }
 
+  /// @brief Verifies stack type for types by checking exact expected values.
   TEST(Rodin_Types, StackType)
   {
     Stack<Integer> intStack;
@@ -95,6 +101,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(intStack.size(), 2);
   }
 
+  /// @brief Verifies flat set type for types by checking exact expected values.
   TEST(Rodin_Types, FlatSetType)
   {
     FlatSet<Integer> intSet;
@@ -112,6 +119,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(*it++, 5);
   }
 
+  /// @brief Verifies unordered set type for types by checking exact expected values, true predicates.
   TEST(Rodin_Types, UnorderedSetType)
   {
     UnorderedSet<Integer> intSet;
@@ -127,6 +135,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(intSet.find(40) == intSet.end());
   }
 
+  /// @brief Verifies map type for types by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Types, MapType)
   {
     Map<Integer, Double> intDoubleMap;
@@ -140,6 +149,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(intDoubleMap[3], 3.3);
   }
 
+  /// @brief Verifies unordered map type for types by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Types, UnorderedMapType)
   {
     UnorderedMap<Integer, Double> intDoubleMap;
@@ -153,6 +163,7 @@ namespace Rodin::Tests::Unit
     EXPECT_DOUBLE_EQ(intDoubleMap[30], 30.3);
   }
 
+  /// @brief Verifies flat map type for types by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Types, FlatMapType)
   {
     FlatMap<Integer, Double> intDoubleMap;
@@ -174,6 +185,7 @@ namespace Rodin::Tests::Unit
 
   //=== Index-specific Types =================================================
 
+  /// @brief Verifies index set type for types by checking exact expected values.
   TEST(Rodin_Types, IndexSetType)
   {
     IndexSet indices;
@@ -191,6 +203,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(*it++, 200);
   }
 
+  /// @brief Verifies index map type for types by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_Types, IndexMapType)
   {
     IndexMap<Double> indexDoubleMap;
@@ -206,6 +219,7 @@ namespace Rodin::Tests::Unit
 
   //=== Utility Types ========================================================
 
+  /// @brief Verifies bit set types for types by checking true predicates, false predicates.
   TEST(Rodin_Types, BitSetTypes)
   {
     BitSet<8> bits8;
@@ -228,6 +242,7 @@ namespace Rodin::Tests::Unit
     EXPECT_FALSE(bits2[1]);
   }
 
+  /// @brief Verifies optional type for types by checking tolerance-based numerical results, exact expected values, true predicates.
   TEST(Rodin_Types, OptionalType)
   {
     Optional<Integer> optInt;
@@ -246,6 +261,7 @@ namespace Rodin::Tests::Unit
   //=== User-defined Literal Tests ===========================================
 
 #if __cpp_size_t_suffix < 202011L
+  /// @brief Test the _UZ suffix for size_t values.
   TEST(Rodin_Types, UserDefinedLiteral_UZ)
   {
     // Test the _UZ suffix for size_t values
@@ -266,6 +282,7 @@ namespace Rodin::Tests::Unit
 
   //=== Template Instantiation Tests ========================================
 
+  /// @brief Test that template types can be instantiated with different types.
   TEST(Rodin_Types, TemplateInstantiation)
   {
     // Test that template types can be instantiated with different types

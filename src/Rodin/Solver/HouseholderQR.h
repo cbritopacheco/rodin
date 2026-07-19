@@ -50,10 +50,12 @@
 
 namespace Rodin::FormLanguage
 {
+  /// @brief Form-language traits for HouseholderQR solvers.
   template <class LinearSystem>
   struct Traits<Solver::HouseholderQR<LinearSystem>>
   {
-    using LinearSystemType = LinearSystem;
+    /// @brief Linear system type.
+      using LinearSystemType = LinearSystem;
   };
 }
 
@@ -82,37 +84,48 @@ namespace Rodin::Solver
     : public LinearSolverBase<Math::LinearSystem<Math::Matrix<Scalar>, Math::Vector<Scalar>>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
+      /// @brief Vector type of the linear system.
       using VectorType = Math::Vector<ScalarType>;
 
+      /// @brief Assembled operator type.
       using OperatorType = Math::Matrix<ScalarType>;
 
+      /// @brief Linear system type.
       using LinearSystemType = Math::LinearSystem<OperatorType, VectorType>;
 
+      /// @brief Associated problem base type.
       using ProblemBaseType = Variational::ProblemBase<LinearSystemType>;
 
+      /// @brief Parent class type.
       using Parent = LinearSolverBase<LinearSystemType>;
 
       using Parent::solve;
 
+      /// @brief Constructs the solver from the problem to be solved.
       HouseholderQR(ProblemBaseType& pb)
         : Parent(pb)
       {}
 
+      /// @brief Copy constructor.
       HouseholderQR(const HouseholderQR& other)
         : Parent(other)
       {}
 
+      /// @brief Move constructor.
       HouseholderQR(HouseholderQR&& other)
         : Parent(std::move(other))
       {}
 
+      /// @brief Solves the assembled linear system.
       void solve(LinearSystemType& axb) override
       {
         axb.getSolution() = m_solver.compute(axb.getOperator()).solve(axb.getVector());
       }
 
+      /// @brief Returns a polymorphic copy of this solver.
       HouseholderQR* copy() const noexcept override
       {
         return new HouseholderQR(*this);
@@ -124,7 +137,3 @@ namespace Rodin::Solver
 }
 
 #endif
-
-
-
-

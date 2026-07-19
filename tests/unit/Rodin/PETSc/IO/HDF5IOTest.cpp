@@ -43,6 +43,7 @@ namespace
         return LocalMesh::UniformGrid(type, { 4, 4 });
       case Polytope::Type::Tetrahedron:
       case Polytope::Type::Hexahedron:
+      case Polytope::Type::Pyramid:
       case Polytope::Type::Wedge:
         return LocalMesh::UniformGrid(type, { 3, 3, 3 });
       default:
@@ -60,6 +61,8 @@ namespace
       case Polytope::Type::Quadrilateral: return "Quad2D";
       case Polytope::Type::Tetrahedron:   return "Tet3D";
       case Polytope::Type::Hexahedron:    return "Hex3D";
+      case Polytope::Type::Pyramid:
+        return "Pyramid3D";
       case Polytope::Type::Wedge:         return "Wedge3D";
       default:                            return "Unknown";
     }
@@ -71,6 +74,7 @@ namespace
 
   // --- PETSc GridFunction HDF5 standalone field file -------------------------
 
+  /// @brief Verifies grid function standalone for PET sc HDF 5 by checking exact expected values.
   TEST_P(PETScHDF5, GridFunctionStandalone)
   {
     const auto type = GetParam();
@@ -124,6 +128,7 @@ namespace
 
   // --- PETSc GridFunction HDF5 round-trip raw DOFs ---------------------------
 
+  /// @brief Verifies grid function persistence raw DO fs for PET sc HDF 5 by checking tolerance-based numerical results, exact expected values.
   TEST_P(PETScHDF5, GridFunctionPersistenceRawDOFs)
   {
     const auto type = GetParam();
@@ -207,18 +212,11 @@ namespace
     }
   };
 
-  INSTANTIATE_TEST_SUITE_P(
-      AllDimensions,
-      PETScHDF5,
-      ::testing::Values(
-          Polytope::Type::Segment,
-          Polytope::Type::Triangle,
-          Polytope::Type::Quadrilateral,
-          Polytope::Type::Tetrahedron,
-          Polytope::Type::Hexahedron,
-          Polytope::Type::Wedge
-      ),
-      PETScPolytopeNameGenerator());
+  INSTANTIATE_TEST_SUITE_P(AllDimensions, PETScHDF5,
+    ::testing::Values(Polytope::Type::Segment, Polytope::Type::Triangle,
+      Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
+      Polytope::Type::Hexahedron, Polytope::Type::Pyramid, Polytope::Type::Wedge),
+    PETScPolytopeNameGenerator());
 }
 
 int main(int argc, char** argv)

@@ -4,8 +4,8 @@
  *       (See accompanying file LICENSE or copy at
  *          https://www.boost.org/LICENSE_1_0.txt)
  */
-#ifndef RODIN_MESH_FORWARDDECLS_H
-#define RODIN_MESH_FORWARDDECLS_H
+#ifndef RODIN_GEOMETRY_FORWARDDECLS_H
+#define RODIN_GEOMETRY_FORWARDDECLS_H
 
 /**
  * @file
@@ -19,6 +19,9 @@
 #include <cstddef>
 
 #include "Rodin/Context.h"
+#ifdef RODIN_USE_MPI
+#include "Rodin/MPI/Context/ForwardDecls.h"
+#endif
 #include "Types.h"
 
 namespace Rodin::Geometry
@@ -52,12 +55,12 @@ namespace Rodin::Geometry
   class PolytopeTransformation;
 
   /**
-   * @brief Template for isoparametric transformations.
+   * @brief Template for finite-element parametric transformations.
    * @tparam FE Finite element type
-   * @see IsoparametricTransformation.h
+   * @see ParametricTransformation.h
    */
   template <class FE>
-  class IsoparametricTransformation;
+  class ParametricTransformation;
 
   /**
    * @brief Represents a geometric polytope in a mesh.
@@ -205,6 +208,15 @@ namespace Rodin::Geometry
    */
   template <>
   class SubMesh<Context::Local>;
+
+  /**
+   * @brief Distributed MPI SubMesh specialization.
+   * @see Rodin/MPI/Geometry/SubMesh.h
+   */
+#ifdef RODIN_USE_MPI
+  template <>
+  class SubMesh<Context::MPI>;
+#endif
 
   /**
    * @brief Builder for constructing SubMesh objects.

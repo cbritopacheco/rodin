@@ -19,6 +19,7 @@
 #include "ForwardDecls.h"
 #include "Function.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::Variational
 {
   /**
@@ -133,6 +134,7 @@ namespace Rodin::Variational
     : public BooleanFunctionBase<BooleanFunction<Boolean>>
   {
     public:
+      /// @brief Parent class type.
       using Parent = BooleanFunctionBase<BooleanFunction<Boolean>>;
 
       BooleanFunction(Boolean v)
@@ -174,4 +176,5 @@ namespace Rodin::Variational
   BooleanFunction(Boolean) -> BooleanFunction<Boolean>;
 }
 
+/// @endcond
 #endif

@@ -21,6 +21,7 @@ using namespace Rodin::Variational;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies construction for variational sparse problem.
   TEST(Rodin_Variational_SparseProblem, Construction)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {2, 2});
@@ -34,6 +35,7 @@ namespace Rodin::Tests::Unit
     SUCCEED();
   }
 
+  /// @brief Verifies assemble for variational sparse problem by checking exact expected values, form assembly.
   TEST(Rodin_Variational_SparseProblem, Assemble)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -58,6 +60,7 @@ namespace Rodin::Tests::Unit
     EXPECT_EQ(static_cast<size_t>(b.size()), Vh.getSize());
   }
 
+  /// @brief Verifies matrix is sparse for variational sparse problem by checking form assembly.
   TEST(Rodin_Variational_SparseProblem, MatrixIsSparse)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -83,6 +86,7 @@ namespace Rodin::Tests::Unit
     EXPECT_GE(nnz, n);
   }
 
+  /// @brief Verifies stiffness matrix is symmetric for variational sparse problem by checking tolerance-based numerical results, form assembly.
   TEST(Rodin_Variational_SparseProblem, StiffnessMatrixIsSymmetric)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});
@@ -105,6 +109,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(diff, 0.0, 1e-12);
   }
 
+  /// @brief Verifies solve poisson for variational sparse problem by checking true predicates, solver behavior.
   TEST(Rodin_Variational_SparseProblem, SolvePoisson)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {4, 4});
@@ -135,6 +140,7 @@ namespace Rodin::Tests::Unit
     EXPECT_TRUE(hasNonZero);
   }
 
+  /// @brief Verifies RHS is non zero with forcing for variational sparse problem by checking true predicates, form assembly.
   TEST(Rodin_Variational_SparseProblem, RHSIsNonZeroWithForcing)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Triangle, {3, 3});

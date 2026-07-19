@@ -203,6 +203,46 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Verifies save load round trip pyramid for IO MFEM P1 grid function by checking tolerance-based numerical results, exact expected values, grid-function projection.
+  TEST(Rodin_IO_MFEM_P1_GridFunction, SaveLoadRoundTrip_Pyramid)
+  {
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, {3, 3, 3});
+
+    mesh.getConnectivity().compute(3, 2);
+    mesh.getConnectivity().compute(2, 1);
+    mesh.getConnectivity().compute(1, 0);
+
+    ASSERT_GE(mesh.getCellCount(), 16u);
+
+    P1 fes(mesh);
+    GridFunction gf(fes);
+
+    RealFunction func(
+      [](const Geometry::Point& p) { return p.x() + 2.0 * p.y() + 3.0 * p.z(); });
+    gf.project(func);
+
+    std::stringstream ss;
+    GridFunctionPrinter<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> printer(gf);
+    printer.print(ss);
+
+    std::string line;
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementSpace");
+    std::getline(ss, line);
+    EXPECT_EQ(line, "FiniteElementCollection: H1_3D_P1");
+
+    ss.clear();
+    ss.seekg(0);
+
+    GridFunction gf_loaded(fes);
+    GridFunctionLoader<FileFormat::MFEM, P1<Real>, Math::Vector<Real>> loader(gf_loaded);
+    loader.load(ss);
+
+    ASSERT_EQ(gf.getSize(), gf_loaded.getSize());
+    for (Index i = 0; i < static_cast<Index>(gf.getSize()); i++)
+      EXPECT_NEAR(gf[i], gf_loaded[i], 1e-10);
+  }
+
   /**
    * @brief Test saving and loading P1 GridFunction on segment mesh (1D)
    */
@@ -390,6 +430,7 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Quadrilateral:
           return LocalMesh::UniformGrid(geometry, { 3, 3 });
         case Polytope::Type::Tetrahedron:
+        case Polytope::Type::Pyramid:
         case Polytope::Type::Hexahedron:
         case Polytope::Type::Wedge:
           return LocalMesh::UniformGrid(geometry, { 2, 2, 2 });
@@ -407,6 +448,8 @@ namespace Rodin::Tests::Unit
         case Polytope::Type::Triangle:      return "Triangle";
         case Polytope::Type::Quadrilateral: return "Quadrilateral";
         case Polytope::Type::Tetrahedron:   return "Tetrahedron";
+        case Polytope::Type::Pyramid:
+          return "Pyramid";
         case Polytope::Type::Hexahedron:    return "Hexahedron";
         case Polytope::Type::Wedge:         return "Wedge";
       }
@@ -417,6 +460,7 @@ namespace Rodin::Tests::Unit
   class P1MEDITGridFunctionCoverage : public ::testing::TestWithParam<Polytope::Type>
   {};
 
+  /// @brief Verifies scalar round trip for P1 MEDIT grid function coverage by checking tolerance-based numerical results, exact expected values.
   TEST_P(P1MEDITGridFunctionCoverage, ScalarRoundTrip)
   {
     Mesh mesh = makeMeditCoverageMesh(GetParam());
@@ -439,22 +483,17 @@ namespace Rodin::Tests::Unit
       EXPECT_DOUBLE_EQ(loaded[i], gf[i]) << "dof " << i;
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-      AllSupportedGeometries,
-      P1MEDITGridFunctionCoverage,
-      ::testing::Values(
-        Polytope::Type::Point,
-        Polytope::Type::Segment,
-        Polytope::Type::Triangle,
-        Polytope::Type::Quadrilateral,
-        Polytope::Type::Tetrahedron,
-        Polytope::Type::Hexahedron,
-        Polytope::Type::Wedge),
-      [](const ::testing::TestParamInfo<Polytope::Type>& info)
-      {
-        return meditGeometryName(info.param);
-      });
+  /// @brief Instantiates P1 MEDIT Grid Function Coverage over the All Supported Geometries parameter coverage.
+  INSTANTIATE_TEST_SUITE_P(AllSupportedGeometries, P1MEDITGridFunctionCoverage,
+    ::testing::Values(Polytope::Type::Point, Polytope::Type::Segment,
+      Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+      Polytope::Type::Tetrahedron, Polytope::Type::Pyramid, Polytope::Type::Hexahedron,
+      Polytope::Type::Wedge),
+    [](const ::testing::TestParamInfo<Polytope::Type>& info) {
+      return meditGeometryName(info.param);
+    });
 
+  /// @brief Verifies vector 3 D round trip for IO MEDIT P1 grid function by checking tolerance-based numerical results, exact expected values.
   TEST(Rodin_IO_MEDIT_P1_GridFunction, Vector3DRoundTrip)
   {
     Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, { 2, 2, 2 });

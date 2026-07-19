@@ -188,6 +188,7 @@ namespace Rodin::Tests::Unit
     });
   }
 
+  /// @brief Instantiates Lagrangian Test over the Lagrangian Mesh Params parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
     LagrangianMeshParams,
     LagrangianTest,

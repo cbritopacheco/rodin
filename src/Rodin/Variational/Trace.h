@@ -46,13 +46,15 @@
 #include "Rodin/Variational/IntegrationPoint.h"
 #include "ShapeFunction.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   template <class NestedDerived, class FES, Variational::ShapeFunctionSpaceType Space>
   struct Traits<Variational::Trace<Variational::ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
-    using FESType = FES;
-    static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
+    /// @brief Finite element space type.
+      using FESType = FES;
+      static constexpr Variational::ShapeFunctionSpaceType SpaceType = Space;
   };
 }
 
@@ -73,8 +75,10 @@ namespace Rodin::Variational
     : public FunctionBase<Trace<FunctionBase<NestedDerived>>>
   {
     public:
+      /// @brief Operand type.
       using OperandType = FunctionBase<NestedDerived>;
 
+      /// @brief Parent class type.
       using Parent = FunctionBase<Trace<OperandType>>;
 
       /**
@@ -174,11 +178,14 @@ namespace Rodin::Variational
     : public ShapeFunctionBase<Trace<ShapeFunctionBase<NestedDerived, FES, Space>>>
   {
     public:
+      /// @brief Finite element space type.
       using FESType = FES;
       static constexpr ShapeFunctionSpaceType SpaceType = Space;
 
+      /// @brief Operand type.
       using OperandType = ShapeFunctionBase<NestedDerived, FES, Space>;
 
+      /// @brief Parent class type.
       using Parent = ShapeFunctionBase<Trace<OperandType>>;
 
       constexpr
@@ -258,4 +265,5 @@ namespace Rodin::Variational
     -> Trace<ShapeFunctionBase<NestedDerived, FES, Space>>;
 }
 
+/// @endcond
 #endif

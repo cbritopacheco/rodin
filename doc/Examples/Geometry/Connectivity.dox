@@ -16,7 +16,7 @@
 
   @section examples-geom-conn-compute Computing Connectivity
 
-  The @ref Rodin::Geometry::Connectivity::compute "Connectivity::compute(d1, d2)"
+  The @ref Rodin::Geometry::Connectivity "Connectivity::compute(d1, d2)"
   method computes the incidence mapping from polytopes of dimension @f$ d_1 @f$
   to polytopes of dimension @f$ d_2 @f$:
 

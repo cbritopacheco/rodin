@@ -57,6 +57,11 @@ namespace Rodin::Geometry::Euclidean
     constexpr
     Line2D(T a, T b, T c);
 
+    /**
+     * Constructs a line from the three coefficients @f$ (a,b,c) @f$.
+     * @param[in] list Initializer list containing exactly the coefficients
+     * @f$ a @f$, @f$ b @f$, and @f$ c @f$.
+     */
     constexpr
     Line2D(std::initializer_list<T> list);
 
@@ -69,6 +74,10 @@ namespace Rodin::Geometry::Euclidean
     constexpr
     Line2D(const Point2D<T>& p, const Point2D<T>& q);
 
+    /**
+     * Constructs the supporting line of a line segment.
+     * @param[in] ls Line segment whose endpoints define the line.
+     */
     constexpr
     Line2D(const LineSegment2D<T>& ls);
 
@@ -145,18 +154,36 @@ namespace Rodin::Geometry::Euclidean
     constexpr
     Optional<T> slope() const;
 
+    /**
+     * Computes the x-intercept of the line.
+     * @retval std::nullopt If the line has no unique x-intercept.
+     * @retval T The x-coordinate where the line intersects the x-axis.
+     */
     inline
     constexpr
     Optional<T> xIntercept() const;
 
+    /**
+     * Computes the y-intercept of the line.
+     * @retval std::nullopt If the line has no unique y-intercept.
+     * @retval T The y-coordinate where the line intersects the y-axis.
+     */
     inline
     constexpr
     Optional<T> yIntercept() const;
 
+    /**
+     * Checks whether the line is vertical.
+     * @returns True if the line has equation @f$ x = c/a @f$.
+     */
     inline
     constexpr
     bool isVertical() const;
 
+    /**
+     * Checks whether the line is horizontal.
+     * @returns True if the line has equation @f$ y = c/b @f$.
+     */
     inline
     constexpr
     bool isHorizontal() const;

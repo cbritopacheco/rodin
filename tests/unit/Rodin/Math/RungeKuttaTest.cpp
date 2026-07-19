@@ -24,6 +24,7 @@ class RungeKuttaTest : public ::testing::Test
 
 // dy/dt = y, y(0) = 1 → y(t) = e^t
 // Single step from t=0 to t=dt
+/// @brief Verifies RK 2 single step exponential for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK2SingleStepExponential)
 {
   RK2 rk2;
@@ -38,6 +39,7 @@ TEST_F(RungeKuttaTest, RK2SingleStepExponential)
   EXPECT_NEAR(q, exact, 0.01); // 2nd order: error ~ O(dt^3)
 }
 
+/// @brief Verifies RK 4 single step exponential for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK4SingleStepExponential)
 {
   RK4 rk4;
@@ -50,6 +52,7 @@ TEST_F(RungeKuttaTest, RK4SingleStepExponential)
   EXPECT_NEAR(q, exact, 1e-6); // 4th order: very accurate
 }
 
+/// @brief Verifies RK 2 multi step exponential for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK2MultiStepExponential)
 {
   RK2 rk2;
@@ -67,6 +70,7 @@ TEST_F(RungeKuttaTest, RK2MultiStepExponential)
   EXPECT_NEAR(y, exact, 0.01);
 }
 
+/// @brief Verifies RK 4 multi step exponential for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK4MultiStepExponential)
 {
   RK4 rk4;
@@ -85,6 +89,7 @@ TEST_F(RungeKuttaTest, RK4MultiStepExponential)
 }
 
 // dy/dt = -y, y(0) = 1 → y(t) = e^{-t}
+/// @brief Verifies RK 4 exponential decay for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK4ExponentialDecay)
 {
   RK4 rk4;
@@ -101,6 +106,7 @@ TEST_F(RungeKuttaTest, RK4ExponentialDecay)
   EXPECT_NEAR(y, std::exp(-1.0), 1e-8);
 }
 
+/// @brief Test aliasing: q and p are the same object.
 TEST_F(RungeKuttaTest, RK2QAndPSameObject)
 {
   // Test aliasing: q and p are the same object
@@ -113,6 +119,7 @@ TEST_F(RungeKuttaTest, RK2QAndPSameObject)
   EXPECT_NEAR(y, 1.105, 1e-10);
 }
 
+/// @brief Test aliasing: q and p are the same object.
 TEST_F(RungeKuttaTest, RK4QAndPSameObject)
 {
   // Test aliasing: q and p are the same object
@@ -125,6 +132,7 @@ TEST_F(RungeKuttaTest, RK4QAndPSameObject)
   EXPECT_NEAR(y, exact, 1e-6);
 }
 
+/// @brief Verifies RK 2 Q and P different objects for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK2QAndPDifferentObjects)
 {
   RK2 rk2;
@@ -137,6 +145,7 @@ TEST_F(RungeKuttaTest, RK2QAndPDifferentObjects)
   EXPECT_DOUBLE_EQ(p, 1.0); // p unchanged
 }
 
+/// @brief Verifies RK 4 Q and P different objects for runge kutta test by checking tolerance-based numerical results.
 TEST_F(RungeKuttaTest, RK4QAndPDifferentObjects)
 {
   RK4 rk4;
@@ -150,6 +159,7 @@ TEST_F(RungeKuttaTest, RK4QAndPDifferentObjects)
   EXPECT_DOUBLE_EQ(p, 1.0); // p unchanged
 }
 
+/// @brief Verify 4th order convergence: halving dt should reduce error by ~16x.
 TEST_F(RungeKuttaTest, RK4ConvergenceOrder)
 {
   // Verify 4th order convergence: halving dt should reduce error by ~16x

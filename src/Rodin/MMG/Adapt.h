@@ -8,8 +8,8 @@
  * @file Adapt.h
  * @brief Metric-based mesh adaptation operator.
  */
-#ifndef RODIN_EXTERNAL_MMG_ADAPT_H
-#define RODIN_EXTERNAL_MMG_ADAPT_H
+#ifndef RODIN_MMG_ADAPT_H
+#define RODIN_MMG_ADAPT_H
 
 #include "ForwardDecls.h"
 

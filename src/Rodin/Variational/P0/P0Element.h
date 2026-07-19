@@ -60,6 +60,7 @@
 
 #include "ForwardDecls.h"
 
+/// @cond RODIN_DOXYGEN_INTERNAL
 namespace Rodin::FormLanguage
 {
   /**
@@ -68,8 +69,10 @@ namespace Rodin::FormLanguage
   template <class Range>
   struct Traits<Variational::P0Element<Range>>
   {
-    using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
-    using RangeType = Range;
+    /// @brief Scalar value type.
+      using ScalarType = typename FormLanguage::Traits<Range>::ScalarType;
+    /// @brief Range (evaluation value) type.
+      using RangeType = Range;
   };
 }
 
@@ -106,6 +109,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P0Element<Scalar>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -288,6 +292,7 @@ namespace Rodin::Variational
       /// Parent class
       using Parent = FiniteElementBase<P0Element<Math::SpatialVector<Scalar>>>;
 
+      /// @brief Scalar value type.
       using ScalarType = Scalar;
 
       /// Type of range
@@ -537,6 +542,15 @@ namespace Rodin::Variational
         return Geometry::Polytope::Traits(this->getGeometry()).getCentroid();
       }
 
+      template <class Coefficient>
+      constexpr void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint&) const
+      {
+        out.resize(m_vdim);
+        for (size_t component = 0; component < m_vdim; ++component)
+          out(component) = coefficient(component);
+      }
+
       constexpr
       size_t getOrder() const
       {
@@ -551,4 +565,5 @@ namespace Rodin::Variational
   };
 }
 
+/// @endcond
 #endif

@@ -27,6 +27,12 @@ namespace Rodin::Context
     friend class boost::serialization::access;
 
     public:
+      /**
+       * @brief Serializes the local context.
+       * @tparam Archive Serialization archive type.
+       * @param ar Archive used for serialization.
+       * @param version Serialization version.
+       */
       template <class Archive>
       void serialize(Archive & ar, const unsigned int version)
       {
@@ -36,5 +42,3 @@ namespace Rodin::Context
 }
 
 #endif
-
-

@@ -74,8 +74,8 @@
   We use a fine mesh (@f$ 64 \times 64 @f$) to adequately resolve the wave,
   following the rule of thumb that the mesh size @f$ h @f$ should satisfy
   @f$ k h \lesssim 1 @f$. The mesh is created using
-  @ref Rodin::Geometry::Mesh::UniformGrid "Mesh::UniformGrid()" and scaled
-  to the unit domain via @ref Rodin::Geometry::Mesh::scale "Mesh::scale()":
+  @ref Rodin::Geometry::Mesh "Mesh::UniformGrid()" and scaled
+  to the unit domain via @ref Rodin::Geometry::Mesh "Mesh::scale()":
 
   @code{.cpp}
   static constexpr Real waveLength = 0.5;
