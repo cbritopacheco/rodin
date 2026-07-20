@@ -5130,7 +5130,7 @@ strict digraph "" {
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=9,
+		weight=8,
 		width=2];
 	"Rodin/Variational/H1/LagrangeBasis.h" -> "Rodin/Math/Vector.h";
 	"Rodin/Variational/H1/LagrangeBasis.h" -> "Rodin/Variational/H1/GLL.h";
@@ -5167,11 +5167,11 @@ strict digraph "" {
 	"Rodin/Variational/H1/Dubiner.h"	[colorscheme=spectral9,
 		fillcolor=8,
 		fixedsize=true,
-		fontsize=7,
+		fontsize=8,
 		height=2,
 		shape=circle,
 		style=filled,
-		weight=12,
+		weight=17,
 		width=2];
 	"Rodin/Variational/H1/Dubiner.h" -> "Rodin/Math/Common.h";
 	"Rodin/Variational/H1/Dubiner.h" -> "Rodin/Math/Matrix.h";
