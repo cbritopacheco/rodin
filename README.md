@@ -1,6 +1,6 @@
 [![Rodin](doc/Images/README_Header.png)](https://github.com/cbritopacheco/rodin/releases)
 
-# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE)
+# Rodin [![License](https://img.shields.io/badge/license-BSL--1.0-green)](https://github.com/cbritopacheco/rodin/blob/master/LICENSE) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20Rodin-yellow?logo=buymeacoffee)](https://www.buymeacoffee.com/cbritopacheco)
 
 Rodin is a lightweight and modular finite element framework which provides many of the associated functionalities that are needed when implementing shape and topology optimization algorithms. These functionalities range from refining and remeshing the underlying shape, to providing elegant mechanisms to specify and solve variational problems.
 
@@ -36,6 +36,7 @@ New to Rodin? Check out our comprehensive [Getting Started Guide](https://cbrito
 8. [CMake options](#cmake-options)
 9. [Development](#development)
 10. [Gallery](#gallery)
+11. [Support Rodin](#support-rodin)
 
 ## Installation
 
@@ -518,3 +519,12 @@ For more information, see [.github/agents/README.md](.github/agents/README.md).
     </td>
   </tr>
 </table>
+
+## Support Rodin
+
+Rodin is developed and maintained as an open-source project. If you find it
+useful for research, teaching, or engineering, you can support its continued
+development by [Buying me a Coffee](https://www.buymeacoffee.com/cbritopacheco).
+
+Support helps fund continued development, documentation, testing, and
+maintenance.
