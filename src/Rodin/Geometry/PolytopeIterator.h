@@ -79,7 +79,20 @@ namespace Rodin::Geometry
       /**
        * @brief Move assignment operator.
        */
-      PolytopeIteratorBase& operator=(PolytopeIteratorBase&&) = default;
+      PolytopeIteratorBase& operator=(PolytopeIteratorBase&& other)
+      {
+        if (this != &other)
+        {
+          m_dimension = other.m_dimension;
+          m_mesh = std::move(other.m_mesh);
+          m_gen = std::move(other.m_gen);
+          m_dirty = other.m_dirty;
+          m_polytope.reset();
+          if (other.m_polytope)
+            m_polytope.emplace(std::move(*other.m_polytope));
+        }
+        return *this;
+      }
 
       /**
        * @brief Conversion to bool (checks if iterator is valid).
@@ -117,9 +130,9 @@ namespace Rodin::Geometry
       const T& operator*() const noexcept
       {
         if (!m_polytope || m_dirty)
-          m_polytope.reset(this->generate());
+          m_polytope.emplace(static_cast<const Derived&>(*this).make());
         m_dirty = false;
-        return *(m_polytope);
+        return *m_polytope;
       }
 
       /**
@@ -129,9 +142,9 @@ namespace Rodin::Geometry
       const T* operator->() const noexcept
       {
         if (!m_polytope || m_dirty)
-          m_polytope.reset(this->generate());
+          m_polytope.emplace(static_cast<const Derived&>(*this).make());
         m_dirty = false;
-        return m_polytope.get();
+        return &*m_polytope;
       }
 
       /**
@@ -144,8 +157,9 @@ namespace Rodin::Geometry
       {
         if (!m_polytope || m_dirty)
           return generate();
-        else
-          return m_polytope.release();
+        auto ptr = std::make_unique<T>(std::move(*m_polytope));
+        m_polytope.reset();
+        return ptr.release();
       }
 
       /**
@@ -210,7 +224,7 @@ namespace Rodin::Geometry
       Optional<std::reference_wrapper<const MeshBase>> m_mesh;
       std::unique_ptr<IndexGeneratorBase> m_gen;
       mutable bool m_dirty;
-      mutable std::unique_ptr<T> m_polytope;
+      mutable Optional<T> m_polytope;
   };
 
   /**
@@ -283,6 +297,12 @@ namespace Rodin::Geometry
       PolytopeIterator& operator=(VertexIterator it);
 
       /**
+       * @brief Constructs the polytope at the current iterator position.
+       * @returns Polytope value stored directly by the iterator
+       */
+      Polytope make() const;
+
+      /**
        * @brief Generates a polytope at current position.
        * @returns Pointer to new Polytope object
        */
@@ -343,6 +363,12 @@ namespace Rodin::Geometry
        * @brief Move assignment operator.
        */
       CellIterator& operator=(CellIterator&&) = default;
+
+      /**
+       * @brief Constructs the cell at the current iterator position.
+       * @returns Cell value stored directly by the iterator
+       */
+      Cell make() const;
 
       /**
        * @brief Generates a cell at current position.
@@ -408,6 +434,12 @@ namespace Rodin::Geometry
       FaceIterator& operator=(FaceIterator&&) = default;
 
       /**
+       * @brief Constructs the face at the current iterator position.
+       * @returns Face value stored directly by the iterator
+       */
+      Face make() const;
+
+      /**
        * @brief Generates a face at current position.
        * @returns Pointer to new Face object
        */
@@ -469,6 +501,12 @@ namespace Rodin::Geometry
        * @brief Move assignment operator.
        */
       VertexIterator& operator=(VertexIterator&&) = default;
+
+      /**
+       * @brief Constructs the vertex at the current iterator position.
+       * @returns Vertex value stored directly by the iterator
+       */
+      Vertex make() const;
 
       /**
        * @brief Generates a vertex at current position.

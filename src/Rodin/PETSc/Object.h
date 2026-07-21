@@ -46,7 +46,8 @@ namespace Rodin::PETSc
        */
       void getComm(MPI_Comm* comm) const
       {
-        PetscErrorCode ierr = PetscObjectGetComm(reinterpret_cast<PetscObject&>(this->getHandle()), comm);
+        [[maybe_unused]] PetscErrorCode ierr =
+          PetscObjectGetComm(reinterpret_cast<PetscObject&>(this->getHandle()), comm);
         assert(ierr == PETSC_SUCCESS);
       }
 

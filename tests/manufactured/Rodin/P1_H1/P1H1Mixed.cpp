@@ -39,7 +39,8 @@ namespace Rodin::Tests::Manufactured::P1H1
       void SetUp() override
       {
         const auto geom = GetParam();
-        if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron || geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
+        if (geom == Polytope::Type::Tetrahedron || geom == Polytope::Type::Hexahedron ||
+          geom == Polytope::Type::Pyramid || geom == Polytope::Type::Wedge)
         {
           m_mesh = Mesh().UniformGrid(geom, { NX, NY, NZ });
           m_mesh.scale(1.0 / (NX - 1));
@@ -248,16 +249,9 @@ namespace Rodin::Tests::Manufactured::P1H1
   );
 
   /// @brief Instantiates Manufactured P1 H1 Mixed Test 20 K 1 over the Polytope Coverage 3 D K 1 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D_K1,
-    Manufactured_P1H1_Mixed_Test_20_K1,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-      )
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D_K1, Manufactured_P1H1_Mixed_Test_20_K1,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Manufactured P1 H1 Mixed Test 10 x 10 K 2 over the Polytope Coverage 2 D K 2 parameter coverage.
   INSTANTIATE_TEST_SUITE_P(
@@ -269,13 +263,7 @@ namespace Rodin::Tests::Manufactured::P1H1
   );
 
   /// @brief Instantiates Manufactured P1 H1 Mixed Test 6 x 6 x 6 K 2 over the Polytope Coverage 3 D K 2 parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D_K2,
-    Manufactured_P1H1_Mixed_Test_6x6x6_K2,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D_K2, Manufactured_P1H1_Mixed_Test_6x6x6_K2,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

@@ -6,7 +6,6 @@
  */
 #include "Rodin/Alert/MemberFunctionException.h"
 
-#include "Rodin/Alert/NamespacedException.h"
 #include "Rodin/Math/SpatialVector.h"
 #include "Rodin/Variational/P1.h"
 #include "Rodin/Variational/GridFunction.h"
@@ -796,10 +795,20 @@ namespace Rodin::Geometry
 
     if (dimensions.size() != dim)
     {
-      Alert::NamespacedException("Rodin::Geometry::Mesh<Context::Local>::UniformGrid")
-        << "Expected " << dim << " dimensions for geometry type " << g
-        << ", but got " << dimensions.size() << "."
-        << Alert::Raise;
+      Alert::MemberFunctionException(Mesh(), __func__)
+        << "Expected " << dim << " dimensions for geometry type " << g << ", but got "
+        << dimensions.size() << "." << Alert::Raise;
+    }
+
+    for (size_t axis = 0; axis < dimensions.size(); ++axis)
+    {
+      if (dimensions.coeff(axis) < 2)
+      {
+        Alert::MemberFunctionException(Mesh(), __func__)
+          << "Expected at least 2 grid points along axis " << axis
+          << " for geometry type " << g << ", but got " << dimensions.coeff(axis) << "."
+          << Alert::Raise;
+      }
     }
 
     switch (g)
@@ -810,9 +819,7 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Segment:
       {
-        assert(dimensions.size() == 1);
         const size_t n = dimensions.coeff(0);
-        assert(n >= 2);
 
         build.initialize(dim).nodes(n);
 
@@ -829,11 +836,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Triangle:
       {
-        assert(dimensions.size() == 2);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         build.initialize(dim).nodes(w * h);
-        assert(w * h >= 4);
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
@@ -853,11 +858,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Quadrilateral:
       {
-        assert(dimensions.size() == 2);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         build.initialize(dim).nodes(w * h);
-        assert(w * h >= 4);
         for (size_t j = 0; j < h; j++)
         {
           for (size_t i = 0; i < w; i++)
@@ -880,11 +883,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Tetrahedron:
       {
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
 
         build.initialize(dim)
              .nodes(w * h * d)
@@ -936,11 +937,9 @@ namespace Rodin::Geometry
       }
       case Polytope::Type::Wedge:
       {
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
         build.initialize(dim).nodes(w * h * d);
         for (size_t k = 0; k < d; k++)
         {
@@ -979,18 +978,14 @@ namespace Rodin::Geometry
 
       case Polytope::Type::Pyramid:
       {
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
 
         const size_t gridVertices = w * h * d;
         const size_t cellCount = (w - 1) * (h - 1) * (d - 1);
 
-        build.initialize(dim)
-             .nodes(gridVertices + cellCount)
-             .reserve(dim, 6 * cellCount);
+        build.initialize(dim).nodes(gridVertices + cellCount).reserve(dim, 6 * cellCount);
 
         for (size_t k = 0; k < d; ++k)
         {
@@ -998,9 +993,8 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i < w; ++i)
             {
-              build.vertex({ static_cast<Real>(i),
-                             static_cast<Real>(j),
-                             static_cast<Real>(k) });
+              build.vertex(
+                {static_cast<Real>(i), static_cast<Real>(j), static_cast<Real>(k)});
             }
           }
         }
@@ -1011,20 +1005,17 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i + 1 < w; ++i)
             {
-              build.vertex({ static_cast<Real>(i) + Real(0.5),
-                             static_cast<Real>(j) + Real(0.5),
-                             static_cast<Real>(k) + Real(0.5) });
+              build.vertex({static_cast<Real>(i) + Real(0.5),
+                static_cast<Real>(j) + Real(0.5), static_cast<Real>(k) + Real(0.5)});
             }
           }
         }
 
-        const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index
-        {
+        const auto vid = [w, h](size_t i, size_t j, size_t k) -> Index {
           return static_cast<Index>(i + j * w + k * w * h);
         };
 
-        const auto cid = [gridVertices, w, h](size_t i, size_t j, size_t k) -> Index
-        {
+        const auto cid = [gridVertices, w, h](size_t i, size_t j, size_t k) -> Index {
           const size_t cw = w - 1;
           const size_t ch = h - 1;
           return static_cast<Index>(gridVertices + i + j * cw + k * cw * ch);
@@ -1036,22 +1027,22 @@ namespace Rodin::Geometry
           {
             for (size_t i = 0; i + 1 < w; ++i)
             {
-              const Index v0 = vid(i,     j,     k);
-              const Index v1 = vid(i + 1, j,     k);
+              const Index v0 = vid(i, j, k);
+              const Index v1 = vid(i + 1, j, k);
               const Index v2 = vid(i + 1, j + 1, k);
-              const Index v3 = vid(i,     j + 1, k);
-              const Index v4 = vid(i,     j,     k + 1);
-              const Index v5 = vid(i + 1, j,     k + 1);
+              const Index v3 = vid(i, j + 1, k);
+              const Index v4 = vid(i, j, k + 1);
+              const Index v5 = vid(i + 1, j, k + 1);
               const Index v6 = vid(i + 1, j + 1, k + 1);
-              const Index v7 = vid(i,     j + 1, k + 1);
-              const Index c  = cid(i, j, k);
+              const Index v7 = vid(i, j + 1, k + 1);
+              const Index c = cid(i, j, k);
 
-              build.polytope(g, { v0, v1, v2, v3, c })
-                   .polytope(g, { v4, v5, v6, v7, c })
-                   .polytope(g, { v0, v4, v5, v1, c })
-                   .polytope(g, { v1, v5, v6, v2, c })
-                   .polytope(g, { v2, v6, v7, v3, c })
-                   .polytope(g, { v3, v7, v4, v0, c });
+              build.polytope(g, {v0, v1, v2, v3, c})
+                .polytope(g, {v4, v5, v6, v7, c})
+                .polytope(g, {v0, v4, v5, v1, c})
+                .polytope(g, {v1, v5, v6, v2, c})
+                .polytope(g, {v2, v6, v7, v3, c})
+                .polytope(g, {v3, v7, v4, v0, c});
             }
           }
         }
@@ -1063,11 +1054,9 @@ namespace Rodin::Geometry
       {
         // Structured brick mesh with MFEM-compatible vertex ordering
         // dimensions = {w, h, d}
-        assert(dimensions.size() == 3);
         const size_t w = dimensions.coeff(0);
         const size_t h = dimensions.coeff(1);
         const size_t d = dimensions.coeff(2);
-        assert(w >= 2 && h >= 2 && d >= 2);
 
         // Total vertices
         build.initialize(dim).nodes(w * h * d);
@@ -1120,7 +1109,8 @@ namespace Rodin::Geometry
       }
       default:
       {
-        assert(false);
+        Alert::MemberFunctionException(Mesh(), __func__)
+          << "Unsupported uniform-grid geometry type " << g << "." << Alert::Raise;
         return build.nodes(0).finalize();
       }
     };

@@ -230,26 +230,12 @@ namespace Rodin::Tests::Manufactured::H1Poisson3D
   }
 
   /// @brief Instantiates Manufactured Poisson 3 D H1 Test 8 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Poisson3D_H1_Test_8,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-    )
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Poisson3D_H1_Test_8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Manufactured Poisson 3 D H1 Test 16 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Poisson3D_H1_Test_16,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge
-    )
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Poisson3D_H1_Test_16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

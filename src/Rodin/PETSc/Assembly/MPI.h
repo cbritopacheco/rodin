@@ -81,7 +81,6 @@ namespace Rodin::Assembly
         const auto& fes = input.getFES();
         const auto& mesh = fes.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx = mesh.getContext();
         const size_t globalSize = fes.getSize();
 
         size_t begin, end;
@@ -89,14 +88,11 @@ namespace Rodin::Assembly
         const size_t ownedSize = end - begin;
 
         PetscErrorCode ierr;
-        ierr = PETSc::Assembly::VectorSetup(res).prepare({
-          static_cast<PetscInt>(ownedSize),
-          static_cast<PetscInt>(globalSize),
-          nullptr,
-          true
-        });
+        ierr =
+          PETSc::Assembly::VectorSetup(res).prepare({static_cast<PetscInt>(ownedSize),
+            static_cast<PetscInt>(globalSize), nullptr, true});
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         for (auto& lfi : input.getLFIs())
         {
@@ -126,18 +122,18 @@ namespace Rodin::Assembly
               const PetscScalar v = lfi.integrate(i);
               ierr = VecSetValue(res, r, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
           }
         }
 
         ierr = VecAssemblyBegin(res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         ierr = VecAssemblyEnd(res);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         (void) ierr;
       }
@@ -196,7 +192,6 @@ namespace Rodin::Assembly
         assert(trialFES.getMesh() == testFES.getMesh());
         const auto& mesh = trialFES.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx = mesh.getContext();
 
         size_t rbegin, rend;
         testFES.getOwnershipRange(rbegin, rend);
@@ -211,16 +206,12 @@ namespace Rodin::Assembly
         const size_t globalCols = trialFES.getSize();
 
         PetscErrorCode ierr;
-        ierr = PETSc::Assembly::MatrixSetup(res).prepare({
-          static_cast<PetscInt>(localRows),
-          static_cast<PetscInt>(localCols),
-          static_cast<PetscInt>(globalRows),
-          static_cast<PetscInt>(globalCols),
-          nullptr,
-          true
-        });
+        ierr =
+          PETSc::Assembly::MatrixSetup(res).prepare({static_cast<PetscInt>(localRows),
+            static_cast<PetscInt>(localCols), static_cast<PetscInt>(globalRows),
+            static_cast<PetscInt>(globalCols), nullptr, true});
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         for (auto& bfi : input.getLocalBFIs())
         {
@@ -245,16 +236,16 @@ namespace Rodin::Assembly
             const auto& rows = testFES.getDOFs(d, idx);
             const auto& cols = trialFES.getDOFs(d, idx);
 
-            for (Index i = 0; i < rows.size(); ++i)
+            for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
             {
               const PetscInt r = static_cast<PetscInt>(rows[i]);
-              for (Index j = 0; j < cols.size(); ++j)
+              for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
               {
                 const PetscInt c = static_cast<PetscInt>(cols[j]);
                 const PetscScalar v = bfi.integrate(j, i);
                 ierr = MatSetValue(res, r, c, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
-                (void) ierr;
+                (void)ierr;
               }
             }
           }
@@ -262,11 +253,11 @@ namespace Rodin::Assembly
 
         ierr = MatAssemblyBegin(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         ierr = MatAssemblyEnd(res, MAT_FINAL_ASSEMBLY);
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         (void) ierr;
       }
@@ -336,10 +327,8 @@ namespace Rodin::Assembly
        * @param[in] input Single-field problem assembly input.
        * @param[in] target Assembly target to update.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         switch (target)
         {
@@ -360,10 +349,7 @@ namespace Rodin::Assembly
         RHS
       };
 
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          AssemblyMode mode) const
+      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
         static_assert(
           std::is_same_v<MeshContextType, Rodin::Context::MPI>,
@@ -385,7 +371,6 @@ namespace Rodin::Assembly
 
         const auto& mesh  = trialFES.getMesh();
         const auto& shard = mesh.getShard();
-        const auto& ctx   = mesh.getContext();
 
         const size_t globalCols = trialFES.getSize();
         const size_t globalRows = testFES.getSize();
@@ -407,16 +392,12 @@ namespace Rodin::Assembly
         assert(A);
         if (doMatrix)
         {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({
-            static_cast<PetscInt>(localRows),
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(globalRows),
-            static_cast<PetscInt>(globalCols),
-            nullptr,
-            true
-          });
+          ierr =
+            PETSc::Assembly::MatrixSetup(A).prepare({static_cast<PetscInt>(localRows),
+              static_cast<PetscInt>(localCols), static_cast<PetscInt>(globalRows),
+              static_cast<PetscInt>(globalCols), nullptr, true});
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         // ------------------------
@@ -425,30 +406,21 @@ namespace Rodin::Assembly
         assert(b);
         if (doVector)
         {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({
-            static_cast<PetscInt>(localRows),
-            static_cast<PetscInt>(globalRows),
-            nullptr,
-            true,
-            true
-          });
+          ierr =
+            PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(localRows),
+              static_cast<PetscInt>(globalRows), nullptr, true, true});
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         auto& x = axb.getSolution();
         assert(x);
         // The solution vector carries the previous iterate as the solver's
         // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({
-          static_cast<PetscInt>(localCols),
-          static_cast<PetscInt>(globalCols),
-          nullptr,
-          true,
-          false
-        });
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(localCols),
+          static_cast<PetscInt>(globalCols), nullptr, true, false});
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         ConstraintMap<PetscScalar> constraints(std::max(globalRows, globalCols));
         using DBCBaseType = Variational::DirichletBCBase<PetscScalar>;
@@ -460,40 +432,39 @@ namespace Rodin::Assembly
           if (dbc.getOperand().getUUID() != u.getUUID())
             continue;
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
-                constraints.setFixed(
-                    static_cast<Index>(local),
-                    static_cast<PetscScalar>(value));
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
               {
-                const auto& masters = pair.first;
-                const auto& coeffs = pair.second;
-                std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
-                entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                for (const auto& [local, value] : dofs)
+                  constraints.setFixed(
+                    static_cast<Index>(local), static_cast<PetscScalar>(value));
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
+              {
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
                 {
-                  entries.push_back({
-                      static_cast<Index>(masters[k]),
-                      static_cast<PetscScalar>(coeffs[k]) });
-                }
-                const auto valueIt = affineValues.find(slave);
-                const PetscScalar value =
-                  valueIt == affineValues.end()
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(masters.size()));
+                  for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+                  {
+                    entries.push_back({static_cast<Index>(masters[k]),
+                      static_cast<PetscScalar>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const PetscScalar value = valueIt == affineValues.end()
                     ? PetscScalar(0)
                     : static_cast<PetscScalar>(valueIt->second);
-                constraints.setIdentification(static_cast<Index>(slave), entries, value);
+                  constraints.setIdentification(
+                    static_cast<Index>(slave), entries, value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
@@ -503,12 +474,10 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
-        auto matrix_entry = [&](Index row, Index col, PetscScalar val)
-        {
-          const PetscScalar colValue =
-            constraints.isIdentified(col)
-              ? constraints.getIdentificationValue(col)
-              : PetscScalar(0);
+        auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
+          const PetscScalar colValue = constraints.isIdentified(col)
+            ? constraints.getIdentificationValue(col)
+            : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
@@ -519,7 +488,7 @@ namespace Rodin::Assembly
               {
                 ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
-                (void) ierr;
+                (void)ierr;
               }
             }
             if (doMatrix)
@@ -527,21 +496,19 @@ namespace Rodin::Assembly
               for (const auto& c : constraints.expand(col))
               {
                 const PetscInt J = static_cast<PetscInt>(c.index);
-                const PetscScalar v =
-                  r.coefficient * val * c.coefficient;
+                const PetscScalar v = r.coefficient * val * c.coefficient;
                 // Insert unconditionally. PETSc decides whether zero-valued
                 // insertions affect the pattern according to its current
                 // matrix options.
                 ierr = MatSetValue(A, I, J, v, ADD_VALUES);
                 assert(ierr == PETSC_SUCCESS);
-                (void) ierr;
+                (void)ierr;
               }
             }
           }
         };
 
-        auto vector_entry = [&](Index row, PetscScalar val)
-        {
+        auto vector_entry = [&](Index row, PetscScalar val) {
           if (val == PetscScalar(0))
             return;
           for (const auto& r : constraints.expand(row))
@@ -550,7 +517,7 @@ namespace Rodin::Assembly
             const PetscScalar v = r.coefficient * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         };
 
@@ -566,8 +533,8 @@ namespace Rodin::Assembly
 
             for (auto it = seq.getIterator(); it; ++it)
             {
-              const size_t d   = it->getDimension();
-              const Index  idx = it->getIndex();
+              const size_t d = it->getDimension();
+              const Index idx = it->getIndex();
 
               if (!shard.isOwned(d, idx))
                 continue;
@@ -584,10 +551,10 @@ namespace Rodin::Assembly
               const auto& rowsDOF = testFES.getDOFs(d, idx);
               const auto& colsDOF = trialFES.getDOFs(d, idx);
 
-              for (Index i = 0; i < rowsDOF.size(); ++i)
+              for (Index i = 0; i < static_cast<Index>(rowsDOF.size()); ++i)
               {
                 const PetscInt I = rowsDOF[i];
-                for (Index j = 0; j < colsDOF.size(); ++j)
+                for (Index j = 0; j < static_cast<Index>(colsDOF.size()); ++j)
                 {
                   const PetscInt J = colsDOF[j];
                   const PetscScalar val = bfi.integrate(j, i);
@@ -605,15 +572,15 @@ namespace Rodin::Assembly
           for (auto& bfi : pb.getGlobalBFIs())
           {
             const auto& trialAttrs = bfi.getTrialAttributes();
-            const auto& testAttrs  = bfi.getTestAttributes();
+            const auto& testAttrs = bfi.getTestAttributes();
 
             MPIIteration trialseq(mesh, bfi.getTrialRegion());
-            MPIIteration testseq(mesh,  bfi.getTestRegion());
+            MPIIteration testseq(mesh, bfi.getTestRegion());
 
             for (auto teIt = testseq.getIterator(); teIt; ++teIt)
             {
-              const size_t td   = teIt->getDimension();
-              const Index  tidx = teIt->getIndex();
+              const size_t td = teIt->getDimension();
+              const Index tidx = teIt->getIndex();
 
               if (!shard.isOwned(td, tidx))
                 continue;
@@ -629,8 +596,8 @@ namespace Rodin::Assembly
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
-                const size_t rd   = trIt->getDimension();
-                const Index  ridx = trIt->getIndex();
+                const size_t rd = trIt->getDimension();
+                const Index ridx = trIt->getIndex();
 
                 if (!trialAttrs.empty())
                 {
@@ -645,10 +612,10 @@ namespace Rodin::Assembly
 
                 bfi.setPolytope(*trIt, *teIt);
 
-                for (Index i = 0; i < rowsDOF.size(); ++i)
+                for (Index i = 0; i < static_cast<Index>(rowsDOF.size()); ++i)
                 {
                   const PetscInt I = rowsDOF[i];
-                  for (Index j = 0; j < colsDOF.size(); ++j)
+                  for (Index j = 0; j < static_cast<Index>(colsDOF.size()); ++j)
                   {
                     const PetscInt J = colsDOF[j];
                     const PetscScalar val = bfi.integrate(j, i);
@@ -666,7 +633,7 @@ namespace Rodin::Assembly
             PetscInt opStart, opEnd;
             ierr = MatGetOwnershipRange(op, &opStart, &opEnd);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             for (PetscInt i = opStart; i < opEnd; ++i)
             {
               PetscInt nc;
@@ -674,12 +641,12 @@ namespace Rodin::Assembly
               const PetscScalar* vals;
               ierr = MatGetRow(op, i, &nc, &cols, &vals);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
               for (PetscInt j = 0; j < nc; ++j)
                 matrix_entry(static_cast<Index>(i), static_cast<Index>(cols[j]), vals[j]);
               ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
           }
         }
@@ -689,10 +656,10 @@ namespace Rodin::Assembly
         {
           ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         // ------------------------
@@ -708,8 +675,8 @@ namespace Rodin::Assembly
 
             for (auto it = seq.getIterator(); it; ++it)
             {
-              const size_t d   = it->getDimension();
-              const Index  idx = it->getIndex();
+              const size_t d = it->getDimension();
+              const Index idx = it->getIndex();
 
               if (!shard.isOwned(d, idx))
                 continue;
@@ -724,7 +691,7 @@ namespace Rodin::Assembly
               lfi.setPolytope(*it);
 
               const auto& dofs = testFES.getDOFs(d, idx);
-              for (Index l = 0; l < dofs.size(); ++l)
+              for (Index l = 0; l < static_cast<Index>(dofs.size()); ++l)
               {
                 const PetscInt I = dofs[l];
                 const PetscScalar val = lfi.integrate(l);
@@ -741,11 +708,11 @@ namespace Rodin::Assembly
             PetscInt lo, hi;
             ierr = VecGetOwnershipRange(vec, &lo, &hi);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             const PetscScalar* arr;
             ierr = VecGetArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             for (PetscInt i = lo; i < hi; ++i)
             {
               const PetscScalar val = arr[i - lo];
@@ -754,7 +721,7 @@ namespace Rodin::Assembly
             }
             ierr = VecRestoreArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         }
 
@@ -763,10 +730,10 @@ namespace Rodin::Assembly
         {
           ierr = VecAssemblyBegin(b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecAssemblyEnd(b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         if (doMatrix)
@@ -776,15 +743,10 @@ namespace Rodin::Assembly
             if (rbegin <= gs && gs < rend)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
 
-          ierr = MatZeroRows(
-              A,
-              static_cast<PetscInt>(rowsToZero.size()),
-              rowsToZero.empty() ? nullptr : rowsToZero.data(),
-              0.0,
-              nullptr,
-              nullptr);
+          ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
+            rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
 
           for (const Index gs : constraints.getIdentifiedRows())
           {
@@ -794,38 +756,38 @@ namespace Rodin::Assembly
             const PetscScalar one = 1.0;
             ierr = MatSetValue(A, I, I, one, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             for (const auto& e : constraints.expand(gs))
             {
               const PetscInt J = static_cast<PetscInt>(e.index);
               const PetscScalar v = -e.coefficient;
               ierr = MatSetValue(A, I, J, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
             const PetscScalar rhs = constraints.getIdentificationValue(gs);
             if (doVector)
             {
               ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
           }
 
           ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           if (doVector)
           {
             ierr = VecAssemblyBegin(b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecAssemblyEnd(b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         }
 
@@ -846,65 +808,49 @@ namespace Rodin::Assembly
             Vec bcVec;
             ierr = VecDuplicate(b, &bcVec);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecZeroEntries(bcVec);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
-            ierr = VecSetValues(
-                bcVec,
-                static_cast<PetscInt>(bcIdx.size()),
-                bcIdx.empty() ? nullptr : bcIdx.data(),
-                bcVals.empty() ? nullptr : bcVals.data(),
-                INSERT_VALUES);
+            (void)ierr;
+            ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(),
+              bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecAssemblyBegin(bcVec);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecAssemblyEnd(bcVec);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
-            ierr = MatZeroRowsColumns(
-                A,
-                static_cast<PetscInt>(bcIdx.size()),
-                bcIdx.empty() ? nullptr : bcIdx.data(),
-                1.0,
-                bcVec,
-                b);
+            (void)ierr;
+            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecDestroy(&bcVec);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
           else if (mode == AssemblyMode::LHS)
           {
-            ierr = MatZeroRows(
-                A,
-                static_cast<PetscInt>(bcIdx.size()),
-                bcIdx.empty() ? nullptr : bcIdx.data(),
-                1.0,
-                nullptr,
-                nullptr);
+            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
           else
           {
-            ierr = VecSetValues(
-                b,
-                static_cast<PetscInt>(bcIdx.size()),
-                bcIdx.empty() ? nullptr : bcIdx.data(),
-                bcVals.empty() ? nullptr : bcVals.data(),
-                INSERT_VALUES);
+            ierr = VecSetValues(b, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(),
+              bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecAssemblyBegin(b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecAssemblyEnd(b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         }
 
@@ -972,10 +918,8 @@ namespace Rodin::Assembly
        * @param[in] input Multi-field problem assembly input.
        * @param[in] target Assembly target to update.
        */
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          Rodin::Variational::AssemblyTarget target) const
+      void execute(LinearSystemType& axb, const InputType& input,
+        Rodin::Variational::AssemblyTarget target) const
       {
         switch (target)
         {
@@ -996,10 +940,7 @@ namespace Rodin::Assembly
         RHS
       };
 
-      void execute(
-          LinearSystemType& axb,
-          const InputType& input,
-          AssemblyMode mode) const
+      void execute(LinearSystemType& axb, const InputType& input, AssemblyMode mode) const
       {
         auto& A = axb.getOperator();
         auto& b = axb.getVector();
@@ -1115,16 +1056,11 @@ namespace Rodin::Assembly
         assert(A);
         if (doMatrix)
         {
-          ierr = PETSc::Assembly::MatrixSetup(A).prepare({
-            static_cast<PetscInt>(localRows),
-            static_cast<PetscInt>(localCols),
-            static_cast<PetscInt>(nrows),
-            static_cast<PetscInt>(ncols),
-            nullptr,
-            true
-          });
+          ierr = PETSc::Assembly::MatrixSetup(A).prepare(
+            {static_cast<PetscInt>(localRows), static_cast<PetscInt>(localCols),
+              static_cast<PetscInt>(nrows), static_cast<PetscInt>(ncols), nullptr, true});
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         // ------------------------
@@ -1133,30 +1069,21 @@ namespace Rodin::Assembly
         assert(b);
         if (doVector)
         {
-          ierr = PETSc::Assembly::VectorSetup(b).prepare({
-            static_cast<PetscInt>(localRows),
-            static_cast<PetscInt>(nrows),
-            nullptr,
-            true,
-            true
-          });
+          ierr =
+            PETSc::Assembly::VectorSetup(b).prepare({static_cast<PetscInt>(localRows),
+              static_cast<PetscInt>(nrows), nullptr, true, true});
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         auto& x = axb.getSolution();
         assert(x);
         // The solution vector carries the previous iterate as the solver's
         // initial guess, so it must not be zeroed on reuse.
-        ierr = PETSc::Assembly::VectorSetup(x).prepare({
-          static_cast<PetscInt>(localCols),
-          static_cast<PetscInt>(ncols),
-          nullptr,
-          true,
-          false
-        });
+        ierr = PETSc::Assembly::VectorSetup(x).prepare({static_cast<PetscInt>(localCols),
+          static_cast<PetscInt>(ncols), nullptr, true, false});
         assert(ierr == PETSC_SUCCESS);
-        (void) ierr;
+        (void)ierr;
 
         ConstraintMap<PetscScalar> constraints(std::max(nrows, ncols));
         using DBCBaseType = Variational::DirichletBCBase<PetscScalar>;
@@ -1170,47 +1097,46 @@ namespace Rodin::Assembly
           const size_t uOff = trialOffsets[uBlock];
 
           dbc.assemble();
-          std::visit([&](auto&& dofs)
-          {
-            using T = std::decay_t<decltype(dofs)>;
-            if constexpr (std::is_same_v<T, ValueDOFsType>)
-            {
-              for (const auto& [local, value] : dofs)
-                constraints.setFixed(
+          std::visit(
+            [&](auto&& dofs) {
+              using T = std::decay_t<decltype(dofs)>;
+              if constexpr (std::is_same_v<T, ValueDOFsType>)
+              {
+                for (const auto& [local, value] : dofs)
+                  constraints.setFixed(
                     static_cast<Index>(uOff + static_cast<size_t>(local)),
                     static_cast<PetscScalar>(value));
-            }
-            else if constexpr (std::is_same_v<T, IdentDOFsType>)
-            {
-              const auto vUUIDOpt = dbc.getValueUUID();
-              assert(vUUIDOpt);
-              const size_t vBlock = findTrialBlock(*vUUIDOpt);
-              const size_t vOff = trialOffsets[vBlock];
-              const auto& affineValues = dbc.getIdentificationValues();
-              for (const auto& [slave, pair] : dofs)
+              }
+              else if constexpr (std::is_same_v<T, IdentDOFsType>)
               {
-                const auto& masters = pair.first;
-                const auto& coeffs = pair.second;
-                std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
-                entries.reserve(static_cast<size_t>(masters.size()));
-                for (Index k = 0; k < masters.size(); k++)
+                const auto vUUIDOpt = dbc.getValueUUID();
+                assert(vUUIDOpt);
+                const size_t vBlock = findTrialBlock(*vUUIDOpt);
+                const size_t vOff = trialOffsets[vBlock];
+                const auto& affineValues = dbc.getIdentificationValues();
+                for (const auto& [slave, pair] : dofs)
                 {
-                  entries.push_back({
-                      static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
-                      static_cast<PetscScalar>(coeffs[k]) });
-                }
-                const auto valueIt = affineValues.find(slave);
-                const PetscScalar value =
-                  valueIt == affineValues.end()
+                  const auto& masters = pair.first;
+                  const auto& coeffs = pair.second;
+                  std::vector<typename ConstraintMap<PetscScalar>::Entry> entries;
+                  entries.reserve(static_cast<size_t>(masters.size()));
+                  for (Index k = 0; k < static_cast<Index>(masters.size()); k++)
+                  {
+                    entries.push_back(
+                      {static_cast<Index>(vOff + static_cast<size_t>(masters[k])),
+                        static_cast<PetscScalar>(coeffs[k])});
+                  }
+                  const auto valueIt = affineValues.find(slave);
+                  const PetscScalar value = valueIt == affineValues.end()
                     ? PetscScalar(0)
                     : static_cast<PetscScalar>(valueIt->second);
-                constraints.setIdentification(
-                    static_cast<Index>(uOff + static_cast<size_t>(slave)),
-                    entries,
+                  constraints.setIdentification(
+                    static_cast<Index>(uOff + static_cast<size_t>(slave)), entries,
                     value);
+                }
               }
-            }
-          }, dbc.getDOFs());
+            },
+            dbc.getDOFs());
         }
 
         if (mode != AssemblyMode::Full && !constraints.getIdentifiedRows().empty())
@@ -1220,11 +1146,9 @@ namespace Rodin::Assembly
             << Alert::Raise;
         }
 
-        auto ownsTrialGlobal = [&](Index g) -> bool
-        {
+        auto ownsTrialGlobal = [&](Index g) -> bool {
           bool owned = false;
-          us.iapply([&](size_t i, const auto& uref)
-          {
+          us.iapply([&](size_t i, const auto& uref) {
             size_t begin, end;
             uref.get().getFiniteElementSpace().getOwnershipRange(begin, end);
             const size_t off = trialOffsets[i];
@@ -1234,12 +1158,10 @@ namespace Rodin::Assembly
           return owned;
         };
 
-        auto matrix_entry = [&](Index row, Index col, PetscScalar val)
-        {
-          const PetscScalar colValue =
-            constraints.isIdentified(col)
-              ? constraints.getIdentificationValue(col)
-              : PetscScalar(0);
+        auto matrix_entry = [&](Index row, Index col, PetscScalar val) {
+          const PetscScalar colValue = constraints.isIdentified(col)
+            ? constraints.getIdentificationValue(col)
+            : PetscScalar(0);
           for (const auto& r : constraints.expand(row))
           {
             const PetscInt I = static_cast<PetscInt>(r.index);
@@ -1248,25 +1170,23 @@ namespace Rodin::Assembly
               const PetscScalar rhsShift = -r.coefficient * val * colValue;
               ierr = VecSetValue(b, I, rhsShift, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
             for (const auto& c : constraints.expand(col))
             {
               const PetscInt J = static_cast<PetscInt>(c.index);
-              const PetscScalar v =
-                r.coefficient * val * c.coefficient;
+              const PetscScalar v = r.coefficient * val * c.coefficient;
               // Insert unconditionally. PETSc decides whether zero-valued
               // insertions affect the pattern according to its current
               // matrix options.
               ierr = MatSetValue(A, I, J, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
           }
         };
 
-        auto vector_entry = [&](Index row, PetscScalar val)
-        {
+        auto vector_entry = [&](Index row, PetscScalar val) {
           if (val == PetscScalar(0))
             return;
           for (const auto& r : constraints.expand(row))
@@ -1275,7 +1195,7 @@ namespace Rodin::Assembly
             const PetscScalar v = r.coefficient * val;
             ierr = VecSetValue(b, I, v, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         };
 
@@ -1307,8 +1227,8 @@ namespace Rodin::Assembly
 
             for (auto it = seq.getIterator(); it; ++it)
             {
-              const size_t d   = it->getDimension();
-              const Index  idx = it->getIndex();
+              const size_t d = it->getDimension();
+              const Index idx = it->getIndex();
 
               if (!shard.isOwned(d, idx))
                 continue;
@@ -1325,10 +1245,10 @@ namespace Rodin::Assembly
               const auto& rows = vFES.getDOFs(d, idx);
               const auto& cols = uFES.getDOFs(d, idx);
 
-              for (Index i = 0; i < rows.size(); ++i)
+              for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
               {
                 const PetscInt I = vOff + rows[i];
-                for (Index j = 0; j < cols.size(); ++j)
+                for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
                 {
                   const PetscInt J = uOff + cols[j];
                   const PetscScalar val = bfi.integrate(j, i);
@@ -1353,15 +1273,15 @@ namespace Rodin::Assembly
             const auto& vFES = getTestFESByUUID(vUUID);
 
             const auto& trialAttrs = bfi.getTrialAttributes();
-            const auto& testAttrs  = bfi.getTestAttributes();
+            const auto& testAttrs = bfi.getTestAttributes();
 
             MPIIteration trialseq(mesh, bfi.getTrialRegion());
-            MPIIteration testseq(mesh,  bfi.getTestRegion());
+            MPIIteration testseq(mesh, bfi.getTestRegion());
 
             for (auto teIt = testseq.getIterator(); teIt; ++teIt)
             {
-              const size_t td   = teIt->getDimension();
-              const Index  tidx = teIt->getIndex();
+              const size_t td = teIt->getDimension();
+              const Index tidx = teIt->getIndex();
 
               if (!shard.isOwned(td, tidx))
                 continue;
@@ -1377,8 +1297,8 @@ namespace Rodin::Assembly
 
               for (auto trIt = trialseq.getIterator(); trIt; ++trIt)
               {
-                const size_t rd   = trIt->getDimension();
-                const Index  ridx = trIt->getIndex();
+                const size_t rd = trIt->getDimension();
+                const Index ridx = trIt->getIndex();
 
                 if (!trialAttrs.empty())
                 {
@@ -1392,10 +1312,10 @@ namespace Rodin::Assembly
 
                 bfi.setPolytope(*trIt, *teIt);
 
-                for (Index i = 0; i < rows.size(); ++i)
+                for (Index i = 0; i < static_cast<Index>(rows.size()); ++i)
                 {
                   const PetscInt I = vOff + rows[i];
-                  for (Index j = 0; j < cols.size(); ++j)
+                  for (Index j = 0; j < static_cast<Index>(cols.size()); ++j)
                   {
                     const PetscInt J = uOff + cols[j];
                     const PetscScalar val = bfi.integrate(j, i);
@@ -1422,7 +1342,7 @@ namespace Rodin::Assembly
             PetscInt rStart, rEnd;
             ierr = MatGetOwnershipRange(op, &rStart, &rEnd);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
 
             for (PetscInt i = rStart; i < rEnd; ++i)
             {
@@ -1431,27 +1351,25 @@ namespace Rodin::Assembly
               const PetscScalar* vals;
               ierr = MatGetRow(op, i, &nc, &cols, &vals);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
               for (PetscInt j = 0; j < nc; ++j)
               {
-                matrix_entry(
-                  static_cast<Index>(vOff) + static_cast<Index>(i),
-                  static_cast<Index>(uOff) + static_cast<Index>(cols[j]),
-                  vals[j]);
+                matrix_entry(static_cast<Index>(vOff) + static_cast<Index>(i),
+                  static_cast<Index>(uOff) + static_cast<Index>(cols[j]), vals[j]);
               }
               ierr = MatRestoreRow(op, i, &nc, &cols, &vals);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
           }
 
           // Assemble A
           ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         // ------------------------
@@ -1464,7 +1382,7 @@ namespace Rodin::Assembly
           {
             const auto vUUID = lfi.getTestFunction().getUUID();
             const size_t vBlock = findTestBlock(vUUID);
-            const size_t vOff   = testOffsets[vBlock];
+            const size_t vOff = testOffsets[vBlock];
 
             const auto& vFES = getTestFESByUUID(vUUID);
 
@@ -1473,8 +1391,8 @@ namespace Rodin::Assembly
 
             for (auto it = seq.getIterator(); it; ++it)
             {
-              const size_t d   = it->getDimension();
-              const Index  idx = it->getIndex();
+              const size_t d = it->getDimension();
+              const Index idx = it->getIndex();
 
               if (!shard.isOwned(d, idx))
                 continue;
@@ -1489,7 +1407,7 @@ namespace Rodin::Assembly
               lfi.setPolytope(*it);
 
               const auto& dofs = vFES.getDOFs(d, idx);
-              for (Index l = 0; l < dofs.size(); ++l)
+              for (Index l = 0; l < static_cast<Index>(dofs.size()); ++l)
               {
                 const PetscInt I = vOff + dofs[l];
                 const PetscScalar val = lfi.integrate(l);
@@ -1504,18 +1422,18 @@ namespace Rodin::Assembly
           {
             const auto vUUID = lf.getTestFunction().getUUID();
             const size_t vBlock = findTestBlock(vUUID);
-            const size_t vOff   = testOffsets[vBlock];
+            const size_t vOff = testOffsets[vBlock];
 
             const auto& vec = lf.getVector();
             PetscInt lo, hi;
             ierr = VecGetOwnershipRange(vec, &lo, &hi);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
 
             const PetscScalar* arr;
             ierr = VecGetArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             for (PetscInt i = lo; i < hi; ++i)
             {
               const PetscScalar val = arr[i - lo];
@@ -1524,16 +1442,16 @@ namespace Rodin::Assembly
             }
             ierr = VecRestoreArrayRead(vec, &arr);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
 
           // Assemble b
           ierr = VecAssemblyBegin(b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecAssemblyEnd(b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         if (doMatrix)
@@ -1543,15 +1461,10 @@ namespace Rodin::Assembly
             if (ownsTrialGlobal(gs))
               rowsToZero.push_back(static_cast<PetscInt>(gs));
 
-          ierr = MatZeroRows(
-              A,
-              static_cast<PetscInt>(rowsToZero.size()),
-              rowsToZero.empty() ? nullptr : rowsToZero.data(),
-              0.0,
-              nullptr,
-              nullptr);
+          ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
+            rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
 
           for (const Index gs : constraints.getIdentifiedRows())
           {
@@ -1561,38 +1474,38 @@ namespace Rodin::Assembly
             const PetscScalar one = 1.0;
             ierr = MatSetValue(A, I, I, one, ADD_VALUES);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             for (const auto& e : constraints.expand(gs))
             {
               const PetscInt J = static_cast<PetscInt>(e.index);
               const PetscScalar v = -e.coefficient;
               ierr = MatSetValue(A, I, J, v, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
             const PetscScalar rhs = constraints.getIdentificationValue(gs);
             if (doVector)
             {
               ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
               assert(ierr == PETSC_SUCCESS);
-              (void) ierr;
+              (void)ierr;
             }
           }
 
           ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           if (doVector)
           {
             ierr = VecAssemblyBegin(b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
             ierr = VecAssemblyEnd(b);
             assert(ierr == PETSC_SUCCESS);
-            (void) ierr;
+            (void)ierr;
           }
         }
 
@@ -1612,65 +1525,49 @@ namespace Rodin::Assembly
           Vec bcVec;
           ierr = VecDuplicate(b, &bcVec);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecZeroEntries(bcVec);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
-          ierr = VecSetValues(
-              bcVec,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              bcVals.empty() ? nullptr : bcVals.data(),
-              INSERT_VALUES);
+          (void)ierr;
+          ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
+            bcIdx.empty() ? nullptr : bcIdx.data(),
+            bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecAssemblyBegin(bcVec);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecAssemblyEnd(bcVec);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
-          ierr = MatZeroRowsColumns(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              1.0,
-              bcVec,
-              b);
+          (void)ierr;
+          ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+            bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecDestroy(&bcVec);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
         else if (mode == AssemblyMode::LHS)
         {
-          ierr = MatZeroRows(
-              A,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              1.0,
-              nullptr,
-              nullptr);
+          ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()),
+            bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, nullptr, nullptr);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
         else
         {
-          ierr = VecSetValues(
-              b,
-              static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              bcVals.empty() ? nullptr : bcVals.data(),
-              INSERT_VALUES);
+          ierr = VecSetValues(b, static_cast<PetscInt>(bcIdx.size()),
+            bcIdx.empty() ? nullptr : bcIdx.data(),
+            bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecAssemblyBegin(b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
           ierr = VecAssemblyEnd(b);
           assert(ierr == PETSC_SUCCESS);
-          (void) ierr;
+          (void)ierr;
         }
 
         (void) ierr;

@@ -7,6 +7,16 @@ using namespace Rodin::Geometry;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Verifies that invalid grid dimensions raise a member-function exception.
+  TEST(Rodin_Geometry_Mesh_UniformGrid, InvalidDimensions)
+  {
+    EXPECT_THROW(LocalMesh::UniformGrid(Polytope::Type::Triangle, {2}), Alert::Exception);
+    EXPECT_THROW(
+      LocalMesh::UniformGrid(Polytope::Type::Triangle, {1, 4}), Alert::Exception);
+    EXPECT_THROW(
+      LocalMesh::UniformGrid(Polytope::Type::Tetrahedron, {2, 0, 2}), Alert::Exception);
+  }
+
   /// @brief Verifies sanity test for geometry mesh uniform grid by checking exact expected values.
   TEST(Rodin_Geometry_Mesh_UniformGrid, SanityTest)
   {
@@ -50,7 +60,7 @@ namespace Rodin::Tests::Unit
   /// @brief Verifies pyramid one brick for geometry mesh uniform grid by checking exact expected values.
   TEST(Rodin_Geometry_Mesh_UniformGrid, Pyramid_OneBrick)
   {
-    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, { 2, 2, 2 });
+    Mesh mesh = LocalMesh::UniformGrid(Polytope::Type::Pyramid, {2, 2, 2});
 
     EXPECT_EQ(mesh.getVertexCount(), 9);
     EXPECT_EQ(mesh.getCellCount(), 6);

@@ -78,8 +78,7 @@ namespace
     KSPGetPC(ksp, &pc);
     const char* pcType = nullptr;
     PCGetType(pc, &pcType);
-    if (pcType && (!std::strcmp(pcType, PCLU)
-                || !std::strcmp(pcType, PCCHOLESKY)))
+    if (pcType && (!std::strcmp(pcType, PCLU) || !std::strcmp(pcType, PCCHOLESKY)))
     {
       PCFactorSetReuseOrdering(pc, PETSC_TRUE);
       PCFactorSetReuseFill(pc, PETSC_TRUE);
@@ -97,9 +96,8 @@ namespace
 
   Vec3 cross3(const Vec3& a, const Vec3& b)
   {
-    return vec3(a(1) * b(2) - a(2) * b(1),
-                a(2) * b(0) - a(0) * b(2),
-                a(0) * b(1) - a(1) * b(0));
+    return vec3(
+      a(1) * b(2) - a(2) * b(1), a(2) * b(0) - a(0) * b(2), a(0) * b(1) - a(1) * b(0));
   }
 
   Real det3(const Vec3& a, const Vec3& b, const Vec3& c)
@@ -127,16 +125,17 @@ namespace
 
   // Squared distance to a triangle, following the Voronoi-region test of
   // Christer Ericson, Real-Time Collision Detection, Section 5.1.5.
-  Real pointTriangleDistance(
-      const Vec3& p, const Vec3& a, const Vec3& b, const Vec3& c)
+  Real pointTriangleDistance(const Vec3& p, const Vec3& a, const Vec3& b, const Vec3& c)
   {
     const Vec3 ab = b - a, ac = c - a, ap = p - a;
     const Real d1 = ab.dot(ap), d2 = ac.dot(ap);
-    if (d1 <= 0 && d2 <= 0) return ap.norm();
+    if (d1 <= 0 && d2 <= 0)
+      return ap.norm();
 
     const Vec3 bp = p - b;
     const Real d3 = ab.dot(bp), d4 = ac.dot(bp);
-    if (d3 >= 0 && d4 <= d3) return bp.norm();
+    if (d3 >= 0 && d4 <= d3)
+      return bp.norm();
 
     const Real vc = d1 * d4 - d3 * d2;
     if (vc <= 0 && d1 >= 0 && d3 <= 0)
@@ -144,7 +143,8 @@ namespace
 
     const Vec3 cp = p - c;
     const Real d5 = ab.dot(cp), d6 = ac.dot(cp);
-    if (d6 >= 0 && d5 <= d6) return cp.norm();
+    if (d6 >= 0 && d5 <= d6)
+      return cp.norm();
 
     const Real vb = d5 * d2 - d1 * d6;
     if (vb <= 0 && d2 >= 0 && d6 <= 0)
@@ -158,28 +158,24 @@ namespace
     return (p - (a + vb * denom * ab + vc * denom * ac)).norm();
   }
 
-  constexpr std::array<std::array<Real, 4>, 4> TetraQuadrature = {{
-    {{ 0.5854101966249685, 0.1381966011250105,
-       0.1381966011250105, 0.1381966011250105 }},
-    {{ 0.1381966011250105, 0.5854101966249685,
-       0.1381966011250105, 0.1381966011250105 }},
-    {{ 0.1381966011250105, 0.1381966011250105,
-       0.5854101966249685, 0.1381966011250105 }},
-    {{ 0.1381966011250105, 0.1381966011250105,
-       0.1381966011250105, 0.5854101966249685 }}
-  }};
+  constexpr std::array<std::array<Real, 4>, 4> TetraQuadrature = {
+    {{{0.5854101966249685, 0.1381966011250105, 0.1381966011250105, 0.1381966011250105}},
+      {{0.1381966011250105, 0.5854101966249685, 0.1381966011250105, 0.1381966011250105}},
+      {{0.1381966011250105, 0.1381966011250105, 0.5854101966249685, 0.1381966011250105}},
+      {{0.1381966011250105, 0.1381966011250105, 0.1381966011250105,
+        0.5854101966249685}}}};
 
   struct CellMomentInfo
   {
-    Index index = 0;
-    Real volume = 0;
-    Real moment = 0;
-    std::array<Vec3, 4> x;
+      Index index = 0;
+      Real volume = 0;
+      Real moment = 0;
+      std::array<Vec3, 4> x;
   };
 
   template <class Phi>
   std::vector<CellMomentInfo> collectCellMoments(
-      const WNGIRMesh& mesh, const Phi& phi, Real epsilon)
+    const WNGIRMesh& mesh, const Phi& phi, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -190,9 +186,9 @@ namespace
       const auto& v = it->getVertices();
       for (std::size_t i = 0; i < 4; ++i)
         info.x[i] = mesh.getVertexCoordinates(v[i]);
-      info.volume = std::abs(det3(info.x[1] - info.x[0],
-                                  info.x[2] - info.x[0],
-                                  info.x[3] - info.x[0])) / Real(6);
+      info.volume = std::abs(det3(info.x[1] - info.x[0], info.x[2] - info.x[0],
+                      info.x[3] - info.x[0])) /
+        Real(6);
       for (const auto& l : TetraQuadrature)
       {
         Math::SpatialPoint rc(3);
@@ -208,8 +204,7 @@ namespace
   }
 
   template <class Displacement>
-  void updateMovedMesh(
-      const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
+  void updateMovedMesh(const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
   {
     const auto& fes = u.getFiniteElementSpace();
     for (Index v = 0; v < mesh.getVertexCount(); ++v)
@@ -221,7 +216,7 @@ namespace
   }
 
   std::size_t sizeOption(
-      int argc, char** argv, const std::string& name, std::size_t fallback)
+    int argc, char** argv, const std::string& name, std::size_t fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -230,8 +225,7 @@ namespace
     return fallback;
   }
 
-  Real realOption(
-      int argc, char** argv, const std::string& name, Real fallback)
+  Real realOption(int argc, char** argv, const std::string& name, Real fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -241,7 +235,7 @@ namespace
   }
 
   std::string stringOption(
-      int argc, char** argv, const std::string& name, std::string fallback)
+    int argc, char** argv, const std::string& name, std::string fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -277,12 +271,9 @@ int run(int argc, char** argv)
   const Real h = H / static_cast<Real>(n);
   const Real hmin = realOption(argc, argv, "hmin", Real(0.1) * h);
   const bool initialMMG = sizeOption(argc, argv, "initial-mmg", 0) != 0;
-  const Real initialMMGHMin =
-    realOption(argc, argv, "initial-mmg-hmin", hmin);
-  const Real initialMMGHMax =
-    realOption(argc, argv, "initial-mmg-hmax", h);
-  const Real initialMMGHausd =
-    realOption(argc, argv, "initial-mmg-hausd", Real(0));
+  const Real initialMMGHMin = realOption(argc, argv, "initial-mmg-hmin", hmin);
+  const Real initialMMGHMax = realOption(argc, argv, "initial-mmg-hmax", h);
+  const Real initialMMGHausd = realOption(argc, argv, "initial-mmg-hausd", Real(0));
   const Real ell = realOption(argc, argv, "ell", Real(0.5));
   const Real alphaReg = realOption(argc, argv, "alpha", Real(2) * h);
   const Real epsilon = realOption(argc, argv, "classifier-eps", Real(1.25) * h);
@@ -293,8 +284,7 @@ int run(int argc, char** argv)
   const Real objectiveTol = realOption(argc, argv, "objective-decrease-tol", 1e-10);
   const std::string reinitMode = stringOption(argc, argv, "reinit", "none");
   const std::size_t reinitEvery = sizeOption(argc, argv, "reinit-every", 1);
-  const std::string redistanceMode =
-    stringOption(argc, argv, "redistance-mode", "none");
+  const std::string redistanceMode = stringOption(argc, argv, "redistance-mode", "none");
   const std::size_t redistanceEvery = sizeOption(argc, argv, "redistance-every", 0);
   const std::size_t repairEvery = sizeOption(argc, argv, "repair-every", 5);
   const Real repairEta = realOption(argc, argv, "repair-eta", Real(0.5) * h);
@@ -304,8 +294,7 @@ int run(int argc, char** argv)
   const std::size_t nx = static_cast<std::size_t>(std::lround(L / h)) + 1;
   const std::size_t ny = n + 1;
   const std::size_t nz = static_cast<std::size_t>(std::lround(W / h)) + 1;
-  WNGIRMesh mesh = WNGIRMesh::UniformGrid(
-      Polytope::Type::Tetrahedron, { nx, ny, nz });
+  WNGIRMesh mesh = WNGIRMesh::UniformGrid(Polytope::Type::Tetrahedron, {nx, ny, nz});
   mesh.scale(h);
   mesh.getConnectivity().compute(2, 3);
   mesh.getConnectivity().compute(3, 2);
@@ -313,8 +302,7 @@ int run(int argc, char** argv)
   mesh.getConnectivity().compute(0, 0);
   const std::size_t D = mesh.getDimension();
 
-  auto tagBoundary = [&](WNGIRMesh& m)
-  {
+  auto tagBoundary = [&](WNGIRMesh& m) {
     for (auto it = m.getBoundary(); it; ++it)
     {
       Vec3 c = vec3();
@@ -324,9 +312,8 @@ int run(int argc, char** argv)
       Attribute attr = Gamma0;
       if (c(0) < Real(1e-9))
         attr = GammaD;
-      else if (c(0) > L - Real(1e-9)
-               && std::abs(c(1) - H / 2) < Real(0.15) * H
-               && std::abs(c(2) - W / 2) < Real(0.15) * W)
+      else if (c(0) > L - Real(1e-9) && std::abs(c(1) - H / 2) < Real(0.15) * H &&
+        std::abs(c(2) - W / 2) < Real(0.15) * W)
         attr = GammaN;
       m.setAttribute({D - 1, it->getIndex()}, attr);
     }
@@ -336,14 +323,11 @@ int run(int argc, char** argv)
   if (initialMMG)
   {
     std::cout << "  initial MMG remesh:"
-              << " hmin=" << initialMMGHMin
-              << " hmax=" << initialMMGHMax
+              << " hmin=" << initialMMGHMin << " hmax=" << initialMMGHMax
               << " hausd=" << initialMMGHausd << "\n";
     MMG::Mesh mmgMesh(std::move(mesh));
     MMG::Optimizer optimizer;
-    optimizer.setHMin(initialMMGHMin)
-             .setHMax(initialMMGHMax)
-             .setAngleDetection(false);
+    optimizer.setHMin(initialMMGHMin).setHMax(initialMMGHMax).setAngleDetection(false);
     if (initialMMGHausd > 0)
       optimizer.setHausdorff(initialMMGHausd);
     optimizer.optimize(mmgMesh);
@@ -362,16 +346,17 @@ int run(int argc, char** argv)
   ScalarP1 sh(mesh);
   ScalarP0 p0(mesh);
   VectorP1 vh(mesh, 3);
-  GridFunction phiH(sh); phiH.setName("phi");
+  GridFunction phiH(sh);
+  phiH.setName("phi");
   PETSc::Variational::TrialFunction wngirTrial(vh);
   PETSc::Variational::TestFunction wngirTest(vh);
   auto& u = wngirTrial.getSolution();
   u.setName("fit");
-  GridFunction dJ(vh); dJ.setName("dJ");
+  GridFunction dJ(vh);
+  dJ.setName("dJ");
 
   // A solid box perforated by a regular array of spherical voids.
-  phiH = [&](const Geometry::Point& p) -> Real
-  {
+  phiH = [&](const Geometry::Point& p) -> Real {
     const auto& x = p.getCoordinates();
     Real value = -std::numeric_limits<Real>::infinity();
     const Real radius = Real(0.16) * std::min(H, W);
@@ -421,8 +406,7 @@ int run(int argc, char** argv)
   wngirDefaults.maxIterations = 60;
   wngirDefaults.activeRMSOverHTol = Real(0.2);
   WNGIRParameters wp =
-    Rodin::Examples::makeWNGIRParameters(
-        argc, argv, h, Gamma, wngirDefaults);
+    Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
   Adaptation::WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
@@ -444,14 +428,12 @@ int run(int argc, char** argv)
   Real complianceCap = std::numeric_limits<Real>::infinity();
 
   std::cout << "3D WNGIR cantilever: " << mesh.getCellCount() << " tetrahedra"
-            << "  grid=" << nx << "x" << ny << "x" << nz
-            << "\n  h=" << h << " ell=" << ell << " alpha=" << alphaReg
-            << " dt=" << dt << " reinit=" << reinitMode << "/" << reinitEvery
+            << "  grid=" << nx << "x" << ny << "x" << nz << "\n  h=" << h
+            << " ell=" << ell << " alpha=" << alphaReg << " dt=" << dt
+            << " reinit=" << reinitMode << "/" << reinitEvery
             << " redistance=" << redistanceMode << "/" << redistanceEvery
-            << " repair=" << repairEvery
-            << "\n  WNGIR metric: gammaM=" << wp.gammaM
-            << " gammaDev=" << wp.gammaH
-            << " gammaDiv=" << wp.gammaDiv
+            << " repair=" << repairEvery << "\n  WNGIR metric: gammaM=" << wp.gammaM
+            << " gammaDev=" << wp.gammaH << " gammaDiv=" << wp.gammaDiv
             << " ellM=" << wp.ellM << '\n';
 
   std::size_t shapeAttempts = 0;
@@ -483,15 +465,15 @@ int run(int argc, char** argv)
     {
       const Index f = fit->getIndex();
       const auto& inc = conn.getIncidence({2, 3}, f);
-      if (inc.size() != 2) continue;
+      if (inc.size() != 2)
+        continue;
       edges.push_back({static_cast<Index>(cellToLocal.at(inc[0])),
-                       static_cast<Index>(cellToLocal.at(inc[1])),
-                       lambdaC * triangleArea(mesh, f), f});
+        static_cast<Index>(cellToLocal.at(inc[1])), lambdaC * triangleArea(mesh, f), f});
     }
     const auto classified = MinSTCut().classify(volumes, moments, edges);
     for (std::size_t i = 0; i < classified.labels.size(); ++i)
       mesh.setAttribute({D, localToCell[i]},
-          classified.labels[i] == MinSTCut::Inside ? Interior : Exterior);
+        classified.labels[i] == MinSTCut::Inside ? Interior : Exterior);
 
     // Keep only material components connected to the clamped boundary.
     std::vector<char> support(mesh.getCellCount(), 0);
@@ -499,17 +481,23 @@ int run(int argc, char** argv)
       if (mesh.getAttribute(D - 1, bit->getIndex()) == Attribute{GammaD})
         for (const Index c : conn.getIncidence({2, 3}, bit->getIndex()))
           support[c] = 1;
-    for (const auto& component : mesh.ccl(
-          [](const Polytope& a, const Polytope& b)
-          { return a.getAttribute() == b.getAttribute(); }).getComponents())
+    for (const auto& component : mesh
+                                   .ccl([](const Polytope& a, const Polytope& b) {
+                                     return a.getAttribute() == b.getAttribute();
+                                   })
+                                   .getComponents())
     {
-      if (component.empty()) continue;
+      if (component.empty())
+        continue;
       const auto attr = mesh.getAttribute(D, *component.begin());
-      if (!attr || *attr != Interior) continue;
+      if (!attr || *attr != Interior)
+        continue;
       bool anchored = false;
-      for (const Index c : component) anchored = anchored || support[c];
+      for (const Index c : component)
+        anchored = anchored || support[c];
       if (!anchored)
-        for (const Index c : component) mesh.setAttribute({D, c}, Exterior);
+        for (const Index c : component)
+          mesh.setAttribute({D, c}, Exterior);
     }
 
     std::vector<Index> interfaceFacets;
@@ -517,7 +505,8 @@ int run(int argc, char** argv)
     {
       const Index f = fit->getIndex();
       const auto& inc = conn.getIncidence({2, 3}, f);
-      if (inc.size() != 2) continue;
+      if (inc.size() != 2)
+        continue;
       const auto a = mesh.getAttribute(D, inc[0]);
       const auto b = mesh.getAttribute(D, inc[1]);
       if ((a && *a == Interior) != (b && *b == Interior))
@@ -530,10 +519,12 @@ int run(int argc, char** argv)
     std::size_t insideCount = 0;
     for (std::size_t i = 0; i < cells.size(); ++i)
       if (mesh.getAttribute(D, localToCell[i]) == Attribute{Interior})
-      { volume += cells[i].volume; ++insideCount; }
+      {
+        volume += cells[i].volume;
+        ++insideCount;
+      }
     std::cout << "  classify: inside=" << insideCount
-              << " interface=" << interfaceFacets.size()
-              << " volume=" << volume << '\n';
+              << " interface=" << interfaceFacets.size() << " volume=" << volume << '\n';
     if (interfaceFacets.empty())
     {
       std::cerr << "  empty classified interface; stopping\n";
@@ -544,16 +535,14 @@ int run(int argc, char** argv)
     gradProjection.solve(gradSolver);
     enableFactorReuse(gradSolver.getHandle());
     if (trace)
-      std::cout << "  PETSc grad: it="
-                << kspIterations(gradSolver.getHandle()) << '\n';
+      std::cout << "  PETSc grad: it=" << kspIterations(gradSolver.getHandle()) << '\n';
     copyPETScToEigen(gp.getSolution().getData(), gradPhi.getData());
     RealFunction phiFn([&](const Geometry::Point& p) { return phiH.getValue(p); });
     AnalyticVectorFunction gradFn(
-        [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
+      [&](const Geometry::Point& p) { return gradPhi.getValue(p); }, 3);
     u = Real(0);
     const auto report = wngir.solve(mesh, interfaceFacets, phiFn, gradFn);
-    std::cout << "  WNGIR: it=" << report.iterations
-              << " exit=" << report.exitReason
+    std::cout << "  WNGIR: it=" << report.iterations << " exit=" << report.exitReason
               << " activeRMS=" << std::scientific << report.activeRMS
               << " activeRMS/h=" << (h > Real(0) ? report.activeRMS / h : Real(0))
               << " activeSup/h=" << (h > Real(0) ? report.activeSup / h : Real(0))
@@ -561,7 +550,8 @@ int run(int argc, char** argv)
 
     updateMovedMesh(mesh, moved, u);
     for (Index c = 0; c < static_cast<Index>(mesh.getCellCount()); ++c)
-      if (const auto a = mesh.getAttribute(D, c)) moved.setAttribute({D, c}, *a);
+      if (const auto a = mesh.getAttribute(D, c))
+        moved.setAttribute({D, c}, *a);
     for (auto fit = mesh.getFace(); fit; ++fit)
       if (const auto a = mesh.getAttribute(D - 1, fit->getIndex()))
         moved.setAttribute({D - 1, fit->getIndex()}, *a);
@@ -575,9 +565,9 @@ int run(int argc, char** argv)
     PETSc::Variational::TrialFunction us(vhInterior);
     PETSc::Variational::TestFunction vs(vhInterior);
     Problem elasticity(us, vs);
-    elasticity = LinearElasticityIntegral(us, vs)(lambdaLame, muLame)
-               - BoundaryIntegral(VectorFunction{0, 0, -1}, vs).over(GammaN)
-               + DirichletBC(us, VectorFunction{0, 0, 0}).on(GammaD);
+    elasticity = LinearElasticityIntegral(us, vs)(lambdaLame, muLame) -
+      BoundaryIntegral(VectorFunction{0, 0, -1}, vs).over(GammaN) +
+      DirichletBC(us, VectorFunction{0, 0, 0}).on(GammaD);
     Solver::KSP elasticitySolver(elasticity);
     elasticitySolver.setPrefix("elasticity_");
     elasticity.assemble();
@@ -588,26 +578,28 @@ int run(int argc, char** argv)
                 << kspIterations(elasticitySolver.getHandle()) << '\n';
     PetscScalar complianceValue = 0;
     VecDot(elasticity.getLinearSystem().getVector(),
-           elasticity.getLinearSystem().getSolution(), &complianceValue);
+      elasticity.getLinearSystem().getSolution(), &complianceValue);
     const Real compliance = PetscRealPart(complianceValue);
     const Real objective = compliance + ell * volume;
-    const bool invalid = !std::isfinite(compliance) || compliance < 0
-                         || compliance > complianceCap;
-    const bool increased = objectiveGuard && std::isfinite(lastObjective)
-      && objective > lastObjective
-                   + objectiveTol * std::max(Real(1), std::abs(lastObjective));
+    const bool invalid =
+      !std::isfinite(compliance) || compliance < 0 || compliance > complianceCap;
+    const bool increased = objectiveGuard && std::isfinite(lastObjective) &&
+      objective >
+        lastObjective + objectiveTol * std::max(Real(1), std::abs(lastObjective));
     if (invalid || increased)
     {
       phiH.getData() = phiGood;
       dt *= Real(0.5);
       std::cout << "  REJECT: J=" << objective << " dt -> " << dt << '\n';
-      if (dt < Real(1e-3) * h) break;
+      if (dt < Real(1e-3) * h)
+        break;
       continue;
     }
     phiGood = phiH.getData();
     lastObjective = objective;
     dt = std::min(dtMax, Real(1.3) * dt);
-    if (itn == 0) complianceCap = Real(50) * compliance;
+    if (itn == 0)
+      complianceCap = Real(50) * compliance;
     objectiveFile << objective << '\n';
     std::cout << "  compliance=" << compliance << " volume=" << volume
               << " J=" << objective << " dt=" << dt << '\n';
@@ -615,24 +607,23 @@ int run(int argc, char** argv)
     auto jac = Jacobian(us.getSolution());
     jac.traceOf(Interior);
     auto strain = Real(0.5) * (jac + jac.T());
-    auto stress = Real(2) * muLame * strain
-                + lambdaLame * Trace(strain) * IdentityMatrix(3);
+    auto stress =
+      Real(2) * muLame * strain + lambdaLame * Trace(strain) * IdentityMatrix(3);
     auto normal = FaceNormal(moved);
     normal.traceOf(Interior);
     Problem hilbert(g, w);
-    hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
-            + Integral(g, w)
-            - FaceIntegral(Dot(stress, strain) - ell, Dot(normal, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD)
-            + DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
+    hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) + Integral(g, w) -
+      FaceIntegral(Dot(stress, strain) - ell, Dot(normal, w)).over(Gamma) +
+      DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaD) +
+      DirichletBC(g, VectorFunction{0, 0, 0}).on(GammaN);
     Solver::KSP hilbertSolver(hilbert);
     hilbertSolver.setPrefix("hilbert_");
     hilbert.assemble();
     hilbert.solve(hilbertSolver);
     enableFactorReuse(hilbertSolver.getHandle());
     if (trace)
-      std::cout << "  PETSc hilbert: it="
-                << kspIterations(hilbertSolver.getHandle()) << '\n';
+      std::cout << "  PETSc hilbert: it=" << kspIterations(hilbertSolver.getHandle())
+                << '\n';
     copyPETScToEigen(g.getSolution().getData(), dJ.getData());
 
     // Write before redistance/advection mutates phiH into the next trial
@@ -649,11 +640,10 @@ int run(int argc, char** argv)
     }
 
     std::string activeMode = reinitMode;
-    bool doRedistance = reinitMode != "none" && reinitEvery > 0
-      && (itn % reinitEvery == 0 || itn + 1 == maxIt);
-    if (!doRedistance && reinitMode == "none" && redistanceMode != "none"
-        && redistanceEvery > 0
-        && ((itn + 1) % redistanceEvery == 0 || itn + 1 == maxIt))
+    bool doRedistance = reinitMode != "none" && reinitEvery > 0 &&
+      (itn % reinitEvery == 0 || itn + 1 == maxIt);
+    if (!doRedistance && reinitMode == "none" && redistanceMode != "none" &&
+      redistanceEvery > 0 && ((itn + 1) % redistanceEvery == 0 || itn + 1 == maxIt))
     {
       activeMode = redistanceMode;
       doRedistance = true;
@@ -661,17 +651,25 @@ int run(int argc, char** argv)
     if (doRedistance)
     {
       Distance::Eikonal<ScalarP1, Math::Vector<Real>>(dist)
-        .setInterior(Interior).setInterface(Gamma).solve().sign();
+        .setInterior(Interior)
+        .setInterface(Gamma)
+        .solve()
+        .sign();
       if (activeMode == "cp")
       {
-        struct FittedFace { std::array<Vec3, 3> x; Vec3 normal; };
+        struct FittedFace
+        {
+            std::array<Vec3, 3> x;
+            Vec3 normal;
+        };
         std::vector<FittedFace> fitted;
         fitted.reserve(interfaceFacets.size());
         for (const Index f : interfaceFacets)
         {
           const auto& fv = moved.getFace(f)->getVertices();
           FittedFace ff;
-          for (int i = 0; i < 3; ++i) ff.x[i] = moved.getVertexCoordinates(fv[i]);
+          for (int i = 0; i < 3; ++i)
+            ff.x[i] = moved.getVertexCoordinates(fv[i]);
           ff.normal = cross3(ff.x[1] - ff.x[0], ff.x[2] - ff.x[0]);
           ff.normal /= std::max(ff.normal.norm(), Real(1e-30));
           Vec3 fc = (ff.x[0] + ff.x[1] + ff.x[2]) / Real(3);
@@ -682,7 +680,8 @@ int run(int argc, char** argv)
               for (const Index v : moved.getCell(c)->getVertices())
                 cc += moved.getVertexCoordinates(v);
               cc /= Real(4);
-              if ((fc - cc).dot(ff.normal) < 0) ff.normal = -ff.normal;
+              if ((fc - cc).dot(ff.normal) < 0)
+                ff.normal = -ff.normal;
               break;
             }
           fitted.push_back(ff);
@@ -691,18 +690,24 @@ int run(int argc, char** argv)
         for (Index v = 0; v < mesh.getVertexCount(); ++v)
         {
           const Index dof = sh.getGlobalIndex({0, v}, 0);
-          if (std::abs(dist.getData()(dof)) > band) continue;
+          if (std::abs(dist.getData()(dof)) > band)
+            continue;
           const Vec3 x = mesh.getVertexCoordinates(v);
           Real dmin = std::numeric_limits<Real>::infinity();
           std::size_t nearest = 0;
           for (std::size_t i = 0; i < fitted.size(); ++i)
           {
-            const Real d = pointTriangleDistance(
-                x, fitted[i].x[0], fitted[i].x[1], fitted[i].x[2]);
-            if (d < dmin) { dmin = d; nearest = i; }
+            const Real d =
+              pointTriangleDistance(x, fitted[i].x[0], fitted[i].x[1], fitted[i].x[2]);
+            if (d < dmin)
+            {
+              dmin = d;
+              nearest = i;
+            }
           }
-          const Vec3 fc = (fitted[nearest].x[0] + fitted[nearest].x[1]
-                         + fitted[nearest].x[2]) / Real(3);
+          const Vec3 fc =
+            (fitted[nearest].x[0] + fitted[nearest].x[1] + fitted[nearest].x[2]) /
+            Real(3);
           dist.getData()(dof) =
             ((x - fc).dot(fitted[nearest].normal) >= 0 ? dmin : -dmin);
         }
@@ -722,8 +727,7 @@ int run(int argc, char** argv)
     dJ /= std::max(speed.max(), Real(1e-30));
     Advection::Lagrangian(adv, advTest, dist, dJ).step(dt);
     phiH.getData() = adv.getSolution().getData();
-    if (repairEvery > 0
-        && ((itn + 1) % repairEvery == 0 || itn + 1 == maxIt))
+    if (repairEvery > 0 && ((itn + 1) % repairEvery == 0 || itn + 1 == maxIt))
     {
       const Math::Vector<Real> rhs = mass.getOperator() * phiH.getData();
       phiH.getData() = repairCG.solve(rhs);
@@ -733,9 +737,8 @@ int run(int argc, char** argv)
   }
 
   xdmf.close();
-  std::cout << "\nDone. Accepted shape iterations: "
-            << acceptedShapeIterations << " / " << maxIt
-            << "  attempts=" << shapeAttempts
+  std::cout << "\nDone. Accepted shape iterations: " << acceptedShapeIterations << " / "
+            << maxIt << "  attempts=" << shapeAttempts
             << ". Objective history in LevelSetWNGIRCantilever3D.obj.txt\n";
   return 0;
 }

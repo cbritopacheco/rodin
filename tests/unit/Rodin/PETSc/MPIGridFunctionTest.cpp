@@ -104,6 +104,34 @@ namespace
     world.barrier();
     SUCCEED();
   }
+
+  TEST(PETSc_MPI_GridFunction, PointEvaluationUsesOwnedAndGhostCoefficients)
+  {
+    auto& world = *g_world;
+    Context::MPI ctx(*g_env, world);
+    auto mesh = distributeFromRoot(ctx);
+    P1 fes(mesh);
+    P1 vectorFES(mesh, size_t(2));
+    Rodin::PETSc::Variational::GridFunction gf(fes);
+    Rodin::PETSc::Variational::GridFunction vector(vectorFES);
+    gf = static_cast<PetscScalar>(3.25);
+    vector = static_cast<PetscScalar>(-1.75);
+
+    size_t evaluated = 0;
+    for (auto cell = mesh.getCell(); cell; ++cell)
+    {
+      const Point p(*cell, Polytope::Traits(cell->getGeometry()).getCentroid());
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(gf(p))), 3.25, 1e-14);
+      const auto value = vector(p);
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(value(0))), -1.75, 1e-14);
+      EXPECT_NEAR(static_cast<Real>(PetscRealPart(value(1))), -1.75, 1e-14);
+      ++evaluated;
+    }
+    EXPECT_GT(evaluated, 0);
+    static_cast<const decltype(gf)&>(gf).flush();
+    static_cast<const decltype(vector)&>(vector).flush();
+    world.barrier();
+  }
 }
 
 int main(int argc, char** argv)

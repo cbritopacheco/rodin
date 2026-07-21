@@ -129,47 +129,38 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           evalData.stressPassive + evalData.stressViscous
           + evalData.active.activeStress;
 
-        residualVector[Model::RadialDisplacement] =
-          yDot - evalData.v;
+        residualVector[Model::RadialDisplacement] = yDot - evalData.v;
 
-        residualVector[Model::RadialVelocity] =
-          m_input.d0 * m_input.rho * vDot
-          + m_input.d0 / m_input.R0 * geometricStretch * totalStress
-          - evalData.pv * geometricStretch * geometricStretch;
+        residualVector[Model::RadialVelocity] = m_input.d0 * m_input.rho * vDot +
+          m_input.d0 / m_input.R0 * geometricStretch * totalStress -
+          evalData.pv * geometricStretch * geometricStretch;
 
-        residualVector[Model::VentricularPressure] =
-          m_input.cavityCapacity * pvDot
-          + evalData.cavityFluxCur
-          + Scalar(4) * std::numbers::pi_v<Scalar>
-            * radius * radius * evalData.v;
+        residualVector[Model::VentricularPressure] = m_input.cavityCapacity * pvDot +
+          evalData.cavityFluxCur +
+          Scalar(4) * std::numbers::pi_v<Scalar> * radius * radius * evalData.v;
 
         residualVector[Model::ArterialPressure] =
-          m_input.Cp * parDot
-          + evalData.windkesselflowP;
+          m_input.Cp * parDot + evalData.windkesselflowP;
 
         residualVector[Model::DistalPressure] =
-          m_input.Cd * pdDot
-          + evalData.windkesselflowD;
+          m_input.Cd * pdDot + evalData.windkesselflowD;
 
         {
           const Scalar h = activeStretch(evalData.ec);
           const Scalar h3 = h * h * h;
           residualVector[Model::FiberDeformation] =
-            (evalData.tauc + m_input.mu * ecDot) * h3
-            - m_input.Es
-              * (evalData.strain1D - evalData.ec)
-              * (Scalar(1) + Scalar(2) * evalData.strain1D);
+            (evalData.tauc + m_input.mu * ecDot) * h3 -
+            m_input.Es * (evalData.strain1D - evalData.ec) *
+              (Scalar(1) + Scalar(2) * evalData.strain1D);
         }
 
         const auto active = evaluateActiveRates(evalData, ecDot);
-        residualVector[Model::ActiveStiffness] =
-          kcDot + active.rate * evalData.kc
-          - active.recruitment * m_input.k0 * active.uPositive;
+        residualVector[Model::ActiveStiffness] = kcDot + active.rate * evalData.kc -
+          active.recruitment * m_input.k0 * active.uPositive;
 
-        residualVector[Model::ActiveStress] =
-          taucDot - evalData.kc * ecDot
-          - active.recruitment * m_input.sigma0 * active.uPositive
-          + active.rate * evalData.tauc;
+        residualVector[Model::ActiveStress] = taucDot - evalData.kc * ecDot -
+          active.recruitment * m_input.sigma0 * active.uPositive +
+          active.rate * evalData.tauc;
 
         if (m_input.alphaR <= std::numeric_limits<Scalar>::epsilon())
         {
@@ -187,10 +178,8 @@ namespace Rodin::Heart::CCMLC2014::Numerics
        * @brief Assemble the exact Jacobian of the coupled residual.
        */
       template <class DenseMatrix, class EvalData>
-      void evaluateJacobian(
-          const EvalData& evalData,
-          DenseMatrix& jacobianMatrix,
-          typename DenseMatrix::Scalar) const
+      void evaluateJacobian(const EvalData& evalData, DenseMatrix& jacobianMatrix,
+        typename DenseMatrix::Scalar) const
       {
         using Scalar = typename DenseMatrix::Scalar;
         jacobianMatrix.resize(Model::NumberOfVariables, Model::NumberOfVariables);
@@ -206,33 +195,29 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         const Scalar F = Scalar(1) + Scalar(2) * evalData.strain1D;
 
         const Scalar totalStress =
-          evalData.stressPassive + evalData.stressViscous
-          + evalData.active.activeStress;
+          evalData.stressPassive + evalData.stressViscous + evalData.active.activeStress;
 
         // Kinematic equation: D(y) - v = 0
         jacobianMatrix(Model::RadialDisplacement, Model::RadialDisplacement) = a0;
         jacobianMatrix(Model::RadialDisplacement, Model::RadialVelocity) = -Scalar(1);
 
         // Wall momentum equation.
-        jacobianMatrix(Model::RadialVelocity, Model::RadialDisplacement) =
-          m_input.d0 / m_input.R0
-          * (dsdy * totalStress
-             + s * (evalData.diffStressPassive
-                    + evalData.diffStressViscous
-                    + evalData.active.dActiveStressWrtDisplacement))
-          - Scalar(2) * evalData.pv * s * dsdy;
+        jacobianMatrix(Model::RadialVelocity, Model::RadialDisplacement) = m_input.d0 /
+            m_input.R0 *
+            (dsdy * totalStress +
+              s *
+                (evalData.diffStressPassive + evalData.diffStressViscous +
+                  evalData.active.dActiveStressWrtDisplacement)) -
+          Scalar(2) * evalData.pv * s * dsdy;
 
         jacobianMatrix(Model::RadialVelocity, Model::RadialVelocity) =
-          m_input.d0 * m_input.rho * a0
-          + m_input.d0 / m_input.R0
-            * s * evalData.diffStressViscousWrtVelocity;
+          m_input.d0 * m_input.rho * a0 +
+          m_input.d0 / m_input.R0 * s * evalData.diffStressViscousWrtVelocity;
 
-        jacobianMatrix(Model::RadialVelocity, Model::VentricularPressure) =
-          -s * s;
+        jacobianMatrix(Model::RadialVelocity, Model::VentricularPressure) = -s * s;
 
-        jacobianMatrix(Model::RadialVelocity, Model::FiberDeformation) =
-          m_input.d0 / m_input.R0
-          * s * evalData.active.partialActiveStressWrtFiberDeformation;
+        jacobianMatrix(Model::RadialVelocity, Model::FiberDeformation) = m_input.d0 /
+          m_input.R0 * s * evalData.active.partialActiveStressWrtFiberDeformation;
 
         // Cavity pressure balance.
         jacobianMatrix(Model::VentricularPressure, Model::RadialDisplacement) =
@@ -262,8 +247,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           evalData.dWindkesselflowD_dPar;
 
         jacobianMatrix(Model::DistalPressure, Model::DistalPressure) +=
-          m_input.Cd * a0
-          + evalData.dWindkesselflowD_dPd;
+          m_input.Cd * a0 + evalData.dWindkesselflowD_dPd;
 
         // Fiber-deformation equilibrium.
         const Scalar ecDot =
@@ -277,9 +261,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
           -m_input.Es * dEdy * (F + Scalar(2) * (evalData.strain1D - evalData.ec));
 
         jacobianMatrix(Model::FiberDeformation, Model::FiberDeformation) =
-          m_input.mu * a0 * h3
-          + Scalar(6) * activeRateStress * h2
-          + m_input.Es * F;
+          m_input.mu * a0 * h3 + Scalar(6) * activeRateStress * h2 + m_input.Es * F;
 
         jacobianMatrix(Model::FiberDeformation, Model::ActiveStress) = h3;
 
@@ -289,26 +271,20 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
         // Active stiffness evolution.
         jacobianMatrix(Model::ActiveStiffness, Model::FiberDeformation) =
-          evalData.kc * dRateDec
-          - dn0Dec * m_input.k0 * active.uPositive;
+          evalData.kc * dRateDec - dn0Dec * m_input.k0 * active.uPositive;
 
-        jacobianMatrix(Model::ActiveStiffness, Model::ActiveStiffness) =
-          a0 + active.rate;
+        jacobianMatrix(Model::ActiveStiffness, Model::ActiveStiffness) = a0 + active.rate;
 
         jacobianMatrix(Model::ActiveStiffness, Model::LoadDependentRelaxation) =
           evalData.kc * active.uNegative;
 
         // Active stress evolution.
-        jacobianMatrix(Model::ActiveStress, Model::FiberDeformation) =
-          -evalData.kc * a0
-          - dn0Dec * m_input.sigma0 * active.uPositive
-          + evalData.tauc * dRateDec;
+        jacobianMatrix(Model::ActiveStress, Model::FiberDeformation) = -evalData.kc * a0 -
+          dn0Dec * m_input.sigma0 * active.uPositive + evalData.tauc * dRateDec;
 
-        jacobianMatrix(Model::ActiveStress, Model::ActiveStiffness) =
-          -ecDot;
+        jacobianMatrix(Model::ActiveStress, Model::ActiveStiffness) = -ecDot;
 
-        jacobianMatrix(Model::ActiveStress, Model::ActiveStress) =
-          a0 + active.rate;
+        jacobianMatrix(Model::ActiveStress, Model::ActiveStress) = a0 + active.rate;
 
         jacobianMatrix(Model::ActiveStress, Model::LoadDependentRelaxation) =
           evalData.tauc * active.uNegative;
@@ -316,22 +292,16 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         // Load-dependent relaxation.
         if (m_input.alphaR <= std::numeric_limits<Scalar>::epsilon())
         {
-          jacobianMatrix(
-              Model::LoadDependentRelaxation,
-              Model::FiberDeformation) = -m_input.dm0(evalData.ec);
-          jacobianMatrix(
-              Model::LoadDependentRelaxation,
-              Model::LoadDependentRelaxation) = Scalar(1);
+          jacobianMatrix(Model::LoadDependentRelaxation, Model::FiberDeformation) =
+            -m_input.dm0(evalData.ec);
+          jacobianMatrix(Model::LoadDependentRelaxation, Model::LoadDependentRelaxation) =
+            Scalar(1);
         }
         else
         {
-          jacobianMatrix(
-              Model::LoadDependentRelaxation,
-              Model::FiberDeformation) =
+          jacobianMatrix(Model::LoadDependentRelaxation, Model::FiberDeformation) =
             -m_input.dm0(evalData.ec) / m_input.alphaR;
-          jacobianMatrix(
-              Model::LoadDependentRelaxation,
-              Model::LoadDependentRelaxation) =
+          jacobianMatrix(Model::LoadDependentRelaxation, Model::LoadDependentRelaxation) =
             a0 + Scalar(1) / m_input.alphaR;
         }
       }
@@ -340,60 +310,48 @@ namespace Rodin::Heart::CCMLC2014::Numerics
       template <class Scalar>
       struct TimeCoefficients
       {
-        Scalar current = 0.0;
-        Scalar previous = 0.0;
-        Scalar previousPrevious = 0.0;
+          Scalar current = 0.0;
+          Scalar previous = 0.0;
+          Scalar previousPrevious = 0.0;
       };
 
       template <class Scalar>
       struct RecruitmentData
       {
-        Scalar value = 0.0;
-        Scalar derivative = 0.0;
+          Scalar value = 0.0;
+          Scalar derivative = 0.0;
       };
 
       template <class Scalar>
       struct ActiveRateData
       {
-        Scalar uPositive = 0.0;
-        Scalar uNegative = 0.0;
-        Scalar recruitment = 0.0;
-        Scalar dRecruitmentDEc = 0.0;
-        Scalar rate = 0.0;
-        Scalar dRateDEcDot = 0.0;
+          Scalar uPositive = 0.0;
+          Scalar uNegative = 0.0;
+          Scalar recruitment = 0.0;
+          Scalar dRecruitmentDEc = 0.0;
+          Scalar rate = 0.0;
+          Scalar dRateDEcDot = 0.0;
       };
 
       template <class EvalData>
-      TimeCoefficients<decltype(std::declval<EvalData>().y)>
-      getTimeCoefficients(const EvalData& data) const
+      TimeCoefficients<decltype(std::declval<EvalData>().y)> getTimeCoefficients(
+        const EvalData& data) const
       {
         using Scalar = decltype(data.y);
-        if (m_input.timeScheme == Model::TimeScheme::BDF2
-            && data.sn.t > data.snm1.t + Scalar(0.5) * data.dt)
+        if (m_input.timeScheme == Model::TimeScheme::BDF2 &&
+          data.sn.t > data.snm1.t + Scalar(0.5) * data.dt)
         {
-          return {
-            Scalar(1.5) / data.dt,
-            -Scalar(2) / data.dt,
-            Scalar(0.5) / data.dt
-          };
+          return {Scalar(1.5) / data.dt, -Scalar(2) / data.dt, Scalar(0.5) / data.dt};
         }
-        return {
-          Scalar(1) / data.dt,
-          -Scalar(1) / data.dt,
-          Scalar(0)
-        };
+        return {Scalar(1) / data.dt, -Scalar(1) / data.dt, Scalar(0)};
       }
 
       template <class Scalar>
-      static Scalar timeDerivative(
-          Scalar current,
-          Scalar previous,
-          Scalar previousPrevious,
-          const TimeCoefficients<Scalar>& tc)
+      static Scalar timeDerivative(Scalar current, Scalar previous,
+        Scalar previousPrevious, const TimeCoefficients<Scalar>& tc)
       {
-        return tc.current * current
-             + tc.previous * previous
-             + tc.previousPrevious * previousPrevious;
+        return tc.current * current + tc.previous * previous +
+          tc.previousPrevious * previousPrevious;
       }
 
       template <class Scalar>
@@ -470,8 +428,8 @@ namespace Rodin::Heart::CCMLC2014::Numerics
       }
 
       template <class EvalData>
-      ActiveRateData<decltype(std::declval<EvalData>().y)>
-      evaluateActiveRates(const EvalData& data, decltype(std::declval<EvalData>().y) ecDot) const
+      ActiveRateData<decltype(std::declval<EvalData>().y)> evaluateActiveRates(
+        const EvalData& data, decltype(std::declval<EvalData>().y) ecDot) const
       {
         using Scalar = decltype(data.y);
         ActiveRateData<Scalar> result;
@@ -483,11 +441,9 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         result.recruitment = recruitment.value;
         result.dRecruitmentDEc = recruitment.derivative;
 
-        result.rate =
-          result.uPositive + data.w * result.uNegative
-          + m_input.alpha * regularizedAbs(ecDot);
-        result.dRateDEcDot =
-          m_input.alpha * regularizedAbsDerivative(ecDot);
+        result.rate = result.uPositive + data.w * result.uNegative +
+          m_input.alpha * regularizedAbs(ecDot);
+        result.dRateDEcDot = m_input.alpha * regularizedAbsDerivative(ecDot);
         return result;
       }
 
@@ -509,39 +465,29 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         Scalar passiveStress = 0.0;
         Scalar passiveStressDerivativeWrtDisplacement = 0.0;
         PassiveLaw passiveLaw;
-        passiveLaw(
-            m_input.passiveEnergy,
-            data.C,
-            Scalar(2) * data.sqrtC / m_input.R0,
-            passiveStress,
-            passiveStressDerivativeWrtDisplacement);
+        passiveLaw(m_input.passiveEnergy, data.C, Scalar(2) * data.sqrtC / m_input.R0,
+          passiveStress, passiveStressDerivativeWrtDisplacement);
 
         data.stressPassive = passiveStress;
         data.diffStressPassive = passiveStressDerivativeWrtDisplacement;
 
         const Scalar s = data.sqrtC;
         const Scalar eta = m_input.eta;
-        data.stressViscous =
-          eta * data.v / m_input.R0
-          * (Scalar(2) * s + Scalar(4) * std::pow(s, Scalar(-11)));
-        data.diffStressViscous =
-          eta * data.v / (m_input.R0 * m_input.R0)
-          * (Scalar(2) - Scalar(44) * std::pow(s, Scalar(-12)));
+        data.stressViscous = eta * data.v / m_input.R0 *
+          (Scalar(2) * s + Scalar(4) * std::pow(s, Scalar(-11)));
+        data.diffStressViscous = eta * data.v / (m_input.R0 * m_input.R0) *
+          (Scalar(2) - Scalar(44) * std::pow(s, Scalar(-12)));
         data.diffStressViscousWrtVelocity =
-          eta / m_input.R0
-          * (Scalar(2) * s + Scalar(4) * std::pow(s, Scalar(-11)));
+          eta / m_input.R0 * (Scalar(2) * s + Scalar(4) * std::pow(s, Scalar(-11)));
 
         const Scalar h = activeStretch(data.ec);
         const Scalar h2 = h * h;
         const Scalar h3 = h2 * h;
         data.active.activeStressOneDimensional =
           m_input.Es / h2 * (data.strain1D - data.ec);
-        data.active.partialActiveStressWrtDisplacement =
-          m_input.Es / h2 * data.diffGreen;
+        data.active.partialActiveStressWrtDisplacement = m_input.Es / h2 * data.diffGreen;
         data.active.partialActiveStressWrtFiberDeformation =
-          m_input.Es
-          * (-Scalar(1) / h2
-             - Scalar(4) * (data.strain1D - data.ec) / h3);
+          m_input.Es * (-Scalar(1) / h2 - Scalar(4) * (data.strain1D - data.ec) / h3);
 
         data.active.activeStress = data.active.activeStressOneDimensional;
         data.active.dActiveStressWrtDisplacement =
@@ -553,8 +499,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
       {
         using Scalar = decltype(data.y);
         const auto tc = getTimeCoefficients(data);
-        const Scalar ecDot =
-          timeDerivative(data.ec, data.sn.ec, data.snm1.ec, tc);
+        const Scalar ecDot = timeDerivative(data.ec, data.sn.ec, data.snm1.ec, tc);
         const auto active = evaluateActiveRates(data, ecDot);
 
         data.active.fiberDeformationPrevious = data.sn.ec;
@@ -563,10 +508,8 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         data.active.gammaPrevious = data.sn.gamma;
         data.active.betaPrevious = data.sn.beta;
         data.active.wPrevious = data.sn.w;
-        data.active.gammaCurrent =
-          std::sqrt(std::max<Scalar>(data.kc, Scalar(0)));
-        data.active.betaCurrent =
-          (data.active.gammaCurrent > Scalar(0))
+        data.active.gammaCurrent = std::sqrt(std::max<Scalar>(data.kc, Scalar(0)));
+        data.active.betaCurrent = (data.active.gammaCurrent > Scalar(0))
           ? data.tauc / data.active.gammaCurrent
           : Scalar(0);
         data.active.wCurrent = data.w;
@@ -586,8 +529,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         using Scalar = decltype(data.y);
 
         const bool mitralOpenCurrent = data.pv <= data.pAtCur;
-        const bool bothClosedCurrent =
-          data.pAtCur <= data.pv && data.pv <= data.par;
+        const bool bothClosedCurrent = data.pAtCur <= data.pv && data.pv <= data.par;
 
         if (mitralOpenCurrent)
         {
@@ -604,8 +546,7 @@ namespace Rodin::Heart::CCMLC2014::Numerics
         else
         {
           data.cavityFluxCur =
-            m_input.Kar * (data.pv - data.par)
-            + m_input.Kp * (data.par - data.pAtCur);
+            m_input.Kar * (data.pv - data.par) + m_input.Kp * (data.par - data.pAtCur);
           data.dCavityFluxCur_dPv = m_input.Kar;
           data.dCavityFluxCur_dPar = -m_input.Kar + m_input.Kp;
         }
@@ -614,37 +555,32 @@ namespace Rodin::Heart::CCMLC2014::Numerics
 
         if (m_input.windkesselRheology == Model::WindkesselRheology::CarreauYasuda)
         {
-          Physics::WindkesselOutflowEvaluator<
-            Input,
-            Physics::Rheology::CarreauYasuda> windkessel(m_input);
+          Physics::WindkesselOutflowEvaluator<Input, Physics::Rheology::CarreauYasuda>
+            windkessel(m_input);
           windkessel.evaluate(data);
         }
         else if (m_input.windkesselRheology == Model::WindkesselRheology::Cross)
         {
-          Physics::WindkesselOutflowEvaluator<
-            Input,
-            Physics::Rheology::Cross> windkessel(m_input);
+          Physics::WindkesselOutflowEvaluator<Input, Physics::Rheology::Cross> windkessel(
+            m_input);
           windkessel.evaluate(data);
         }
         else if (m_input.windkesselRheology == Model::WindkesselRheology::PowerLaw)
         {
-          Physics::WindkesselOutflowEvaluator<
-            Input,
-            Physics::Rheology::PowerLaw> windkessel(m_input);
+          Physics::WindkesselOutflowEvaluator<Input, Physics::Rheology::PowerLaw>
+            windkessel(m_input);
           windkessel.evaluate(data);
         }
         else if (m_input.windkesselRheology == Model::WindkesselRheology::Quemada)
         {
-          Physics::WindkesselOutflowEvaluator<
-            Input,
-            Physics::Rheology::Quemada> windkessel(m_input);
+          Physics::WindkesselOutflowEvaluator<Input, Physics::Rheology::Quemada>
+            windkessel(m_input);
           windkessel.evaluate(data);
         }
         else
         {
-          Physics::WindkesselOutflowEvaluator<
-            Input,
-            Physics::Rheology::Newtonian> windkessel(m_input);
+          Physics::WindkesselOutflowEvaluator<Input, Physics::Rheology::Newtonian>
+            windkessel(m_input);
           windkessel.evaluate(data);
         }
       }

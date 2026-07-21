@@ -39,13 +39,13 @@
 using namespace Rodin;
 using namespace Rodin::Geometry;
 
-static boost::mpi::environment*  g_env   = nullptr;
+static boost::mpi::environment* g_env = nullptr;
 static boost::mpi::communicator* g_world = nullptr;
 
 namespace
 {
   Mesh<Context::Local> makeShardableMesh(
-      Polytope::Type type, std::initializer_list<size_t> shape)
+    Polytope::Type type, std::initializer_list<size_t> shape)
   {
     auto mesh = Mesh<Context::Local>::UniformGrid(type, shape);
     const size_t D = mesh.getDimension();
@@ -58,9 +58,7 @@ namespace
   }
 
   Mesh<Context::MPI> distributeFromRoot(
-      const Context::MPI& ctx,
-      Polytope::Type type,
-      std::initializer_list<size_t> shape)
+    const Context::MPI& ctx, Polytope::Type type, std::initializer_list<size_t> shape)
   {
     const auto& comm = ctx.getCommunicator();
 
@@ -294,7 +292,7 @@ TEST(MPI_Geometry_SubMesh, CellSubmeshByDimension)
   // The global cell count of the submesh should equal the global cell count
   // of the parent mesh.
   const size_t parentGlobalCells = mesh.getPolytopeCount(cellDim);
-  const size_t subGlobalCells    = sub.getPolytopeCount(cellDim);
+  const size_t subGlobalCells = sub.getPolytopeCount(cellDim);
   EXPECT_EQ(subGlobalCells, parentGlobalCells);
 }
 
@@ -388,8 +386,8 @@ TEST(MPI_Geometry_SubMesh, RestrictionOfParentQuadraturePoint)
 
   const Index subLocal = 0;
   const Index parentLocal = pmap.left.at(subLocal);
-  const auto& qf = QF::PolytopeQuadratureFormula::get(
-      1, mesh.getGeometry(faceDim, parentLocal));
+  const auto& qf =
+    QF::PolytopeQuadratureFormula::get(1, mesh.getGeometry(faceDim, parentLocal));
   const auto& parentQ = mesh.getQuadrature(faceDim, parentLocal, qf);
   ASSERT_GT(parentQ.getSize(), 0u);
 
@@ -423,7 +421,8 @@ TEST(MPI_Geometry_SubMesh, RestrictionRejectsParentCellPointOnBoundarySubMesh)
   Point parentCellPoint(*mesh.getPolytope(cellDim, 0), refCoords);
 
   EXPECT_FALSE(boundary.restriction(parentCellPoint).has_value())
-    << "Boundary SubMesh should reject parent cell points outside its selected dimension.";
+    << "Boundary SubMesh should reject parent cell points outside its selected "
+       "dimension.";
 }
 
 /// @brief Verifies quadrature points use MPI parent mesh identity for MPI geometry sub mesh by checking exact expected values, true predicates, false predicates.
@@ -438,8 +437,7 @@ TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPIParentMeshIdentity)
     return;
 
   const Index localIdx = 0;
-  const auto& qf = QF::PolytopeQuadratureFormula::get(
-      1, mesh.getGeometry(d, localIdx));
+  const auto& qf = QF::PolytopeQuadratureFormula::get(1, mesh.getGeometry(d, localIdx));
   const auto& q = mesh.getQuadrature(d, localIdx, qf);
   ASSERT_GT(q.getSize(), 0u);
 
@@ -474,15 +472,15 @@ TEST(MPI_Geometry_SubMesh, QuadraturePointsUseMPISubMeshIdentity)
     return;
 
   const Index localIdx = 0;
-  const auto& qf = QF::PolytopeQuadratureFormula::get(
-      1, boundary.getGeometry(d, localIdx));
+  const auto& qf =
+    QF::PolytopeQuadratureFormula::get(1, boundary.getGeometry(d, localIdx));
   const auto& q = boundary.getQuadrature(d, localIdx, qf);
   ASSERT_GT(q.getSize(), 0u);
 
   const Point& p = q.getPoint(0);
   const MeshBase& pointMesh = p.getPolytope().getMesh();
   const MeshBase& submeshIdentity =
-      static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
+    static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
   const MeshBase& shardMesh = static_cast<const MeshBase&>(boundary.getShard());
 
   EXPECT_TRUE(pointMesh == submeshIdentity);
@@ -513,10 +511,10 @@ TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
   const Index subLocalIdx = 0;
   const Index parentLocalIdx = boundary.getPolytopeMap(d).left.at(subLocalIdx);
 
-  const auto& parentQF = QF::PolytopeQuadratureFormula::get(
-      1, mesh.getGeometry(d, parentLocalIdx));
-  const auto& subQF = QF::PolytopeQuadratureFormula::get(
-      1, boundary.getGeometry(d, subLocalIdx));
+  const auto& parentQF =
+    QF::PolytopeQuadratureFormula::get(1, mesh.getGeometry(d, parentLocalIdx));
+  const auto& subQF =
+    QF::PolytopeQuadratureFormula::get(1, boundary.getGeometry(d, subLocalIdx));
 
   const auto& parentQ = mesh.getQuadrature(d, parentLocalIdx, parentQF);
   const auto& subQ = boundary.getQuadrature(d, subLocalIdx, subQF);
@@ -525,7 +523,7 @@ TEST(MPI_Geometry_SubMesh, QuadratureCacheSeparatesParentAndSubMeshIdentities)
 
   const MeshBase& parentIdentity = static_cast<const MeshBase&>(mesh);
   const MeshBase& submeshIdentity =
-      static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
+    static_cast<const MeshBase&>(static_cast<const Mesh<Context::MPI>&>(boundary));
 
   EXPECT_TRUE(parentQ.getPoint(0).getPolytope().getMesh() == parentIdentity);
   EXPECT_EQ(parentQ.getPoint(0).getPolytope().getIndex(), parentLocalIdx);
@@ -543,7 +541,7 @@ int main(int argc, char** argv)
 
   boost::mpi::environment env(argc, argv);
   boost::mpi::communicator world;
-  g_env   = &env;
+  g_env = &env;
   g_world = &world;
 
   return RUN_ALL_TESTS();

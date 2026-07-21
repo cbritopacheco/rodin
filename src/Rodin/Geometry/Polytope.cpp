@@ -762,7 +762,7 @@ namespace Rodin::Geometry
       }
       case Geometry::Polytope::Type::Pyramid:
       {
-        static const Math::SpatialVector<Real> s_node{{ 0.375, 0.375, 0.25 }};
+        static const Math::SpatialVector<Real> s_node{{0.375, 0.375, 0.25}};
         return s_node;
       }
       case Geometry::Polytope::Type::Wedge:
@@ -834,14 +834,10 @@ namespace Rodin::Geometry
       }
       case Type::Pyramid:
       {
-        static const std::vector<Math::SpatialPoint> s_nodes =
-        {
-          Math::SpatialPoint{{ 0, 0, 0 }},
-          Math::SpatialPoint{{ 1, 0, 0 }},
-          Math::SpatialPoint{{ 1, 1, 0 }},
-          Math::SpatialPoint{{ 0, 1, 0 }},
-          Math::SpatialPoint{{ 0, 0, 1 }}
-        };
+        static const std::vector<Math::SpatialPoint> s_nodes = {
+          Math::SpatialPoint{{0, 0, 0}}, Math::SpatialPoint{{1, 0, 0}},
+          Math::SpatialPoint{{1, 1, 0}}, Math::SpatialPoint{{0, 1, 0}},
+          Math::SpatialPoint{{0, 0, 1}}};
         return s_nodes[i];
       }
       case Type::Hexahedron:
@@ -884,84 +880,51 @@ namespace Rodin::Geometry
     {
       case Type::Point:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          Math::Matrix<Real>{},
-          Math::Vector<Real>{}
-        };
+        static const HalfSpace s_hs = {Math::Matrix<Real>{}, Math::Vector<Real>{}};
         return s_hs;
       }
       case Type::Segment:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: x=0  -> -x <= 0
+        static const HalfSpace s_hs = {          // local 0: x=0  -> -x <= 0
           // local 1: x=1  ->  x <= 1
-          Math::Matrix<Real>{{ -1 }, { 1 }},
-          Math::Vector<Real>{{ 0, 1 }}
-        };
+          Math::Matrix<Real>{{-1}, {1}}, Math::Vector<Real>{{0, 1}}};
         return s_hs;
       }
       case Type::Triangle:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: y=0                ->  -y <= 0
+        static const HalfSpace s_hs = {// local 0: y=0                ->  -y <= 0
           // local 1: x+y=1              ->  (x+y)/√2 <= 1/√2
           // local 2: x=0                ->  -x <= 0
-          Math::Matrix<Real>{
-            {  0, -1 },
-            {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) },
-            { -1,  0 }
-          },
-          Math::Vector<Real>{{ 0, 1 / std::sqrt(2.0), 0 }}
-        };
+          Math::Matrix<Real>{{0, -1}, {1 / std::sqrt(2.0), 1 / std::sqrt(2.0)}, {-1, 0}},
+          Math::Vector<Real>{{0, 1 / std::sqrt(2.0), 0}}};
         return s_hs;
       }
       case Type::Hexahedron:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: z=0   -> -z <= 0
+        static const HalfSpace s_hs = {// local 0: z=0   -> -z <= 0
           // local 1: y=0   -> -y <= 0
           // local 2: x=1   ->  x <= 1
           // local 3: y=1   ->  y <= 1
           // local 4: x=0   -> -x <= 0
           // local 5: z=1   ->  z <= 1
           Math::Matrix<Real>{
-            {  0,  0, -1 },
-            {  0, -1,  0 },
-            {  1,  0,  0 },
-            {  0,  1,  0 },
-            { -1,  0,  0 },
-            {  0,  0,  1 }
-          },
-          Math::Vector<Real>{{ 0, 0, 1, 1, 0, 1 }}
-        };
+            {0, 0, -1}, {0, -1, 0}, {1, 0, 0}, {0, 1, 0}, {-1, 0, 0}, {0, 0, 1}},
+          Math::Vector<Real>{{0, 0, 1, 1, 0, 1}}};
         return s_hs;
       }
       case Type::Quadrilateral:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: y=0   -> -y <= 0
+        static const HalfSpace s_hs = {// local 0: y=0   -> -y <= 0
           // local 1: x=1   ->  x <= 1
           // local 2: y=1   ->  y <= 1
           // local 3: x=0   -> -x <= 0
-          Math::Matrix<Real>{
-            {  0, -1 },
-            {  1,  0 },
-            {  0,  1 },
-            { -1,  0 }
-          },
-          Math::Vector<Real>{{ 0, 1, 1, 0 }}
-        };
+          Math::Matrix<Real>{{0, -1}, {1, 0}, {0, 1}, {-1, 0}},
+          Math::Vector<Real>{{0, 1, 1, 0}}};
         return s_hs;
       }
       case Type::Tetrahedron:
       {
-        static thread_local const HalfSpace s_hs =
-        {
+        static const HalfSpace s_hs = {
           // Must match Connectivity::getSubPolytopes tetra face order:
           //
           // face 0: (1,2,3)  -> x+y+z=1   ->  (x+y+z)/sqrt(3) <= 1/sqrt(3)
@@ -969,20 +932,17 @@ namespace Rodin::Geometry
           // face 2: (0,1,3)  -> y=0       ->  -y <= 0
           // face 3: (0,2,1)  -> z=0       ->  -z <= 0
           Math::Matrix<Real>{
-            {  1 / std::sqrt(3.0),  1 / std::sqrt(3.0),  1 / std::sqrt(3.0) }, // x+y+z <= 1
-            { -1,  0,  0 },                                                    // x >= 0
-            {  0, -1,  0 },                                                    // y >= 0
-            {  0,  0, -1 }                                                     // z >= 0
+            {1 / std::sqrt(3.0), 1 / std::sqrt(3.0), 1 / std::sqrt(3.0)}, // x+y+z <= 1
+            {-1, 0, 0}, // x >= 0
+            {0, -1, 0}, // y >= 0
+            {0, 0, -1} // z >= 0
           },
-          Math::Vector<Real>{{ 1 / std::sqrt(3.0), 0, 0, 0 }}
-        };
+          Math::Vector<Real>{{1 / std::sqrt(3.0), 0, 0, 0}}};
         return s_hs;
       }
       case Type::Pyramid:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // Reference pyramid:
+        static const HalfSpace s_hs = {// Reference pyramid:
           //   z >= 0, y >= 0, x + z <= 1, y + z <= 1, x >= 0.
           //
           // Face order matches Connectivity::getSubPolytopes:
@@ -991,40 +951,27 @@ namespace Rodin::Geometry
           // local 2: side x+z=1  (1,2,4)
           // local 3: side y+z=1  (2,3,4)
           // local 4: side x = 0  (3,0,4)
-          Math::Matrix<Real>{
-            {  0,  0, -1 },
-            {  0, -1,  0 },
-            {  1 / std::sqrt(2.0),  0,  1 / std::sqrt(2.0) },
-            {  0,  1 / std::sqrt(2.0),  1 / std::sqrt(2.0) },
-            { -1,  0,  0 }
-          },
-          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0 }}
-        };
+          Math::Matrix<Real>{{0, 0, -1}, {0, -1, 0},
+            {1 / std::sqrt(2.0), 0, 1 / std::sqrt(2.0)},
+            {0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0)}, {-1, 0, 0}},
+          Math::Vector<Real>{{0, 0, 1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0}}};
         return s_hs;
       }
       case Type::Wedge:
       {
-        static thread_local const HalfSpace s_hs =
-        {
-          // local 0: z=0                ->  -z <= 0
+        static const HalfSpace s_hs = {// local 0: z=0                ->  -z <= 0
           // local 1: y=0                ->  -y <= 0
           // local 2: x+y=1              ->  (x+y)/√2 <= 1/√2
           // local 3: x=0                ->  -x <= 0
           // local 4: z=1                ->   z <= 1
-          Math::Matrix<Real>{
-            {  0,  0, -1 },
-            {  0, -1,  0 },
-            {  1 / std::sqrt(2.0),  1 / std::sqrt(2.0), 0 },
-            { -1,  0,  0 },
-            {  0,  0,  1 }
-          },
-          Math::Vector<Real>{{ 0, 0, 1 / std::sqrt(2.0), 0, 1 }}
-        };
+          Math::Matrix<Real>{{0, 0, -1}, {0, -1, 0},
+            {1 / std::sqrt(2.0), 1 / std::sqrt(2.0), 0}, {-1, 0, 0}, {0, 0, 1}},
+          Math::Vector<Real>{{0, 0, 1 / std::sqrt(2.0), 0, 1}}};
         return s_hs;
       }
     }
     assert(false);
-    static thread_local const HalfSpace s_null;
+    static const HalfSpace s_null;
     return s_null;
   }
 
@@ -1556,8 +1503,7 @@ namespace Rodin::Geometry
       case Type::Pyramid:
       {
         auto sq = [](Real v) { return v * v; };
-        auto projectTri = [](Real u, Real v, Real& ou, Real& ov)
-        {
+        auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
           u = std::max(u, Real(0));
           v = std::max(v, Real(0));
           const Real s = u + v;
@@ -1575,8 +1521,7 @@ namespace Rodin::Geometry
         Real bestd = std::numeric_limits<Real>::infinity();
         Real bx = 0, by = 0, bz = 0;
 
-        auto consider = [&](Real x, Real y, Real z)
-        {
+        auto consider = [&](Real x, Real y, Real z) {
           const Real d = sq(rc[0] - x) + sq(rc[1] - y) + sq(rc[2] - z);
           if (d < bestd)
           {
@@ -1587,10 +1532,8 @@ namespace Rodin::Geometry
           }
         };
 
-        consider(
-            std::clamp(rc[0], Real(0), Real(1)),
-            std::clamp(rc[1], Real(0), Real(1)),
-            Real(0));
+        consider(std::clamp(rc[0], Real(0), Real(1)), std::clamp(rc[1], Real(0), Real(1)),
+          Real(0));
 
         Real u, v;
         projectTri(rc[0], rc[2], u, v);
@@ -1605,7 +1548,9 @@ namespace Rodin::Geometry
         projectTri(Real(1) - rc[1] - rc[2], rc[2], u, v);
         consider(Real(0), Real(1) - u - v, v);
 
-        out[0] = bx; out[1] = by; out[2] = bz;
+        out[0] = bx;
+        out[1] = by;
+        out[2] = bz;
         return;
       }
       case Type::Wedge:
@@ -1871,8 +1816,7 @@ namespace Rodin::Geometry
         // 4: side x=0        (3,0,4)
         assert(local < 5);
 
-        auto projectTri = [](Real u, Real v, Real& ou, Real& ov)
-        {
+        auto projectTri = [](Real u, Real v, Real& ou, Real& ov) {
           u = std::max(u, Real(0));
           v = std::max(v, Real(0));
           const Real s = u + v;
@@ -1899,24 +1843,32 @@ namespace Rodin::Geometry
         if (local == 1)
         {
           projectTri(rc[0], rc[2], u, v);
-          out[0] = u; out[1] = Real(0); out[2] = v;
+          out[0] = u;
+          out[1] = Real(0);
+          out[2] = v;
           return;
         }
         if (local == 2)
         {
           projectTri(rc[1], rc[2], u, v);
-          out[0] = Real(1) - v; out[1] = u; out[2] = v;
+          out[0] = Real(1) - v;
+          out[1] = u;
+          out[2] = v;
           return;
         }
         if (local == 3)
         {
           projectTri(Real(1) - rc[0] - rc[2], rc[2], u, v);
-          out[0] = Real(1) - u - v; out[1] = Real(1) - v; out[2] = v;
+          out[0] = Real(1) - u - v;
+          out[1] = Real(1) - v;
+          out[2] = v;
           return;
         }
 
         projectTri(Real(1) - rc[1] - rc[2], rc[2], u, v);
-        out[0] = Real(0); out[1] = Real(1) - u - v; out[2] = v;
+        out[0] = Real(0);
+        out[1] = Real(1) - u - v;
+        out[2] = v;
         return;
       }
       case Type::Wedge:

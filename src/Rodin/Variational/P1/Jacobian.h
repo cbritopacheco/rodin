@@ -480,9 +480,7 @@ namespace Rodin::Variational
 
           // Reference coordinates at this sample.
           const auto& rc =
-            qf
-              ? qf->getPoint(ip.getIndex())
-              : pt.getReferenceCoordinates();
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           // J^{-1} at this integration point
           const auto Jinv = pt.getJacobianInverse();
@@ -527,7 +525,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      auto getBasis(size_t local) const
+      const SpatialMatrixType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.jac.size());

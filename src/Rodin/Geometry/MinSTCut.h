@@ -29,8 +29,7 @@ namespace Rodin::Geometry
       /// @brief Label value for cells outside the level set.
       static constexpr int Outside = 1;
       /// @brief Sentinel index denoting an absent edge/index.
-      static constexpr Index InvalidIndex =
-        std::numeric_limits<Index>::max();
+      static constexpr Index InvalidIndex = std::numeric_limits<Index>::max();
 
       /// @brief A weighted graph edge between two cells.
       struct Edge
@@ -72,27 +71,27 @@ namespace Rodin::Geometry
       {
         /// Multiplicative scale applied to every pairwise capacity
         /// (Potts smoothing strength lambda).
-        Real lambdaScale = 1;
+          Real lambdaScale = 1;
 
         /// Multiplicative scale applied to every unary cost.
-        Real unaryScale = 1;
+          Real unaryScale = 1;
 
         /// If `|moment[i]| >= farFieldThreshold` the cell `i` is pinned
         /// to `sign(-moment[i])` by injecting a large unary on the
         /// opposite terminal. Disabled when negative.
-        Real farFieldThreshold = -1;
+          Real farFieldThreshold = -1;
 
         /// Per-edge multiplier replacing `lambdaScale` on the i-th edge.
         /// Use for zero-level-aware facet weighting (e.g. down-weight
         /// pairwise term where |phi| is small so the cut prefers to
         /// align with the actual interface).
         /// Size must be `edges.size()` or `0` (disabled).
-        std::vector<Real> perEdgeLambda;
+          std::vector<Real> perEdgeLambda;
 
         /// Per-cell free/fixed mask. `cellInBand[i] == false` pins cell
         /// `i` to `sign(-moment[i])` via a large unary. Size must be
         /// `volumes.size()` or `0` (disabled, all cells free).
-        std::vector<Boolean> cellInBand;
+          std::vector<Boolean> cellInBand;
       };
 
       /// @brief Returns the unary cost of labeling a cell Inside, given its
@@ -105,25 +104,18 @@ namespace Rodin::Geometry
 
       /// @brief Classifies cells into Inside/Outside via a Potts min s-t cut
       /// built from per-cell volumes and moments.
-      Result classify(
-          const std::vector<Real>& volumes,
-          const std::vector<Real>& moments,
-          const std::vector<Edge>& edges) const;
+      Result classify(const std::vector<Real>& volumes, const std::vector<Real>& moments,
+        const std::vector<Edge>& edges) const;
 
       /// @brief Classifies cells with additional @ref Options (narrow-band
       /// restriction, far-field pinning, per-edge weighting).
-      Result classify(
-          const std::vector<Real>& volumes,
-          const std::vector<Real>& moments,
-          const std::vector<Edge>& edges,
-          const Options& options) const;
+      Result classify(const std::vector<Real>& volumes, const std::vector<Real>& moments,
+        const std::vector<Edge>& edges, const Options& options) const;
 
       /// @brief Solves the s-t min cut directly from precomputed unary costs
       /// and edges.
-      Result solve(
-          const std::vector<Real>& insideCosts,
-          const std::vector<Real>& outsideCosts,
-          const std::vector<Edge>& edges) const;
+      Result solve(const std::vector<Real>& insideCosts,
+        const std::vector<Real>& outsideCosts, const std::vector<Edge>& edges) const;
   };
 }
 

@@ -396,9 +396,7 @@ namespace Rodin::Variational
           const size_t nv = fe.getCount();
 
           const auto& rc =
-            qf
-              ? qf->getPoint(ip.getIndex())
-              : pt.getReferenceCoordinates();
+            qf ? qf->getPoint(ip.getIndex()) : pt.getReferenceCoordinates();
 
           // J^{-T} at this integration point (constant for affine maps)
           const auto JinvT = pt.getJacobianInverse().transpose();
@@ -419,8 +417,7 @@ namespace Rodin::Variational
         return *this;
       }
 
-      constexpr
-      auto getBasis(size_t local) const
+      constexpr const SpatialVectorType& getBasis(size_t local) const
       {
         assert(m_cache.cellKey);
         assert(local < m_cache.grad.size());

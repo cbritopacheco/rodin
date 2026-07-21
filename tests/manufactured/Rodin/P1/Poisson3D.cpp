@@ -27,7 +27,6 @@ using namespace Rodin::Variational;
 using namespace Rodin::Solver;
 using namespace Rodin::Test::Random;
 
-
 /**
  * @brief Manufactured solutions for the 3D Poisson problem on supported 3D meshes.
  *
@@ -53,8 +52,7 @@ using namespace Rodin::Test::Random;
 namespace Rodin::Tests::Manufactured::Poisson3D
 {
   template <size_t M>
-  class Manufactured_Poisson3D_Test
-    : public ::testing::TestWithParam<Polytope::Type>
+  class Manufactured_Poisson3D_Test : public ::testing::TestWithParam<Polytope::Type>
   {
   protected:
     void SetUp() override
@@ -681,35 +679,17 @@ namespace Rodin::Tests::Manufactured::Poisson3D
   }
 
   /// @brief Instantiates Manufactured Poisson 3 D Test 8 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Poisson3D_Test_8,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Poisson3D_Test_8,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Manufactured Poisson 3 D Test 16 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Poisson3D_Test_16,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Poisson3D_Test_16,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 
   /// @brief Instantiates Manufactured Poisson 3 D Test 32 over the Polytope Coverage 3 D parameter coverage.
-  INSTANTIATE_TEST_SUITE_P(
-    PolytopeCoverage3D,
-    Manufactured_Poisson3D_Test_32,
-    ::testing::Values(
-      Polytope::Type::Tetrahedron,
-      Polytope::Type::Hexahedron,
-      Polytope::Type::Pyramid,
-      Polytope::Type::Wedge)
-  );
+  INSTANTIATE_TEST_SUITE_P(PolytopeCoverage3D, Manufactured_Poisson3D_Test_32,
+    ::testing::Values(Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+      Polytope::Type::Pyramid, Polytope::Type::Wedge));
 }

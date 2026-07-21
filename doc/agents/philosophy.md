@@ -123,9 +123,13 @@ rather than extended:
 - **Vary behavior by template parameter, not by subclass or flag** (scalar
   type, range type, FES, mesh/context — every FES family and solver is
   parameterized this way).
-- **Free functions for procedures; classes only where state is owned.**
-  Multi-stage algorithms are staged free functions (e.g. `solveWNGIR`),
-  each stage independently testable, composed by the caller.
+- **Multi-stage algorithms are classes with proper names.** The class is
+  named for the algorithm, each stage is a member function, and the context
+  the stages share — inputs, parameters, intermediate state — is retained in
+  the class rather than threaded through argument lists. Each stage stays
+  independently testable: construct the object, drive the stages, inspect the
+  result. Free functions remain the right shape for single-step operations
+  that own no context.
 - **New solvers are expressed IN the form language, not beside it.** WNGIR
   is built from `Problem` + `Integral`/`FaceIntegral` + custom integrators
   that slot into the existing assembly — a sentence in the language, not a

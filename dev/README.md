@@ -45,12 +45,16 @@ diagnostics between releases.
 `TidyTU.cpp` and compares findings against `clang_tidy.baseline`.
 
 ```sh
+cmake -S . -B build -DRODIN_BUILD_TIDY=ON
+python3 dev/check_clang_tidy.py --build-dir build
 python3 dev/check_clang_tidy.py --flags "<compiler flags>"
 python3 dev/check_clang_tidy.py --flags "<compiler flags>" --update-baseline
 ```
 
 `TidyTU.cpp` is an aggregate translation unit that includes Rodin headers so
-clang-tidy can inspect the library consistently.
+clang-tidy can inspect the library consistently. The CMake-backed invocation
+also checks optional modules enabled in that build with their actual dependency
+include paths and feature definitions.
 
 ### House Style
 

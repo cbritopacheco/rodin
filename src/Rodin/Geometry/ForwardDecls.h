@@ -20,7 +20,7 @@
 
 #include "Rodin/Context.h"
 #ifdef RODIN_USE_MPI
-#  include "Rodin/MPI/Context/ForwardDecls.h"
+#include "Rodin/MPI/Context/ForwardDecls.h"
 #endif
 #include "Types.h"
 

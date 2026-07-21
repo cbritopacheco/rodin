@@ -88,11 +88,16 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Tetrahedron: return "Tetrahedron";
-      case Polytope::Type::Hexahedron:  return "Hexahedron";
-      case Polytope::Type::Pyramid:     return "Pyramid";
-      case Polytope::Type::Wedge:       return "Wedge";
-      default:                          return "Other";
+      case Polytope::Type::Tetrahedron:
+        return "Tetrahedron";
+      case Polytope::Type::Hexahedron:
+        return "Hexahedron";
+      case Polytope::Type::Pyramid:
+        return "Pyramid";
+      case Polytope::Type::Wedge:
+        return "Wedge";
+      default:
+        return "Other";
     }
   }
 }
@@ -266,8 +271,7 @@ namespace Rodin::Tests::Unit
     DirichletBC dbc(u, RealFunction(gValue));
     dbc.assemble();
 
-    for (const auto& [local, value]
-           : std::get<IndexMap<Real>>(dbc.getDOFs()))
+    for (const auto& [local, value] : std::get<IndexMap<Real>>(dbc.getDOFs()))
       EXPECT_NEAR(value, gValue, 1e-12);
   }
 
@@ -342,14 +346,11 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 3 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    for (auto type :
-         { Polytope::Type::Tetrahedron,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Wedge })
+    for (auto type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
-      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
+      auto mpiMesh = distributeFromRoot(ctx, type, {4, 3, 3});
 
       size_t localCount = 0;
       Assembly::MPIIteration iter(mpiMesh, Geometry::Region::Cells);
@@ -394,8 +395,7 @@ namespace Rodin::Tests::Unit
       EXPECT_GT(globalFixed, 0u);
     }
 
-    for (const auto& [local, value]
-           : std::get<IndexMap<Real>>(dbc.getDOFs()))
+    for (const auto& [local, value] : std::get<IndexMap<Real>>(dbc.getDOFs()))
       EXPECT_NEAR(value, gValue, 1e-12);
   }
 
@@ -410,15 +410,12 @@ namespace Rodin::Tests::Unit
 
     Context::MPI ctx(*g_env, world);
 
-    for (auto type :
-         { Polytope::Type::Tetrahedron,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Wedge })
+    for (auto type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
 
-      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
+      auto mpiMesh = distributeFromRoot(ctx, type, {4, 3, 3});
 
       P1<Real, Mesh<Context::MPI>> fes(mpiMesh);
       TrialFunction u(fes);
@@ -426,16 +423,10 @@ namespace Rodin::Tests::Unit
       DirichletBC dbc(u, RealFunction(1.0));
       dbc.assemble();
 
-      const size_t localFixed =
-        std::get<IndexMap<Real>>(dbc.getDOFs()).size();
+      const size_t localFixed = std::get<IndexMap<Real>>(dbc.getDOFs()).size();
 
       size_t globalFixed = 0;
-      boost::mpi::reduce(
-          world,
-          localFixed,
-          globalFixed,
-          std::plus<size_t>(),
-          0);
+      boost::mpi::reduce(world, localFixed, globalFixed, std::plus<size_t>(), 0);
 
       if (world.rank() == 0)
       {

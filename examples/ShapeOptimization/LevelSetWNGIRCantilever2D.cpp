@@ -64,7 +64,7 @@ namespace
   constexpr Attribute Gamma0 = 1;               // free outer       (bdr attr 1)
   constexpr Attribute GammaD = 2;               // clamped left     (bdr attr 2)
   constexpr Attribute GammaN = 3;               // loaded right-mid (bdr attr 3)
-  constexpr Attribute Gamma  = 4;               // free interface   (bdr attr 4)
+  constexpr Attribute Gamma = 4;               // free interface   (bdr attr 4)
 
   // Lame coefficients (plane, matching LevelSetCantilever2D).
   constexpr Real muLame = 0.3846;
@@ -83,18 +83,15 @@ namespace
     return std::tanh(phi / epsilon);
   }
 
-  constexpr std::array<std::array<Real, 3>, 3> TriangleBarycentricQuadrature = {{
-    {{ Real(2) / 3, Real(1) / 6, Real(1) / 6 }},
-    {{ Real(1) / 6, Real(2) / 3, Real(1) / 6 }},
-    {{ Real(1) / 6, Real(1) / 6, Real(2) / 3 }}
-  }};
+  constexpr std::array<std::array<Real, 3>, 3> TriangleBarycentricQuadrature = {
+    {{{Real(2) / 3, Real(1) / 6, Real(1) / 6}}, {{Real(1) / 6, Real(2) / 3, Real(1) / 6}},
+      {{Real(1) / 6, Real(1) / 6, Real(2) / 3}}}};
 
   Real facetLength(const WNGIRMesh& mesh, Index facet)
   {
     const auto face = mesh.getFace(facet);
     const auto& v = face->getVertices();
-    return (mesh.getVertexCoordinates(v[1]) - mesh.getVertexCoordinates(v[0]))
-      .norm();
+    return (mesh.getVertexCoordinates(v[1]) - mesh.getVertexCoordinates(v[0])).norm();
   }
 
   // Distance from point p to segment [a,b].
@@ -116,8 +113,7 @@ namespace
   // zero set to the fitted interface (the int_Gamma a^2 gradient).
   // `a` is row-major a[i*ny + j] on a gnx x gny lattice with spacing h.
   void reinitIR(std::vector<Real>& a, int gnx, int gny, Real h,
-                const std::vector<std::array<Vec2, 2>>& seg,
-                int K, Real lambdaIR)
+    const std::vector<std::array<Vec2, 2>>& seg, int K, Real lambdaIR)
   {
     auto AT = [&](int i, int j) -> Real& { return a[i * gny + j]; };
     auto bilinear = [&](Real x, Real y) -> Real {
@@ -125,8 +121,8 @@ namespace
       int i = std::max(0, std::min(gnx - 2, (int)gx));
       int j = std::max(0, std::min(gny - 2, (int)gy));
       Real u = gx - i, v = gy - j;
-      return (1 - u) * (1 - v) * AT(i, j) + u * (1 - v) * AT(i + 1, j)
-           + (1 - u) * v * AT(i, j + 1) + u * v * AT(i + 1, j + 1);
+      return (1 - u) * (1 - v) * AT(i, j) + u * (1 - v) * AT(i + 1, j) +
+        (1 - u) * v * AT(i, j + 1) + u * v * AT(i + 1, j + 1);
     };
     std::vector<Real> S0(a.size());
     for (std::size_t k = 0; k < a.size(); ++k)
@@ -146,10 +142,13 @@ namespace
           const Real cp = (AT(i, j + 1) - AT(i, j)) / h;
           auto sq = [](Real x) { return x * x; };
           Real gx2, gy2;
-          if (S > 0) {
+          if (S > 0)
+          {
             gx2 = std::max(sq(std::max(am, Real(0))), sq(std::min(ap, Real(0))));
             gy2 = std::max(sq(std::max(cm, Real(0))), sq(std::min(cp, Real(0))));
-          } else {
+          }
+          else
+          {
             gx2 = std::max(sq(std::min(am, Real(0))), sq(std::max(ap, Real(0))));
             gy2 = std::max(sq(std::min(cm, Real(0))), sq(std::max(cp, Real(0))));
           }
@@ -162,12 +161,13 @@ namespace
         const Real ds = (s[1] - s[0]).norm();
         Real gx = m(0) / h, gy = m(1) / h;
         int i = (int)gx, j = (int)gy;
-        if (i < 1 || i > gnx - 2 || j < 1 || j > gny - 2) continue;
+        if (i < 1 || i > gnx - 2 || j < 1 || j > gny - 2)
+          continue;
         Real u = gx - i, v = gy - j;
         const Real f = -dtau * lambdaIR * Real(2) * bilinear(m(0), m(1)) * ds / h;
-        np[i * gny + j]         += f * (1 - u) * (1 - v);
-        np[(i + 1) * gny + j]   += f * u * (1 - v);
-        np[i * gny + j + 1]     += f * (1 - u) * v;
+        np[i * gny + j] += f * (1 - u) * (1 - v);
+        np[(i + 1) * gny + j] += f * u * (1 - v);
+        np[i * gny + j + 1] += f * (1 - u) * v;
         np[(i + 1) * gny + j + 1] += f * u * v;
       }
       a.swap(np);
@@ -176,17 +176,17 @@ namespace
 
   struct CellMomentInfo
   {
-    Index index = 0;
-    Real area = 0;
-    Real moment = 0;
-    std::array<Index, 3> vertices{};
-    std::array<Vec2, 3> x;
+      Index index = 0;
+      Real area = 0;
+      Real moment = 0;
+      std::array<Index, 3> vertices{};
+      std::array<Vec2, 3> x;
   };
 
   // Phase moments of the carried discrete level set phiH (P1) per cell.
   template <class PhiGf>
   std::vector<CellMomentInfo> collectCellMomentInfo(
-      const WNGIRMesh& mesh, const PhiGf& phiH, Real epsilon)
+    const WNGIRMesh& mesh, const PhiGf& phiH, Real epsilon)
   {
     std::vector<CellMomentInfo> cells;
     cells.reserve(mesh.getCellCount());
@@ -221,7 +221,7 @@ namespace
 
   template <class Displacement>
   void updateMovedMeshFromDisplacement(
-      const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
+    const WNGIRMesh& mesh, WNGIRMesh& moved, const Displacement& u)
   {
     const auto& uFes = u.getFiniteElementSpace();
     const auto& uData = u.getData();
@@ -229,23 +229,22 @@ namespace
     {
       const Vec2 x = mesh.getVertexCoordinates(v);
       const auto& dofs = uFes.getDOFs(0, v);
-      moved.setVertexCoordinates(v, vec2(x(0) + uData(dofs[0]),
-                                         x(1) + uData(dofs[1])));
+      moved.setVertexCoordinates(v, vec2(x(0) + uData(dofs[0]), x(1) + uData(dofs[1])));
     }
   }
 
-  std::size_t parseSizeTOption(int argc, char** argv, const std::string& name,
-                               std::size_t fallback)
+  std::size_t parseSizeTOption(
+    int argc, char** argv, const std::string& name, std::size_t fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
       if (std::string(argv[i]).rfind(prefix, 0) == 0)
-        return static_cast<std::size_t>(std::stoul(std::string(argv[i]).substr(prefix.size())));
+        return static_cast<std::size_t>(
+          std::stoul(std::string(argv[i]).substr(prefix.size())));
     return fallback;
   }
 
-  Real parseRealOption(int argc, char** argv, const std::string& name,
-                       Real fallback)
+  Real parseRealOption(int argc, char** argv, const std::string& name, Real fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -254,8 +253,8 @@ namespace
     return fallback;
   }
 
-  std::string parseStringOption(int argc, char** argv, const std::string& name,
-                                const std::string& fallback)
+  std::string parseStringOption(
+    int argc, char** argv, const std::string& name, const std::string& fallback)
   {
     const std::string prefix = "--" + name + "=";
     for (int i = 1; i < argc; ++i)
@@ -266,17 +265,17 @@ namespace
 
   struct StageTimer
   {
-    using Clock = std::chrono::steady_clock;
+      using Clock = std::chrono::steady_clock;
 
-    Clock::time_point t = Clock::now();
+      Clock::time_point t = Clock::now();
 
-    Real reset()
-    {
-      const auto now = Clock::now();
-      const Real out = std::chrono::duration<Real>(now - t).count();
-      t = now;
-      return out;
-    }
+      Real reset()
+      {
+        const auto now = Clock::now();
+        const Real out = std::chrono::duration<Real>(now - t).count();
+        t = now;
+        return out;
+      }
   };
 }
 
@@ -289,12 +288,9 @@ int main(int argc, char** argv)
   const Real ell = parseRealOption(argc, argv, "ell", Real(0.4));
   const Real h = H / static_cast<Real>(n);   // uniform cell size = metric h
   const Real hmin = parseRealOption(argc, argv, "hmin", Real(0.1) * h);
-  const bool initialMMG =
-    parseSizeTOption(argc, argv, "initial-mmg", 0) != 0;
-  const Real initialMMGHMin =
-    parseRealOption(argc, argv, "initial-mmg-hmin", hmin);
-  const Real initialMMGHMax =
-    parseRealOption(argc, argv, "initial-mmg-hmax", h);
+  const bool initialMMG = parseSizeTOption(argc, argv, "initial-mmg", 0) != 0;
+  const Real initialMMGHMin = parseRealOption(argc, argv, "initial-mmg-hmin", hmin);
+  const Real initialMMGHMax = parseRealOption(argc, argv, "initial-mmg-hmax", h);
   const Real initialMMGHausd =
     parseRealOption(argc, argv, "initial-mmg-hausd", Real(0.5) * hmin);
   // Design-smoothness knobs (sensitive — raise gently):
@@ -307,7 +303,7 @@ int main(int argc, char** argv)
   const Real lambdaC = parseRealOption(argc, argv, "classifier-lambda", Real(0.004));
   // Adaptive step: start at dt, grow x1.3 on accepted steps up to dtMax, halve
   // on a rejected (blown-up) step.
-  const Real dt    = parseRealOption(argc, argv, "dt", Real(2) * h);
+  const Real dt = parseRealOption(argc, argv, "dt", Real(2) * h);
   const Real dtMax = parseRealOption(argc, argv, "dt-max", Real(4) * h);
   const bool objectiveLineSearch =
     parseSizeTOption(argc, argv, "objective-linesearch", 1) != 0;
@@ -339,26 +335,19 @@ int main(int argc, char** argv)
   const std::string reinitMode = parseStringOption(argc, argv, "reinit", "cp");
   const std::size_t irSteps = parseSizeTOption(argc, argv, "ir-steps", 30);
   const Real irLambda = parseRealOption(argc, argv, "ir-lambda", Real(20));
-  const Real irDtauFactor =
-    parseRealOption(argc, argv, "ir-dtau-factor", Real(0.1));
-  const Real irDeltaEps =
-    parseRealOption(argc, argv, "ir-delta-eps", Real(1.5) * h);
-  const std::size_t reinitEvery =
-    parseSizeTOption(argc, argv, "reinit-every", 1);
+  const Real irDtauFactor = parseRealOption(argc, argv, "ir-dtau-factor", Real(0.1));
+  const Real irDeltaEps = parseRealOption(argc, argv, "ir-delta-eps", Real(1.5) * h);
+  const std::size_t reinitEvery = parseSizeTOption(argc, argv, "reinit-every", 1);
   const std::string redistanceMode =
     parseStringOption(argc, argv, "redistance-mode", "none");
-  const std::size_t redistanceEvery =
-    parseSizeTOption(argc, argv, "redistance-every", 0);
-  const std::size_t outputEvery =
-    parseSizeTOption(argc, argv, "output-every", 1);
+  const std::size_t redistanceEvery = parseSizeTOption(argc, argv, "redistance-every", 0);
+  const std::size_t outputEvery = parseSizeTOption(argc, argv, "output-every", 1);
   const std::size_t irDpUpdateEvery =
     std::max<std::size_t>(1, parseSizeTOption(argc, argv, "ir-dp-update-every", 1));
-  const std::size_t repairEvery =
-    parseSizeTOption(argc, argv, "repair-every", 5);
+  const std::size_t repairEvery = parseSizeTOption(argc, argv, "repair-every", 5);
   const Real repairEta = parseRealOption(argc, argv, "repair-eta", Real(0.5) * h);
   const Real repairBand = parseRealOption(argc, argv, "repair-band", Real(4) * h);
-  const bool repairCalibrate =
-    parseSizeTOption(argc, argv, "repair-calibrate", 0) != 0;
+  const bool repairCalibrate = parseSizeTOption(argc, argv, "repair-calibrate", 0) != 0;
   const bool printTiming = parseSizeTOption(argc, argv, "timing", 0) != 0;
   const bool trace = parseSizeTOption(argc, argv, "trace", 0) != 0;
 
@@ -368,7 +357,7 @@ int main(int argc, char** argv)
   {
     const std::size_t nx = static_cast<std::size_t>(std::lround(L / h)) + 1;
     const std::size_t ny = n + 1;
-    mesh = WNGIRMesh::UniformGrid(Polytope::Type::Triangle, { nx, ny });
+    mesh = WNGIRMesh::UniformGrid(Polytope::Type::Triangle, {nx, ny});
     mesh.scale(h);
   }
   else
@@ -383,8 +372,7 @@ int main(int argc, char** argv)
 
   // Tag outer boundary: left edge clamped (GammaD), small right-edge segment
   // loaded (GammaN), the rest free (Gamma0).
-  auto tagBoundary = [&](WNGIRMesh& m)
-  {
+  auto tagBoundary = [&](WNGIRMesh& m) {
     const std::size_t D = m.getDimension();
     for (auto it = m.getBoundary(); it; ++it)
     {
@@ -397,8 +385,7 @@ int main(int argc, char** argv)
       Attribute attr = Gamma0;
       if (xm < Real(1e-9))
         attr = GammaD;                                   // left edge
-      else if (xm > L - Real(1e-9)
-               && ym > Real(0.45) * H && ym < Real(0.55) * H)
+      else if (xm > L - Real(1e-9) && ym > Real(0.45) * H && ym < Real(0.55) * H)
         attr = GammaN;                                   // right-middle load
       m.setAttribute({D - 1, f}, attr);
     }
@@ -408,14 +395,11 @@ int main(int argc, char** argv)
   if (initialMMG)
   {
     std::cout << "  initial MMG remesh:"
-              << " hmin=" << initialMMGHMin
-              << " hmax=" << initialMMGHMax
+              << " hmin=" << initialMMGHMin << " hmax=" << initialMMGHMax
               << " hausd=" << initialMMGHausd << "\n";
     MMG::Mesh mmgMesh(std::move(mesh));
     MMG::Optimizer optimizer;
-    optimizer.setHMin(initialMMGHMin)
-             .setHMax(initialMMGHMax)
-             .setAngleDetection(false);
+    optimizer.setHMin(initialMMGHMin).setHMax(initialMMGHMax).setAngleDetection(false);
     if (initialMMGHausd > 0)
       optimizer.setHausdorff(initialMMGHausd);
     optimizer.optimize(mmgMesh);
@@ -448,12 +432,14 @@ int main(int argc, char** argv)
   ScalarP0 p0(mesh);
   VectorP1 vh(mesh, 2);
 
-  GridFunction phiH(sh);          phiH.setName("phi");
+  GridFunction phiH(sh);
+  phiH.setName("phi");
   TrialFunction wngirTrial(vh);
-  TestFunction  wngirTest(vh);
+  TestFunction wngirTest(vh);
   auto& u = wngirTrial.getSolution();
   u.setName("displacement");      // WNGIR fit
-  GridFunction dJ(vh);            dJ.setName("dJ");            // shape velocity
+  GridFunction dJ(vh);
+  dJ.setName("dJ");            // shape velocity
 
   // Reusable background-space objects. The background mesh connectivity is
   // fixed; only coefficients, attributes, and vertex coordinates are updated.
@@ -461,17 +447,16 @@ int main(int argc, char** argv)
   GridFunction gradPhiSmoothed(gradFes);
   auto gradPhiDiscrete = Grad(phiH);
   TrialFunction gradTrial(gradFes);
-  TestFunction  gradTest(gradFes);
+  TestFunction gradTest(gradFes);
   Problem gradProjection(gradTrial, gradTest);
-  gradProjection = Integral(gradTrial, gradTest)
-                 - Integral(gradPhiDiscrete, gradTest);
+  gradProjection = Integral(gradTrial, gradTest) - Integral(gradPhiDiscrete, gradTest);
 
   GridFunction dist(sh);
   GridFunction speed(sh);
   GridFunction phiR(sh);
   GridFunction dp(p0);
   TrialFunction irTrial(sh);
-  TestFunction  irTest(sh);
+  TestFunction irTest(sh);
   BilinearForm irMass(irTrial, irTest);
   irMass = Integral(irTrial, irTest);
   irMass.assemble();
@@ -484,21 +469,20 @@ int main(int argc, char** argv)
   repairStiffness.assemble();
   Math::SparseMatrix<Real> repairOperator = irMass.getOperator();
   repairOperator += (repairEta * repairEta) * repairStiffness.getOperator();
-  Eigen::ConjugateGradient<Math::SparseMatrix<Real>,
-    Eigen::Lower | Eigen::Upper> repairCG;
+  Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
+    repairCG;
   repairCG.setTolerance(Real(1e-10));
   repairCG.setMaxIterations(static_cast<int>(phiH.getData().size()));
   repairCG.compute(repairOperator);
 
   TrialFunction adv(sh);
-  TestFunction  advTest(sh);
+  TestFunction advTest(sh);
 
   Rodin::Examples::WNGIRExampleDefaults wngirDefaults;
   wngirDefaults.maxIterations = 60;
   wngirDefaults.activeRMSOverHTol = Real(0.2);
   WNGIRParameters wp =
-    Rodin::Examples::makeWNGIRParameters(
-        argc, argv, h, Gamma, wngirDefaults);
+    Rodin::Examples::makeWNGIRParameters(argc, argv, h, Gamma, wngirDefaults);
   wp.trace = trace;
   WNGIR wngir(wngirTrial, wngirTest);
   wngir.setParameters(wp);
@@ -507,12 +491,10 @@ int main(int argc, char** argv)
   if (meshFile.empty())
   {
     // Uniform grid: analytic array of holes (classic cantilever seed).
-    phiH = [&](const Geometry::Point& p) -> Real
-    {
+    phiH = [&](const Geometry::Point& p) -> Real {
       const auto& X = p.getCoordinates();
       const Real nxh = 8, nyh = 4;
-      const Real s = std::cos(nxh * M_PI * X(0) / L)
-                   * std::cos(nyh * M_PI * X(1) / H);
+      const Real s = std::cos(nxh * M_PI * X(0) / L) * std::cos(nyh * M_PI * X(1) / H);
       return -(s + Real(0.4));   // phi<0 (material) where s > -0.4
     };
   }
@@ -523,12 +505,14 @@ int main(int argc, char** argv)
     {
       const Index f = faceIt->getIndex();
       const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-      if (inc.size() != 2) continue;
+      if (inc.size() != 2)
+        continue;
       const auto a = mesh.getAttribute(D, inc[0]);
       const auto b = mesh.getAttribute(D, inc[1]);
       const bool ia = a && *a == interiorAttribute;
       const bool ib = b && *b == interiorAttribute;
-      if (ia != ib) mesh.setAttribute({D - 1, f}, Gamma);
+      if (ia != ib)
+        mesh.setAttribute({D - 1, f}, Gamma);
     }
     phiH = Real(0);
     Distance::Eikonal<ScalarP1, Math::Vector<Real>>(phiH)
@@ -542,35 +526,28 @@ int main(int argc, char** argv)
   auto domainGrid = xdmf.grid("domain");
   domainGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   domainGrid.add(phiH, IO::XDMF::Center::Node);
-  domainGrid.add(dJ,   IO::XDMF::Center::Node);
+  domainGrid.add(dJ, IO::XDMF::Center::Node);
 
   WNGIRMesh moved(mesh);
   VectorP1 vhMoved(moved, 2);
   TrialFunction g(vhMoved);
-  TestFunction  w(vhMoved);
+  TestFunction w(vhMoved);
   auto stateGrid = xdmf.grid("state");
 
-  const std::string meshDescription =
-    meshFile.empty()
-      ? (initialMMG ? "uniform grid + initial MMG" : "uniform grid")
-      : (initialMMG ? meshFile + " + initial MMG" : meshFile);
+  const std::string meshDescription = meshFile.empty()
+    ? (initialMMG ? "uniform grid + initial MMG" : "uniform grid")
+    : (initialMMG ? meshFile + " + initial MMG" : meshFile);
   std::cout << "WNGIR cantilever on " << mesh.getCellCount() << " cells ("
             << meshDescription << ")"
             << "\n  domain [0," << L << "]x[0," << H << "]"
-            << "  ell=" << ell << "  alpha=" << alphaReg
-            << "  h=" << h << "  dt=" << dt
+            << "  ell=" << ell << "  alpha=" << alphaReg << "  h=" << h << "  dt=" << dt
             << "  objectiveLineSearch=" << objectiveLineSearch
-            << "\n  WNGIR: gammaM=" << wp.gammaM
-            << " gammaDev=" << wp.gammaH
-            << " gammaDiv=" << wp.gammaDiv
-            << " ellM=" << wp.ellM
-            << " rmsTol=" << wp.activeRMSTol
-            << " supTol=" << wp.activeSupTol
-            << " steps=" << wp.maxIterations
-            << "  reinit=" << reinitMode << "/" << reinitEvery
-            << "  redistance=" << redistanceMode << "/" << redistanceEvery
-            << "  repairEvery=" << repairEvery
-            << "  outputEvery=" << outputEvery << '\n';
+            << "\n  WNGIR: gammaM=" << wp.gammaM << " gammaDev=" << wp.gammaH
+            << " gammaDiv=" << wp.gammaDiv << " ellM=" << wp.ellM
+            << " rmsTol=" << wp.activeRMSTol << " supTol=" << wp.activeSupTol
+            << " steps=" << wp.maxIterations << "  reinit=" << reinitMode << "/"
+            << reinitEvery << "  redistance=" << redistanceMode << "/" << redistanceEvery
+            << "  repairEvery=" << repairEvery << "  outputEvery=" << outputEvery << '\n';
   std::ofstream fObj("LevelSetWNGIRCantilever2D.obj.txt");
 
   // Backtracking guard: body-fitted topology optimization can sever the load
@@ -581,9 +558,8 @@ int main(int argc, char** argv)
   Real dtCur = dt;
   Real complianceCap = std::numeric_limits<Real>::infinity();  // set after it 0
   Real lastAcceptedObjective = std::numeric_limits<Real>::infinity();
-  auto backgroundCellGradientMagnitude = [&](const auto& gf,
-                                             const Polytope& cell) -> Real
-  {
+  auto backgroundCellGradientMagnitude = [&](
+                                           const auto& gf, const Polytope& cell) -> Real {
     const auto& vv = cell.getVertices();
     const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
     const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
@@ -598,7 +574,7 @@ int main(int argc, char** argv)
       return Real(1);
     const Real g0 = p1v - p0v;
     const Real g1 = p2v - p0v;
-    const Real gx = ( J11 * g0 - J10 * g1) / det;
+    const Real gx = (J11 * g0 - J10 * g1) / det;
     const Real gy = (-J01 * g0 + J00 * g1) / det;
     return std::sqrt(gx * gx + gy * gy);
   };
@@ -647,13 +623,14 @@ int main(int argc, char** argv)
     {
       const Index facet = faceIt->getIndex();
       const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, facet);
-      if (inc.size() != 2) continue;
+      if (inc.size() != 2)
+        continue;
       const auto a = cellToLocal.find(inc[0]);
       const auto b = cellToLocal.find(inc[1]);
-      if (a == cellToLocal.end() || b == cellToLocal.end()) continue;
-      graphEdges.push_back({ static_cast<Index>(a->second),
-                             static_cast<Index>(b->second),
-                             lambdaC * facetLength(mesh, facet), facet });
+      if (a == cellToLocal.end() || b == cellToLocal.end())
+        continue;
+      graphEdges.push_back({static_cast<Index>(a->second), static_cast<Index>(b->second),
+        lambdaC * facetLength(mesh, facet), facet});
     }
 
     const MinSTCut cut;
@@ -661,8 +638,7 @@ int main(int argc, char** argv)
 
     for (std::size_t l = 0; l < classified.labels.size(); ++l)
       mesh.setAttribute({D, localToCell[l]},
-                        classified.labels[l] == MinSTCut::Inside
-                          ? interiorAttribute : exteriorAttribute);
+        classified.labels[l] == MinSTCut::Inside ? interiorAttribute : exteriorAttribute);
 
     // ---- Connected-component cleanup -------------------------------------
     // Remove interior material not connected, through interior cells, to the
@@ -676,26 +652,36 @@ int main(int argc, char** argv)
       {
         if (mesh.getAttribute(D - 1, it->getIndex()) != Attribute{GammaD})
           continue;
-        for (const Index c :
-             mesh.getConnectivity().getIncidence({1, 2}, it->getIndex()))
+        for (const Index c : mesh.getConnectivity().getIncidence({1, 2}, it->getIndex()))
           isSupportCell[c] = 1;
       }
-      const auto comps = mesh.ccl(
-          [](const Polytope& a, const Polytope& b)
-          { return a.getAttribute() == b.getAttribute(); }).getComponents();
+      const auto comps = mesh
+                           .ccl([](const Polytope& a, const Polytope& b) {
+                             return a.getAttribute() == b.getAttribute();
+                           })
+                           .getComponents();
       std::size_t removed = 0;
       for (const auto& comp : comps)
       {
-        if (comp.empty()) continue;
+        if (comp.empty())
+          continue;
         const Index rep = *comp.begin();
         const auto ra = mesh.getAttribute(D, rep);
-        if (!ra || *ra != interiorAttribute) continue;   // exterior component
+        if (!ra || *ra != interiorAttribute)
+          continue;   // exterior component
         bool anchored = false;
         for (const Index c : comp)
-          if (isSupportCell[c]) { anchored = true; break; }
+          if (isSupportCell[c])
+          {
+            anchored = true;
+            break;
+          }
         if (!anchored)
           for (const Index c : comp)
-          { mesh.setAttribute({D, c}, exteriorAttribute); ++removed; }
+          {
+            mesh.setAttribute({D, c}, exteriorAttribute);
+            ++removed;
+          }
       }
       if (removed)
         std::cout << "  CCL: removed " << removed
@@ -708,7 +694,8 @@ int main(int argc, char** argv)
     {
       const Index f = faceIt->getIndex();
       const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-      if (inc.size() != 2) continue;
+      if (inc.size() != 2)
+        continue;
       const auto a = mesh.getAttribute(D, inc[0]);
       const auto b = mesh.getAttribute(D, inc[1]);
       const bool ia = a && *a == interiorAttribute;
@@ -726,13 +713,15 @@ int main(int argc, char** argv)
     {
       const auto a = mesh.getAttribute(D, localToCell[l]);
       if (a && *a == interiorAttribute)
-      { ++nInside; areaInterior += cellMoments[l].area; }
+      {
+        ++nInside;
+        areaInterior += cellMoments[l].area;
+      }
     }
 
     std::cout << "  classify: interior cells=" << nInside
               << "  interface facets=" << interfaceFacets.size()
-              << "  area=" << std::fixed << std::setprecision(4)
-              << areaInterior << '\n';
+              << "  area=" << std::fixed << std::setprecision(4) << areaInterior << '\n';
     tClassify = iterTimer.reset();
 
     // ---- Stage 2: WNGIR fit mesh so skeleton lands on phi=0 --------------
@@ -741,10 +730,12 @@ int main(int argc, char** argv)
     gradPhiSmoothed.getData() = gradTrial.getSolution().getData();
     tGrad = iterTimer.reset();
     RealFunction phiFn(
-        [&](const Geometry::Point& p) -> Real { return phiH.getValue(p); });
+      [&](const Geometry::Point& p) -> Real { return phiH.getValue(p); });
     AnalyticVectorFunction gradPhiFn(
-        [&](const Geometry::Point& p) -> Math::SpatialVector<Real>
-        { return gradPhiSmoothed.getValue(p); }, /*dim=*/2);
+      [&](const Geometry::Point& p) -> Math::SpatialVector<Real> {
+        return gradPhiSmoothed.getValue(p);
+      },
+      /*dim=*/2);
 
     u.getData().setZero();
     {
@@ -758,17 +749,13 @@ int main(int argc, char** argv)
         const Real ux = u.getData()(d[0]), uy = u.getData()(d[1]);
         maxUoverH = std::max(maxUoverH, std::sqrt(ux * ux + uy * uy) / h);
       }
-      const Real activeRMSOverH =
-        h > Real(0) ? rep.activeRMS / h : Real(0);
-      const Real activeSupOverH =
-        h > Real(0) ? rep.activeSup / h : Real(0);
-      std::cout << "  WNGIR: it=" << rep.iterations
-                << "  exit=" << rep.exitReason
+      const Real activeRMSOverH = h > Real(0) ? rep.activeRMS / h : Real(0);
+      const Real activeSupOverH = h > Real(0) ? rep.activeSup / h : Real(0);
+      std::cout << "  WNGIR: it=" << rep.iterations << "  exit=" << rep.exitReason
                 << "  activeRMS=" << std::scientific << std::setprecision(2)
-                << rep.activeRMS
-                << "  activeRMS/h=" << activeRMSOverH
-                << "  activeSup/h=" << activeSupOverH
-                << "  max|u|/h=" << maxUoverH << '\n';
+                << rep.activeRMS << "  activeRMS/h=" << activeRMSOverH
+                << "  activeSup/h=" << activeSupOverH << "  max|u|/h=" << maxUoverH
+                << '\n';
     }
     tWNGIR = iterTimer.reset();
 
@@ -790,25 +777,25 @@ int main(int argc, char** argv)
     tMoveTrim = iterTimer.reset();
 
     VectorP1 vhInt(trimmed, 2);
-    auto fLoad = VectorFunction{ Real(0), Real(-1) };
+    auto fLoad = VectorFunction{Real(0), Real(-1)};
     TrialFunction us(vhInt);
-    TestFunction  vs(vhInt);
+    TestFunction vs(vhInt);
     // Tikhonov soft-foundation: a tiny mass term k_reg*(u,v) removes the
     // near-rigid-body null space that a one-cell-wide (nearly disconnected)
     // member produces, so the solve stays well-posed (bounded compliance)
     // instead of blowing up and freezing the optimizer. Body-fitted analogue
     // of the weak ersatz material. k_reg is tiny relative to the stiffness.
     Problem elasticity(us, vs);
-    elasticity = LinearElasticityIntegral(us, vs)(lambdaLame, muLame)
-               - BoundaryIntegral(fLoad, vs).over(GammaN)
-               + DirichletBC(us, VectorFunction{ Real(0), Real(0) }).on(GammaD);
+    elasticity = LinearElasticityIntegral(us, vs)(lambdaLame, muLame) -
+      BoundaryIntegral(fLoad, vs).over(GammaN) +
+      DirichletBC(us, VectorFunction{Real(0), Real(0)}).on(GammaD);
     Solver::CG(elasticity).solve();
 
     // Compliance = a(u,u).
     Real compliance = 0;
     {
       TrialFunction cu(vhInt);
-      TestFunction  cv(vhInt);
+      TestFunction cv(vhInt);
       BilinearForm bf(cu, cv);
       bf = LinearElasticityIntegral(cu, cv)(lambdaLame, muLame);
       bf.assemble();
@@ -822,19 +809,19 @@ int main(int argc, char** argv)
     // value. The monotonicity check is delayed by one outer iteration: the
     // trial design created by the previous advection is evaluated here, and
     // rejected by restoring the last accepted carrier and halving dt.
-    const bool blewUp = !std::isfinite(compliance) || compliance < Real(0)
-                        || compliance > complianceCap;
-    const bool objectiveIncreased =
-      objectiveLineSearch && std::isfinite(lastAcceptedObjective)
-      && objective > lastAcceptedObjective
-                   + objectiveDecreaseTol * std::max(Real(1), std::abs(lastAcceptedObjective));
+    const bool blewUp =
+      !std::isfinite(compliance) || compliance < Real(0) || compliance > complianceCap;
+    const bool objectiveIncreased = objectiveLineSearch &&
+      std::isfinite(lastAcceptedObjective) &&
+      objective > lastAcceptedObjective +
+          objectiveDecreaseTol * std::max(Real(1), std::abs(lastAcceptedObjective));
     if (blewUp)
     {
       dtCur *= Real(0.5);
       phiH.getData() = phiGood;
       std::cout << "  REJECT (blow-up, compliance=" << std::scientific
-                << std::setprecision(2) << compliance
-                << "): reverting, dt -> " << dtCur << '\n';
+                << std::setprecision(2) << compliance << "): reverting, dt -> " << dtCur
+                << '\n';
       if (dtCur < Real(1e-3) * h)
       {
         stopReason = "dt-floor-after-blow-up-rejections";
@@ -847,8 +834,7 @@ int main(int argc, char** argv)
       dtCur *= Real(0.5);
       phiH.getData() = phiGood;
       std::cout << "  REJECT (objective increase, J=" << std::scientific
-                << std::setprecision(4) << objective
-                << " > " << lastAcceptedObjective
+                << std::setprecision(4) << objective << " > " << lastAcceptedObjective
                 << "): reverting, dt -> " << dtCur << '\n';
       if (dtCur < Real(1e-3) * h)
       {
@@ -863,10 +849,11 @@ int main(int argc, char** argv)
     if (it == 0)
       complianceCap = Real(50) * compliance;   // blow-up threshold
 
-    fObj << objective << "\n"; fObj.flush();
-    std::cout << "  compliance=" << std::scientific << std::setprecision(4)
-              << compliance << "  area=" << areaInterior
-              << "  J=" << objective << "  dt=" << dtCur << '\n';
+    fObj << objective << "\n";
+    fObj.flush();
+    std::cout << "  compliance=" << std::scientific << std::setprecision(4) << compliance
+              << "  area=" << areaInterior << "  J=" << objective << "  dt=" << dtCur
+              << '\n';
 
     // ---- Stage 4: shape gradient + Hilbert regularization ----------------
     // The state lives on `trimmed` (a SubMesh of `moved`), so the gradient and
@@ -881,11 +868,10 @@ int main(int argc, char** argv)
     auto nrm = FaceNormal(moved);
     nrm.traceOf(interiorAttribute);
     Problem hilbert(g, w);
-    hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w))
-            + Integral(g, w)
-            - FaceIntegral(Dot(Ae, e) - ell, Dot(nrm, w)).over(Gamma)
-            + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaD)
-            + DirichletBC(g, VectorFunction{ Real(0), Real(0) }).on(GammaN);
+    hilbert = Integral(alphaReg * alphaReg * Jacobian(g), Jacobian(w)) + Integral(g, w) -
+      FaceIntegral(Dot(Ae, e) - ell, Dot(nrm, w)).over(Gamma) +
+      DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaD) +
+      DirichletBC(g, VectorFunction{Real(0), Real(0)}).on(GammaN);
     Solver::CG(hilbert).solve();
     // Velocity is computed on `moved`; carry it to the fixed background grid
     // (same connectivity) to advect phi there. The moved->background transfer
@@ -919,13 +905,10 @@ int main(int argc, char** argv)
     // interface facets (moved-mesh segments at X+u), so phi carries the
     // sub-cell interface position forward instead of re-quantizing every step.
     std::string activeReinitMode = reinitMode;
-    bool doReinit =
-      reinitMode != "none"
-      && reinitEvery > 0
-      && (it % reinitEvery == 0 || it + 1 == maxIt);
-    if (!doReinit && reinitMode == "none" && redistanceMode != "none"
-        && redistanceEvery > 0
-        && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt))
+    bool doReinit = reinitMode != "none" && reinitEvery > 0 &&
+      (it % reinitEvery == 0 || it + 1 == maxIt);
+    if (!doReinit && reinitMode == "none" && redistanceMode != "none" &&
+      redistanceEvery > 0 && ((it + 1) % redistanceEvery == 0 || it + 1 == maxIt))
     {
       activeReinitMode = redistanceMode;
       doReinit = true;
@@ -952,127 +935,135 @@ int main(int argc, char** argv)
       // from the fitted interface itself, NOT from the stale FMM/staircase sign.
       // Using the FMM sign caused a spurious zero crossing (phantom sliver ->
       // singular elasticity) wherever the fit moved the interface across a node.
-      std::vector<std::array<Vec2, 2>> fittedSeg;
-      std::vector<Vec2> fittedN;
-      fittedSeg.reserve(interfaceFacets.size());
-      fittedN.reserve(interfaceFacets.size());
-      for (const Index f : interfaceFacets)
-      {
-        const auto& vv = moved.getFace(f)->getVertices();
-        const Vec2 a = moved.getVertexCoordinates(vv[0]);
-        const Vec2 b = moved.getVertexCoordinates(vv[1]);
-        Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));        // perp to segment
-        const Real nn = nrm.norm();
-        if (nn > Real(1e-30)) nrm = nrm / nn; else nrm = vec2(1, 0);
+        std::vector<std::array<Vec2, 2>> fittedSeg;
+        std::vector<Vec2> fittedN;
+        fittedSeg.reserve(interfaceFacets.size());
+        fittedN.reserve(interfaceFacets.size());
+        for (const Index f : interfaceFacets)
+        {
+          const auto& vv = moved.getFace(f)->getVertices();
+          const Vec2 a = moved.getVertexCoordinates(vv[0]);
+          const Vec2 b = moved.getVertexCoordinates(vv[1]);
+          Vec2 nrm = vec2(b(1) - a(1), -(b(0) - a(0)));        // perp to segment
+          const Real nn = nrm.norm();
+          if (nn > Real(1e-30))
+            nrm = nrm / nn;
+          else
+            nrm = vec2(1, 0);
         // orient away from the interior incident cell's (moved) centroid
-        const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
-        Vec2 cInt = vec2(0, 0); bool haveInt = false;
-        for (const Index c : inc)
-        {
-          const auto at = mesh.getAttribute(D, c);
-          if (at && *at == interiorAttribute)
+          const auto& inc = mesh.getConnectivity().getIncidence({1, 2}, f);
+          Vec2 cInt = vec2(0, 0);
+          bool haveInt = false;
+          for (const Index c : inc)
           {
-            const auto& cvv = mesh.getCell(c)->getVertices();
-            Vec2 ctr = vec2(0, 0);
-            for (const Index cv : cvv) ctr += moved.getVertexCoordinates(cv);
-            cInt = ctr / static_cast<Real>(cvv.size()); haveInt = true; break;
+            const auto at = mesh.getAttribute(D, c);
+            if (at && *at == interiorAttribute)
+            {
+              const auto& cvv = mesh.getCell(c)->getVertices();
+              Vec2 ctr = vec2(0, 0);
+              for (const Index cv : cvv)
+                ctr += moved.getVertexCoordinates(cv);
+              cInt = ctr / static_cast<Real>(cvv.size());
+              haveInt = true;
+              break;
+            }
           }
+          const Vec2 mid = Real(0.5) * (a + b);
+          if (haveInt && (mid - cInt).dot(nrm) < Real(0))
+            nrm = -nrm;
+          fittedSeg.push_back({a, b});
+          fittedN.push_back(nrm);
         }
-        const Vec2 mid = Real(0.5) * (a + b);
-        if (haveInt && (mid - cInt).dot(nrm) < Real(0)) nrm = -nrm;
-        fittedSeg.push_back({ a, b });
-        fittedN.push_back(nrm);
-      }
-      auto overwriteClosestPointBand = [&]()
-      {
-        const Real band = Real(6) * h;
-        for (Index v = 0; v < mesh.getVertexCount(); ++v)
-        {
-          const Index d = sh.getGlobalIndex({0, v}, 0);
-          if (std::abs(fmmDist(d)) > band) continue;
-          const Vec2 X = mesh.getVertexCoordinates(v);
-          Real dmin = std::numeric_limits<Real>::infinity();
-          std::size_t kmin = 0;
-          for (std::size_t k = 0; k < fittedSeg.size(); ++k)
+        auto overwriteClosestPointBand = [&]() {
+          const Real band = Real(6) * h;
+          for (Index v = 0; v < mesh.getVertexCount(); ++v)
           {
-            const Real dk =
-              pointSegmentDistance(X, fittedSeg[k][0], fittedSeg[k][1]);
-            if (dk < dmin) { dmin = dk; kmin = k; }
-          }
-          if (std::isfinite(dmin))
-          {
-            const Vec2 mid =
-              Real(0.5) * (fittedSeg[kmin][0] + fittedSeg[kmin][1]);
-            const Real s = (X - mid).dot(fittedN[kmin]) >= Real(0)
-                             ? Real(1) : Real(-1);   // outward = exterior = +
-            dist.getData()(d) = s * dmin;
-          }
-        }
-      };
-
-      auto cellGradientMagnitude = [&](const auto& gf,
-                                       const Polytope& cell) -> Real
-      {
-        const auto& vv = cell.getVertices();
-        const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-        const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-        const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-        const Real p0v = gf.getData()(sh.getGlobalIndex({0, vv[0]}, 0));
-        const Real p1v = gf.getData()(sh.getGlobalIndex({0, vv[1]}, 0));
-        const Real p2v = gf.getData()(sh.getGlobalIndex({0, vv[2]}, 0));
-        const Real J00 = x1(0) - x0(0), J01 = x2(0) - x0(0);
-        const Real J10 = x1(1) - x0(1), J11 = x2(1) - x0(1);
-        const Real det = J00 * J11 - J01 * J10;
-        if (std::abs(det) < Real(1e-30))
-          return Real(1);
-        const Real g0 = p1v - p0v;
-        const Real g1 = p2v - p0v;
-        const Real gx = ( J11 * g0 - J10 * g1) / det;
-        const Real gy = (-J01 * g0 + J00 * g1) / det;
-        return std::sqrt(gx * gx + gy * gy);
-      };
-
-      auto gradientStats = [&](const auto& gf, bool cutCellsOnly)
-      {
-        Real gmin = std::numeric_limits<Real>::infinity();
-        Real gmax = Real(0);
-        const Real band = Real(4) * h;
-        std::size_t cnt = 0;
-        for (auto cit = mesh.getCell(); cit; ++cit)
-        {
-          const auto& vv = cit->getVertices();
-          Real av = Real(0);
-          Real vmin = std::numeric_limits<Real>::infinity();
-          Real vmax = -std::numeric_limits<Real>::infinity();
-          for (const Index v : vv)
-          {
-            const Real pv = gf.getData()(sh.getGlobalIndex({0, v}, 0));
-            av += std::abs(pv);
-            vmin = std::min(vmin, pv);
-            vmax = std::max(vmax, pv);
-          }
-          av /= static_cast<Real>(vv.size());
-          if (cutCellsOnly)
-          {
-            if (!(vmin <= Real(0) && vmax >= Real(0)))
+            const Index d = sh.getGlobalIndex({0, v}, 0);
+            if (std::abs(fmmDist(d)) > band)
               continue;
+            const Vec2 X = mesh.getVertexCoordinates(v);
+            Real dmin = std::numeric_limits<Real>::infinity();
+            std::size_t kmin = 0;
+            for (std::size_t k = 0; k < fittedSeg.size(); ++k)
+            {
+              const Real dk = pointSegmentDistance(X, fittedSeg[k][0], fittedSeg[k][1]);
+              if (dk < dmin)
+              {
+                dmin = dk;
+                kmin = k;
+              }
+            }
+            if (std::isfinite(dmin))
+            {
+              const Vec2 mid = Real(0.5) * (fittedSeg[kmin][0] + fittedSeg[kmin][1]);
+              const Real s = (X - mid).dot(fittedN[kmin]) >= Real(0)
+                ? Real(1)
+                : Real(-1);   // outward = exterior = +
+              dist.getData()(d) = s * dmin;
+            }
           }
-          else if (av > band)
-          {
-            continue;
-          }
-          const Real gm = cellGradientMagnitude(gf, *cit);
-          gmin = std::min(gmin, gm);
-          gmax = std::max(gmax, gm);
-          ++cnt;
-        }
-        if (cnt == 0)
-          return std::array<Real, 2>{ Real(0), Real(0) };
-        return std::array<Real, 2>{ gmin, gmax };
-      };
+        };
 
-      if (activeReinitMode == "ir" || activeReinitMode == "ir-phi")
-      {
+        auto cellGradientMagnitude = [&](const auto& gf, const Polytope& cell) -> Real {
+          const auto& vv = cell.getVertices();
+          const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
+          const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
+          const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
+          const Real p0v = gf.getData()(sh.getGlobalIndex({0, vv[0]}, 0));
+          const Real p1v = gf.getData()(sh.getGlobalIndex({0, vv[1]}, 0));
+          const Real p2v = gf.getData()(sh.getGlobalIndex({0, vv[2]}, 0));
+          const Real J00 = x1(0) - x0(0), J01 = x2(0) - x0(0);
+          const Real J10 = x1(1) - x0(1), J11 = x2(1) - x0(1);
+          const Real det = J00 * J11 - J01 * J10;
+          if (std::abs(det) < Real(1e-30))
+            return Real(1);
+          const Real g0 = p1v - p0v;
+          const Real g1 = p2v - p0v;
+          const Real gx = (J11 * g0 - J10 * g1) / det;
+          const Real gy = (-J01 * g0 + J00 * g1) / det;
+          return std::sqrt(gx * gx + gy * gy);
+        };
+
+        auto gradientStats = [&](const auto& gf, bool cutCellsOnly) {
+          Real gmin = std::numeric_limits<Real>::infinity();
+          Real gmax = Real(0);
+          const Real band = Real(4) * h;
+          std::size_t cnt = 0;
+          for (auto cit = mesh.getCell(); cit; ++cit)
+          {
+            const auto& vv = cit->getVertices();
+            Real av = Real(0);
+            Real vmin = std::numeric_limits<Real>::infinity();
+            Real vmax = -std::numeric_limits<Real>::infinity();
+            for (const Index v : vv)
+            {
+              const Real pv = gf.getData()(sh.getGlobalIndex({0, v}, 0));
+              av += std::abs(pv);
+              vmin = std::min(vmin, pv);
+              vmax = std::max(vmax, pv);
+            }
+            av /= static_cast<Real>(vv.size());
+            if (cutCellsOnly)
+            {
+              if (!(vmin <= Real(0) && vmax >= Real(0)))
+                continue;
+            }
+            else if (av > band)
+            {
+              continue;
+            }
+            const Real gm = cellGradientMagnitude(gf, *cit);
+            gmin = std::min(gmin, gm);
+            gmax = std::max(gmax, gm);
+            ++cnt;
+          }
+          if (cnt == 0)
+            return std::array<Real, 2>{Real(0), Real(0)};
+          return std::array<Real, 2>{gmin, gmax};
+        };
+
+        if (activeReinitMode == "ir" || activeReinitMode == "ir-phi")
+        {
         // Li-Xu DRLSE with the full signed bounded double-well diffusivity
         //
         //   d_p(s) = 1 - 1/s,                 s >= 1,
@@ -1083,212 +1074,205 @@ int main(int argc, char** argv)
         // reinit=ir-phi, the pin is the coarea approximation
         // int delta_eps(phi_h) |grad phi_h| phi^2 dx, hence the geometric
         // reference is the level set itself and not the classified mesh.
-        const Real dtauR = irDtauFactor * h * h;
-        const int  Kr    = static_cast<int>(irSteps);
-        if (activeReinitMode == "ir")
-        {
+          const Real dtauR = irDtauFactor * h * h;
+          const int Kr = static_cast<int>(irSteps);
+          if (activeReinitMode == "ir")
+          {
           // Mesh-pinned variant: start from the clean FMM SDF and use the
           // fitted mesh only as a zero-trace constraint.
-          dist.getData() = fmmDist;
-          phiR.getData() = dist.getData();
-        }
-        else
-        {
-          // Phi-pinned variant: start from the carried level set, rescaled by
-          // the average cut-cell gradient so the unknown has distance units.
-          Real gsum = Real(0);
-          std::size_t gcnt = 0;
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            Real vmin = std::numeric_limits<Real>::infinity();
-            Real vmax = -std::numeric_limits<Real>::infinity();
-            for (const Index v : vv)
-            {
-              const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
-              vmin = std::min(vmin, pv);
-              vmax = std::max(vmax, pv);
-            }
-            if (vmin <= Real(0) && vmax >= Real(0))
-            {
-              gsum += cellGradientMagnitude(phiH, *cit);
-              ++gcnt;
-            }
+            dist.getData() = fmmDist;
+            phiR.getData() = dist.getData();
           }
-          const Real gscale =
-            gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12))
-                     : Real(1);
-          phiR.getData() = phiH.getData() / gscale;
-        }
-        std::vector<Eigen::Triplet<Real>> pinTriplets;
-
-        auto addPinPoint = [&](const Vec2& y, Real w)
-        {
-          Math::SpatialPoint pc(2);
-          pc(0) = y(0);
-          pc(1) = y(1);
-          constexpr Real tol = Real(1e-10);
-          for (auto cit = mesh.getCell(); cit; ++cit)
+          else
           {
-            Math::SpatialPoint rc(2);
-            cit->getTransformation().inverse(rc, pc);
-            const Real l0 = Real(1) - rc(0) - rc(1);
-            const Real l1 = rc(0);
-            const Real l2 = rc(1);
-            if (l0 < -tol || l1 < -tol || l2 < -tol)
-              continue;
-            const auto& vv = cit->getVertices();
-            const std::array<Real, 3> N = {{ l0, l1, l2 }};
-            for (std::size_t a = 0; a < 3; ++a)
-            {
-              const Index ia = sh.getGlobalIndex({0, vv[a]}, 0);
-              for (std::size_t b = 0; b < 3; ++b)
-              {
-                const Index ib = sh.getGlobalIndex({0, vv[b]}, 0);
-                pinTriplets.emplace_back(
-                    static_cast<int>(ia),
-                    static_cast<int>(ib),
-                    w * N[a] * N[b]);
-              }
-            }
-            return;
-          }
-        };
-
-        if (activeReinitMode == "ir")
-        {
-          pinTriplets.reserve(18 * fittedSeg.size());
-          // Two-point Gauss quadrature on every moved interface segment.
-          constexpr Real q0 = Real(0.21132486540518711775);
-          constexpr Real q1 = Real(0.78867513459481288225);
-          for (const auto& seg : fittedSeg)
-          {
-            const Vec2 a = seg[0];
-            const Vec2 b = seg[1];
-            const Real ds = (b - a).norm();
-            addPinPoint((Real(1) - q0) * a + q0 * b, Real(0.5) * ds);
-            addPinPoint((Real(1) - q1) * a + q1 * b, Real(0.5) * ds);
-          }
-        }
-        else
-        {
-          pinTriplets.reserve(27 * mesh.getCellCount());
-          Real gsum = Real(0);
-          std::size_t gcnt = 0;
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            Real vmin = std::numeric_limits<Real>::infinity();
-            Real vmax = -std::numeric_limits<Real>::infinity();
-            for (const Index v : vv)
-            {
-              const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
-              vmin = std::min(vmin, pv);
-              vmax = std::max(vmax, pv);
-            }
-            if (vmin <= Real(0) && vmax >= Real(0))
-            {
-              gsum += cellGradientMagnitude(phiH, *cit);
-              ++gcnt;
-            }
-          }
-          const Real gavg =
-            gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12))
-                     : Real(1);
-          const Real epsPhi = std::max(irDeltaEps * gavg, Real(1e-12));
-          for (auto cit = mesh.getCell(); cit; ++cit)
-          {
-            const auto& vv = cit->getVertices();
-            const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
-            const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
-            const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
-            const Real area = std::abs(Real(0.5) *
-              ((x1(0) - x0(0)) * (x2(1) - x0(1))
-             - (x1(1) - x0(1)) * (x2(0) - x0(0))));
-            const Real gmag = cellGradientMagnitude(phiH, *cit);
-            std::array<Index, 3> gd;
-            std::array<Real, 3> pv;
-            for (std::size_t a = 0; a < 3; ++a)
-            {
-              gd[a] = sh.getGlobalIndex({0, vv[a]}, 0);
-              pv[a] = phiH.getData()(gd[a]);
-            }
-            for (const auto& bary : TriangleBarycentricQuadrature)
-            {
-              const std::array<Real, 3> N = {{ bary[0], bary[1], bary[2] }};
-              const Real phiq = N[0] * pv[0] + N[1] * pv[1] + N[2] * pv[2];
-              if (std::abs(phiq) >= epsPhi)
-                continue;
-              const Real delta =
-                (Real(1) / (Real(2) * epsPhi))
-                * (Real(1) + std::cos(M_PI * phiq / epsPhi));
-              const Real w = (area / Real(3)) * delta * gmag;
-              for (std::size_t a = 0; a < 3; ++a)
-                for (std::size_t b = 0; b < 3; ++b)
-                  pinTriplets.emplace_back(
-                      static_cast<int>(gd[a]),
-                      static_cast<int>(gd[b]),
-                      w * N[a] * N[b]);
-            }
-          }
-        }
-
-        Math::SparseMatrix<Real> A(phiR.getData().size(), phiR.getData().size());
-        std::vector<Eigen::Triplet<Real>> aTriplets;
-        aTriplets.reserve(
-            static_cast<std::size_t>(phiR.getData().size()) + pinTriplets.size());
-        for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
-          aTriplets.emplace_back(
-              static_cast<int>(i), static_cast<int>(i), irMassLump(i) / dtauR);
-        for (const auto& t : pinTriplets)
-          aTriplets.emplace_back(t.row(), t.col(), Real(2) * irLambda * t.value());
-        A.setFromTriplets(aTriplets.begin(), aTriplets.end());
-        Eigen::ConjugateGradient<Math::SparseMatrix<Real>,
-          Eigen::Lower | Eigen::Upper> irCG;
-        irCG.setTolerance(Real(1e-10));
-        irCG.setMaxIterations(static_cast<int>(phiR.getData().size()));
-        irCG.compute(A);
-        const auto gInCut = gradientStats(phiR, true);
-        const auto gInBand = gradientStats(phiR, false);
-        Math::Vector<Real> rK(phiR.getData().size());
-        for (int kk = 0; kk < Kr; ++kk)
-        {
-          if (kk == 0 || static_cast<std::size_t>(kk) % irDpUpdateEvery == 0)
-          {
+            // Phi-pinned variant: start from the carried level set, rescaled by
+            // the average cut-cell gradient so the unknown has distance units.
+            Real gsum = Real(0);
+            std::size_t gcnt = 0;
             for (auto cit = mesh.getCell(); cit; ++cit)
             {
-              const Index dc = p0.getGlobalIndex({D, cit->getIndex()}, 0);
-              const Real s = cellGradientMagnitude(phiR, *cit);
-              Real dpv;
-              if (s >= Real(1)) dpv = Real(1) - Real(1)/s;
-              else { const Real x = Real(2)*M_PI*s;
-                     dpv = s > Real(1e-6) ? std::sin(x)/x : Real(1); }
-              dp.getData()(dc) = dpv;
+              const auto& vv = cit->getVertices();
+              Real vmin = std::numeric_limits<Real>::infinity();
+              Real vmax = -std::numeric_limits<Real>::infinity();
+              for (const Index v : vv)
+              {
+                const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
+                vmin = std::min(vmin, pv);
+                vmax = std::max(vmax, pv);
+              }
+              if (vmin <= Real(0) && vmax >= Real(0))
+              {
+                gsum += cellGradientMagnitude(phiH, *cit);
+                ++gcnt;
+              }
             }
-            irDiffusion.assemble();
+            const Real gscale =
+              gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12)) : Real(1);
+            phiR.getData() = phiH.getData() / gscale;
           }
-          rK = irDiffusion.getOperator() * phiR.getData();
-          Math::Vector<Real> rhs(phiR.getData().size());
+          std::vector<Eigen::Triplet<Real>> pinTriplets;
+
+          auto addPinPoint = [&](const Vec2& y, Real w) {
+            Math::SpatialPoint pc(2);
+            pc(0) = y(0);
+            pc(1) = y(1);
+            constexpr Real tol = Real(1e-10);
+            for (auto cit = mesh.getCell(); cit; ++cit)
+            {
+              Math::SpatialPoint rc(2);
+              cit->getTransformation().inverse(rc, pc);
+              const Real l0 = Real(1) - rc(0) - rc(1);
+              const Real l1 = rc(0);
+              const Real l2 = rc(1);
+              if (l0 < -tol || l1 < -tol || l2 < -tol)
+                continue;
+              const auto& vv = cit->getVertices();
+              const std::array<Real, 3> N = {{l0, l1, l2}};
+              for (std::size_t a = 0; a < 3; ++a)
+              {
+                const Index ia = sh.getGlobalIndex({0, vv[a]}, 0);
+                for (std::size_t b = 0; b < 3; ++b)
+                {
+                  const Index ib = sh.getGlobalIndex({0, vv[b]}, 0);
+                  pinTriplets.emplace_back(
+                    static_cast<int>(ia), static_cast<int>(ib), w * N[a] * N[b]);
+                }
+              }
+              return;
+            }
+          };
+
+          if (activeReinitMode == "ir")
+          {
+            pinTriplets.reserve(18 * fittedSeg.size());
+            // Two-point Gauss quadrature on every moved interface segment.
+            constexpr Real q0 = Real(0.21132486540518711775);
+            constexpr Real q1 = Real(0.78867513459481288225);
+            for (const auto& seg : fittedSeg)
+            {
+              const Vec2 a = seg[0];
+              const Vec2 b = seg[1];
+              const Real ds = (b - a).norm();
+              addPinPoint((Real(1) - q0) * a + q0 * b, Real(0.5) * ds);
+              addPinPoint((Real(1) - q1) * a + q1 * b, Real(0.5) * ds);
+            }
+          }
+          else
+          {
+            pinTriplets.reserve(27 * mesh.getCellCount());
+            Real gsum = Real(0);
+            std::size_t gcnt = 0;
+            for (auto cit = mesh.getCell(); cit; ++cit)
+            {
+              const auto& vv = cit->getVertices();
+              Real vmin = std::numeric_limits<Real>::infinity();
+              Real vmax = -std::numeric_limits<Real>::infinity();
+              for (const Index v : vv)
+              {
+                const Real pv = phiH.getData()(sh.getGlobalIndex({0, v}, 0));
+                vmin = std::min(vmin, pv);
+                vmax = std::max(vmax, pv);
+              }
+              if (vmin <= Real(0) && vmax >= Real(0))
+              {
+                gsum += cellGradientMagnitude(phiH, *cit);
+                ++gcnt;
+              }
+            }
+            const Real gavg =
+              gcnt > 0 ? std::max(gsum / static_cast<Real>(gcnt), Real(1e-12)) : Real(1);
+            const Real epsPhi = std::max(irDeltaEps * gavg, Real(1e-12));
+            for (auto cit = mesh.getCell(); cit; ++cit)
+            {
+              const auto& vv = cit->getVertices();
+              const Vec2 x0 = mesh.getVertexCoordinates(vv[0]);
+              const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
+              const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
+              const Real area = std::abs(Real(0.5) *
+                ((x1(0) - x0(0)) * (x2(1) - x0(1)) - (x1(1) - x0(1)) * (x2(0) - x0(0))));
+              const Real gmag = cellGradientMagnitude(phiH, *cit);
+              std::array<Index, 3> gd;
+              std::array<Real, 3> pv;
+              for (std::size_t a = 0; a < 3; ++a)
+              {
+                gd[a] = sh.getGlobalIndex({0, vv[a]}, 0);
+                pv[a] = phiH.getData()(gd[a]);
+              }
+              for (const auto& bary : TriangleBarycentricQuadrature)
+              {
+                const std::array<Real, 3> N = {{bary[0], bary[1], bary[2]}};
+                const Real phiq = N[0] * pv[0] + N[1] * pv[1] + N[2] * pv[2];
+                if (std::abs(phiq) >= epsPhi)
+                  continue;
+                const Real delta = (Real(1) / (Real(2) * epsPhi)) *
+                  (Real(1) + std::cos(M_PI * phiq / epsPhi));
+                const Real w = (area / Real(3)) * delta * gmag;
+                for (std::size_t a = 0; a < 3; ++a)
+                  for (std::size_t b = 0; b < 3; ++b)
+                    pinTriplets.emplace_back(
+                      static_cast<int>(gd[a]), static_cast<int>(gd[b]), w * N[a] * N[b]);
+              }
+            }
+          }
+
+          Math::SparseMatrix<Real> A(phiR.getData().size(), phiR.getData().size());
+          std::vector<Eigen::Triplet<Real>> aTriplets;
+          aTriplets.reserve(
+            static_cast<std::size_t>(phiR.getData().size()) + pinTriplets.size());
           for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
-            rhs(i) = (irMassLump(i) / dtauR) * phiR.getData()(i) - rK(i);
-          phiR.getData() = irCG.solve(rhs);
+            aTriplets.emplace_back(
+              static_cast<int>(i), static_cast<int>(i), irMassLump(i) / dtauR);
+          for (const auto& t : pinTriplets)
+            aTriplets.emplace_back(t.row(), t.col(), Real(2) * irLambda * t.value());
+          A.setFromTriplets(aTriplets.begin(), aTriplets.end());
+          Eigen::ConjugateGradient<Math::SparseMatrix<Real>, Eigen::Lower | Eigen::Upper>
+            irCG;
+          irCG.setTolerance(Real(1e-10));
+          irCG.setMaxIterations(static_cast<int>(phiR.getData().size()));
+          irCG.compute(A);
+          const auto gInCut = gradientStats(phiR, true);
+          const auto gInBand = gradientStats(phiR, false);
+          Math::Vector<Real> rK(phiR.getData().size());
+          for (int kk = 0; kk < Kr; ++kk)
+          {
+            if (kk == 0 || static_cast<std::size_t>(kk) % irDpUpdateEvery == 0)
+            {
+              for (auto cit = mesh.getCell(); cit; ++cit)
+              {
+                const Index dc = p0.getGlobalIndex({D, cit->getIndex()}, 0);
+                const Real s = cellGradientMagnitude(phiR, *cit);
+                Real dpv;
+                if (s >= Real(1))
+                  dpv = Real(1) - Real(1) / s;
+                else
+                {
+                  const Real x = Real(2) * M_PI * s;
+                  dpv = s > Real(1e-6) ? std::sin(x) / x : Real(1);
+                }
+                dp.getData()(dc) = dpv;
+              }
+              irDiffusion.assemble();
+            }
+            rK = irDiffusion.getOperator() * phiR.getData();
+            Math::Vector<Real> rhs(phiR.getData().size());
+            for (Eigen::Index i = 0; i < phiR.getData().size(); ++i)
+              rhs(i) = (irMassLump(i) / dtauR) * phiR.getData()(i) - rK(i);
+            phiR.getData() = irCG.solve(rhs);
+          }
+          const auto gOutCut = gradientStats(phiR, true);
+          const auto gOutBand = gradientStats(phiR, false);
+          std::cout << "    IR-DRLSE" << (activeReinitMode == "ir-phi" ? "-phi" : "")
+                    << ": |grad phi| cut [" << std::fixed << std::setprecision(3)
+                    << gInCut[0] << "," << gInCut[1] << "] -> [" << gOutCut[0] << ","
+                    << gOutCut[1] << "]"
+                    << "  band [" << gInBand[0] << "," << gInBand[1] << "] -> ["
+                    << gOutBand[0] << "," << gOutBand[1] << "]\n";
+          dist.getData() = phiR.getData();
         }
-        const auto gOutCut = gradientStats(phiR, true);
-        const auto gOutBand = gradientStats(phiR, false);
-        std::cout << "    IR-DRLSE"
-                  << (activeReinitMode == "ir-phi" ? "-phi" : "")
-                  << ": |grad phi| cut ["
-                  << std::fixed << std::setprecision(3)
-                  << gInCut[0] << "," << gInCut[1] << "] -> ["
-                  << gOutCut[0] << "," << gOutCut[1] << "]"
-                  << "  band [" << gInBand[0] << "," << gInBand[1]
-                  << "] -> [" << gOutBand[0] << "," << gOutBand[1] << "]\n";
-        dist.getData() = phiR.getData();
-      }
-      else
-      {
-        overwriteClosestPointBand();
-      }
+        else
+        {
+          overwriteClosestPointBand();
+        }
       }
     }
     tRedistance = iterTimer.reset();
@@ -1324,8 +1308,7 @@ int main(int argc, char** argv)
           const Vec2 x1 = mesh.getVertexCoordinates(vv[1]);
           const Vec2 x2 = mesh.getVertexCoordinates(vv[2]);
           const Real area = std::abs(Real(0.5) *
-            ((x1(0) - x0(0)) * (x2(1) - x0(1))
-           - (x1(1) - x0(1)) * (x2(0) - x0(0))));
+            ((x1(0) - x0(0)) * (x2(1) - x0(1)) - (x1(1) - x0(1)) * (x2(0) - x0(0))));
           gsum += area * backgroundCellGradientMagnitude(phiH, *cit);
           wsum += area;
         }
@@ -1333,8 +1316,8 @@ int main(int argc, char** argv)
         {
           const Real c = std::max(gsum / wsum, Real(1e-12));
           phiH.getData() /= c;
-          std::cout << "    repair: scale=" << std::scientific
-                    << std::setprecision(3) << c << '\n';
+          std::cout << "    repair: scale=" << std::scientific << std::setprecision(3)
+                    << c << '\n';
         }
       }
     }
@@ -1342,30 +1325,22 @@ int main(int argc, char** argv)
 
     if (printTiming)
     {
-      const Real total = tClassify + tGrad + tWNGIR + tMoveTrim
-                       + tElasticity + tHilbert + tRedistance + tAdvect
-                       + tRepair + tWrite;
+      const Real total = tClassify + tGrad + tWNGIR + tMoveTrim + tElasticity + tHilbert +
+        tRedistance + tAdvect + tRepair + tWrite;
       std::cout << "  timing:"
                 << " classify=" << std::scientific << std::setprecision(2) << tClassify
-                << " grad=" << tGrad
-                << " wngir=" << tWNGIR
-                << " moveTrim=" << tMoveTrim
-                << " elas=" << tElasticity
-                << " hilbert=" << tHilbert
-                << " redist=" << tRedistance
-                << " advect=" << tAdvect
-                << " repair=" << tRepair
-                << " write=" << tWrite
-                << " total=" << total << '\n';
+                << " grad=" << tGrad << " wngir=" << tWNGIR << " moveTrim=" << tMoveTrim
+                << " elas=" << tElasticity << " hilbert=" << tHilbert
+                << " redist=" << tRedistance << " advect=" << tAdvect
+                << " repair=" << tRepair << " write=" << tWrite << " total=" << total
+                << '\n';
     }
     ++acceptedShapeIterations;
   }
 
   xdmf.close();
-  std::cout << "\nDone. Accepted shape iterations: "
-            << acceptedShapeIterations << " / " << maxIt
-            << "  attempts=" << shapeAttempts
-            << "  stop=" << stopReason
+  std::cout << "\nDone. Accepted shape iterations: " << acceptedShapeIterations << " / "
+            << maxIt << "  attempts=" << shapeAttempts << "  stop=" << stopReason
             << ". Objective history in LevelSetWNGIRCantilever2D.obj.txt\n";
   return 0;
 }

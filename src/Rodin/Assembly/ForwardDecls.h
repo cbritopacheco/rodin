@@ -111,9 +111,8 @@ namespace Rodin::Assembly
    * shape-function expression @f$ A(v) @f$, and the essential boundary
    * attributes.
    */
-  template <class Scalar, class Sol1, class FES1,
-            class Derived2, class FES2,
-            Variational::ShapeFunctionSpaceType Sp>
+  template <class Scalar, class Sol1, class FES1, class Derived2, class FES2,
+    Variational::ShapeFunctionSpaceType Sp>
   class DirichletBCShapeFunctionAssemblyInput;
 
   /**

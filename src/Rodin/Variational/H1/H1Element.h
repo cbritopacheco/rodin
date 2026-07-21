@@ -482,8 +482,7 @@ namespace Rodin::Variational
             static const std::vector<Math::SpatialPoint> s_nodes = [] {
               constexpr size_t count = (K + 1) * (K + 2) * (2 * K + 3) / 6;
 
-              auto offset = [](size_t layer)
-              {
+              auto offset = [](size_t layer) {
                 size_t out = 0;
                 for (size_t k = 0; k < layer; ++k)
                 {
@@ -493,25 +492,26 @@ namespace Rodin::Variational
                 return out;
               };
 
-              auto idx = [&](size_t i, size_t j, size_t k)
-              {
+              auto idx = [&](size_t i, size_t j, size_t k) {
                 const size_t n = K - k + 1;
                 return offset(k) + j * n + i;
               };
 
-              auto triLattice = [](size_t alpha)
-              {
-                struct IJ { size_t i, j; };
+              auto triLattice = [](size_t alpha) {
+                struct IJ
+                {
+                    size_t i, j;
+                };
                 size_t pos = 0;
                 for (size_t j = 0; j <= K; ++j)
                 {
                   for (size_t i = 0; i <= K - j; ++i, ++pos)
                   {
                     if (pos == alpha)
-                      return IJ{ i, j };
+                      return IJ{i, j};
                   }
                 }
-                return IJ{ 0, 0 };
+                return IJ{0, 0};
               };
 
               std::vector<Math::SpatialPoint> nodes(count);
@@ -519,9 +519,8 @@ namespace Rodin::Variational
               const auto& xi = GLL01<K>::getNodes();
               const auto& tri = FeketeTriangle<K>::getNodes();
 
-              auto set = [&](size_t node, Real x, Real y, Real z)
-              {
-                nodes[node] = Math::SpatialPoint{{ x, y, z }};
+              auto set = [&](size_t node, Real x, Real y, Real z) {
+                nodes[node] = Math::SpatialPoint{{x, y, z}};
                 assigned[node] = 1;
               };
 
@@ -558,10 +557,8 @@ namespace Rodin::Variational
                     const size_t node = idx(i, j, k);
                     if (!assigned[node])
                     {
-                      set(node,
-                          q * static_cast<Real>(i) / static_cast<Real>(n),
-                          q * static_cast<Real>(j) / static_cast<Real>(n),
-                          z);
+                      set(node, q * static_cast<Real>(i) / static_cast<Real>(n),
+                        q * static_cast<Real>(j) / static_cast<Real>(n), z);
                     }
                   }
                 }
@@ -1125,6 +1122,27 @@ namespace Rodin::Variational
       const Math::SpatialPoint& getNode(size_t local) const
       {
         return H1Element<K, ScalarType>::getNodes(this->getGeometry())[local / m_vdim];
+      }
+
+      template <class Coefficient>
+      constexpr void evaluate(
+        RangeType& out, Coefficient&& coefficient, const Math::SpatialPoint& rc) const
+      {
+        assert(m_vdim > 0);
+        out.resize(m_vdim);
+        out.setZero();
+
+        const H1Element<K, ScalarType> scalarfe(this->getGeometry());
+        const size_t count = scalarfe.getCount();
+        for (size_t node = 0; node < count; ++node)
+        {
+          const ScalarType phi = scalarfe.getBasis(node)(rc);
+          for (size_t component = 0; component < m_vdim; ++component)
+          {
+            const size_t local = node * m_vdim + component;
+            out(component) += coefficient(local) * phi;
+          }
+        }
       }
 
       constexpr

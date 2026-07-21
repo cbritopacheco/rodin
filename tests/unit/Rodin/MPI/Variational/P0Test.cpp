@@ -94,11 +94,16 @@ namespace
   {
     switch (type)
     {
-      case Polytope::Type::Tetrahedron: return "Tetrahedron";
-      case Polytope::Type::Hexahedron:  return "Hexahedron";
-      case Polytope::Type::Pyramid:     return "Pyramid";
-      case Polytope::Type::Wedge:       return "Wedge";
-      default:                          return "Other";
+      case Polytope::Type::Tetrahedron:
+        return "Tetrahedron";
+      case Polytope::Type::Hexahedron:
+        return "Hexahedron";
+      case Polytope::Type::Pyramid:
+        return "Pyramid";
+      case Polytope::Type::Wedge:
+        return "Wedge";
+      default:
+        return "Other";
     }
   }
 }
@@ -138,14 +143,11 @@ namespace Rodin::Tests::Unit
       GTEST_SKIP() << "Test designed for at most 4 MPI ranks.";
 
     Context::MPI ctx(*g_env, world);
-    for (auto type :
-         { Polytope::Type::Tetrahedron,
-           Polytope::Type::Hexahedron,
-           Polytope::Type::Pyramid,
-           Polytope::Type::Wedge })
+    for (auto type : {Polytope::Type::Tetrahedron, Polytope::Type::Hexahedron,
+           Polytope::Type::Pyramid, Polytope::Type::Wedge})
     {
       SCOPED_TRACE(polytopeName(type));
-      auto mpiMesh = distributeFromRoot(ctx, type, { 4, 3, 3 });
+      auto mpiMesh = distributeFromRoot(ctx, type, {4, 3, 3});
 
       P0<Real, Mesh<Context::MPI>> fes(mpiMesh);
 
