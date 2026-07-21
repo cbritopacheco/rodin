@@ -277,22 +277,6 @@ CoupledLV0DCoronary3D::makeInput(const Config &cfg) {
   return input;
 }
 
-void CoupledLV0DCoronary3D::updateRCR(const Model &model, RCR &bc, Real Q,
-                                      Real dt) {
-  const Real a = bc.C / dt;
-
-  const auto &s = model.getState();
-  const auto &h = model.getHistory();
-
-  const Real dPim = (s.pv - h.nm1.pv) / dt;
-  const Real Qim = bc.C * 0.3 * dPim;
-
-  bc.pc = (a * bc.pc + Q + Qim + s.pv / bc.Rd) / (a + 1.0 / bc.Rd);
-
-  bc.qd = (bc.pc - s.pv) / bc.Rd;
-  bc.pout = bc.pc + bc.Rp * Q;
-}
-
 std::pair<CoupledLV0DCoronary3D::Real, CoupledLV0DCoronary3D::Real>
 CoupledLV0DCoronary3D::outletFlow(const Config &cfg, const CarreauYasuda &visc,
                                   Real dp, Real L, Real radius) {
@@ -480,17 +464,30 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   // capacitor balance, so any kink in pv (isovolumic phases) becomes a flow
   // spike and drives a large retrograde peak. Filtering p_im bounds d(p_im)/dt
   // (implicit Euler: unconditionally stable) and removes those artifacts.
+  // Two tissue pressures with independent cavity (CIEP) and active (SIP)
+  // transmission, one per compartment. Both sources act on both compartments;
+  // the coefficients differ because the thin-walled venular bed is more
+  // collapsible and can be made contraction- rather than cavity-driven.
+  //   p_im   = intramyocardialFraction * pv + intramyocardialActiveFraction * tau_c
+  //   p_im,v = venousCavityFraction    * pv + venousActiveFraction         * tau_c
   const Real alpha = cfg.intramyocardialFraction;
   const Real tauIm = std::max<Real>(cfg.intramyocardialFilterTau, 0.0);
-  // Cavity-induced (alpha*pv) plus shortening-induced (kappa_tau*tau_c) pressure.
+  const Real theta = (tauIm > 0.0) ? dt / (dt + tauIm) : 1.0;
+
   const Real pimTarget =
       alpha * s.pv + cfg.intramyocardialActiveFraction * s.tauc;
   const Real pimOld = bc.pimFilt;
-  const Real theta = (tauIm > 0.0) ? dt / (dt + tauIm) : 1.0;
   const Real pim = pimOld + theta * (pimTarget - pimOld); // filtered p_im^{n+1}
   const Real dPim = (pim - pimOld) / dt;
-  const Real Qim = bc.C * dPim;              // arterial-compartment pump
-  const Real Qimv = bc.Cv * cfg.venousIntramyoFraction * dPim; // venous pump
+
+  const Real pimvTarget =
+      cfg.venousCavityFraction * s.pv + cfg.venousActiveFraction * s.tauc;
+  const Real pimvOld = bc.pimvFilt;
+  const Real pimv = pimvOld + theta * (pimvTarget - pimvOld);
+  const Real dPimv = (pimv - pimvOld) / dt;
+
+  const Real Qim = bc.C * dPim;    // arterial-compartment pump
+  const Real Qimv = bc.Cv * dPimv; // venous-compartment pump
   (void)h;
 
   // ---- Coupled arterial + venous capacitor solve (2x2 Newton) -------------
@@ -557,8 +554,9 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
 
   bc.pout = bc.pc + dpP;
 
-  // Persist the filtered intramyocardial pressure for the next step.
+  // Persist the filtered intramyocardial pressures for the next step.
   bc.pimFilt = pim;
+  bc.pimvFilt = pimv;
 }
 
 CoupledLV0DCoronary3D::Real
@@ -1497,8 +1495,23 @@ void CoupledLV0DCoronary3D::computeWallShear() {
   const auto gradUn0 = Dot(gradRec0, normal);
   const auto gradUn1 = Dot(gradRec1, normal);
   const auto gradUn2 = Dot(gradRec2, normal);
-  const auto tracRec = VectorFunction(cy.muInf * gradUn0, cy.muInf * gradUn1,
-                                      cy.muInf * gradUn2);
+
+  // Local Carreau-Yasuda viscosity, built from the SAME expression projected
+  // into m_mu (the "viscosity" field written to XDMF). The wall shear stress
+  // is tau_w = mu(gamma) * du/dn; using the constant muInf here decoupled the
+  // WSS from the rheology entirely, so the WSS map could not reflect the
+  // viscosity field (no correlation) and under-predicted tau_w in exactly the
+  // low-shear recirculation zones where mu departs from muInf.
+  const auto symU = 0.5 * (Jacobian(uSol) + Transpose(Jacobian(uSol)));
+  const auto gammaDot = Sqrt(cy.gammaRegularization * cy.gammaRegularization +
+                             2.0 * Dot(symU, symU));
+  const auto carreauBase = 1.0 + Pow(cy.lambda * gammaDot, cy.yasuda);
+  const auto muLocal = cy.muInf + (cy.mu0 - cy.muInf) *
+                                      Pow(carreauBase,
+                                          (cy.n - 1.0) / cy.yasuda);
+
+  const auto tracRec = VectorFunction(muLocal * gradUn0, muLocal * gradUn1,
+                                      muLocal * gradUn2);
   const auto wallStressRec = tracRec - Dot(tracRec, normal) * normal;
 
   VelocityTrialFunctionType wssTrial(m_uh);
@@ -1597,7 +1610,9 @@ CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const {
     d.pc[tag] = bc.pc;
     d.pOut[tag] = bc.pout;
     d.pven[tag] = bc.pven;
-    d.pim = bc.pimFilt; // ~identical across outlets (same pv, tauc, filter)
+    // ~identical across outlets (same pv, tauc, filter)
+    d.pim = bc.pimFilt;
+    d.pimv = bc.pimvFilt;
   }
 
   return d;
@@ -1654,6 +1669,7 @@ void CoupledLV0DCoronary3D::writeCSVHeader() {
         << "kc,"
         << "tauc,"
         << "IntramyoPressure,"
+        << "IntramyoVenousPressure,"
         << "CoronaryOutlet7VenPressure,"
         << "CoronaryOutlet8VenPressure,"
         << "CoronaryOutlet9VenPressure,"
@@ -1690,7 +1706,7 @@ void CoupledLV0DCoronary3D::writeCSVRow() {
         << get(d.pOut, 6) << ',' << get(d.pOut, 7) << ',' << get(d.pOut, 8)
         << ',' << get(d.pOut, 9) << ',' << d.flowBalance << ',' << d.ec << ','
         << d.gamma << ',' << d.beta << ',' << d.w << ',' << d.kc << ','
-        << d.tauc << ',' << d.pim << ',' << get(d.pven, 7) << ','
+        << d.tauc << ',' << d.pim << ',' << d.pimv << ',' << get(d.pven, 7) << ','
         << get(d.pven, 8) << ',' << get(d.pven, 9) << ',' << get(d.pven, 10)
         << ',' << get(d.pven, 14) << ',' << get(d.pven, 15) << '\n';
 

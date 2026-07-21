@@ -108,8 +108,6 @@ public:
     Real C = 0.0;
     /// @brief Distal resistance.
     Real Rd = 0.0;
-    /// @brief Distal pressure state.
-    Real pd = 0.0;
     /// @brief Capacitor pressure state.
     Real pc = 0.0;
     /// @brief Outlet pressure applied to the 3D model.
@@ -118,6 +116,10 @@ public:
     Real qd = 0.0;
 
     Real pimFilt = 0.0;
+    /// @brief Low-pass-filtered intramyocardial pressure acting on the VENOUS
+    ///        compartment. Separate state because the venous compartment has
+    ///        its own cavity/active transmission coefficients.
+    Real pimvFilt = 0.0;
     /// @brief Venous compartment pressure state (downstream of the distal
     ///        resistance, drains to the right atrium through R_v).
     Real pven = 0.0;
@@ -159,14 +161,6 @@ public:
   };
 
   struct OutletFlowLaw {
-    /// @brief Proximal surrogate vessel radius.
-    Real proximalRadius = 6.e-4;
-    /// @brief Proximal surrogate vessel length.
-    Real proximalLength = 0.00075;
-    /// @brief Distal surrogate vessel radius.
-    Real distalRadius = 1e-4;
-    /// @brief Distal surrogate vessel length.
-    Real distalLength = 0.0025;
     /// @brief Array with radius and large for each branch
     std::unordered_map<Attribute, GeoArtery> geometricParam{
         {7,  {6.e-4,  0.0125, 3e-4, 0.0025}},
@@ -204,8 +198,6 @@ public:
     Real zeroFlowTolerance = 1.0e-16;
     /// @brief Minimum pressure-drop bracket.
     Real pressureDropBracketMin = 1.0;
-    /// @brief Distal capacitor bracket pressure pad.
-    Real distalPressureBracketPad = 1000.0;
   };
 
   /**
@@ -453,7 +445,9 @@ public:
     /// @brief 0D LV model parameters and initial conditions.
     LVModel lv;
     /// @brief Default RCR parameters copied to every outlet at startup.
-    RCR defaultRCR{5.0e8, 2.0e-11, 1.0e9, 500.0, 10000.0, 10000.0};
+    /// @details Designated initializers: robust against member reordering.
+    RCR defaultRCR{
+        .Rp = 5.0e8, .C = 2.0e-11, .Rd = 1.0e9, .pc = 10000.0, .pout = 10000.0};
 
     /// @brief Enable automatic Murray-law outlet RCR calibration at startup.
     /// @details When true, each outlet's total resistance is sized so the
@@ -477,7 +471,7 @@ public:
     /// @details Set to 0 to recover the old, directly-applied p_im (spiky).
     ///          ~0.01-0.03 s removes the dP/dt spikes and tames the systolic
     ///          retrograde peak without materially shifting mean flow.
-    Real intramyocardialFilterTau = 0.0;
+    Real intramyocardialFilterTau = 0.02;
 
     /// @brief Shortening-induced intramyocardial pressure gain (SIP): the
     ///        intramyocardial pressure target becomes
@@ -488,7 +482,19 @@ public:
     Real venousComplianceFactor = 2.5;
     Real venousResistanceFraction = 0.05;
     Real rightAtrialPressure = 600.0;
-    Real venousIntramyoFraction = 1.0;
+
+    /// @brief Cavity-induced (CIEP) transmission to the VENOUS compartment:
+    ///        p_im,v = venousCavityFraction * p_v + venousActiveFraction * tau_c.
+    /// @details Independent of the arterial coefficients, so the venous side can
+    ///          be made contraction-driven (raise venousActiveFraction, lower
+    ///          venousCavityFraction) rather than cavity-driven. Setting these
+    ///          equal to intramyocardialFraction / intramyocardialActiveFraction
+    ///          makes both compartments feel the same tissue pressure.
+    Real venousCavityFraction = 0.65;
+    /// @brief Shortening-induced (SIP) transmission to the VENOUS compartment.
+    ///        Same calibration caveat as intramyocardialActiveFraction (tau_c is
+    ///        O(sigma0)); tune against the IntramyoVenousPressure CSV column.
+    Real venousActiveFraction = 0.01;
 
     Real inletTangentialDamping = 5e2;
     Real inletVelocityDamping = 0.0;
@@ -544,13 +550,13 @@ private:
     std::map<Attribute, Real> pOut;
     std::map<Attribute, Real> pven;
     Real pim = 0.0;
+    Real pimv = 0.0;
   };
 
   static Model::Input makeInput(const Config &cfg);
   static MeshType makeMesh(const Rodin::Context::MPI &context,
                            const Config &cfg);
 
-  static void updateRCR(const Model &model, RCR &bc, Real Q, Real dt);
   static void updateRCRNonNew(const Config &cfg, const Attribute& tag, const Model &model, RCR &bc,
                               Real Q, Real dt);
 
