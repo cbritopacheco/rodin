@@ -122,11 +122,7 @@ namespace
     return MPI_Wtime();
   }
 
-  static void endTimer(
-      MPI_Comm comm,
-      bool isRoot,
-      const std::string& label,
-      double start)
+  static void endTimer(MPI_Comm comm, bool isRoot, const std::string& label, double start)
   {
     const double local = MPI_Wtime() - start;
     double global = 0.0;
@@ -134,22 +130,15 @@ namespace
 
     if (isRoot)
     {
-      std::cout << std::fixed << std::setprecision(6)
-                << "[timer] end   " << label
-                << " : " << global << " s max/rank"
-                << std::endl;
+      std::cout << std::fixed << std::setprecision(6) << "[timer] end   " << label
+                << " : " << global << " s max/rank" << std::endl;
     }
   }
 
   static void printLinearSystemInfo(
-      MPI_Comm comm,
-      bool isRoot,
-      const char* label,
-      ::Mat A,
-      ::Vec x,
-      ::Vec b)
+    MPI_Comm comm, bool isRoot, const char* label, ::Mat A, ::Vec x, ::Vec b)
   {
-    (void) isRoot;
+    (void)isRoot;
 
     const char* xtype = PETSC_NULLPTR;
     const char* btype = PETSC_NULLPTR;
@@ -173,49 +162,55 @@ namespace
     PetscInt mGlobal = 0, nGlobal = 0;
 
     ierr = VecGetLocalSize(x, &xLocal);
-    if (ierr != PETSC_SUCCESS) xLocal = -1;
+    if (ierr != PETSC_SUCCESS)
+      xLocal = -1;
     ierr = VecGetSize(x, &xGlobal);
-    if (ierr != PETSC_SUCCESS) xGlobal = -1;
+    if (ierr != PETSC_SUCCESS)
+      xGlobal = -1;
 
     ierr = VecGetLocalSize(b, &bLocal);
-    if (ierr != PETSC_SUCCESS) bLocal = -1;
+    if (ierr != PETSC_SUCCESS)
+      bLocal = -1;
     ierr = VecGetSize(b, &bGlobal);
-    if (ierr != PETSC_SUCCESS) bGlobal = -1;
+    if (ierr != PETSC_SUCCESS)
+      bGlobal = -1;
 
     ierr = MatGetLocalSize(A, &mLocal, &nLocal);
-    if (ierr != PETSC_SUCCESS) { mLocal = -1; nLocal = -1; }
+    if (ierr != PETSC_SUCCESS)
+    {
+      mLocal = -1;
+      nLocal = -1;
+    }
     ierr = MatGetSize(A, &mGlobal, &nGlobal);
-    if (ierr != PETSC_SUCCESS) { mGlobal = -1; nGlobal = -1; }
+    if (ierr != PETSC_SUCCESS)
+    {
+      mGlobal = -1;
+      nGlobal = -1;
+    }
 
-    PetscPrintf(
-        comm,
-        "[petsc] %s\n"
-        "        A type=%s local=%" PetscInt_FMT "x%" PetscInt_FMT
-        " global=%" PetscInt_FMT "x%" PetscInt_FMT "\n"
-        "        x type=%s local=%" PetscInt_FMT " global=%" PetscInt_FMT "\n"
-        "        b type=%s local=%" PetscInt_FMT " global=%" PetscInt_FMT "\n",
-        label,
-        atype ? atype : "(null)",
-        mLocal, nLocal, mGlobal, nGlobal,
-        xtype ? xtype : "(null)",
-        xLocal, xGlobal,
-        btype ? btype : "(null)",
-        bLocal, bGlobal);
+    PetscPrintf(comm,
+      "[petsc] %s\n"
+      "        A type=%s local=%" PetscInt_FMT "x%" PetscInt_FMT " global=%" PetscInt_FMT
+      "x%" PetscInt_FMT "\n"
+      "        x type=%s local=%" PetscInt_FMT " global=%" PetscInt_FMT "\n"
+      "        b type=%s local=%" PetscInt_FMT " global=%" PetscInt_FMT "\n",
+      label, atype ? atype : "(null)", mLocal, nLocal, mGlobal, nGlobal,
+      xtype ? xtype : "(null)", xLocal, xGlobal, btype ? btype : "(null)", bLocal,
+      bGlobal);
   }
-
 
   struct Volume
   {
-    static constexpr Attribute Fluid = 1;
-    static constexpr Attribute Solid = 2;
+      static constexpr Attribute Fluid = 1;
+      static constexpr Attribute Solid = 2;
   };
 
   struct Boundary
   {
-    static constexpr Attribute FSI = 2;
-    static constexpr Attribute Inlet = 4;
-    static constexpr std::array<Attribute, 6> Outlets{{10, 15, 9, 14, 8, 7}};
-    static constexpr Attribute SolidRing = 17;
+      static constexpr Attribute FSI = 2;
+      static constexpr Attribute Inlet = 4;
+      static constexpr std::array<Attribute, 6> Outlets{{10, 15, 9, 14, 8, 7}};
+      static constexpr Attribute SolidRing = 17;
   };
 
   enum class FlowMode
@@ -226,52 +221,52 @@ namespace
 
   struct RCR
   {
-    Real Rp = 1.0e8;
-    Real C = 1.0e-11;
-    Real Rd = 1.0e9;
-    Real pd = 500.0;
-    Real pc = 10500.0;
-    Real pout = 11000.0;
-    Real qd = 0.0;
+      Real Rp = 1.0e8;
+      Real C = 1.0e-11;
+      Real Rd = 1.0e9;
+      Real pd = 500.0;
+      Real pc = 10500.0;
+      Real pout = 11000.0;
+      Real qd = 0.0;
   };
 
   struct CarreauYasuda
   {
-    Real mu0 = 0.0186058;
-    Real muInf = 0.0042963;
-    Real lambda = 0.2435;
-    Real n = 0.2079;
-    Real yasuda = 1.5410;
-    Real gammaRegularization = 1.0e-3;
+      Real mu0 = 0.0186058;
+      Real muInf = 0.0042963;
+      Real lambda = 0.2435;
+      Real n = 0.2079;
+      Real yasuda = 1.5410;
+      Real gammaRegularization = 1.0e-3;
   };
 
   struct Config
   {
-    std::string meshPath = "malla_merge.mesh";
-    std::string xdmfBasename = "CoronaryArtery_FSI";
-    std::string csvPath = "CoronaryArtery_FSI.csv";
-    Real meshScale = 1.0e-3;
+      std::string meshPath = "malla_merge.mesh";
+      std::string xdmfBasename = "CoronaryArtery_FSI";
+      std::string csvPath = "CoronaryArtery_FSI.csv";
+      Real meshScale = 1.0e-3;
 
-    Real dt = 1.0e-3;
-    size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
+      Real dt = 1.0e-3;
+      size_t nsteps = 3 * static_cast<int>(0.85 / 1.0e-3);
 
-    Real fluidDensity = 1060.0;
-    Real pressurePenalty = 1.0e-12;
-    Real inletBackflowStabilization = 1.0;
-    Real outletBackflowStabilization = 1.0;
-    FlowMode flowMode = FlowMode::Oseen;
-    CarreauYasuda viscosity;
+      Real fluidDensity = 1060.0;
+      Real pressurePenalty = 1.0e-12;
+      Real inletBackflowStabilization = 1.0;
+      Real outletBackflowStabilization = 1.0;
+      FlowMode flowMode = FlowMode::Oseen;
+      CarreauYasuda viscosity;
 
-    Real solidDensity = 1060.0;
-    Real solidYoungModulus = 5.0e4;
-    Real solidPoissonRatio = 0.3;
-    Real newmarkBeta = 0.25;
-    Real newmarkGamma = 0.5;
+      Real solidDensity = 1060.0;
+      Real solidYoungModulus = 5.0e4;
+      Real solidPoissonRatio = 0.3;
+      Real newmarkBeta = 0.25;
+      Real newmarkGamma = 0.5;
 
-    Real ringStiffness = 8.0e4;
-    Real ringDamping = 0;
-    Real inactiveRegularization = 1.0e-10;
-    PetscBool moveMeshDuringNewton = PETSC_FALSE;
+      Real ringStiffness = 8.0e4;
+      Real ringDamping = 0;
+      Real inactiveRegularization = 1.0e-10;
+      PetscBool moveMeshDuringNewton = PETSC_FALSE;
   };
 
   static Real periodic_activation(Real t)
@@ -398,8 +393,7 @@ namespace
     in.proximalLength = 0.4;
     in.distalRadius = 0.0007;
     in.distalLength = 0.004;
-    in.windkesselRheology =
-      Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
+    in.windkesselRheology = Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Quemada;
 
     in.Kat = 9.0e-6;
     in.Kp = 5.0e-10;
@@ -437,10 +431,10 @@ namespace
   static void initializeModel(Model& model, const Model::Input& in)
   {
     model.setMaxIterations(200)
-         .setAbsoluteTolerance(1.0e-8)
-         .setRelativeTolerance(1.0e-8)
-         .setStepTolerance(1.0e-10)
-         .setDampingFactor(1.0);
+      .setAbsoluteTolerance(1.0e-8)
+      .setRelativeTolerance(1.0e-8)
+      .setStepTolerance(1.0e-10)
+      .setDampingFactor(1.0);
 
     Model::State s0;
     s0.t = 0.0;
@@ -522,8 +516,7 @@ namespace
 
   template <class MeshT>
   static void saveReferenceVertices(
-      const MeshT& mesh,
-      std::vector<Math::SpatialPoint>& vertices)
+    const MeshT& mesh, std::vector<Math::SpatialPoint>& vertices)
   {
     vertices.resize(mesh.getVertexCount());
     for (auto it = mesh.getVertex(); it; ++it)
@@ -531,11 +524,9 @@ namespace
   }
 
   template <class MeshT, class FESType, class GridFunctionType>
-  static void moveMeshWithVertexDisplacement(
-      MeshT& mesh,
-      const std::vector<Math::SpatialPoint>& referenceVertices,
-      const FESType& displacementFES,
-      const GridFunctionType& displacement)
+  static void moveMeshWithVertexDisplacement(MeshT& mesh,
+    const std::vector<Math::SpatialPoint>& referenceVertices,
+    const FESType& displacementFES, const GridFunctionType& displacement)
   {
     assert(mesh.getVertexCount() == referenceVertices.size());
     const size_t dim = mesh.getSpaceDimension();
@@ -555,9 +546,8 @@ namespace
 
   static std::string lower(std::string s)
   {
-    std::transform(
-        s.begin(), s.end(), s.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    std::transform(s.begin(), s.end(), s.begin(),
+      [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     return s;
   }
 
@@ -565,23 +555,15 @@ namespace
   {
     char meshPath[PETSC_MAX_PATH_LEN] = {};
     PetscBool meshPathSet = PETSC_FALSE;
-    PetscOptionsGetString(
-        PETSC_NULLPTR, PETSC_NULLPTR,
-        "-coronary_fsi_mesh",
-        meshPath,
-        sizeof(meshPath),
-        &meshPathSet);
+    PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_fsi_mesh", meshPath,
+      sizeof(meshPath), &meshPathSet);
     if (meshPathSet)
       cfg.meshPath = meshPath;
 
     char flowMode[32] = {};
     PetscBool flowModeSet = PETSC_FALSE;
-    PetscOptionsGetString(
-        PETSC_NULLPTR, PETSC_NULLPTR,
-        "-coronary_flow_mode",
-        flowMode,
-        sizeof(flowMode),
-        &flowModeSet);
+    PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_flow_mode", flowMode,
+      sizeof(flowMode), &flowModeSet);
     if (flowModeSet)
     {
       const std::string mode = lower(flowMode);
@@ -590,7 +572,8 @@ namespace
       else if (mode == "oseen")
         cfg.flowMode = FlowMode::Oseen;
       else
-        throw std::runtime_error("Invalid -coronary_flow_mode. Expected newton or oseen.");
+        throw std::runtime_error(
+          "Invalid -coronary_flow_mode. Expected newton or oseen.");
     }
 
     PetscReal dt = cfg.dt;
@@ -601,15 +584,13 @@ namespace
 
     PetscInt nsteps = static_cast<PetscInt>(cfg.nsteps);
     PetscBool nstepsSet = PETSC_FALSE;
-    PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_nsteps", &nsteps, &nstepsSet);
+    PetscOptionsGetInt(
+      PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_nsteps", &nsteps, &nstepsSet);
     if (nstepsSet)
       cfg.nsteps = static_cast<size_t>(std::max<PetscInt>(0, nsteps));
 
-    PetscOptionsGetBool(
-        PETSC_NULLPTR, PETSC_NULLPTR,
-        "-coronary_fsi_move_mesh_during_newton",
-        &cfg.moveMeshDuringNewton,
-        PETSC_NULLPTR);
+    PetscOptionsGetBool(PETSC_NULLPTR, PETSC_NULLPTR,
+      "-coronary_fsi_move_mesh_during_newton", &cfg.moveMeshDuringNewton, PETSC_NULLPTR);
   }
 }
 
@@ -624,7 +605,8 @@ int main(int argc, char** argv)
   const bool isRoot = comm.rank() == RootRank;
 
   if (isRoot)
-    std::cout << "Starting CoronaryArtery_FSI_PETSc_MPI on " << comm.size() << " processes." << std::endl;
+    std::cout << "Starting CoronaryArtery_FSI_PETSc_MPI on " << comm.size()
+              << " processes." << std::endl;
 
   try
   {
@@ -648,14 +630,12 @@ int main(int argc, char** argv)
       endTimer(PETSC_COMM_WORLD, isRoot, "saveReferenceVertices", t0);
     }
 
-    using VelocityFES =
-      H1<2, Math::SpatialVector<Real>, MeshType>;
-    using PressureFES =
-      H1<1, Real, MeshType>;
-    using DisplacementFES =
-      H1<1, Math::SpatialVector<Real>, MeshType>;
+    using VelocityFES = H1<2, Math::SpatialVector<Real>, MeshType>;
+    using PressureFES = H1<1, Real, MeshType>;
+    using DisplacementFES = H1<1, Math::SpatialVector<Real>, MeshType>;
 
-    const double fesStart = beginTimer(PETSC_COMM_WORLD, isRoot, "construct finite element spaces");
+    const double fesStart =
+      beginTimer(PETSC_COMM_WORLD, isRoot, "construct finite element spaces");
     VelocityFES uh(std::integral_constant<size_t, 2>{}, mesh, dim);
     PressureFES ph(std::integral_constant<size_t, 1>{}, mesh);
     DisplacementFES dh(std::integral_constant<size_t, 1>{}, mesh, dim);
@@ -667,8 +647,7 @@ int main(int argc, char** argv)
       std::cout << "[dofs] pressure ph = " << ph.getSize() << std::endl;
       std::cout << "[dofs] displacement dh = " << dh.getSize() << std::endl;
       std::cout << "[dofs] monolithic total = "
-                << (uh.getSize() + ph.getSize() + dh.getSize())
-                << std::endl;
+                << (uh.getSize() + ph.getSize() + dh.getSize()) << std::endl;
     }
 
     PETSc::Variational::TrialFunction du(uh);
@@ -700,8 +679,7 @@ int main(int argc, char** argv)
     PETSc::Variational::GridFunction meshVelocity(dh);
     PETSc::Variational::GridFunction one(ph);
 
-    auto zero = VectorFunction(dim, [&](const Point&)
-    {
+    auto zero = VectorFunction(dim, [&](const Point&) {
       Math::SpatialVector<Real> value(dim);
       value.setZero();
       return value;
@@ -710,22 +688,22 @@ int main(int argc, char** argv)
     {
       const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "initialize grid functions");
 
-    uState = zero;
-    pState = 0.0;
-    etaState = zero;
-    dState = zero;
-    uOld = zero;
-    pOld = 0.0;
-    etaOld = zero;
-    dOld = zero;
-    solidVelocity = zero;
-    solidAcceleration = zero;
-    solidVelocityOld = zero;
-    solidAccelerationOld = zero;
-    dPred = zero;
-    vPred = zero;
-    meshVelocity = zero;
-    one = 1.0;
+      uState = zero;
+      pState = 0.0;
+      etaState = zero;
+      dState = zero;
+      uOld = zero;
+      pOld = 0.0;
+      etaOld = zero;
+      dOld = zero;
+      solidVelocity = zero;
+      solidAcceleration = zero;
+      solidVelocityOld = zero;
+      solidAccelerationOld = zero;
+      dPred = zero;
+      vPred = zero;
+      meshVelocity = zero;
+      one = 1.0;
 
       endTimer(PETSC_COMM_WORLD, isRoot, "initialize grid functions", t0);
     }
@@ -742,7 +720,8 @@ int main(int argc, char** argv)
     size_t nc = mesh.getCellCount();
     if (isRoot)
     {
-      std::cout << "Mesh loaded with " << nv << " vertices and " << nc << " cells." << std::endl;
+      std::cout << "Mesh loaded with " << nv << " vertices and " << nc << " cells."
+                << std::endl;
     }
 
     IO::XDMF xdmf(comm, cfg.xdmfBasename, RootRank);
@@ -778,18 +757,22 @@ int main(int argc, char** argv)
       outletPressureValue[outlet] = wk.at(outlet).pout;
 
     auto pin = RealFunction([&](const Point&) { return pinValue; });
-    auto pout0 = RealFunction([&](const Point&) { return outletPressureValue[Boundary::Outlets[0]]; });
-    auto pout1 = RealFunction([&](const Point&) { return outletPressureValue[Boundary::Outlets[1]]; });
-    auto pout2 = RealFunction([&](const Point&) { return outletPressureValue[Boundary::Outlets[2]]; });
-    auto pout3 = RealFunction([&](const Point&) { return outletPressureValue[Boundary::Outlets[3]]; });
-    auto pout4 = RealFunction([&](const Point&) { return outletPressureValue[Boundary::Outlets[4]]; });
-    auto pout5 = RealFunction([&](const Point&) { return outletPressureValue[Boundary::Outlets[5]]; });
+    auto pout0 = RealFunction(
+      [&](const Point&) { return outletPressureValue[Boundary::Outlets[0]]; });
+    auto pout1 = RealFunction(
+      [&](const Point&) { return outletPressureValue[Boundary::Outlets[1]]; });
+    auto pout2 = RealFunction(
+      [&](const Point&) { return outletPressureValue[Boundary::Outlets[2]]; });
+    auto pout3 = RealFunction(
+      [&](const Point&) { return outletPressureValue[Boundary::Outlets[3]]; });
+    auto pout4 = RealFunction(
+      [&](const Point&) { return outletPressureValue[Boundary::Outlets[4]]; });
+    auto pout5 = RealFunction(
+      [&](const Point&) { return outletPressureValue[Boundary::Outlets[5]]; });
 
-    const Real solidLambda =
-      cfg.solidYoungModulus * cfg.solidPoissonRatio
-      / ((1.0 + cfg.solidPoissonRatio) * (1.0 - 2.0 * cfg.solidPoissonRatio));
-    const Real solidMu =
-      cfg.solidYoungModulus / (2.0 * (1.0 + cfg.solidPoissonRatio));
+    const Real solidLambda = cfg.solidYoungModulus * cfg.solidPoissonRatio /
+      ((1.0 + cfg.solidPoissonRatio) * (1.0 - 2.0 * cfg.solidPoissonRatio));
+    const Real solidMu = cfg.solidYoungModulus / (2.0 * (1.0 + cfg.solidPoissonRatio));
     Solid::NeoHookean law(solidLambda, solidMu);
     Solid::InternalVirtualWorkTangent solidTangent(law, deta, z, dState);
     Solid::InternalVirtualWorkResidual solidInternal(law, z, dState);
@@ -837,198 +820,188 @@ int main(int argc, char** argv)
     const auto& cy = cfg.viscosity;
     const Real gammaReg = cy.gammaRegularization;
     const Real deltaMu = cy.mu0 - cy.muInf;
-    const auto shear =
-      Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));
-    const auto shearLag =
-      Sqrt(gammaReg * gammaReg + 2.0 * Dot(symLag, symLag));
-    const auto carreauBase =
-      1.0 + Pow(cy.lambda * shear, cy.yasuda);
-    const auto carreauBaseLag =
-      1.0 + Pow(cy.lambda * shearLag, cy.yasuda);
-    const auto mu =
-      cy.muInf + deltaMu * Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
-    const auto muLag =
-      cy.muInf + deltaMu * Pow(carreauBaseLag, (cy.n - 1.0) / cy.yasuda);
-    const auto dshear =
-      2.0 * Dot(symU, symDU) / shear;
-    const auto dmu =
-      deltaMu
-      * (cy.n - 1.0)
-      * Pow(carreauBase, (cy.n - 1.0 - cy.yasuda) / cy.yasuda)
-      * std::pow(cy.lambda, cy.yasuda)
-      * Pow(shear, cy.yasuda - 1.0)
-      * dshear;
+    const auto shear = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));
+    const auto shearLag = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symLag, symLag));
+    const auto carreauBase = 1.0 + Pow(cy.lambda * shear, cy.yasuda);
+    const auto carreauBaseLag = 1.0 + Pow(cy.lambda * shearLag, cy.yasuda);
+    const auto mu = cy.muInf + deltaMu * Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
+    const auto muLag = cy.muInf + deltaMu * Pow(carreauBaseLag, (cy.n - 1.0) / cy.yasuda);
+    const auto dshear = 2.0 * Dot(symU, symDU) / shear;
+    const auto dmu = deltaMu * (cy.n - 1.0) *
+      Pow(carreauBase, (cy.n - 1.0 - cy.yasuda) / cy.yasuda) *
+      std::pow(cy.lambda, cy.yasuda) * Pow(shear, cy.yasuda - 1.0) * dshear;
 
-    const auto solidVelocityState =
-      vPred + solidVelocityCoeff * (dState - dPred);
+    const auto solidVelocityState = vPred + solidVelocityCoeff * (dState - dPred);
 
     Problem fsi(du, dp, deta, v, q, z);
 
     {
-      const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "build variational FSI form expression");
+      const double t0 =
+        beginTimer(PETSC_COMM_WORLD, isRoot, "build variational FSI form expression");
 
-    if (cfg.flowMode == FlowMode::Newton)
-    {
-      fsi =
+      if (cfg.flowMode == FlowMode::Newton)
+      {
+        fsi =
           /* Newton ALE fluid tangent. */
-            (cfg.fluidDensity / dt) * Integral(du, v).over(Volume::Fluid)
-          + cfg.fluidDensity * Integral(Dot(convTangentVelocity, v)).over(Volume::Fluid)
-          + cfg.fluidDensity * Integral(Dot(convTangentTransportU, v)).over(Volume::Fluid)
-          - (cfg.fluidDensity / dt) * Integral(Dot(convTangentTransportEta, v)).over(Volume::Fluid)
-          + 0.5 * cfg.fluidDensity * Integral(divTransportState * Dot(du, v)).over(Volume::Fluid)
-          + 0.5 * cfg.fluidDensity * Integral(Dot(Div(du) * uState, v)).over(Volume::Fluid)
-          - (0.5 * cfg.fluidDensity / dt) * Integral(Dot(Div(deta) * uState, v)).over(Volume::Fluid)
-          + 2.0 * Integral(mu * symDU, symV).over(Volume::Fluid)
-          + 2.0 * Integral(dmu * symU, symV).over(Volume::Fluid)
-          - Integral(dp, Div(v)).over(Volume::Fluid)
-          + Integral(Div(du), q).over(Volume::Fluid)
-          + cfg.pressurePenalty * Integral(dp, q).over(Volume::Fluid)
-          + BoundaryIntegral(inletBackflow * Dot(du, v)).over(Boundary::Inlet)
-          + BoundaryIntegral(outletBackflow * Dot(du, v)).over(
-              Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
+          (cfg.fluidDensity / dt) * Integral(du, v).over(Volume::Fluid) +
+          cfg.fluidDensity * Integral(Dot(convTangentVelocity, v)).over(Volume::Fluid) +
+          cfg.fluidDensity * Integral(Dot(convTangentTransportU, v)).over(Volume::Fluid) -
+          (cfg.fluidDensity / dt) *
+            Integral(Dot(convTangentTransportEta, v)).over(Volume::Fluid) +
+          0.5 * cfg.fluidDensity *
+            Integral(divTransportState * Dot(du, v)).over(Volume::Fluid) +
+          0.5 * cfg.fluidDensity *
+            Integral(Dot(Div(du) * uState, v)).over(Volume::Fluid) -
+          (0.5 * cfg.fluidDensity / dt) *
+            Integral(Dot(Div(deta) * uState, v)).over(Volume::Fluid) +
+          2.0 * Integral(mu * symDU, symV).over(Volume::Fluid) +
+          2.0 * Integral(dmu * symU, symV).over(Volume::Fluid) -
+          Integral(dp, Div(v)).over(Volume::Fluid) +
+          Integral(Div(du), q).over(Volume::Fluid) +
+          cfg.pressurePenalty * Integral(dp, q).over(Volume::Fluid) +
+          BoundaryIntegral(inletBackflow * Dot(du, v)).over(Boundary::Inlet) +
+          BoundaryIntegral(outletBackflow * Dot(du, v))
+            .over(Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
               Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5])
 
           /* Newton ALE fluid residual. */
-          + (cfg.fluidDensity / dt) * Integral(uState - uOld, v).over(Volume::Fluid)
-          + cfg.fluidDensity * Integral(Dot(convState, v)).over(Volume::Fluid)
-          + 0.5 * cfg.fluidDensity * Integral(Dot(divTransportState * uState, v)).over(Volume::Fluid)
-          + 2.0 * Integral(mu * symU, symV).over(Volume::Fluid)
-          - Integral(pState, Div(v)).over(Volume::Fluid)
-          + Integral(Div(uState), q).over(Volume::Fluid)
-          + cfg.pressurePenalty * Integral(pState, q).over(Volume::Fluid)
-          + BoundaryIntegral(pin * Dot(v, normal)).over(Boundary::Inlet)
-          + BoundaryIntegral(pout0 * Dot(v, normal)).over(Boundary::Outlets[0])
-          + BoundaryIntegral(pout1 * Dot(v, normal)).over(Boundary::Outlets[1])
-          + BoundaryIntegral(pout2 * Dot(v, normal)).over(Boundary::Outlets[2])
-          + BoundaryIntegral(pout3 * Dot(v, normal)).over(Boundary::Outlets[3])
-          + BoundaryIntegral(pout4 * Dot(v, normal)).over(Boundary::Outlets[4])
-          + BoundaryIntegral(pout5 * Dot(v, normal)).over(Boundary::Outlets[5])
-          + BoundaryIntegral(inletBackflow * Dot(uState, v)).over(Boundary::Inlet)
-          + BoundaryIntegral(outletBackflow * Dot(uState, v)).over(
-              Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
+          + (cfg.fluidDensity / dt) * Integral(uState - uOld, v).over(Volume::Fluid) +
+          cfg.fluidDensity * Integral(Dot(convState, v)).over(Volume::Fluid) +
+          0.5 * cfg.fluidDensity *
+            Integral(Dot(divTransportState * uState, v)).over(Volume::Fluid) +
+          2.0 * Integral(mu * symU, symV).over(Volume::Fluid) -
+          Integral(pState, Div(v)).over(Volume::Fluid) +
+          Integral(Div(uState), q).over(Volume::Fluid) +
+          cfg.pressurePenalty * Integral(pState, q).over(Volume::Fluid) +
+          BoundaryIntegral(pin * Dot(v, normal)).over(Boundary::Inlet) +
+          BoundaryIntegral(pout0 * Dot(v, normal)).over(Boundary::Outlets[0]) +
+          BoundaryIntegral(pout1 * Dot(v, normal)).over(Boundary::Outlets[1]) +
+          BoundaryIntegral(pout2 * Dot(v, normal)).over(Boundary::Outlets[2]) +
+          BoundaryIntegral(pout3 * Dot(v, normal)).over(Boundary::Outlets[3]) +
+          BoundaryIntegral(pout4 * Dot(v, normal)).over(Boundary::Outlets[4]) +
+          BoundaryIntegral(pout5 * Dot(v, normal)).over(Boundary::Outlets[5]) +
+          BoundaryIntegral(inletBackflow * Dot(uState, v)).over(Boundary::Inlet) +
+          BoundaryIntegral(outletBackflow * Dot(uState, v))
+            .over(Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
               Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5])
 
           /* Harmonic ALE displacement increment in the fluid. */
-          + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid)
-          + Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
+          + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid) +
+          Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
 
           /* Nonlinear Newmark solid block over the solid cells. */
-          + solidMass * Integral(deta, z).over(Volume::Solid)
-          + solidTangent.over(Volume::Solid)
-          + solidMass * Integral(dState, z).over(Volume::Solid)
-          - solidMass * Integral(dPred, z).over(Volume::Solid)
-          + solidInternal.over(Volume::Solid)
+          + solidMass * Integral(deta, z).over(Volume::Solid) +
+          solidTangent.over(Volume::Solid) +
+          solidMass * Integral(dState, z).over(Volume::Solid) -
+          solidMass * Integral(dPred, z).over(Volume::Solid) +
+          solidInternal.over(Volume::Solid)
 
           /* Coronary solid ring support from CoronaryArterySolid_PETSc_MPI.cpp. */
           + (cfg.ringStiffness + ringVelocityCoeff) *
-            BoundaryIntegral(deta, z).over(Boundary::SolidRing)
-          + (cfg.ringStiffness + ringVelocityCoeff) *
-            BoundaryIntegral(dState, z).over(Boundary::SolidRing)
-          - ringVelocityCoeff *
-            BoundaryIntegral(dPred, z).over(Boundary::SolidRing)
-          + cfg.ringDamping *
-            BoundaryIntegral(vPred, z).over(Boundary::SolidRing)
+            BoundaryIntegral(deta, z).over(Boundary::SolidRing) +
+          (cfg.ringStiffness + ringVelocityCoeff) *
+            BoundaryIntegral(dState, z).over(Boundary::SolidRing) -
+          ringVelocityCoeff * BoundaryIntegral(dPred, z).over(Boundary::SolidRing) +
+          cfg.ringDamping * BoundaryIntegral(vPred, z).over(Boundary::SolidRing)
 
           /* Inactive regularization for globally defined fields. */
-          + cfg.inactiveRegularization * Integral(du, v).over(Volume::Solid)
-          + cfg.inactiveRegularization * Integral(uState, v).over(Volume::Solid)
-          + cfg.inactiveRegularization * Integral(dp, q).over(Volume::Solid)
-          + cfg.inactiveRegularization * Integral(pState, q).over(Volume::Solid)
+          + cfg.inactiveRegularization * Integral(du, v).over(Volume::Solid) +
+          cfg.inactiveRegularization * Integral(uState, v).over(Volume::Solid) +
+          cfg.inactiveRegularization * Integral(dp, q).over(Volume::Solid) +
+          cfg.inactiveRegularization * Integral(pState, q).over(Volume::Solid)
 
           /* Essential and FSI kinematic constraints. */
-          + DirichletBC(deta, -etaState).on(
-              Boundary::Inlet,
-              Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
-              Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5])
-          + DirichletBC(
-              du,
-              solidVelocityCoeff * deta,
-              solidVelocityState - uState).on(Boundary::FSI);
-    }
-    else
-    {
-const Real fsiPenalty = 1e2; // tune
+          + DirichletBC(deta, -etaState)
+              .on(Boundary::Inlet, Boundary::Outlets[0], Boundary::Outlets[1],
+                Boundary::Outlets[2], Boundary::Outlets[3], Boundary::Outlets[4],
+                Boundary::Outlets[5]) +
+          DirichletBC(du, solidVelocityCoeff * deta, solidVelocityState - uState)
+            .on(Boundary::FSI);
+      }
+      else
+      {
+        const Real fsiPenalty = 1e2; // tune
 
-      fsi =
+        fsi =
           /* Oseen ALE fluid tangent with lagged transport and viscosity. */
-            (cfg.fluidDensity / dt) * Integral(du, v).over(Volume::Fluid)
-          + cfg.fluidDensity * Integral(Dot(oseenConvTangent, v)).over(Volume::Fluid)
-          + 0.5 * cfg.fluidDensity * Integral(divTransportLag * Dot(du, v)).over(Volume::Fluid)
-          + 2.0 * Integral(muLag * symDU, symV).over(Volume::Fluid)
-          - Integral(dp, Div(v)).over(Volume::Fluid)
-          + Integral(Div(du), q).over(Volume::Fluid)
-          + cfg.pressurePenalty * Integral(dp, q).over(Volume::Fluid)
-          + BoundaryIntegral(inletBackflow * Dot(du, v)).over(Boundary::Inlet)
-          + BoundaryIntegral(outletBackflow * Dot(du, v)).over(
-              Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
+          (cfg.fluidDensity / dt) * Integral(du, v).over(Volume::Fluid) +
+          cfg.fluidDensity * Integral(Dot(oseenConvTangent, v)).over(Volume::Fluid) +
+          0.5 * cfg.fluidDensity *
+            Integral(divTransportLag * Dot(du, v)).over(Volume::Fluid) +
+          2.0 * Integral(muLag * symDU, symV).over(Volume::Fluid) -
+          Integral(dp, Div(v)).over(Volume::Fluid) +
+          Integral(Div(du), q).over(Volume::Fluid) +
+          cfg.pressurePenalty * Integral(dp, q).over(Volume::Fluid) +
+          BoundaryIntegral(inletBackflow * Dot(du, v)).over(Boundary::Inlet) +
+          BoundaryIntegral(outletBackflow * Dot(du, v))
+            .over(Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
               Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5])
 
           /* Oseen residual, still embedded in global SNES for the solid. */
-          + (cfg.fluidDensity / dt) * Integral(uState - uOld, v).over(Volume::Fluid)
-          + cfg.fluidDensity * Integral(Dot(oseenConvState, v)).over(Volume::Fluid)
-          + 0.5 * cfg.fluidDensity * Integral(Dot(divTransportLag * uState, v)).over(Volume::Fluid)
-          + 2.0 * Integral(muLag * symU, symV).over(Volume::Fluid)
-          - Integral(pState, Div(v)).over(Volume::Fluid)
-          + Integral(Div(uState), q).over(Volume::Fluid)
-          + cfg.pressurePenalty * Integral(pState, q).over(Volume::Fluid)
-          + BoundaryIntegral(pin * Dot(v, normal)).over(Boundary::Inlet)
-          + BoundaryIntegral(pout0 * Dot(v, normal)).over(Boundary::Outlets[0])
-          + BoundaryIntegral(pout1 * Dot(v, normal)).over(Boundary::Outlets[1])
-          + BoundaryIntegral(pout2 * Dot(v, normal)).over(Boundary::Outlets[2])
-          + BoundaryIntegral(pout3 * Dot(v, normal)).over(Boundary::Outlets[3])
-          + BoundaryIntegral(pout4 * Dot(v, normal)).over(Boundary::Outlets[4])
-          + BoundaryIntegral(pout5 * Dot(v, normal)).over(Boundary::Outlets[5])
+          + (cfg.fluidDensity / dt) * Integral(uState - uOld, v).over(Volume::Fluid) +
+          cfg.fluidDensity * Integral(Dot(oseenConvState, v)).over(Volume::Fluid) +
+          0.5 * cfg.fluidDensity *
+            Integral(Dot(divTransportLag * uState, v)).over(Volume::Fluid) +
+          2.0 * Integral(muLag * symU, symV).over(Volume::Fluid) -
+          Integral(pState, Div(v)).over(Volume::Fluid) +
+          Integral(Div(uState), q).over(Volume::Fluid) +
+          cfg.pressurePenalty * Integral(pState, q).over(Volume::Fluid) +
+          BoundaryIntegral(pin * Dot(v, normal)).over(Boundary::Inlet) +
+          BoundaryIntegral(pout0 * Dot(v, normal)).over(Boundary::Outlets[0]) +
+          BoundaryIntegral(pout1 * Dot(v, normal)).over(Boundary::Outlets[1]) +
+          BoundaryIntegral(pout2 * Dot(v, normal)).over(Boundary::Outlets[2]) +
+          BoundaryIntegral(pout3 * Dot(v, normal)).over(Boundary::Outlets[3]) +
+          BoundaryIntegral(pout4 * Dot(v, normal)).over(Boundary::Outlets[4]) +
+          BoundaryIntegral(pout5 * Dot(v, normal)).over(Boundary::Outlets[5])
 
           /* Harmonic ALE displacement increment in the fluid. */
-          + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid)
-          + Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
+          + Integral(Jacobian(deta), Jacobian(z)).over(Volume::Fluid) +
+          Integral(Jacobian(etaState), Jacobian(z)).over(Volume::Fluid)
 
           /* Nonlinear Newmark solid block over the solid cells. */
-          + solidMass * Integral(deta, z).over(Volume::Solid)
-          + solidTangent.over(Volume::Solid)
-          + solidMass * Integral(dState, z).over(Volume::Solid)
-          - solidMass * Integral(dPred, z).over(Volume::Solid)
-          + solidInternal.over(Volume::Solid)
+          + solidMass * Integral(deta, z).over(Volume::Solid) +
+          solidTangent.over(Volume::Solid) +
+          solidMass * Integral(dState, z).over(Volume::Solid) -
+          solidMass * Integral(dPred, z).over(Volume::Solid) +
+          solidInternal.over(Volume::Solid)
 
           /* Coronary solid ring support from CoronaryArterySolid_PETSc_MPI.cpp. */
           + (cfg.ringStiffness + ringVelocityCoeff) *
-            BoundaryIntegral(deta, z).over(Boundary::SolidRing)
-          + (cfg.ringStiffness + ringVelocityCoeff) *
-            BoundaryIntegral(dState, z).over(Boundary::SolidRing)
-          - ringVelocityCoeff *
-            BoundaryIntegral(dPred, z).over(Boundary::SolidRing)
-          + cfg.ringDamping *
-            BoundaryIntegral(vPred, z).over(Boundary::SolidRing)
+            BoundaryIntegral(deta, z).over(Boundary::SolidRing) +
+          (cfg.ringStiffness + ringVelocityCoeff) *
+            BoundaryIntegral(dState, z).over(Boundary::SolidRing) -
+          ringVelocityCoeff * BoundaryIntegral(dPred, z).over(Boundary::SolidRing) +
+          cfg.ringDamping * BoundaryIntegral(vPred, z).over(Boundary::SolidRing)
 
           /* Inactive regularization for globally defined fields. */
-          + cfg.inactiveRegularization * Integral(du, v).over(Volume::Solid)
-          + cfg.inactiveRegularization * Integral(uState, v).over(Volume::Solid)
-          + cfg.inactiveRegularization * Integral(dp, q).over(Volume::Solid)
-          + cfg.inactiveRegularization * Integral(pState, q).over(Volume::Solid)
+          + cfg.inactiveRegularization * Integral(du, v).over(Volume::Solid) +
+          cfg.inactiveRegularization * Integral(uState, v).over(Volume::Solid) +
+          cfg.inactiveRegularization * Integral(dp, q).over(Volume::Solid) +
+          cfg.inactiveRegularization * Integral(pState, q).over(Volume::Solid)
 
-+ fsiPenalty * BoundaryIntegral(Dot(du, v)).over(Boundary::FSI)
+          + fsiPenalty * BoundaryIntegral(Dot(du, v)).over(Boundary::FSI)
 
-- fsiPenalty * solidVelocityCoeff
-    * BoundaryIntegral(Dot(deta, v)).over(Boundary::FSI)
+          - fsiPenalty * solidVelocityCoeff *
+            BoundaryIntegral(Dot(deta, v)).over(Boundary::FSI)
 
-- fsiPenalty
-    * BoundaryIntegral(Dot(solidVelocityState - uState, v)).over(Boundary::FSI)
+          - fsiPenalty *
+            BoundaryIntegral(Dot(solidVelocityState - uState, v)).over(Boundary::FSI)
 
-- fsiPenalty * solidVelocityCoeff
-    * BoundaryIntegral(Dot(du, z)).over(Boundary::FSI)
+          - fsiPenalty * solidVelocityCoeff *
+            BoundaryIntegral(Dot(du, z)).over(Boundary::FSI)
 
-+ fsiPenalty * solidVelocityCoeff * solidVelocityCoeff
-    * BoundaryIntegral(Dot(deta, z)).over(Boundary::FSI)
+          + fsiPenalty * solidVelocityCoeff * solidVelocityCoeff *
+            BoundaryIntegral(Dot(deta, z)).over(Boundary::FSI)
 
-+ fsiPenalty * solidVelocityCoeff
-    * BoundaryIntegral(Dot(solidVelocityState - uState, z)).over(Boundary::FSI)
+          + fsiPenalty * solidVelocityCoeff *
+            BoundaryIntegral(Dot(solidVelocityState - uState, z)).over(Boundary::FSI)
 
           /* Essential and FSI kinematic constraints. */
-          + DirichletBC(deta, -etaState).on(
-              Boundary::Inlet,
-              Boundary::Outlets[0], Boundary::Outlets[1], Boundary::Outlets[2],
-              Boundary::Outlets[3], Boundary::Outlets[4], Boundary::Outlets[5]);
-    }
+          + DirichletBC(deta, -etaState)
+              .on(Boundary::Inlet, Boundary::Outlets[0], Boundary::Outlets[1],
+                Boundary::Outlets[2], Boundary::Outlets[3], Boundary::Outlets[4],
+                Boundary::Outlets[5]);
+      }
 
       endTimer(PETSC_COMM_WORLD, isRoot, "build variational FSI form expression", t0);
     }
@@ -1042,13 +1015,8 @@ const Real fsiPenalty = 1e2; // tune
       endTimer(PETSC_COMM_WORLD, isRoot, "initial fsi.assemble", t0);
 
       auto& system = fsi.getLinearSystem();
-      printLinearSystemInfo(
-          PETSC_COMM_WORLD,
-          isRoot,
-          "after initial fsi.assemble",
-          system.getOperator(),
-          system.getSolution(),
-          system.getVector());
+      printLinearSystemInfo(PETSC_COMM_WORLD, isRoot, "after initial fsi.assemble",
+        system.getOperator(), system.getSolution(), system.getVector());
     }
 
     if (isRoot)
@@ -1060,18 +1028,13 @@ const Real fsiPenalty = 1e2; // tune
     Solver::SNES snes(ksp);
     snes.setTolerances(1.0e-10, 1.0e-8, 1.0e-10, 50, 10000);
     endTimer(
-        PETSC_COMM_WORLD,
-        isRoot,
-        "construct/configure KSP and SNES",
-        solverConfigStart);
+      PETSC_COMM_WORLD, isRoot, "construct/configure KSP and SNES", solverConfigStart);
 
-    auto moveMeshToCurrentDisplacement = [&]()
-    {
+    auto moveMeshToCurrentDisplacement = [&]() {
       moveMeshWithVertexDisplacement(mesh, referenceVertices, dh, dState);
     };
 
-    snes.setStateUpdate([&](const PETSc::Math::Vector& state)
-    {
+    snes.setStateUpdate([&](const PETSc::Math::Vector& state) {
       const size_t uOffset = 0;
       const size_t pOffset = uOffset + uh.getSize();
       const size_t etaOffset = pOffset + ph.getSize();
@@ -1097,8 +1060,7 @@ const Real fsiPenalty = 1e2; // tune
         moveMeshToCurrentDisplacement();
     });
 
-    using FluxLinearForm =
-      LinearForm<PressureFES, ::Vec>;
+    using FluxLinearForm = LinearForm<PressureFES, ::Vec>;
     PETSc::Variational::TestFunction qFlux(ph);
     FluxLinearForm flux(qFlux);
 
@@ -1107,8 +1069,7 @@ const Real fsiPenalty = 1e2; // tune
       if (isRoot)
         std::cout << "Starting step " << step << " / " << cfg.nsteps << std::endl;
 
-      const double modelStepStart =
-        beginTimer(PETSC_COMM_WORLD, isRoot, "0D model.step");
+      const double modelStepStart = beginTimer(PETSC_COMM_WORLD, isRoot, "0D model.step");
       const auto rep = model.step(dt);
       endTimer(PETSC_COMM_WORLD, isRoot, "0D model.step", modelStepStart);
       if (!rep.converged)
@@ -1147,51 +1108,34 @@ const Real fsiPenalty = 1e2; // tune
       meshVelocity = etaState;
       meshVelocity *= 1.0 / dt;
       moveMeshToCurrentDisplacement();
-      endTimer(
-          PETSC_COMM_WORLD,
-          isRoot,
-          "Newmark predictor/state reset",
-          predictorStart);
+      endTimer(PETSC_COMM_WORLD, isRoot, "Newmark predictor/state reset", predictorStart);
 
       if (isRoot)
       {
-        Alert::Info()
-          << "Coronary monolithic ALE FSI step " << step
-          << " / " << cfg.nsteps
-          << "  flow="
-          << (cfg.flowMode == FlowMode::Newton ? "newton" : "oseen")
-          << Alert::Raise;
+        Alert::Info() << "Coronary monolithic ALE FSI step " << step << " / "
+                      << cfg.nsteps << "  flow="
+                      << (cfg.flowMode == FlowMode::Newton ? "newton" : "oseen")
+                      << Alert::Raise;
       }
 
       {
         auto& system = fsi.getLinearSystem();
-        printLinearSystemInfo(
-            PETSC_COMM_WORLD,
-            isRoot,
-            "before snes.solve",
-            system.getOperator(),
-            system.getSolution(),
-            system.getVector());
+        printLinearSystemInfo(PETSC_COMM_WORLD, isRoot, "before snes.solve",
+          system.getOperator(), system.getSolution(), system.getVector());
 
         const double t0 = beginTimer(PETSC_COMM_WORLD, isRoot, "snes.solve");
         snes.solve();
         endTimer(PETSC_COMM_WORLD, isRoot, "snes.solve", t0);
 
-        printLinearSystemInfo(
-            PETSC_COMM_WORLD,
-            isRoot,
-            "after snes.solve",
-            system.getOperator(),
-            system.getSolution(),
-            system.getVector());
+        printLinearSystemInfo(PETSC_COMM_WORLD, isRoot, "after snes.solve",
+          system.getOperator(), system.getSolution(), system.getVector());
       }
 
       if (!snes.converged())
       {
         if (isRoot)
-          std::cerr << "SNES failed at step " << step
-                    << " after " << snes.getIterationNumber()
-                    << " iterations.\n";
+          std::cerr << "SNES failed at step " << step << " after "
+                    << snes.getIterationNumber() << " iterations.\n";
         break;
       }
 
@@ -1215,14 +1159,12 @@ const Real fsiPenalty = 1e2; // tune
       }
       endTimer(PETSC_COMM_WORLD, isRoot, "flux assembly/evaluation", fluxStart);
 
-      const double rcrStart =
-        beginTimer(PETSC_COMM_WORLD, isRoot, "RCR update");
+      const double rcrStart = beginTimer(PETSC_COMM_WORLD, isRoot, "RCR update");
       for (const Attribute outlet : Boundary::Outlets)
         updateRCR(model, wk[outlet], qOut[outlet], dt);
       endTimer(PETSC_COMM_WORLD, isRoot, "RCR update", rcrStart);
 
-      const double historyStart =
-        beginTimer(PETSC_COMM_WORLD, isRoot, "history update");
+      const double historyStart = beginTimer(PETSC_COMM_WORLD, isRoot, "history update");
       uOld.setData(uState.getData());
       pOld.setData(pState.getData());
       etaOld.setData(etaState.getData());
@@ -1240,23 +1182,15 @@ const Real fsiPenalty = 1e2; // tune
       if (isRoot && csv)
       {
         const double csvStart = MPI_Wtime();
-        csv << s.t << ','
-            << s.y << ','
-            << s.v << ','
-            << s.pv << ','
-            << s.par << ','
-            << s.pd << ','
-            << qIn << ','
-            << qOutSum;
+        csv << s.t << ',' << s.y << ',' << s.v << ',' << s.pv << ',' << s.par << ','
+            << s.pd << ',' << qIn << ',' << qOutSum;
         for (const Attribute outlet : Boundary::Outlets)
           csv << ',' << qOut[outlet] << ',' << wk[outlet].pout;
         csv << '\n';
         csv.flush();
         std::cout << std::fixed << std::setprecision(6)
-                  << "[timer] end   CSV write : "
-                  << (MPI_Wtime() - csvStart)
-                  << " s rank/root"
-                  << std::endl;
+                  << "[timer] end   CSV write : " << (MPI_Wtime() - csvStart)
+                  << " s rank/root" << std::endl;
       }
     }
 

@@ -62,8 +62,7 @@ namespace Rodin::Solid
    * @f]
    */
   template <class LawDerived, class TestFunctionType, class DisplacementType>
-  class InternalVirtualWorkResidual<LawDerived, TestFunctionType,
-                                    DisplacementType> final
+  class InternalVirtualWorkResidual<LawDerived, TestFunctionType, DisplacementType> final
     : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
@@ -86,10 +85,14 @@ namespace Rodin::Solid
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkResidual expects a Rodin test function.");
 
+      /**
+       * @brief Constructs the pure-displacement momentum residual integrator.
+       * @param law The constitutive law
+       * @param v The displacement test function
+       * @param displacement The current displacement state
+       */
       InternalVirtualWorkResidual(
-          const LawDerived& law,
-          const TestType& v,
-          const StateType& displacement)
+        const LawDerived& law, const TestType& v, const StateType& displacement)
         : Parent(v),
           m_law(law),
           m_test(v),
@@ -110,8 +113,14 @@ namespace Rodin::Solid
           m_testfes(other.m_testfes),
           m_statefes(other.m_statefes),
           m_quadOrder(other.m_quadOrder),
-          m_input(other.m_input)      {}
+          m_input(other.m_input)
+      {}
 
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -120,12 +129,22 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
         return *this;
       }
 
+      /**
+       * @brief Sets an auxiliary constitutive input callback.
+       * @param input The callback invoked on each constitutive point
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setInput(InputFunction input)
       {
         m_input = std::move(input);
@@ -133,7 +152,8 @@ namespace Rodin::Solid
       }
 
       /// @brief Sets the current polytope and assembles the element residual.
-      InternalVirtualWorkResidual& setPolytope(const Geometry::Polytope& polytope) final override
+      InternalVirtualWorkResidual& setPolytope(
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
@@ -150,7 +170,8 @@ namespace Rodin::Solid
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
           : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
-        const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -227,7 +248,11 @@ namespace Rodin::Solid
         return new InternalVirtualWorkResidual(*this);
       }
 
-      const LawType& getLaw() const { return m_law; }
+      /// @brief Returns the stored constitutive law.
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       void checkCompatibility(const StateType& displacement) const
@@ -237,8 +262,8 @@ namespace Rodin::Solid
 
         assert(&stateFES.getMesh() == &testFES.getMesh());
         assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
-        (void) testFES;
-        (void) stateFES;
+        (void)testFES;
+        (void)stateFES;
       }
 
       LawType m_law;
@@ -266,32 +291,44 @@ namespace Rodin::Solid
    * the volumetric response is carried by the pressure field.
    */
   template <class LawDerived, class TestFunctionType, class DisplacementType,
-            class PressureType>
-  class InternalVirtualWorkResidual<LawDerived, TestFunctionType,
-                                    DisplacementType, PressureType> final
-    : public Variational::LinearFormIntegratorBase<Real>
+    class PressureType>
+  class InternalVirtualWorkResidual<LawDerived, TestFunctionType, DisplacementType,
+    PressureType>
+    final : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+      /// @brief Constitutive law type.
       using LawType = LawDerived;
+      /// @brief Test function type.
       using TestType = TestFunctionType;
+      /// @brief Current displacement state type.
       using StateType = DisplacementType;
+      /// @brief Current pressure state type.
       using PressureStateType = PressureType;
 
+      /// @brief Test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
-      using PressureFESType =
-        typename FormLanguage::Traits<PressureStateType>::FESType;
+      /// @brief Pressure state finite element space type.
+      using PressureFESType = typename FormLanguage::Traits<PressureStateType>::FESType;
 
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkResidual expects a Rodin test function.");
 
-      InternalVirtualWorkResidual(
-          const LawDerived& law,
-          const TestType& v,
-          const StateType& displacement,
-          const PressureStateType& pressure)
+      /**
+       * @brief Constructs the mixed momentum residual integrator.
+       * @param law The isochoric constitutive law
+       * @param v The displacement test function
+       * @param displacement The current displacement state
+       * @param pressure The current pressure state
+       */
+      InternalVirtualWorkResidual(const LawDerived& law, const TestType& v,
+        const StateType& displacement, const PressureStateType& pressure)
         : Parent(v),
           m_law(law),
           m_test(v),
@@ -305,6 +342,7 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
+      /// @brief Copy constructor.
       InternalVirtualWorkResidual(const InternalVirtualWorkResidual& other)
         : Parent(other),
           m_law(other.m_law),
@@ -318,6 +356,11 @@ namespace Rodin::Solid
           m_input(other.m_input)
       {}
 
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -326,6 +369,11 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /**
+       * @brief Rebinds the pressure state.
+       * @param gf The new pressure state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setPressure(const PressureStateType& gf)
       {
         m_pressure = std::cref(gf);
@@ -333,19 +381,31 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
         return *this;
       }
 
+      /**
+       * @brief Sets an auxiliary constitutive input callback.
+       * @param input The callback invoked on each constitutive point
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidual& setInput(InputFunction input)
       {
         m_input = std::move(input);
         return *this;
       }
 
-      InternalVirtualWorkResidual& setPolytope(const Geometry::Polytope& polytope) final override
+      /// @brief Sets the current polytope and assembles the element residual.
+      InternalVirtualWorkResidual& setPolytope(
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
@@ -363,9 +423,9 @@ namespace Rodin::Solid
 
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
-          : 2 * std::max({testFE.getOrder(), stateFE.getOrder(),
-                          pressFE.getOrder()});
-        const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+          : 2 * std::max({testFE.getOrder(), stateFE.getOrder(), pressFE.getOrder()});
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -421,28 +481,36 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns an entry of the current element residual vector.
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this residual integrator.
       InternalVirtualWorkResidual* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidual(*this);
       }
 
-      const LawType& getLaw() const { return m_law; }
+      /// @brief Returns the stored constitutive law.
+      const LawType& getLaw() const
+      {
+        return m_law;
+      }
 
     private:
       void checkCompatibility(const StateType& displacement) const
@@ -454,9 +522,9 @@ namespace Rodin::Solid
         assert(&stateFES.getMesh() == &testFES.getMesh());
         assert(&pressFES.getMesh() == &testFES.getMesh());
         assert(stateFES.getVectorDimension() == testFES.getVectorDimension());
-        (void) testFES;
-        (void) stateFES;
-        (void) pressFES;
+        (void)testFES;
+        (void)stateFES;
+        (void)pressFES;
       }
 
       LawType m_law;
@@ -486,20 +554,30 @@ namespace Rodin::Solid
     : public Variational::LinearFormIntegratorBase<Real>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
+      /// @brief Pressure test function type.
       using TestType = TestPressFunctionType;
+      /// @brief Current displacement state type.
       using StateType = DisplacementType;
 
+      /// @brief Pressure test finite element space type.
       using TestFESType = typename FormLanguage::Traits<TestType>::FESType;
+      /// @brief Displacement state finite element space type.
       using StateFESType = typename FormLanguage::Traits<StateType>::FESType;
 
       static_assert(Variational::IsTestFunction<TestType>::Value,
         "Solid::InternalVirtualWorkResidualP expects a Rodin test function.");
 
-      InternalVirtualWorkResidualP(
-          const TestType& q,
-          const StateType& displacement)
+      /**
+       * @brief Constructs the pressure residual for the incompressibility
+       * constraint.
+       * @param q The pressure test function
+       * @param displacement The current displacement state
+       */
+      InternalVirtualWorkResidualP(const TestType& q, const StateType& displacement)
         : Parent(q),
           m_test(q),
           m_displacement(displacement),
@@ -510,6 +588,7 @@ namespace Rodin::Solid
         checkCompatibility(displacement);
       }
 
+      /// @brief Copy constructor.
       InternalVirtualWorkResidualP(const InternalVirtualWorkResidualP& other)
         : Parent(other),
           m_test(other.m_test),
@@ -519,6 +598,11 @@ namespace Rodin::Solid
           m_quadOrder(other.m_quadOrder)
       {}
 
+      /**
+       * @brief Rebinds the displacement linearization point.
+       * @param gf The new displacement state
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidualP& setDisplacement(const StateType& gf)
       {
         checkCompatibility(gf);
@@ -527,13 +611,20 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /**
+       * @brief Sets the quadrature order.
+       * @param order The quadrature order, or zero for automatic selection
+       * @returns Reference to this object
+       */
       InternalVirtualWorkResidualP& setQuadratureOrder(size_t order)
       {
         m_quadOrder = order;
         return *this;
       }
 
-      InternalVirtualWorkResidualP& setPolytope(const Geometry::Polytope& polytope) final override
+      /// @brief Sets the current polytope and assembles the element residual.
+      InternalVirtualWorkResidualP& setPolytope(
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = polytope;
 
@@ -549,7 +640,8 @@ namespace Rodin::Solid
         const size_t effectiveOrder = (m_quadOrder > 0)
           ? m_quadOrder
           : 2 * std::max(testFE.getOrder(), stateFE.getOrder());
-        const auto& qf = QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
+        const auto& qf =
+          QF::PolytopeQuadratureFormula::get(effectiveOrder, polytope.getGeometry());
         const auto& quadrature = polytope.getQuadrature(qf);
         const size_t nqp = quadrature.getSize();
 
@@ -585,22 +677,26 @@ namespace Rodin::Solid
         return *this;
       }
 
+      /// @brief Returns an entry of the current element residual vector.
       ScalarType integrate(size_t te) final override
       {
         return m_elemVec(te);
       }
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return m_polytope->get();
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Polymorphically copies this residual integrator.
       InternalVirtualWorkResidualP* copy() const noexcept final override
       {
         return new InternalVirtualWorkResidualP(*this);
@@ -613,8 +709,8 @@ namespace Rodin::Solid
         const auto& stateFES = displacement.getFiniteElementSpace();
 
         assert(&stateFES.getMesh() == &testFES.getMesh());
-        (void) testFES;
-        (void) stateFES;
+        (void)testFES;
+        (void)stateFES;
       }
 
       std::reference_wrapper<const TestType> m_test;
@@ -629,34 +725,24 @@ namespace Rodin::Solid
 
   /// CTAD deduction guide for the displacement-only residual
   template <class LawDerived, class TestFunctionType, class DisplacementType>
-  InternalVirtualWorkResidual(const LawDerived&,
-                               const TestFunctionType&,
-                               const DisplacementType&)
-    -> InternalVirtualWorkResidual<
-         LawDerived,
-         std::decay_t<TestFunctionType>,
-         std::decay_t<DisplacementType>>;
+  InternalVirtualWorkResidual(
+    const LawDerived&, const TestFunctionType&, const DisplacementType&)
+    -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
+      std::decay_t<DisplacementType>>;
 
   /// CTAD deduction guide for the mixed u-p momentum residual
   template <class LawDerived, class TestFunctionType, class DisplacementType,
-            class PressureType>
-  InternalVirtualWorkResidual(const LawDerived&,
-                               const TestFunctionType&,
-                               const DisplacementType&,
-                               const PressureType&)
-    -> InternalVirtualWorkResidual<
-         LawDerived,
-         std::decay_t<TestFunctionType>,
-         std::decay_t<DisplacementType>,
-         std::decay_t<PressureType>>;
+    class PressureType>
+  InternalVirtualWorkResidual(const LawDerived&, const TestFunctionType&,
+    const DisplacementType&, const PressureType&)
+    -> InternalVirtualWorkResidual<LawDerived, std::decay_t<TestFunctionType>,
+      std::decay_t<DisplacementType>, std::decay_t<PressureType>>;
 
   /// CTAD deduction guide for the incompressibility constraint residual
   template <class TestPressFunctionType, class DisplacementType>
-  InternalVirtualWorkResidualP(const TestPressFunctionType&,
-                               const DisplacementType&)
-    -> InternalVirtualWorkResidualP<
-         std::decay_t<TestPressFunctionType>,
-         std::decay_t<DisplacementType>>;
+  InternalVirtualWorkResidualP(const TestPressFunctionType&, const DisplacementType&)
+    -> InternalVirtualWorkResidualP<std::decay_t<TestPressFunctionType>,
+      std::decay_t<DisplacementType>>;
 }
 
 #endif

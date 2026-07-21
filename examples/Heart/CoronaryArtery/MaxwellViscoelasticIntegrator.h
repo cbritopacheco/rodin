@@ -61,8 +61,7 @@ namespace Rodin::Examples::Heart
    */
   template <class TestFunction, class StoredTensor>
   class MaxwellHistoryLinearIntegrator final
-    : public Variational::LinearFormIntegratorBase<
-        typename TestFunction::ScalarType>
+    : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
   {
     public:
       using ScalarType = typename TestFunction::ScalarType;
@@ -74,7 +73,7 @@ namespace Rodin::Examples::Heart
        * @param[in] scale Scalar premultiplier (e.g. decay = tau/(tau+dt)).
        */
       MaxwellHistoryLinearIntegrator(
-          const TestFunction& v, const StoredTensor& pv, ScalarType scale)
+        const TestFunction& v, const StoredTensor& pv, ScalarType scale)
         : Parent(v.getLeaf()),
           m_v(v),
           m_pv(pv),
@@ -92,7 +91,7 @@ namespace Rodin::Examples::Heart
       }
 
       MaxwellHistoryLinearIntegrator& setPolytope(
-          const Geometry::Polytope& polytope) final override
+        const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
 
@@ -168,12 +167,8 @@ namespace Rodin::Examples::Heart
     private:
       // P_v : grad Psi = sum_{c,j} pv[c*d+j] * sum_r Jref(c,r) Jinv(r,j).
       template <class Basis, class JInv, class Vector>
-      static ScalarType contract(
-          const Basis& basis,
-          const Math::SpatialVector<Real>& rc,
-          const JInv& Jinv,
-          const Vector& pv,
-          size_t d)
+      static ScalarType contract(const Basis& basis, const Math::SpatialVector<Real>& rc,
+        const JInv& Jinv, const Vector& pv, size_t d)
       {
         const auto Jref = basis.getJacobian()(rc);
         ScalarType s = 0;
@@ -184,8 +179,8 @@ namespace Rodin::Examples::Heart
             ScalarType gradPhys = 0;
             for (size_t r = 0; r < d; ++r)
               gradPhys +=
-                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r))
-                * Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
+                Jref(static_cast<std::uint8_t>(c), static_cast<std::uint8_t>(r)) *
+                Jinv(static_cast<std::uint8_t>(r), static_cast<std::uint8_t>(j));
             s += pv(static_cast<std::uint8_t>(c * d + j)) * gradPhys;
           }
         }
@@ -199,7 +194,7 @@ namespace Rodin::Examples::Heart
 
       template <class Function>
       static size_t getFunctionOrder(
-          const Function& f, const Geometry::Polytope& polytope, size_t fallback)
+        const Function& f, const Geometry::Polytope& polytope, size_t fallback)
       {
         if constexpr (requires { f.getOrder(polytope); })
         {

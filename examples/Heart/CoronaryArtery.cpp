@@ -91,17 +91,14 @@ int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 
-
-  const auto setPETScDefault =
-    [](const char* name, const char* value)
-    {
-      PetscBool set = PETSC_FALSE;
-      PetscErrorCode ierr = PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name, &set);
-      if (ierr == PETSC_SUCCESS && !set)
-        ierr = PetscOptionsSetValue(PETSC_NULLPTR, name, value);
-      assert(ierr == PETSC_SUCCESS);
-      (void) ierr;
-    };
+  const auto setPETScDefault = [](const char* name, const char* value) {
+    PetscBool set = PETSC_FALSE;
+    PetscErrorCode ierr = PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name, &set);
+    if (ierr == PETSC_SUCCESS && !set)
+      ierr = PetscOptionsSetValue(PETSC_NULLPTR, name, value);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+  };
 
   setPETScDefault("-ksp_type", "preonly");
   setPETScDefault("-pc_type", "lu");
@@ -125,68 +122,54 @@ int main(int argc, char** argv)
 
       char flowMode[32] = {};
       PetscBool flowModeSet = PETSC_FALSE;
-      PetscErrorCode ierr = PetscOptionsGetString(
-          PETSC_NULLPTR,
-          PETSC_NULLPTR,
-          "-coronary_flow_mode",
-          flowMode,
-          sizeof(flowMode),
-          &flowModeSet);
+      PetscErrorCode ierr = PetscOptionsGetString(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_flow_mode", flowMode, sizeof(flowMode), &flowModeSet);
       assert(ierr == PETSC_SUCCESS);
-      (void) ierr;
+      (void)ierr;
 
       if (flowModeSet)
       {
         std::string mode(flowMode);
-        std::transform(
-            mode.begin(), mode.end(), mode.begin(),
-            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        std::transform(mode.begin(), mode.end(), mode.begin(),
+          [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
         if (mode == "newton")
         {
-          cfg.flowMode =
-            Rodin::Examples::Heart::CoupledLV0DCoronary3D::FlowMode::Newton;
+          cfg.flowMode = Rodin::Examples::Heart::CoupledLV0DCoronary3D::FlowMode::Newton;
         }
         else if (mode == "oseen")
         {
-          cfg.flowMode =
-            Rodin::Examples::Heart::CoupledLV0DCoronary3D::FlowMode::Oseen;
+          cfg.flowMode = Rodin::Examples::Heart::CoupledLV0DCoronary3D::FlowMode::Oseen;
         }
         else
         {
           throw std::runtime_error(
-              "Invalid -coronary_flow_mode. Expected newton or oseen.");
+            "Invalid -coronary_flow_mode. Expected newton or oseen.");
         }
       }
 
       PetscReal backflowStabilization = cfg.outletBackflowStabilization;
       PetscBool backflowStabilizationSet = PETSC_FALSE;
-      ierr = PetscOptionsGetReal(
-          PETSC_NULLPTR,
-          PETSC_NULLPTR,
-          "-coronary_outlet_backflow_stabilization",
-          &backflowStabilization,
-          &backflowStabilizationSet);
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_outlet_backflow_stabilization", &backflowStabilization,
+        &backflowStabilizationSet);
       assert(ierr == PETSC_SUCCESS);
       if (backflowStabilizationSet)
         cfg.outletBackflowStabilization = backflowStabilization;
 
       PetscReal inletBackflowStabilization = cfg.inletBackflowStabilization;
       PetscBool inletBackflowStabilizationSet = PETSC_FALSE;
-      ierr = PetscOptionsGetReal(
-          PETSC_NULLPTR,
-          PETSC_NULLPTR,
-          "-coronary_inlet_backflow_stabilization",
-          &inletBackflowStabilization,
-          &inletBackflowStabilizationSet);
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_inlet_backflow_stabilization", &inletBackflowStabilization,
+        &inletBackflowStabilizationSet);
       assert(ierr == PETSC_SUCCESS);
       if (inletBackflowStabilizationSet)
         cfg.inletBackflowStabilization = inletBackflowStabilization;
 
       PetscReal dt = cfg.dt;
       PetscBool dtSet = PETSC_FALSE;
-      ierr = PetscOptionsGetReal(
-          PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_dt", &dt, &dtSet);
+      ierr =
+        PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_dt", &dt, &dtSet);
       assert(ierr == PETSC_SUCCESS);
       if (dtSet)
       {
@@ -198,7 +181,7 @@ int main(int argc, char** argv)
       PetscInt nsteps = static_cast<PetscInt>(cfg.nsteps);
       PetscBool nstepsSet = PETSC_FALSE;
       ierr = PetscOptionsGetInt(
-          PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_nsteps", &nsteps, &nstepsSet);
+        PETSC_NULLPTR, PETSC_NULLPTR, "-coronary_nsteps", &nsteps, &nstepsSet);
       assert(ierr == PETSC_SUCCESS);
       if (nstepsSet)
       {
@@ -209,38 +192,32 @@ int main(int argc, char** argv)
 
       PetscReal reductionFactor = cfg.timeAdaptivityReductionFactor;
       PetscBool reductionFactorSet = PETSC_FALSE;
-      ierr = PetscOptionsGetReal(
-          PETSC_NULLPTR,
-          PETSC_NULLPTR,
-          "-coronary_time_adaptivity_reduction_factor",
-          &reductionFactor,
-          &reductionFactorSet);
+      ierr = PetscOptionsGetReal(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_time_adaptivity_reduction_factor", &reductionFactor,
+        &reductionFactorSet);
       assert(ierr == PETSC_SUCCESS);
       if (reductionFactorSet)
       {
         if (reductionFactor <= 0 || reductionFactor >= 1)
         {
           throw std::runtime_error(
-              "-coronary_time_adaptivity_reduction_factor must be in (0, 1).");
+            "-coronary_time_adaptivity_reduction_factor must be in (0, 1).");
         }
         cfg.timeAdaptivityReductionFactor = reductionFactor;
       }
 
       PetscInt maxAdaptivityLevels = cfg.timeAdaptivityMaxLevels;
       PetscBool maxAdaptivityLevelsSet = PETSC_FALSE;
-      ierr = PetscOptionsGetInt(
-          PETSC_NULLPTR,
-          PETSC_NULLPTR,
-          "-coronary_time_adaptivity_max_levels",
-          &maxAdaptivityLevels,
-          &maxAdaptivityLevelsSet);
+      ierr = PetscOptionsGetInt(PETSC_NULLPTR, PETSC_NULLPTR,
+        "-coronary_time_adaptivity_max_levels", &maxAdaptivityLevels,
+        &maxAdaptivityLevelsSet);
       assert(ierr == PETSC_SUCCESS);
       if (maxAdaptivityLevelsSet)
       {
         if (maxAdaptivityLevels < 0)
         {
           throw std::runtime_error(
-              "-coronary_time_adaptivity_max_levels must be nonnegative.");
+            "-coronary_time_adaptivity_max_levels must be nonnegative.");
         }
         cfg.timeAdaptivityMaxLevels = maxAdaptivityLevels;
       }

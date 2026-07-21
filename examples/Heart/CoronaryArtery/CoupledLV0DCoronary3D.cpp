@@ -28,119 +28,177 @@
 #include "CoronaryArteryAlerts.h"
 #include "CoupledLV0DCoronary3D.h"
 
-namespace Rodin::Examples::Heart {
-using namespace Rodin;
-using namespace Rodin::Math;
-using namespace Rodin::Solver;
-using namespace Rodin::Geometry;
-using namespace Rodin::Variational;
+namespace Rodin::Examples::Heart
+{
+  using namespace Rodin;
+  using namespace Rodin::Math;
+  using namespace Rodin::Solver;
+  using namespace Rodin::Geometry;
+  using namespace Rodin::Variational;
 
-namespace {
-constexpr int RootRank = 0;
+  namespace
+  {
+    constexpr int RootRank = 0;
 
-const char *flowModeName(CoupledLV0DCoronary3D::FlowMode mode) {
-  switch (mode) {
-  case CoupledLV0DCoronary3D::FlowMode::Newton:
-    return "newton";
-  case CoupledLV0DCoronary3D::FlowMode::Oseen:
-    return "oseen";
-  }
-  return "unknown";
-}
+    const char* flowModeName(CoupledLV0DCoronary3D::FlowMode mode)
+    {
+      switch (mode)
+      {
+        case CoupledLV0DCoronary3D::FlowMode::Newton:
+          return "newton";
+        case CoupledLV0DCoronary3D::FlowMode::Oseen:
+          return "oseen";
+      }
+      return "unknown";
+    }
 
-class VecSnapshot {
-public:
-  explicit VecSnapshot(::Vec source) {
-    PetscErrorCode ierr = VecDuplicate(source, &m_data);
-    assert(ierr == PETSC_SUCCESS);
-    ierr = VecCopy(source, m_data);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
-  }
+    class VecSnapshot
+    {
+      public:
+        explicit VecSnapshot(::Vec source)
+        {
+          PetscErrorCode ierr = VecDuplicate(source, &m_data);
+          assert(ierr == PETSC_SUCCESS);
+          ierr = VecCopy(source, m_data);
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
 
-  VecSnapshot(const VecSnapshot &) = delete;
-  VecSnapshot &operator=(const VecSnapshot &) = delete;
+        VecSnapshot(const VecSnapshot&) = delete;
+        VecSnapshot& operator=(const VecSnapshot&) = delete;
 
-  ~VecSnapshot() {
-    if (m_data) {
-      PetscErrorCode ierr = VecDestroy(&m_data);
-      assert(ierr == PETSC_SUCCESS);
-      (void)ierr;
+        ~VecSnapshot()
+        {
+          if (m_data)
+          {
+            PetscErrorCode ierr = VecDestroy(&m_data);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+          }
+        }
+
+        void restore(::Vec target) const
+        {
+          PetscErrorCode ierr = VecCopy(m_data, target);
+          assert(ierr == PETSC_SUCCESS);
+          (void)ierr;
+        }
+
+      private:
+        ::Vec m_data = PETSC_NULLPTR;
+    };
+  } // namespace
+
+  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI& context)
+    : CoupledLV0DCoronary3D(context, Config{})
+  {}
+
+  CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(
+    const Context::MPI& context, const Config& cfg)
+    : m_cfg(cfg),
+      m_input(makeInput(m_cfg)),
+      m_model(m_input),
+      m_mesh(makeMesh(context, m_cfg)),
+      m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
+      m_uh(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
+      m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
+      m_uph(std::integral_constant<size_t, 2>{}, m_mesh, m_mesh.getSpaceDimension()),
+      m_tauh(m_mesh),
+      m_u(m_uh),
+      m_p(m_ph),
+      m_mu(m_ph),
+      m_v(m_uh),
+      m_q(m_ph),
+      m_r(m_ph),
+      m_uOld(m_uh),
+      m_pOld(m_ph),
+      m_one(m_ph),
+      m_qFlux(m_ph),
+      m_sub(m_uph),
+      m_subOld(m_uph),
+      m_up(m_uph),
+      m_vp(m_uph),
+      m_tau(m_tauh),
+      m_t(m_tauh),
+      m_tauOld(m_tauh),
+      m_flux(m_qFlux),
+      m_shearWall(m_uh),
+      m_flow(m_u, m_p, m_v, m_q),
+      m_flowKSP(m_flow),
+      m_flowSolver(m_flowKSP),
+      m_viscosityProjection(m_mu, m_r),
+      m_viscosityProjectionKSP(m_viscosityProjection),
+      m_l2ConvU(m_up, m_vp),
+      m_l2ConvUSolver(m_l2ConvU),
+      m_subProjection(m_sub, m_vp),
+      m_subProjectionSolver(m_subProjection),
+      m_tauProjection(m_tau, m_t),
+      m_tauProjectionSolver(m_tauProjection)
+  {
+    auto cellCount = m_mesh.getCellCount();
+    auto vertexCount = m_mesh.getVertexCount();
+    auto spaceDim = m_mesh.getSpaceDimension();
+    auto velocityDOFs = m_uh.getSize();
+    auto pressureDOFs = m_ph.getSize();
+
+    if (isRoot())
+    {
+      Alert::Info() << "---- Mesh ----" << Alert::NewLine
+                    << "Number of elements in mesh: " << cellCount << Alert::NewLine
+                    << "Number of vertices in mesh: " << vertexCount << Alert::NewLine
+                    << "Mesh space dimension: " << spaceDim << Alert::Raise;
+
+      Alert::Info() << "---- Function spaces ----" << Alert::NewLine
+                    << "Velocity space has " << velocityDOFs << " DOFs." << Alert::NewLine
+                    << "Pressure space has " << pressureDOFs << " DOFs." << Alert::Raise;
     }
   }
 
-  void restore(::Vec target) const {
-    PetscErrorCode ierr = VecCopy(m_data, target);
-    assert(ierr == PETSC_SUCCESS);
-    (void)ierr;
-  }
+  CoupledLV0DCoronary3D::~CoupledLV0DCoronary3D() = default;
 
-private:
-  ::Vec m_data = PETSC_NULLPTR;
-};
-} // namespace
+  CoupledLV0DCoronary3D::MeshType CoupledLV0DCoronary3D::makeMesh(
+    const Context::MPI& context, const Config& cfg)
+  {
+    const auto& comm = context.getCommunicator();
 
-CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI &context)
-    : CoupledLV0DCoronary3D(context, Config{}) {}
+    Rodin::MPI::Sharder sharder(context);
+    if (comm.rank() == RootRank)
+    {
+      Geometry::Mesh<Context::Local> mesh;
+      mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
 
-CoupledLV0DCoronary3D::CoupledLV0DCoronary3D(const Context::MPI &context,
-                                             const Config &cfg)
-    : m_cfg(cfg), m_input(makeInput(m_cfg)), m_model(m_input),
-      m_mesh(makeMesh(context, m_cfg)),
-      m_xdmf(context.getCommunicator(), m_cfg.xdmfBasename),
-      m_uh(std::integral_constant<size_t, 2>{}, m_mesh,
-           m_mesh.getSpaceDimension()),
-      m_ph(std::integral_constant<size_t, 1>{}, m_mesh),
-      m_uph(std::integral_constant<size_t, 2>{}, m_mesh,
-            m_mesh.getSpaceDimension()),
-      m_tauh(m_mesh), m_u(m_uh), m_p(m_ph), m_mu(m_ph), m_v(m_uh), m_q(m_ph),
-      m_r(m_ph), m_uOld(m_uh), m_pOld(m_ph), m_one(m_ph), m_qFlux(m_ph),
-      m_sub(m_uph), m_subOld(m_uph), m_up(m_uph), m_vp(m_uph), m_tau(m_tauh),
-      m_t(m_tauh), m_tauOld(m_tauh), m_flux(m_qFlux), m_shearWall(m_uh),
-      m_flow(m_u, m_p, m_v, m_q), m_flowKSP(m_flow), m_flowSolver(m_flowKSP),
-      m_viscosityProjection(m_mu, m_r),
-      m_viscosityProjectionKSP(m_viscosityProjection), m_l2ConvU(m_up, m_vp),
-      m_l2ConvUSolver(m_l2ConvU), m_subProjection(m_sub, m_vp),
-      m_subProjectionSolver(m_subProjection), m_tauProjection(m_tau, m_t),
-      m_tauProjectionSolver(m_tauProjection) {
-  auto cellCount = m_mesh.getCellCount();
-  auto vertexCount = m_mesh.getVertexCount();
-  auto spaceDim = m_mesh.getSpaceDimension();
-  auto velocityDOFs = m_uh.getSize();
-  auto pressureDOFs = m_ph.getSize();
+      if (mesh.getSpaceDimension() != 3)
+        throw std::runtime_error("Expected a 3D coronary mesh.");
 
-  if (isRoot()) {
-    Alert::Info() << "---- Mesh ----" << Alert::NewLine
-                  << "Number of elements in mesh: " << cellCount
-                  << Alert::NewLine
-                  << "Number of vertices in mesh: " << vertexCount
-                  << Alert::NewLine << "Mesh space dimension: " << spaceDim
-                  << Alert::Raise;
+      Alert::Info() << "Computing connectivity for " << cfg.meshPath << " ..."
+                    << Alert::Raise;
 
-    Alert::Info() << "---- Function spaces ----" << Alert::NewLine
-                  << "Velocity space has " << velocityDOFs << " DOFs."
-                  << Alert::NewLine << "Pressure space has " << pressureDOFs
-                  << " DOFs." << Alert::Raise;
-  }
-}
+      const size_t D = mesh.getDimension();
+      mesh.getConnectivity().compute(D, D);
+      mesh.getConnectivity().compute(D, 0);
+      mesh.getConnectivity().compute(D, D - 1);
+      mesh.getConnectivity().compute(D - 1, D);
+      mesh.getConnectivity().compute(D - 1, 0);
+      mesh.getConnectivity().compute(D - 1, 1);
+      mesh.getConnectivity().compute(1, 0);
 
-CoupledLV0DCoronary3D::~CoupledLV0DCoronary3D() = default;
+      Alert::Info() << "Partitioning coronary mesh over " << comm.size()
+                    << " MPI ranks ..." << Alert::Raise;
 
-CoupledLV0DCoronary3D::MeshType
-CoupledLV0DCoronary3D::makeMesh(const Context::MPI &context,
-                                const Config &cfg) {
-  const auto &comm = context.getCommunicator();
+#ifdef RODIN_USE_SCOTCH
+      Alert::Info() << "Using SCOTCH mesh partitioner." << Alert::Raise;
+      Scotch::Partitioner partitioner(mesh);
+#else
+      Alert::Info() << "Using balanced compact mesh partitioner." << Alert::Raise;
+      Geometry::BalancedCompactPartitioner partitioner(mesh);
+#endif
+      partitioner.partition(static_cast<size_t>(comm.size()));
+      sharder.shard(partitioner);
+      sharder.scatter(RootRank);
+    }
 
-  Rodin::MPI::Sharder sharder(context);
-  if (comm.rank() == RootRank) {
-    Geometry::Mesh<Context::Local> mesh;
-    mesh.load(cfg.meshPath, IO::FileFormat::MEDIT);
-
-    if (mesh.getSpaceDimension() != 3)
-      throw std::runtime_error("Expected a 3D coronary mesh.");
-
-    Alert::Info() << "Computing connectivity for " << cfg.meshPath << " ..."
-                  << Alert::Raise;
+    MeshType mesh = sharder.gather(RootRank);
+    mesh.scale(cfg.meshScale);
 
     const size_t D = mesh.getDimension();
     mesh.getConnectivity().compute(D, D);
@@ -150,314 +208,285 @@ CoupledLV0DCoronary3D::makeMesh(const Context::MPI &context,
     mesh.getConnectivity().compute(D - 1, 0);
     mesh.getConnectivity().compute(D - 1, 1);
     mesh.getConnectivity().compute(1, 0);
+    mesh.reconcile(2);
+    mesh.reconcile(1);
 
-    Alert::Info() << "Partitioning coronary mesh over " << comm.size()
-                  << " MPI ranks ..." << Alert::Raise;
+    mesh.save(cfg.xdmfBasename + "_partitioned" +
+        std::to_string(mesh.getContext().getCommunicator().rank()) + ".mesh",
+      IO::FileFormat::MEDIT);
 
-#ifdef RODIN_USE_SCOTCH
-    Alert::Info() << "Using SCOTCH mesh partitioner." << Alert::Raise;
-    Scotch::Partitioner partitioner(mesh);
-#else
-    Alert::Info() << "Using balanced compact mesh partitioner." << Alert::Raise;
-    Geometry::BalancedCompactPartitioner partitioner(mesh);
-#endif
-    partitioner.partition(static_cast<size_t>(comm.size()));
-    sharder.shard(partitioner);
-    sharder.scatter(RootRank);
+    return mesh;
   }
 
-  MeshType mesh = sharder.gather(RootRank);
-  mesh.scale(cfg.meshScale);
-
-  const size_t D = mesh.getDimension();
-  mesh.getConnectivity().compute(D, D);
-  mesh.getConnectivity().compute(D, 0);
-  mesh.getConnectivity().compute(D, D - 1);
-  mesh.getConnectivity().compute(D - 1, D);
-  mesh.getConnectivity().compute(D - 1, 0);
-  mesh.getConnectivity().compute(D - 1, 1);
-  mesh.getConnectivity().compute(1, 0);
-  mesh.reconcile(2);
-  mesh.reconcile(1);
-
-  mesh.save(cfg.xdmfBasename + "_partitioned" +
-                std::to_string(mesh.getContext().getCommunicator().rank()) +
-                ".mesh",
-            IO::FileFormat::MEDIT);
-
-  return mesh;
-}
-
-CoupledLV0DCoronary3D::Model::Input
-CoupledLV0DCoronary3D::makeInput(const Config &cfg) {
-  Model::Input input;
-
-  input.rho = cfg.lv.rho;
-  input.R0 = cfg.lv.R0;
-  input.d0 = cfg.lv.d0;
-
-  input.Es = cfg.lv.Es;
-  input.mu = cfg.lv.mu;
-  input.eta = cfg.lv.eta;
-  input.alpha = cfg.lv.alpha;
-  input.alphaR = cfg.lv.alphaR;
-  input.k0 = cfg.lv.k0;
-  input.sigma0 = cfg.lv.sigma0;
-
-  input.Rp = cfg.lv.Rp;
-  input.Cp = cfg.lv.Cp;
-  input.Rd = cfg.lv.Rd;
-  input.Cd = cfg.lv.Cd;
-
-  input.proximalRadius = cfg.lv.proximalRadius;
-  input.proximalLength = cfg.lv.proximalLength;
-  input.distalRadius = cfg.lv.distalRadius;
-  input.distalLength = cfg.lv.distalLength;
-
-  input.mu_0 = cfg.lv.mu_0;
-  input.mu_Inf = cfg.lv.mu_Inf;
-  input.lambda = cfg.lv.lambda;
-  input.n = cfg.lv.n;
-  input.yasuda = cfg.lv.yasuda;
-
-  input.Kat = cfg.lv.Kat;
-  input.Kp = cfg.lv.Kp;
-  input.Kar = cfg.lv.Kar;
-
-  input.cavityCapacity = cfg.lv.cavityCapacity;
-
-  input.localTolerance = cfg.lv.localTolerance;
-  input.localMaxIterations = cfg.lv.localMaxIterations;
-  input.localDamping = cfg.lv.localDamping;
-  input.absRegularization = cfg.lv.absRegularization;
-
-  input.initFibDef = cfg.lv.initFibDef;
-  input.initActiveStiffness = cfg.lv.initActiveStiffness;
-  input.initActiveStress = cfg.lv.initActiveStress;
-
-  input.pSv = [p = cfg.lv.systemicVenousPressure](Real) { return p; };
-  input.pAt = [p = cfg.atrialPressure](Real t) {
-    return atrial_pressure(p, t);
-  };
-  input.u = [a = cfg.activation](Real t) { return periodic_activation(a, t); };
-  input.m0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
-              lowEc = cfg.lv.relaxationM0LowEc,
-              highEc = cfg.lv.relaxationM0HighEc](Real ec) {
-    if (highEc <= lowEc)
-      return high;
-    if (ec <= lowEc)
-      return low;
-    if (ec >= highEc)
-      return high;
-    const Real s = (ec - lowEc) / (highEc - lowEc);
-    return (1.0 - s) * low + s * high;
-  };
-  input.dm0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
-               lowEc = cfg.lv.relaxationM0LowEc,
-               highEc = cfg.lv.relaxationM0HighEc](Real ec) {
-    if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
-      return 0.0;
-    return (high - low) / (highEc - lowEc);
-  };
-
+  CoupledLV0DCoronary3D::Model::Input CoupledLV0DCoronary3D::makeInput(const Config& cfg)
   {
-    using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
+    Model::Input input;
 
-    typename PassiveEnergy::Parameters hp;
-    hp.mu1 = cfg.lv.passiveMu1;
-    hp.mu2 = cfg.lv.passiveMu2;
-    hp.C0 = cfg.lv.passiveC0;
-    hp.C1 = cfg.lv.passiveC1;
-    hp.C2 = cfg.lv.passiveC2;
-    hp.C3 = cfg.lv.passiveC3;
+    input.rho = cfg.lv.rho;
+    input.R0 = cfg.lv.R0;
+    input.d0 = cfg.lv.d0;
 
-    input.passiveEnergy = PassiveEnergy(hp);
-  }
+    input.Es = cfg.lv.Es;
+    input.mu = cfg.lv.mu;
+    input.eta = cfg.lv.eta;
+    input.alpha = cfg.lv.alpha;
+    input.alphaR = cfg.lv.alphaR;
+    input.k0 = cfg.lv.k0;
+    input.sigma0 = cfg.lv.sigma0;
 
-  return input;
-}
+    input.Rp = cfg.lv.Rp;
+    input.Cp = cfg.lv.Cp;
+    input.Rd = cfg.lv.Rd;
+    input.Cd = cfg.lv.Cd;
 
-std::pair<CoupledLV0DCoronary3D::Real, CoupledLV0DCoronary3D::Real>
-CoupledLV0DCoronary3D::outletFlow(const Config &cfg, const CarreauYasuda &visc,
-                                  Real dp, Real L, Real radius) {
-  const auto &law = cfg.outletFlowLaw;
-  const auto &cy = visc;
+    input.proximalRadius = cfg.lv.proximalRadius;
+    input.proximalLength = cfg.lv.proximalLength;
+    input.distalRadius = cfg.lv.distalRadius;
+    input.distalLength = cfg.lv.distalLength;
 
-  const Real mu0 = cy.mu0;
-  const Real muInf = cy.muInf;
-  const Real lambda = cy.lambda;
-  const Real n = cy.n;
-  const Real yasuda = cy.yasuda;
-  const Real delta = mu0 - muInf;
+    input.mu_0 = cfg.lv.mu_0;
+    input.mu_Inf = cfg.lv.mu_Inf;
+    input.lambda = cfg.lv.lambda;
+    input.n = cfg.lv.n;
+    input.yasuda = cfg.lv.yasuda;
 
-  const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
-  const Real adp = std::abs(dp);
+    input.Kat = cfg.lv.Kat;
+    input.Kp = cfg.lv.Kp;
+    input.Kar = cfg.lv.Kar;
 
-  const Real R0 =
-      8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
+    input.cavityCapacity = cfg.lv.cavityCapacity;
 
-  if (adp < law.pressureDropTolerance)
-    return {dp / R0, 1.0 / R0};
+    input.localTolerance = cfg.lv.localTolerance;
+    input.localMaxIterations = cfg.lv.localMaxIterations;
+    input.localDamping = cfg.lv.localDamping;
+    input.absRegularization = cfg.lv.absRegularization;
 
-  const Real tauW = radius * adp / (2.0 * L);
+    input.initFibDef = cfg.lv.initFibDef;
+    input.initActiveStiffness = cfg.lv.initActiveStiffness;
+    input.initActiveStress = cfg.lv.initActiveStress;
 
-  auto mu = [&](Real g) -> Real {
-    return muInf + delta * std::pow(1.0 + std::pow(lambda * g, yasuda),
-                                    (n - 1.0) / yasuda);
-  };
-
-  auto dmu = [&](Real g) -> Real {
-    const Real base = 1.0 + std::pow(lambda * g, yasuda);
-
-    return delta * (n - 1.0) * std::pow(base, (n - 1.0 - yasuda) / yasuda) *
-           std::pow(lambda, yasuda) * std::pow(g, yasuda - 1.0);
-  };
-
-  auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real> {
-    const Real m = mu(g);
-    const Real dm = dmu(g);
-    return {g * m - tauW, m + g * dm};
-  };
-
-  Math::RootFinding::NewtonRaphson<Real> rootFinder(
-      law.shearAbsoluteTolerance, law.shearRelativeTolerance,
-      law.shearStepTolerance, law.shearMaxIterations);
-
-  Real gHi = std::max<Real>(tauW / muInf, law.minShearRate);
-
-  for (int k = 0;
-       k < law.maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
-    gHi *= 2.0;
-
-  if (tauMinusTauW(gHi).first < 0.0) {
-    std::cerr << "Warning: failed to bracket wall shear rate. "
-              << "Using Poiseuille fallback.\n";
-    return {dp / R0, 1.0 / R0};
-  }
-
-  const auto gammaRoot =
-      rootFinder.solve(tauMinusTauW, 0.5 * gHi, law.shearStepTolerance, gHi);
-
-  if (!gammaRoot) {
-    std::cerr << "Warning: failed to solve wall shear rate. "
-              << "Using Poiseuille fallback.\n";
-    return {dp / R0, 1.0 / R0};
-  }
-
-  const Real gammaW = *gammaRoot;
-
-  auto integrand = [&](Real g) -> Real {
-    if (g <= 0.0)
-      return 0.0;
-
-    const Real m = mu(g);
-    const Real dm = dmu(g);
-    const Real dtau = m + g * dm;
-
-    return std::pow(g, 3.0) * m * m * dtau;
-  };
-
-  Math::RungeKutta::RK4 integrator;
-
-  const int steps = law.integralSteps;
-  const Real hStep = gammaW / static_cast<Real>(steps);
-
-  Real I = 0.0;
-
-  auto rhs = [&](Real g, Real y) -> Real {
-    (void)y;
-    return integrand(g);
-  };
-
-  for (int i = 0; i < steps; ++i) {
-    const Real g = static_cast<Real>(i) * hStep;
-    integrator.step(I, g, hStep, I, rhs);
-  }
-
-  if (I <= 0.0 || !std::isfinite(I)) {
-    std::cerr << "Warning: invalid WRMS integral. "
-              << "Using Poiseuille fallback.\n";
-    return {dp / R0, 1.0 / R0};
-  }
-
-  const Real qAbs = std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I /
-                    std::pow(tauW, 3.0);
-
-  const Real dqAbs = (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW -
-                      3.0 * qAbs) /
-                     adp;
-
-  if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0) {
-    std::cerr << "Warning: invalid WRMS flow derivative. "
-              << "Using Poiseuille fallback.\n";
-    return {dp / R0, 1.0 / R0};
-  }
-
-  return {sgn * qAbs, dqAbs};
-}
-
-void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
-                                            const Attribute &tag,
-                                            const Model &model, RCR &bc, Real Q,
-                                            Real dt) {
-  const auto &s = model.getState();
-  const auto &h = model.getHistory();
-
-  const Real cap = bc.C / dt;
-  const Real pcOld = bc.pc;
-  const Real pvenOld = bc.pven;
-
-  const auto &law = cfg.outletFlowLaw;
-
-  const Real radiusP = law.geometricParam.at(tag).Rp;
-  const Real lengthP = law.geometricParam.at(tag).Lp;
-
-  const Real radiusD = law.geometricParam.at(tag).Rd;
-  const Real lengthD = law.geometricParam.at(tag).Ld;
-
-  auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real> {
-    // Stepping always uses the *running* rheology so pathologies move the flux.
-    return outletFlow(cfg, cfg.viscosity, dp, L, radius);
-  };
-
-  auto solvePressureDropForFlow = [&](Real targetQ, Real L, Real radius,
-                                      Real guess) -> Real {
-    if (std::abs(targetQ) < law.zeroFlowTolerance)
-      return 0.0;
-
-    const Real sgn = (targetQ >= 0.0) ? 1.0 : -1.0;
-    const Real qAbs = std::abs(targetQ);
-
-    auto F = [&](Real x) -> std::pair<Real, Real> {
-      const auto [q, dq] = flowLaw(sgn * x, L, radius);
-      return {sgn * q - qAbs, dq};
+    input.pSv = [p = cfg.lv.systemicVenousPressure](Real) { return p; };
+    input.pAt = [p = cfg.atrialPressure](Real t) { return atrial_pressure(p, t); };
+    input.u = [a = cfg.activation](Real t) { return periodic_activation(a, t); };
+    input.m0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
+                 lowEc = cfg.lv.relaxationM0LowEc,
+                 highEc = cfg.lv.relaxationM0HighEc](Real ec) {
+      if (highEc <= lowEc)
+        return high;
+      if (ec <= lowEc)
+        return low;
+      if (ec >= highEc)
+        return high;
+      const Real s = (ec - lowEc) / (highEc - lowEc);
+      return (1.0 - s) * low + s * high;
+    };
+    input.dm0 = [low = cfg.lv.relaxationM0Low, high = cfg.lv.relaxationM0High,
+                  lowEc = cfg.lv.relaxationM0LowEc,
+                  highEc = cfg.lv.relaxationM0HighEc](Real ec) {
+      if (highEc <= lowEc || ec <= lowEc || ec >= highEc)
+        return 0.0;
+      return (high - low) / (highEc - lowEc);
     };
 
-    Real hi = std::max<Real>(std::abs(guess), law.pressureDropBracketMin);
+    {
+      using PassiveEnergy = std::decay_t<decltype(input.passiveEnergy)>;
 
-    for (int k = 0; k < law.maxBracketIterations && F(hi).first < 0.0; ++k)
-      hi *= 2.0;
+      typename PassiveEnergy::Parameters hp;
+      hp.mu1 = cfg.lv.passiveMu1;
+      hp.mu2 = cfg.lv.passiveMu2;
+      hp.C0 = cfg.lv.passiveC0;
+      hp.C1 = cfg.lv.passiveC1;
+      hp.C2 = cfg.lv.passiveC2;
+      hp.C3 = cfg.lv.passiveC3;
 
-    if (F(hi).first < 0.0) {
-      std::cerr << "Warning: failed to bracket pressure drop for targetQ = "
-                << targetQ << ". Returning last upper bound.\n";
-      return sgn * hi;
+      input.passiveEnergy = PassiveEnergy(hp);
     }
 
-    Math::RootFinding::NewtonRaphson<Real> solver(
-        law.flowAbsoluteTolerance, law.flowRelativeTolerance,
-        law.flowStepTolerance, law.flowMaxIterations);
+    return input;
+  }
 
-    const auto root = solver.solve(F, std::min(std::abs(guess), hi), 0.0, hi);
+  std::pair<CoupledLV0DCoronary3D::Real, CoupledLV0DCoronary3D::Real>
+  CoupledLV0DCoronary3D::outletFlow(
+    const Config& cfg, const CarreauYasuda& visc, Real dp, Real L, Real radius)
+  {
+    const auto& law = cfg.outletFlowLaw;
+    const auto& cy = visc;
 
-    if (!root) {
-      std::cerr << "Warning: failed to invert flow law for targetQ = "
-                << targetQ << ". Returning bracket upper bound.\n";
-      return sgn * hi;
+    const Real mu0 = cy.mu0;
+    const Real muInf = cy.muInf;
+    const Real lambda = cy.lambda;
+    const Real n = cy.n;
+    const Real yasuda = cy.yasuda;
+    const Real delta = mu0 - muInf;
+
+    const Real sgn = (dp >= 0.0) ? 1.0 : -1.0;
+    const Real adp = std::abs(dp);
+
+    const Real R0 = 8.0 * mu0 * L / (std::numbers::pi_v<Real> * std::pow(radius, 4.0));
+
+    if (adp < law.pressureDropTolerance)
+      return {dp / R0, 1.0 / R0};
+
+    const Real tauW = radius * adp / (2.0 * L);
+
+    auto mu = [&](Real g) -> Real {
+      return muInf +
+        delta * std::pow(1.0 + std::pow(lambda * g, yasuda), (n - 1.0) / yasuda);
+    };
+
+    auto dmu = [&](Real g) -> Real {
+      const Real base = 1.0 + std::pow(lambda * g, yasuda);
+
+      return delta * (n - 1.0) * std::pow(base, (n - 1.0 - yasuda) / yasuda) *
+        std::pow(lambda, yasuda) * std::pow(g, yasuda - 1.0);
+    };
+
+    auto tauMinusTauW = [&](Real g) -> std::pair<Real, Real> {
+      const Real m = mu(g);
+      const Real dm = dmu(g);
+      return {g * m - tauW, m + g * dm};
+    };
+
+    Math::RootFinding::NewtonRaphson<Real> rootFinder(law.shearAbsoluteTolerance,
+      law.shearRelativeTolerance, law.shearStepTolerance, law.shearMaxIterations);
+
+    Real gHi = std::max<Real>(tauW / muInf, law.minShearRate);
+
+    for (int k = 0; k < law.maxBracketIterations && tauMinusTauW(gHi).first < 0.0; ++k)
+      gHi *= 2.0;
+
+    if (tauMinusTauW(gHi).first < 0.0)
+    {
+      std::cerr << "Warning: failed to bracket wall shear rate. "
+                << "Using Poiseuille fallback.\n";
+      return {dp / R0, 1.0 / R0};
     }
 
-    return sgn * (*root);
-  };
+    const auto gammaRoot =
+      rootFinder.solve(tauMinusTauW, 0.5 * gHi, law.shearStepTolerance, gHi);
+
+    if (!gammaRoot)
+    {
+      std::cerr << "Warning: failed to solve wall shear rate. "
+                << "Using Poiseuille fallback.\n";
+      return {dp / R0, 1.0 / R0};
+    }
+
+    const Real gammaW = *gammaRoot;
+
+    auto integrand = [&](Real g) -> Real {
+      if (g <= 0.0)
+        return 0.0;
+
+      const Real m = mu(g);
+      const Real dm = dmu(g);
+      const Real dtau = m + g * dm;
+
+      return std::pow(g, 3.0) * m * m * dtau;
+    };
+
+    Math::RungeKutta::RK4 integrator;
+
+    const int steps = law.integralSteps;
+    const Real hStep = gammaW / static_cast<Real>(steps);
+
+    Real I = 0.0;
+
+    auto rhs = [&](Real g, Real y) -> Real {
+      (void)y;
+      return integrand(g);
+    };
+
+    for (int i = 0; i < steps; ++i)
+    {
+      const Real g = static_cast<Real>(i) * hStep;
+      integrator.step(I, g, hStep, I, rhs);
+    }
+
+    if (I <= 0.0 || !std::isfinite(I))
+    {
+      std::cerr << "Warning: invalid WRMS integral. " << "Using Poiseuille fallback.\n";
+      return {dp / R0, 1.0 / R0};
+    }
+
+    const Real qAbs =
+      std::numbers::pi_v<Real> * std::pow(radius, 3.0) * I / std::pow(tauW, 3.0);
+
+    const Real dqAbs =
+      (std::numbers::pi_v<Real> * std::pow(radius, 3.0) * gammaW - 3.0 * qAbs) / adp;
+
+    if (!std::isfinite(qAbs) || !std::isfinite(dqAbs) || dqAbs <= 0.0)
+    {
+      std::cerr << "Warning: invalid WRMS flow derivative. "
+                << "Using Poiseuille fallback.\n";
+      return {dp / R0, 1.0 / R0};
+    }
+
+    return {sgn * qAbs, dqAbs};
+  }
+
+  void CoupledLV0DCoronary3D::updateRCRNonNew(
+    const Config& cfg, const Attribute& tag, const Model& model, RCR& bc, Real Q, Real dt)
+  {
+    const auto& s = model.getState();
+    const auto& h = model.getHistory();
+
+    const Real cap = bc.C / dt;
+    const Real pcOld = bc.pc;
+    const Real pvenOld = bc.pven;
+
+    const auto& law = cfg.outletFlowLaw;
+
+    const Real radiusP = law.geometricParam.at(tag).Rp;
+    const Real lengthP = law.geometricParam.at(tag).Lp;
+
+    const Real radiusD = law.geometricParam.at(tag).Rd;
+    const Real lengthD = law.geometricParam.at(tag).Ld;
+
+    auto flowLaw = [&](Real dp, Real L, Real radius) -> std::pair<Real, Real> {
+    // Stepping always uses the *running* rheology so pathologies move the flux.
+      return outletFlow(cfg, cfg.viscosity, dp, L, radius);
+    };
+
+    auto solvePressureDropForFlow = [&](Real targetQ, Real L, Real radius,
+                                      Real guess) -> Real {
+      if (std::abs(targetQ) < law.zeroFlowTolerance)
+        return 0.0;
+
+      const Real sgn = (targetQ >= 0.0) ? 1.0 : -1.0;
+      const Real qAbs = std::abs(targetQ);
+
+      auto F = [&](Real x) -> std::pair<Real, Real> {
+        const auto [q, dq] = flowLaw(sgn * x, L, radius);
+        return {sgn * q - qAbs, dq};
+      };
+
+      Real hi = std::max<Real>(std::abs(guess), law.pressureDropBracketMin);
+
+      for (int k = 0; k < law.maxBracketIterations && F(hi).first < 0.0; ++k)
+        hi *= 2.0;
+
+      if (F(hi).first < 0.0)
+      {
+        std::cerr << "Warning: failed to bracket pressure drop for targetQ = " << targetQ
+                  << ". Returning last upper bound.\n";
+        return sgn * hi;
+      }
+
+      Math::RootFinding::NewtonRaphson<Real> solver(law.flowAbsoluteTolerance,
+        law.flowRelativeTolerance, law.flowStepTolerance, law.flowMaxIterations);
+
+      const auto root = solver.solve(F, std::min(std::abs(guess), hi), 0.0, hi);
+
+      if (!root)
+      {
+        std::cerr << "Warning: failed to invert flow law for targetQ = " << targetQ
+                  << ". Returning bracket upper bound.\n";
+        return sgn * hi;
+      }
+
+      return sgn * (*root);
+    };
 
   // Intramyocardial pressure, low-pass filtered through a series R_a = tau/C.
   // A directly applied p_im = alpha*pv injects C*d(p_im)/dt straight into the
@@ -470,25 +499,24 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   // collapsible and can be made contraction- rather than cavity-driven.
   //   p_im   = intramyocardialFraction * pv + intramyocardialActiveFraction * tau_c
   //   p_im,v = venousCavityFraction    * pv + venousActiveFraction         * tau_c
-  const Real alpha = cfg.intramyocardialFraction;
-  const Real tauIm = std::max<Real>(cfg.intramyocardialFilterTau, 0.0);
-  const Real theta = (tauIm > 0.0) ? dt / (dt + tauIm) : 1.0;
+    const Real alpha = cfg.intramyocardialFraction;
+    const Real tauIm = std::max<Real>(cfg.intramyocardialFilterTau, 0.0);
+    const Real theta = (tauIm > 0.0) ? dt / (dt + tauIm) : 1.0;
 
-  const Real pimTarget =
-      alpha * s.pv + cfg.intramyocardialActiveFraction * s.tauc;
-  const Real pimOld = bc.pimFilt;
-  const Real pim = pimOld + theta * (pimTarget - pimOld); // filtered p_im^{n+1}
-  const Real dPim = (pim - pimOld) / dt;
+    const Real pimTarget = alpha * s.pv + cfg.intramyocardialActiveFraction * s.tauc;
+    const Real pimOld = bc.pimFilt;
+    const Real pim = pimOld + theta * (pimTarget - pimOld); // filtered p_im^{n+1}
+    const Real dPim = (pim - pimOld) / dt;
 
-  const Real pimvTarget =
+    const Real pimvTarget =
       cfg.venousCavityFraction * s.pv + cfg.venousActiveFraction * s.tauc;
-  const Real pimvOld = bc.pimvFilt;
-  const Real pimv = pimvOld + theta * (pimvTarget - pimvOld);
-  const Real dPimv = (pimv - pimvOld) / dt;
+    const Real pimvOld = bc.pimvFilt;
+    const Real pimv = pimvOld + theta * (pimvTarget - pimvOld);
+    const Real dPimv = (pimv - pimvOld) / dt;
 
-  const Real Qim = bc.C * dPim;    // arterial-compartment pump
-  const Real Qimv = bc.Cv * dPimv; // venous-compartment pump
-  (void)h;
+    const Real Qim = bc.C * dPim;    // arterial-compartment pump
+    const Real Qimv = bc.Cv * dPimv; // venous-compartment pump
+    (void)h;
 
   // ---- Coupled arterial + venous capacitor solve (2x2 Newton) -------------
   // Unknowns (p_c, p_ven). The arterial node p_c (compressed by p_im) drains
@@ -498,355 +526,363 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
   //
   //   R1 = (C/dt)(p_c   - p_c^n)   - Q_im  + q_d      - Q     = 0
   //   R2 = (C_v/dt)(p_ven - p_ven^n) - Q_imv - q_d + q_v      = 0
-  const Real capv = bc.Cv / dt;
-  const Real Rv = std::max(bc.Rv, 1e-30);
-  const Real Pra = cfg.rightAtrialPressure;
+    const Real capv = bc.Cv / dt;
+    const Real Rv = std::max(bc.Rv, 1e-30);
+    const Real Pra = cfg.rightAtrialPressure;
 
-  Real pc = pcOld;
-  Real pven = pvenOld;
-  bool converged = false;
+    Real pc = pcOld;
+    Real pven = pvenOld;
+    bool converged = false;
 
-  for (int it = 0; it < law.flowMaxIterations; ++it) {
-    const auto [qd, dqd] = flowLaw(pc - pven, lengthD, radiusD);
-    const auto [qv, dqv] = flowLaw(pven - Pra, lengthD, Rv);
+    for (int it = 0; it < law.flowMaxIterations; ++it)
+    {
+      const auto [qd, dqd] = flowLaw(pc - pven, lengthD, radiusD);
+      const auto [qv, dqv] = flowLaw(pven - Pra, lengthD, Rv);
 
-    const Real R1 = cap * (pc - pcOld) - Qim + qd - Q;
-    const Real R2 = capv * (pven - pvenOld) - Qimv - qd + qv;
+      const Real R1 = cap * (pc - pcOld) - Qim + qd - Q;
+      const Real R2 = capv * (pven - pvenOld) - Qimv - qd + qv;
 
-    const Real J11 = cap + dqd;
-    const Real J12 = -dqd;
-    const Real J21 = -dqd;
-    const Real J22 = capv + dqd + dqv;
+      const Real J11 = cap + dqd;
+      const Real J12 = -dqd;
+      const Real J21 = -dqd;
+      const Real J22 = capv + dqd + dqv;
 
-    const Real det = J11 * J22 - J12 * J21;
-    if (std::abs(det) < 1e-300)
-      break;
+      const Real det = J11 * J22 - J12 * J21;
+      if (std::abs(det) < 1e-300)
+        break;
 
-    const Real dpc = (-J22 * R1 + J12 * R2) / det;
-    const Real dpven = (J21 * R1 - J11 * R2) / det;
+      const Real dpc = (-J22 * R1 + J12 * R2) / det;
+      const Real dpven = (J21 * R1 - J11 * R2) / det;
 
-    pc += dpc;
-    pven += dpven;
+      pc += dpc;
+      pven += dpven;
 
-    if (std::abs(dpc) + std::abs(dpven) <
-        law.flowStepTolerance * (1.0 + std::abs(pc) + std::abs(pven))) {
-      converged = true;
-      break;
+      if (std::abs(dpc) + std::abs(dpven) <
+        law.flowStepTolerance * (1.0 + std::abs(pc) + std::abs(pven)))
+      {
+        converged = true;
+        break;
+      }
     }
-  }
 
-  if (!converged || !std::isfinite(pc) || !std::isfinite(pven)) {
-    std::cerr << "Warning: coupled arterial/venous capacitor solve did not "
-              << "converge. Keeping previous states.\n";
-    pc = pcOld;
-    pven = pvenOld;
-  }
+    if (!converged || !std::isfinite(pc) || !std::isfinite(pven))
+    {
+      std::cerr << "Warning: coupled arterial/venous capacitor solve did not "
+                << "converge. Keeping previous states.\n";
+      pc = pcOld;
+      pven = pvenOld;
+    }
 
-  bc.pc = pc;
-  bc.pven = pven;
+    bc.pc = pc;
+    bc.pven = pven;
 
-  const auto [qd, dqd_f] = flowLaw(bc.pc - bc.pven, lengthD, radiusD);
-  (void)dqd_f;
-  bc.qd = qd;
+    const auto [qd, dqd_f] = flowLaw(bc.pc - bc.pven, lengthD, radiusD);
+    (void)dqd_f;
+    bc.qd = qd;
 
-  const Real oldGuess = bc.pout - bc.pc;
-  const Real dpP = solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
+    const Real oldGuess = bc.pout - bc.pc;
+    const Real dpP = solvePressureDropForFlow(Q, lengthP, radiusP, oldGuess);
 
-  bc.pout = bc.pc + dpP;
+    bc.pout = bc.pc + dpP;
 
   // Persist the filtered intramyocardial pressures for the next step.
-  bc.pimFilt = pim;
-  bc.pimvFilt = pimv;
-}
+    bc.pimFilt = pim;
+    bc.pimvFilt = pimv;
+  }
 
-CoupledLV0DCoronary3D::Real
-CoupledLV0DCoronary3D::periodic_activation(const Activation &cfg, Real t) {
-  const Real T = cfg.period;
-  const Real tau = t - T * std::floor(t / T);
+  CoupledLV0DCoronary3D::Real CoupledLV0DCoronary3D::periodic_activation(
+    const Activation& cfg, Real t)
+  {
+    const Real T = cfg.period;
+    const Real tau = t - T * std::floor(t / T);
 
-  auto ss = [](Real s) {
-    s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
-    return s * s * (3.0 - 2.0 * s);
-  };
+    auto ss = [](Real s) {
+      s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
+      return s * s * (3.0 - 2.0 * s);
+    };
 
-  if (tau < cfg.tRampStart)
-    return 0.0;
-  if (tau < cfg.tRampEnd)
-    return cfg.positiveValue *
-           ss((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
-  if (tau < cfg.tPlateauEnd)
-    return cfg.positiveValue;
-  if (tau < cfg.tRelaxEnd)
-    return cfg.positiveValue +
-           (cfg.negativeValue - cfg.positiveValue) *
-               ss((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
-  if (tau < cfg.tNegativeEnd)
-    return cfg.negativeValue;
+    if (tau < cfg.tRampStart)
+      return 0.0;
+    if (tau < cfg.tRampEnd)
+      return cfg.positiveValue *
+        ss((tau - cfg.tRampStart) / (cfg.tRampEnd - cfg.tRampStart));
+    if (tau < cfg.tPlateauEnd)
+      return cfg.positiveValue;
+    if (tau < cfg.tRelaxEnd)
+      return cfg.positiveValue +
+        (cfg.negativeValue - cfg.positiveValue) *
+        ss((tau - cfg.tPlateauEnd) / (cfg.tRelaxEnd - cfg.tPlateauEnd));
+    if (tau < cfg.tNegativeEnd)
+      return cfg.negativeValue;
 
   // Smooth return from the negative plateau back to baseline over the rest of
   // the cycle (removes the old instantaneous negativeValue -> 0 jump).
-  return cfg.negativeValue *
-         (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
-}
+    return cfg.negativeValue *
+      (1.0 - ss((tau - cfg.tNegativeEnd) / (T - cfg.tNegativeEnd)));
+  }
 
-CoupledLV0DCoronary3D::Real
-CoupledLV0DCoronary3D::atrial_pressure(const AtrialPressure &cfg, Real t) {
-  const Real T = cfg.period;
-  const Real tau = t - T * std::floor(t / T);
+  CoupledLV0DCoronary3D::Real CoupledLV0DCoronary3D::atrial_pressure(
+    const AtrialPressure& cfg, Real t)
+  {
+    const Real T = cfg.period;
+    const Real tau = t - T * std::floor(t / T);
 
   // C1-continuous (smoothstep) ramps between the same plateau values, so the
   // prescribed atrial/venous pressure has no derivative kinks.
-  auto ss = [](Real s) {
-    s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
-    return s * s * (3.0 - 2.0 * s);
-  };
-  auto ramp = [&](Real a, Real b, Real s) { return a + (b - a) * ss(s); };
+    auto ss = [](Real s) {
+      s = s < 0.0 ? 0.0 : (s > 1.0 ? 1.0 : s);
+      return s * s * (3.0 - 2.0 * s);
+    };
+    auto ramp = [&](Real a, Real b, Real s) { return a + (b - a) * ss(s); };
 
-  if (tau < cfg.t1)
-    return ramp(cfg.minValue, cfg.maxValue, tau / cfg.t1);
-  if (tau < cfg.t2)
-    return cfg.maxValue;
-  if (tau < cfg.t3)
-    return ramp(cfg.maxValue, cfg.minValue, (tau - cfg.t2) / (cfg.t3 - cfg.t2));
-  if (tau < cfg.t4)
-    return ramp(cfg.minValue, cfg.secondThreshold,
-                (tau - cfg.t3) / (cfg.t4 - cfg.t3));
-  if (tau < cfg.t5)
-    return cfg.secondThreshold;
-  if (tau < cfg.t6)
-    return ramp(cfg.secondThreshold, cfg.minValue,
-                (tau - cfg.t5) / (cfg.t6 - cfg.t5));
+    if (tau < cfg.t1)
+      return ramp(cfg.minValue, cfg.maxValue, tau / cfg.t1);
+    if (tau < cfg.t2)
+      return cfg.maxValue;
+    if (tau < cfg.t3)
+      return ramp(cfg.maxValue, cfg.minValue, (tau - cfg.t2) / (cfg.t3 - cfg.t2));
+    if (tau < cfg.t4)
+      return ramp(cfg.minValue, cfg.secondThreshold, (tau - cfg.t3) / (cfg.t4 - cfg.t3));
+    if (tau < cfg.t5)
+      return cfg.secondThreshold;
+    if (tau < cfg.t6)
+      return ramp(cfg.secondThreshold, cfg.minValue, (tau - cfg.t5) / (cfg.t6 - cfg.t5));
 
-  return cfg.minValue;
-}
+    return cfg.minValue;
+  }
 
-CoupledLV0DCoronary3D &CoupledLV0DCoronary3D::initialize() {
-  setupModel();
-  setupMeshAndSpaces();
-  setupDiagnostics();
-  printInitialState();
+  CoupledLV0DCoronary3D& CoupledLV0DCoronary3D::initialize()
+  {
+    setupModel();
+    setupMeshAndSpaces();
+    setupDiagnostics();
+    printInitialState();
 
-  m_initialized = true;
-  return *this;
-}
+    m_initialized = true;
+    return *this;
+  }
 
-void CoupledLV0DCoronary3D::setupModel() {
-  m_model.setMaxIterations(m_cfg.lv.maxIterations)
+  void CoupledLV0DCoronary3D::setupModel()
+  {
+    m_model.setMaxIterations(m_cfg.lv.maxIterations)
       .setAbsoluteTolerance(m_cfg.lv.absoluteTolerance)
       .setRelativeTolerance(m_cfg.lv.relativeTolerance)
       .setStepTolerance(m_cfg.lv.stepTolerance)
       .setDampingFactor(m_cfg.lv.dampingFactor);
 
-  Model::State s0;
-  s0.t = 0.0;
-  s0.y = m_cfg.lv.initialY;
-  s0.v = m_cfg.lv.initialV;
-  s0.pv = m_input.pAt(0.0) + m_cfg.lv.initialPvOffset;
-  s0.par = m_cfg.lv.initialPar;
-  s0.pd = m_cfg.lv.initialPd;
-  s0.ec = m_input.initFibDef;
-  s0.gamma = std::sqrt(std::max<Real>(m_input.initActiveStiffness, 0.0));
-  s0.beta = (s0.gamma > 0.0) ? (m_input.initActiveStress / s0.gamma) : 0.0;
-  s0.kc = s0.gamma * s0.gamma;
-  s0.tauc = s0.gamma * s0.beta;
-  s0.w = m_input.m0(s0.ec);
+    Model::State s0;
+    s0.t = 0.0;
+    s0.y = m_cfg.lv.initialY;
+    s0.v = m_cfg.lv.initialV;
+    s0.pv = m_input.pAt(0.0) + m_cfg.lv.initialPvOffset;
+    s0.par = m_cfg.lv.initialPar;
+    s0.pd = m_cfg.lv.initialPd;
+    s0.ec = m_input.initFibDef;
+    s0.gamma = std::sqrt(std::max<Real>(m_input.initActiveStiffness, 0.0));
+    s0.beta = (s0.gamma > 0.0) ? (m_input.initActiveStress / s0.gamma) : 0.0;
+    s0.kc = s0.gamma * s0.gamma;
+    s0.tauc = s0.gamma * s0.beta;
+    s0.w = m_input.m0(s0.ec);
 
-  m_model.initialize(s0);
-}
+    m_model.initialize(s0);
+  }
 
-void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
-  if (isRoot())
-    Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..."
-                  << Alert::Raise;
+  void CoupledLV0DCoronary3D::setupMeshAndSpaces()
+  {
+    if (isRoot())
+      Alert::Info() << "Setting up " << m_cfg.xdmfBasename << ".xdmf ..." << Alert::Raise;
 
-  m_xdmf.setMesh(m_mesh);
+    m_xdmf.setMesh(m_mesh);
 
-  m_u.setName("u");
-  m_p.setName("p");
-  m_mu.setName("viscosity");
-  m_up.setName("projected_convection");
-  m_sub.setName("subscale");
-  m_tau.setName("tau");
-  m_shearWall.setName("shearStress");
+    m_u.setName("u");
+    m_p.setName("p");
+    m_mu.setName("viscosity");
+    m_up.setName("projected_convection");
+    m_sub.setName("subscale");
+    m_tau.setName("tau");
+    m_shearWall.setName("shearStress");
 
-  m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-  m_pOld = 0.0;
-  m_one = 1.0;
-  m_mu.getSolution() = 0.0;
-  m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
-  m_tauOld = 0.0;
-  m_shearWall = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_uOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_pOld = 0.0;
+    m_one = 1.0;
+    m_mu.getSolution() = 0.0;
+    m_subOld = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
+    m_tauOld = 0.0;
+    m_shearWall = Math::SpatialVector<Real>{{0.0, 0.0, 0.0}};
 
-  m_xdmf.add("velocity", m_u.getSolution());
-  m_xdmf.add("pressure", m_p.getSolution());
-  m_xdmf.add("viscosity", m_mu.getSolution());
-  m_xdmf.add("subscale", m_sub.getSolution());
-  m_xdmf.add("tau", m_tau.getSolution());
-  m_xdmf.add("shearStress", m_shearWall);
+    m_xdmf.add("velocity", m_u.getSolution());
+    m_xdmf.add("pressure", m_p.getSolution());
+    m_xdmf.add("viscosity", m_mu.getSolution());
+    m_xdmf.add("subscale", m_sub.getSolution());
+    m_xdmf.add("tau", m_tau.getSolution());
+    m_xdmf.add("shearStress", m_shearWall);
 
-  m_wk.clear();
-  for (const Attribute tag : m_cfg.outlets) {
-    m_wk.emplace(tag, m_cfg.defaultRCR);
+    m_wk.clear();
+    for (const Attribute tag : m_cfg.outlets)
+    {
+      m_wk.emplace(tag, m_cfg.defaultRCR);
     // Venous compartment defaults (overwritten by calibration below when
     // autoCalibrateOutlets is enabled); guarantees R_v > 0 either way.
-    auto &bc = m_wk.at(tag);
-    bc.Cv = m_cfg.venousComplianceFactor * bc.C;
-    bc.Rv = std::max<Real>(m_cfg.venousResistanceFraction * bc.Rd, 1.0);
-    bc.pven = 0.5 * (bc.pc + m_cfg.rightAtrialPressure);
-  }
+      auto& bc = m_wk.at(tag);
+      bc.Cv = m_cfg.venousComplianceFactor * bc.C;
+      bc.Rv = std::max<Real>(m_cfg.venousResistanceFraction * bc.Rd, 1.0);
+      bc.pven = 0.5 * (bc.pc + m_cfg.rightAtrialPressure);
+    }
 
   // ---- Automatic Murray-law outlet calibration --------------------------
-  if (m_cfg.autoCalibrateOutlets) {
-    const Real PI = std::numbers::pi_v<Real>;
-    const Real pim = 0.45 * m_model.getState().pv; // alpha * pv (distal level)
-    const Real par0 = m_model.getState().par;
-    const Real dP = std::max<Real>(par0 - pim, 1.0);
+    if (m_cfg.autoCalibrateOutlets)
+    {
+      const Real PI = std::numbers::pi_v<Real>;
+      const Real pim = 0.45 * m_model.getState().pv; // alpha * pv (distal level)
+      const Real par0 = m_model.getState().par;
+      const Real dP = std::max<Real>(par0 - pim, 1.0);
 
     // Equivalent radius r = sqrt(A/pi) from the measured outlet area.
-    std::map<Attribute, Real> rEq;
-    Real sumR3 = 0.0;
-    for (const Attribute tag : m_cfg.outlets) {
-      m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
-      m_flux.assemble();
-      const Real area = std::max<Real>(m_flux(m_one), 1e-12);
-      rEq[tag] = std::sqrt(area / PI);
-      sumR3 += rEq[tag] * rEq[tag] * rEq[tag];
+      std::map<Attribute, Real> rEq;
+      Real sumR3 = 0.0;
+      for (const Attribute tag : m_cfg.outlets)
+      {
+        m_flux = BoundaryIntegral(m_one, m_qFlux).over(tag);
+        m_flux.assemble();
+        const Real area = std::max<Real>(m_flux(m_one), 1e-12);
+        rEq[tag] = std::sqrt(area / PI);
+        sumR3 += rEq[tag] * rEq[tag] * rEq[tag];
+      }
+
+      const Real fp = std::clamp(m_cfg.proximalResistanceFraction, 0.0, 0.5);
+      for (const Attribute tag : m_cfg.outlets)
+      {
+        const Real w = (rEq[tag] * rEq[tag] * rEq[tag]) / std::max(sumR3, 1e-30);
+        const Real Qi = std::max<Real>(m_cfg.lcaTargetFlow * w, 1e-12);
+        const Real Ri = dP / Qi;         // total branch resistance
+        const Real Rd = (1.0 - fp) * Ri; // distal (peripheral)
+        const Real Rp = fp * Ri;         // proximal (characteristic)
+
+        const Real muN = m_cfg.newtonianCalibrationViscosity;
+        auto& g = m_cfg.outletFlowLaw.geometricParam.at(tag);
+        g.Rd = std::pow(8.0 * muN * g.Ld / (PI * std::max(Rd, 1e-300)), 0.25);
+        g.Rp = std::pow(8.0 * muN * g.Lp / (PI * std::max(Rp, 1e-300)), 0.25);
+
+        auto& bc = m_wk.at(tag);
+        bc.C = m_cfg.rcrTau / Rd;                     // uniform tau = Rd*C
+        bc.Cv = m_cfg.venousComplianceFactor * bc.C;  // venous compliance
+        bc.Rv = m_cfg.venousResistanceFraction * Rd;  // venous resistance << Rd
+        bc.pven = 0.5 * (bc.pc + m_cfg.rightAtrialPressure); // init venous state
+        if (isRoot())
+          Alert::Info() << "  [calib] outlet " << tag
+                        << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
+                        << "  Q=" << (Qi * 6.0e7) << " mL/min" << "  Rd=" << Rd
+                        << "  C=" << m_wk.at(tag).C << "  tau=" << (Rd * m_wk.at(tag).C)
+                        << " s" << Alert::Raise;
+      }
     }
 
-    const Real fp = std::clamp(m_cfg.proximalResistanceFraction, 0.0, 0.5);
-    for (const Attribute tag : m_cfg.outlets) {
-      const Real w = (rEq[tag] * rEq[tag] * rEq[tag]) / std::max(sumR3, 1e-30);
-      const Real Qi = std::max<Real>(m_cfg.lcaTargetFlow * w, 1e-12);
-      const Real Ri = dP / Qi;         // total branch resistance
-      const Real Rd = (1.0 - fp) * Ri; // distal (peripheral)
-      const Real Rp = fp * Ri;         // proximal (characteristic)
-
-      const Real muN = m_cfg.newtonianCalibrationViscosity;
-      auto &g = m_cfg.outletFlowLaw.geometricParam.at(tag);
-      g.Rd = std::pow(8.0 * muN * g.Ld / (PI * std::max(Rd, 1e-300)), 0.25);
-      g.Rp = std::pow(8.0 * muN * g.Lp / (PI * std::max(Rp, 1e-300)), 0.25);
-
-      auto &bc = m_wk.at(tag);
-      bc.C = m_cfg.rcrTau / Rd;                     // uniform tau = Rd*C
-      bc.Cv = m_cfg.venousComplianceFactor * bc.C;  // venous compliance
-      bc.Rv = m_cfg.venousResistanceFraction * Rd;  // venous resistance << Rd
-      bc.pven = 0.5 * (bc.pc + m_cfg.rightAtrialPressure); // init venous state
-      if (isRoot())
-        Alert::Info() << "  [calib] outlet " << tag
-                      << "  A=" << (rEq[tag] * rEq[tag] * PI) << " m^2"
-                      << "  Q=" << (Qi * 6.0e7) << " mL/min"
-                      << "  Rd=" << Rd << "  C=" << m_wk.at(tag).C
-                      << "  tau=" << (Rd * m_wk.at(tag).C) << " s"
-                      << Alert::Raise;
-    }
-  }
-
-  m_flowSolver.setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
-      .setStateUpdate([this](const PETSc::Math::Vector &x) {
+    m_flowSolver.setTolerances(1e-10, 1e-8, 1e-10, 50, 10000)
+      .setStateUpdate([this](const PETSc::Math::Vector& x) {
         m_u.getSolution().setData(x, 0);
         m_p.getSolution().setData(x, m_uh.getSize());
       });
-}
-
-void CoupledLV0DCoronary3D::setupDiagnostics() {
-  if (!isRoot())
-    return;
-
-  m_csv.open(m_cfg.csvPath);
-
-  if (!m_csv)
-    throw std::runtime_error("Failed to open coupled CSV file: " +
-                             m_cfg.csvPath);
-
-  writeCSVHeader();
-}
-
-void CoupledLV0DCoronary3D::printInitialState() const {
-  if (!isRoot())
-    return;
-
-  const auto &s = m_model.getState();
-
-  Alert::Info() << "Initial 0D state:" << Alert::NewLine << "y     = " << s.y
-                << Alert::NewLine << "v     = " << s.v << Alert::NewLine
-                << "pv    = " << s.pv << Alert::NewLine << "par   = " << s.par
-                << Alert::NewLine << "pd    = " << s.pd << Alert::NewLine
-                << "ec    = " << s.ec << Alert::NewLine << "gamma = " << s.gamma
-                << Alert::NewLine << "beta  = " << s.beta << Alert::NewLine
-                << "w     = " << s.w << Alert::NewLine << "kc    = " << s.kc
-                << Alert::NewLine << "tauc  = " << s.tauc << Alert::NewLine
-                << "3D flow mode: " << flowModeName(m_cfg.flowMode)
-                << Alert::Raise;
-}
-
-bool CoupledLV0DCoronary3D::isRoot() const {
-  return m_mesh.getContext().getCommunicator().rank() == RootRank;
-}
-
-bool CoupledLV0DCoronary3D::advance0D() {
-  if (isRoot())
-    ZeroDInfo() << "Advancing LV model ..." << Alert::Raise;
-
-  const auto rep = m_model.step(m_cfg.dt);
-
-  if (isRoot()) {
-    ZeroDInfo() << "Newton: " << (rep.converged ? "converged" : "NOT converged")
-                << "  iter = " << rep.iterations
-                << "  |F| = " << rep.finalResidual
-                << "  |dx| = " << rep.finalStepNorm << Alert::Raise;
   }
 
-  if (isRoot() && rep.converged) {
-    const auto &s = m_model.getState();
-    ZeroDInfo() << "pv  = " << s.pv << " Pa"
-                << "  par = " << s.par << " Pa"
-                << "  pd  = " << s.pd << " Pa" << Alert::Raise;
+  void CoupledLV0DCoronary3D::setupDiagnostics()
+  {
+    if (!isRoot())
+      return;
+
+    m_csv.open(m_cfg.csvPath);
+
+    if (!m_csv)
+      throw std::runtime_error("Failed to open coupled CSV file: " + m_cfg.csvPath);
+
+    writeCSVHeader();
   }
 
-  return rep.converged;
-}
+  void CoupledLV0DCoronary3D::printInitialState() const
+  {
+    if (!isRoot())
+      return;
 
-void CoupledLV0DCoronary3D::solveStatic() {
-  if (isRoot())
-    ThreeDInfo() << "Solving static initialization ..." << Alert::Raise;
+    const auto& s = m_model.getState();
 
-  const auto normal = BoundaryNormal(m_mesh);
-  const Attribute outlet0 = m_cfg.outlets[0];
-  const Attribute outlet1 = m_cfg.outlets[1];
-  const Attribute outlet2 = m_cfg.outlets[2];
-  const Attribute outlet3 = m_cfg.outlets[3];
-  const Attribute outlet4 = m_cfg.outlets[4];
-  const Attribute outlet5 = m_cfg.outlets[5];
+    Alert::Info() << "Initial 0D state:" << Alert::NewLine << "y     = " << s.y
+                  << Alert::NewLine << "v     = " << s.v << Alert::NewLine
+                  << "pv    = " << s.pv << Alert::NewLine << "par   = " << s.par
+                  << Alert::NewLine << "pd    = " << s.pd << Alert::NewLine
+                  << "ec    = " << s.ec << Alert::NewLine << "gamma = " << s.gamma
+                  << Alert::NewLine << "beta  = " << s.beta << Alert::NewLine
+                  << "w     = " << s.w << Alert::NewLine << "kc    = " << s.kc
+                  << Alert::NewLine << "tauc  = " << s.tauc << Alert::NewLine
+                  << "3D flow mode: " << flowModeName(m_cfg.flowMode) << Alert::Raise;
+  }
 
-  const auto &s = m_model.getState();
-  const Real pin = s.par;
+  bool CoupledLV0DCoronary3D::isRoot() const
+  {
+    return m_mesh.getContext().getCommunicator().rank() == RootRank;
+  }
 
-  const Real mu = m_cfg.viscosity.mu0;
+  bool CoupledLV0DCoronary3D::advance0D()
+  {
+    if (isRoot())
+      ZeroDInfo() << "Advancing LV model ..." << Alert::Raise;
 
-  const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+    const auto rep = m_model.step(m_cfg.dt);
 
-  const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+    if (isRoot())
+    {
+      ZeroDInfo() << "Newton: " << (rep.converged ? "converged" : "NOT converged")
+                  << "  iter = " << rep.iterations << "  |F| = " << rep.finalResidual
+                  << "  |dx| = " << rep.finalStepNorm << Alert::Raise;
+    }
 
-  const auto &uLag = m_uOld;
-  const auto oseenConvection = Mult(Jacobian(m_u), uLag); // (uLag·∇)du
-  const auto divLag = Div(uLag);
-  const auto oseenTemam = divLag * Dot(m_u, m_v); // Temam stabilization
+    if (isRoot() && rep.converged)
+    {
+      const auto& s = m_model.getState();
+      ZeroDInfo() << "pv  = " << s.pv << " Pa" << "  par = " << s.par << " Pa"
+                  << "  pd  = " << s.pd << " Pa" << Alert::Raise;
+    }
+
+    return rep.converged;
+  }
+
+  void CoupledLV0DCoronary3D::solveStatic()
+  {
+    if (isRoot())
+      ThreeDInfo() << "Solving static initialization ..." << Alert::Raise;
+
+    const auto normal = BoundaryNormal(m_mesh);
+    const Attribute outlet0 = m_cfg.outlets[0];
+    const Attribute outlet1 = m_cfg.outlets[1];
+    const Attribute outlet2 = m_cfg.outlets[2];
+    const Attribute outlet3 = m_cfg.outlets[3];
+    const Attribute outlet4 = m_cfg.outlets[4];
+    const Attribute outlet5 = m_cfg.outlets[5];
+
+    const auto& s = m_model.getState();
+    const Real pin = s.par;
+
+    const Real mu = m_cfg.viscosity.mu0;
+
+    const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+
+    const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+
+    const auto& uLag = m_uOld;
+    const auto oseenConvection = Mult(Jacobian(m_u), uLag); // (uLag·∇)du
+    const auto divLag = Div(uLag);
+    const auto oseenTemam = divLag * Dot(m_u, m_v); // Temam stabilization
 
   // Backflow damping (keeps BCs stable even in steady solve)
-  const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
-  const auto outletBackflowDamping =
+    const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
+    const auto outletBackflowDamping =
       0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
 
-  m_flow =
-      2.0 * Integral(mu * symDU, symV)
+    m_flow = 2.0 * Integral(mu * symDU, symV)
 
-      - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) +
-      m_cfg.eps * Integral(m_p, m_q)
+      - Integral(m_p, Div(m_v)) + Integral(Div(m_u), m_q) + m_cfg.eps * Integral(m_p, m_q)
 
       + BoundaryIntegral(pin * Dot(m_v, normal)).over(m_cfg.inlet)
 
-      +
-      BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
+      + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
       BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1) +
       BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2) +
       BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3) +
@@ -862,126 +898,127 @@ void CoupledLV0DCoronary3D::solveStatic() {
 
       + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
 
-  m_flow.assemble();
+    m_flow.assemble();
 
-  if (!m_flowFieldSplitsSet) {
-    m_flow.setFieldSplits();
-    m_flowFieldSplitsSet = true;
+    if (!m_flowFieldSplitsSet)
+    {
+      m_flow.setFieldSplits();
+      m_flowFieldSplitsSet = true;
+    }
+
+    m_flow.solve(m_flowKSP);
+
+    ::KSPConvergedReason reason;
+    PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+    assert(ierr == PETSC_SUCCESS);
+
+    PetscInt iterations = 0;
+    ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+
+    if (isRoot())
+    {
+      KSPInfo() << "Static solve: " << (reason > 0 ? "Converged" : "Did NOT converge")
+                << "  iterations = " << iterations << Alert::Raise;
+    }
   }
 
-  m_flow.solve(m_flowKSP);
+  bool CoupledLV0DCoronary3D::solve3D()
+  {
+    const auto setup3DStart = CoronaryClock::now();
 
-  ::KSPConvergedReason reason;
-  PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
-  assert(ierr == PETSC_SUCCESS);
+    const auto& s = m_model.getState();
+    const Real pin = s.par;
 
-  PetscInt iterations = 0;
-  ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
-  assert(ierr == PETSC_SUCCESS);
-  (void)ierr;
+    const auto normal = BoundaryNormal(m_mesh);
+    const Attribute outlet0 = m_cfg.outlets[0];
+    const Attribute outlet1 = m_cfg.outlets[1];
+    const Attribute outlet2 = m_cfg.outlets[2];
+    const Attribute outlet3 = m_cfg.outlets[3];
+    const Attribute outlet4 = m_cfg.outlets[4];
+    const Attribute outlet5 = m_cfg.outlets[5];
 
-  if (isRoot()) {
-    KSPInfo() << "Static solve: "
-              << (reason > 0 ? "Converged" : "Did NOT converge")
-              << "  iterations = " << iterations << Alert::Raise;
-  }
-}
+    const auto& uState = m_u.getSolution();
+    const auto& pState = m_p.getSolution();
+    const auto& uLag = m_uOld;
 
-bool CoupledLV0DCoronary3D::solve3D() {
-  const auto setup3DStart = CoronaryClock::now();
+    const auto gradDU = Jacobian(m_u);
+    const auto gradU = Jacobian(uState);
+    const auto gradLag = Jacobian(uLag);
 
-  const auto &s = m_model.getState();
-  const Real pin = s.par;
+    const auto newtonConvection = Mult(gradDU, uState) + Mult(gradU, m_u);
 
-  const auto normal = BoundaryNormal(m_mesh);
-  const Attribute outlet0 = m_cfg.outlets[0];
-  const Attribute outlet1 = m_cfg.outlets[1];
-  const Attribute outlet2 = m_cfg.outlets[2];
-  const Attribute outlet3 = m_cfg.outlets[3];
-  const Attribute outlet4 = m_cfg.outlets[4];
-  const Attribute outlet5 = m_cfg.outlets[5];
+    const auto stateConvection = Mult(gradU, uState);
+    const auto oseenConvectionJacobian = Mult(gradDU, uLag);
 
-  const auto &uState = m_u.getSolution();
-  const auto &pState = m_p.getSolution();
-  const auto &uLag = m_uOld;
+    const auto divDU = Div(m_u);
+    const auto divU = Div(uState);
+    const auto divLag = Div(uLag);
 
-  const auto gradDU = Jacobian(m_u);
-  const auto gradU = Jacobian(uState);
-  const auto gradLag = Jacobian(uLag);
+    const auto temamJacobian1 = Dot(divDU * uState, m_v);
 
-  const auto newtonConvection = Mult(gradDU, uState) + Mult(gradU, m_u);
+    const auto temamJacobian2 = divU * Dot(m_u, m_v);
 
-  const auto stateConvection = Mult(gradU, uState);
-  const auto oseenConvectionJacobian = Mult(gradDU, uLag);
+    const auto temamResidual = divU * Dot(uState, m_v);
 
-  const auto divDU = Div(m_u);
-  const auto divU = Div(uState);
-  const auto divLag = Div(uLag);
+    const auto oseenTemamJacobian = divLag * Dot(m_u, m_v);
 
-  const auto temamJacobian1 = Dot(divDU * uState, m_v);
-
-  const auto temamJacobian2 = divU * Dot(m_u, m_v);
-
-  const auto temamResidual = divU * Dot(uState, m_v);
-
-  const auto oseenTemamJacobian = divLag * Dot(m_u, m_v);
-
-  const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
-  const auto inletBeta = Max(Dot(m_uOld, normal), 0.0);
-  const auto outletBackflowDamping =
+    const auto outletBeta = Max(-Dot(m_uOld, normal), 0.0);
+    const auto inletBeta = Max(Dot(m_uOld, normal), 0.0);
+    const auto outletBackflowDamping =
       0.5 * m_cfg.outletBackflowStabilization * m_cfg.rho * outletBeta;
-  const auto inletBackflowDamping =
+    const auto inletBackflowDamping =
       0.5 * m_cfg.inletBackflowStabilization * m_cfg.rho * inletBeta;
-  const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
+    const auto symDU = 0.5 * (Jacobian(m_u) + Transpose(Jacobian(m_u)));
 
-  const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
+    const auto symV = 0.5 * (Jacobian(m_v) + Transpose(Jacobian(m_v)));
 
-  const auto symU = 0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
+    const auto symU = 0.5 * (Jacobian(uState) + Transpose(Jacobian(uState)));
 
-  const auto symLag = 0.5 * (gradLag + Transpose(gradLag));
+    const auto symLag = 0.5 * (gradLag + Transpose(gradLag));
 
-  const auto duNormal = Dot(m_u, normal) * normal;
+    const auto duNormal = Dot(m_u, normal) * normal;
 
-  const auto duTangential = m_u - duNormal;
+    const auto duTangential = m_u - duNormal;
 
-  const auto uStateNormal = Dot(uState, normal) * normal;
+    const auto uStateNormal = Dot(uState, normal) * normal;
 
-  const auto uStateTangential = uState - uStateNormal;
+    const auto uStateTangential = uState - uStateNormal;
 
-  const auto &cy = m_cfg.viscosity;
-  const Real gammaReg = cy.gammaRegularization;
-  const Real mu0 = cy.mu0;
-  const Real muInf = cy.muInf;
-  const Real lambda = cy.lambda;
-  const Real nCY = cy.n;
-  const Real yasuda = cy.yasuda;
-  const Real deltaMu = mu0 - muInf;
+    const auto& cy = m_cfg.viscosity;
+    const Real gammaReg = cy.gammaRegularization;
+    const Real mu0 = cy.mu0;
+    const Real muInf = cy.muInf;
+    const Real lambda = cy.lambda;
+    const Real nCY = cy.n;
+    const Real yasuda = cy.yasuda;
+    const Real deltaMu = mu0 - muInf;
 
-  const auto gamma = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));
+    const auto gamma = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symU, symU));
 
-  const auto gammaLag = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symLag, symLag));
+    const auto gammaLag = Sqrt(gammaReg * gammaReg + 2.0 * Dot(symLag, symLag));
 
-  const auto carreauBase = 1.0 + Pow(lambda * gamma, yasuda);
+    const auto carreauBase = 1.0 + Pow(lambda * gamma, yasuda);
 
-  const auto carreauBaseLag = 1.0 + Pow(lambda * gammaLag, yasuda);
+    const auto carreauBaseLag = 1.0 + Pow(lambda * gammaLag, yasuda);
 
-  const auto mu = muInf + deltaMu * Pow(carreauBase, (nCY - 1.0) / yasuda);
+    const auto mu = muInf + deltaMu * Pow(carreauBase, (nCY - 1.0) / yasuda);
 
-  const auto muLag =
-      muInf + deltaMu * Pow(carreauBaseLag, (nCY - 1.0) / yasuda);
+    const auto muLag = muInf + deltaMu * Pow(carreauBaseLag, (nCY - 1.0) / yasuda);
 
-  const auto dgamma = 2.0 * Dot(symU, symDU) / gamma;
+    const auto dgamma = 2.0 * Dot(symU, symDU) / gamma;
 
-  const auto dmu = deltaMu * (nCY - 1.0) *
-                   Pow(carreauBase, (nCY - 1.0 - yasuda) / yasuda) *
-                   std::pow(lambda, yasuda) * Pow(gamma, yasuda - 1.0) * dgamma;
+    const auto dmu = deltaMu * (nCY - 1.0) *
+      Pow(carreauBase, (nCY - 1.0 - yasuda) / yasuda) * std::pow(lambda, yasuda) *
+      Pow(gamma, yasuda - 1.0) * dgamma;
 
   /*
    * Convective residual target:
    *
    *   a^n = (grad u^n) u^n.
    */
-  const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
+    const auto convectionTarget = Mult(Jacobian(m_uOld), m_uOld);
 
   /*
    * L2 projection of the convective term:
@@ -989,32 +1026,31 @@ bool CoupledLV0DCoronary3D::solve3D() {
    *   int proj_conv_h · v = int u^n · grad u^n  · v.
    */
 
-  m_l2ConvU = Integral(m_up, m_vp) - Integral(convectionTarget, m_vp);
-  m_l2ConvU.assemble();
-  m_l2ConvUSolver.solve();
+    m_l2ConvU = Integral(m_up, m_vp) - Integral(convectionTarget, m_vp);
+    m_l2ConvU.assemble();
+    m_l2ConvUSolver.solve();
 
-  RealFunction tau = [=, this](const Point &p) -> Real {
-    const auto uOld = m_uOld.getValue(p);
-    const Real mu = m_mu.getSolution().getValue(p);
-    const Real hK = std::pow(p.getPolytope().getMeasure(),
-                             1.0 / p.getPolytope().getDimension());
-    const Real order = 2;
-    const Real speed = std::sqrt(dot(uOld, uOld));
+    RealFunction tau = [=, this](const Point& p) -> Real {
+      const auto uOld = m_uOld.getValue(p);
+      const Real mu = m_mu.getSolution().getValue(p);
+      const Real hK =
+        std::pow(p.getPolytope().getMeasure(), 1.0 / p.getPolytope().getDimension());
+      const Real order = 2;
+      const Real speed = std::sqrt(dot(uOld, uOld));
 
-    const Real Tau =
-        1. / (4.0 * std::pow(order, 4.) * mu / (m_cfg.rho * std::pow(hK, 2.0)) +
-              2.0 * order * speed / hK);
+      const Real Tau = 1. /
+        (4.0 * std::pow(order, 4.) * mu / (m_cfg.rho * std::pow(hK, 2.0)) +
+          2.0 * order * speed / hK);
 
-    return 1. / (m_cfg.rho / m_cfg.dt + m_cfg.rho / Tau);
-  };
+      return 1. / (m_cfg.rho / m_cfg.dt + m_cfg.rho / Tau);
+    };
 
-  m_tauProjection = Integral(m_tau, m_t) - Integral(tau, m_t);
-  m_tauProjection.assemble();
-  m_tauProjectionSolver.solve();
+    m_tauProjection = Integral(m_tau, m_t) - Integral(tau, m_t);
+    m_tauProjection.assemble();
+    m_tauProjectionSolver.solve();
 
-  auto subUpdate = VectorFunction(
-      m_mesh.getSpaceDimension(),
-      [=, this](const Point &p) -> Math::SpatialVector<Real> {
+    auto subUpdate = VectorFunction(
+      m_mesh.getSpaceDimension(), [=, this](const Point& p) -> Math::SpatialVector<Real> {
         const auto conv = convectionTarget.getValue(p);
         const auto proj = m_up.getSolution().getValue(p);
         const auto old = m_subOld.getValue(p);
@@ -1022,9 +1058,9 @@ bool CoupledLV0DCoronary3D::solve3D() {
 
         Math::SpatialVector<Real> out(m_mesh.getSpaceDimension());
 
-        for (size_t c = 0; c < out.size(); ++c) {
-          out[c] =
-              tau * m_cfg.rho * (1. / m_cfg.dt * old[c] - (conv[c] - proj[c]));
+        for (size_t c = 0; c < out.size(); ++c)
+        {
+          out[c] = tau * m_cfg.rho * (1. / m_cfg.dt * old[c] - (conv[c] - proj[c]));
         }
 
         return out;
@@ -1036,12 +1072,13 @@ bool CoupledLV0DCoronary3D::solve3D() {
    *   int sub_h · v = int subUpdate · v.
    */
 
-  m_subProjection = Integral(m_sub, m_vp) - Integral(subUpdate, m_vp);
-  m_subProjection.assemble();
-  m_subProjectionSolver.solve();
+    m_subProjection = Integral(m_sub, m_vp) - Integral(subUpdate, m_vp);
+    m_subProjection.assemble();
+    m_subProjectionSolver.solve();
 
-  if (m_cfg.flowMode == FlowMode::Newton) {
-    m_flow =
+    if (m_cfg.flowMode == FlowMode::Newton)
+    {
+      m_flow =
         /*
          * =========================
          * Newton Jacobian / tangent
@@ -1092,8 +1129,7 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *   Z (du · n) (v · n)
          */
         + m_cfg.inletImpedance *
-              BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
-                  .over(m_cfg.inlet)
+          BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping tangent.
@@ -1101,7 +1137,7 @@ bool CoupledLV0DCoronary3D::solve3D() {
          * Controls u_tau without directly prescribing normal inflow.
          */
         + m_cfg.inletTangentialDamping *
-              BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+          BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Backflow stabilization tangent.
@@ -1114,11 +1150,9 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *
          * Since beta is lagged with m_uOld, the tangent is simply beta * du.
          */
-        +
-        BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+        + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
 
-        +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
         BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
         BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
         BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
@@ -1187,16 +1221,11 @@ bool CoupledLV0DCoronary3D::solve3D() {
         /*
          * Outlet pressure Neumann residuals.
          */
-        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal))
-              .over(outlet0) +
-        BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal))
-            .over(outlet1) +
-        BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal))
-            .over(outlet2) +
-        BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal))
-            .over(outlet3) +
-        BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal))
-            .over(outlet4) +
+        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
+        BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1) +
+        BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2) +
+        BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3) +
+        BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4) +
         BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
         /*
@@ -1204,19 +1233,13 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *
          * Must use uState.
          */
-        + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v))
-              .over(m_cfg.inlet)
+        + BoundaryIntegral(inletBackflowDamping * Dot(uState, m_v)).over(m_cfg.inlet)
 
-        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-              .over(outlet0) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-            .over(outlet1) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-            .over(outlet2) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-            .over(outlet3) +
-        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v))
-            .over(outlet4) +
+        + BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet0) +
+        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet1) +
+        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet2) +
+        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet3) +
+        BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet4) +
         BoundaryIntegral(outletBackflowDamping * Dot(uState, m_v)).over(outlet5)
 
         /*
@@ -1227,8 +1250,10 @@ bool CoupledLV0DCoronary3D::solve3D() {
          * on the wall.
          */
         + DirichletBC(m_u, -uState).on(m_cfg.wall);
-  } else {
-    m_flow =
+    }
+    else
+    {
+      m_flow =
         /*
          * =========================
          * Oseen linear operator
@@ -1273,7 +1298,7 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *     ((grad v) u^n).
          */
 
-      //  + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
+        //  + VMSConvectionBilinearIntegrator(m_u, m_v, m_uOld, m_tau.getSolution(),
         //                                  m_cfg.rho)
 
         /*
@@ -1286,32 +1311,29 @@ bool CoupledLV0DCoronary3D::solve3D() {
          */
 
         //- VMSConvectionLinearIntegrator(m_v, m_sub.getSolution(), m_uOld,
-          //                              m_up.getSolution(), m_tau.getSolution(),
-            //                            m_cfg.rho, m_cfg.dt)
+        //                              m_up.getSolution(), m_tau.getSolution(),
+        //                            m_cfg.rho, m_cfg.dt)
 
         /*
          * Inlet normal impedance.
          */
         + m_cfg.inletImpedance *
-              BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v))
-                  .over(m_cfg.inlet)
+          BoundaryIntegral(Dot(Dot(m_u, normal) * normal, m_v)).over(m_cfg.inlet)
 
         /*
          * Inlet tangential damping.
          */
         + m_cfg.inletTangentialDamping *
-              BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
+          BoundaryIntegral(Dot(duTangential, m_v)).over(m_cfg.inlet)
 
         /*
          * Backflow stabilization.
          *
          * Keep only one inlet term.
          */
-        +
-        BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
+        + BoundaryIntegral(inletBackflowDamping * Dot(m_u, m_v)).over(m_cfg.inlet)
 
-        +
-        BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
+        + BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet0) +
         BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet1) +
         BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet2) +
         BoundaryIntegral(outletBackflowDamping * Dot(m_u, m_v)).over(outlet3) +
@@ -1339,16 +1361,11 @@ bool CoupledLV0DCoronary3D::solve3D() {
         /*
          * Explicit outlet pressures.
          */
-        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal))
-              .over(outlet0) +
-        BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal))
-            .over(outlet1) +
-        BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal))
-            .over(outlet2) +
-        BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal))
-            .over(outlet3) +
-        BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal))
-            .over(outlet4) +
+        + BoundaryIntegral(m_wk.at(outlet0).pout * Dot(m_v, normal)).over(outlet0) +
+        BoundaryIntegral(m_wk.at(outlet1).pout * Dot(m_v, normal)).over(outlet1) +
+        BoundaryIntegral(m_wk.at(outlet2).pout * Dot(m_v, normal)).over(outlet2) +
+        BoundaryIntegral(m_wk.at(outlet3).pout * Dot(m_v, normal)).over(outlet3) +
+        BoundaryIntegral(m_wk.at(outlet4).pout * Dot(m_v, normal)).over(outlet4) +
         BoundaryIntegral(m_wk.at(outlet5).pout * Dot(m_v, normal)).over(outlet5)
 
         /*
@@ -1358,540 +1375,517 @@ bool CoupledLV0DCoronary3D::solve3D() {
          *   u = 0.
          */
         + DirichletBC(m_u, Zero(m_mesh.getSpaceDimension())).on(m_cfg.wall);
-  }
-
-  m_stepTiming.setup3DForm = secondsSince(setup3DStart);
-
-  const bool isNewtonFlow = m_cfg.flowMode == FlowMode::Newton;
-  const bool needsInitialSystem = !m_flowFieldSplitsSet;
-
-  if (needsInitialSystem) {
-    if (isRoot())
-      ThreeDInfo() << "Initializing flow system ..." << Alert::Raise;
-  }
-
-  if (!isNewtonFlow || needsInitialSystem) {
-    const auto assemble3DStart = CoronaryClock::now();
-    m_flow.assemble();
-    m_stepTiming.assemble3D = secondsSince(assemble3DStart);
-  }
-
-  if (needsInitialSystem) {
-    const auto fieldSplitsStart = CoronaryClock::now();
-    m_flow.setFieldSplits();
-    m_stepTiming.fieldSplits = secondsSince(fieldSplitsStart);
-    m_flowFieldSplitsSet = true;
-  }
-
-  if (isRoot()) {
-    ThreeDInfo() << "Solving with PETSc " << (isNewtonFlow ? "SNES" : "KSP")
-                 << " ..." << Alert::Raise;
-  }
-
-  const auto solve3DStart = CoronaryClock::now();
-  if (isNewtonFlow)
-    m_flowSolver.solve();
-  else
-    m_flow.solve(m_flowKSP);
-  m_stepTiming.solve3D = secondsSince(solve3DStart);
-
-  if (isNewtonFlow) {
-    if (isRoot()) {
-      SNESInfo() << (m_flowSolver.converged() ? "Converged"
-                                              : "Did NOT converge")
-                 << "  iterations = " << m_flowSolver.getIterationNumber()
-                 << Alert::Raise;
     }
-    return m_flowSolver.converged();
+
+    m_stepTiming.setup3DForm = secondsSince(setup3DStart);
+
+    const bool isNewtonFlow = m_cfg.flowMode == FlowMode::Newton;
+    const bool needsInitialSystem = !m_flowFieldSplitsSet;
+
+    if (needsInitialSystem)
+    {
+      if (isRoot())
+        ThreeDInfo() << "Initializing flow system ..." << Alert::Raise;
+    }
+
+    if (!isNewtonFlow || needsInitialSystem)
+    {
+      const auto assemble3DStart = CoronaryClock::now();
+      m_flow.assemble();
+      m_stepTiming.assemble3D = secondsSince(assemble3DStart);
+    }
+
+    if (needsInitialSystem)
+    {
+      const auto fieldSplitsStart = CoronaryClock::now();
+      m_flow.setFieldSplits();
+      m_stepTiming.fieldSplits = secondsSince(fieldSplitsStart);
+      m_flowFieldSplitsSet = true;
+    }
+
+    if (isRoot())
+    {
+      ThreeDInfo() << "Solving with PETSc " << (isNewtonFlow ? "SNES" : "KSP") << " ..."
+                   << Alert::Raise;
+    }
+
+    const auto solve3DStart = CoronaryClock::now();
+    if (isNewtonFlow)
+      m_flowSolver.solve();
+    else
+      m_flow.solve(m_flowKSP);
+    m_stepTiming.solve3D = secondsSince(solve3DStart);
+
+    if (isNewtonFlow)
+    {
+      if (isRoot())
+      {
+        SNESInfo() << (m_flowSolver.converged() ? "Converged" : "Did NOT converge")
+                   << "  iterations = " << m_flowSolver.getIterationNumber()
+                   << Alert::Raise;
+      }
+      return m_flowSolver.converged();
+    }
+
+    ::KSPConvergedReason reason;
+    PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
+    assert(ierr == PETSC_SUCCESS);
+
+    PetscInt iterations = 0;
+    ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
+    assert(ierr == PETSC_SUCCESS);
+    (void)ierr;
+
+    if (isRoot())
+    {
+      KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
+                << "  iterations = " << iterations << Alert::Raise;
+    }
+    return reason > 0;
   }
 
-  ::KSPConvergedReason reason;
-  PetscErrorCode ierr = KSPGetConvergedReason(m_flowKSP.getHandle(), &reason);
-  assert(ierr == PETSC_SUCCESS);
+  void CoupledLV0DCoronary3D::computeFluxes()
+  {
+    const auto normal = BoundaryNormal(m_mesh);
+    const auto& s = m_model.getState();
 
-  PetscInt iterations = 0;
-  ierr = KSPGetIterationNumber(m_flowKSP.getHandle(), &iterations);
-  assert(ierr == PETSC_SUCCESS);
-  (void)ierr;
-
-  if (isRoot()) {
-    KSPInfo() << (reason > 0 ? "Converged" : "Did NOT converge")
-              << "  iterations = " << iterations << Alert::Raise;
-  }
-  return reason > 0;
-}
-
-void CoupledLV0DCoronary3D::computeFluxes() {
-  const auto normal = BoundaryNormal(m_mesh);
-  const auto &s = m_model.getState();
-
-  m_flux = BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux)
-               .over(m_cfg.inlet);
-
-  m_flux.assemble();
-  m_stepData.qIn = m_flux(m_one);
-
-  m_stepData.qOut.clear();
-  m_stepData.qOutSum = 0.0;
-
-  for (const Attribute tag : m_cfg.outlets) {
-    m_flux =
-        BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux).over(tag);
+    m_flux = BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux).over(m_cfg.inlet);
 
     m_flux.assemble();
+    m_stepData.qIn = m_flux(m_one);
 
-    const Real qOut = m_flux(m_one);
+    m_stepData.qOut.clear();
+    m_stepData.qOutSum = 0.0;
 
-    m_stepData.qOut[tag] = qOut;
-    m_stepData.qOutSum += qOut;
-  }
+    for (const Attribute tag : m_cfg.outlets)
+    {
+      m_flux = BoundaryIntegral(Dot(m_u.getSolution(), normal), m_qFlux).over(tag);
 
-  m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
-  m_stepData.t = s.t;
-}
+      m_flux.assemble();
 
-void CoupledLV0DCoronary3D::computeWallShear() {
-  const auto &cy = m_cfg.viscosity;
-  const auto normal = BoundaryNormal(m_mesh);
-  const auto &uSol = m_u.getSolution();
+      const Real qOut = m_flux(m_one);
 
-  VelocityTrialFunctionType gradRecTrial(m_uh);
-  VelocityTestFunctionType gradRecTest(m_uh);
-
-  const auto jacRow0 = VectorFunction(Component(Jacobian(uSol), 0, 0),
-                                      Component(Jacobian(uSol), 0, 1),
-                                      Component(Jacobian(uSol), 0, 2));
-  const auto jacRow1 = VectorFunction(Component(Jacobian(uSol), 1, 0),
-                                      Component(Jacobian(uSol), 1, 1),
-                                      Component(Jacobian(uSol), 1, 2));
-  const auto jacRow2 = VectorFunction(Component(Jacobian(uSol), 2, 0),
-                                      Component(Jacobian(uSol), 2, 1),
-                                      Component(Jacobian(uSol), 2, 2));
-
-  VelocityGridFunctionType gradRec0(m_uh);
-  VelocityGridFunctionType gradRec1(m_uh);
-  VelocityGridFunctionType gradRec2(m_uh);
-
-  // Same mass matrix, three right-hand sides: reuse one problem + one KSP.
-  VelocityProjectionProblemType gradRecProj(gradRecTrial, gradRecTest);
-  Rodin::Solver::KSP gradRecKSP(gradRecProj);
-
-  gradRecProj =
-      Integral(gradRecTrial, gradRecTest) - Integral(jacRow0, gradRecTest);
-  gradRecProj.solve(gradRecKSP);
-  gradRec0.setData(gradRecTrial.getSolution().getData());
-
-  gradRecProj =
-      Integral(gradRecTrial, gradRecTest) - Integral(jacRow1, gradRecTest);
-  gradRecProj.solve(gradRecKSP);
-  gradRec1.setData(gradRecTrial.getSolution().getData());
-
-  gradRecProj =
-      Integral(gradRecTrial, gradRecTest) - Integral(jacRow2, gradRecTest);
-  gradRecProj.solve(gradRecKSP);
-  gradRec2.setData(gradRecTrial.getSolution().getData());
-
-  // (grad u . n)_i = gradRec_i . n is the wall-normal directional derivative.
-  const auto gradUn0 = Dot(gradRec0, normal);
-  const auto gradUn1 = Dot(gradRec1, normal);
-  const auto gradUn2 = Dot(gradRec2, normal);
-
-  // Local Carreau-Yasuda viscosity, built from the SAME expression projected
-  // into m_mu (the "viscosity" field written to XDMF). The wall shear stress
-  // is tau_w = mu(gamma) * du/dn; using the constant muInf here decoupled the
-  // WSS from the rheology entirely, so the WSS map could not reflect the
-  // viscosity field (no correlation) and under-predicted tau_w in exactly the
-  // low-shear recirculation zones where mu departs from muInf.
-  const auto symU = 0.5 * (Jacobian(uSol) + Transpose(Jacobian(uSol)));
-  const auto gammaDot = Sqrt(cy.gammaRegularization * cy.gammaRegularization +
-                             2.0 * Dot(symU, symU));
-  const auto carreauBase = 1.0 + Pow(cy.lambda * gammaDot, cy.yasuda);
-  const auto muLocal = cy.muInf + (cy.mu0 - cy.muInf) *
-                                      Pow(carreauBase,
-                                          (cy.n - 1.0) / cy.yasuda);
-
-  const auto tracRec = VectorFunction(muLocal * gradUn0, muLocal * gradUn1,
-                                      muLocal * gradUn2);
-  const auto wallStressRec = tracRec - Dot(tracRec, normal) * normal;
-
-  VelocityTrialFunctionType wssTrial(m_uh);
-  VelocityTestFunctionType wssTest(m_uh);
-  const Real wssReg = 1.0e-3;
-  VelocityProjectionProblemType wssProj(wssTrial, wssTest);
-  wssProj = BoundaryIntegral(Dot(wssTrial, wssTest)).over(m_cfg.wall) +
-            wssReg * Integral(Dot(wssTrial, wssTest)) -
-            BoundaryIntegral(Dot(wallStressRec, wssTest)).over(m_cfg.wall);
-  Rodin::Solver::KSP wssKSP(wssProj);
-  wssProj.solve(wssKSP);
-  m_shearWall.setData(wssTrial.getSolution().getData());
-
-  if (isRoot()) {
-    ::Vec fvec = m_shearWall.getData();
-    PetscInt nf = 0;
-    VecGetLocalSize(fvec, &nf);
-    const PetscScalar *farr = nullptr;
-    VecGetArrayRead(fvec, &farr);
-    Real fieldMax = 0.0;
-    for (PetscInt i = 0; i < nf; ++i)
-      fieldMax = std::max(fieldMax, std::abs(farr[i]));
-    VecRestoreArrayRead(fvec, &farr);
-    Alert::Info() << "  [wss] field max = " << fieldMax << " Pa" << Alert::Raise;
-  }
-}
-
-void CoupledLV0DCoronary3D::updateHistory() {
-  m_uOld.setData(m_u.getSolution().getData());
-  m_pOld.setData(m_p.getSolution().getData());
-  m_subOld.setData(m_sub.getSolution().getData());
-  m_tauOld.setData(m_tau.getSolution().getData());
-}
-
-void CoupledLV0DCoronary3D::writeOutputs() {
-  const auto &cy = m_cfg.viscosity;
-  const auto symU = 0.5 * (Jacobian(m_u.getSolution()) +
-                           Transpose(Jacobian(m_u.getSolution())));
-  const auto gamma = Sqrt(cy.gammaRegularization * cy.gammaRegularization +
-                          2.0 * Dot(symU, symU));
-  const auto carreauBase = 1.0 + Pow(cy.lambda * gamma, cy.yasuda);
-  const auto mu = cy.muInf + (cy.mu0 - cy.muInf) *
-                                 Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
-
-  m_viscosityProjection = Integral(m_mu, m_r) - Integral(mu, m_r);
-  m_viscosityProjection.solve(m_viscosityProjectionKSP);
-
-  computeWallShear();
-
-  m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
-}
-
-CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const {
-  StepData d;
-
-  const auto &s = m_model.getState();
-
-  d.t = s.t;
-  d.pat = m_input.pAt(s.t);
-  d.psv = m_input.pSv(s.t);
-
-  d.y = s.y;
-  d.v = s.v;
-  d.radius = m_input.R0 + s.y;
-
-  d.lvVolume =
-      (4.0 / 3.0) * std::numbers::pi_v<Real> * d.radius * d.radius * d.radius;
-
-  d.lvFlow = 4.0 * std::numbers::pi_v<Real> * d.radius * d.radius * s.v;
-
-  d.pv = s.pv;
-  d.par = s.par;
-  d.pd = s.pd;
-
-  d.ec = s.ec;
-  d.gamma = s.gamma;
-  d.beta = s.beta;
-  d.w = s.w;
-  d.kc = s.kc;
-  d.tauc = s.tauc;
-
-  d.qIn = m_stepData.qIn;
-  d.qOutSum = m_stepData.qOutSum;
-  d.qDistalSum = 0.0;
-  d.qCapChargingSum = 0.0;
-  d.flowBalance = m_stepData.flowBalance;
-  d.qOut = m_stepData.qOut;
-
-  for (const auto &[tag, bc] : m_wk) {
-    const auto qOutIt = m_stepData.qOut.find(tag);
-    const Real qOut = (qOutIt == m_stepData.qOut.end()) ? 0.0 : qOutIt->second;
-
-    d.qDistal[tag] = bc.qd;
-    d.qDistalSum += bc.qd;
-    d.qCapChargingSum += qOut - bc.qd;
-    d.pc[tag] = bc.pc;
-    d.pOut[tag] = bc.pout;
-    d.pven[tag] = bc.pven;
-    // ~identical across outlets (same pv, tauc, filter)
-    d.pim = bc.pimFilt;
-    d.pimv = bc.pimvFilt;
-  }
-
-  return d;
-}
-
-void CoupledLV0DCoronary3D::writeCSVHeader() {
-  if (!isRoot())
-    return;
-
-  m_csv << "t,"
-        << "LeftAtriumPressure,"
-        << "VenaCavaPressure,"
-        << "LeftVentricleDisplacement,"
-        << "LeftVentricleVelocity,"
-        << "LeftVentricleRadius,"
-        << "LeftVentricleVolume,"
-        << "LeftVentriclePressure,"
-        << "AortaPressure,"
-        << "DistalPressure,"
-        << "LeftVentricleFlow,"
-        << "CoronaryInletFlux,"
-        << "CoronaryOutlet4Flux,"
-        << "CoronaryOutlet5Flux,"
-        << "CoronaryOutlet6Flux,"
-        << "CoronaryOutlet7Flux,"
-        << "CoronaryOutlet8Flux,"
-        << "CoronaryOutlet9Flux,"
-        << "CoronaryOutletFluxTotal,"
-        << "CoronaryOutlet4DistalFlux,"
-        << "CoronaryOutlet5DistalFlux,"
-        << "CoronaryOutlet6DistalFlux,"
-        << "CoronaryOutlet7DistalFlux,"
-        << "CoronaryOutlet8DistalFlux,"
-        << "CoronaryOutlet9DistalFlux,"
-        << "CoronaryDistalFluxTotal,"
-        << "CoronaryCapChargingFluxTotal,"
-        << "CoronaryOutlet4CapPressure,"
-        << "CoronaryOutlet5CapPressure,"
-        << "CoronaryOutlet6CapPressure,"
-        << "CoronaryOutlet7CapPressure,"
-        << "CoronaryOutlet8CapPressure,"
-        << "CoronaryOutlet9CapPressure,"
-        << "CoronaryOutlet4Pressure,"
-        << "CoronaryOutlet5Pressure,"
-        << "CoronaryOutlet6Pressure,"
-        << "CoronaryOutlet7Pressure,"
-        << "CoronaryOutlet8Pressure,"
-        << "CoronaryOutlet9Pressure,"
-        << "FlowBalance,"
-        << "ec,"
-        << "gamma,"
-        << "beta,"
-        << "w,"
-        << "kc,"
-        << "tauc,"
-        << "IntramyoPressure,"
-        << "IntramyoVenousPressure,"
-        << "CoronaryOutlet7VenPressure,"
-        << "CoronaryOutlet8VenPressure,"
-        << "CoronaryOutlet9VenPressure,"
-        << "CoronaryOutlet10VenPressure,"
-        << "CoronaryOutlet14VenPressure,"
-        << "CoronaryOutlet15VenPressure\n";
-
-  m_csv.flush();
-}
-
-void CoupledLV0DCoronary3D::writeCSVRow() {
-  if (!isRoot())
-    return;
-
-  const StepData d = collectStepData();
-
-  auto get = [](const std::map<Attribute, Real> &m, Attribute a) -> Real {
-    const auto it = m.find(a);
-    return (it == m.end()) ? 0.0 : it->second;
-  };
-
-  m_csv << d.t << ',' << d.pat << ',' << d.psv << ',' << d.y << ',' << d.v
-        << ',' << d.radius << ',' << d.lvVolume << ',' << d.pv << ',' << d.par
-        << ',' << d.pd << ',' << d.lvFlow << ',' << d.qIn << ','
-        << get(d.qOut, 4) << ',' << get(d.qOut, 5) << ',' << get(d.qOut, 6)
-        << ',' << get(d.qOut, 7) << ',' << get(d.qOut, 8) << ','
-        << get(d.qOut, 9) << ',' << d.qOutSum << ',' << get(d.qDistal, 4) << ','
-        << get(d.qDistal, 5) << ',' << get(d.qDistal, 6) << ','
-        << get(d.qDistal, 7) << ',' << get(d.qDistal, 8) << ','
-        << get(d.qDistal, 9) << ',' << d.qDistalSum << ',' << d.qCapChargingSum
-        << ',' << get(d.pc, 4) << ',' << get(d.pc, 5) << ',' << get(d.pc, 6)
-        << ',' << get(d.pc, 7) << ',' << get(d.pc, 8) << ',' << get(d.pc, 9)
-        << ',' << get(d.pOut, 4) << ',' << get(d.pOut, 5) << ','
-        << get(d.pOut, 6) << ',' << get(d.pOut, 7) << ',' << get(d.pOut, 8)
-        << ',' << get(d.pOut, 9) << ',' << d.flowBalance << ',' << d.ec << ','
-        << d.gamma << ',' << d.beta << ',' << d.w << ',' << d.kc << ','
-        << d.tauc << ',' << d.pim << ',' << d.pimv << ',' << get(d.pven, 7) << ','
-        << get(d.pven, 8) << ',' << get(d.pven, 9) << ',' << get(d.pven, 10)
-        << ',' << get(d.pven, 14) << ',' << get(d.pven, 15) << '\n';
-
-  m_csv.flush();
-}
-
-void CoupledLV0DCoronary3D::printStepTiming(int step) const {
-  const auto &comm = m_mesh.getContext().getCommunicator();
-  auto maxTime = [&](Real local) {
-    return boost::mpi::all_reduce(comm, local, MaxReal{});
-  };
-
-  const Real total = maxTime(m_stepTiming.total);
-  const Real advance0D = maxTime(m_stepTiming.advance0D);
-  const Real setup3DForm = maxTime(m_stepTiming.setup3DForm);
-  const Real assemble3D = maxTime(m_stepTiming.assemble3D);
-  const Real fieldSplits = maxTime(m_stepTiming.fieldSplits);
-  const Real solve3D = maxTime(m_stepTiming.solve3D);
-  const Real fluxes = maxTime(m_stepTiming.fluxes);
-  const Real outletRCR = maxTime(m_stepTiming.outletRCR);
-  const Real csv = maxTime(m_stepTiming.csv);
-  const Real history = maxTime(m_stepTiming.history);
-  const Real output = maxTime(m_stepTiming.output);
-
-  if (isRoot()) {
-    TimingInfo() << "step = " << step << "  total = " << total << " s"
-                 << "  0D = " << advance0D << " s"
-                 << "  3D-form = " << setup3DForm << " s"
-                 << "  3D-assemble = " << assemble3D << " s"
-                 << "  field-splits = " << fieldSplits << " s"
-                 << "  3D-solve = " << solve3D << " s"
-                 << "  fluxes = " << fluxes << " s"
-                 << "  RCR = " << outletRCR << " s"
-                 << "  csv = " << csv << " s"
-                 << "  history = " << history << " s"
-                 << "  output = " << output << " s" << Alert::Raise;
-  }
-}
-
-int CoupledLV0DCoronary3D::run() {
-  if (!m_initialized)
-    initialize();
-
-  const Real baseDt = m_cfg.dt;
-  const Real factor = m_cfg.timeAdaptivityReductionFactor;
-  const int maxLevels = m_cfg.timeAdaptivityMaxLevels;
-  const Real startTime = m_model.getState().t;
-  const Real finalTime = startTime + static_cast<Real>(m_cfg.nsteps) * baseDt;
-
-  if (!(factor > 0.0 && factor < 1.0)) {
-    Alert::Exception() << "Invalid time adaptivity reduction factor: " << factor
-                       << ". Expected a value in (0, 1)." << Alert::Raise;
-    return 1;
-  }
-
-  if (maxLevels < 0) {
-    Alert::Exception() << "Invalid time adaptivity maximum levels: "
-                       << maxLevels << ". Expected a non-negative value."
-                       << Alert::Raise;
-    return 1;
-  }
-
-  Real nextDt = baseDt;
-  int acceptedStep = 0;
-
-  {
-    // solveStatic();
-
-    // computeFluxes();
-    // for (const Attribute tag : m_cfg.outlets)
-    // updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
-    //  m_cfg.dt);
-
-    // updateHistory();
-  }
-
-  while (m_model.getState().t <
-         finalTime - 0.5 * std::numeric_limits<Real>::epsilon()) {
-    const Real t_current = m_model.getState().t;
-    const Real remaining = finalTime - t_current;
-    const Real physicalDt = std::min(nextDt, remaining);
-    Real solverDt = physicalDt;
-    int level = 0;
-
-    const auto savedRCR = m_wk;
-    const StepData savedStepData = m_stepData;
-    const VecSnapshot savedU(m_u.getSolution().getData());
-    const VecSnapshot savedP(m_p.getSolution().getData());
-
-    m_cfg.dt = physicalDt;
-    m_stepTiming = StepTiming{};
-    const auto stepStart = CoronaryClock::now();
-
-    if (isRoot()) {
-      Alert::Info() << "━━━ Step " << (acceptedStep + 1)
-                    << "  t = " << t_current << " s"
-                    << " / " << finalTime << " s"
-                    << "  (dt = " << physicalDt << " s)"
-                    << " ━━━" << Alert::Raise;
+      m_stepData.qOut[tag] = qOut;
+      m_stepData.qOutSum += qOut;
     }
 
-    const auto advance0DStart = CoronaryClock::now();
-    const bool advanced0D = advance0D();
-    m_stepTiming.advance0D = secondsSince(advance0DStart);
+    m_stepData.flowBalance = m_stepData.qIn + m_stepData.qOutSum;
+    m_stepData.t = s.t;
+  }
 
-    if (!advanced0D) {
-      Alert::Exception() << "0D solver failed to converge at step "
-                         << (acceptedStep + 1)
-                         << ", t = " << m_model.getState().t << Alert::Raise;
+  void CoupledLV0DCoronary3D::computeWallShear()
+  {
+    const auto& cy = m_cfg.viscosity;
+    const auto normal = BoundaryNormal(m_mesh);
+    const auto& uSol = m_u.getSolution();
+
+    VelocityTrialFunctionType gradRecTrial(m_uh);
+    VelocityTestFunctionType gradRecTest(m_uh);
+
+    const auto jacRow0 = VectorFunction(Component(Jacobian(uSol), 0, 0),
+      Component(Jacobian(uSol), 0, 1), Component(Jacobian(uSol), 0, 2));
+    const auto jacRow1 = VectorFunction(Component(Jacobian(uSol), 1, 0),
+      Component(Jacobian(uSol), 1, 1), Component(Jacobian(uSol), 1, 2));
+    const auto jacRow2 = VectorFunction(Component(Jacobian(uSol), 2, 0),
+      Component(Jacobian(uSol), 2, 1), Component(Jacobian(uSol), 2, 2));
+
+    VelocityGridFunctionType gradRec0(m_uh);
+    VelocityGridFunctionType gradRec1(m_uh);
+    VelocityGridFunctionType gradRec2(m_uh);
+
+    // Same mass matrix, three right-hand sides: reuse one problem + one KSP.
+    VelocityProjectionProblemType gradRecProj(gradRecTrial, gradRecTest);
+    Rodin::Solver::KSP gradRecKSP(gradRecProj);
+
+    gradRecProj = Integral(gradRecTrial, gradRecTest) - Integral(jacRow0, gradRecTest);
+    gradRecProj.solve(gradRecKSP);
+    gradRec0.setData(gradRecTrial.getSolution().getData());
+
+    gradRecProj = Integral(gradRecTrial, gradRecTest) - Integral(jacRow1, gradRecTest);
+    gradRecProj.solve(gradRecKSP);
+    gradRec1.setData(gradRecTrial.getSolution().getData());
+
+    gradRecProj = Integral(gradRecTrial, gradRecTest) - Integral(jacRow2, gradRecTest);
+    gradRecProj.solve(gradRecKSP);
+    gradRec2.setData(gradRecTrial.getSolution().getData());
+
+    // (grad u . n)_i = gradRec_i . n is the wall-normal directional derivative.
+    const auto gradUn0 = Dot(gradRec0, normal);
+    const auto gradUn1 = Dot(gradRec1, normal);
+    const auto gradUn2 = Dot(gradRec2, normal);
+
+    // Local Carreau-Yasuda viscosity, built from the SAME expression projected
+    // into m_mu (the "viscosity" field written to XDMF). The wall shear stress
+    // is tau_w = mu(gamma) * du/dn; using the constant muInf here decoupled the
+    // WSS from the rheology entirely, so the WSS map could not reflect the
+    // viscosity field (no correlation) and under-predicted tau_w in exactly the
+    // low-shear recirculation zones where mu departs from muInf.
+    const auto symU = 0.5 * (Jacobian(uSol) + Transpose(Jacobian(uSol)));
+    const auto gammaDot =
+      Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symU, symU));
+    const auto carreauBase = 1.0 + Pow(cy.lambda * gammaDot, cy.yasuda);
+    const auto muLocal =
+      cy.muInf + (cy.mu0 - cy.muInf) * Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
+
+    const auto tracRec =
+      VectorFunction(muLocal * gradUn0, muLocal * gradUn1, muLocal * gradUn2);
+    const auto wallStressRec = tracRec - Dot(tracRec, normal) * normal;
+
+    VelocityTrialFunctionType wssTrial(m_uh);
+    VelocityTestFunctionType wssTest(m_uh);
+    const Real wssReg = 1.0e-3;
+    VelocityProjectionProblemType wssProj(wssTrial, wssTest);
+    wssProj = BoundaryIntegral(Dot(wssTrial, wssTest)).over(m_cfg.wall) +
+      wssReg * Integral(Dot(wssTrial, wssTest)) -
+      BoundaryIntegral(Dot(wallStressRec, wssTest)).over(m_cfg.wall);
+    Rodin::Solver::KSP wssKSP(wssProj);
+    wssProj.solve(wssKSP);
+    m_shearWall.setData(wssTrial.getSolution().getData());
+
+    if (isRoot())
+    {
+      ::Vec fvec = m_shearWall.getData();
+      PetscInt nf = 0;
+      VecGetLocalSize(fvec, &nf);
+      const PetscScalar* farr = nullptr;
+      VecGetArrayRead(fvec, &farr);
+      Real fieldMax = 0.0;
+      for (PetscInt i = 0; i < nf; ++i)
+        fieldMax = std::max(fieldMax, std::abs(farr[i]));
+      VecRestoreArrayRead(fvec, &farr);
+      Alert::Info() << "  [wss] field max = " << fieldMax << " Pa" << Alert::Raise;
+    }
+  }
+
+  void CoupledLV0DCoronary3D::updateHistory()
+  {
+    m_uOld.setData(m_u.getSolution().getData());
+    m_pOld.setData(m_p.getSolution().getData());
+    m_subOld.setData(m_sub.getSolution().getData());
+    m_tauOld.setData(m_tau.getSolution().getData());
+  }
+
+  void CoupledLV0DCoronary3D::writeOutputs()
+  {
+    const auto& cy = m_cfg.viscosity;
+    const auto symU =
+      0.5 * (Jacobian(m_u.getSolution()) + Transpose(Jacobian(m_u.getSolution())));
+    const auto gamma =
+      Sqrt(cy.gammaRegularization * cy.gammaRegularization + 2.0 * Dot(symU, symU));
+    const auto carreauBase = 1.0 + Pow(cy.lambda * gamma, cy.yasuda);
+    const auto mu =
+      cy.muInf + (cy.mu0 - cy.muInf) * Pow(carreauBase, (cy.n - 1.0) / cy.yasuda);
+
+    m_viscosityProjection = Integral(m_mu, m_r) - Integral(mu, m_r);
+    m_viscosityProjection.solve(m_viscosityProjectionKSP);
+
+    computeWallShear();
+
+    m_xdmf.write(m_model.getState().t - m_cfg.dt).flush();
+  }
+
+  CoupledLV0DCoronary3D::StepData CoupledLV0DCoronary3D::collectStepData() const
+  {
+    StepData d;
+
+    const auto& s = m_model.getState();
+
+    d.t = s.t;
+    d.pat = m_input.pAt(s.t);
+    d.psv = m_input.pSv(s.t);
+
+    d.y = s.y;
+    d.v = s.v;
+    d.radius = m_input.R0 + s.y;
+
+    d.lvVolume = (4.0 / 3.0) * std::numbers::pi_v<Real> * d.radius * d.radius * d.radius;
+
+    d.lvFlow = 4.0 * std::numbers::pi_v<Real> * d.radius * d.radius * s.v;
+
+    d.pv = s.pv;
+    d.par = s.par;
+    d.pd = s.pd;
+
+    d.ec = s.ec;
+    d.gamma = s.gamma;
+    d.beta = s.beta;
+    d.w = s.w;
+    d.kc = s.kc;
+    d.tauc = s.tauc;
+
+    d.qIn = m_stepData.qIn;
+    d.qOutSum = m_stepData.qOutSum;
+    d.qDistalSum = 0.0;
+    d.qCapChargingSum = 0.0;
+    d.flowBalance = m_stepData.flowBalance;
+    d.qOut = m_stepData.qOut;
+
+    for (const auto& [tag, bc] : m_wk)
+    {
+      const auto qOutIt = m_stepData.qOut.find(tag);
+      const Real qOut = (qOutIt == m_stepData.qOut.end()) ? 0.0 : qOutIt->second;
+
+      d.qDistal[tag] = bc.qd;
+      d.qDistalSum += bc.qd;
+      d.qCapChargingSum += qOut - bc.qd;
+      d.pc[tag] = bc.pc;
+      d.pOut[tag] = bc.pout;
+      d.pven[tag] = bc.pven;
+      // ~identical across outlets (same pv, tauc, filter)
+      d.pim = bc.pimFilt;
+      d.pimv = bc.pimvFilt;
+    }
+
+    return d;
+  }
+
+  void CoupledLV0DCoronary3D::writeCSVHeader()
+  {
+    if (!isRoot())
+      return;
+
+    m_csv << "t," << "LeftAtriumPressure," << "VenaCavaPressure,"
+          << "LeftVentricleDisplacement," << "LeftVentricleVelocity,"
+          << "LeftVentricleRadius," << "LeftVentricleVolume," << "LeftVentriclePressure,"
+          << "AortaPressure," << "DistalPressure," << "LeftVentricleFlow,"
+          << "CoronaryInletFlux," << "CoronaryOutlet4Flux," << "CoronaryOutlet5Flux,"
+          << "CoronaryOutlet6Flux," << "CoronaryOutlet7Flux," << "CoronaryOutlet8Flux,"
+          << "CoronaryOutlet9Flux," << "CoronaryOutletFluxTotal,"
+          << "CoronaryOutlet4DistalFlux," << "CoronaryOutlet5DistalFlux,"
+          << "CoronaryOutlet6DistalFlux," << "CoronaryOutlet7DistalFlux,"
+          << "CoronaryOutlet8DistalFlux," << "CoronaryOutlet9DistalFlux,"
+          << "CoronaryDistalFluxTotal," << "CoronaryCapChargingFluxTotal,"
+          << "CoronaryOutlet4CapPressure," << "CoronaryOutlet5CapPressure,"
+          << "CoronaryOutlet6CapPressure," << "CoronaryOutlet7CapPressure,"
+          << "CoronaryOutlet8CapPressure," << "CoronaryOutlet9CapPressure,"
+          << "CoronaryOutlet4Pressure," << "CoronaryOutlet5Pressure,"
+          << "CoronaryOutlet6Pressure," << "CoronaryOutlet7Pressure,"
+          << "CoronaryOutlet8Pressure," << "CoronaryOutlet9Pressure," << "FlowBalance,"
+          << "ec," << "gamma," << "beta," << "w," << "kc," << "tauc,"
+          << "IntramyoPressure," << "IntramyoVenousPressure,"
+          << "CoronaryOutlet7VenPressure," << "CoronaryOutlet8VenPressure,"
+          << "CoronaryOutlet9VenPressure," << "CoronaryOutlet10VenPressure,"
+          << "CoronaryOutlet14VenPressure," << "CoronaryOutlet15VenPressure\n";
+
+    m_csv.flush();
+  }
+
+  void CoupledLV0DCoronary3D::writeCSVRow()
+  {
+    if (!isRoot())
+      return;
+
+    const StepData d = collectStepData();
+
+    auto get = [](const std::map<Attribute, Real>& m, Attribute a) -> Real {
+      const auto it = m.find(a);
+      return (it == m.end()) ? 0.0 : it->second;
+    };
+
+    m_csv << d.t << ',' << d.pat << ',' << d.psv << ',' << d.y << ',' << d.v << ','
+          << d.radius << ',' << d.lvVolume << ',' << d.pv << ',' << d.par << ',' << d.pd
+          << ',' << d.lvFlow << ',' << d.qIn << ',' << get(d.qOut, 4) << ','
+          << get(d.qOut, 5) << ',' << get(d.qOut, 6) << ',' << get(d.qOut, 7) << ','
+          << get(d.qOut, 8) << ',' << get(d.qOut, 9) << ',' << d.qOutSum << ','
+          << get(d.qDistal, 4) << ',' << get(d.qDistal, 5) << ',' << get(d.qDistal, 6)
+          << ',' << get(d.qDistal, 7) << ',' << get(d.qDistal, 8) << ','
+          << get(d.qDistal, 9) << ',' << d.qDistalSum << ',' << d.qCapChargingSum << ','
+          << get(d.pc, 4) << ',' << get(d.pc, 5) << ',' << get(d.pc, 6) << ','
+          << get(d.pc, 7) << ',' << get(d.pc, 8) << ',' << get(d.pc, 9) << ','
+          << get(d.pOut, 4) << ',' << get(d.pOut, 5) << ',' << get(d.pOut, 6) << ','
+          << get(d.pOut, 7) << ',' << get(d.pOut, 8) << ',' << get(d.pOut, 9) << ','
+          << d.flowBalance << ',' << d.ec << ',' << d.gamma << ',' << d.beta << ',' << d.w
+          << ',' << d.kc << ',' << d.tauc << ',' << d.pim << ',' << d.pimv << ','
+          << get(d.pven, 7) << ',' << get(d.pven, 8) << ',' << get(d.pven, 9) << ','
+          << get(d.pven, 10) << ',' << get(d.pven, 14) << ',' << get(d.pven, 15) << '\n';
+
+    m_csv.flush();
+  }
+
+  void CoupledLV0DCoronary3D::printStepTiming(int step) const
+  {
+    const auto& comm = m_mesh.getContext().getCommunicator();
+    auto maxTime = [&](Real local) {
+      return boost::mpi::all_reduce(comm, local, MaxReal{});
+    };
+
+    const Real total = maxTime(m_stepTiming.total);
+    const Real advance0D = maxTime(m_stepTiming.advance0D);
+    const Real setup3DForm = maxTime(m_stepTiming.setup3DForm);
+    const Real assemble3D = maxTime(m_stepTiming.assemble3D);
+    const Real fieldSplits = maxTime(m_stepTiming.fieldSplits);
+    const Real solve3D = maxTime(m_stepTiming.solve3D);
+    const Real fluxes = maxTime(m_stepTiming.fluxes);
+    const Real outletRCR = maxTime(m_stepTiming.outletRCR);
+    const Real csv = maxTime(m_stepTiming.csv);
+    const Real history = maxTime(m_stepTiming.history);
+    const Real output = maxTime(m_stepTiming.output);
+
+    if (isRoot())
+    {
+      TimingInfo() << "step = " << step << "  total = " << total << " s"
+                   << "  0D = " << advance0D << " s" << "  3D-form = " << setup3DForm
+                   << " s" << "  3D-assemble = " << assemble3D << " s"
+                   << "  field-splits = " << fieldSplits << " s"
+                   << "  3D-solve = " << solve3D << " s" << "  fluxes = " << fluxes
+                   << " s" << "  RCR = " << outletRCR << " s" << "  csv = " << csv << " s"
+                   << "  history = " << history << " s" << "  output = " << output << " s"
+                   << Alert::Raise;
+    }
+  }
+
+  int CoupledLV0DCoronary3D::run()
+  {
+    if (!m_initialized)
+      initialize();
+
+    const Real baseDt = m_cfg.dt;
+    const Real factor = m_cfg.timeAdaptivityReductionFactor;
+    const int maxLevels = m_cfg.timeAdaptivityMaxLevels;
+    const Real startTime = m_model.getState().t;
+    const Real finalTime = startTime + static_cast<Real>(m_cfg.nsteps) * baseDt;
+
+    if (!(factor > 0.0 && factor < 1.0))
+    {
+      Alert::Exception() << "Invalid time adaptivity reduction factor: " << factor
+                         << ". Expected a value in (0, 1)." << Alert::Raise;
       return 1;
     }
 
-    const auto advancedState = m_model.getState();
-    const auto advancedHistory = m_model.getHistory();
-    const auto advancedUnknowns = m_model.getUnknowns();
-    const auto advancedReport = m_model.getReport();
+    if (maxLevels < 0)
+    {
+      Alert::Exception() << "Invalid time adaptivity maximum levels: " << maxLevels
+                         << ". Expected a non-negative value." << Alert::Raise;
+      return 1;
+    }
 
-    bool accepted = false;
+    Real nextDt = baseDt;
+    int acceptedStep = 0;
 
-    while (!accepted) {
-      m_cfg.dt = solverDt;
+    {
+      // solveStatic();
 
-      if (!solve3D()) {
-        m_model.restore(advancedState, advancedHistory, advancedUnknowns,
-                        advancedReport);
-        m_wk = savedRCR;
-        m_stepData = savedStepData;
-        savedU.restore(m_u.getSolution().getData());
-        savedP.restore(m_p.getSolution().getData());
+      // computeFluxes();
+      // for (const Attribute tag : m_cfg.outlets)
+      // updateRCRNonNew(m_cfg, m_model, m_wk[tag], m_stepData.qOut.at(tag),
+      //  m_cfg.dt);
 
-        if (level >= maxLevels) {
-          Alert::Exception() << "3D flow solver failed to converge at step "
-                             << (acceptedStep + 1) << " after " << (level + 1)
-                             << " attempt(s). Minimum solver dt = " << solverDt
-                             << " s." << Alert::Raise;
-          return 1;
-        }
+      // updateHistory();
+    }
 
-        solverDt *= factor;
-        ++level;
+    while (m_model.getState().t < finalTime - 0.5 * std::numeric_limits<Real>::epsilon())
+    {
+      const Real t_current = m_model.getState().t;
+      const Real remaining = finalTime - t_current;
+      const Real physicalDt = std::min(nextDt, remaining);
+      Real solverDt = physicalDt;
+      int level = 0;
 
-        if (isRoot()) {
-          Alert::Info() << "[3D] Retrying step " << (acceptedStep + 1)
-                        << " with reduced solver dt = " << solverDt
-                        << " s  (adapt level = " << level << " / " << maxLevels
-                        << ")" << Alert::Raise;
-        }
+      const auto savedRCR = m_wk;
+      const StepData savedStepData = m_stepData;
+      const VecSnapshot savedU(m_u.getSolution().getData());
+      const VecSnapshot savedP(m_p.getSolution().getData());
 
-        continue;
+      m_cfg.dt = physicalDt;
+      m_stepTiming = StepTiming{};
+      const auto stepStart = CoronaryClock::now();
+
+      if (isRoot())
+      {
+        Alert::Info() << "━━━ Step " << (acceptedStep + 1) << "  t = " << t_current
+                      << " s" << " / " << finalTime << " s" << "  (dt = " << physicalDt
+                      << " s)" << " ━━━" << Alert::Raise;
       }
 
-      const auto fluxesStart = CoronaryClock::now();
-      computeFluxes();
-      m_stepTiming.fluxes = secondsSince(fluxesStart);
+      const auto advance0DStart = CoronaryClock::now();
+      const bool advanced0D = advance0D();
+      m_stepTiming.advance0D = secondsSince(advance0DStart);
 
-      const auto outletRCRStart = CoronaryClock::now();
-      m_cfg.dt = physicalDt;
-      for (const Attribute tag : m_cfg.outlets)
-        updateRCRNonNew(m_cfg, tag, m_model, m_wk[tag], m_stepData.qOut.at(tag),
-                        m_cfg.dt);
-      m_stepTiming.outletRCR = secondsSince(outletRCRStart);
+      if (!advanced0D)
+      {
+        Alert::Exception() << "0D solver failed to converge at step "
+                           << (acceptedStep + 1) << ", t = " << m_model.getState().t
+                           << Alert::Raise;
+        return 1;
+      }
 
-      const auto csvStart = CoronaryClock::now();
-      writeCSVRow();
-      m_stepTiming.csv = secondsSince(csvStart);
+      const auto advancedState = m_model.getState();
+      const auto advancedHistory = m_model.getHistory();
+      const auto advancedUnknowns = m_model.getUnknowns();
+      const auto advancedReport = m_model.getReport();
 
-      const auto historyStart = CoronaryClock::now();
-      updateHistory();
-      m_stepTiming.history = secondsSince(historyStart);
+      bool accepted = false;
 
-      const auto outputStart = CoronaryClock::now();
-      writeOutputs();
-      m_stepTiming.output = secondsSince(outputStart);
+      while (!accepted)
+      {
+        m_cfg.dt = solverDt;
 
-      m_stepTiming.total = secondsSince(stepStart);
-      printStepTiming(acceptedStep + 1);
+        if (!solve3D())
+        {
+          m_model.restore(
+            advancedState, advancedHistory, advancedUnknowns, advancedReport);
+          m_wk = savedRCR;
+          m_stepData = savedStepData;
+          savedU.restore(m_u.getSolution().getData());
+          savedP.restore(m_p.getSolution().getData());
 
-      accepted = true;
-      ++acceptedStep;
-      nextDt = std::min(baseDt, solverDt / factor);
+          if (level >= maxLevels)
+          {
+            Alert::Exception() << "3D flow solver failed to converge at step "
+                               << (acceptedStep + 1) << " after " << (level + 1)
+                               << " attempt(s). Minimum solver dt = " << solverDt << " s."
+                               << Alert::Raise;
+            return 1;
+          }
+
+          solverDt *= factor;
+          ++level;
+
+          if (isRoot())
+          {
+            Alert::Info() << "[3D] Retrying step " << (acceptedStep + 1)
+                          << " with reduced solver dt = " << solverDt
+                          << " s  (adapt level = " << level << " / " << maxLevels << ")"
+                          << Alert::Raise;
+          }
+
+          continue;
+        }
+
+        const auto fluxesStart = CoronaryClock::now();
+        computeFluxes();
+        m_stepTiming.fluxes = secondsSince(fluxesStart);
+
+        const auto outletRCRStart = CoronaryClock::now();
+        m_cfg.dt = physicalDt;
+        for (const Attribute tag : m_cfg.outlets)
+          updateRCRNonNew(
+            m_cfg, tag, m_model, m_wk[tag], m_stepData.qOut.at(tag), m_cfg.dt);
+        m_stepTiming.outletRCR = secondsSince(outletRCRStart);
+
+        const auto csvStart = CoronaryClock::now();
+        writeCSVRow();
+        m_stepTiming.csv = secondsSince(csvStart);
+
+        const auto historyStart = CoronaryClock::now();
+        updateHistory();
+        m_stepTiming.history = secondsSince(historyStart);
+
+        const auto outputStart = CoronaryClock::now();
+        writeOutputs();
+        m_stepTiming.output = secondsSince(outputStart);
+
+        m_stepTiming.total = secondsSince(stepStart);
+        printStepTiming(acceptedStep + 1);
+
+        accepted = true;
+        ++acceptedStep;
+        nextDt = std::min(baseDt, solverDt / factor);
+      }
     }
-  }
 
-  m_cfg.dt = baseDt;
-  m_xdmf.close();
-  return 0;
-}
+    m_cfg.dt = baseDt;
+    m_xdmf.close();
+    return 0;
+  }
 } // namespace Rodin::Examples::Heart
