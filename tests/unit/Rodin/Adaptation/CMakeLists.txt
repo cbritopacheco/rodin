@@ -20,3 +20,27 @@ gtest_discover_tests(RodinAdaptationWNGIRConstraintStateTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinAdaptationWNGIRPrimalBarrierStateTest
+  WNGIRPrimalBarrierStateTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRPrimalBarrierStateTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRPrimalBarrierStateTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinAdaptationWNGIRValidationWeightsTest
+  WNGIRValidationWeightsTest.cpp)
+target_link_libraries(RodinAdaptationWNGIRValidationWeightsTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Adaptation)
+gtest_discover_tests(RodinAdaptationWNGIRValidationWeightsTest
+  PROPERTIES
+    LABELS unit
+)

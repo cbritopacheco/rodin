@@ -17,6 +17,10 @@ set(RodinAdaptation_HEADERS
   WNGIRConstraintState.h
   WNGIRMarginForce.h
   WNGIRParameters.h
+  WNGIRPrimalBarrierForce.h
+  WNGIRPrimalBarrierMetric.h
+  WNGIRPrimalBarrierState.h
+  WNGIRValidationWeights.h
   WNGIRReport.h
   WNGIRSolver.h
   WNGIRNormalOffset.h

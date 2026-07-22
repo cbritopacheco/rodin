@@ -33,6 +33,8 @@
 #include "WNGIRAdmissibilityMetric.h"
 #include "WNGIRMarginForce.h"
 #include "WNGIRParameters.h"
+#include "WNGIRPrimalBarrierForce.h"
+#include "WNGIRPrimalBarrierMetric.h"
 #include "WNGIRReport.h"
 #include "WNGIRNormalOffsetCoefficient.h"
 #include "WNGIRNormalOffsetForceCoefficient.h"
@@ -223,9 +225,10 @@ namespace Rodin::Adaptation
           m_report = rep;
           return rep;
         }
-
-
-
+        const Real domainMeasure =
+          p.constraintFormulation == WNGIRConstraintFormulation::PrimalBarrierQP
+          ? getDomainMeasure(mesh, fes)
+          : Real(0);
 
         // ============================================================
         // Per-iteration field evaluations through the GridFunction.
@@ -416,8 +419,10 @@ namespace Rodin::Adaptation
             WNGIRConstraintFormulation::SignBlindMetric;
           const bool activeSetKKT = p.constraintFormulation ==
             WNGIRConstraintFormulation::ActiveSetKKT;
+          const bool primalBarrierQP =
+            p.constraintFormulation == WNGIRConstraintFormulation::PrimalBarrierQP;
 
-          if (directional)
+          if (directional && !primalBarrierQP)
           {
             typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
             predictorBody = predictorBody + obsMetric - surfaceForce;
@@ -472,6 +477,84 @@ namespace Rodin::Adaptation
               solveOk = false;
             }
             rep.tSolve += secondsSince(tic);
+          }
+          else if (primalBarrierQP)
+          {
+            typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
+            predictorBody = predictorBody + obsMetric - surfaceForce;
+            if (!p.dirichletAttributes.empty())
+              predictorBody = predictorBody +
+                Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                  .on(p.dirichletAttributes);
+            m_stepProblem = predictorBody;
+            m_stepProblem.assemble();
+            rep.tAssembly += secondsSince(tic);
+
+            tic = Clock::now();
+            std::size_t predictorIterations = 0;
+            Real predictorError = std::numeric_limits<Real>::infinity();
+            solveOk = solveStep(vK, predictorIterations, predictorError);
+            linearIterations += predictorIterations;
+            linearError = predictorError;
+            rep.tSolve += secondsSince(tic);
+            if (!solveOk)
+              break;
+
+            const Real modelDecrease = Real(0.5) *
+              std::max(Real(0),
+                getSurfaceForceAction(mesh, fes, u, vK, phi, grad, interfaceFacets,
+                  sigma2, meshDim, locator));
+            const Real barrierCoefficient = domainMeasure > Real(0)
+              ? p.primalBarrierMu * modelDecrease / domainMeasure
+              : Real(0);
+            rep.primalBarrierCoefficient = barrierCoefficient;
+
+            uTrial.getData().setZero();
+            const Real predictorAlpha =
+              getBarrierStepScale(mesh, fes, u, uTrial, vK, meshDim);
+            vK *= predictorAlpha;
+            const std::size_t innerIterations =
+              std::max<std::size_t>(1, p.primalBarrierIterations);
+            tic = Clock::now();
+            for (std::size_t inner = 0; inner < innerIterations; ++inner)
+            {
+              Detail::WNGIRPrimalBarrierMetric barrierMetric(
+                m_duStep, m_vStep, u, vK, p, barrierCoefficient);
+              Detail::WNGIRPrimalBarrierForce barrierForce(
+                m_vStep, u, vK, p, barrierCoefficient);
+              typename ProblemType::ProblemBodyType body(m_bulkForm);
+              body = body + obsMetric + barrierMetric - surfaceForce - barrierForce;
+              if (!p.dirichletAttributes.empty())
+                body = body +
+                  Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                    .on(p.dirichletAttributes);
+              m_stepProblem = body;
+              m_stepProblem.assemble();
+              rep.tAssembly += secondsSince(tic);
+
+              tic = Clock::now();
+              std::size_t barrierIterations = 0;
+              Real barrierError = std::numeric_limits<Real>::infinity();
+              solveOk = solveStep(uTrial, barrierIterations, barrierError);
+              linearIterations += barrierIterations;
+              linearError = barrierError;
+              rep.tSolve += secondsSince(tic);
+              if (!solveOk)
+                break;
+
+              scratch = uTrial;
+              scratch -= vK;
+              const Real innerAlpha =
+                getBarrierStepScale(mesh, fes, u, vK, scratch, meshDim);
+              if (!(innerAlpha > Real(0)))
+              {
+                solveOk = false;
+                break;
+              }
+              scratch *= innerAlpha;
+              vK += scratch;
+              tic = Clock::now();
+            }
           }
           else
           {
@@ -703,9 +786,9 @@ namespace Rodin::Adaptation
                       << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
                       << "  linIt=" << rep.linearIterations << "  α=" << alpha
                       << "  marginScale=" << marginScale
-                      << "  kktAct=" << rep.activeConstraints
-                      << "  bt=" << backtracks << "  min_j=" << rep.minJ
-                      << "  max_Q=" << rep.maxQRel << '\n';
+                      << "  muEff=" << rep.primalBarrierCoefficient
+                      << "  kktAct=" << rep.activeConstraints << "  bt=" << backtracks
+                      << "  min_j=" << rep.minJ << "  max_Q=" << rep.maxQRel << '\n';
 
           if (surf.activeRMS <= activeRMSTol)
           {
@@ -871,6 +954,92 @@ namespace Rodin::Adaptation
           ? m_parameters.quadratureOrder
           : std::max<std::size_t>(2, 2 * fe.getOrder());
         return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+      }
+
+      /// @brief Measure of the fixed background domain used to normalize the QP.
+      template <class Mesh, class FES>
+      Real getDomainMeasure(const Mesh& mesh, const FES& fes) const
+      {
+        Real measure = 0;
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& qf = getQuadrature(*cell, fes);
+          const auto& quadrature = cell->getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+            measure += qf.getWeight(q) * quadrature.getPoint(q).getDistortion();
+        }
+        return measure;
+      }
+
+      /// @brief Action of the negative Welsch first variation on a direction.
+      template <class Mesh, class FES, class PhiType, class GradType, class LocatorType>
+      Real getSurfaceForceAction(const Mesh& mesh, const FES& fes,
+        const Displacement& current, const Displacement& direction, const PhiType& phi,
+        const GradType& grad, const std::vector<Index>& interfaceFacets, Real sigma2,
+        std::size_t dimension, const LocatorType& locator) const
+      {
+        Detail::WNGIRSurfaceForceCoefficient force(
+          phi, grad, current, locator, m_parameters, sigma2, dimension);
+        Real action = 0;
+        for (const Index facetIndex : interfaceFacets)
+        {
+          const auto face = mesh.getFace(facetIndex);
+          const auto& qf = getQuadrature(*face, fes);
+          const auto& quadrature = face->getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const auto& point = quadrature.getPoint(q);
+            const Variational::IntegrationPoint ip(point, &qf, q);
+            action += qf.getWeight(q) * point.getDistortion() *
+              force.getValue(ip).dot(direction.getValue(point));
+          }
+        }
+        return action;
+      }
+
+      /// @brief Fraction-to-boundary factor for a primal barrier Newton update.
+      template <class Mesh, class FES>
+      Real getBarrierStepScale(const Mesh& mesh, const FES& fes,
+        const Displacement& current, const Displacement& inner,
+        const Displacement& increment, std::size_t dimension) const
+      {
+        const Real tau =
+          std::clamp(m_parameters.fractionToBoundary, Real(0), Real(0.999));
+        Real alpha = Real(1);
+        CellDeformation deformation(dimension);
+        auto currentJacobian = Variational::Jacobian(current);
+        auto innerJacobian = Variational::Jacobian(inner);
+        auto incrementJacobian = Variational::Jacobian(increment);
+
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& qf = getQuadrature(*cell, fes);
+          const auto& quadrature = cell->getQuadrature(qf);
+          for (std::size_t q = 0; q < quadrature.getSize(); ++q)
+          {
+            const Variational::IntegrationPoint ip(quadrature.getPoint(q), &qf, q);
+            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+            if (!deformation.isAdmissible())
+              return Real(0);
+            const auto innerGradient = innerJacobian.getValue(ip);
+            const auto incrementGradient = incrementJacobian.getValue(ip);
+            const Real innerJ = -deformation.getJacobianAction(innerGradient);
+            const Real incrementJ = -deformation.getJacobianAction(incrementGradient);
+            const Real innerQ = deformation.getRelativeDistortionAction(innerGradient);
+            const Real incrementQ =
+              deformation.getRelativeDistortionAction(incrementGradient);
+            const Real slackJ = deformation.getJacobian() - m_parameters.jSafe - innerJ;
+            const Real slackQ =
+              m_parameters.qMax - deformation.getRelativeDistortion() - innerQ;
+            if (slackJ <= Real(0) || slackQ <= Real(0))
+              return Real(0);
+            if (incrementJ > Real(0))
+              alpha = std::min(alpha, tau * slackJ / incrementJ);
+            if (incrementQ > Real(0))
+              alpha = std::min(alpha, tau * slackQ / incrementQ);
+          }
+        }
+        return std::clamp(alpha, Real(0), Real(1));
       }
 
       /**

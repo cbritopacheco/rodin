@@ -47,6 +47,8 @@ namespace Rodin::Adaptation
     FractionalMarginMetric,
     /// @brief Fractional-margin metric followed by an affine global safeguard.
     SafeguardedMarginMetric,
+    /// @brief Primal logarithmic-barrier solution of the linearized QP.
+    PrimalBarrierQP,
     /// @brief Exact active-set solution of the linearized constrained problem.
     ActiveSetKKT
   };
@@ -80,7 +82,7 @@ namespace Rodin::Adaptation
     /// This changes the Riesz metric only; no quality force is added to the
     /// right-hand side.
     /// gammaQual ≤ 0 disables the Q hinge.
-      Real gammaQual = 1; ///< Relative-distortion quality metric weight.
+      Real gammaQual = 0; ///< Relative-distortion quality metric weight.
       Real qStar = Real(1.75); ///< Relative-distortion hinge threshold.
     /// Optional one-sided size hinge:
     ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
@@ -96,10 +98,13 @@ namespace Rodin::Adaptation
       Real metricActivationEpsilon =
         Real(1e-8); ///< Positive guard for smooth activation.
       WNGIRConstraintFormulation constraintFormulation =
-        WNGIRConstraintFormulation::SignBlindMetric; ///< Linearized constraint model.
+        WNGIRConstraintFormulation::PrimalBarrierQP; ///< Linearized constraint model.
       Real marginFraction = Real(0.5); ///< Fraction of a margin available to one step.
       std::size_t marginCorrectionIterations = 3; ///< Safeguarded penalty corrections.
       Real marginPenaltyGrowth = 10; ///< Penalty growth between safeguard corrections.
+      std::size_t primalBarrierIterations = 3; ///< Newton corrections of the QP barrier.
+      Real primalBarrierMu = Real(0.3); ///< Dimensionless barrier/model-decrease ratio.
+      Real fractionToBoundary = Real(0.95); ///< Strict-feasibility fraction.
       Real omegaMin = 0.1;        ///< active-set threshold on ω.
       Real alphaMin = 1e-4;       ///< line-search floor.
       bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds.

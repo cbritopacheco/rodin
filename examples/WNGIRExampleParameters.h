@@ -28,7 +28,7 @@ namespace Rodin::Examples
       Real ellOverH = Real(0.75);
       Real gammaJ = 1;
       Real gammaQ = 1;
-      Real gammaQual = 1;
+      Real gammaQual = 0;
       Real activeRMSOverHTol = 0;
       Real activeSupOverHTol = 0;
       Real gammaSize = 0;
@@ -129,7 +129,7 @@ namespace Rodin::Examples
     int argc, char** argv)
   {
     const auto value =
-      stringOption(argc, argv, "wngir-constraint-formulation", "sign-blind");
+      stringOption(argc, argv, "wngir-constraint-formulation", "primal-barrier-qp");
     if (value == "sign-blind")
       return Adaptation::WNGIRConstraintFormulation::SignBlindMetric;
     if (value == "directional")
@@ -138,6 +138,8 @@ namespace Rodin::Examples
       return Adaptation::WNGIRConstraintFormulation::FractionalMarginMetric;
     if (value == "safeguarded-margin")
       return Adaptation::WNGIRConstraintFormulation::SafeguardedMarginMetric;
+    if (value == "primal-barrier-qp")
+      return Adaptation::WNGIRConstraintFormulation::PrimalBarrierQP;
     if (value == "active-set-kkt")
       return Adaptation::WNGIRConstraintFormulation::ActiveSetKKT;
     throw std::invalid_argument(
@@ -192,6 +194,13 @@ namespace Rodin::Examples
         p.marginCorrectionIterations));
     p.marginPenaltyGrowth = realOption(
       argc, argv, "wngir-margin-penalty-growth", p.marginPenaltyGrowth);
+    p.primalBarrierIterations = std::max<std::size_t>(1,
+      sizeOption(
+        argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));
+    p.primalBarrierMu =
+      realOption(argc, argv, "wngir-primal-barrier-mu", p.primalBarrierMu);
+    p.fractionToBoundary =
+      realOption(argc, argv, "wngir-fraction-to-boundary", p.fractionToBoundary);
     p.qualitySmoothDelta =
       realOption(argc, argv, "wngir-quality-smooth-delta", p.qualitySmoothDelta);
     p.jBarrierSmoothDelta =

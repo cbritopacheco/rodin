@@ -10,6 +10,7 @@
 #include "CellDeformation.h"
 #include "WNGIRConstraintState.h"
 #include "WNGIRParameters.h"
+#include "WNGIRValidationWeights.h"
 
 namespace Rodin::Adaptation::Detail
 {
@@ -69,6 +70,7 @@ namespace Rodin::Adaptation::Detail
           : std::max<std::size_t>(2, 2 * trialFE.getOrder());
         const auto& qf = QF::PolytopeQuadratureFormula::get(qOrder, geometry);
         const auto& quad = polytope.getQuadrature(qf);
+        const WNGIRValidationWeights validationWeights(qf);
 
         const std::size_t ntr = trialFE.getCount();
         const std::size_t nte = testFE.getCount();
@@ -91,7 +93,7 @@ namespace Rodin::Adaptation::Detail
         {
           const auto& pt = quad.getPoint(qp);
           const Variational::IntegrationPoint ip(pt, &qf, qp);
-          const Real w = qf.getWeight(qp) * pt.getDistortion();
+          const Real w = validationWeights.getWeight(qp) * pt.getDistortion();
           def.setDisplacementGradient(currentJacobian.getValue(ip));
             // Near-singular: cofactor via inverse is unreliable; skip.
           if (!def.isInvertible())

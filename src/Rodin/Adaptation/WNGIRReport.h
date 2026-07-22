@@ -24,6 +24,8 @@ namespace Rodin::Adaptation
       Real lastAlpha = 0;
     /// @brief Last affine margin-safeguard factor.
       Real lastMarginScale = 1;
+    /// @brief Effective per-volume coefficient assembled for the last barrier QP.
+      Real primalBarrierCoefficient = 0;
     /// @brief Norm or magnitude of the last accepted step.
       Real acceptedStep = 0;
     /// @brief Minimum sampled Jacobian determinant.
