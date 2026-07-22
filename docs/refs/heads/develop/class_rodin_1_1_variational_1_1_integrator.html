@@ -178,6 +178,10 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
               using <a href="#a02f58f805c9cd09c1326a38fcb96f441" class="m-doc-self">Parent</a> = <a href="class_rodin_1_1_form_language_1_1_base.html" class="m-doc">FormLanguage::<wbr />Base</a>
             </dt>
             <dd>Parent class type.</dd>
+            <dt>
+              using <a href="#adea5ccfd57d26e8af9eb776fdf191b04" class="m-doc">OrderType</a> = std::function&lt;size_t(const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;)&gt;
+            </dt>
+            <dd>Virtual destructor.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -195,15 +199,27 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
               <span class="m-doc-wrap-bumper"><a href="#aca6f9d6b5c1e439f37fe91ed2a4e2bca" class="m-doc">Integrator</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp;&amp; other)</span>
             </dt>
             <dd>Move constructor.</dd>
-            <dt id="a3842c4391e24b1ae23008e194352e718">
-              <span class="m-doc-wrap-bumper"><a href="#a3842c4391e24b1ae23008e194352e718" class="m-doc-self">~Integrator</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
-            </dt>
-            <dd>Virtual destructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a954904358be9bf90ec5d9fb9f907784d" class="m-doc">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t) -&gt; <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp;</span>
+            </dt>
+            <dd>Restores order inference from the integrand.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4c4c2ddfd3edbd42d18604bd674784a2" class="m-doc">setOrder</a>(</span><span class="m-doc-wrap">size_t order) -&gt; <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp;</span>
+            </dt>
+            <dd>Sets a constant integration order.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a503b6171d3423d1daad5ac38b42b55bc" class="m-doc">setOrder</a>(</span><span class="m-doc-wrap"><a href="#adea5ccfd57d26e8af9eb776fdf191b04" class="m-doc">OrderType</a> order) -&gt; <a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp;</span>
+            </dt>
+            <dd>Sets a rule computing the integration order per polytope.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const -&gt; <a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt;</span>
+            </dt>
+            <dd>The integration order to use on a polytope.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0efed77ea30ca5909fecfb130f0bdb74" class="m-doc">getType</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="#a1d1cfd8ffb84e947f82999c682b666a7" class="m-doc">Type</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -241,6 +257,16 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
           </div></section>
         </section>
         <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="adea5ccfd57d26e8af9eb776fdf191b04"><div>
+            <h3>
+              using Rodin::<wbr />Variational::<wbr />Integrator::<wbr /><a href="#adea5ccfd57d26e8af9eb776fdf191b04" class="m-doc-self">OrderType</a> = std::function&lt;size_t(const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp;)&gt;
+            </h3>
+            <p>Virtual destructor.</p>
+<p>Rule giving the integration order to use on a polytope.</p><aside class="m-note m-default"><h4>See also</h4><p>setOrder(OrderType)</p></aside>
+          </div></section>
+        </section>
+        <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a3657fe65d87bc277e68e875e6543fc40"><div>
             <h3>
@@ -274,6 +300,72 @@ $ A_{ij} = \int_K \nabla \phi_j \cdot \nabla \psi_i \, dx $
                   <td>Integrator to move</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a954904358be9bf90ec5d9fb9f907784d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a954904358be9bf90ec5d9fb9f907784d" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">std::nullopt_t)</span></span>
+            </h3>
+            <p>Restores order inference from the integrand.</p>
+<p>This is the default: the order is derived per polytope from the polynomial degrees of the finite elements living on it. Correct whenever the integrand is polynomial.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4c4c2ddfd3edbd42d18604bd674784a2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4c4c2ddfd3edbd42d18604bd674784a2" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap">size_t order)</span></span>
+            </h3>
+            <p>Sets a constant integration order.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">order&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Integration order to use on every polytope</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Note that the inferred order is a function of the polytope, so a constant is only equivalent to inference on a mesh whose elements all share one degree; prefer <a href="#a503b6171d3423d1daad5ac38b42b55bc" class="m-doc">setOrder(OrderType)</a> otherwise.</p>
+          </div></section>
+          <section class="m-doc-details" id="a503b6171d3423d1daad5ac38b42b55bc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="class_rodin_1_1_variational_1_1_integrator.html" class="m-doc">Integrator</a>&amp; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a503b6171d3423d1daad5ac38b42b55bc" class="m-doc-self">setOrder</a>(</span><span class="m-doc-wrap"><a href="#adea5ccfd57d26e8af9eb776fdf191b04" class="m-doc">OrderType</a> order)</span></span>
+            </h3>
+            <p>Sets a rule computing the integration order per polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">order&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Rule invoked with the polytope being integrated</td>
+                </tr>
+              </tbody>
+            </table>
+<p>On an integrator the order is the degree of the quadrature rule, not the polynomial degree of an expression; the two coincide only when the integrand is polynomial. Set it explicitly whenever it is not — a coefficient composing a level set with a mesh lookup, say — since the inferred order is then meaningless and typically too low.</p>
+          </div></section>
+          <section class="m-doc-details" id="a350edea67dfa070881b66ed34db4c27c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="group___rodin_types.html#gaaf8f4d77efd311ec7818ab421294ef82" class="m-doc">Optional</a>&lt;size_t&gt; Rodin::<wbr />Variational::<wbr />Integrator::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a350edea67dfa070881b66ed34db4c27c" class="m-doc-self">getOrder</a>(</span><span class="m-doc-wrap">const <a href="class_rodin_1_1_geometry_1_1_polytope.html" class="m-doc">Geometry::<wbr />Polytope</a>&amp; polytope) const</span></span>
+            </h3>
+            <p>The integration order to use on a polytope.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">polytope&nbsp;<span class="m-label m-flat m-info">in</span></td>
+                  <td>Polytope being integrated</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The order given by the rule, or an empty optional when the order is to be inferred from the integrand.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a0efed77ea30ca5909fecfb130f0bdb74"><div>

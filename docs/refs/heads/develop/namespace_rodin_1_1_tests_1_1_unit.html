@@ -10737,6 +10737,76 @@ $ \int_{-1}^{1} P_5(x)P_{15}(x)\,dx = 0 $
               LinearForm_WithVectorFunction)</span>
             </dt>
             <dd>Verifies linear form with vector function for variational integral by checking form assembly.</dd>
+            <dt id="a9a8572adf7808955cb2506ac3674332e">
+              <span class="m-doc-wrap-bumper"><a href="#a9a8572adf7808955cb2506ac3674332e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Default_InfersOrder)</span>
+            </dt>
+            <dd>By default an integrator infers its order, reporting none of its own.</dd>
+            <dt id="aa87d2ff3c6cb1189b1e8b4d5f2f29a93">
+              <span class="m-doc-wrap-bumper"><a href="#aa87d2ff3c6cb1189b1e8b4d5f2f29a93" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Constant_AppliesEverywhere)</span>
+            </dt>
+            <dd>A constant order is reported for every polytope.</dd>
+            <dt id="ac6015771c13275333f4e918563b4423d">
+              <span class="m-doc-wrap-bumper"><a href="#ac6015771c13275333f4e918563b4423d" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Rule_EvaluatedPerPolytope)</span>
+            </dt>
+            <dd>A rule is evaluated per polytope, and sees each one.</dd>
+            <dt id="ad4978c513b5973fb3f2d86e3ea6ca054">
+              <span class="m-doc-wrap-bumper"><a href="#ad4978c513b5973fb3f2d86e3ea6ca054" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Nullopt_RestoresInference)</span>
+            </dt>
+            <dd>Passing nullopt restores inference after an explicit order was set.</dd>
+            <dt id="a495e39d883da42f51889240941c3537e">
+              <span class="m-doc-wrap-bumper"><a href="#a495e39d883da42f51889240941c3537e" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Order_SurvivesCopy)</span>
+            </dt>
+            <dd>The order survives the copy every form assembly makes of its integrator.</dd>
+            <dt id="a31b7d91ad279aafbf98d25bfd079a9a0">
+              <span class="m-doc-wrap-bumper"><a href="#a31b7d91ad279aafbf98d25bfd079a9a0" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Order_ReachesQuadrature)</span>
+            </dt>
+            <dd>A sufficient order integrates a quartic exactly; a deficient one does not.</dd>
+            <dt id="a5d1f9b345c749be3af71ba29444364df">
+              <span class="m-doc-wrap-bumper"><a href="#a5d1f9b345c749be3af71ba29444364df" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Rule_ReachesQuadrature)</span>
+            </dt>
+            <dd>A per-polytope rule reaches the quadrature just as a constant does.</dd>
+            <dt id="a7d6c105966d4f7d87bac20c1002971f6">
+              <span class="m-doc-wrap-bumper"><a href="#a7d6c105966d4f7d87bac20c1002971f6" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              BilinearIntegrator_HonoursOrder)</span>
+            </dt>
+            <dd>setOrder is honoured by bilinear integrators too.</dd>
+            <dt id="abee95446e7aee172321a324845f0df50">
+              <span class="m-doc-wrap-bumper"><a href="#abee95446e7aee172321a324845f0df50" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              BoundaryIntegrator_HonoursOrder)</span>
+            </dt>
+            <dd>setOrder is honoured by boundary integrators too.</dd>
+            <dt id="afed77098fd3da45f04b4a2f18165c933">
+              <span class="m-doc-wrap-bumper"><a href="#afed77098fd3da45f04b4a2f18165c933" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              MixedOrder_InferenceFollowsDegree)</span>
+            </dt>
+            <dd>Inference differs with the polynomial degree of the space.</dd>
+            <dt id="ab0a6323a93df2269de2f0fd8b86bce78">
+              <span class="m-doc-wrap-bumper"><a href="#ab0a6323a93df2269de2f0fd8b86bce78" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              MixedOrder_ExplicitOverridesInference)</span>
+            </dt>
+            <dd>An explicit order overrides inference on a higher-degree space.</dd>
+            <dt id="a2946e888fa24694ae90dfc1c9b8fca85">
+              <span class="m-doc-wrap-bumper"><a href="#a2946e888fa24694ae90dfc1c9b8fca85" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              Quadrilateral_HonoursOrder)</span>
+            </dt>
+            <dd>On a quadrilateral mesh the order machinery behaves identically.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a8ff3c897435bb098d504a21febefe238" class="m-doc">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              MixedPolytopes_RuleSeesEachGeometry)</span>
+            </dt>
+            <dd>On a mesh carrying two geometries a rule sees both, and may give each its own order.</dd>
+            <dt id="a6bef12ab410a733e00477be70cf298ba">
+              <span class="m-doc-wrap-bumper"><a href="#a6bef12ab410a733e00477be70cf298ba" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              MixedPolytopes_IntegratesExactly)</span>
+            </dt>
+            <dd>A per-geometry rule integrates correctly across a mixed mesh.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab3b7bb1cfc8709f2b327bf1b03624c4a" class="m-doc">findInteriorFacePoint</a>(</span><span class="m-doc-wrap"><a href="class_rodin_1_1_geometry_1_1_mesh.html" class="m-doc">Geometry::<wbr />Mesh</a>&lt;<a href="class_rodin_1_1_context_1_1_local.html" class="m-doc">Context::<wbr />Local</a>&gt;&amp; mesh) -&gt; std::pair&lt;bool, <a href="class_rodin_1_1_geometry_1_1_point.html" class="m-doc">Geometry::<wbr />Point</a>&gt;</span>
             </dt>
@@ -12949,6 +13019,14 @@ $ u_s - u_s = 0 $
               </tfoot>
             </table>
 <p>For a planar quadrilateral with vertices ordered counter-clockwise, determines if point (px, py, pz) lies on the face and computes its parametric coordinates (s, t) in [0,1]x[0,1].</p><p>Algorithm:</p><ol><li>Compute the face normal using cross product of edge vectors</li><li>Check if point lies on the plane within tolerance</li><li>Project to 2D by dropping the axis with largest normal component</li><li>Solve for parametric coordinates in the projected space</li></ol><p>Note: This simplified algorithm assumes axis-aligned or near-axis-aligned quads, which is appropriate for reference element faces.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8ff3c897435bb098d504a21febefe238"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> Rodin::<wbr />Tests::<wbr />Unit::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8ff3c897435bb098d504a21febefe238" class="m-doc-self">TEST</a>(</span><span class="m-doc-wrap">Rodin_Variational_IntegratorOrder,
+              MixedPolytopes_RuleSeesEachGeometry)</span></span>
+            </h3>
+            <p>On a mesh carrying two geometries a rule sees both, and may give each its own order.</p>
+<p>This is the case a constant order cannot express: the inferred order is a function of the polytope, so only a rule can follow it.</p>
           </div></section>
           <section class="m-doc-details" id="ab3b7bb1cfc8709f2b327bf1b03624c4a"><div>
             <h3>
