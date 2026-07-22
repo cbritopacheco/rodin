@@ -7,7 +7,9 @@
 #ifndef RODIN_ADAPTATION_WNGIRREPORT_H
 #define RODIN_ADAPTATION_WNGIRREPORT_H
 
-#include "WNGIRCommon.h"
+#include <vector>
+
+#include "Rodin/Types.h"
 
 namespace Rodin::Adaptation
 {
@@ -20,6 +22,8 @@ namespace Rodin::Adaptation
       Real sigma = 0;
     /// @brief Last accepted line-search factor.
       Real lastAlpha = 0;
+    /// @brief Last affine margin-safeguard factor.
+      Real lastMarginScale = 1;
     /// @brief Norm or magnitude of the last accepted step.
       Real acceptedStep = 0;
     /// @brief Minimum sampled Jacobian determinant.
@@ -52,7 +56,14 @@ namespace Rodin::Adaptation
       Real tSolve = 0;      ///< CG iterations.
       Real tLineSearch = 0; ///< true-geometry admissibility + energy LS.
       std::size_t linearIterations = 0; ///< Accumulated linear iterations.
+      std::size_t activeConstraints = 0; ///< Accumulated KKT active-set size.
       Real linearError = 0; ///< Last linear solver residual/error estimate.
+    /// Per-cell fit--admissibility conflict indicator.
+    ///
+    /// Local alignment between the interface force and selected admissibility
+    /// normals, aggregated per cell. This is neither a KKT multiplier nor a
+    /// certificate that no feasible descent direction remains.
+      std::vector<Real> conflictIndicator;
       std::size_t andersonTried = 0; ///< Number of Anderson trials.
       std::size_t andersonAccepted = 0; ///< Number of accepted Anderson trials.
       Real lastAndersonTheta = 0; ///< Last Anderson damping parameter.

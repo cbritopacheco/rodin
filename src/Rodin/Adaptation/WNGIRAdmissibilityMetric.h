@@ -7,7 +7,8 @@
 #ifndef RODIN_ADAPTATION_WNGIRADMISSIBILITYMETRIC_H
 #define RODIN_ADAPTATION_WNGIRADMISSIBILITYMETRIC_H
 
-#include "WNGIRDetail.h"
+#include "CellDeformation.h"
+#include "WNGIRConstraintState.h"
 #include "WNGIRParameters.h"
 
 namespace Rodin::Adaptation::Detail
@@ -26,12 +27,15 @@ namespace Rodin::Adaptation::Detail
 
         /// @brief Constructs the admissibility-metric integrator.
       WNGIRAdmissibilityMetric(const TrialFunction& du, const TestFunction& v,
-        const Displacement& current, const WNGIRParameters& parameters)
+        const Displacement& current, const WNGIRParameters& parameters,
+        const Displacement* predictor = nullptr, Real constraintMultiplier = Real(1))
         : Parent(du.getLeaf(), v.getLeaf()),
           m_du(std::cref(du)),
           m_v(std::cref(v)),
           m_current(current),
-          m_parameters(parameters)
+          m_parameters(parameters),
+          m_predictor(predictor),
+          m_constraintMultiplier(constraintMultiplier)
       {}
 
         /// @brief Copy constructor.
@@ -70,126 +74,81 @@ namespace Rodin::Adaptation::Detail
         const std::size_t nte = testFE.getCount();
         m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
         m_matrix.setZero();
+        m_aJTrial.resize(ntr);
+        m_aQTrial.resize(ntr);
+        m_aJTest.resize(nte);
+        m_aQTest.resize(nte);
 
-        auto smoothStep = [](Real x, Real delta) -> Real {
-          if (delta <= Real(0))
-            return x > Real(0) ? Real(1) : Real(0);
-          return Real(0.5) * (Real(1) + std::tanh(x / delta));
-        };
+        auto trialJacobian = Variational::Jacobian(m_du.get());
+        auto testJacobian = Variational::Jacobian(m_v.get());
+        auto currentJacobian = Variational::Jacobian(m_current.get());
+        auto predictorJacobian =
+          Variational::Jacobian(m_predictor ? *m_predictor : m_current.get());
+        const bool sameSpace = trialFES == testFES;
 
+        CellDeformation def(dim);
         for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
         {
           const auto& pt = quad.getPoint(qp);
           const Variational::IntegrationPoint ip(pt, &qf, qp);
           const Real w = qf.getWeight(qp) * pt.getDistortion();
-          const auto F = deformationGradient(m_current.get(), polytope, ip, dim);
-          const Real jK = F.determinant();
+          def.setDisplacementGradient(currentJacobian.getValue(ip));
             // Near-singular: cofactor via inverse is unreliable; skip.
-          if (std::abs(jK) < Real(1e-14))
+          if (!def.isInvertible())
             continue;
-            // Shape terms (Q_rel and its barriers/hinge) need j > 0; the
-            // size hinge needs only j and a_j, so it runs for ALL j —
-            // including inverted cells, which it pulls back to validity.
-          const bool shapeOK = jK > Real(0);
-          Real frob2 = 0;
-          Real qK = 0;
-          Real sJ0 = 0, sQ0 = 0;
-          Real jWeight = 0, qWeight = 0, qualWeight = 0;
-          Math::SpatialMatrix<Real> dQdF = makeZeroMatrix(dim);
-          if (shapeOK)
-          {
-            frob2 = F.squaredNorm();
-            const auto FinvT = F.inverse().transpose();
-            qK = frob2 / (d * std::pow(jK, Real(2) / d));
-            dQdF = Math::SpatialMatrix<Real>(
-              (Real(2) / d) * std::pow(jK, -Real(2) / d) * (F - (frob2 / d) * FinvT));
-            sJ0 = jK - params.jSafe;
-            sQ0 = params.qMax - qK;
-            if (params.includeAdmissibilityMetric && params.gammaJ > Real(0) &&
-              sJ0 > Real(0))
-            {
-              if (params.metricActivation == WNGIRMetricActivation::Smooth)
-              {
-                const Real s = std::max(sJ0, params.metricActivationEpsilon);
-                jWeight =
-                  smoothStep(params.s0J - sJ0, params.jBarrierSmoothDelta) / (s * s);
-              }
-              else if (sJ0 < params.s0J)
-                jWeight = Real(1) / (sJ0 * sJ0);
-            }
-            if (params.includeAdmissibilityMetric && params.gammaQ > Real(0) &&
-              sQ0 > Real(0))
-            {
-              if (params.metricActivation == WNGIRMetricActivation::Smooth)
-              {
-                const Real s = std::max(sQ0, params.metricActivationEpsilon);
-                qWeight =
-                  smoothStep(params.s0Q - sQ0, params.qBarrierSmoothDelta) / (s * s);
-              }
-              else if (sQ0 < params.s0Q)
-                qWeight = Real(1) / (sQ0 * sQ0);
-            }
-            if (params.includeQualityMetric && params.gammaQual > Real(0))
-            {
-              if (params.metricActivation == WNGIRMetricActivation::Smooth)
-                qualWeight = smoothStep(qK - params.qStar, params.qualitySmoothDelta);
-              else if (qK > params.qStar)
-                qualWeight = Real(1);
-            }
-          }
-          Real sizeWeight = 0;
-          if (params.includeQualityMetric && params.gammaSize > Real(0))
-          {
-            if (params.metricActivation == WNGIRMetricActivation::Smooth)
-              sizeWeight = smoothStep(params.jStar - jK, params.jBarrierSmoothDelta);
-            else if (jK < params.jStar)
-              sizeWeight = Real(1);
-          }
+          Optional<Math::SpatialMatrix<Real>> predictorGradient;
+          if (m_predictor)
+            predictorGradient = predictorJacobian.getValue(ip);
+          const WNGIRConstraintState state(
+            def, params, predictorGradient ? &*predictorGradient : nullptr);
+          const Real jWeight = state.getJacobianWeight();
+          const Real qWeight = state.getDistortionWeight();
+          const Real qualWeight = state.getQualityWeight();
+          const Real sizeWeight = state.getSizeWeight();
           if (jWeight <= Real(0) && qWeight <= Real(0) && qualWeight <= Real(0) &&
             sizeWeight <= Real(0))
             continue;
 
-          const auto Jinv = pt.getJacobianInverse();
-          const auto& rc = pt.getReferenceCoordinates();
-          const auto FinvT = F.inverse().transpose();
+          const bool shapeOK = def.isAdmissible();
 
-          std::vector<Real> aJTrial(ntr), aQTrial(ntr);
-          std::vector<Real> aJTest(nte), aQTest(nte);
-          auto fillActions = [&](const auto& fe, std::vector<Real>& aJ,
-                               std::vector<Real>& aQ) {
-            for (std::size_t l = 0; l < fe.getCount(); ++l)
+          trialJacobian.setIntegrationPoint(ip);
+          for (std::size_t l = 0; l < ntr; ++l)
+          {
+            const auto jp = trialJacobian.getBasis(l);
+            m_aJTrial[l] = def.getJacobianAction(jp);
+            m_aQTrial[l] = shapeOK ? def.getRelativeDistortionAction(jp) : Real(0);
+          }
+          if (sameSpace)
+          {
+            m_aJTest = m_aJTrial;
+            m_aQTest = m_aQTrial;
+          }
+          else
+          {
+            testJacobian.setIntegrationPoint(ip);
+            for (std::size_t l = 0; l < nte; ++l)
             {
-              const auto jp = physicalJacobian(fe, l, rc, Jinv, dim);
-              Real accJ = 0;
-              Real accQ = 0;
-              for (std::size_t r = 0; r < dim; ++r)
-                for (std::size_t c = 0; c < dim; ++c)
-                {
-                  const auto rr = static_cast<Eigen::Index>(r);
-                  const auto cc = static_cast<Eigen::Index>(c);
-                  accJ += jK * FinvT(rr, cc) * jp(rr, cc);
-                  accQ += dQdF(rr, cc) * jp(rr, cc);
-                }
-              aJ[l] = accJ;
-              aQ[l] = accQ;
+              const auto jp = testJacobian.getBasis(l);
+              m_aJTest[l] = def.getJacobianAction(jp);
+              m_aQTest[l] = shapeOK ? def.getRelativeDistortionAction(jp) : Real(0);
             }
-          };
-          fillActions(trialFE, aJTrial, aQTrial);
-          fillActions(testFE, aJTest, aQTest);
+          }
 
           if (jWeight > Real(0))
           {
             for (std::size_t te = 0; te < nte; ++te)
               for (std::size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                  w * params.gammaJ * jWeight * aJTrial[tr] * aJTest[te];
+                  w * m_constraintMultiplier * params.gammaJ * jWeight *
+                    m_aJTrial[tr] * m_aJTest[te];
           }
           if (qWeight > Real(0))
           {
             for (std::size_t te = 0; te < nte; ++te)
               for (std::size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                  w * params.gammaQ * qWeight * aQTrial[tr] * aQTest[te];
+                  w * m_constraintMultiplier * params.gammaQ * qWeight *
+                    m_aQTrial[tr] * m_aQTest[te];
           }
           if (qualWeight > Real(0))
           {
@@ -197,7 +156,7 @@ namespace Rodin::Adaptation::Detail
             for (std::size_t te = 0; te < nte; ++te)
               for (std::size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                  w * params.gammaQual * qualWeight * aQTrial[tr] * aQTest[te];
+                  w * params.gammaQual * qualWeight * m_aQTrial[tr] * m_aQTest[te];
           }
           if (sizeWeight > Real(0))
           {
@@ -205,7 +164,7 @@ namespace Rodin::Adaptation::Detail
             for (std::size_t te = 0; te < nte; ++te)
               for (std::size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                  w * params.gammaSize * sizeWeight * aJTrial[tr] * aJTest[te];
+                  w * params.gammaSize * sizeWeight * m_aJTrial[tr] * m_aJTest[te];
           }
         }
         return *this;
@@ -233,7 +192,13 @@ namespace Rodin::Adaptation::Detail
       std::reference_wrapper<const TestFunction> m_v;
       std::reference_wrapper<const Displacement> m_current;
       std::reference_wrapper<const WNGIRParameters> m_parameters;
+      const Displacement* m_predictor;
+      Real m_constraintMultiplier;
       const Geometry::Polytope* m_polytope = nullptr;
+      std::vector<Real> m_aJTrial;
+      std::vector<Real> m_aQTrial;
+      std::vector<Real> m_aJTest;
+      std::vector<Real> m_aQTest;
       Math::Matrix<Real> m_matrix;
   };
 }

@@ -406,6 +406,8 @@ int main(int argc, char** argv)
   cellLabel.setName("cell_label");
   GridFunction phaseMoment(p0Fes);
   phaseMoment.setName("phase_moment");
+  GridFunction conflict(p0Fes);
+  conflict.setName("fit_admissibility_conflict");
   TrialFunction wngirTrial(vectorFes);
   TestFunction wngirTest(vectorFes);
   auto& u = wngirTrial.getSolution();
@@ -436,6 +438,7 @@ int main(int argc, char** argv)
   backgroundGrid.setMesh(mesh, IO::XDMF::MeshPolicy::Transient);
   backgroundGrid.add(cellLabel, IO::XDMF::Center::Cell);
   backgroundGrid.add(phaseMoment, IO::XDMF::Center::Cell);
+  backgroundGrid.add(conflict, IO::XDMF::Center::Cell);
   backgroundGrid.add(phiGf, IO::XDMF::Center::Node);
   backgroundGrid.add(u, IO::XDMF::Center::Node);
 
@@ -605,6 +608,16 @@ int main(int argc, char** argv)
               << "  cgErr=" << wngirRep.linearError << "  ls=" << wngirRep.tLineSearch
               << "  exit=" << wngirRep.exitReason << '\n';
     iterations = wngirRep.iterations;
+      // Per-cell fit-admissibility alignment indicator, not a KKT multiplier.
+    conflict.getData().setZero();
+    if (!wngirRep.conflictIndicator.empty())
+      for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+      {
+        const Index cellIdx = cellIt->getIndex();
+        const Index dof =
+          p0Fes.getGlobalIndex({mesh.getDimension(), cellIdx}, 0);
+        conflict.getData()(dof) = wngirRep.conflictIndicator[cellIdx];
+      }
     lastAlpha = wngirRep.lastAlpha;
     acceptedStep = wngirRep.acceptedStep;
     minJ = wngirRep.minJ;

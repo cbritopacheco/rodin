@@ -156,8 +156,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -355,8 +355,8 @@ namespace Rodin::Variational
         const auto& fes = integrand.getFiniteElementSpace();
         const auto& fe  = fes.getFiniteElement(d, idx);
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -583,7 +583,8 @@ namespace Rodin::Variational
           polytope.getDimension(), polytope.getIndex());
 
         // P1 × P1 product is degree 2 — need at least order-2 quadrature.
-        const size_t order = trialfe.getOrder() + testfe.getOrder();
+        const size_t order =
+          this->getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
 
         if (recompute)
@@ -931,7 +932,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe  = testfes.getFiniteElement(d, idx);
 
-        const size_t order = trialfe.getOrder() + testfe.getOrder();
+        const size_t order =
+          this->getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1245,7 +1247,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1509,7 +1512,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -1823,7 +1827,8 @@ namespace Rodin::Variational
         const auto& trialfe = trialfes.getFiniteElement(d, idx);
         const auto& testfe  = testfes.getFiniteElement(d, idx);
 
-        const size_t order = trialfe.getOrder() + testfe.getOrder();
+        const size_t order =
+          this->getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2045,7 +2050,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2271,7 +2277,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2530,7 +2537,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -2669,6 +2677,291 @@ namespace Rodin::Variational
             Jacobian<ShapeFunction<LHSDerived, P1<Range, Mesh>, TrialSpace>>>,
           ShapeFunctionBase<
             Jacobian<ShapeFunction<RHSDerived, P1<Range, Mesh>, TestSpace>>>>>;
+
+  /**
+   * @ingroup QuadratureRuleSpecializations
+   * @brief Integration of a rank-one form in the P1 Jacobian of ShapeFunction.
+   *
+   * Assembles
+   * @f[
+   *   \int_K (A : \mathbf{J}\,u)\,(A : \mathbf{J}\,v)\ dx,
+   * @f]
+   * the outer product of a single Frobenius contraction of a matrix
+   * coefficient @f$A@f$ against the Jacobians of the trial and test functions.
+   * Barrier and hinge metrics take this shape: the constraint gradient of a
+   * scalar margin @f$m(F)@f$ is @f$\partial_F m : \nabla v@f$, so its
+   * Gauss-Newton Hessian is the square of that contraction.
+   *
+   * The coefficient is evaluated once per quadrature point rather than once per
+   * basis pair, and the reference-space basis Jacobians are tabulated once per
+   * geometry and quadrature rule, shared by every physical cell.
+   */
+  template <class CoeffDerived, class LHSDerived, class RHSDerived, class LHSRange,
+    class RHSRange, class LHSMesh, class RHSMesh>
+  class QuadratureRule<
+    Dot<ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
+                            ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived,
+                                                P1<LHSRange, LHSMesh>, TrialSpace>>,
+                              P1<LHSRange, LHSMesh>, TrialSpace>>,
+          P1<LHSRange, LHSMesh>, TrialSpace>,
+      ShapeFunctionBase<Dot<FunctionBase<CoeffDerived>,
+                          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived,
+                                              P1<RHSRange, RHSMesh>, TestSpace>>,
+                            P1<RHSRange, RHSMesh>, TestSpace>>,
+        P1<RHSRange, RHSMesh>, TestSpace>>>
+    : public LocalBilinearFormIntegratorBase<
+        typename FormLanguage::Traits<FunctionBase<CoeffDerived>>::ScalarType>
+  {
+    public:
+      using LHSFESType = P1<LHSRange, LHSMesh>;
+      using RHSFESType = P1<RHSRange, RHSMesh>;
+      using CoefficientType = FunctionBase<CoeffDerived>;
+
+      using ScalarType = typename FormLanguage::Traits<CoefficientType>::ScalarType;
+
+      using LHSType = ShapeFunctionBase<
+        Dot<CoefficientType,
+          ShapeFunctionBase<Jacobian<ShapeFunction<LHSDerived, LHSFESType, TrialSpace>>,
+            LHSFESType, TrialSpace>>,
+        LHSFESType, TrialSpace>;
+
+      using RHSType = ShapeFunctionBase<
+        Dot<CoefficientType,
+          ShapeFunctionBase<Jacobian<ShapeFunction<RHSDerived, RHSFESType, TestSpace>>,
+            RHSFESType, TestSpace>>,
+        RHSFESType, TestSpace>;
+
+      using IntegrandType = Dot<LHSType, RHSType>;
+
+      using Parent = LocalBilinearFormIntegratorBase<ScalarType>;
+
+        /// @brief Marks this specialization, for tests that assert it is chosen.
+      static constexpr bool IsRankOneJacobianForm = true;
+
+      QuadratureRule(const IntegrandType& integrand)
+        : Parent(integrand.getLHS().getLeaf(), integrand.getRHS().getLeaf()),
+          m_integrand(integrand.copy()),
+          m_qf(nullptr),
+          m_quadrature(nullptr),
+          m_polytope(nullptr),
+          m_set(false),
+          m_order(0)
+      {}
+
+      QuadratureRule(const QuadratureRule& other)
+        : Parent(other),
+          m_integrand(other.m_integrand->copy()),
+          m_qf(nullptr),
+          m_quadrature(nullptr),
+          m_polytope(nullptr),
+          m_set(false),
+          m_order(0)
+      {}
+
+      QuadratureRule(QuadratureRule&& other)
+        : Parent(std::move(other)),
+          m_integrand(std::move(other.m_integrand)),
+          m_qf(other.m_qf),
+          m_quadrature(other.m_quadrature),
+          m_polytope(other.m_polytope),
+          m_set(other.m_set),
+          m_order(other.m_order),
+          m_geometry(other.m_geometry),
+          m_trialRefJac(std::move(other.m_trialRefJac)),
+          m_testRefJac(std::move(other.m_testRefJac)),
+          m_matrix(std::move(other.m_matrix))
+      {}
+
+      const IntegrandType& getIntegrand() const
+      {
+        assert(m_integrand);
+        return *m_integrand;
+      }
+
+      const Geometry::Polytope& getPolytope() const final override
+      {
+        assert(m_polytope);
+        return *m_polytope;
+      }
+
+      QuadratureRule& setPolytope(const Geometry::Polytope& polytope) final override
+      {
+        m_polytope = &polytope;
+
+        const size_t d = polytope.getDimension();
+        const Index idx = polytope.getIndex();
+
+        const auto& integrand = getIntegrand();
+        const auto& lhs = integrand.getLHS();
+        const auto& rhs = integrand.getRHS();
+          // The coefficient is shared by both sides of the outer product.
+        const auto& coeff = lhs.getDerived().getLHS();
+        const auto& trialfes = lhs.getFiniteElementSpace();
+        const auto& testfes = rhs.getFiniteElementSpace();
+        const auto& trialfe = trialfes.getFiniteElement(d, idx);
+        const auto& testfe = testfes.getFiniteElement(d, idx);
+
+        const size_t k_tr = trialfe.getOrder();
+        const size_t k_te = testfe.getOrder();
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
+
+        const auto geometry = polytope.getGeometry();
+        const bool recompute = !m_set || m_order != order || m_geometry != geometry;
+        if (recompute)
+        {
+          m_set = true;
+          m_order = order;
+          m_geometry = geometry;
+          m_qf = &QF::PolytopeQuadratureFormula::get(order, geometry);
+
+          // Reference-space basis Jacobians are shared by every physical cell
+          // with this geometry and quadrature rule.
+          const auto& rc = m_qf->getPoint(0);
+          m_trialRefJac.resize(trialfe.getCount());
+          for (size_t local = 0; local < trialfe.getCount(); ++local)
+          {
+            auto& J = m_trialRefJac[local];
+            J.resize(trialfes.getVectorDimension(), d);
+            const auto& basis = trialfe.getBasis(local);
+            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+              for (size_t j = 0; j < d; ++j)
+                J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+          }
+          if (trialfes == testfes)
+          {
+            m_testRefJac = m_trialRefJac;
+          }
+          else
+          {
+            m_testRefJac.resize(testfe.getCount());
+            for (size_t local = 0; local < testfe.getCount(); ++local)
+            {
+              auto& J = m_testRefJac[local];
+              J.resize(testfes.getVectorDimension(), d);
+              const auto& basis = testfe.getBasis(local);
+              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+                for (size_t j = 0; j < d; ++j)
+                  J(i, j) = basis.template getDerivative<1>(i, j)(rc);
+            }
+          }
+        }
+
+        assert(m_qf);
+        m_quadrature = &polytope.getQuadrature(*m_qf);
+        const auto& q = *m_quadrature;
+
+        const size_t ntr = m_trialRefJac.size();
+        const size_t nte = m_testRefJac.size();
+        m_matrix.resize(static_cast<Eigen::Index>(nte), static_cast<Eigen::Index>(ntr));
+        m_matrix.setZero();
+
+        m_trialAction.resize(ntr);
+        m_testAction.resize(nte);
+
+        for (size_t qp = 0; qp < q.getSize(); ++qp)
+        {
+          const auto& p = q.getPoint(qp);
+          const IntegrationPoint ip(p, m_qf, qp);
+          const ScalarType wdet =
+            static_cast<ScalarType>(m_qf->getWeight(qp) * p.getDistortion());
+          const auto& Jinv = p.getJacobianInverse();
+
+          // Hoisted: one coefficient evaluation for the whole basis pair loop.
+          const auto A = coeff.getValue(ip);
+
+          for (size_t tr = 0; tr < ntr; ++tr)
+          {
+            ScalarType action = 0;
+            const auto& Jref = m_trialRefJac[tr];
+            for (size_t i = 0; i < trialfes.getVectorDimension(); ++i)
+            {
+              for (size_t j = 0; j < d; ++j)
+              {
+                ScalarType physicalDerivative = 0;
+                for (size_t r = 0; r < d; ++r)
+                  physicalDerivative += Jref(i, r) * Jinv(r, j);
+                action += A(i, j) * physicalDerivative;
+              }
+            }
+            m_trialAction[tr] = action;
+          }
+          if (trialfes == testfes)
+          {
+            m_testAction = m_trialAction;
+          }
+          else
+          {
+            for (size_t te = 0; te < nte; ++te)
+            {
+              ScalarType action = 0;
+              const auto& Jref = m_testRefJac[te];
+              for (size_t i = 0; i < testfes.getVectorDimension(); ++i)
+              {
+                for (size_t j = 0; j < d; ++j)
+                {
+                  ScalarType physicalDerivative = 0;
+                  for (size_t r = 0; r < d; ++r)
+                    physicalDerivative += Jref(i, r) * Jinv(r, j);
+                  action += A(i, j) * physicalDerivative;
+                }
+              }
+              m_testAction[te] = action;
+            }
+          }
+
+          if (trialfes == testfes)
+          {
+            for (size_t te = 0; te < nte; ++te)
+            {
+              const ScalarType at = wdet * m_trialAction[te];
+              for (size_t tr = 0; tr <= te; ++tr)
+                m_matrix(te, tr) += at * m_trialAction[tr];
+            }
+          }
+          else
+          {
+            for (size_t te = 0; te < nte; ++te)
+            {
+              const ScalarType at = wdet * m_testAction[te];
+              for (size_t tr = 0; tr < ntr; ++tr)
+                m_matrix(te, tr) += at * m_trialAction[tr];
+            }
+          }
+        }
+
+        if (trialfes == testfes)
+        {
+          m_matrix.template triangularView<Eigen::Upper>() =
+            m_matrix.transpose().template triangularView<Eigen::Upper>();
+        }
+
+        return *this;
+      }
+
+      ScalarType integrate(size_t tr, size_t te) final override
+      {
+        return m_matrix(te, tr);
+      }
+
+      virtual Geometry::Region getRegion() const override = 0;
+
+      virtual QuadratureRule* copy() const noexcept override = 0;
+
+    private:
+      std::unique_ptr<IntegrandType> m_integrand;
+      const QF::QuadratureFormulaBase* m_qf;
+      const Geometry::PolytopeQuadrature* m_quadrature;
+      const Geometry::Polytope* m_polytope;
+      bool m_set;
+      size_t m_order;
+      Optional<Geometry::Polytope::Type> m_geometry;
+      std::vector<Math::Matrix<ScalarType>> m_trialRefJac;
+      std::vector<Math::Matrix<ScalarType>> m_testRefJac;
+      std::vector<ScalarType> m_trialAction;
+      std::vector<ScalarType> m_testAction;
+      Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> m_matrix;
+  };
 
   /**
    * @ingroup QuadratureRuleSpecializations
@@ -2841,7 +3134,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;
@@ -3181,7 +3475,8 @@ namespace Rodin::Variational
 
         const size_t k_tr = trialfe.getOrder();
         const size_t k_te = testfe.getOrder();
-        const size_t order = (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2);
+        const size_t order = this->getOrder(polytope).value_or(
+          (k_tr == 0 || k_te == 0) ? 0 : (k_tr + k_te - 2));
 
         const auto geometry = polytope.getGeometry();
         const bool recompute = !m_set || m_order != order || m_geometry != geometry;

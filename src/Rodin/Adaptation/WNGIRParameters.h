@@ -7,7 +7,10 @@
 #ifndef RODIN_ADAPTATION_WNGIRPARAMETERS_H
 #define RODIN_ADAPTATION_WNGIRPARAMETERS_H
 
-#include "WNGIRCommon.h"
+#include <cstddef>
+
+#include "Rodin/Geometry/Types.h"
+#include "Rodin/Types.h"
 
 namespace Rodin::Adaptation
 {
@@ -31,6 +34,21 @@ namespace Rodin::Adaptation
     Hard,
     /// @brief Activate the metric contribution with a smooth transition.
     Smooth
+  };
+
+  /// @brief Local treatment of linearized quality and admissibility margins.
+  enum class WNGIRConstraintFormulation
+  {
+    /// @brief Penalize both signs of every state-activated constraint action.
+    SignBlindMetric,
+    /// @brief Penalize only actions that consume the current margin.
+    DirectionalMetric,
+    /// @brief Limit the predicted action to a fraction of the current margin.
+    FractionalMarginMetric,
+    /// @brief Fractional-margin metric followed by an affine global safeguard.
+    SafeguardedMarginMetric,
+    /// @brief Exact active-set solution of the linearized constrained problem.
+    ActiveSetKKT
   };
 
   /// @brief Runtime parameters controlling WNGIR assembly and iteration.
@@ -68,7 +86,7 @@ namespace Rodin::Adaptation
     ///   K_j(v,z) = gammaSize ∫_{j<jStar} a_j(v) a_j(z) dX.
     /// Disabled by default. Inversion is handled by the near-zero j barrier
     /// and the true-geometry line search, allowing small well-shaped cells.
-      Real gammaSize = 0; ///< Jacobian size-hinge metric weight.
+      Real gammaSize = 0; ///< Size-hinge weight in the symmetric metric model.
       Real jStar = Real(0.3); ///< Jacobian size-hinge threshold.
       WNGIRMetricActivation metricActivation =
         WNGIRMetricActivation::Hard; ///< Activation rule for metric hinges.
@@ -77,6 +95,11 @@ namespace Rodin::Adaptation
       Real qBarrierSmoothDelta = Real(0.1); ///< Smooth Q-barrier transition width.
       Real metricActivationEpsilon =
         Real(1e-8); ///< Positive guard for smooth activation.
+      WNGIRConstraintFormulation constraintFormulation =
+        WNGIRConstraintFormulation::SignBlindMetric; ///< Linearized constraint model.
+      Real marginFraction = Real(0.5); ///< Fraction of a margin available to one step.
+      std::size_t marginCorrectionIterations = 3; ///< Safeguarded penalty corrections.
+      Real marginPenaltyGrowth = 10; ///< Penalty growth between safeguard corrections.
       Real omegaMin = 0.1;        ///< active-set threshold on ω.
       Real alphaMin = 1e-4;       ///< line-search floor.
       bool admissibilityChecks = true; ///< Enforce true-geometry j and Q bounds.
@@ -100,7 +123,6 @@ namespace Rodin::Adaptation
       Real stepTol = 0;           ///< ≤0 ⇒ 1e-4·h.
       Real acceptedStepOverHTol =
         Real(5e-3); ///< >0 stops best-effort when accepted step/h is small.
-      Real pointLocationTolerance = 0; ///< ≤0 ⇒ 1e-10 for moved FE evaluation.
       Real cgRelativeTolerance = 1e-6; ///< relative residual tolerance for CG.
       std::size_t cgMaxIterations = 0; ///< 0 ⇒ min(2000, max(100, 2*ndofs)).
       std::size_t andersonMemory = 3;  ///< 0 disables safeguarded Anderson.
@@ -114,15 +136,9 @@ namespace Rodin::Adaptation
         0; ///< Mesh attribute identifying interface facets.
       FlatSet<Geometry::Attribute> dirichletAttributes; ///< Zero-displacement boundaries.
       bool trace = false; ///< Print per-iteration diagnostics when true.
-      /// If true, also add the nonlinear Q-barrier first variation to the RHS.
-      /// The j-barrier first variation is part of the quality energy when
-      /// includeQualityGradient=true.
-      bool includeAdmissibilityGradient = false;
       /// If true, add near-boundary admissibility barriers to the metric.
       /// The true-geometry line search remains the final admissibility check.
       bool includeAdmissibilityMetric = true;
-      /// If true, also add the one-sided quality first variation to the RHS.
-      bool includeQualityGradient = false;
       /// If true, add the Q_rel and optional j-size hinge Gauss--Newton terms
       /// to the metric.
       bool includeQualityMetric = true;

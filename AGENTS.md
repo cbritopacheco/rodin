@@ -68,6 +68,16 @@ assembly/solver changes, the relevant manufactured tests pass too.
 
 ## Non-negotiable rules (summary — details in doc/agents/conventions.md)
 
+0. **Search Rodin before writing anything.** Establish that the tool or
+   concept does not already exist before adding a helper, a cache, or a
+   bespoke integrator — the form language, `Geometry`'s cached quadrature and
+   `Point`, and the assembly specialisations already cover most needs. See
+   `doc/agents/philosophy.md`, "Search before you build". Concluding that
+   Rodin *lacks* something requires a tree-wide search and a look at
+   `ls src/Rodin` first — capabilities are named by top-level modules
+   (`Location`, `Distance`, `Eikonal`, ...) and specializations live in
+   per-space subdirectories, so a narrow grep produces false negatives that
+   licence large amounts of duplicate code.
 1. **PETSc error handling:** `assert(ierr == PETSC_SUCCESS)` after each call
    is the house idiom. Do not introduce checking macros or convert existing
    asserts.

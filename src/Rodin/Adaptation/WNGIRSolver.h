@@ -15,21 +15,29 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
 
 #include "Rodin/Solver/CG.h"
+#include "Rodin/Variational/Integrator.h"
 #include "Rodin/Variational/Jacobian.h"
 #include "Rodin/Variational/Trace.h"
 #include "Rodin/Variational/IdentityMatrix.h"
 
+#include "Rodin/Location.h"
+
+#include "CellDeformation.h"
+#include "WNGIRActiveSetKKT.h"
 #include "WNGIRAdmissibilityMetric.h"
-#include "WNGIRNormalOffsetInitializer.h"
+#include "WNGIRMarginForce.h"
 #include "WNGIRParameters.h"
 #include "WNGIRReport.h"
-#include "WNGIRSurfaceForce.h"
-#include "WNGIRSurfaceObservationMetric.h"
+#include "WNGIRNormalOffsetCoefficient.h"
+#include "WNGIRNormalOffsetForceCoefficient.h"
+#include "WNGIRObservationCoefficient.h"
+#include "WNGIRSurfaceForceCoefficient.h"
 
 namespace Rodin::Adaptation
 {
@@ -40,12 +48,10 @@ namespace Rodin::Adaptation
    * by repeatedly solving a regularized first-derivative metric problem and
    * line-searching the resulting displacement on the true geometry.
    *
-   * Constructed from backend-matched trial and test functions, the solver uses
-   * the ordinary Rodin form-language deduction path for the step
-   * @ref Rodin::Variational::Problem, the metric @ref Rodin::Variational::BilinearForm,
-   * and @ref Rodin::Solver::CG. Every global quantity is a backend-matched
-   * GridFunction; only element-local geometry uses @ref Math::SpatialVector /
-   * @ref Math::SpatialMatrix. WNGIR contains no backend-specific code.
+   * Constructed from backend-matched trial and test functions, the symmetric
+   * metric path uses the ordinary Rodin form-language deduction path for
+   * @ref Rodin::Variational::Problem, @ref Rodin::Variational::BilinearForm,
+   * and @ref Rodin::Solver::CG.
    */
   template <class TrialFunctionType, class TestFunctionType>
   class WNGIR
@@ -65,6 +71,55 @@ namespace Rodin::Adaptation
       using SpatialMat = Math::SpatialMatrix<Real>;
 
     public:
+      /// @brief Mesh-validity summary of a displacement.
+      struct AdmissibilityState
+      {
+        /// @brief Smallest Jacobian over all cell quadrature points.
+        Real minJ = std::numeric_limits<Real>::infinity();
+
+        /// @brief Largest relative distortion over the non-inverted points.
+        Real maxQ = 0;
+
+        /// @brief Number of quadrature points at or below the Jacobian floor.
+        std::size_t inadmissibleCount = 0;
+      };
+
+      /// @brief Interface-fit summary of a displacement.
+      struct SurfaceState
+      {
+        /// @brief Welsch energy of the interface residual.
+        Real energy = 0;
+
+        /// @brief Measure carrying a non-negligible Welsch weight.
+        Real activeLen = 0;
+
+        /// @brief Measure of the whole interface.
+        Real totalLen = 0;
+
+        /// @brief Root-mean-square residual over the active part.
+        Real activeRMS = 0;
+
+        /// @brief Supremum residual over the active part.
+        Real activeSup = 0;
+      };
+
+      /**
+       * @brief Kink of the discrete interface across facet boundaries.
+       *
+       * The interface is only piecewise smooth: adjacent facets meet at an
+       * angle that does not vanish under refinement, and no displacement can
+       * fit a feature finer than that kink. The statistics therefore floor the
+       * residual tolerances.
+       */
+      struct NormalJump
+      {
+        /// @brief Measure-weighted RMS angle between adjacent facet normals.
+        Real rms = 0;
+
+        /// @brief Largest angle between adjacent facet normals.
+        Real max = 0;
+      };
+
       /// @brief Constructs the WNGIR solver from trial and test functions.
       WNGIR(TrialFunctionType& du, TestFunctionType& v)
         : m_u(&du.getSolution()),
@@ -95,8 +150,15 @@ namespace Rodin::Adaptation
         return m_report;
       }
 
+      /**
+       * @brief Solves the WNGIR fitting problem on marked interface facets.
+       *
+       * The supplied sensitivity @p grad must equal the derivative of @p phi
+       * at the moved quadrature points for the assembled force to be the exact
+       * first variation of the line-search energy. An independently supplied
+       * sensitivity is supported, but then defines a pseudo-gradient.
+       */
       template <class Mesh, class PhiDerived, class GradDerived>
-      /// @brief Solves the WNGIR fitting problem on marked interface facets.
       WNGIRReport solve(const Mesh& mesh,
         const std::vector<Rodin::Index>& interfaceFacets,
         const Variational::RealFunctionBase<PhiDerived>& phi,
@@ -132,183 +194,9 @@ namespace Rodin::Adaptation
         // Field values come from GridFunction::getValue (cached), so the
         // tables store quadrature geometry only.
         // ============================================================
-        struct FacetQP
-        {
-            Real w = 0;
-            SpatialVec X;
-            Math::SpatialPoint rc;
-        };
-        struct FacetTable
-        {
-            Index facet = 0;
-            std::vector<FacetQP> qps;
-        };
-        std::vector<FacetTable> facetTables;
-        facetTables.reserve(interfaceFacets.size());
-        for (const Index facetIdx : interfaceFacets)
-        {
-          const auto face = mesh.getFace(facetIdx);
-          const auto& fe = fes.getFiniteElement(meshDim - 1, facetIdx);
-          const std::size_t feOrder = fe.getOrder();
-          const std::size_t qOrder = p.quadratureOrder > 0
-            ? p.quadratureOrder
-            : std::max<std::size_t>(2, 2 * feOrder);
-          const auto& qf =
-            QF::PolytopeQuadratureFormula::get(qOrder, face->getGeometry());
-          const auto& quad = face->getQuadrature(qf);
-
-          FacetTable ft;
-          ft.facet = facetIdx;
-          ft.qps.resize(quad.getSize());
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
-          {
-            const auto& pt = quad.getPoint(q);
-            auto& fq = ft.qps[q];
-            fq.w = qf.getWeight(q) * pt.getDistortion();
-            const auto& pc = pt.getPhysicalCoordinates();
-            fq.X = SpatialVec::Zero(meshDim);
-            for (std::size_t r = 0; r < meshDim; ++r)
-              fq.X(static_cast<Eigen::Index>(r)) = pc(r);
-            fq.rc = pt.getReferenceCoordinates();
-          }
-          facetTables.push_back(std::move(ft));
-        }
-
-        auto clampUnit = [](Real x) { return std::max(Real(-1), std::min(Real(1), x)); };
-        auto edgeKey = [](Index a, Index b) -> std::uint64_t {
-          const auto lo = static_cast<std::uint64_t>(std::min(a, b));
-          const auto hi = static_cast<std::uint64_t>(std::max(a, b));
-          return (lo << 32) ^ hi;
-        };
-        std::vector<SpatialVec> facetNormals(interfaceFacets.size());
-        std::vector<Real> facetMeasures(interfaceFacets.size(), Real(0));
-        if (meshDim == 2)
-        {
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            const auto face = mesh.getFace(interfaceFacets[i]);
-            SpatialVec n = SpatialVec::Zero(meshDim);
-            Real measure = 0;
-            for (const auto& fq : facetTables[i].qps)
-            {
-              const Geometry::Point pt(*face, fq.rc, fq.X);
-              const auto& J = pt.getJacobian();
-              SpatialVec t = SpatialVec::Zero(meshDim);
-              for (std::size_t r = 0; r < meshDim; ++r)
-                t(static_cast<Eigen::Index>(r)) = J(r, 0);
-              SpatialVec nq(2);
-              nq(0) = t(1);
-              nq(1) = -t(0);
-              const Real nn = nq.norm();
-              if (nn > Real(1e-30))
-              {
-                n += fq.w * (nq / nn);
-                measure += fq.w;
-              }
-            }
-            if (n.norm() <= Real(1e-30))
-            {
-              n.setZero();
-              n(0) = Real(1);
-            }
-            else
-              n /= n.norm();
-            facetMeasures[i] = measure;
-            facetNormals[i] = n;
-          }
-        }
-        else if (meshDim == 3)
-        {
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            const auto face = mesh.getFace(interfaceFacets[i]);
-            SpatialVec n = SpatialVec::Zero(meshDim);
-            Real measure = 0;
-            for (const auto& fq : facetTables[i].qps)
-            {
-              const Geometry::Point pt(*face, fq.rc, fq.X);
-              const auto& J = pt.getJacobian();
-              SpatialVec a = SpatialVec::Zero(meshDim);
-              SpatialVec b = SpatialVec::Zero(meshDim);
-              for (std::size_t r = 0; r < meshDim; ++r)
-              {
-                a(static_cast<Eigen::Index>(r)) = J(r, 0);
-                b(static_cast<Eigen::Index>(r)) = J(r, 1);
-              }
-              SpatialVec nq = a.cross(b);
-              const Real nn = nq.norm();
-              if (nn > Real(1e-30))
-              {
-                n += fq.w * (nq / nn);
-                measure += fq.w;
-              }
-            }
-            if (n.norm() <= Real(1e-30))
-            {
-              n.setZero();
-              n(0) = Real(1);
-            }
-            else
-              n /= n.norm();
-            facetMeasures[i] = measure;
-            facetNormals[i] = n;
-          }
-        }
-        Real normalJumpSq = 0;
-        Real normalJumpWeight = 0;
-        Real normalJumpMax = 0;
-        if (meshDim == 2)
-        {
-          std::unordered_map<Index, std::vector<std::size_t>> incident;
-          incident.reserve(2 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-            for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
-              incident[v].push_back(i);
-          for (const auto& [_, faces] : incident)
-          {
-            for (std::size_t a = 0; a < faces.size(); ++a)
-              for (std::size_t b = a + 1; b < faces.size(); ++b)
-              {
-                const auto ia = faces[a], ib = faces[b];
-                const Real dot = std::abs(facetNormals[ia].dot(facetNormals[ib]));
-                const Real theta = std::acos(clampUnit(dot));
-                const Real w = Real(0.5) * (facetMeasures[ia] + facetMeasures[ib]);
-                normalJumpSq += w * theta * theta;
-                normalJumpWeight += w;
-                normalJumpMax = std::max(normalJumpMax, theta);
-              }
-          }
-        }
-        else if (meshDim == 3)
-        {
-          std::unordered_map<std::uint64_t, std::vector<std::size_t>> incident;
-          incident.reserve(3 * interfaceFacets.size());
-          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
-          {
-            const auto& vv = mesh.getFace(interfaceFacets[i])->getVertices();
-            incident[edgeKey(vv[0], vv[1])].push_back(i);
-            incident[edgeKey(vv[1], vv[2])].push_back(i);
-            incident[edgeKey(vv[2], vv[0])].push_back(i);
-          }
-          for (const auto& [_, faces] : incident)
-          {
-            for (std::size_t a = 0; a < faces.size(); ++a)
-              for (std::size_t b = a + 1; b < faces.size(); ++b)
-              {
-                const auto ia = faces[a], ib = faces[b];
-                const Real dot = std::abs(facetNormals[ia].dot(facetNormals[ib]));
-                const Real theta = std::acos(clampUnit(dot));
-                const Real w = Real(0.5) * (facetMeasures[ia] + facetMeasures[ib]);
-                normalJumpSq += w * theta * theta;
-                normalJumpWeight += w;
-                normalJumpMax = std::max(normalJumpMax, theta);
-              }
-          }
-        }
-        rep.normalJumpRMS = normalJumpWeight > Real(0)
-          ? std::sqrt(normalJumpSq / normalJumpWeight)
-          : Real(0);
-        rep.normalJumpMax = normalJumpMax;
+        const auto normalJump = getNormalJump(mesh, fes, interfaceFacets, meshDim);
+        rep.normalJumpRMS = normalJump.rms;
+        rep.normalJumpMax = normalJump.max;
         const Real floorRMS = meshDim == 3 ? p.rmsFloor3D : p.rmsFloor2D;
         const Real floorSup = meshDim == 3 ? p.supFloor3D : p.supFloor2D;
         Real activeRMSOverHTol = p.activeRMSOverHTol;
@@ -323,29 +211,10 @@ namespace Rodin::Adaptation
         rep.effectiveRMSOverHTol = activeRMSOverHTol;
         rep.effectiveSupOverHTol = activeSupOverHTol;
 
-        auto facetPoint = [&](const FacetTable& ft, const FacetQP& fq) {
-          const auto face = mesh.getFace(ft.facet);
-          return Geometry::Point(*face, fq.rc, fq.X);
-        };
-
-        // ---- Fixed Welsch scale: σ = max(3h, q90(|φ| on Γ at u=0)) ----
-        std::vector<Real> r0abs;
-        for (const auto& ft : facetTables)
-          for (const auto& fq : ft.qps)
-          {
-            SpatialVec zero = SpatialVec::Zero(meshDim);
-            const auto src = facetPoint(ft, fq);
-            r0abs.push_back(std::abs(
-              Detail::evaluateTranslatedPoint(phi, src, zero, p.pointLocationTolerance)));
-          }
-        Real sigma = Real(3) * h;
-        if (!r0abs.empty())
-        {
-          const std::size_t k90 =
-            static_cast<std::size_t>(Real(0.9) * static_cast<Real>(r0abs.size() - 1));
-          std::nth_element(r0abs.begin(), r0abs.begin() + k90, r0abs.end());
-          sigma = std::max(sigma, r0abs[k90]);
-        }
+          // One bounding-volume locator per solve: the background mesh is fixed
+          // for the frame, and the index builds lazily on first query.
+        const Location::AABB<Mesh> locator(mesh);
+        const Real sigma = getWelschScale(mesh, fes, phi, interfaceFacets, h);
         const Real sigma2 = sigma * sigma;
         rep.sigma = sigma;
         if (!p.hasInterfaceAttribute)
@@ -355,121 +224,19 @@ namespace Rodin::Adaptation
           return rep;
         }
 
-        struct CellQP
-        {
-            Real w = 0;
-            Math::SpatialPoint rc;
-            SpatialVec X;
-        };
-        struct CellTable
-        {
-            Index cell = 0;
-            std::vector<CellQP> qps;
-        };
-        std::vector<CellTable> cellTables;
-        cellTables.reserve(mesh.getCellCount());
-        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
-        {
-          const Index cellIdx = cellIt->getIndex();
-          const auto& fe = fes.getFiniteElement(meshDim, cellIdx);
-          const std::size_t feOrder = fe.getOrder();
-          const std::size_t qOrder = p.quadratureOrder > 0
-            ? p.quadratureOrder
-            : std::max<std::size_t>(2, 2 * feOrder);
-          const auto& qf =
-            QF::PolytopeQuadratureFormula::get(qOrder, cellIt->getGeometry());
-          const auto& quad = cellIt->getQuadrature(qf);
 
-          CellTable ct;
-          ct.cell = cellIdx;
-          ct.qps.resize(quad.getSize());
-          for (std::size_t q = 0; q < quad.getSize(); ++q)
-          {
-            const auto& pt = quad.getPoint(q);
-            auto& cq = ct.qps[q];
-            cq.w = qf.getWeight(q) * pt.getDistortion();
-            cq.rc = pt.getReferenceCoordinates();
-            const auto& pc = pt.getPhysicalCoordinates();
-            cq.X = SpatialVec::Zero(meshDim);
-            for (std::size_t r = 0; r < meshDim; ++r)
-              cq.X(static_cast<Eigen::Index>(r)) = pc(r);
-          }
-          cellTables.push_back(std::move(ct));
-        }
+
 
         // ============================================================
         // Per-iteration field evaluations through the GridFunction.
         // ============================================================
-        auto fieldAtFacetQP = [&](const Displacement& gf, const FacetTable& ft,
-                                const FacetQP& fq) -> SpatialVec {
-          return gf.getValue(facetPoint(ft, fq));
-        };
-
-        auto deformationAtCellQP = [&](const Displacement& gf, const CellTable& ct,
-                                     const CellQP& cq) -> SpatialMat {
-          const auto cell = mesh.getCell(ct.cell);
-          const Geometry::Point pt(*cell, cq.rc, cq.X);
-          SpatialMat F = SpatialMat::Identity(meshDim, meshDim);
-          F += Variational::Jacobian(gf).getValue(pt);
-          return F;
-        };
-
-        struct FastAdm
-        {
-            Real minJ = std::numeric_limits<Real>::infinity();
-            Real maxQ = 0;
-            std::size_t inadmissibleCount = 0;
-        };
+        using FastAdm = AdmissibilityState;
         auto fastAdmissibility = [&](const Displacement& gf) {
-          FastAdm a;
-          for (const auto& ct : cellTables)
-            for (const auto& cq : ct.qps)
-            {
-              const SpatialMat F = deformationAtCellQP(gf, ct, cq);
-              const Real j = F.determinant();
-              if (j < a.minJ)
-                a.minJ = j;
-              if (j <= p.jMinRatio)
-                ++a.inadmissibleCount;
-              if (j > Real(0))
-              {
-                const Real q = F.squaredNorm() / (d * std::pow(j, Real(2) / d));
-                if (q > a.maxQ)
-                  a.maxQ = q;
-              }
-            }
-          return a;
-        };
-
-        struct SurfaceState
-        {
-            Real energy = 0;
-            Real activeLen = 0, totalLen = 0;
-            Real activeRMS = 0, activeSup = 0;
+          return getAdmissibilityState(mesh, fes, gf, meshDim);
         };
         auto surfaceState = [&](const Displacement& gf) {
-          SurfaceState s;
-          Real sq = 0;
-          for (const auto& ft : facetTables)
-            for (const auto& fq : ft.qps)
-            {
-              const SpatialVec y = fq.X + fieldAtFacetQP(gf, ft, fq);
-              const auto src = facetPoint(ft, fq);
-              const SpatialVec displacement = y - fq.X;
-              const Real r = Detail::evaluateTranslatedPoint(
-                phi, src, displacement, p.pointLocationTolerance);
-              const Real omega = std::exp(-r * r / sigma2);
-              s.totalLen += fq.w;
-              s.energy += fq.w * Real(0.5) * sigma2 * (Real(1) - omega);
-              if (omega >= p.omegaMin)
-              {
-                s.activeLen += fq.w;
-                sq += fq.w * r * r;
-                s.activeSup = std::max(s.activeSup, std::abs(r));
-              }
-            }
-          s.activeRMS = s.activeLen > Real(0) ? std::sqrt(sq / s.activeLen) : Real(0);
-          return s;
+          return getSurfaceState(
+            mesh, fes, gf, phi, interfaceFacets, sigma2, meshDim, locator);
         };
 
         rep.tSetup = secondsSince(setupTic);
@@ -504,13 +271,31 @@ namespace Rodin::Adaptation
         Displacement previousU(fes);
         Displacement uTrial(fes);
 
+        // The interface coefficients are not polynomial, so the quadrature
+        // order is given to the integrator explicitly, per face.
+        const Variational::Integrator::OrderType surfaceOrder =
+          [&](const Geometry::Polytope& face) -> std::size_t {
+            if (p.quadratureOrder > 0)
+              return p.quadratureOrder;
+            const auto& fe =
+              fes.getFiniteElement(face.getDimension(), face.getIndex());
+            return std::max<std::size_t>(2, 2 * fe.getOrder());
+          };
+
         if (p.initialGuessGamma > Real(0))
         {
           auto tic = Clock::now();
-          Detail::WNGIRNormalOffsetMetric initMetric(
-            phi, grad, m_duStep, m_vStep, p, sigma2);
+          Detail::WNGIRNormalOffsetCoefficient initCoeff(
+            phi, grad, p, sigma2, meshDim);
+          auto initMetric = Variational::FaceIntegral(
+            Variational::Dot(initCoeff * m_duStep, m_vStep));
+          initMetric.setOrder(surfaceOrder);
           initMetric.over(p.interfaceAttribute);
-          Detail::WNGIRNormalOffsetForce initForce(phi, grad, m_vStep, p, sigma2);
+          Detail::WNGIRNormalOffsetForceCoefficient initForceCoeff(
+            phi, grad, p, sigma2, meshDim);
+          auto initForce =
+            Variational::FaceIntegral(initForceCoeff, m_vStep);
+          initForce.setOrder(surfaceOrder);
           initForce.over(p.interfaceAttribute);
           typename ProblemType::ProblemBodyType body(m_bulkForm);
           body = body + initMetric - initForce;
@@ -611,30 +396,127 @@ namespace Rodin::Adaptation
         for (; rep.iterations < p.maxIterations; ++rep.iterations)
         {
           auto tic = Clock::now();
-          Detail::WNGIRAdmissibilityMetric admMetric(m_duStep, m_vStep, u, p);
-          Detail::WNGIRSurfaceObservationMetric obsMetric(
-            phi, grad, m_duStep, m_vStep, u, p, sigma2);
+          Detail::WNGIRObservationCoefficient obsCoeff(
+            phi, grad, u, locator, p, sigma2, meshDim);
+          auto obsMetric = Variational::FaceIntegral(
+            Variational::Dot(obsCoeff * m_duStep, m_vStep));
+          obsMetric.setOrder(surfaceOrder);
           obsMetric.over(p.interfaceAttribute);
-          Detail::WNGIRSurfaceForce surfaceForce(phi, grad, m_vStep, u, p, sigma2);
+          Detail::WNGIRSurfaceForceCoefficient forceCoeff(
+            phi, grad, u, locator, p, sigma2, meshDim);
+          auto surfaceForce = Variational::FaceIntegral(forceCoeff, m_vStep);
+          surfaceForce.setOrder(surfaceOrder);
           surfaceForce.over(p.interfaceAttribute);
           std::size_t linearIterations = 0;
           Real linearError = std::numeric_limits<Real>::infinity();
-
-          typename ProblemType::ProblemBodyType body(m_bulkForm);
-          body = body + obsMetric + admMetric - surfaceForce;
           Math::Vector<Real> zero(meshDim);
           zero.setZero();
-          if (!p.dirichletAttributes.empty())
-            body = body +
-              Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
-                .on(p.dirichletAttributes);
-          m_stepProblem = body;
-          m_stepProblem.assemble();
-          rep.tAssembly += secondsSince(tic);
+          bool solveOk = true;
+          const bool directional = p.constraintFormulation !=
+            WNGIRConstraintFormulation::SignBlindMetric;
+          const bool activeSetKKT = p.constraintFormulation ==
+            WNGIRConstraintFormulation::ActiveSetKKT;
 
-          tic = Clock::now();
-          const bool solveOk = solveStep(vK, linearIterations, linearError);
-          rep.tSolve += secondsSince(tic);
+          if (directional)
+          {
+            typename ProblemType::ProblemBodyType predictorBody(m_bulkForm);
+            predictorBody = predictorBody + obsMetric - surfaceForce;
+            if (!p.dirichletAttributes.empty())
+              predictorBody = predictorBody +
+                Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                  .on(p.dirichletAttributes);
+            m_stepProblem = predictorBody;
+            m_stepProblem.assemble();
+            rep.tAssembly += secondsSince(tic);
+            tic = Clock::now();
+            std::size_t predictorIterations = 0;
+            Real predictorError = std::numeric_limits<Real>::infinity();
+            solveOk = solveStep(vK, predictorIterations, predictorError);
+            linearIterations += predictorIterations;
+            linearError = predictorError;
+            rep.tSolve += secondsSince(tic);
+            if (!solveOk)
+            {
+              rep.exitReason = "solve-predictor-failed";
+              break;
+            }
+            tic = Clock::now();
+          }
+
+          if (activeSetKKT)
+          {
+            if (!p.dirichletAttributes.empty())
+            {
+              rep.exitReason = "active-set-kkt-reference-requires-free-dofs";
+              break;
+            }
+            using OperatorType =
+              typename FormLanguage::Traits<LinearSystemType>::OperatorType;
+            using VectorType =
+              typename FormLanguage::Traits<LinearSystemType>::VectorType;
+            if constexpr (std::is_same_v<OperatorType, Math::SparseMatrix<Real>> &&
+              std::is_same_v<VectorType, Math::Vector<Real>>)
+            {
+              std::size_t activeConstraints = 0;
+              Math::Vector<Real> direction;
+              const auto& system = m_stepProblem.getLinearSystem();
+              Detail::WNGIRActiveSetKKT reference(m_duStep, u, p);
+              solveOk = reference.solve(mesh, system.getOperator(), system.getVector(),
+                direction, activeConstraints);
+              if (solveOk)
+                vK.getData() = direction;
+              rep.activeConstraints += activeConstraints;
+            }
+            else
+            {
+              solveOk = false;
+            }
+            rep.tSolve += secondsSince(tic);
+          }
+          else
+          {
+            const bool safeguarded = p.constraintFormulation ==
+              WNGIRConstraintFormulation::SafeguardedMarginMetric;
+            const std::size_t corrections = safeguarded
+              ? std::max<std::size_t>(1, p.marginCorrectionIterations)
+              : 1;
+            for (std::size_t correction = 0; correction < corrections; ++correction)
+            {
+              const Real multiplier = safeguarded
+                ? std::pow(std::max(Real(1), p.marginPenaltyGrowth),
+                    static_cast<Real>(correction))
+                : Real(1);
+              Detail::WNGIRAdmissibilityMetric admMetric(
+                m_duStep, m_vStep, u, p, directional ? &vK : nullptr, multiplier);
+              typename ProblemType::ProblemBodyType body(m_bulkForm);
+              body = body + obsMetric - surfaceForce + admMetric;
+              if (p.constraintFormulation ==
+                  WNGIRConstraintFormulation::FractionalMarginMetric || safeguarded)
+              {
+                Detail::WNGIRMarginForce marginForce(m_vStep, u, vK, p, multiplier);
+                body = body - marginForce;
+              }
+              if (!p.dirichletAttributes.empty())
+                body = body +
+                  Variational::DirichletBC(m_duStep, Variational::VectorFunction(zero))
+                    .on(p.dirichletAttributes);
+              m_stepProblem = body;
+              m_stepProblem.assemble();
+              rep.tAssembly += secondsSince(tic);
+
+              tic = Clock::now();
+              std::size_t correctionIterations = 0;
+              Real correctionError = std::numeric_limits<Real>::infinity();
+              solveOk = solveStep(vK, correctionIterations, correctionError);
+              linearIterations += correctionIterations;
+              linearError = correctionError;
+              rep.tSolve += secondsSince(tic);
+              if (!solveOk || (safeguarded &&
+                getMarginScale(mesh, fes, u, vK, meshDim) >= Real(0.999)))
+                break;
+              tic = Clock::now();
+            }
+          }
           if (!solveOk)
           {
             rep.exitReason = "solve-linear-failed";
@@ -649,24 +531,37 @@ namespace Rodin::Adaptation
             break;
           }
 
+          Real marginScale = Real(1);
+          if (p.constraintFormulation ==
+            WNGIRConstraintFormulation::SafeguardedMarginMetric)
+          {
+            marginScale = getMarginScale(mesh, fes, u, vK, meshDim);
+            vK *= marginScale;
+          }
+          rep.lastMarginScale = marginScale;
+
           // ---- Optimal step rescale β = ⟨d,v⟩_Γ / ⟨v,v⟩_Γ ----
           Real beta = Real(1);
           Real rawDemonsRMS = Real(0);
           Real liftedTraceRMS = Real(0);
-          Real scaledTraceRMS = Real(0);
-          if (p.betaMax > Real(1) || p.trace)
+          if (!directional && (p.betaMax > Real(1) || p.trace))
           {
             Real bNum = 0, bDen = 0, dDen = 0, gammaMeasure = 0;
-            for (const auto& ft : facetTables)
-              for (const auto& fq : ft.qps)
+            DeformationMap deformation(u, locator);
+            for (const Index facetIdx : interfaceFacets)
+            {
+              const auto face = mesh.getFace(facetIdx);
+              const auto& qf =
+                getQuadrature(*face, fes);
+              const auto& quad = face->getQuadrature(qf);
+              for (std::size_t q = 0; q < quad.getSize(); ++q)
               {
-                const SpatialVec y = fq.X + fieldAtFacetQP(u, ft, fq);
-                const auto src = facetPoint(ft, fq);
-                const SpatialVec disp = y - fq.X;
-                const Real r = Detail::evaluateTranslatedPoint(
-                  phi, src, disp, p.pointLocationTolerance);
-                const SpatialVec g = Detail::evaluateTranslatedPoint(
-                  grad, src, disp, p.pointLocationTolerance);
+                const auto& src = quad.getPoint(q);
+                const Variational::IntegrationPoint ip(src, &qf, q);
+                const Real fqw = qf.getWeight(q) * src.getDistortion();
+                const auto& moved = deformation.getMovedPoint(ip);
+                const Real r = phi.getValue(moved);
+                const SpatialVec g = grad.getValue(moved);
                 const Real obsWeight = g.dot(g) + epsG +
                   (p.residualStabilizedObservationMetric ? (r * r) / sigma2 : Real(0));
                 const Real omega = std::exp(-r * r / sigma2);
@@ -684,12 +579,13 @@ namespace Rodin::Adaptation
                     dVec = (-omega * r / (g.dot(g) + epsG)) * g;
                     break;
                 }
-                const SpatialVec v = fieldAtFacetQP(vK, ft, fq);
-                bNum += fq.w * dVec.dot(v);
-                bDen += fq.w * v.dot(v);
-                dDen += fq.w * dVec.dot(dVec);
-                gammaMeasure += fq.w;
+                const SpatialVec v = vK.getValue(src);
+                bNum += fqw * dVec.dot(v);
+                bDen += fqw * v.dot(v);
+                dDen += fqw * dVec.dot(dVec);
+                gammaMeasure += fqw;
               }
+            }
             if (gammaMeasure > Real(0))
             {
               rawDemonsRMS = std::sqrt(std::max<Real>(Real(0), dDen) / gammaMeasure);
@@ -700,8 +596,11 @@ namespace Rodin::Adaptation
               beta = std::clamp(bNum / bDen, Real(1), p.betaMax);
               vK *= beta;
             }
-            scaledTraceRMS = beta * liftedTraceRMS;
           }
+
+
+
+
 
           const Real maxStep = std::max(std::abs(vK.max()), std::abs(vK.min()));
           if (maxStep <= stepTol)
@@ -803,6 +702,8 @@ namespace Rodin::Adaptation
                       << "  β=" << beta
                       << "  step/h=" << (h > Real(0) ? rep.acceptedStep / h : Real(0))
                       << "  linIt=" << rep.linearIterations << "  α=" << alpha
+                      << "  marginScale=" << marginScale
+                      << "  kktAct=" << rep.activeConstraints
                       << "  bt=" << backtracks << "  min_j=" << rep.minJ
                       << "  max_Q=" << rep.maxQRel << '\n';
 
@@ -848,11 +749,447 @@ namespace Rodin::Adaptation
           }
           ePrev = eNow;
         }
+
+          // Local fit-admissibility alignment diagnostic; this is not a KKT
+          // multiplier or a certificate that no feasible descent remains.
+        {
+          Variational::LinearForm forceForm(m_vStep);
+          Detail::WNGIRSurfaceForceCoefficient diagCoeff(
+            phi, grad, u, locator, p, sigma2, meshDim);
+          auto diagForce = Variational::FaceIntegral(diagCoeff, m_vStep);
+          diagForce.setOrder(surfaceOrder);
+          diagForce.over(p.interfaceAttribute);
+          forceForm = diagForce;
+          forceForm.assemble();
+          rep.conflictIndicator = getConflictIndicator(
+            mesh, fes, u, forceForm.getVector(), meshDim);
+        }
+
         m_report = rep;
         return rep;
       }
 
     private:
+
+      /**
+       * @brief Per-cell fit--admissibility conflict indicator.
+       *
+       * At a converged, possibly stagnated, state projects the interface force
+       * separately onto each selected constraint normal,
+       * @f[
+       *   \lambda_i=\max\Bigl(0,\ \frac{\langle F_\Gamma,c_i\rangle}{\lVert c_i\rVert^2}\Bigr),
+       * @f]
+       * and aggregates the peak over each cell. The value coincides with a
+       * multiplier only in the orthogonal single-constraint model. In general,
+       * a large value indicates local alignment between the fit force and a
+       * selected constraint normal; it does not identify a KKT active set or
+       * certify the absence of a feasible descent direction.
+       *
+       * Diagnostic only: it consumes the assembled interface force at the final
+       * state and performs no constrained solve. The Jacobian normal is
+       * @f$c_j=-a_j@f$ and the distortion normal @f$c_Q=a_Q@f$, with
+       * @f$a_j,a_Q@f$ the linearised margin actions of
+       * @ref WNGIRAdmissibilityMetric.h.
+       */
+      template <class Mesh, class FES>
+      std::vector<Real> getConflictIndicator(const Mesh& mesh, const FES& fes,
+        const Displacement& u, const Math::Vector<Real>& force,
+        std::size_t dimension) const
+      {
+        std::vector<Real> indicator(mesh.getCellCount(), Real(0));
+        CellDeformation deformation(dimension);
+        auto displacementJacobian = Variational::Jacobian(u);
+        auto basisJacobian = Variational::Jacobian(m_vStep);
+
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const Index cellIdx = cellIt->getIndex();
+          const auto& fe = fes.getFiniteElement(dimension, cellIdx);
+          const auto& qf = getQuadrature(*cellIt, fes);
+          const auto& quad = cellIt->getQuadrature(qf);
+
+          Real cellLambda = 0;
+          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          {
+            const auto& pt = quad.getPoint(q);
+            const Variational::IntegrationPoint ip(pt, &qf, q);
+            deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
+            if (!deformation.isAdmissible())
+              continue;
+            const Real jK = deformation.getJacobian();
+            const Real qK = deformation.getRelativeDistortion();
+
+            const Real sJ = jK - m_parameters.jSafe;
+            const Real sQ = m_parameters.qMax - qK;
+            const bool jActive = m_parameters.gammaJ > Real(0) &&
+              sJ > Real(0) && sJ < m_parameters.s0J;
+            const bool qActive = m_parameters.gammaQ > Real(0) &&
+              sQ > Real(0) && sQ < m_parameters.s0Q;
+            if (!jActive && !qActive)
+              continue;
+
+            Real gjf = 0, gjg = 0, gqf = 0, gqg = 0;
+            for (std::size_t l = 0; l < fe.getCount(); ++l)
+            {
+              basisJacobian.setIntegrationPoint(ip);
+              const auto jp = basisJacobian.getBasis(l);
+              const Real aJ = deformation.getJacobianAction(jp);
+              const Real aQ = deformation.getRelativeDistortionAction(jp);
+              const Real fl = force(static_cast<Eigen::Index>(
+                fes.getGlobalIndex({dimension, cellIdx}, l)));
+                // c_j = -a_j, c_Q = +a_Q.
+              gjf += (-aJ) * fl;
+              gjg += aJ * aJ;
+              gqf += aQ * fl;
+              gqg += aQ * aQ;
+            }
+            if (jActive && gjg > Real(0))
+              cellLambda = std::max(cellLambda, std::max(Real(0), gjf / gjg));
+            if (qActive && gqg > Real(0))
+              cellLambda = std::max(cellLambda, std::max(Real(0), gqf / gqg));
+          }
+          indicator[cellIdx] = cellLambda;
+        }
+        return indicator;
+      }
+
+      /**
+       * @brief Quadrature formula WNGIR uses on a polytope.
+       *
+       * Exact for the products of shape functions the forms contain, unless an
+       * order is pinned in the parameters. Serves cells and interface facets
+       * alike: the polytope carries its own dimension, so the element degree
+       * follows from it.
+       */
+      template <class FES>
+      const QF::QuadratureFormulaBase& getQuadrature(
+        const Geometry::Polytope& polytope, const FES& fes) const
+      {
+        const auto& fe =
+          fes.getFiniteElement(polytope.getDimension(), polytope.getIndex());
+        const std::size_t order = m_parameters.quadratureOrder > 0
+          ? m_parameters.quadratureOrder
+          : std::max<std::size_t>(2, 2 * fe.getOrder());
+        return QF::PolytopeQuadratureFormula::get(order, polytope.getGeometry());
+      }
+
+      /**
+       * @brief Scales a direction to respect a fraction of every affine margin.
+       *
+       * For each sampled row @f$C_i v \leq b_i@f$, this returns the largest
+       * common factor in @f$[0,1]@f$ such that
+       * @f$C_i(\alpha v) \leq \theta b_i@f$. The nonlinear admissibility
+       * check remains authoritative because the sampled constraints are only
+       * first-order models of the true deformed geometry.
+       */
+      template <class Mesh, class FES>
+      Real getMarginScale(const Mesh& mesh, const FES& fes,
+        const Displacement& current, const Displacement& direction,
+        std::size_t dimension) const
+      {
+        const Real fraction =
+          std::clamp(m_parameters.marginFraction, Real(0), Real(1));
+        const Real jacobianFloor =
+          std::max(m_parameters.jSafe, m_parameters.jLineSearchRatio);
+        Real scale = Real(1);
+        CellDeformation deformation(dimension);
+        auto currentJacobian = Variational::Jacobian(current);
+        auto directionJacobian = Variational::Jacobian(direction);
+
+        for (auto cell = mesh.getCell(); cell; ++cell)
+        {
+          const auto& qf = getQuadrature(*cell, fes);
+          const auto& quad = cell->getQuadrature(qf);
+          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          {
+            const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
+            deformation.setDisplacementGradient(currentJacobian.getValue(ip));
+            if (!deformation.isAdmissible())
+              return Real(0);
+
+            const auto gradient = directionJacobian.getValue(ip);
+            const Real jacobianConsumption =
+              -deformation.getJacobianAction(gradient);
+            if (jacobianConsumption > Real(0))
+            {
+              const Real margin = deformation.getJacobian() - jacobianFloor;
+              if (margin <= Real(0))
+                return Real(0);
+              scale = std::min(scale, fraction * margin / jacobianConsumption);
+            }
+
+            const Real distortionConsumption =
+              deformation.getRelativeDistortionAction(gradient);
+            if (distortionConsumption > Real(0))
+            {
+              const Real margin =
+                m_parameters.qMax - deformation.getRelativeDistortion();
+              if (margin <= Real(0))
+                return Real(0);
+              scale = std::min(scale, fraction * margin / distortionConsumption);
+            }
+          }
+        }
+        return std::clamp(scale, Real(0), Real(1));
+      }
+
+      /**
+       * @brief Evaluates the mesh validity of a displacement.
+       *
+       * Sweeps every cell quadrature point for the extremes that decide whether
+       * a trial step is acceptable. Only @f$j@f$ is needed at most points, so
+       * the deformation is evaluated lazily, and the distortion is read only
+       * where the cell is not inverted, since it is undefined otherwise.
+       */
+      template <class Mesh, class FES>
+      AdmissibilityState getAdmissibilityState(const Mesh& mesh, const FES& fes,
+        const Displacement& u, std::size_t dimension) const
+      {
+        AdmissibilityState state;
+        CellDeformation deformation(dimension);
+        auto displacementJacobian = Variational::Jacobian(u);
+        for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
+        {
+          const auto& qf = getQuadrature(*cellIt, fes);
+          const auto& quad = cellIt->getQuadrature(qf);
+          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          {
+            const Variational::IntegrationPoint ip(quad.getPoint(q), &qf, q);
+            deformation.setDisplacementGradient(displacementJacobian.getValue(ip));
+            const Real j = deformation.getJacobian();
+            if (j < state.minJ)
+              state.minJ = j;
+            if (j <= m_parameters.jMinRatio)
+              ++state.inadmissibleCount;
+            if (deformation.isAdmissible())
+            {
+              const Real qRel = deformation.getRelativeDistortion();
+              if (qRel > state.maxQ)
+                state.maxQ = qRel;
+            }
+          }
+        }
+        return state;
+      }
+
+      /**
+       * @brief Evaluates the interface fit of a displacement.
+       *
+       * The residual is the level set read at the deformed image of each
+       * interface quadrature point. Points whose Welsch weight has fallen below
+       * @ref WNGIRParameters::omegaMin are excluded from the residual norms:
+       * they are the ones the robust weighting has already rejected as
+       * outliers, and including them would let a distant feature dominate an
+       * otherwise converged fit.
+       */
+      template <class Mesh, class FES, class PhiType, class LocatorType>
+      SurfaceState getSurfaceState(const Mesh& mesh, const FES& fes,
+        const Displacement& u, const PhiType& phi,
+        const std::vector<Index>& interfaceFacets, Real sigma2,
+        std::size_t dimension, const LocatorType& locator) const
+      {
+        SurfaceState state;
+        Real squared = 0;
+        DeformationMap deformation(u, locator);
+        for (const Index facetIdx : interfaceFacets)
+        {
+          const auto face = mesh.getFace(facetIdx);
+          const auto& qf = getQuadrature(*face, fes);
+          const auto& quad = face->getQuadrature(qf);
+          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          {
+            const auto& src = quad.getPoint(q);
+            const Variational::IntegrationPoint ip(src, &qf, q);
+            const Real w = qf.getWeight(q) * src.getDistortion();
+            const Real r = phi.getValue(deformation.getMovedPoint(ip));
+            const Real omega = std::exp(-r * r / sigma2);
+            state.totalLen += w;
+            state.energy += w * Real(0.5) * sigma2 * (Real(1) - omega);
+            if (omega >= m_parameters.omegaMin)
+            {
+              state.activeLen += w;
+              squared += w * r * r;
+              state.activeSup = std::max(state.activeSup, std::abs(r));
+            }
+          }
+        }
+        state.activeRMS = state.activeLen > Real(0)
+          ? std::sqrt(squared / state.activeLen)
+          : Real(0);
+        return state;
+      }
+
+      /**
+       * @brief Normal-jump statistics of the discrete interface.
+       *
+       * Facets are adjacent when they share a vertex in two dimensions or an
+       * edge in three, and each adjacent pair contributes the angle between its
+       * normals weighted by the mean of the two facet measures. Normals are
+       * compared up to sign, since facet orientation is not consistent across
+       * the interface.
+       */
+      template <class Mesh, class FES>
+      NormalJump getNormalJump(const Mesh& mesh, const FES& fes,
+        const std::vector<Index>& interfaceFacets, std::size_t dimension) const
+      {
+          // Averaged unit normal and measure of each facet. The normal is the
+          // quadrature average of the pointwise unit normals, so a curved facet
+          // contributes its mean orientation; a facet degenerate throughout
+          // falls back to a fixed direction rather than a null vector.
+        constexpr Real degenerate = Real(1e-30);
+        std::vector<Math::SpatialVector<Real>> normals(interfaceFacets.size());
+        std::vector<Real> measures(interfaceFacets.size(), Real(0));
+
+        for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
+        {
+          const auto face = mesh.getFace(interfaceFacets[i]);
+          const auto& qf = getQuadrature(*face, fes);
+          const auto& quad = face->getQuadrature(qf);
+
+          Math::SpatialVector<Real> n =
+            Math::SpatialVector<Real>::Zero(dimension);
+          Real measure = 0;
+          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          {
+            const auto& pt = quad.getPoint(q);
+            const Real w = qf.getWeight(q) * pt.getDistortion();
+            const auto& J = pt.getJacobian();
+              // The facet normal: in 2D the tangent rotated a quarter turn, in
+              // 3D the cross product of the two tangents.
+            Math::SpatialVector<Real> nq;
+            if (dimension == 2)
+            {
+              nq.resize(2);
+              nq(0) = J(1, 0);
+              nq(1) = -J(0, 0);
+            }
+            else
+            {
+              Math::SpatialVector<Real> a =
+                Math::SpatialVector<Real>::Zero(dimension);
+              Math::SpatialVector<Real> b =
+                Math::SpatialVector<Real>::Zero(dimension);
+              for (std::size_t r = 0; r < dimension; ++r)
+              {
+                a(static_cast<Eigen::Index>(r)) = J(r, 0);
+                b(static_cast<Eigen::Index>(r)) = J(r, 1);
+              }
+              nq = a.cross(b);
+            }
+            const Real norm = nq.norm();
+            if (norm > degenerate)
+            {
+              n += w * (nq / norm);
+              measure += w;
+            }
+          }
+
+          if (n.norm() <= degenerate)
+          {
+            n.setZero();
+            n(0) = Real(1);
+          }
+          else
+          {
+            n /= n.norm();
+          }
+          measures[i] = measure;
+          normals[i] = n;
+        }
+
+        const auto edgeKey = [](Index a, Index b) -> std::uint64_t {
+          const auto lo = static_cast<std::uint64_t>(std::min(a, b));
+          const auto hi = static_cast<std::uint64_t>(std::max(a, b));
+          return (lo << 32) ^ hi;
+        };
+
+          // Facets sharing an incidence, keyed by the shared entity.
+        std::unordered_map<std::uint64_t, std::vector<std::size_t>> incident;
+        if (dimension == 2)
+        {
+          incident.reserve(2 * interfaceFacets.size());
+          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
+            for (const Index v : mesh.getFace(interfaceFacets[i])->getVertices())
+              incident[static_cast<std::uint64_t>(v)].push_back(i);
+        }
+        else if (dimension == 3)
+        {
+          incident.reserve(3 * interfaceFacets.size());
+          for (std::size_t i = 0; i < interfaceFacets.size(); ++i)
+          {
+            const auto& vv = mesh.getFace(interfaceFacets[i])->getVertices();
+            incident[edgeKey(vv[0], vv[1])].push_back(i);
+            incident[edgeKey(vv[1], vv[2])].push_back(i);
+            incident[edgeKey(vv[2], vv[0])].push_back(i);
+          }
+        }
+
+        NormalJump jump;
+        Real squared = 0;
+        Real weight = 0;
+        for (const auto& [key, faces] : incident)
+        {
+          (void)key;
+          for (std::size_t a = 0; a < faces.size(); ++a)
+          {
+            for (std::size_t b = a + 1; b < faces.size(); ++b)
+            {
+              const auto ia = faces[a], ib = faces[b];
+              const Real dot = std::abs(normals[ia].dot(normals[ib]));
+              const Real theta = std::acos(
+                std::max(Real(-1), std::min(Real(1), dot)));
+              const Real w = Real(0.5) * (measures[ia] + measures[ib]);
+              squared += w * theta * theta;
+              weight += w;
+              jump.max = std::max(jump.max, theta);
+            }
+          }
+        }
+        jump.rms = weight > Real(0) ? std::sqrt(squared / weight) : Real(0);
+        return jump;
+      }
+
+      /**
+       * @brief Welsch scale @f$\sigma@f$ of the interface residual.
+       *
+       * The robust weight @f$\omega=e^{-r^2/\sigma^2}@f$ needs a scale
+       * separating the residuals to be fitted from those to be rejected as
+       * outliers. It is the 90th percentile of the undeformed residual, floored
+       * at @f$3h@f$: the percentile adapts to how far the interface actually
+       * starts from the mesh, while the floor keeps @f$\sigma@f$ above the
+       * resolution below which no displacement can distinguish features.
+       *
+       * Fixed once per frame rather than re-estimated per iteration, which
+       * would let the scale chase its own progress and never reject anything.
+       */
+      template <class Mesh, class FES, class PhiType>
+      Real getWelschScale(const Mesh& mesh, const FES& fes, const PhiType& phi,
+        const std::vector<Index>& interfaceFacets, Real h) const
+      {
+        std::vector<Real> residuals;
+        for (const Index facetIdx : interfaceFacets)
+        {
+          const auto face = mesh.getFace(facetIdx);
+          const auto& qf = getQuadrature(*face, fes);
+          const auto& quad = face->getQuadrature(qf);
+          for (std::size_t q = 0; q < quad.getSize(); ++q)
+          {
+            residuals.push_back(std::abs(phi.getValue(quad.getPoint(q))));
+          }
+        }
+
+        Real sigma = Real(3) * h;
+        if (!residuals.empty())
+        {
+          const std::size_t k90 = static_cast<std::size_t>(
+            Real(0.9) * static_cast<Real>(residuals.size() - 1));
+          std::nth_element(
+            residuals.begin(), residuals.begin() + k90, residuals.end());
+          sigma = std::max(sigma, residuals[k90]);
+        }
+        return sigma;
+      }
+
       // Solves the currently-assembled step problem with CG and copies the
       // backend-matched solution GridFunction into @p out.
       bool solveStep(Displacement& out, std::size_t& iterations, Real& error)

@@ -535,8 +535,8 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(trialfe.getOrder() + testfe.getOrder()));
 
         const bool recompute =
           !m_set || (m_order != order) || (m_geometry != geometry);
@@ -751,8 +751,8 @@ namespace Rodin::Variational
 
         const auto geometry = polytope.getGeometry();
 
-        const size_t order =
-          integrand.getOrder(polytope).value_or(fe.getOrder());
+        const size_t order = this->getOrder(polytope).value_or(
+          integrand.getOrder(polytope).value_or(fe.getOrder()));
 
         const bool recompute =
           !m_set || (m_order != order) || (m_geometry != geometry);

@@ -7,18 +7,24 @@ Distributed under the Boost Software License, Version 1.0.
 
 set(RodinAdaptation_HEADERS
   AnalyticFunctionAdapters.h
-  CellGeomCache.h
   WNGIR.h
+  WNGIRActiveSetKKT.h
   WNGIRAdmissibility.h
   WNGIRAdmissibilityMetric.h
-  WNGIRCommon.h
-  WNGIRDetail.h
-  WNGIRNormalOffsetInitializer.h
+  CellDeformation.h
+  DeformationMap.h
+  CellGeomCache.h
+  WNGIRConstraintState.h
+  WNGIRMarginForce.h
   WNGIRParameters.h
   WNGIRReport.h
   WNGIRSolver.h
-  WNGIRSurfaceForce.h
-  WNGIRSurfaceObservationMetric.h
+  WNGIRNormalOffset.h
+  WNGIRNormalOffsetCoefficient.h
+  WNGIRNormalOffsetForceCoefficient.h
+  WNGIRObservationCoefficient.h
+  WNGIRResidualState.h
+  WNGIRSurfaceForceCoefficient.h
 )
 
 # Header-only / interface library

@@ -653,3 +653,25 @@ gtest_discover_tests(RodinVariationalSubMeshGridFunctionTest
   PROPERTIES
     LABELS unit
 )
+
+add_executable(RodinVariationalIntegratorOrderTest IntegratorOrderTest.cpp)
+target_link_libraries(RodinVariationalIntegratorOrderTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalIntegratorOrderTest
+  PROPERTIES
+    LABELS unit
+)
+
+add_executable(RodinVariationalRankOneJacobianFormTest RankOneJacobianFormTest.cpp)
+target_link_libraries(RodinVariationalRankOneJacobianFormTest
+  PUBLIC
+  GTest::gtest
+  GTest::gtest_main
+  Rodin::Variational)
+gtest_discover_tests(RodinVariationalRankOneJacobianFormTest
+  PROPERTIES
+    LABELS unit
+)

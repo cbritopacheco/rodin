@@ -125,6 +125,25 @@ namespace Rodin::Examples
     throw std::invalid_argument("Unknown --wngir-observation-metric value: " + value);
   }
 
+  inline Adaptation::WNGIRConstraintFormulation parseConstraintFormulation(
+    int argc, char** argv)
+  {
+    const auto value =
+      stringOption(argc, argv, "wngir-constraint-formulation", "sign-blind");
+    if (value == "sign-blind")
+      return Adaptation::WNGIRConstraintFormulation::SignBlindMetric;
+    if (value == "directional")
+      return Adaptation::WNGIRConstraintFormulation::DirectionalMetric;
+    if (value == "fractional-margin")
+      return Adaptation::WNGIRConstraintFormulation::FractionalMarginMetric;
+    if (value == "safeguarded-margin")
+      return Adaptation::WNGIRConstraintFormulation::SafeguardedMarginMetric;
+    if (value == "active-set-kkt")
+      return Adaptation::WNGIRConstraintFormulation::ActiveSetKKT;
+    throw std::invalid_argument(
+      "Unknown --wngir-constraint-formulation value: " + value);
+  }
+
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
     Geometry::Attribute interfaceAttribute, const WNGIRExampleDefaults& defaults = {})
   {
@@ -165,6 +184,14 @@ namespace Rodin::Examples
     p.gammaSize = realOption(argc, argv, "wngir-gamma-size", defaults.gammaSize);
     p.jStar = realOption(argc, argv, "wngir-jstar", Real(0.3));
     p.metricActivation = parseMetricActivation(argc, argv);
+    p.constraintFormulation = parseConstraintFormulation(argc, argv);
+    p.marginFraction =
+      realOption(argc, argv, "wngir-margin-fraction", p.marginFraction);
+    p.marginCorrectionIterations = std::max<std::size_t>(1,
+      sizeOption(argc, argv, "wngir-margin-corrections",
+        p.marginCorrectionIterations));
+    p.marginPenaltyGrowth = realOption(
+      argc, argv, "wngir-margin-penalty-growth", p.marginPenaltyGrowth);
     p.qualitySmoothDelta =
       realOption(argc, argv, "wngir-quality-smooth-delta", p.qualitySmoothDelta);
     p.jBarrierSmoothDelta =

@@ -16,7 +16,9 @@
  */
 
 #include "Adaptation/AnalyticFunctionAdapters.h"
+#include "Adaptation/CellDeformation.h"
 #include "Adaptation/CellGeomCache.h"
+#include "Adaptation/DeformationMap.h"
 #include "Adaptation/WNGIR.h"
 #include "Adaptation/WNGIRAdmissibility.h"
 
