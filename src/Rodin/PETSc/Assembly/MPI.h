@@ -743,51 +743,71 @@ namespace Rodin::Assembly
             if (rbegin <= gs && gs < rend)
               rowsToZero.push_back(static_cast<PetscInt>(gs));
 
-          ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
-            rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
+          // MatZeroRows bumps the matrix's nonzero-state counter even when it
+          // is handed zero rows. PETSc's PCSetUp compares that counter against
+          // the one the preconditioner last factored and, on any increase,
+          // reports DIFFERENT_NONZERO_PATTERN, forcing external direct solvers
+          // (e.g. MUMPS) to redo their symbolic analysis. Across the reused
+          // LinearSystem of a time-stepping or multi-RHS solve, that repeats
+          // the expensive ordering on every reassembly. The pattern is fixed
+          // here (MatrixSetup only zeroes and refills), so the call is a pure
+          // no-op when no rank has an identified row to zero; skip it then.
+          // The emptiness test is itself collective, hence the reduction.
+          PetscInt localIdentRows = static_cast<PetscInt>(rowsToZero.size());
+          PetscInt globalIdentRows = 0;
+          ierr = MPIU_Allreduce(&localIdentRows, &globalIdentRows, 1, MPIU_INT,
+            MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
 
-          for (const Index gs : constraints.getIdentifiedRows())
+          if (globalIdentRows > 0)
           {
-            if (!(rbegin <= gs && gs < rend))
-              continue;
-            const PetscInt I = static_cast<PetscInt>(gs);
-            const PetscScalar one = 1.0;
-            ierr = MatSetValue(A, I, I, one, ADD_VALUES);
+            ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
+              rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
-            for (const auto& e : constraints.expand(gs))
+
+            for (const Index gs : constraints.getIdentifiedRows())
             {
-              const PetscInt J = static_cast<PetscInt>(e.index);
-              const PetscScalar v = -e.coefficient;
-              ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+              if (!(rbegin <= gs && gs < rend))
+                continue;
+              const PetscInt I = static_cast<PetscInt>(gs);
+              const PetscScalar one = 1.0;
+              ierr = MatSetValue(A, I, I, one, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
+              for (const auto& e : constraints.expand(gs))
+              {
+                const PetscInt J = static_cast<PetscInt>(e.index);
+                const PetscScalar v = -e.coefficient;
+                ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                (void)ierr;
+              }
+              const PetscScalar rhs = constraints.getIdentificationValue(gs);
+              if (doVector)
+              {
+                ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                (void)ierr;
+              }
             }
-            const PetscScalar rhs = constraints.getIdentificationValue(gs);
+
+            ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
             if (doVector)
             {
-              ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
+              ierr = VecAssemblyBegin(b);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecAssemblyEnd(b);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
             }
-          }
-
-          ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          if (doVector)
-          {
-            ierr = VecAssemblyBegin(b);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecAssemblyEnd(b);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
           }
         }
 
@@ -802,41 +822,58 @@ namespace Rodin::Assembly
           }
         }
 
+        // See the identified-row reduction above: MatZeroRows /
+        // MatZeroRowsColumns must not run with a globally empty index set, or
+        // they bump the nonzero-state counter for nothing and defeat
+        // factorization reuse.
+        PetscInt localBcRows = static_cast<PetscInt>(bcIdx.size());
+        PetscInt globalBcRows = 0;
+        ierr = MPIU_Allreduce(&localBcRows, &globalBcRows, 1, MPIU_INT, MPI_SUM,
+          PetscObjectComm(reinterpret_cast<PetscObject>(A)));
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         {
           if (mode == AssemblyMode::Full)
           {
-            Vec bcVec;
-            ierr = VecDuplicate(b, &bcVec);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecZeroEntries(bcVec);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(),
-              bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecAssemblyBegin(bcVec);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecAssemblyEnd(bcVec);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecDestroy(&bcVec);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
+            if (globalBcRows > 0)
+            {
+              Vec bcVec;
+              ierr = VecDuplicate(b, &bcVec);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecZeroEntries(bcVec);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.empty() ? nullptr : bcIdx.data(),
+                bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecAssemblyBegin(bcVec);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecAssemblyEnd(bcVec);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecDestroy(&bcVec);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+            }
           }
           else if (mode == AssemblyMode::LHS)
           {
-            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()),
-              bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, nullptr, nullptr);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
+            if (globalBcRows > 0)
+            {
+              ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()),
+                bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, nullptr, nullptr);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+            }
           }
           else
           {
@@ -1461,51 +1498,71 @@ namespace Rodin::Assembly
             if (ownsTrialGlobal(gs))
               rowsToZero.push_back(static_cast<PetscInt>(gs));
 
-          ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
-            rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
+          // MatZeroRows bumps the matrix's nonzero-state counter even when it
+          // is handed zero rows. PETSc's PCSetUp compares that counter against
+          // the one the preconditioner last factored and, on any increase,
+          // reports DIFFERENT_NONZERO_PATTERN, forcing external direct solvers
+          // (e.g. MUMPS) to redo their symbolic analysis. Across the reused
+          // LinearSystem of a time-stepping or multi-RHS solve, that repeats
+          // the expensive ordering on every reassembly. The pattern is fixed
+          // here (MatrixSetup only zeroes and refills), so the call is a pure
+          // no-op when no rank has an identified row to zero; skip it then.
+          // The emptiness test is itself collective, hence the reduction.
+          PetscInt localIdentRows = static_cast<PetscInt>(rowsToZero.size());
+          PetscInt globalIdentRows = 0;
+          ierr = MPIU_Allreduce(&localIdentRows, &globalIdentRows, 1, MPIU_INT,
+            MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
           assert(ierr == PETSC_SUCCESS);
           (void)ierr;
 
-          for (const Index gs : constraints.getIdentifiedRows())
+          if (globalIdentRows > 0)
           {
-            if (!ownsTrialGlobal(gs))
-              continue;
-            const PetscInt I = static_cast<PetscInt>(gs);
-            const PetscScalar one = 1.0;
-            ierr = MatSetValue(A, I, I, one, ADD_VALUES);
+            ierr = MatZeroRows(A, static_cast<PetscInt>(rowsToZero.size()),
+              rowsToZero.empty() ? nullptr : rowsToZero.data(), 0.0, nullptr, nullptr);
             assert(ierr == PETSC_SUCCESS);
             (void)ierr;
-            for (const auto& e : constraints.expand(gs))
+
+            for (const Index gs : constraints.getIdentifiedRows())
             {
-              const PetscInt J = static_cast<PetscInt>(e.index);
-              const PetscScalar v = -e.coefficient;
-              ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+              if (!ownsTrialGlobal(gs))
+                continue;
+              const PetscInt I = static_cast<PetscInt>(gs);
+              const PetscScalar one = 1.0;
+              ierr = MatSetValue(A, I, I, one, ADD_VALUES);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
+              for (const auto& e : constraints.expand(gs))
+              {
+                const PetscInt J = static_cast<PetscInt>(e.index);
+                const PetscScalar v = -e.coefficient;
+                ierr = MatSetValue(A, I, J, v, ADD_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                (void)ierr;
+              }
+              const PetscScalar rhs = constraints.getIdentificationValue(gs);
+              if (doVector)
+              {
+                ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
+                assert(ierr == PETSC_SUCCESS);
+                (void)ierr;
+              }
             }
-            const PetscScalar rhs = constraints.getIdentificationValue(gs);
+
+            ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
             if (doVector)
             {
-              ierr = VecSetValue(b, I, rhs, INSERT_VALUES);
+              ierr = VecAssemblyBegin(b);
+              assert(ierr == PETSC_SUCCESS);
+              (void)ierr;
+              ierr = VecAssemblyEnd(b);
               assert(ierr == PETSC_SUCCESS);
               (void)ierr;
             }
-          }
-
-          ierr = MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          if (doVector)
-          {
-            ierr = VecAssemblyBegin(b);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
-            ierr = VecAssemblyEnd(b);
-            assert(ierr == PETSC_SUCCESS);
-            (void)ierr;
           }
         }
 
@@ -1520,40 +1577,57 @@ namespace Rodin::Assembly
           }
         }
 
+        // See the identified-row reduction above: MatZeroRows /
+        // MatZeroRowsColumns must not run with a globally empty index set, or
+        // they bump the nonzero-state counter for nothing and defeat
+        // factorization reuse.
+        PetscInt localBcRows = static_cast<PetscInt>(bcIdx.size());
+        PetscInt globalBcRows = 0;
+        ierr = MPIU_Allreduce(&localBcRows, &globalBcRows, 1, MPIU_INT, MPI_SUM,
+          PetscObjectComm(reinterpret_cast<PetscObject>(A)));
+        assert(ierr == PETSC_SUCCESS);
+        (void)ierr;
+
         if (mode == AssemblyMode::Full)
         {
-          Vec bcVec;
-          ierr = VecDuplicate(b, &bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = VecZeroEntries(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
-            bcIdx.empty() ? nullptr : bcIdx.data(),
-            bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = VecAssemblyBegin(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = VecAssemblyEnd(bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
-            bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
-          ierr = VecDestroy(&bcVec);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
+          if (globalBcRows > 0)
+          {
+            Vec bcVec;
+            ierr = VecDuplicate(b, &bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = VecZeroEntries(bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = VecSetValues(bcVec, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(),
+              bcVals.empty() ? nullptr : bcVals.data(), INSERT_VALUES);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = VecAssemblyBegin(bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = VecAssemblyEnd(bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = MatZeroRowsColumns(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, bcVec, b);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+            ierr = VecDestroy(&bcVec);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+          }
         }
         else if (mode == AssemblyMode::LHS)
         {
-          ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()),
-            bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, nullptr, nullptr);
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
+          if (globalBcRows > 0)
+          {
+            ierr = MatZeroRows(A, static_cast<PetscInt>(bcIdx.size()),
+              bcIdx.empty() ? nullptr : bcIdx.data(), 1.0, nullptr, nullptr);
+            assert(ierr == PETSC_SUCCESS);
+            (void)ierr;
+          }
         }
         else
         {
