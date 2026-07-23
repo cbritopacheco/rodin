@@ -15,7 +15,8 @@
  * spurious nonzero-state bump is expensive: MUMPS redoes its analysis whenever
  * PETSc reports a changed sparsity pattern.
  *
- * Regression guard for the assembly fix in @ref Rodin::PETSc::Assembly::MPI:
+ * Regression guard for the assembly fix in the MPI assembly backend
+ * (src/Rodin/PETSc/Assembly/MPI.h):
  * @c MatZeroRows / @c MatZeroRowsColumns must not run with a globally empty
  * index set, because they bump the matrix nonzero-state counter even for zero
  * rows, which makes PETSc report DIFFERENT_NONZERO_PATTERN and forces MUMPS to
@@ -310,6 +311,10 @@ namespace Rodin::Tests::Unit::MPIKSPFactorizationReuse
   }
 }
 
+/**
+ * @brief Test entry point: initializes MPI and PETSc with event logging
+ *        enabled and runs the distributed factorization-reuse suite.
+ */
 int main(int argc, char** argv)
 {
   boost::mpi::environment env(argc, argv);
