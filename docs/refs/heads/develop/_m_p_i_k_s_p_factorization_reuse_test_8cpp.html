@@ -84,11 +84,12 @@
               Reference
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
+                <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
         </nav>
-<p>The sequential test pins the reuse contract for <code>seqaij</code> matrices factored by PETSc&#x27;s built-in LU. This one pins it for <code>mpiaij</code> matrices factored by MUMPS, which is the configuration production runs use and the one where a spurious nonzero-state bump is expensive: MUMPS redoes its analysis whenever PETSc reports a changed sparsity pattern.</p><p>Regression guard for the assembly fix in Rodin::PETSc::Assembly::MPI: <code>MatZeroRows</code> / <code>MatZeroRowsColumns</code> must not run with a globally empty index set, because they bump the matrix nonzero-state counter even for zero rows, which makes PETSc report DIFFERENT_NONZERO_PATTERN and forces MUMPS to repeat its symbolic factorization on every reassembly of a reused system.</p><p>The observable is PETSc&#x27;s own event log (MatLUFactorSym / MatLUFactorNum call counts), with every reuse assertion paired with a numerical one. The MUMPS solver is driven with the same <code>-mat_mumps_icntl_20/21</code> 0 options the production coronary example uses; without centralized right-hand sides this MUMPS build faults inside its distributed RHS scatter.</p><aside class="m-note m-default"><h4>See also</h4><p>KSPFactorizationReuseTest.cpp for the contract these tests share.</p></aside>
+<p>The sequential test pins the reuse contract for <code>seqaij</code> matrices factored by PETSc&#x27;s built-in LU. This one pins it for <code>mpiaij</code> matrices factored by MUMPS, which is the configuration production runs use and the one where a spurious nonzero-state bump is expensive: MUMPS redoes its analysis whenever PETSc reports a changed sparsity pattern.</p><p>Regression guard for the assembly fix in the MPI assembly backend (src/Rodin/PETSc/Assembly/MPI.h): <code>MatZeroRows</code> / <code>MatZeroRowsColumns</code> must not run with a globally empty index set, because they bump the matrix nonzero-state counter even for zero rows, which makes PETSc report DIFFERENT_NONZERO_PATTERN and forces MUMPS to repeat its symbolic factorization on every reassembly of a reused system.</p><p>The observable is PETSc&#x27;s own event log (MatLUFactorSym / MatLUFactorNum call counts), with every reuse assertion paired with a numerical one. The MUMPS solver is driven with the same <code>-mat_mumps_icntl_20/21</code> 0 options the production coronary example uses; without centralized right-hand sides this MUMPS build faults inside its distributed RHS scatter.</p><aside class="m-note m-default"><h4>See also</h4><p>KSPFactorizationReuseTest.cpp for the contract these tests share.</p></aside>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -98,6 +99,16 @@
             <dd>Tests of the Rodin library</dd>
             <dt>namespace <a href="namespace_rodin_1_1_tests_1_1_unit.html" class="m-doc">Rodin::Tests::Unit</a></dt>
             <dd>Namespace <a href="namespace_rodin_1_1_tests.html" class="m-doc">Rodin::<wbr />Tests</a>.</dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a3c04138a5bfe5d72780bb7e82a18e627">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3c04138a5bfe5d72780bb7e82a18e627" class="m-doc-self">main</a>(</span><span class="m-doc-wrap">int argc,
+              char** argv) -&gt; int</span>
+            </dt>
+            <dd>Test entry point: initializes MPI and PETSc with event logging enabled and runs the distributed factorization-reuse suite.</dd>
           </dl>
         </section>
       </div>
