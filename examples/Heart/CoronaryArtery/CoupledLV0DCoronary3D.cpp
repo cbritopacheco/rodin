@@ -133,7 +133,15 @@ namespace Rodin::Examples::Heart
       m_subProjection(m_sub, m_vp),
       m_subProjectionSolver(m_subProjection),
       m_tauProjection(m_tau, m_t),
-      m_tauProjectionSolver(m_tauProjection)
+      m_tauProjectionSolver(m_tauProjection),
+      m_gradRecTrial(m_uh),
+      m_gradRecTest(m_uh),
+      m_gradRecProj(m_gradRecTrial, m_gradRecTest),
+      m_gradRecKSP(m_gradRecProj),
+      m_wssTrial(m_uh),
+      m_wssTest(m_uh),
+      m_wssProj(m_wssTrial, m_wssTest),
+      m_wssKSP(m_wssProj)
   {
     auto cellCount = m_mesh.getCellCount();
     auto vertexCount = m_mesh.getVertexCount();
@@ -655,11 +663,50 @@ namespace Rodin::Examples::Heart
   {
     setupModel();
     setupMeshAndSpaces();
+    setupProjectionSolvers();
     setupDiagnostics();
     printInitialState();
 
     m_initialized = true;
     return *this;
+  }
+
+  void CoupledLV0DCoronary3D::setupProjectionSolvers()
+  {
+    // The output-path projections all invert symmetric positive-definite mass
+    // matrices, for which Jacobi-preconditioned CG converges in a handful of
+    // iterations with no matrix factorization at all. Give each its own PETSc
+    // options prefix and default it to CG + Jacobi, so these solves no longer
+    // inherit the global direct (MUMPS LU) solver used for the coupled flow
+    // system. The defaults are only applied when the user has not set the
+    // corresponding option, so they remain overridable from the command line.
+    const auto setPrefixedDefault =
+      [](const std::string& prefix, const char* suffix, const char* value)
+    {
+      const std::string name = "-" + prefix + suffix;
+      PetscBool set = PETSC_FALSE;
+      PetscErrorCode ierr =
+        PetscOptionsHasName(PETSC_NULLPTR, PETSC_NULLPTR, name.c_str(), &set);
+      assert(ierr == PETSC_SUCCESS);
+      if (!set)
+      {
+        ierr = PetscOptionsSetValue(PETSC_NULLPTR, name.c_str(), value);
+        assert(ierr == PETSC_SUCCESS);
+      }
+      (void)ierr;
+    };
+
+    const auto configureMassSolver = [&](Rodin::Solver::KSP& ksp,
+                                       const std::string& prefix)
+    {
+      setPrefixedDefault(prefix, "ksp_type", "cg");
+      setPrefixedDefault(prefix, "pc_type", "jacobi");
+      ksp.setPrefix(prefix);
+    };
+
+    configureMassSolver(m_viscosityProjectionKSP, "coronary_visc_proj_");
+    configureMassSolver(m_gradRecKSP, "coronary_gradrec_proj_");
+    configureMassSolver(m_wssKSP, "coronary_wss_proj_");
   }
 
   void CoupledLV0DCoronary3D::setupModel()
@@ -1479,9 +1526,6 @@ namespace Rodin::Examples::Heart
     const auto normal = BoundaryNormal(m_mesh);
     const auto& uSol = m_u.getSolution();
 
-    VelocityTrialFunctionType gradRecTrial(m_uh);
-    VelocityTestFunctionType gradRecTest(m_uh);
-
     const auto jacRow0 = VectorFunction(Component(Jacobian(uSol), 0, 0),
       Component(Jacobian(uSol), 0, 1), Component(Jacobian(uSol), 0, 2));
     const auto jacRow1 = VectorFunction(Component(Jacobian(uSol), 1, 0),
@@ -1493,21 +1537,23 @@ namespace Rodin::Examples::Heart
     VelocityGridFunctionType gradRec1(m_uh);
     VelocityGridFunctionType gradRec2(m_uh);
 
-    // Same mass matrix, three right-hand sides: reuse one problem + one KSP.
-    VelocityProjectionProblemType gradRecProj(gradRecTrial, gradRecTest);
-    Rodin::Solver::KSP gradRecKSP(gradRecProj);
+    // Same mass matrix, three right-hand sides: the member problem + KSP keep
+    // the matrix and its preconditioner across steps and across the three
+    // solves here (see setupProjectionSolvers()).
+    m_gradRecProj =
+      Integral(m_gradRecTrial, m_gradRecTest) - Integral(jacRow0, m_gradRecTest);
+    m_gradRecProj.solve(m_gradRecKSP);
+    gradRec0.setData(m_gradRecTrial.getSolution().getData());
 
-    gradRecProj = Integral(gradRecTrial, gradRecTest) - Integral(jacRow0, gradRecTest);
-    gradRecProj.solve(gradRecKSP);
-    gradRec0.setData(gradRecTrial.getSolution().getData());
+    m_gradRecProj =
+      Integral(m_gradRecTrial, m_gradRecTest) - Integral(jacRow1, m_gradRecTest);
+    m_gradRecProj.solve(m_gradRecKSP);
+    gradRec1.setData(m_gradRecTrial.getSolution().getData());
 
-    gradRecProj = Integral(gradRecTrial, gradRecTest) - Integral(jacRow1, gradRecTest);
-    gradRecProj.solve(gradRecKSP);
-    gradRec1.setData(gradRecTrial.getSolution().getData());
-
-    gradRecProj = Integral(gradRecTrial, gradRecTest) - Integral(jacRow2, gradRecTest);
-    gradRecProj.solve(gradRecKSP);
-    gradRec2.setData(gradRecTrial.getSolution().getData());
+    m_gradRecProj =
+      Integral(m_gradRecTrial, m_gradRecTest) - Integral(jacRow2, m_gradRecTest);
+    m_gradRecProj.solve(m_gradRecKSP);
+    gradRec2.setData(m_gradRecTrial.getSolution().getData());
 
     // (grad u . n)_i = gradRec_i . n is the wall-normal directional derivative.
     const auto gradUn0 = Dot(gradRec0, normal);
@@ -1531,16 +1577,12 @@ namespace Rodin::Examples::Heart
       VectorFunction(muLocal * gradUn0, muLocal * gradUn1, muLocal * gradUn2);
     const auto wallStressRec = tracRec - Dot(tracRec, normal) * normal;
 
-    VelocityTrialFunctionType wssTrial(m_uh);
-    VelocityTestFunctionType wssTest(m_uh);
     const Real wssReg = 1.0e-3;
-    VelocityProjectionProblemType wssProj(wssTrial, wssTest);
-    wssProj = BoundaryIntegral(Dot(wssTrial, wssTest)).over(m_cfg.wall) +
-      wssReg * Integral(Dot(wssTrial, wssTest)) -
-      BoundaryIntegral(Dot(wallStressRec, wssTest)).over(m_cfg.wall);
-    Rodin::Solver::KSP wssKSP(wssProj);
-    wssProj.solve(wssKSP);
-    m_shearWall.setData(wssTrial.getSolution().getData());
+    m_wssProj = BoundaryIntegral(Dot(m_wssTrial, m_wssTest)).over(m_cfg.wall) +
+      wssReg * Integral(Dot(m_wssTrial, m_wssTest)) -
+      BoundaryIntegral(Dot(wallStressRec, m_wssTest)).over(m_cfg.wall);
+    m_wssProj.solve(m_wssKSP);
+    m_shearWall.setData(m_wssTrial.getSolution().getData());
 
     if (isRoot())
     {

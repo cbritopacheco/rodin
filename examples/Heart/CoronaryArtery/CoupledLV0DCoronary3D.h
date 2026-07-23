@@ -584,6 +584,7 @@ namespace Rodin::Examples::Heart
 
       void setupModel();
       void setupMeshAndSpaces();
+      void setupProjectionSolvers();
       void setupDiagnostics();
       void printInitialState() const;
       bool isRoot() const;
@@ -651,6 +652,19 @@ namespace Rodin::Examples::Heart
       Rodin::Solver::KSP m_l2ConvUSolver;
       Rodin::Solver::KSP m_subProjectionSolver;
       Rodin::Solver::KSP m_tauProjectionSolver;
+
+      // Wall-shear recovery projections. Hoisted to members so their mass
+      // matrix and preconditioner are built once and reused across every
+      // output step instead of being reconstructed (and, under a direct
+      // solver, refactorized) each call to computeWallShear().
+      VelocityTrialFunctionType m_gradRecTrial;
+      VelocityTestFunctionType m_gradRecTest;
+      VelocityProjectionProblemType m_gradRecProj;
+      Rodin::Solver::KSP m_gradRecKSP;
+      VelocityTrialFunctionType m_wssTrial;
+      VelocityTestFunctionType m_wssTest;
+      VelocityProjectionProblemType m_wssProj;
+      Rodin::Solver::KSP m_wssKSP;
 
       std::map<Attribute, RCR> m_wk;
 
