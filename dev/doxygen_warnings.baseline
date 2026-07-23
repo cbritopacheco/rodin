@@ -5,13 +5,3 @@
 # Shrink by fixing warnings, regenerate with
 #   python3 dev/check_doxygen_warnings.py --update-baseline
 # Never grow this file to silence a new warning.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member Parent (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member Parent (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member RangeType (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member RangeType (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::AnalyticVectorFunction is not documented.
-src/Rodin/Adaptation/AnalyticFunctionAdapters.h: warning: Member copy() const noexcept override (function) of class Rodin::Adaptation::AnalyticMatrixFunction is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member Parent (typedef) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member ScalarType (typedef) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.
-src/Rodin/Adaptation/WNGIRAdmissibilityMetric.h: warning: Member copy() const noexcept final override (function) of class Rodin::Adaptation::Detail::WNGIRAdmissibilityMetric is not documented.

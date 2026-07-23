@@ -23,7 +23,9 @@ namespace Rodin::Adaptation::Detail
         typename TrialFunction::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename TrialFunction::ScalarType;
+      /// @brief Parent class type.
       using Parent = Variational::LocalBilinearFormIntegratorBase<ScalarType>;
 
         /// @brief Constructs the admissibility-metric integrator.
@@ -184,6 +186,7 @@ namespace Rodin::Adaptation::Detail
         return Geometry::Region::Cells;
       }
 
+      /// @brief Clones this integrator.
       WNGIRAdmissibilityMetric* copy() const noexcept final override
       {
         return new WNGIRAdmissibilityMetric(*this);
