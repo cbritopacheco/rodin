@@ -15,6 +15,7 @@ namespace Rodin::Tests::Unit
     : public testing::TestWithParam<Geometry::Polytope::Type>
   {};
 
+  /// @brief Test case.
   TEST_P(WNGIRValidationWeightsTest, DefinesPositiveMeasureWithReferenceMass)
   {
     const auto& qf = QF::PolytopeQuadratureFormula::get(4, GetParam());
@@ -33,10 +34,8 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(validationWeight, signedWeight, 1e-14);
   }
 
-  INSTANTIATE_TEST_SUITE_P(
-    Simplex,
-    WNGIRValidationWeightsTest,
+  /// @brief Test case.
+  INSTANTIATE_TEST_SUITE_P(Simplex, WNGIRValidationWeightsTest,
     testing::Values(
-      Geometry::Polytope::Type::Triangle,
-      Geometry::Polytope::Type::Tetrahedron));
+      Geometry::Polytope::Type::Triangle, Geometry::Polytope::Type::Tetrahedron));
 }

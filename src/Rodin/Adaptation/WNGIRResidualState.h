@@ -20,22 +20,34 @@ namespace Rodin::Adaptation::Detail
   {
     public:
       template <class PhiType, class GradType, class DeformationType>
+      /// @brief Constructs the w n g i r residual state.
       WNGIRResidualState(const PhiType& phi, const GradType& grad,
-        const DeformationType& deformation,
-        const Variational::IntegrationPoint& ip, Real sigma2, bool weighted)
+        const DeformationType& deformation, const Variational::IntegrationPoint& ip,
+        Real sigma2, bool weighted)
       {
         const auto& moved = deformation.getMovedPoint(ip);
         m_residual = phi.getValue(moved);
         m_gradient = grad.getValue(moved);
-        m_weight = weighted
-          ? std::exp(-m_residual * m_residual / sigma2) : Real(1);
+        m_weight = weighted ? std::exp(-m_residual * m_residual / sigma2) : Real(1);
       }
 
-      Real getResidual() const { return m_residual; }
+      /// @brief The residual.
+      Real getResidual() const
+      {
+        return m_residual;
+      }
 
-      const Math::SpatialVector<Real>& getGradient() const { return m_gradient; }
+      /// @brief The gradient.
+      const Math::SpatialVector<Real>& getGradient() const
+      {
+        return m_gradient;
+      }
 
-      Real getWeight() const { return m_weight; }
+      /// @brief The weight.
+      Real getWeight() const
+      {
+        return m_weight;
+      }
 
     private:
       Real m_residual;

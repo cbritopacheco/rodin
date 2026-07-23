@@ -14,17 +14,17 @@ namespace Rodin::Adaptation::Detail
   class WNGIRPrimalBarrierState
   {
     public:
+      /// @brief Constructs the w n g i r primal barrier state.
       WNGIRPrimalBarrierState(const CellDeformation& deformation,
-        const Math::SpatialMatrix<Real>& innerGradient,
-        const WNGIRParameters& parameters, Real barrierCoefficient)
+        const Math::SpatialMatrix<Real>& innerGradient, const WNGIRParameters& parameters,
+        Real barrierCoefficient)
       {
         if (!deformation.isAdmissible())
           return;
         m_jAction = -deformation.getJacobianAction(innerGradient);
         m_qAction = deformation.getRelativeDistortionAction(innerGradient);
         m_jSlack = deformation.getJacobian() - parameters.jSafe - m_jAction;
-        m_qSlack = parameters.qMax -
-          deformation.getRelativeDistortion() - m_qAction;
+        m_qSlack = parameters.qMax - deformation.getRelativeDistortion() - m_qAction;
         if (m_jSlack <= Real(0) || m_qSlack <= Real(0))
           return;
 
@@ -43,15 +43,51 @@ namespace Rodin::Adaptation::Detail
         m_feasible = true;
       }
 
-      bool isFeasible() const { return m_feasible; }
-      Real getJacobianAction() const { return m_jAction; }
-      Real getDistortionAction() const { return m_qAction; }
-      Real getJacobianSlack() const { return m_jSlack; }
-      Real getDistortionSlack() const { return m_qSlack; }
-      Real getJacobianHessian() const { return m_jHessian; }
-      Real getDistortionHessian() const { return m_qHessian; }
-      Real getJacobianForce() const { return m_jForce; }
-      Real getDistortionForce() const { return m_qForce; }
+      /// @brief Whether feasible.
+      bool isFeasible() const
+      {
+        return m_feasible;
+      }
+      /// @brief The jacobian action.
+      Real getJacobianAction() const
+      {
+        return m_jAction;
+      }
+      /// @brief The distortion action.
+      Real getDistortionAction() const
+      {
+        return m_qAction;
+      }
+      /// @brief The jacobian slack.
+      Real getJacobianSlack() const
+      {
+        return m_jSlack;
+      }
+      /// @brief The distortion slack.
+      Real getDistortionSlack() const
+      {
+        return m_qSlack;
+      }
+      /// @brief The jacobian hessian.
+      Real getJacobianHessian() const
+      {
+        return m_jHessian;
+      }
+      /// @brief The distortion hessian.
+      Real getDistortionHessian() const
+      {
+        return m_qHessian;
+      }
+      /// @brief The jacobian force.
+      Real getJacobianForce() const
+      {
+        return m_jForce;
+      }
+      /// @brief The distortion force.
+      Real getDistortionForce() const
+      {
+        return m_qForce;
+      }
 
     private:
       bool m_feasible = false;

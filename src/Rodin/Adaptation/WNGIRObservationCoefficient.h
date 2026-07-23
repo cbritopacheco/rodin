@@ -14,22 +14,25 @@
 namespace Rodin::Adaptation::Detail
 {
   /// @brief Matrix coefficient of the WNGIR surface observation metric.
-  template <class PhiDerived, class GradDerived, class Displacement,
-    class LocatorType>
+  template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
   class WNGIRObservationCoefficient final
     : public Variational::MatrixFunctionBase<Real,
-        WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement,
-          LocatorType>>
+        WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialMatrix<ScalarType>;
+      /// @brief Parent class type.
       using Parent = Variational::MatrixFunctionBase<ScalarType,
-        WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement,
-          LocatorType>>;
+        WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>>;
+      /// @brief Level-set function type.
       using PhiType = Variational::RealFunctionBase<PhiDerived>;
+      /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
+      /// @brief Constructs the w n g i r observation coefficient.
       WNGIRObservationCoefficient(const PhiType& phi, const GradType& grad,
         const Displacement& current, const LocatorType& locator,
         const WNGIRParameters& parameters, Real sigma2, std::size_t dimension)
@@ -41,6 +44,7 @@ namespace Rodin::Adaptation::Detail
           m_dimension(dimension)
       {}
 
+      /// @brief Copy constructor.
       WNGIRObservationCoefficient(const WNGIRObservationCoefficient& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
@@ -51,6 +55,7 @@ namespace Rodin::Adaptation::Detail
           m_dimension(other.m_dimension)
       {}
 
+      /// @brief Evaluates the coefficient at a point.
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         constexpr Real epsG = Real(1e-12);
@@ -63,10 +68,11 @@ namespace Rodin::Adaptation::Detail
           const WNGIRResidualState state(
             *m_phi, *m_grad, m_deformation, ip, m_sigma2, false);
           const Real g2 = state.getGradient().dot(state.getGradient());
-          const Real a = params.gammaObs * (g2 + epsG +
-            (params.residualStabilizedObservationMetric
-              ? (state.getResidual() * state.getResidual()) / m_sigma2
-              : Real(0)));
+          const Real a = params.gammaObs *
+            (g2 + epsG +
+              (params.residualStabilizedObservationMetric
+                  ? (state.getResidual() * state.getResidual()) / m_sigma2
+                  : Real(0)));
           m.setZero();
           for (std::uint8_t r = 0; r < d; ++r)
             m(r, r) = a;
@@ -96,15 +102,25 @@ namespace Rodin::Adaptation::Detail
         return m;
       }
 
-      std::size_t getRows() const noexcept { return m_dimension; }
+      /// @brief Number of rows of the matrix value.
+      std::size_t getRows() const noexcept
+      {
+        return m_dimension;
+      }
 
-      std::size_t getColumns() const noexcept { return m_dimension; }
+      /// @brief Number of columns of the matrix value.
+      std::size_t getColumns() const noexcept
+      {
+        return m_dimension;
+      }
 
+      /// @brief Reports no intrinsic polynomial order.
       Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
       }
 
+      /// @brief Clones this object.
       WNGIRObservationCoefficient* copy() const noexcept override
       {
         return new WNGIRObservationCoefficient(*this);
@@ -119,14 +135,11 @@ namespace Rodin::Adaptation::Detail
       std::size_t m_dimension;
   };
 
-  template <class PhiDerived, class GradDerived, class Displacement,
-    class LocatorType>
+  template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
   WNGIRObservationCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
-    const Variational::VectorFunctionBase<Real, GradDerived>&,
-    const Displacement&, const LocatorType&, const WNGIRParameters&, Real,
-    std::size_t)
-    -> WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement,
-         LocatorType>;
+    const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
+    const LocatorType&, const WNGIRParameters&, Real, std::size_t)
+    -> WNGIRObservationCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 
 #endif

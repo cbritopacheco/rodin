@@ -29,7 +29,7 @@ namespace Rodin::Adaptation
    * @c mutable @ref Rodin::Optional idiom of @ref Rodin::Geometry::Point.
    *
    * This is the mesh-adaptation counterpart of
-   * @ref Rodin::Solid::Kinematics::KinematicState. It differs deliberately in two
+   * @c Rodin::Solid::Kinematics::KinematicState. It differs deliberately in two
    * ways, both required here:
    * - it is *lazy*: an admissibility sweep needs only @f$j@f$ at most points, and
    *   never needs @f$C@f$, @f$b@f$ or @f$\log j@f$, so computing them eagerly
@@ -57,8 +57,7 @@ namespace Rodin::Adaptation
        * @brief Sets the displacement gradient @f$H=\nabla u@f$, giving
        * @f$F=I+H@f$, and invalidates the derived quantities.
        */
-      CellDeformation& setDisplacementGradient(
-        const Math::SpatialMatrix<Real>& H)
+      CellDeformation& setDisplacementGradient(const Math::SpatialMatrix<Real>& H)
       {
         m_F = Math::SpatialMatrix<Real>::Identity(
           static_cast<std::uint8_t>(m_d), static_cast<std::uint8_t>(m_d));
@@ -68,8 +67,7 @@ namespace Rodin::Adaptation
       }
 
       /// @brief Sets the deformation gradient @f$F@f$ directly.
-      CellDeformation& setDeformationGradient(
-        const Math::SpatialMatrix<Real>& F)
+      CellDeformation& setDeformationGradient(const Math::SpatialMatrix<Real>& F)
       {
         m_F = F;
         invalidate();
@@ -77,7 +75,10 @@ namespace Rodin::Adaptation
       }
 
       /// @brief The spatial dimension.
-      std::size_t getDimension() const { return m_d; }
+      std::size_t getDimension() const
+      {
+        return m_d;
+      }
 
       /// @brief The deformation gradient @f$F=I+\nabla u@f$.
       const Math::SpatialMatrix<Real>& getDeformationGradient() const
@@ -98,19 +99,22 @@ namespace Rodin::Adaptation
        *
        * The derived shape quantities are defined only in this case.
        */
-      bool isAdmissible() const { return getJacobian() > Real(0); }
+      bool isAdmissible() const
+      {
+        return getJacobian() > Real(0);
+      }
 
       /**
        * @brief Whether @f$F@f$ is numerically invertible, @f$|j|>\varepsilon@f$.
        *
-       * Weaker than @ref isAdmissible: an inverted cell (@f$j<0@f$) is
+       * Weaker than @ref isAdmissible — an inverted cell (@f$j<0@f$) is
        * invertible. Mesh adaptation relies on this distinction, since the
        * size-control terms act on inverted cells precisely to pull them back to
        * validity, and need @f$F^{-\top}@f$ there.
        */
       bool isInvertible() const
       {
-        return std::abs(getJacobian()) > s_singularTolerance;
+        return std::abs(getJacobian()) > singularTolerance;
       }
 
       /**
@@ -141,8 +145,7 @@ namespace Rodin::Adaptation
         if (!m_Q)
         {
           const Real d = static_cast<Real>(m_d);
-          m_Q = m_F.squaredNorm() /
-            (d * std::pow(getJacobian(), Real(2) / d));
+          m_Q = m_F.squaredNorm() / (d * std::pow(getJacobian(), Real(2) / d));
         }
         return *m_Q;
       }
@@ -159,8 +162,7 @@ namespace Rodin::Adaptation
           const Real d = static_cast<Real>(m_d);
           const Real j = getJacobian();
           const Real frob2 = m_F.squaredNorm();
-          m_dQdF = Math::SpatialMatrix<Real>(
-            (Real(2) / d) * std::pow(j, -Real(2) / d) *
+          m_dQdF = Math::SpatialMatrix<Real>((Real(2) / d) * std::pow(j, -Real(2) / d) *
             (m_F - (frob2 / d) * getInverseTranspose()));
         }
         return *m_dQdF;
@@ -190,7 +192,7 @@ namespace Rodin::Adaptation
 
     private:
       /// @brief Below this @f$|j|@f$ the cofactor via the inverse is unreliable.
-      static constexpr Real s_singularTolerance = Real(1e-14);
+      static constexpr Real singularTolerance = Real(1e-14);
 
       void invalidate() const
       {

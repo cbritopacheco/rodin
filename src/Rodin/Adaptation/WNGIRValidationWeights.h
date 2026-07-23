@@ -16,6 +16,7 @@ namespace Rodin::Adaptation::Detail
   class WNGIRValidationWeights
   {
     public:
+      /// @brief Constructs the w n g i r validation weights.
       explicit WNGIRValidationWeights(const QF::QuadratureFormulaBase& qf)
         : m_qf(qf)
       {
@@ -26,11 +27,10 @@ namespace Rodin::Adaptation::Detail
           signedWeight += qf.getWeight(q);
           absoluteWeight += std::abs(qf.getWeight(q));
         }
-        m_scale = absoluteWeight > Real(0)
-          ? signedWeight / absoluteWeight
-          : Real(0);
+        m_scale = absoluteWeight > Real(0) ? signedWeight / absoluteWeight : Real(0);
       }
 
+      /// @brief The weight.
       Real getWeight(std::size_t q) const
       {
         return m_scale * std::abs(m_qf.get().getWeight(q));

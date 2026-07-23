@@ -31,42 +31,40 @@ namespace Rodin::Tests::Unit
     }
   }
 
+  /// @brief Test case.
   TEST(Rodin_Adaptation_WNGIRConstraintState, SignBlind_UsesBothDirections)
   {
     const auto deformation = compressedCell();
     auto parameters = jacobianOnlyParameters();
-    parameters.constraintFormulation =
-      WNGIRConstraintFormulation::SignBlindMetric;
+    parameters.constraintFormulation = WNGIRConstraintFormulation::SignBlindMetric;
 
     Detail::WNGIRConstraintState state(deformation, parameters);
     EXPECT_GT(state.getJacobianWeight(), 0);
   }
 
+  /// @brief Test case.
   TEST(Rodin_Adaptation_WNGIRConstraintState, Directional_RejectsImprovingAction)
   {
     const auto deformation = compressedCell();
     auto parameters = jacobianOnlyParameters();
-    parameters.constraintFormulation =
-      WNGIRConstraintFormulation::DirectionalMetric;
+    parameters.constraintFormulation = WNGIRConstraintFormulation::DirectionalMetric;
     Math::SpatialMatrix<Real> improving = Math::SpatialMatrix<Real>::Identity(2, 2);
     improving.setZero();
     improving(0, 0) = 1;
     Math::SpatialMatrix<Real> consuming = -improving;
 
-    Detail::WNGIRConstraintState improvingState(
-      deformation, parameters, &improving);
-    Detail::WNGIRConstraintState consumingState(
-      deformation, parameters, &consuming);
+    Detail::WNGIRConstraintState improvingState(deformation, parameters, &improving);
+    Detail::WNGIRConstraintState consumingState(deformation, parameters, &consuming);
     EXPECT_EQ(improvingState.getJacobianWeight(), 0);
     EXPECT_GT(consumingState.getJacobianWeight(), 0);
   }
 
+  /// @brief Test case.
   TEST(Rodin_Adaptation_WNGIRConstraintState, Fractional_ActivatesAtFractionalMargin)
   {
     const auto deformation = compressedCell();
     auto parameters = jacobianOnlyParameters();
-    parameters.constraintFormulation =
-      WNGIRConstraintFormulation::FractionalMarginMetric;
+    parameters.constraintFormulation = WNGIRConstraintFormulation::FractionalMarginMetric;
     parameters.marginFraction = Real(0.5);
     Math::SpatialMatrix<Real> below = Math::SpatialMatrix<Real>::Identity(2, 2);
     below.setZero();
@@ -82,6 +80,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(aboveState.getJacobianTarget(), Real(0.045), 1e-14);
   }
 
+  /// @brief Test case.
   TEST(Rodin_Adaptation_WNGIRConstraintState, Safeguarded_UsesFractionalLocalModel)
   {
     const auto deformation = compressedCell();
@@ -89,8 +88,7 @@ namespace Rodin::Tests::Unit
     parameters.constraintFormulation =
       WNGIRConstraintFormulation::SafeguardedMarginMetric;
     parameters.marginFraction = Real(0.25);
-    Math::SpatialMatrix<Real> predictor =
-      Math::SpatialMatrix<Real>::Identity(2, 2);
+    Math::SpatialMatrix<Real> predictor = Math::SpatialMatrix<Real>::Identity(2, 2);
     predictor.setZero();
     predictor(0, 0) = Real(-0.1);
 

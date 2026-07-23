@@ -41,11 +41,15 @@ namespace Rodin::Adaptation
        * @param locator Bounding-volume locator bound to the displaced mesh.
        */
       DeformationMap(const Displacement& u, const LocatorType& locator)
-        : m_u(u), m_locator(locator)
+        : m_u(u),
+          m_locator(locator)
       {}
 
       /// @brief The underlying displacement field.
-      const Displacement& getDisplacement() const { return m_u.get(); }
+      const Displacement& getDisplacement() const
+      {
+        return m_u.get();
+      }
 
       /**
        * @brief The displacement @f$u(x)@f$ at an integration point, as a
@@ -71,8 +75,7 @@ namespace Rodin::Adaptation
        * @param ip Integration point on the reference configuration; its
        * polytope and quadrature index form the cache key.
        */
-      const Geometry::Point& getMovedPoint(
-        const Variational::IntegrationPoint& ip) const
+      const Geometry::Point& getMovedPoint(const Variational::IntegrationPoint& ip) const
       {
         const auto& pt = ip.getPoint();
         const auto& polytope = pt.getPolytope();
@@ -82,8 +85,7 @@ namespace Rodin::Adaptation
             // Geometry::Point is constructible but not assignable, so the slot
             // is re-emplaced rather than overwritten.
           m_moved.emplace(makeMovedPoint(pt,
-            pt.getPhysicalCoordinates() + getDisplacementValue(pt, ip),
-            m_locator.get()));
+            pt.getPhysicalCoordinates() + getDisplacementValue(pt, ip), m_locator.get()));
           m_key = key;
         }
         return *m_moved;
@@ -112,11 +114,11 @@ namespace Rodin::Adaptation
         else
         {
           assert(sourcePolytope.getDimension() + 1 == dimension);
-          const auto& adjacent = mesh.getConnectivity().getIncidence(
-            dimension - 1, dimension).at(sourcePolytope.getIndex());
+          const auto& adjacent = mesh.getConnectivity()
+                                   .getIncidence(dimension - 1, dimension)
+                                   .at(sourcePolytope.getIndex());
           if (adjacent.empty())
-            throw std::runtime_error(
-              "Deformation map source face has no adjacent cell.");
+            throw std::runtime_error("Deformation map source face has no adjacent cell.");
           cell = *adjacent.begin();
         }
 
@@ -127,15 +129,14 @@ namespace Rodin::Adaptation
 
       struct Key
       {
-        std::size_t dimension;
-        Index index;
-        std::size_t qp;
+          std::size_t dimension;
+          Index index;
+          std::size_t qp;
 
-        bool operator==(const Key& other) const
-        {
-          return dimension == other.dimension && index == other.index &&
-            qp == other.qp;
-        }
+          bool operator==(const Key& other) const
+          {
+            return dimension == other.dimension && index == other.index && qp == other.qp;
+          }
       };
 
       std::reference_wrapper<const Displacement> m_u;

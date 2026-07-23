@@ -13,25 +13,28 @@
 namespace Rodin::Adaptation::Detail
 {
   /// @brief Negative first-variation coefficient of the Welsch interface energy.
-  template <class PhiDerived, class GradDerived, class Displacement,
-    class LocatorType>
+  template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
   class WNGIRSurfaceForceCoefficient final
     : public Variational::VectorFunctionBase<Real,
-        WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement,
-          LocatorType>>
+        WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = Real;
+      /// @brief Range (evaluation value) type.
       using RangeType = Math::SpatialVector<ScalarType>;
+      /// @brief Parent class type.
       using Parent = Variational::VectorFunctionBase<ScalarType,
-        WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement,
-          LocatorType>>;
+        WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>>;
+      /// @brief Level-set function type.
       using PhiType = Variational::RealFunctionBase<PhiDerived>;
+      /// @brief Level-set gradient function type.
       using GradType = Variational::VectorFunctionBase<Real, GradDerived>;
 
+      /// @brief Constructs the w n g i r surface force coefficient.
       WNGIRSurfaceForceCoefficient(const PhiType& phi, const GradType& grad,
-        const Displacement& current, const LocatorType& locator,
-        const WNGIRParameters&, Real sigma2, std::size_t dimension)
+        const Displacement& current, const LocatorType& locator, const WNGIRParameters&,
+        Real sigma2, std::size_t dimension)
         : m_phi(phi.copy()),
           m_grad(grad.copy()),
           m_deformation(current, locator),
@@ -39,6 +42,7 @@ namespace Rodin::Adaptation::Detail
           m_dimension(dimension)
       {}
 
+      /// @brief Copy constructor.
       WNGIRSurfaceForceCoefficient(const WNGIRSurfaceForceCoefficient& other)
         : Parent(other),
           m_phi(other.m_phi->copy()),
@@ -48,6 +52,7 @@ namespace Rodin::Adaptation::Detail
           m_dimension(other.m_dimension)
       {}
 
+      /// @brief Evaluates the coefficient at a point.
       RangeType getValue(const Variational::IntegrationPoint& ip) const
       {
         const WNGIRResidualState state(
@@ -55,8 +60,13 @@ namespace Rodin::Adaptation::Detail
         return (-state.getWeight() * state.getResidual()) * state.getGradient();
       }
 
-      std::size_t getDimension() const noexcept { return m_dimension; }
+      /// @brief Dimension of the vector value.
+      std::size_t getDimension() const noexcept
+      {
+        return m_dimension;
+      }
 
+      /// @brief Reports no intrinsic polynomial order.
       Optional<std::size_t> getOrder(const Geometry::Polytope&) const noexcept
       {
         return std::nullopt;
@@ -75,15 +85,11 @@ namespace Rodin::Adaptation::Detail
       std::size_t m_dimension;
   };
 
-  template <class PhiDerived, class GradDerived, class Displacement,
-    class LocatorType>
-  WNGIRSurfaceForceCoefficient(
-    const Variational::RealFunctionBase<PhiDerived>&,
-    const Variational::VectorFunctionBase<Real, GradDerived>&,
-    const Displacement&, const LocatorType&, const WNGIRParameters&, Real,
-    std::size_t)
-    -> WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement,
-         LocatorType>;
+  template <class PhiDerived, class GradDerived, class Displacement, class LocatorType>
+  WNGIRSurfaceForceCoefficient(const Variational::RealFunctionBase<PhiDerived>&,
+    const Variational::VectorFunctionBase<Real, GradDerived>&, const Displacement&,
+    const LocatorType&, const WNGIRParameters&, Real, std::size_t)
+    -> WNGIRSurfaceForceCoefficient<PhiDerived, GradDerived, Displacement, LocatorType>;
 }
 
 #endif

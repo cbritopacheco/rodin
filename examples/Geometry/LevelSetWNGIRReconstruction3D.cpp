@@ -614,8 +614,7 @@ int main(int argc, char** argv)
       for (auto cellIt = mesh.getCell(); cellIt; ++cellIt)
       {
         const Index cellIdx = cellIt->getIndex();
-        const Index dof =
-          p0Fes.getGlobalIndex({mesh.getDimension(), cellIdx}, 0);
+        const Index dof = p0Fes.getGlobalIndex({mesh.getDimension(), cellIdx}, 0);
         conflict.getData()(dof) = wngirRep.conflictIndicator[cellIdx];
       }
     lastAlpha = wngirRep.lastAlpha;

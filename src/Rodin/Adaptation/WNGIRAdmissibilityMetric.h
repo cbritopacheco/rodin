@@ -141,16 +141,16 @@ namespace Rodin::Adaptation::Detail
             for (std::size_t te = 0; te < nte; ++te)
               for (std::size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                  w * m_constraintMultiplier * params.gammaJ * jWeight *
-                    m_aJTrial[tr] * m_aJTest[te];
+                  w * m_constraintMultiplier * params.gammaJ * jWeight * m_aJTrial[tr] *
+                  m_aJTest[te];
           }
           if (qWeight > Real(0))
           {
             for (std::size_t te = 0; te < nte; ++te)
               for (std::size_t tr = 0; tr < ntr; ++tr)
                 m_matrix(static_cast<Eigen::Index>(te), static_cast<Eigen::Index>(tr)) +=
-                  w * m_constraintMultiplier * params.gammaQ * qWeight *
-                    m_aQTrial[tr] * m_aQTest[te];
+                  w * m_constraintMultiplier * params.gammaQ * qWeight * m_aQTrial[tr] *
+                  m_aQTest[te];
           }
           if (qualWeight > Real(0))
           {

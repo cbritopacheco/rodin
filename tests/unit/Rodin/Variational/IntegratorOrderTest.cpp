@@ -401,9 +401,8 @@ namespace Rodin::Tests::Unit
     integ.setOrder(3);
     EXPECT_EQ(integ.getOrder(*facet).value_or(0), 3u);
 
-    integ.setOrder([](const Polytope& p) -> size_t {
-      return p.getDimension() == 0 ? 5 : 2;
-    });
+    integ.setOrder(
+      [](const Polytope& p) -> size_t { return p.getDimension() == 0 ? 5 : 2; });
     EXPECT_EQ(integ.getOrder(*facet).value_or(0), 5u);
   }
 
@@ -458,8 +457,7 @@ namespace Rodin::Tests::Unit
     integ.setOrder(8);
     auto finer = Integral(quartic(), v);
     finer.setOrder(12);
-    EXPECT_NEAR(
-      assembledIntegral(integ, v), assembledIntegral(finer, v), 1e-10);
+    EXPECT_NEAR(assembledIntegral(integ, v), assembledIntegral(finer, v), 1e-10);
   }
 
   /// @brief Pyramids: the quadrature rule follows the declared order.
@@ -473,8 +471,7 @@ namespace Rodin::Tests::Unit
     integ.setOrder(8);
     auto finer = Integral(quartic(), v);
     finer.setOrder(12);
-    EXPECT_NEAR(
-      assembledIntegral(integ, v), assembledIntegral(finer, v), 1e-10);
+    EXPECT_NEAR(assembledIntegral(integ, v), assembledIntegral(finer, v), 1e-10);
   }
 
   /// @brief A per-polytope rule sees every cell of a 3D mesh.
@@ -499,9 +496,9 @@ namespace Rodin::Tests::Unit
   /// @brief Bilinear forms honour an explicit order on every geometry.
   TEST(Rodin_Variational_IntegratorOrder, Bilinear_AcrossGeometries)
   {
-    for (const auto g : { Polytope::Type::Segment, Polytope::Type::Triangle,
-           Polytope::Type::Quadrilateral, Polytope::Type::Tetrahedron,
-           Polytope::Type::Wedge, Polytope::Type::Pyramid })
+    for (const auto g :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Quadrilateral,
+        Polytope::Type::Tetrahedron, Polytope::Type::Wedge, Polytope::Type::Pyramid})
     {
       auto mesh = uniformGrid(g, 2);
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);
@@ -536,8 +533,8 @@ namespace Rodin::Tests::Unit
   /// @brief Boundary integrators honour an explicit order in 1D, 2D and 3D.
   TEST(Rodin_Variational_IntegratorOrder, Boundary_AcrossDimensions)
   {
-    for (const auto g : { Polytope::Type::Segment, Polytope::Type::Triangle,
-           Polytope::Type::Tetrahedron })
+    for (const auto g :
+      {Polytope::Type::Segment, Polytope::Type::Triangle, Polytope::Type::Tetrahedron})
     {
       auto mesh = uniformGrid(g, 2);
       H1 fes(std::integral_constant<size_t, 1>{}, mesh);

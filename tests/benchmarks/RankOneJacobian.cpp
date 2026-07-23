@@ -107,6 +107,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh, 2);
     specializedAssembly(state, fes);
   }
+  /// @brief The b e n c h m a r k.
   BENCHMARK(P1RankOneSpecialized);
 
   static void P1RankOneGeneric(benchmark::State& state)
@@ -115,6 +116,7 @@ namespace Rodin::Tests::Benchmarks
     P1 fes(mesh, 2);
     genericAssembly(state, fes);
   }
+  /// @brief The b e n c h m a r k.
   BENCHMARK(P1RankOneGeneric);
 
   static void H1P2RankOneSpecialized(benchmark::State& state)
@@ -123,6 +125,7 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, 2);
     specializedAssembly(state, fes);
   }
+  /// @brief The b e n c h m a r k.
   BENCHMARK(H1P2RankOneSpecialized);
 
   static void H1P2RankOneGeneric(benchmark::State& state)
@@ -131,5 +134,6 @@ namespace Rodin::Tests::Benchmarks
     H1 fes(std::integral_constant<size_t, 2>{}, mesh, 2);
     genericAssembly(state, fes);
   }
+  /// @brief The b e n c h m a r k.
   BENCHMARK(H1P2RankOneGeneric);
 }

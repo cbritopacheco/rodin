@@ -16,6 +16,7 @@ namespace Rodin::Adaptation::Detail
   {
     public:
       template <class PhiType, class GradType>
+      /// @brief Constructs the w n g i r normal offset.
       WNGIRNormalOffset(const PhiType& phi, const GradType& grad,
         const Geometry::Point& p, const WNGIRParameters& params, Real sigma2)
       {
@@ -40,13 +41,29 @@ namespace Rodin::Adaptation::Detail
         m_attenuation = std::exp(-m_offset * m_offset / sigma2);
       }
 
-      bool isDegenerate() const { return m_degenerate; }
+      /// @brief Whether degenerate.
+      bool isDegenerate() const
+      {
+        return m_degenerate;
+      }
 
-      const Math::SpatialVector<Real>& getNormal() const { return m_normal; }
+      /// @brief The normal.
+      const Math::SpatialVector<Real>& getNormal() const
+      {
+        return m_normal;
+      }
 
-      Real getOffset() const { return m_offset; }
+      /// @brief The offset.
+      Real getOffset() const
+      {
+        return m_offset;
+      }
 
-      Real getAttenuation() const { return m_attenuation; }
+      /// @brief The attenuation.
+      Real getAttenuation() const
+      {
+        return m_attenuation;
+      }
 
     private:
       bool m_degenerate = false;

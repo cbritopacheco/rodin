@@ -24,9 +24,12 @@ namespace Rodin::Adaptation::Detail
     : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename TestFunction::ScalarType;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
+      /// @brief Constructs the w n g i r margin force.
       WNGIRMarginForce(const TestFunction& v, const Displacement& current,
         const Displacement& predictor, const WNGIRParameters& parameters,
         Real constraintMultiplier = Real(1))
@@ -38,14 +41,17 @@ namespace Rodin::Adaptation::Detail
           m_constraintMultiplier(constraintMultiplier)
       {}
 
+      /// @brief Copy constructor.
       WNGIRMarginForce(const WNGIRMarginForce&) = default;
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds to a polytope and assembles the local system.
       WNGIRMarginForce& setPolytope(const Geometry::Polytope& polytope) final override
       {
         m_polytope = &polytope;
@@ -55,7 +61,8 @@ namespace Rodin::Adaptation::Detail
         const auto& fe = fes.getFiniteElement(dim, idx);
         const auto& params = m_parameters.get();
         const std::size_t qOrder = params.quadratureOrder > 0
-          ? params.quadratureOrder : std::max<std::size_t>(2, 2 * fe.getOrder());
+          ? params.quadratureOrder
+          : std::max<std::size_t>(2, 2 * fe.getOrder());
         const auto& qf =
           QF::PolytopeQuadratureFormula::get(qOrder, polytope.getGeometry());
         const auto& quad = polytope.getQuadrature(qf);
@@ -87,26 +94,29 @@ namespace Rodin::Adaptation::Detail
             const auto basisGradient = testJacobian.getBasis(local);
             const Real cJ = -deformation.getJacobianAction(basisGradient);
             const Real cQ = qWeight > Real(0)
-              ? deformation.getRelativeDistortionAction(basisGradient) : Real(0);
-            m_vector(static_cast<Eigen::Index>(local)) += w *
-              m_constraintMultiplier *
+              ? deformation.getRelativeDistortionAction(basisGradient)
+              : Real(0);
+            m_vector(static_cast<Eigen::Index>(local)) += w * m_constraintMultiplier *
               (params.gammaJ * jWeight * state.getJacobianTarget() * cJ +
-               params.gammaQ * qWeight * state.getDistortionTarget() * cQ);
+                params.gammaQ * qWeight * state.getDistortionTarget() * cQ);
           }
         }
         return *this;
       }
 
+      /// @brief Returns an entry of the assembled local system.
       ScalarType integrate(std::size_t local) final override
       {
         return m_vector(static_cast<Eigen::Index>(local));
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Clones this object.
       WNGIRMarginForce* copy() const noexcept final override
       {
         return new WNGIRMarginForce(*this);

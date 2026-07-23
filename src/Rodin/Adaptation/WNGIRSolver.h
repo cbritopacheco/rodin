@@ -77,32 +77,32 @@ namespace Rodin::Adaptation
       struct AdmissibilityState
       {
         /// @brief Smallest Jacobian over all cell quadrature points.
-        Real minJ = std::numeric_limits<Real>::infinity();
+          Real minJ = std::numeric_limits<Real>::infinity();
 
         /// @brief Largest relative distortion over the non-inverted points.
-        Real maxQ = 0;
+          Real maxQ = 0;
 
         /// @brief Number of quadrature points at or below the Jacobian floor.
-        std::size_t inadmissibleCount = 0;
+          std::size_t inadmissibleCount = 0;
       };
 
       /// @brief Interface-fit summary of a displacement.
       struct SurfaceState
       {
         /// @brief Welsch energy of the interface residual.
-        Real energy = 0;
+          Real energy = 0;
 
         /// @brief Measure carrying a non-negligible Welsch weight.
-        Real activeLen = 0;
+          Real activeLen = 0;
 
         /// @brief Measure of the whole interface.
-        Real totalLen = 0;
+          Real totalLen = 0;
 
         /// @brief Root-mean-square residual over the active part.
-        Real activeRMS = 0;
+          Real activeRMS = 0;
 
         /// @brief Supremum residual over the active part.
-        Real activeSup = 0;
+          Real activeSup = 0;
       };
 
       /**
@@ -116,10 +116,10 @@ namespace Rodin::Adaptation
       struct NormalJump
       {
         /// @brief Measure-weighted RMS angle between adjacent facet normals.
-        Real rms = 0;
+          Real rms = 0;
 
         /// @brief Largest angle between adjacent facet normals.
-        Real max = 0;
+          Real max = 0;
       };
 
       /// @brief Constructs the WNGIR solver from trial and test functions.
@@ -278,26 +278,23 @@ namespace Rodin::Adaptation
         // order is given to the integrator explicitly, per face.
         const Variational::Integrator::OrderType surfaceOrder =
           [&](const Geometry::Polytope& face) -> std::size_t {
-            if (p.quadratureOrder > 0)
-              return p.quadratureOrder;
-            const auto& fe =
-              fes.getFiniteElement(face.getDimension(), face.getIndex());
-            return std::max<std::size_t>(2, 2 * fe.getOrder());
-          };
+          if (p.quadratureOrder > 0)
+            return p.quadratureOrder;
+          const auto& fe = fes.getFiniteElement(face.getDimension(), face.getIndex());
+          return std::max<std::size_t>(2, 2 * fe.getOrder());
+        };
 
         if (p.initialGuessGamma > Real(0))
         {
           auto tic = Clock::now();
-          Detail::WNGIRNormalOffsetCoefficient initCoeff(
-            phi, grad, p, sigma2, meshDim);
-          auto initMetric = Variational::FaceIntegral(
-            Variational::Dot(initCoeff * m_duStep, m_vStep));
+          Detail::WNGIRNormalOffsetCoefficient initCoeff(phi, grad, p, sigma2, meshDim);
+          auto initMetric =
+            Variational::FaceIntegral(Variational::Dot(initCoeff * m_duStep, m_vStep));
           initMetric.setOrder(surfaceOrder);
           initMetric.over(p.interfaceAttribute);
           Detail::WNGIRNormalOffsetForceCoefficient initForceCoeff(
             phi, grad, p, sigma2, meshDim);
-          auto initForce =
-            Variational::FaceIntegral(initForceCoeff, m_vStep);
+          auto initForce = Variational::FaceIntegral(initForceCoeff, m_vStep);
           initForce.setOrder(surfaceOrder);
           initForce.over(p.interfaceAttribute);
           typename ProblemType::ProblemBodyType body(m_bulkForm);
@@ -401,8 +398,8 @@ namespace Rodin::Adaptation
           auto tic = Clock::now();
           Detail::WNGIRObservationCoefficient obsCoeff(
             phi, grad, u, locator, p, sigma2, meshDim);
-          auto obsMetric = Variational::FaceIntegral(
-            Variational::Dot(obsCoeff * m_duStep, m_vStep));
+          auto obsMetric =
+            Variational::FaceIntegral(Variational::Dot(obsCoeff * m_duStep, m_vStep));
           obsMetric.setOrder(surfaceOrder);
           obsMetric.over(p.interfaceAttribute);
           Detail::WNGIRSurfaceForceCoefficient forceCoeff(
@@ -415,10 +412,10 @@ namespace Rodin::Adaptation
           Math::Vector<Real> zero(meshDim);
           zero.setZero();
           bool solveOk = true;
-          const bool directional = p.constraintFormulation !=
-            WNGIRConstraintFormulation::SignBlindMetric;
-          const bool activeSetKKT = p.constraintFormulation ==
-            WNGIRConstraintFormulation::ActiveSetKKT;
+          const bool directional =
+            p.constraintFormulation != WNGIRConstraintFormulation::SignBlindMetric;
+          const bool activeSetKKT =
+            p.constraintFormulation == WNGIRConstraintFormulation::ActiveSetKKT;
           const bool primalBarrierQP =
             p.constraintFormulation == WNGIRConstraintFormulation::PrimalBarrierQP;
 
@@ -560,9 +557,8 @@ namespace Rodin::Adaptation
           {
             const bool safeguarded = p.constraintFormulation ==
               WNGIRConstraintFormulation::SafeguardedMarginMetric;
-            const std::size_t corrections = safeguarded
-              ? std::max<std::size_t>(1, p.marginCorrectionIterations)
-              : 1;
+            const std::size_t corrections =
+              safeguarded ? std::max<std::size_t>(1, p.marginCorrectionIterations) : 1;
             for (std::size_t correction = 0; correction < corrections; ++correction)
             {
               const Real multiplier = safeguarded
@@ -574,7 +570,8 @@ namespace Rodin::Adaptation
               typename ProblemType::ProblemBodyType body(m_bulkForm);
               body = body + obsMetric - surfaceForce + admMetric;
               if (p.constraintFormulation ==
-                  WNGIRConstraintFormulation::FractionalMarginMetric || safeguarded)
+                  WNGIRConstraintFormulation::FractionalMarginMetric ||
+                safeguarded)
               {
                 Detail::WNGIRMarginForce marginForce(m_vStep, u, vK, p, multiplier);
                 body = body - marginForce;
@@ -594,8 +591,8 @@ namespace Rodin::Adaptation
               linearIterations += correctionIterations;
               linearError = correctionError;
               rep.tSolve += secondsSince(tic);
-              if (!solveOk || (safeguarded &&
-                getMarginScale(mesh, fes, u, vK, meshDim) >= Real(0.999)))
+              if (!solveOk ||
+                (safeguarded && getMarginScale(mesh, fes, u, vK, meshDim) >= Real(0.999)))
                 break;
               tic = Clock::now();
             }
@@ -634,8 +631,7 @@ namespace Rodin::Adaptation
             for (const Index facetIdx : interfaceFacets)
             {
               const auto face = mesh.getFace(facetIdx);
-              const auto& qf =
-                getQuadrature(*face, fes);
+              const auto& qf = getQuadrature(*face, fes);
               const auto& quad = face->getQuadrature(qf);
               for (std::size_t q = 0; q < quad.getSize(); ++q)
               {
@@ -680,10 +676,6 @@ namespace Rodin::Adaptation
               vK *= beta;
             }
           }
-
-
-
-
 
           const Real maxStep = std::max(std::abs(vK.max()), std::abs(vK.min()));
           if (maxStep <= stepTol)
@@ -844,8 +836,8 @@ namespace Rodin::Adaptation
           diagForce.over(p.interfaceAttribute);
           forceForm = diagForce;
           forceForm.assemble();
-          rep.conflictIndicator = getConflictIndicator(
-            mesh, fes, u, forceForm.getVector(), meshDim);
+          rep.conflictIndicator =
+            getConflictIndicator(mesh, fes, u, forceForm.getVector(), meshDim);
         }
 
         m_report = rep;
@@ -853,7 +845,6 @@ namespace Rodin::Adaptation
       }
 
     private:
-
       /**
        * @brief Per-cell fit--admissibility conflict indicator.
        *
@@ -904,10 +895,10 @@ namespace Rodin::Adaptation
 
             const Real sJ = jK - m_parameters.jSafe;
             const Real sQ = m_parameters.qMax - qK;
-            const bool jActive = m_parameters.gammaJ > Real(0) &&
-              sJ > Real(0) && sJ < m_parameters.s0J;
-            const bool qActive = m_parameters.gammaQ > Real(0) &&
-              sQ > Real(0) && sQ < m_parameters.s0Q;
+            const bool jActive =
+              m_parameters.gammaJ > Real(0) && sJ > Real(0) && sJ < m_parameters.s0J;
+            const bool qActive =
+              m_parameters.gammaQ > Real(0) && sQ > Real(0) && sQ < m_parameters.s0Q;
             if (!jActive && !qActive)
               continue;
 
@@ -918,8 +909,8 @@ namespace Rodin::Adaptation
               const auto jp = basisJacobian.getBasis(l);
               const Real aJ = deformation.getJacobianAction(jp);
               const Real aQ = deformation.getRelativeDistortionAction(jp);
-              const Real fl = force(static_cast<Eigen::Index>(
-                fes.getGlobalIndex({dimension, cellIdx}, l)));
+              const Real fl = force(
+                static_cast<Eigen::Index>(fes.getGlobalIndex({dimension, cellIdx}, l)));
                 // c_j = -a_j, c_Q = +a_Q.
               gjf += (-aJ) * fl;
               gjg += aJ * aJ;
@@ -1052,12 +1043,10 @@ namespace Rodin::Adaptation
        * first-order models of the true deformed geometry.
        */
       template <class Mesh, class FES>
-      Real getMarginScale(const Mesh& mesh, const FES& fes,
-        const Displacement& current, const Displacement& direction,
-        std::size_t dimension) const
+      Real getMarginScale(const Mesh& mesh, const FES& fes, const Displacement& current,
+        const Displacement& direction, std::size_t dimension) const
       {
-        const Real fraction =
-          std::clamp(m_parameters.marginFraction, Real(0), Real(1));
+        const Real fraction = std::clamp(m_parameters.marginFraction, Real(0), Real(1));
         const Real jacobianFloor =
           std::max(m_parameters.jSafe, m_parameters.jLineSearchRatio);
         Real scale = Real(1);
@@ -1077,8 +1066,7 @@ namespace Rodin::Adaptation
               return Real(0);
 
             const auto gradient = directionJacobian.getValue(ip);
-            const Real jacobianConsumption =
-              -deformation.getJacobianAction(gradient);
+            const Real jacobianConsumption = -deformation.getJacobianAction(gradient);
             if (jacobianConsumption > Real(0))
             {
               const Real margin = deformation.getJacobian() - jacobianFloor;
@@ -1091,8 +1079,7 @@ namespace Rodin::Adaptation
               deformation.getRelativeDistortionAction(gradient);
             if (distortionConsumption > Real(0))
             {
-              const Real margin =
-                m_parameters.qMax - deformation.getRelativeDistortion();
+              const Real margin = m_parameters.qMax - deformation.getRelativeDistortion();
               if (margin <= Real(0))
                 return Real(0);
               scale = std::min(scale, fraction * margin / distortionConsumption);
@@ -1154,8 +1141,8 @@ namespace Rodin::Adaptation
       template <class Mesh, class FES, class PhiType, class LocatorType>
       SurfaceState getSurfaceState(const Mesh& mesh, const FES& fes,
         const Displacement& u, const PhiType& phi,
-        const std::vector<Index>& interfaceFacets, Real sigma2,
-        std::size_t dimension, const LocatorType& locator) const
+        const std::vector<Index>& interfaceFacets, Real sigma2, std::size_t dimension,
+        const LocatorType& locator) const
       {
         SurfaceState state;
         Real squared = 0;
@@ -1182,9 +1169,8 @@ namespace Rodin::Adaptation
             }
           }
         }
-        state.activeRMS = state.activeLen > Real(0)
-          ? std::sqrt(squared / state.activeLen)
-          : Real(0);
+        state.activeRMS =
+          state.activeLen > Real(0) ? std::sqrt(squared / state.activeLen) : Real(0);
         return state;
       }
 
@@ -1215,16 +1201,15 @@ namespace Rodin::Adaptation
           const auto& qf = getQuadrature(*face, fes);
           const auto& quad = face->getQuadrature(qf);
 
-          Math::SpatialVector<Real> n =
-            Math::SpatialVector<Real>::Zero(dimension);
+          Math::SpatialVector<Real> n = Math::SpatialVector<Real>::Zero(dimension);
           Real measure = 0;
           for (std::size_t q = 0; q < quad.getSize(); ++q)
           {
             const auto& pt = quad.getPoint(q);
             const Real w = qf.getWeight(q) * pt.getDistortion();
             const auto& J = pt.getJacobian();
-              // The facet normal: in 2D the tangent rotated a quarter turn, in
-              // 3D the cross product of the two tangents.
+            // The facet normal: in 2D the tangent rotated a quarter turn, in
+            // 3D the cross product of the two tangents.
             Math::SpatialVector<Real> nq;
             if (dimension == 2)
             {
@@ -1234,10 +1219,8 @@ namespace Rodin::Adaptation
             }
             else
             {
-              Math::SpatialVector<Real> a =
-                Math::SpatialVector<Real>::Zero(dimension);
-              Math::SpatialVector<Real> b =
-                Math::SpatialVector<Real>::Zero(dimension);
+              Math::SpatialVector<Real> a = Math::SpatialVector<Real>::Zero(dimension);
+              Math::SpatialVector<Real> b = Math::SpatialVector<Real>::Zero(dimension);
               for (std::size_t r = 0; r < dimension; ++r)
               {
                 a(static_cast<Eigen::Index>(r)) = J(r, 0);
@@ -1272,7 +1255,7 @@ namespace Rodin::Adaptation
           return (lo << 32) ^ hi;
         };
 
-          // Facets sharing an incidence, keyed by the shared entity.
+        // Facets sharing an incidence, keyed by the shared entity.
         std::unordered_map<std::uint64_t, std::vector<std::size_t>> incident;
         if (dimension == 2)
         {
@@ -1305,8 +1288,7 @@ namespace Rodin::Adaptation
             {
               const auto ia = faces[a], ib = faces[b];
               const Real dot = std::abs(normals[ia].dot(normals[ib]));
-              const Real theta = std::acos(
-                std::max(Real(-1), std::min(Real(1), dot)));
+              const Real theta = std::acos(std::max(Real(-1), std::min(Real(1), dot)));
               const Real w = Real(0.5) * (measures[ia] + measures[ib]);
               squared += w * theta * theta;
               weight += w;
@@ -1350,10 +1332,9 @@ namespace Rodin::Adaptation
         Real sigma = Real(3) * h;
         if (!residuals.empty())
         {
-          const std::size_t k90 = static_cast<std::size_t>(
-            Real(0.9) * static_cast<Real>(residuals.size() - 1));
-          std::nth_element(
-            residuals.begin(), residuals.begin() + k90, residuals.end());
+          const std::size_t k90 =
+            static_cast<std::size_t>(Real(0.9) * static_cast<Real>(residuals.size() - 1));
+          std::nth_element(residuals.begin(), residuals.begin() + k90, residuals.end());
           sigma = std::max(sigma, residuals[k90]);
         }
         return sigma;

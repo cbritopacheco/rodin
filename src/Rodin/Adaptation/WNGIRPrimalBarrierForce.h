@@ -17,24 +17,34 @@ namespace Rodin::Adaptation::Detail
     : public Variational::LinearFormIntegratorBase<typename TestFunction::ScalarType>
   {
     public:
+      /// @brief Scalar value type.
       using ScalarType = typename TestFunction::ScalarType;
+      /// @brief Parent class type.
       using Parent = Variational::LinearFormIntegratorBase<ScalarType>;
 
-      WNGIRPrimalBarrierForce(const TestFunction& z,
-        const Displacement& current, const Displacement& inner,
-        const WNGIRParameters& parameters, Real barrierCoefficient)
-        : Parent(z.getLeaf()), m_z(z), m_current(current), m_inner(inner),
-          m_parameters(parameters), m_barrierCoefficient(barrierCoefficient)
+      /// @brief Constructs the w n g i r primal barrier force.
+      WNGIRPrimalBarrierForce(const TestFunction& z, const Displacement& current,
+        const Displacement& inner, const WNGIRParameters& parameters,
+        Real barrierCoefficient)
+        : Parent(z.getLeaf()),
+          m_z(z),
+          m_current(current),
+          m_inner(inner),
+          m_parameters(parameters),
+          m_barrierCoefficient(barrierCoefficient)
       {}
 
+      /// @brief Copy constructor.
       WNGIRPrimalBarrierForce(const WNGIRPrimalBarrierForce&) = default;
 
+      /// @brief Returns the current polytope.
       const Geometry::Polytope& getPolytope() const final override
       {
         assert(m_polytope);
         return *m_polytope;
       }
 
+      /// @brief Binds to a polytope and assembles the local system.
       WNGIRPrimalBarrierForce& setPolytope(
         const Geometry::Polytope& polytope) final override
       {
@@ -67,8 +77,7 @@ namespace Rodin::Adaptation::Detail
           if (!deformation.isAdmissible())
             continue;
           const WNGIRPrimalBarrierState state(
-            deformation, innerJacobian.getValue(ip), parameters,
-            m_barrierCoefficient);
+            deformation, innerJacobian.getValue(ip), parameters, m_barrierCoefficient);
           assert(state.isFeasible());
           if (!state.isFeasible())
             continue;
@@ -89,16 +98,19 @@ namespace Rodin::Adaptation::Detail
         return *this;
       }
 
+      /// @brief Returns an entry of the assembled local system.
       ScalarType integrate(std::size_t local) final override
       {
         return m_vector(static_cast<Eigen::Index>(local));
       }
 
+      /// @brief Returns the integration region.
       Geometry::Region getRegion() const final override
       {
         return Geometry::Region::Cells;
       }
 
+      /// @brief Clones this object.
       WNGIRPrimalBarrierForce* copy() const noexcept final override
       {
         return new WNGIRPrimalBarrierForce(*this);

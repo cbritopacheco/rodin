@@ -11,13 +11,12 @@ using namespace Rodin::Adaptation;
 
 namespace Rodin::Tests::Unit
 {
+  /// @brief Test case.
   TEST(Rodin_Adaptation_WNGIRPrimalBarrierState, ComputesNewtonCoefficients)
   {
     CellDeformation deformation(2);
-    deformation.setDeformationGradient(
-      Math::SpatialMatrix<Real>::Identity(2, 2));
-    Math::SpatialMatrix<Real> inner =
-      Math::SpatialMatrix<Real>::Identity(2, 2);
+    deformation.setDeformationGradient(Math::SpatialMatrix<Real>::Identity(2, 2));
+    Math::SpatialMatrix<Real> inner = Math::SpatialMatrix<Real>::Identity(2, 2);
     inner *= Real(-0.1);
     WNGIRParameters parameters;
     parameters.jSafe = Real(0.1);
@@ -26,8 +25,7 @@ namespace Rodin::Tests::Unit
     parameters.gammaQ = 0;
     parameters.primalBarrierMu = Real(0.01);
 
-    Detail::WNGIRPrimalBarrierState state(
-      deformation, inner, parameters, Real(0.01));
+    Detail::WNGIRPrimalBarrierState state(deformation, inner, parameters, Real(0.01));
     ASSERT_TRUE(state.isFeasible());
     EXPECT_NEAR(state.getJacobianAction(), Real(0.2), 1e-14);
     EXPECT_NEAR(state.getJacobianSlack(), Real(0.7), 1e-14);
@@ -35,18 +33,16 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(state.getJacobianForce(), Real(-0.02 / 0.98), 1e-14);
   }
 
+  /// @brief Test case.
   TEST(Rodin_Adaptation_WNGIRPrimalBarrierState, RejectsNonpositiveTrialSlack)
   {
     CellDeformation deformation(2);
-    deformation.setDeformationGradient(
-      Math::SpatialMatrix<Real>::Identity(2, 2));
-    Math::SpatialMatrix<Real> inner =
-      -Math::SpatialMatrix<Real>::Identity(2, 2);
+    deformation.setDeformationGradient(Math::SpatialMatrix<Real>::Identity(2, 2));
+    Math::SpatialMatrix<Real> inner = -Math::SpatialMatrix<Real>::Identity(2, 2);
     WNGIRParameters parameters;
     parameters.jSafe = Real(0.1);
 
-    Detail::WNGIRPrimalBarrierState state(
-      deformation, inner, parameters, Real(0.01));
+    Detail::WNGIRPrimalBarrierState state(deformation, inner, parameters, Real(0.01));
     EXPECT_FALSE(state.isFeasible());
   }
 }

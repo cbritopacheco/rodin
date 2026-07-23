@@ -25,17 +25,21 @@ namespace Rodin::Adaptation::Detail
   {
       struct Constraint
       {
-        std::vector<std::pair<Index, Real>> entries;
-        Real bound;
+          std::vector<std::pair<Index, Real>> entries;
+          Real bound;
       };
 
     public:
-      WNGIRActiveSetKKT(const TrialFunction& trial,
-        const Displacement& current, const WNGIRParameters& parameters)
-        : m_trial(trial), m_current(current), m_parameters(parameters)
+      /// @brief Constructs the w n g i r active set k k t.
+      WNGIRActiveSetKKT(const TrialFunction& trial, const Displacement& current,
+        const WNGIRParameters& parameters)
+        : m_trial(trial),
+          m_current(current),
+          m_parameters(parameters)
       {}
 
       template <class Mesh>
+      /// @brief Solves the local constrained system.
       bool solve(const Mesh& mesh, const Math::SparseMatrix<Real>& metric,
         const Math::Vector<Real>& force, Math::Vector<Real>& direction,
         std::size_t& activeCount) const
@@ -64,8 +68,8 @@ namespace Rodin::Adaptation::Detail
           {
             if (std::find(active.begin(), active.end(), row) != active.end())
               continue;
-            const Real violation = dot(constraints[row], direction) -
-              constraints[row].bound;
+            const Real violation =
+              dot(constraints[row], direction) - constraints[row].bound;
             if (violation > maxViolation)
             {
               maxViolation = violation;
@@ -108,8 +112,9 @@ namespace Rodin::Adaptation::Detail
           Math::Vector<Real> rhs(count);
           for (Eigen::Index i = 0; i < count; ++i)
           {
-            rhs(i) = dot(constraints[active[static_cast<std::size_t>(i)]],
-              unconstrained) - constraints[active[static_cast<std::size_t>(i)]].bound;
+            rhs(i) =
+              dot(constraints[active[static_cast<std::size_t>(i)]], unconstrained) -
+              constraints[active[static_cast<std::size_t>(i)]].bound;
             for (Eigen::Index j = 0; j < count; ++j)
               schur(i, j) = dot(constraints[active[static_cast<std::size_t>(i)]],
                 responses[static_cast<std::size_t>(j)]);
@@ -149,9 +154,9 @@ namespace Rodin::Adaptation::Detail
           const Index index = cell->getIndex();
           const auto& fe = fes.getFiniteElement(dim, index);
           const std::size_t order = params.quadratureOrder > 0
-            ? params.quadratureOrder : std::max<std::size_t>(2, 2 * fe.getOrder());
-          const auto& qf =
-            QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
+            ? params.quadratureOrder
+            : std::max<std::size_t>(2, 2 * fe.getOrder());
+          const auto& qf = QF::PolytopeQuadratureFormula::get(order, cell->getGeometry());
           const auto& quad = cell->getQuadrature(qf);
           for (std::size_t qp = 0; qp < quad.getSize(); ++qp)
           {
@@ -169,10 +174,10 @@ namespace Rodin::Adaptation::Detail
             {
               const Index global = fes.getGlobalIndex({dim, index}, local);
               const auto gradient = basisJacobian.getBasis(local);
-              jacobian.entries.emplace_back(global,
-                -deformation.getJacobianAction(gradient));
-              quality.entries.emplace_back(global,
-                deformation.getRelativeDistortionAction(gradient));
+              jacobian.entries.emplace_back(
+                global, -deformation.getJacobianAction(gradient));
+              quality.entries.emplace_back(
+                global, deformation.getRelativeDistortionAction(gradient));
             }
             constraints.push_back(std::move(jacobian));
             constraints.push_back(std::move(quality));

@@ -142,8 +142,7 @@ namespace Rodin::Examples
       return Adaptation::WNGIRConstraintFormulation::PrimalBarrierQP;
     if (value == "active-set-kkt")
       return Adaptation::WNGIRConstraintFormulation::ActiveSetKKT;
-    throw std::invalid_argument(
-      "Unknown --wngir-constraint-formulation value: " + value);
+    throw std::invalid_argument("Unknown --wngir-constraint-formulation value: " + value);
   }
 
   inline Adaptation::WNGIRParameters makeWNGIRParameters(int argc, char** argv, Real h,
@@ -187,13 +186,11 @@ namespace Rodin::Examples
     p.jStar = realOption(argc, argv, "wngir-jstar", Real(0.3));
     p.metricActivation = parseMetricActivation(argc, argv);
     p.constraintFormulation = parseConstraintFormulation(argc, argv);
-    p.marginFraction =
-      realOption(argc, argv, "wngir-margin-fraction", p.marginFraction);
+    p.marginFraction = realOption(argc, argv, "wngir-margin-fraction", p.marginFraction);
     p.marginCorrectionIterations = std::max<std::size_t>(1,
-      sizeOption(argc, argv, "wngir-margin-corrections",
-        p.marginCorrectionIterations));
-    p.marginPenaltyGrowth = realOption(
-      argc, argv, "wngir-margin-penalty-growth", p.marginPenaltyGrowth);
+      sizeOption(argc, argv, "wngir-margin-corrections", p.marginCorrectionIterations));
+    p.marginPenaltyGrowth =
+      realOption(argc, argv, "wngir-margin-penalty-growth", p.marginPenaltyGrowth);
     p.primalBarrierIterations = std::max<std::size_t>(1,
       sizeOption(
         argc, argv, "wngir-primal-barrier-iterations", p.primalBarrierIterations));

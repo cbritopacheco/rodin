@@ -14,16 +14,17 @@ namespace Rodin::Tests::Unit
     Math::SpatialMatrix<Real> matrix2(Real a, Real b, Real c, Real d)
     {
       Math::SpatialMatrix<Real> m = Math::SpatialMatrix<Real>::Identity(2, 2);
-      m(0, 0) = a; m(0, 1) = b;
-      m(1, 0) = c; m(1, 1) = d;
+      m(0, 0) = a;
+      m(0, 1) = b;
+      m(1, 0) = c;
+      m(1, 1) = d;
       return m;
     }
 
     /// @brief Rotation by @p theta.
     Math::SpatialMatrix<Real> rotation2(Real theta)
     {
-      return matrix2(
-        std::cos(theta), -std::sin(theta), std::sin(theta), std::cos(theta));
+      return matrix2(std::cos(theta), -std::sin(theta), std::sin(theta), std::cos(theta));
     }
   }
 
@@ -42,8 +43,10 @@ namespace Rodin::Tests::Unit
   {
     CellDeformation def(2);
     Math::SpatialMatrix<Real> h = Math::SpatialMatrix<Real>::Identity(2, 2);
-    h(0, 0) = 1; h(0, 1) = 0;
-    h(1, 0) = 0; h(1, 1) = 1;
+    h(0, 0) = 1;
+    h(0, 1) = 0;
+    h(1, 0) = 0;
+    h(1, 1) = 1;
       // H = I gives F = 2I, so j = 4.
     def.setDisplacementGradient(h);
     EXPECT_NEAR(def.getJacobian(), 4.0, 1e-14);
@@ -103,9 +106,9 @@ namespace Rodin::Tests::Unit
     plain.setDeformationGradient(F);
     const Real reference = plain.getRelativeDistortion();
 
-    for (const Real s : { 0.25, 1.0, 7.0 })
+    for (const Real s : {0.25, 1.0, 7.0})
     {
-      for (const Real theta : { 0.0, 0.7, 2.9 })
+      for (const Real theta : {0.0, 0.7, 2.9})
       {
         CellDeformation transformed(2);
         transformed.setDeformationGradient(
@@ -135,8 +138,7 @@ namespace Rodin::Tests::Unit
     CellDeformation plus(2), minus(2);
     plus.setDeformationGradient(Math::SpatialMatrix<Real>(F + eps * G));
     minus.setDeformationGradient(Math::SpatialMatrix<Real>(F - eps * G));
-    const Real numeric =
-      (plus.getJacobian() - minus.getJacobian()) / (2 * eps);
+    const Real numeric = (plus.getJacobian() - minus.getJacobian()) / (2 * eps);
 
     EXPECT_NEAR(analytic, numeric, 1e-6);
   }
@@ -155,8 +157,8 @@ namespace Rodin::Tests::Unit
     CellDeformation plus(2), minus(2);
     plus.setDeformationGradient(Math::SpatialMatrix<Real>(F + eps * G));
     minus.setDeformationGradient(Math::SpatialMatrix<Real>(F - eps * G));
-    const Real numeric = (plus.getRelativeDistortion() -
-      minus.getRelativeDistortion()) / (2 * eps);
+    const Real numeric =
+      (plus.getRelativeDistortion() - minus.getRelativeDistortion()) / (2 * eps);
 
     EXPECT_NEAR(analytic, numeric, 1e-6);
   }
@@ -184,8 +186,7 @@ namespace Rodin::Tests::Unit
     EXPECT_NEAR(def.getJacobian(), 5.0, 1e-14);
     EXPECT_GT(def.getRelativeDistortion(), q0);
     EXPECT_NEAR(def.getInverseTranspose()(0, 0), 0.2, 1e-14);
-    EXPECT_GT(std::abs(def.getRelativeDistortionGradient()(0, 0) - dQdF0(0, 0)),
-      1e-9);
+    EXPECT_GT(std::abs(def.getRelativeDistortionGradient()(0, 0) - dQdF0(0, 0)), 1e-9);
     EXPECT_NEAR(finvT0(0, 0), 0.5, 1e-14);
   }
 
@@ -194,7 +195,9 @@ namespace Rodin::Tests::Unit
   {
     CellDeformation def(3);
     Math::SpatialMatrix<Real> F = Math::SpatialMatrix<Real>::Identity(3, 3);
-    F(0, 0) = 2; F(1, 1) = 3; F(2, 2) = 4;
+    F(0, 0) = 2;
+    F(1, 1) = 3;
+    F(2, 2) = 4;
     def.setDeformationGradient(F);
 
     EXPECT_NEAR(def.getJacobian(), 24.0, 1e-13);
