@@ -314,6 +314,10 @@ namespace Rodin::Tests::Unit::KSPFactorizationReuse
   }
 }
 
+/**
+ * @brief Test entry point: initializes PETSc with event logging enabled and
+ *        runs the factorization-reuse suite.
+ */
 int main(int argc, char** argv)
 {
   PetscInitialize(&argc, &argv, nullptr, nullptr);
