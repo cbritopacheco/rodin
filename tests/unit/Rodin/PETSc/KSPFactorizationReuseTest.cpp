@@ -50,23 +50,25 @@ namespace Rodin::Tests::Unit::KSPFactorizationReuse
     /// @brief Number of symbolic and numeric LU factorizations logged so far.
     struct FactorCounts
     {
-      int symbolic = 0;
-      int numeric = 0;
+        int symbolic = 0;
+        int numeric = 0;
     };
 
     /// @brief Reads the cumulative LU factorization event counts from PETSc.
     FactorCounts factorCounts()
     {
-      const auto count = [](const char* name) -> int
-      {
+      const auto count = [](const char* name) -> int {
         PetscLogEvent event = -1;
         PetscErrorCode ierr = PetscLogEventGetId(name, &event);
         assert(ierr == PETSC_SUCCESS);
         if (event < 0)
           return 0;
 
+        // Stage 0 (the main stage) explicitly: PETSC_DETERMINE as a stage
+        // argument is not portable to PETSc 3.19, and these tests never push a
+        // log stage, so every event is recorded in the main stage.
         PetscEventPerfInfo info;
-        ierr = PetscLogEventGetPerfInfo(PETSC_DETERMINE, event, &info);
+        ierr = PetscLogEventGetPerfInfo(0, event, &info);
         assert(ierr == PETSC_SUCCESS);
         (void)ierr;
         return info.count;
@@ -215,8 +217,7 @@ namespace Rodin::Tests::Unit::KSPFactorizationReuse
     mass.solve(ksp);
 
     const auto second = factorCounts();
-    EXPECT_EQ(second.symbolic, first.symbolic)
-      << "symbolic factorization was not reused";
+    EXPECT_EQ(second.symbolic, first.symbolic) << "symbolic factorization was not reused";
     EXPECT_EQ(second.numeric, first.numeric + 1)
       << "numeric factorization was skipped or repeated";
     EXPECT_NEAR(maxDeviation(u.getSolution(), c / 4.0), 0.0, tolerance)
