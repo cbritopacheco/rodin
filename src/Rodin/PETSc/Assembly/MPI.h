@@ -755,10 +755,13 @@ namespace Rodin::Assembly
           // The emptiness test is itself collective, hence the reduction.
           PetscInt localIdentRows = static_cast<PetscInt>(rowsToZero.size());
           PetscInt globalIdentRows = 0;
-          ierr = MPIU_Allreduce(&localIdentRows, &globalIdentRows, 1, MPIU_INT,
-            MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
+          // Raw MPI_Allreduce, not MPIU_Allreduce: on PETSc 3.19 the latter is a
+          // statement macro that injects a return, so it cannot be assigned to
+          // ierr in this void function (it builds on 3.22, fails CI on 3.19).
+          const int identReduceErr = MPI_Allreduce(&localIdentRows, &globalIdentRows, 1,
+            MPIU_INT, MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
+          assert(identReduceErr == MPI_SUCCESS);
+          (void)identReduceErr;
 
           if (globalIdentRows > 0)
           {
@@ -828,10 +831,11 @@ namespace Rodin::Assembly
         // factorization reuse.
         PetscInt localBcRows = static_cast<PetscInt>(bcIdx.size());
         PetscInt globalBcRows = 0;
-        ierr = MPIU_Allreduce(&localBcRows, &globalBcRows, 1, MPIU_INT, MPI_SUM,
-          PetscObjectComm(reinterpret_cast<PetscObject>(A)));
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
+        // Raw MPI_Allreduce, not MPIU_Allreduce: see the identified-row reduction.
+        const int bcReduceErr = MPI_Allreduce(&localBcRows, &globalBcRows, 1, MPIU_INT,
+          MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
+        assert(bcReduceErr == MPI_SUCCESS);
+        (void)bcReduceErr;
 
         {
           if (mode == AssemblyMode::Full)
@@ -1510,10 +1514,13 @@ namespace Rodin::Assembly
           // The emptiness test is itself collective, hence the reduction.
           PetscInt localIdentRows = static_cast<PetscInt>(rowsToZero.size());
           PetscInt globalIdentRows = 0;
-          ierr = MPIU_Allreduce(&localIdentRows, &globalIdentRows, 1, MPIU_INT,
-            MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
-          assert(ierr == PETSC_SUCCESS);
-          (void)ierr;
+          // Raw MPI_Allreduce, not MPIU_Allreduce: on PETSc 3.19 the latter is a
+          // statement macro that injects a return, so it cannot be assigned to
+          // ierr in this void function (it builds on 3.22, fails CI on 3.19).
+          const int identReduceErr = MPI_Allreduce(&localIdentRows, &globalIdentRows, 1,
+            MPIU_INT, MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
+          assert(identReduceErr == MPI_SUCCESS);
+          (void)identReduceErr;
 
           if (globalIdentRows > 0)
           {
@@ -1583,10 +1590,11 @@ namespace Rodin::Assembly
         // factorization reuse.
         PetscInt localBcRows = static_cast<PetscInt>(bcIdx.size());
         PetscInt globalBcRows = 0;
-        ierr = MPIU_Allreduce(&localBcRows, &globalBcRows, 1, MPIU_INT, MPI_SUM,
-          PetscObjectComm(reinterpret_cast<PetscObject>(A)));
-        assert(ierr == PETSC_SUCCESS);
-        (void)ierr;
+        // Raw MPI_Allreduce, not MPIU_Allreduce: see the identified-row reduction.
+        const int bcReduceErr = MPI_Allreduce(&localBcRows, &globalBcRows, 1, MPIU_INT,
+          MPI_SUM, PetscObjectComm(reinterpret_cast<PetscObject>(A)));
+        assert(bcReduceErr == MPI_SUCCESS);
+        (void)bcReduceErr;
 
         if (mode == AssemblyMode::Full)
         {
