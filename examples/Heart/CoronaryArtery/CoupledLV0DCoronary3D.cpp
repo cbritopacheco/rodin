@@ -508,7 +508,16 @@ void CoupledLV0DCoronary3D::updateRCRNonNew(const Config &cfg,
 
   for (int it = 0; it < law.flowMaxIterations; ++it) {
     const auto [qd, dqd] = flowLaw(pc - pven, lengthD, radiusD);
-    const auto [qv, dqv] = flowLaw(pven - Pra, lengthD, Rv);
+
+    // Venous drainage to the right atrium is a LINEAR resistor q_v =
+    // (p_ven - P_RA)/R_v, exactly as written in the balance above. R_v (bc.Rv)
+    // is a resistance [Pa s/m^3], NOT a tube radius, so it must not be fed to
+    // the Carreau-Yasuda tube law outletFlow() (which reads its 3rd argument as
+    // a radius via R0 = 8 mu L / (pi r^4)). Doing so made R0 ~ 0, pinned p_ven
+    // to P_RA, and left the whole venous compartment (C_v, R_v, p_ven, the
+    // venous pump) inert. The linear law restores it.
+    const Real qv = (pven - Pra) / Rv;
+    const Real dqv = 1.0 / Rv;
 
     const Real R1 = cap * (pc - pcOld) - Qim + qd - Q;
     const Real R2 = capv * (pven - pvenOld) - Qimv - qd + qv;
@@ -698,7 +707,12 @@ void CoupledLV0DCoronary3D::setupMeshAndSpaces() {
   // ---- Automatic Murray-law outlet calibration --------------------------
   if (m_cfg.autoCalibrateOutlets) {
     const Real PI = std::numbers::pi_v<Real>;
-    const Real pim = 0.45 * m_model.getState().pv; // alpha * pv (distal level)
+    // Resting intramyocardial level used only to set the calibration driving
+    // pressure. Use the SAME alpha the model uses at run time
+    // (intramyocardialFraction) so the calibrated geometry is consistent with
+    // the stepping formulation.
+    const Real pim =
+        m_cfg.intramyocardialFraction * m_model.getState().pv;
     const Real par0 = m_model.getState().par;
     const Real dP = std::max<Real>(par0 - pim, 1.0);
 
@@ -1634,33 +1648,33 @@ void CoupledLV0DCoronary3D::writeCSVHeader() {
         << "DistalPressure,"
         << "LeftVentricleFlow,"
         << "CoronaryInletFlux,"
-        << "CoronaryOutlet4Flux,"
-        << "CoronaryOutlet5Flux,"
-        << "CoronaryOutlet6Flux,"
         << "CoronaryOutlet7Flux,"
         << "CoronaryOutlet8Flux,"
         << "CoronaryOutlet9Flux,"
+        << "CoronaryOutlet10Flux,"
+        << "CoronaryOutlet14Flux,"
+        << "CoronaryOutlet15Flux,"
         << "CoronaryOutletFluxTotal,"
-        << "CoronaryOutlet4DistalFlux,"
-        << "CoronaryOutlet5DistalFlux,"
-        << "CoronaryOutlet6DistalFlux,"
         << "CoronaryOutlet7DistalFlux,"
         << "CoronaryOutlet8DistalFlux,"
         << "CoronaryOutlet9DistalFlux,"
+        << "CoronaryOutlet10DistalFlux,"
+        << "CoronaryOutlet14DistalFlux,"
+        << "CoronaryOutlet15DistalFlux,"
         << "CoronaryDistalFluxTotal,"
         << "CoronaryCapChargingFluxTotal,"
-        << "CoronaryOutlet4CapPressure,"
-        << "CoronaryOutlet5CapPressure,"
-        << "CoronaryOutlet6CapPressure,"
         << "CoronaryOutlet7CapPressure,"
         << "CoronaryOutlet8CapPressure,"
         << "CoronaryOutlet9CapPressure,"
-        << "CoronaryOutlet4Pressure,"
-        << "CoronaryOutlet5Pressure,"
-        << "CoronaryOutlet6Pressure,"
+        << "CoronaryOutlet10CapPressure,"
+        << "CoronaryOutlet14CapPressure,"
+        << "CoronaryOutlet15CapPressure,"
         << "CoronaryOutlet7Pressure,"
         << "CoronaryOutlet8Pressure,"
         << "CoronaryOutlet9Pressure,"
+        << "CoronaryOutlet10Pressure,"
+        << "CoronaryOutlet14Pressure,"
+        << "CoronaryOutlet15Pressure,"
         << "FlowBalance,"
         << "ec,"
         << "gamma,"
@@ -1694,17 +1708,17 @@ void CoupledLV0DCoronary3D::writeCSVRow() {
   m_csv << d.t << ',' << d.pat << ',' << d.psv << ',' << d.y << ',' << d.v
         << ',' << d.radius << ',' << d.lvVolume << ',' << d.pv << ',' << d.par
         << ',' << d.pd << ',' << d.lvFlow << ',' << d.qIn << ','
-        << get(d.qOut, 4) << ',' << get(d.qOut, 5) << ',' << get(d.qOut, 6)
-        << ',' << get(d.qOut, 7) << ',' << get(d.qOut, 8) << ','
-        << get(d.qOut, 9) << ',' << d.qOutSum << ',' << get(d.qDistal, 4) << ','
-        << get(d.qDistal, 5) << ',' << get(d.qDistal, 6) << ','
-        << get(d.qDistal, 7) << ',' << get(d.qDistal, 8) << ','
-        << get(d.qDistal, 9) << ',' << d.qDistalSum << ',' << d.qCapChargingSum
-        << ',' << get(d.pc, 4) << ',' << get(d.pc, 5) << ',' << get(d.pc, 6)
+        << get(d.qOut, 7) << ',' << get(d.qOut, 8) << ',' << get(d.qOut, 9)
+        << ',' << get(d.qOut, 10) << ',' << get(d.qOut, 14) << ','
+        << get(d.qOut, 15) << ',' << d.qOutSum << ',' << get(d.qDistal, 7) << ','
+        << get(d.qDistal, 8) << ',' << get(d.qDistal, 9) << ','
+        << get(d.qDistal, 10) << ',' << get(d.qDistal, 14) << ','
+        << get(d.qDistal, 15) << ',' << d.qDistalSum << ',' << d.qCapChargingSum
         << ',' << get(d.pc, 7) << ',' << get(d.pc, 8) << ',' << get(d.pc, 9)
-        << ',' << get(d.pOut, 4) << ',' << get(d.pOut, 5) << ','
-        << get(d.pOut, 6) << ',' << get(d.pOut, 7) << ',' << get(d.pOut, 8)
-        << ',' << get(d.pOut, 9) << ',' << d.flowBalance << ',' << d.ec << ','
+        << ',' << get(d.pc, 10) << ',' << get(d.pc, 14) << ',' << get(d.pc, 15)
+        << ',' << get(d.pOut, 7) << ',' << get(d.pOut, 8) << ','
+        << get(d.pOut, 9) << ',' << get(d.pOut, 10) << ',' << get(d.pOut, 14)
+        << ',' << get(d.pOut, 15) << ',' << d.flowBalance << ',' << d.ec << ','
         << d.gamma << ',' << d.beta << ',' << d.w << ',' << d.kc << ','
         << d.tauc << ',' << d.pim << ',' << d.pimv << ',' << get(d.pven, 7) << ','
         << get(d.pven, 8) << ',' << get(d.pven, 9) << ',' << get(d.pven, 10)

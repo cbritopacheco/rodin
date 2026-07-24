@@ -127,31 +127,30 @@ int main()
 
   // Windkessel
   in.Rp = 5.0e7;
-  in.Cp = 4e-9;
+  in.Cp = 6e-9;
   in.Rd = 1.0e8;
-  in.Cd = 1.0e-8;
+  in.Cd = 1.0e-9;
 
-  in.mu_0 = 0.0186058;
-  in.mu_Inf = 0.0042963;
-  in.lambda = 0.2435;
-  in.n = 0.2079;
-  in.m = 0.0035;
-  in.yasuda = 1.541;
+  in.mu_0 = 5.35;
+  in.mu_Inf = 0.0033;
+  in.lambda = 14.445;
+  in.n = 0.8;
+  in.m = 0.003;
+  in.yasuda = 0.62;
   in.mu_plasma = 0.0032704;
   in.k_0 = 3.5678;
   in.gamma_c = 10.2754;
   in.k_Inf = 1.5352;
-  in.proximalRadius = 0.0015;
-  in.proximalLength = 0.05;
-  in.distalRadius = 0.0005;
-  in.distalLength = 0.2;
+  in.proximalRadius = 0.0125;
+  in.proximalLength = 0.35;
+  in.distalRadius = 0.002;
+  in.distalLength = 0.55;
   in.windkesselRheology =
-    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::CarreauYasuda;
-
+    Rodin::Heart::CCMLC2014::Model::WindkesselRheology::Cross;
   // Valve parameters
-  in.Kat = 5.0e-7;
+  in.Kat = 6.0e-7;
   in.Kp  = 5.0e-11;
-  in.Kar = 1e-7;
+  in.Kar = 1.0e-7;
 
   in.cavityCapacity = 5.0e-12;
 
